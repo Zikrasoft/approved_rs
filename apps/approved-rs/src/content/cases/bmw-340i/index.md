@@ -4,131 +4,131 @@ translations:
   en:
     title: BMW 340i
     body: |-
-      **BMW M340 pre-purchase inspection in Serbia: why even low mileage doesn't guarantee perfect condition**
+      **One-off BMW M340 inspection in Serbia: low mileage does not guarantee a car is in perfect condition**
 
-      A returning client contacted us again after we had previously helped them find a car through our full car-sourcing service. This time, the brief was simpler: the client had found a **BMW M340** themselves and only needed a one-off pre-purchase inspection.
+      A returning client got in touch with us again. We had previously helped them find a car as part of our full car-sourcing service. This time, the task was simpler: the client had found a **BMW M340** and wanted a one-off inspection before buying it.
 
-      We carry out one-off vehicle inspections in **Belgrade**, as well as **Novi Sad, Čačak and other cities across Serbia**. If you've already found a car you're interested in, we can inspect it on site and help you understand its actual mechanical condition before you buy.
+      We carry out one-off car inspections in **Belgrade**, as well as in **Novi Sad, Čačak, and other cities across Serbia**. If you have already found a car you are interested in, we can come out, inspect it, and help you understand its true technical condition before you buy.
 
-      What we checked on the BMW M340:
+      Here is what we checked on the BMW M340:
 
       - engine and timing chain condition
       - operation of the car's main systems
-      - diagnostic fault codes and live operating data
-      - transmission adaptation values
-      - performance on a thorough test drive
-      - overall mechanical condition
+      - diagnostic readings and the actual operating parameters of its components
+      - transmission adaptations
+      - a full test drive
+      - the car's overall technical condition
 
-      This case is a good reminder that **low mileage doesn't necessarily mean a car is free of mechanical issues**.
+      This case shows that **low mileage does not guarantee a car is free of technical issues**.
 
-      Diagnostics showed that **timing chain stretch was already at around 20%**. Finding issues like this before the deal is crucial: they reveal the car's actual condition, help you anticipate future costs and give you a firmer basis for deciding whether to buy.
+      Diagnostics showed that **the timing chain had already stretched by around 20%**. It is important to identify issues like this before completing a purchase. They reveal the car's true condition, give you an idea of future costs, and help you make an informed decision about whether to buy it.
 
-      If you've found a car in Serbia yourself and don't need our full car-sourcing service, you can book a **one-off pre-purchase inspection** in:
+      If you have found a car in Serbia yourself and do not need our full car-sourcing service, you can book a **one-off pre-purchase car inspection** in:
 
       <ul class="icon-pin">
       <li>Belgrade</li>
       <li>Novi Sad</li>
       <li>Čačak</li>
-      <li>other cities across Serbia</li>
+      <li>and other cities across Serbia</li>
       </ul>
 
-      We'll inspect the car, run diagnostics and take it for a test drive, giving you an objective picture of its condition before you hand over any money.
+      We will inspect the car, run diagnostics, take it for a test drive, and give you an objective picture of its condition before you hand over your money.
   sr:
     title: BMW 340i
     body: |-
-      **Provera auta pre kupovine: BMW M340 u Srbiji pokazuje da ni mala kilometraža ne garantuje besprekorno stanje**
+      **Jednokratna provera BMW M340 u Srbiji: ni mala kilometraža ne garantuje da je automobil u savršenom stanju**
 
-      Ponovo nam se obratio stalni klijent kome smo ranije pomogli da pronađe automobil kroz kompletnu uslugu pronalaženja i izbora vozila. Ovog puta zadatak je bio jednostavniji: klijent je sam pronašao **BMW M340** i bila mu je potrebna samo provera auta pre kupovine.
+      Ponovo nam se obratio stalni klijent, kome smo ranije pomogli da pronađe automobil u okviru usluge kompletnog odabira vozila. Ovog puta zadatak je bio jednostavniji: klijent je sam pronašao **BMW M340** i želeo je samo jednokratnu proveru auta pre kupovine.
 
-      Usluga provera auta pre kupovine dostupna je u **Beogradu**, kao i u **Novom Sadu, Čačku i drugim gradovima Srbije**. Ako ste već pronašli zanimljiv automobil, možemo da izađemo na teren, proverimo ga i pomognemo vam da steknete jasnu sliku o njegovom stvarnom tehničkom stanju pre kupovine.
+      Jednokratnu provera auta pre kupovine obavljamo u **Beogradu**, kao i u **Novom Sadu, Čačku i drugim gradovima Srbije**. Ako ste već pronašli zanimljiv automobil, možemo da dođemo, proverimo ga i pomognemo vam da utvrdite njegovo stvarno tehničko stanje pre kupovine.
 
       Šta smo proverili na BMW-u M340:
 
       - stanje motora i razvodnog lanca
-      - rad glavnih sistema vozila
-      - dijagnostiku i stvarne radne parametre sklopova
+      - rad glavnih sistema automobila
+      - dijagnostiku i stvarne parametre rada sklopova
       - adaptacije menjača
-      - ponašanje automobila tokom detaljne probne vožnje
-      - opšte tehničko stanje vozila
+      - detaljnu probnu vožnju
+      - opšte tehničko stanje automobila
 
-      Ovaj slučaj jasno pokazuje da **mala kilometraža ne znači da je automobil bez tehničkih nedostataka**.
+      Ovaj slučaj dobro pokazuje da **mala kilometraža ne znači da automobil nema tehničkih problema**.
 
-      Dijagnostika je pokazala da je **istegnutost razvodnog lanca već bila oko 20%**. Važno je otkriti ovakve stvari pre kupovine: one otkrivaju stvarno stanje automobila, pomažu da se procene budući troškovi i daju osnovu za odluku o kupovini.
+      Dijagnostika je pokazala da je **istegnutost razvodnog lanca već dostigla oko 20%**. Važno je otkriti ovakve stvari pre kupovine: one pokazuju stvarno stanje automobila, daju predstavu o budućim troškovima i predstavljaju važan argument pri donošenju odluke o kupovini.
 
-      Ako ste sami pronašli automobil u Srbiji i nije vam potrebna kompletna usluga pronalaženja i izbora vozila, dostupna vam je **provera auta pre kupovine** u sledećim gradovima:
+      Ako ste sami pronašli automobil u Srbiji i nije vam potrebna usluga kompletnog odabira vozila, možete da naručite **jednokratnu provera auta pre kupovine** u:
 
       <ul class="icon-pin">
-      <li>Beograd</li>
-      <li>Novi Sad</li>
-      <li>Čačak</li>
-      <li>i drugi gradovi Srbije</li>
+      <li>Beogradu</li>
+      <li>Novom Sadu</li>
+      <li>Čačku</li>
+      <li>i drugim gradovima Srbije</li>
       </ul>
 
-      Proverićemo automobil, uraditi dijagnostiku i probnu vožnju i dati vam objektivnu sliku njegovog stanja pre nego što ga platite.
+      Proverićemo automobil, obaviti dijagnostiku i probnu vožnju i dati vam objektivnu sliku njegovog stanja pre nego što izdvojite novac za njega.
   es:
     title: BMW 340i
     body: |-
-      **Inspección puntual de un BMW M340 en Serbia: cuando un kilometraje bajo no garantiza un estado perfecto**
+      **Inspección puntual de un BMW M340 en Serbia: por qué un kilometraje bajo no garantiza un estado perfecto**
 
-      Un cliente habitual, al que ya habíamos ayudado a encontrar un coche con nuestro servicio integral de búsqueda y selección, volvió a contactar con nosotros. Esta vez, el encargo era más sencillo: había encontrado por su cuenta un **BMW M340** y solo necesitaba una inspección antes de comprarlo.
+      Volvió a contactarnos un cliente habitual al que ya habíamos ayudado a encontrar un coche mediante un servicio integral de búsqueda. Esta vez la tarea era más sencilla: el cliente había encontrado por su cuenta un **BMW M340** y solo quería una inspección puntual antes de comprarlo.
 
-      Realizamos inspecciones puntuales de vehículos en **Belgrado**, así como en **Novi Sad, Čačak y otras ciudades de Serbia**. Si ya has encontrado un coche que te interesa, podemos desplazarnos para revisarlo y ayudarte a conocer su estado mecánico real antes de la compra.
+      Realizamos inspecciones puntuales de vehículos en **Belgrado**, así como en **Novi Sad, Cacak y otras ciudades de Serbia**. Si ya has encontrado una opción interesante, podemos desplazarnos, revisar el coche y ayudarte a conocer su estado técnico real antes de la compra.
 
-      Qué revisamos en el BMW M340:
+      Esto es lo que revisamos en el BMW M340:
 
       - el estado del motor y de la cadena de distribución
       - el funcionamiento de los principales sistemas del vehículo
-      - el diagnóstico electrónico y los parámetros reales de funcionamiento de los componentes
-      - los valores de adaptación de la caja de cambios
-      - el comportamiento del coche en una prueba de conducción completa
-      - el estado mecánico general del vehículo
+      - el diagnóstico y los parámetros reales de funcionamiento de los componentes
+      - las adaptaciones de la caja de cambios
+      - una prueba de conducción completa
+      - el estado técnico general del vehículo
 
-      Este caso demuestra que **un kilometraje bajo no garantiza la ausencia de problemas mecánicos**.
+      Este caso demuestra que **un kilometraje bajo no garantiza que el coche esté libre de problemas técnicos**.
 
-      El diagnóstico reveló que **el alargamiento de la cadena de distribución ya rondaba el 20%**. Es importante detectar este tipo de problemas antes de cerrar la operación: permiten conocer el estado real del coche, prever futuros gastos y tomar una decisión de compra con más información.
+      El diagnóstico reveló que **la cadena de distribución ya se había estirado alrededor de un 20 %**. Es importante detectar este tipo de problemas antes de cerrar la compra: permiten conocer el estado real del coche, prever los gastos futuros y contar con argumentos para decidir si conviene comprarlo.
 
-      Si has encontrado un coche por tu cuenta en Serbia y no necesitas un servicio integral de búsqueda y selección, puedes contratar una **inspección puntual del vehículo antes de la compra** en:
+      Si has encontrado un coche por tu cuenta en Serbia y no necesitas un servicio integral de búsqueda, puedes encargar una **inspección puntual del vehículo antes de comprarlo** en:
 
       <ul class="icon-pin">
       <li>Belgrado</li>
       <li>Novi Sad</li>
-      <li>Čačak</li>
+      <li>Cacak</li>
       <li>y otras ciudades de Serbia</li>
       </ul>
 
-      Revisaremos el vehículo, realizaremos un diagnóstico y una prueba de conducción, y te ofreceremos una valoración objetiva de su estado antes de que pagues por él.
+      Revisaremos el coche, realizaremos un diagnóstico y una prueba de conducción, y te daremos una valoración objetiva de su estado antes de que pagues por él.
   de:
     title: BMW 340i
     body: |-
-      **Einmaliger Fahrzeugcheck eines BMW M340 in Serbien: Warum auch eine geringe Laufleistung keinen einwandfreien Zustand garantiert**
+      **Einmalige Prüfung eines BMW M340 in Serbien: Auch eine geringe Laufleistung garantiert keinen einwandfreien Zustand**
 
-      Ein Stammkunde, dem wir bereits bei der umfassenden Fahrzeugsuche geholfen hatten, wandte sich erneut an uns. Diesmal war der Auftrag überschaubarer: Der Kunde hatte selbst einen **BMW M340** gefunden und wollte lediglich einen Fahrzeugcheck vor dem Kauf.
+      Ein Stammkunde wandte sich erneut an uns. Zuvor hatten wir ihm bereits im Rahmen einer umfassenden Fahrzeugsuche geholfen, ein Auto zu finden. Diesmal war die Aufgabe einfacher: Der Kunde hatte selbst einen **BMW M340** ins Auge gefasst und wollte vor dem Kauf lediglich eine einmalige Prüfung.
 
-      Solche Einzelprüfungen bieten wir in **Belgrad** sowie in **Novi Sad, Čačak und anderen Städten Serbiens** an. Wenn Sie bereits ein interessantes Fahrzeug gefunden haben, prüfen wir es vor Ort und helfen Ihnen, seinen tatsächlichen technischen Zustand vor dem Kauf einzuschätzen.
+      Einmalige Fahrzeugprüfungen bieten wir in **Belgrad** sowie in **Novi Sad, Cacak und anderen Städten Serbiens** an. Wenn Sie bereits ein interessantes Fahrzeug gefunden haben, können wir es vor Ort prüfen und Ihnen helfen, seinen tatsächlichen technischen Zustand vor dem Kauf einzuschätzen.
 
-      Das haben wir am BMW M340 geprüft:
+      Was wir am BMW M340 geprüft haben:
 
       - Zustand des Motors und der Steuerkette
       - Funktion der wichtigsten Fahrzeugsysteme
-      - Fehlerspeicher und tatsächliche Betriebswerte der Komponenten
-      - Adaptionswerte des Getriebes
-      - Fahrverhalten bei einer ausführlichen Probefahrt
-      - allgemeinen technischen Zustand des Fahrzeugs
+      - Diagnose und tatsächliche Betriebswerte der Komponenten
+      - Anpassungswerte des Getriebes
+      - ausführliche Probefahrt
+      - allgemeiner technischer Zustand des Fahrzeugs
 
-      Dieser Fall zeigt deutlich: **Eine geringe Laufleistung ist noch keine Garantie dafür, dass technisch alles in Ordnung ist**.
+      Dieser Fall zeigt deutlich: **Eine geringe Laufleistung garantiert nicht, dass das Fahrzeug frei von technischen Problemen ist.**
 
-      Die Diagnose ergab, dass **die Steuerkettenlängung bereits bei rund 20 % lag**. Solche Auffälligkeiten sollten unbedingt vor dem Kauf erkannt werden. Sie geben Aufschluss über den tatsächlichen Zustand des Fahrzeugs, machen mögliche Folgekosten absehbar und liefern eine wichtige Grundlage für die Kaufentscheidung.
+      Die Diagnose ergab, dass **sich die Steuerkette bereits um etwa 20 % gelängt hatte**. Solche Mängel sollte man vor dem Kauf erkennen. Sie geben Aufschluss über den tatsächlichen Zustand des Fahrzeugs, ermöglichen eine Einschätzung künftiger Kosten und liefern eine wichtige Grundlage für die Kaufentscheidung.
 
-      Wenn Sie selbst ein Fahrzeug in Serbien gefunden haben und keine umfassende Unterstützung bei der Fahrzeugsuche benötigen, können Sie einen **einmaligen Fahrzeugcheck vor dem Kauf** buchen, und zwar in:
+      Wenn Sie selbst ein Fahrzeug in Serbien gefunden haben und keine umfassende Fahrzeugsuche benötigen, können Sie eine **einmalige Prüfung vor dem Kauf** in folgenden Städten beauftragen:
 
       <ul class="icon-pin">
       <li>Belgrad</li>
       <li>Novi Sad</li>
-      <li>Čačak</li>
+      <li>Cacak</li>
       <li>und anderen Städten Serbiens</li>
       </ul>
 
-      Wir prüfen das Fahrzeug, führen eine Diagnose und eine Probefahrt durch und geben Ihnen ein objektives Bild seines Zustands, bevor Sie dafür bezahlen.
+      Wir prüfen das Fahrzeug, führen eine Diagnose und eine Probefahrt durch und geben Ihnen ein objektives Bild von seinem Zustand, bevor Sie dafür bezahlen.
 car: BMW 340i
 year: 2025
 price:

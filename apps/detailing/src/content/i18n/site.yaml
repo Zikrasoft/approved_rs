@@ -98,7 +98,7 @@ translations:
       prices: Cene
       contact: Kontakt
     llms:
-      keyFacts: Ključne informacije
+      keyFacts: Ključne činjenice
       other: Ostalo
       languages: Drugi jezici
     header:
@@ -109,114 +109,114 @@ translations:
       languageLabel: Jezik
       cta: Zakažite termin
     footer:
-      tagline: Detailing studio u Beogradu. Folije, poliranje, keramička zaštita, restauracija kože.
+      tagline: Studio za detailing u Beogradu. Folije, poliranje, keramička zaštita, koža.
       navHeading: Stranice
-      contactHeading: Kontaktirajte nas
+      contactHeading: Kontakt
       hoursHeading: Radno vreme
-      hours: Pon–Sub, 09:00–19:00
+      hours: Pon-sub, 09:00-19:00
       privacyLabel: Politika privatnosti
       aboutLabel: O projektu
       rightsSuffix: Sva prava zadržana.
-      developerCredit: 'Izrada sajta: studio Zikrasoft'
+      developerCredit: Sajt izradio studio Zikrasoft
     common:
       homeLabel: Početna
       skipToContent: Pređi na sadržaj
-      breadcrumbLabel: Putanja navigacije
+      breadcrumbLabel: Putanja stranice
       readMore: Saznajte više
       backToWorks: Svi radovi
       allWorks: Pogledajte sve radove
       faqHeading: Česta pitanja
       beforeLabel: Pre
       afterLabel: Posle
-      dragHint: Prevucite za poređenje
+      dragHint: Povucite da biste uporedili
       closeLabel: Zatvori
       prevLabel: Prethodna fotografija
       nextLabel: Sledeća fotografija
-      scrollHint: Skrolujte nadole
+      scrollHint: Pomerite nadole
       fromPrice: od
       perCar: po automobilu
-      emptyWorks: Uskoro ćemo ovde objaviti naše radove. Do tada nam pišite, rado ćemo vam ispričati više i pokazati ih uživo.
+      emptyWorks: Uskoro će se ovde pojaviti naši radovi. Za sada nam pišite, rado ćemo vam objasniti i pokazati uživo.
     channels:
-      call: Pozovite nas
-      whatsapp: Pišite nam na WhatsApp
-      viber: Pišite nam na Viber
-      telegram: Pišite nam na Telegram
+      call: Pozovite
+      whatsapp: Pišite na WhatsApp
+      viber: Pišite na Viber
+      telegram: Pišite na Telegram
       instagram: Instagram
       social: Pratite nas na društvenim mrežama
     telegramChoice:
-      heading: Kako želite da nam pišete?
+      heading: Kako vam je lakše da nam pišete?
       bot: Preko bota
-      botHint: Opišite šta je potrebno vašem automobilu, naš saradnik će odgovoriti u istom razgovoru
-      manager: Direktno našem saradniku
-      managerHint: Privatan razgovor sa našim saradnikom na Telegramu
+      botHint: Recite nam šta je potrebno vašem automobilu, menadžer će vam odgovoriti u istom četu
+      manager: Direktno menadžeru
+      managerHint: Privatni čet sa menadžerom na Telegramu
     copyPhone:
       label: Kopiraj broj telefona
       copied: Kopirano
     form:
       heading: Zakažite konsultaciju
       subheading: Pogledaćemo automobil, iskreno vam reći šta mu je zaista potrebno i dati tačnu cenu.
-      nameLabel: Kako se zovete (nije obavezno)
+      nameLabel: Kako se zovete (opciono)
       namePlaceholder: Ime
       contactChannelLabel: Kako da vas kontaktiramo
-      channelPhone: Telefonski poziv
-      countryLabel: Pozivni broj države
+      channelPhone: Poziv
+      countryLabel: Pozivni broj zemlje
       contactLabel: Broj telefona
       contactPlaceholder: 60 123 4567
       telegramPlaceholder: '@username ili broj telefona'
-      commentLabel: Napomena
-      commentPlaceholder: Marka, model, godište i šta želite da uradimo
-      submit: Pošaljite upit
-      submitting: Šaljemo…
+      commentLabel: Komentar
+      commentPlaceholder: Marka, model, godište i šta želite da uradite
+      submit: Pošalji upit
+      submitting: Šaljemo...
       privacyNote: Slanjem upita prihvatate
       privacyLinkText: politiku privatnosti
       errorTelegram: Unesite Telegram @username ili broj telefona
-      errorTelegramHandle: 'Proverite @username: najmanje 3 znaka, samo latinična slova, cifre i _'
+      errorTelegramHandle: 'Proverite @username: najmanje 3 znaka, samo latinica, brojevi i _'
       errorPhone: Unesite ispravan broj telefona
-      errorSubmit: Upit nije poslat. Proverite internet vezu i pokušajte ponovo
+      errorSubmit: Upit nije poslat. Proverite vezu i pokušajte ponovo
       modalTitle: Pošaljite upit
     cookie:
       notice: Koristimo kolačiće.
       more: Više informacija u
       policyLink: politici privatnosti
-      accept: Prihvati
-      decline: Odbij
+      accept: Prihvatam
+      decline: Odbijam
       settings: Podešavanja kolačića
   en:
     nav:
       services: Services
-      works: Our work
-      process: How we work
-      prices: Prices
+      works: Our Work
+      process: How We Work
+      prices: Pricing
       contact: Contact
     llms:
-      keyFacts: Key facts
+      keyFacts: Key Facts
       other: Other
-      languages: Other languages
+      languages: Other Languages
     header:
       primaryNavLabel: Main navigation
       mobileNavLabel: Mobile menu
-      menuOpenLabel: Menu
+      menuOpenLabel: Open menu
       menuCloseLabel: Close menu
       languageLabel: Language
       cta: Book an appointment
     footer:
-      tagline: Car detailing studio in Belgrade. Wraps, paint protection film, polishing, ceramic coatings and leather restoration.
+      tagline: Car detailing studio in Belgrade. Paint protection film, polishing, ceramic coating and leather restoration.
       navHeading: Explore
       contactHeading: Get in touch
       hoursHeading: Opening hours
-      hours: Mon–Sat, 09:00–19:00
-      privacyLabel: Privacy policy
-      aboutLabel: About this site
+      hours: Mon-Sat, 09:00-19:00
+      privacyLabel: Privacy Policy
+      aboutLabel: About
       rightsSuffix: All rights reserved.
-      developerCredit: Website by Zikrasoft
+      developerCredit: Website by Zikrasoft studio
     common:
       homeLabel: Home
       skipToContent: Skip to content
       breadcrumbLabel: Breadcrumbs
-      readMore: Learn more
-      backToWorks: Back to all work
+      readMore: Read more
+      backToWorks: All work
       allWorks: View all work
-      faqHeading: Frequently asked questions
+      faqHeading: Frequently Asked Questions
       beforeLabel: Before
       afterLabel: After
       dragHint: Drag to compare
@@ -226,26 +226,26 @@ translations:
       scrollHint: Scroll down
       fromPrice: from
       perCar: per car
-      emptyWorks: Our work will be featured here soon. In the meantime, get in touch and we'll talk you through it and show you in person.
+      emptyWorks: Our work will be featured here soon. In the meantime, get in touch and we'll tell you more and show you around.
     channels:
-      call: Call us
+      call: Call
       whatsapp: Message us on WhatsApp
       viber: Message us on Viber
       telegram: Message us on Telegram
       instagram: Instagram
-      social: Follow us
+      social: Follow us on social media
     telegramChoice:
-      heading: How would you like to get in touch?
-      bot: Via our bot
-      botHint: Tell us about your car and a team member will reply in the same chat
-      manager: Message our team directly
-      managerHint: A private Telegram chat with a member of our team
+      heading: How would you like to message us?
+      bot: Message the bot
+      botHint: Tell us about your car, and a manager will reply in the same chat
+      manager: Message a manager directly
+      managerHint: A private Telegram chat with a manager
     copyPhone:
       label: Copy phone number
       copied: Copied
     form:
       heading: Book a consultation
-      subheading: We'll inspect your car, give you an honest assessment of what it really needs and provide an exact quote.
+      subheading: We'll take a look at your car, tell you honestly what it needs, and give you an exact price.
       nameLabel: Your name (optional)
       namePlaceholder: Name
       contactChannelLabel: How should we contact you?
@@ -254,21 +254,21 @@ translations:
       contactLabel: Phone number
       contactPlaceholder: 60 123 4567
       telegramPlaceholder: '@username or phone number'
-      commentLabel: Message
+      commentLabel: Comment
       commentPlaceholder: Make, model, year and what you'd like done
-      submit: Send enquiry
-      submitting: Sending…
+      submit: Send request
+      submitting: Sending...
       privacyNote: By submitting this form, you agree to our
-      privacyLinkText: privacy policy
+      privacyLinkText: Privacy Policy
       errorTelegram: Enter your Telegram @username or phone number
       errorTelegramHandle: 'Check your @username: at least 3 characters, using only Latin letters, numbers and _'
       errorPhone: Enter a valid phone number
-      errorSubmit: Your enquiry couldn't be sent. Check your connection and try again
+      errorSubmit: Your request couldn't be sent. Check your connection and try again
       modalTitle: Send an enquiry
     cookie:
       notice: We use cookies.
       more: Learn more in our
-      policyLink: privacy policy
+      policyLink: Privacy Policy
       accept: Accept
       decline: Decline
       settings: Cookie settings

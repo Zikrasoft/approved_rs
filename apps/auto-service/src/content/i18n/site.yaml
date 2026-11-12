@@ -128,18 +128,18 @@ translations:
       about: O servisu
       contact: Kontakt
     llms:
-      keyFacts: Ključne informacije
+      keyFacts: Ključne činjenice
       other: Ostalo
       languages: Drugi jezici
     header:
       menuOpenLabel: Meni
-      menuCloseLabel: Zatvorite meni
+      menuCloseLabel: Zatvori meni
       languageLabel: Jezik
       cta: Zakažite termin
       partsCta: Upit
       callback: Pozovite me
     footer:
-      tagline: Auto servis i izbor auto delova na Zvezdari, Beograd.
+      tagline: Auto servis i prodaja auto delova na Zvezdari, Beograd.
       servicesHeading: Usluge
       companyHeading: Servis
       contactHeading: Kontakt
@@ -147,24 +147,24 @@ translations:
       privacyLabel: Politika privatnosti
       aboutLabel: O servisu
       rightsSuffix: Sva prava zadržana.
-      developerCredit: Sajt je izradio studio Zikrasoft
+      developerCredit: Sajt je izradila agencija Zikrasoft
     common:
       homeLabel: Početna
       skipToContent: Pređite na sadržaj
-      breadcrumbLabel: Putanja navigacije
+      breadcrumbLabel: Putanja stranice
       primaryNavLabel: Glavna navigacija
       mobileNavLabel: Mobilni meni
       faqHeading: Česta pitanja
-      closeLabel: Zatvorite
+      closeLabel: Zatvori
       prevLabel: Prethodna fotografija
       nextLabel: Sledeća fotografija
       fromPrice: od
       priceOnRequest: na upit
       allServices: Sve usluge
       allWorks: Svi primeri radova
-      emptyWorks: Primeri radova stižu uskoro. U međuvremenu nas pozovite, ispričaćemo vam šta smo radili na sličnim automobilima.
+      emptyWorks: Primeri radova biće uskoro dostupni. Do tada nas pozovite, reći ćemo Vam šta smo radili na sličnim automobilima.
       socialHeading: Pratite nas na društvenim mrežama
-      writeInstead: Više vam odgovara poruka?
+      writeInstead: Radije biste nam pisali?
     hours:
       week: Pon–pet 09:00–18:00
       saturday: Sub 09:00–14:00
@@ -174,14 +174,14 @@ translations:
       facts:
         - Govorimo srpski, ruski i engleski
         - Plaćanje gotovinom ili karticom
-        - Dok popravljamo Vaš automobil, možete sačekati kod nas uz kafu i udoban kauč
+        - Možete sačekati dok popravljamo Vaš automobil. Imamo kauč i kafu.
     photos:
-      heroMechanic: Mehaničar u CarLabu popravlja motor izvađen iz automobila na dizalici
-      workshopBay: Automobil sa otvorenom haubom u radionici CarLaba između stubova dizalice
+      heroMechanic: Majstor iz CarLaba popravlja motor skinut sa automobila na dizalici
+      workshopBay: Automobil sa otvorenim poklopcem motora u radionici CarLaba, između stubova dizalice
       facade: Ulaz u auto servis CarLab na Zvezdari, natpis AUTO SERVIS CARLAB.RS
-      wallSign: Logo CarLab na zidu radionice i mehaničar pored automobila sa otvorenom haubom
-      loungeSofas: Čekaonica u CarLabu, kauč, fotelja i stočić sa časopisima
-      loungeCoffee: Aparat za kafu i kapsule u čekaonici u CarLabu
+      wallSign: Logo CarLaba na zidu radionice i majstor pored automobila sa otvorenim poklopcem motora
+      loungeSofas: Prostor za čekanje u CarLabu, kauč, fotelja i stočić sa časopisima
+      loungeCoffee: Aparat za kafu i kapsule u prostoru za čekanje u CarLabu
     googleRating:
       rating: '{rating} na Google-u'
       reviews:
@@ -198,38 +198,38 @@ translations:
       label: Kopirajte broj
       copied: Kopirano
     telegramChoice:
-      heading: Kako želite da nam pišete?
+      heading: Kako Vam je lakše da nam pišete?
       bot: Preko bota
-      botHint: Opišite problem sa automobilom, saradnik će vam odgovoriti u istom razgovoru
+      botHint: Recite nam šta nije u redu sa automobilom, saradnik će Vam odgovoriti u istom četu
       manager: Direktno saradniku
-      managerHint: Privatni razgovor sa saradnikom na Telegramu
+      managerHint: Lični čet sa saradnikom na Telegramu
     form:
       heading: Zakažite termin u servisu
-      subheading: Opišite problem sa automobilom. Pozvaćemo vas da razjasnimo detalje i predložimo termin i cenu.
+      subheading: Opišite šta nije u redu sa automobilom. Pozvaćemo Vas, proveriti detalje i reći Vam termin i cenu.
       nameLabel: Ime
-      namePlaceholder: Kako da vam se obraćamo
+      namePlaceholder: Kako da Vam se obraćamo?
       contactLabel: Telefon
       contactPlaceholder: 64 123 4567
       telegramPlaceholder: '@username ili broj telefona'
-      contactChannelLabel: Kako da vas kontaktiramo
-      channelPhone: Telefonski poziv
+      contactChannelLabel: Kako da Vas kontaktiramo
+      channelPhone: Poziv
       countryLabel: Pozivni broj zemlje
-      commentLabel: Automobil i opis problema
-      commentPlaceholder: Marka, model, godište i problem koji ste primetili
+      commentLabel: Automobil i problem
+      commentPlaceholder: Marka, model, godište i šta Vas brine
       submit: Pošaljite upit
       submitting: Šaljemo…
-      privacyNote: Prihvatam
-      privacyLinkText: politiku privatnosti
-      privacyOpen: Otvorite
-      privacyNotice: Slanjem upita prihvatate
+      privacyNote: Saglasan/na sam sa
+      privacyLinkText: politikom privatnosti
+      privacyOpen: Otvori
+      privacyNotice: Slanjem upita, saglasni ste sa
       moreDetails: Dodajte ime ili komentar
       modalTitle: Zakažite termin u servisu
-      callbackTitle: Pozvaćemo vas
-      errorPhone: Proverite broj telefona, izgleda da nije unet u celosti
-      errorPhoneTooLong: Proverite broj telefona, ima previše cifara
+      callbackTitle: Pozvaćemo Vas
+      errorPhone: Proverite broj, izgleda da nije unet u celosti
+      errorPhoneTooLong: Proverite broj, ima suvišnih cifara
       errorTelegram: Unesite @username na Telegramu ili broj telefona
-      errorTelegramHandle: 'Proverite @username: najmanje 3 znaka, samo latinična slova, cifre i _'
-      errorSubmit: Upit nije poslat. Proverite internet vezu i pokušajte ponovo
+      errorTelegramHandle: 'Proverite @username: najmanje 3 znaka, samo latinica, cifre i _'
+      errorSubmit: Upit nije poslat. Proverite vezu i pokušajte ponovo
     cookie:
       notice: Koristimo kolačiće
       more: Više informacija u
@@ -257,15 +257,15 @@ translations:
       partsCta: Enquiry
       callback: Call me back
     footer:
-      tagline: Car servicing and help finding the right parts in Zvezdara, Belgrade.
+      tagline: Car service and parts sourcing in Zvezdara, Belgrade.
       servicesHeading: Services
-      companyHeading: Workshop
+      companyHeading: Service
       contactHeading: Contact
-      hours: Mon–Fri 09:00–18:00 · Sat 09:00–14:00
+      hours: Mon-Fri 09:00-18:00 · Sat 09:00-14:00
       privacyLabel: Privacy policy
       aboutLabel: About us
       rightsSuffix: All rights reserved.
-      developerCredit: Website by Zikrasoft
+      developerCredit: Website by Zikrasoft studio
     common:
       homeLabel: Home
       skipToContent: Skip to content
@@ -277,28 +277,28 @@ translations:
       prevLabel: Previous photo
       nextLabel: Next photo
       fromPrice: from
-      priceOnRequest: on request
+      priceOnRequest: price on request
       allServices: All services
-      allWorks: View all our work
-      emptyWorks: Examples of our work are coming soon. In the meantime, give us a call and we'll tell you about jobs we've done on similar cars.
+      allWorks: All our work
+      emptyWorks: Our work will be featured here soon. In the meantime, call us and we'll tell you about similar cars we've worked on.
       socialHeading: Follow us
       writeInstead: Prefer to message us?
     hours:
-      week: Mon–Fri 09:00–18:00
-      saturday: Sat 09:00–14:00
+      week: Mon-Fri 09:00-18:00
+      saturday: Sat 09:00-14:00
     visit:
       heading: Visit us in Zvezdara
       route: Get directions
       facts:
         - We speak Serbian, Russian and English
         - Pay by cash or card
-        - You're welcome to wait while we work on your car, with a sofa and coffee available
+        - You can wait while we work on your car. We have a sofa and coffee.
     photos:
-      heroMechanic: A CarLab mechanic repairs an engine removed from a car on a lift
-      workshopBay: A car with its bonnet open between the lift posts in the CarLab workshop
-      facade: Entrance to the CarLab workshop in Zvezdara, with the AUTO SERVIS CARLAB.RS sign
-      wallSign: The CarLab logo on the workshop wall and a mechanic beside a car with its bonnet open
-      loungeSofas: CarLab waiting area with a sofa, armchair and coffee table with magazines
+      heroMechanic: CarLab mechanic repairing an engine removed from a car on a lift
+      workshopBay: Car with its hood open in the CarLab workshop, between the lift posts
+      facade: Entrance to CarLab in Zvezdara, with the AUTO SERVIS CARLAB.RS sign
+      wallSign: CarLab logo on the workshop wall and a mechanic by a car with its hood open
+      loungeSofas: CarLab waiting area with a sofa, armchair and table with magazines
       loungeCoffee: Coffee machine and capsules in the CarLab waiting area
     googleRating:
       rating: '{rating} on Google'
@@ -308,7 +308,7 @@ translations:
         many: '{count} reviews'
         other: '{count} reviews'
     channels:
-      call: Call us
+      call: Call
       whatsapp: WhatsApp
       viber: Viber
       telegram: Telegram
@@ -318,39 +318,39 @@ translations:
     telegramChoice:
       heading: How would you like to message us?
       bot: Via our bot
-      botHint: Tell us what's wrong with your car and a member of our team will reply in the same chat
-      manager: Message our team directly
-      managerHint: A private Telegram chat with a member of our team
+      botHint: Tell us what's wrong with your car, and our manager will reply in the same chat
+      manager: Message the manager directly
+      managerHint: Chat directly with our manager on Telegram
     form:
-      heading: Book a workshop appointment
-      subheading: Tell us what's wrong with your car. We'll call you back to discuss the details, arrange a time and give you a price.
+      heading: Book a service appointment
+      subheading: Tell us what's wrong with your car. We'll call back, get the details and let you know the time and price.
       nameLabel: Name
       namePlaceholder: What should we call you?
-      contactLabel: Phone number
+      contactLabel: Phone
       contactPlaceholder: 64 123 4567
       telegramPlaceholder: '@username or phone number'
       contactChannelLabel: How should we contact you?
-      channelPhone: Phone call
+      channelPhone: Call
       countryLabel: Country code
-      commentLabel: Your car and the problem
+      commentLabel: Car and what needs attention
       commentPlaceholder: Make, model, year and what's wrong
       submit: Send enquiry
-      submitting: Sending…
+      submitting: Sending...
       privacyNote: I agree to the
       privacyLinkText: privacy policy
       privacyOpen: Open
-      privacyNotice: By submitting your enquiry, you agree to our
+      privacyNotice: By sending this enquiry, you agree to the
       moreDetails: Add your name or a comment
-      modalTitle: Book a workshop appointment
+      modalTitle: Book a service appointment
       callbackTitle: We'll call you back
-      errorPhone: Check your phone number. It looks incomplete
-      errorPhoneTooLong: Check your phone number. It has too many digits
+      errorPhone: Check the number. It looks incomplete.
+      errorPhoneTooLong: Check the number. It has too many digits.
       errorTelegram: Enter your Telegram @username or phone number
-      errorTelegramHandle: 'Check your @username: at least 3 characters, using only Latin letters, numbers and _'
-      errorSubmit: Your enquiry wasn't sent. Check your connection and try again
+      errorTelegramHandle: 'Check the @username: at least 3 characters, using only Latin letters, numbers and _'
+      errorSubmit: Your enquiry wasn't sent. Check your connection and try again.
     cookie:
       notice: We use cookies
-      more: Find out more in our
+      more: Read more in our
       policyLink: privacy policy
       accept: OK
       decline: No

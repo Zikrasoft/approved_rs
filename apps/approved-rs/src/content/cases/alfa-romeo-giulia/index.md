@@ -14,83 +14,83 @@ translations:
   en:
     title: Alfa Romeo Giulia
     body: |-
-      ## Car sourcing in Serbia: finding an Alfa Romeo Giulia in great condition
+      ## Car sourcing in Serbia: finding a well-kept Alfa Romeo Giulia
 
-      Dmitry came to us looking to buy an **Alfa Romeo Giulia**. He initially wanted the **280 hp** version and sent us several listings that caught his eye. We checked each car's dealer service records and **CarVertical** report. As expected, a significant number had been involved in accidents. Unfortunately, the more powerful versions are often driven hard, so finding a genuinely good example is no easy task.
+      Dmitry came to us looking for an **Alfa Romeo Giulia**. He initially had his heart set on the **280 hp** version and sent us several cars he liked. We checked each one against its dealer service history and **CarVertical** report. As expected, many had been in accidents. Unfortunately, high-powered versions are often driven hard, so finding a truly good example can be a challenge.
 
-      We suggested an alternative: a **2021 Alfa Romeo Giulia** in striking red, powered by a **2.0 Turbo engine with 200 hp**. It had a **full service history**, an excellent **CarVertical** report and one of the most reliable automatic transmissions in its class, the **ZF 8HP**.
+      In the end, we suggested an alternative: a **2021 Alfa Romeo Giulia** in a striking shade of red, with a **2.0 Turbo 200 hp** engine. It had a **full service history**, an excellent **CarVertical** report, and one of the most reliable automatic transmissions in its class, the **ZF 8HP**.
 
-      After the purchase, we gave the car a comprehensive service at our workshop:
+      After purchase, the car received a full service at our workshop:
 
       <ul class="icon-check">
-      <li>Engine oil and all filters replaced</li>
-      <li>Spark plugs replaced</li>
-      <li>ZF 8HP automatic transmission fluid and pan replaced</li>
+      <li>engine oil and all filters</li>
+      <li>spark plugs</li>
+      <li>oil and sump replacement for the ZF 8HP automatic transmission</li>
       </ul>
 
-      Yes, replacing the cabin filter on an Alfa Romeo is an adventure in itself, but we tackled that too.
+      Yes, replacing the cabin filter in an Alfa Romeo is a challenge in itself, but we got that done too.
 
-      Dmitry drove away with a fully serviced **Alfa Romeo Giulia**, ready to deliver driving pleasure without any nasty surprises.
+      Dmitry ended up with a fully serviced **Alfa Romeo Giulia** that delivers a great driving experience without any unpleasant surprises.
   sr:
     title: Alfa Romeo Giulia
     body: |-
-      ## Pronalaženje automobila u Srbiji: kako smo pronašli očuvanu Alfu Romeo Giulia
+      ## Auto sourcing u Srbiji: kako smo pronašli očuvanu Alfu Romeo Giuliju
 
-      Obratio nam se Dmitrij sa željom da kupi **Alfu Romeo Giulia**. U početku je tražio verziju sa **280 KS** i poslao nam nekoliko oglasa koji su mu se dopali. Za svaki automobil uradili smo proveru auta pre kupovine kroz servisnu istoriju iz ovlašćene mreže i **CarVertical** izveštaj. Kao što smo i očekivali, ispostavilo se da je veliki deo automobila učestvovao u saobraćajnim nezgodama. Nažalost, snažnije verzije se često voze prilično oštro, pa nije lako pronaći zaista dobar primerak.
+      Javio nam se Dmitrij sa željom da kupi **Alfu Romeo Giuliju**. U početku je tražio verziju sa **280 KS** i poslao nam nekoliko modela koji su mu se dopali. Proverili smo svaki automobil kroz evidenciju ovlašćenih servisa i izveštaj **CarVertical**. Kao što smo i očekivali, veliki broj automobila bio je havarisan. Nažalost, snažnije verzije se često voze veoma intenzivno, pa nije lako pronaći zaista dobar primerak.
 
-      Na kraju smo predložili alternativu: **Alfu Romeo Giulia iz 2021. godine**, u atraktivnoj crvenoj boji, sa motorom **2.0 Turbo od 200 KS**. Automobil je imao **kompletnu servisnu istoriju**, odličan **CarVertical** izveštaj i jedan od najpouzdanijih automatskih menjača u svojoj klasi, **ZF 8HP**.
+      Na kraju smo predložili alternativu: **Alfu Romeo Giuliju iz 2021. godine**, u upečatljivoj crvenoj boji, sa motorom **2.0 Turbo od 200 KS**. Automobil je imao **potpunu servisnu istoriju**, odličan izveštaj **CarVertical** i jedan od najpouzdanijih automatskih menjača u svojoj klasi, **ZF 8HP**.
 
-      Nakon kupovine, u našem servisu obavili smo kompletno održavanje automobila:
+      Nakon kupovine, automobil je prošao kompletan servis u našem servisu:
 
       <ul class="icon-check">
-      <li>zamenu motornog ulja i svih filtera</li>
-      <li>zamenu svećica</li>
-      <li>zamenu ulja u automatskom menjaču ZF 8HP, zajedno sa karterom</li>
+      <li>zamena ulja i svih filtera</li>
+      <li>zamena svećica</li>
+      <li>zamena ulja u automatskom menjaču ZF 8HP, zajedno sa karterom</li>
       </ul>
 
-      Da, zamena filtera kabine na Alfi Romeo je izazov za sebe, ali i to smo uspešno rešili.
+      Da, zamena filtera kabine na Alfi Romeo poseban je izazov, ali smo i to rešili.
 
-      Dmitrij je na kraju dobio potpuno servisiranu **Alfu Romeo Giulia**, koja pruža uživanje u vožnji bez neprijatnih iznenađenja.
+      Dmitrij je na kraju dobio potpuno servisiranu **Alfu Romeo Giuliju** koja pruža uživanje u vožnji, bez neprijatnih iznenađenja.
   es:
     title: Alfa Romeo Giulia
     body: |-
       ## Búsqueda de coches en Serbia: cómo encontramos un Alfa Romeo Giulia en buen estado
 
-      Dmitri acudió a nosotros porque quería comprar un **Alfa Romeo Giulia**. En un principio buscaba la versión de **280 CV** y nos envió varios anuncios que le habían gustado. Comprobamos el historial de mantenimiento en la red oficial y el informe de **CarVertical** de cada coche. Como esperábamos, una parte importante había sufrido accidentes. Por desgracia, las versiones más potentes suelen recibir un uso muy exigente y no es fácil encontrar una unidad realmente bien cuidada.
+      Dmitry se puso en contacto con nosotros porque quería comprar un **Alfa Romeo Giulia**. En un principio, buscaba la versión de **280 CV** y nos envió varios anuncios que le habían gustado. Comprobamos el historial de cada coche con los registros de los concesionarios y **CarVertical**. Como era de esperar, muchos habían sufrido accidentes. Por desgracia, las versiones más potentes suelen conducirse de forma muy exigente, así que no es fácil encontrar una unidad en buen estado.
 
-      Al final le propusimos una alternativa: un **Alfa Romeo Giulia de 2021** en un llamativo color rojo, con motor **2.0 Turbo de 200 CV**. Contaba con un **historial de mantenimiento completo**, un informe de **CarVertical** impecable y una de las cajas de cambios automáticas más fiables de su categoría, la **ZF 8HP**.
+      Al final, le propusimos una alternativa: un **Alfa Romeo Giulia de 2021**, de un llamativo color rojo y con motor **2.0 Turbo de 200 CV**. El coche tenía **el historial de mantenimiento completo**, un excelente informe de **CarVertical** y una de las cajas automáticas más fiables de su categoría, la **ZF 8HP**.
 
-      Tras la compra, realizamos un mantenimiento completo en nuestro taller:
+      Tras la compra, el coche recibió una revisión completa en nuestro taller:
 
       <ul class="icon-check">
-      <li>Cambio de aceite y de todos los filtros</li>
-      <li>Sustitución de las bujías</li>
-      <li>Cambio del aceite y del cárter de la caja de cambios automática ZF 8HP</li>
+      <li>aceite y todos los filtros</li>
+      <li>bujías</li>
+      <li>aceite de la caja automática ZF 8HP y cambio del cárter</li>
       </ul>
 
-      Sí, cambiar el filtro del habitáculo de un Alfa Romeo tiene su complicación, pero también superamos ese reto.
+      Sí, cambiar el filtro del habitáculo de un Alfa Romeo es toda una odisea, pero también nos encargamos de ello.
 
-      Así, Dmitri recibió un **Alfa Romeo Giulia** con todo el mantenimiento al día, listo para disfrutar al volante sin sorpresas desagradables.
+      Al final, Dmitry se llevó un **Alfa Romeo Giulia** con el mantenimiento al día, listo para disfrutar de la conducción sin sorpresas desagradables.
   de:
     title: Alfa Romeo Giulia
     body: |-
-      ## Autosuche in Serbien: So fanden wir eine Alfa Romeo Giulia in gutem Zustand
+      ## Fahrzeugsuche in Serbien: So fanden wir eine gut erhaltene Alfa Romeo Giulia
 
-      Dmitri wandte sich an uns, weil er eine **Alfa Romeo Giulia** kaufen wollte. Zunächst sollte es die Version mit **280 PS** sein. Er schickte uns mehrere Angebote, die ihm gefielen. Wir prüften bei jedem Fahrzeug die beim Vertragshändler hinterlegte Historie sowie den **CarVertical**-Bericht. Wie erwartet hatte ein erheblicher Teil der Fahrzeuge Unfallschäden in der Vorgeschichte. Leider werden die leistungsstarken Versionen oft sehr sportlich gefahren, sodass es nicht leicht ist, ein wirklich gutes Exemplar zu finden.
+      Dmitry wandte sich an uns, weil er eine **Alfa Romeo Giulia** kaufen wollte. Zunächst interessierte er sich für die Version mit **280 PS** und schickte uns einige Fahrzeuge, die ihm gefielen. Wir prüften jedes einzelne anhand der Händlerhistorie und bei **CarVertical**. Wie erwartet, hatte ein großer Teil der Fahrzeuge Unfallschäden. Leistungsstarke Versionen werden oft sehr intensiv gefahren, daher ist es nicht leicht, ein wirklich gutes Exemplar zu finden.
 
-      Schließlich schlugen wir eine Alternative vor: eine **Alfa Romeo Giulia aus dem Jahr 2021** in auffälligem Rot mit einem **2.0-Turbomotor und 200 PS**. Das Fahrzeug hatte eine **lückenlose Servicehistorie**, einen einwandfreien **CarVertical**-Bericht und eines der zuverlässigsten Automatikgetriebe seiner Klasse: das **ZF 8HP**.
+      Schließlich schlugen wir eine Alternative vor: eine **Alfa Romeo Giulia aus dem Jahr 2021** in auffälligem Rot mit einem **2,0-Liter-Turbomotor und 200 PS**. Das Fahrzeug hatte eine **lückenlose Servicehistorie**, einen hervorragenden **CarVertical-Bericht** und war mit einem der zuverlässigsten Automatikgetriebe seiner Klasse ausgestattet, dem **ZF 8HP**.
 
-      Nach dem Kauf führten wir in unserer Werkstatt eine umfassende Wartung durch:
+      Nach dem Kauf wurde das Fahrzeug bei uns umfassend gewartet:
 
       <ul class="icon-check">
-      <li>Motoröl und sämtliche Filter gewechselt</li>
-      <li>Zündkerzen erneuert</li>
-      <li>Getriebeöl und Ölwanne des ZF-8HP-Automatikgetriebes gewechselt</li>
+      <li>Motoröl und alle Filter</li>
+      <li>Zündkerzen</li>
+      <li>Ölwechsel am ZF-8HP-Automatikgetriebe inklusive Ölwanne</li>
       </ul>
 
-      Ja, der Wechsel des Innenraumfilters ist bei Alfa Romeo eine Herausforderung für sich. Aber auch die haben wir gemeistert.
+      Ja, der Austausch des Innenraumfilters bei einem Alfa Romeo ist eine Herausforderung für sich, aber auch das haben wir gemeistert.
 
-      So bekam Dmitri eine rundum gewartete **Alfa Romeo Giulia**, die Fahrspaß ohne böse Überraschungen bietet.
+      So bekam Dmitry eine vollständig gewartete **Alfa Romeo Giulia**, die Fahrspaß ohne unangenehme Überraschungen bietet.
 translatedFrom: bc6eca0dc0254934
 ---
 

@@ -71,52 +71,52 @@ translations:
       languages: Other languages
       countries: Services by country
       cities: Car sourcing by city
-      vehicleImport: Car imports
+      vehicleImport: Car import
     navHint:
-      vehicle-sourcing: We'll find and inspect your car
-      vehicle-import: We'll import it and handle customs clearance
+      vehicle-sourcing: We'll find and inspect a car
+      vehicle-import: We'll import and clear customs for your car
       vehicle-buyback: We'll buy your car
-      vehicle-inspection: We'll inspect the car you've found
+      vehicle-inspection: We'll inspect a car you've found
     nav:
       vehicle-sourcing: Car sourcing
       vehicle-import: Cars from Europe and China
       vehicle-buyback: Sell your car
-      vehicle-inspection: Car inspections
-      cases: Real deals
+      vehicle-inspection: Inspection
+      cases: Our deals
       contacts: Contact
     header:
       menuLabel: Menu
       menuCloseLabel: Close menu
       languageLabel: Language
-      ctaShort: Enquire
+      ctaShort: Get started
       ctaLong: Send an enquiry
     footer:
       servicesHeading: Services
       companyHeading: Company
       privacyLabel: Privacy
-      tagline: We'll find, inspect and deliver your car from Europe. We handle everything, from the search to delivery.
-      contactManagerLabel: Message our team
-      hoursLine: Available 24/7
-      copyrightSuffix: Car sourcing, inspections and delivery from Europe
+      tagline: We'll find, inspect and deliver a car from Europe. We handle the whole process, from the search to delivery.
+      contactManagerLabel: Message a manager
+      hoursLine: 24/7, every day
+      copyrightSuffix: Car sourcing, inspection and delivery from Europe
       cookieSettingsLabel: Cookie settings
       channelLinkLabel: Our channel
-      developerCredit: Website by Zikrasoft
+      developerCredit: Website by Zikrasoft studio
       aboutLabel: About us
     copyPhone:
       label: Copy phone number
       copied: Copied
     telegramChoice:
       heading: How would you like to get in touch?
-      bot: Via our bot
-      botHint: Tell us what car you're looking for, and our team will reply in the same chat
-      manager: Message our team directly
-      managerHint: A private Telegram chat with a member of our team
+      bot: Via the bot
+      botHint: Tell us what car you're looking for, and a manager will reply in the same chat
+      manager: Message a manager directly
+      managerHint: A private Telegram chat with a manager
     common:
       otherServicesLabel: 'Other services:'
       alsoWorkingInLabel: 'We also operate in:'
       homeLabel: Home
       faqHeading: Frequently asked questions
-      viewAllCasesLabel: View all deals
+      viewAllCasesLabel: All deals
       closeLabel: Close
       channelLabel: Our channel
       cookie:
@@ -131,22 +131,22 @@ translations:
         next: Next photo
   sr:
     llms:
-      keyFacts: Ključne informacije
+      keyFacts: Ključne činjenice
       other: Ostalo
       languages: Drugi jezici
       countries: Usluge po zemljama
       cities: Pronalaženje automobila po gradovima
       vehicleImport: Uvoz automobila
     navHint:
-      vehicle-sourcing: Pronalazimo i proveravamo automobil
-      vehicle-import: Uvozimo i carinimo
-      vehicle-buyback: Otkupljujemo vaš automobil
-      vehicle-inspection: Proveravamo auto koji ste sami pronašli
+      vehicle-sourcing: Pronaći ćemo i proveriti automobil
+      vehicle-import: Uvešćemo automobil i obaviti carinjenje
+      vehicle-buyback: Otkupićemo vaš automobil
+      vehicle-inspection: Pregledaćemo automobil koji ste vi pronašli
     nav:
       vehicle-sourcing: Pronalaženje automobila
       vehicle-import: Automobili iz Evrope i Kine
-      vehicle-buyback: Otkup
-      vehicle-inspection: Provera auta pre kupovine
+      vehicle-buyback: Otkup automobila
+      vehicle-inspection: Provera
       cases: Realizovane kupovine
       contacts: Kontakt
     header:
@@ -157,28 +157,28 @@ translations:
       ctaLong: Pošaljite upit
     footer:
       servicesHeading: Usluge
-      companyHeading: O nama
+      companyHeading: Kompanija
       privacyLabel: Privatnost
-      tagline: Pronalazimo, proveravamo i dopremamo automobil iz Evrope. Preuzimamo ceo proces, od pretrage do isporuke.
-      contactManagerLabel: Pišite savetniku
-      hoursLine: Dostupni 24 sata, svakog dana
-      copyrightSuffix: Pronalaženje, provera i dovoz automobila iz Evrope
+      tagline: Pronaći ćemo, proveriti i isporučiti automobil iz Evrope. Preuzimamo ceo proces, od potrage do isporuke.
+      contactManagerLabel: Pišite menadžeru
+      hoursLine: Dostupni smo 24/7
+      copyrightSuffix: Pronalaženje, provera i isporuka automobila iz Evrope
       cookieSettingsLabel: Podešavanja kolačića
       channelLinkLabel: Naš kanal
-      developerCredit: Sajt je izradio studio Zikrasoft
+      developerCredit: Sajt je izradila agencija Zikrasoft
       aboutLabel: O projektu
     copyPhone:
       label: Kopiraj broj
       copied: Kopirano
     telegramChoice:
-      heading: Kako želite da nam pišete?
+      heading: Kako vam je najlakše da nam pišete?
       bot: Preko bota
-      botHint: Opišite kakav automobil tražite, savetnik će vam odgovoriti u istom četu
-      manager: Direktno savetniku
-      managerHint: Privatni razgovor sa savetnikom na Telegramu
+      botHint: Recite nam kakav automobil tražite, a menadžer će vam odgovoriti u istom četu
+      manager: Direktno menadžeru
+      managerHint: Privatni čet sa menadžerom na Telegramu
     common:
       otherServicesLabel: 'Ostale usluge:'
-      alsoWorkingInLabel: 'Poslujemo i u:'
+      alsoWorkingInLabel: 'Radimo i u:'
       homeLabel: Početna
       faqHeading: Česta pitanja
       viewAllCasesLabel: Sve realizovane kupovine
@@ -188,10 +188,10 @@ translations:
         notice: Koristimo kolačiće.
         more: Više informacija u
         policyLink: politici privatnosti
-        accept: Prihvati
-        decline: Odbij
+        accept: Prihvatam
+        decline: Odbijam
       gallery:
-        morePhotos: Više fotografija
+        morePhotos: Još fotografija
         prev: Prethodna fotografija
         next: Sledeća fotografija
   es:
@@ -203,14 +203,14 @@ translations:
       cities: Búsqueda de coches por ciudad
       vehicleImport: Importación de coches
     navHint:
-      vehicle-sourcing: Encontramos y revisamos tu coche
-      vehicle-import: Lo importamos y tramitamos el despacho de aduanas
+      vehicle-sourcing: Encontramos y revisamos el coche
+      vehicle-import: Lo traemos y nos encargamos del despacho de aduanas
       vehicle-buyback: Compramos tu coche
       vehicle-inspection: Revisamos el coche que has encontrado
     nav:
       vehicle-sourcing: Búsqueda de coches
       vehicle-import: Coches de Europa y China
-      vehicle-buyback: Compramos tu coche
+      vehicle-buyback: Recompra
       vehicle-inspection: Inspección
       cases: Operaciones reales
       contacts: Contacto
@@ -218,16 +218,16 @@ translations:
       menuLabel: Menú
       menuCloseLabel: Cerrar menú
       languageLabel: Idioma
-      ctaShort: Solicitud
+      ctaShort: Solicitar
       ctaLong: Enviar solicitud
     footer:
       servicesHeading: Servicios
       companyHeading: Empresa
       privacyLabel: Privacidad
-      tagline: Buscamos, revisamos y traemos tu coche de Europa. Nos encargamos de todo, desde la búsqueda hasta la entrega.
-      contactManagerLabel: Escribir a un asesor
-      hoursLine: Las 24 horas, todos los días
-      copyrightSuffix: Búsqueda, inspección y entrega de coches de Europa
+      tagline: Buscamos, revisamos y traemos coches de Europa. Nos ocupamos de todo el proceso, desde la búsqueda hasta la entrega.
+      contactManagerLabel: Escribir al asesor
+      hoursLine: Abierto las 24 horas, todos los días
+      copyrightSuffix: Búsqueda, revisión y entrega de coches de Europa
       cookieSettingsLabel: Configuración de cookies
       channelLinkLabel: Nuestro canal
       developerCredit: Sitio web creado por el estudio Zikrasoft
@@ -236,10 +236,10 @@ translations:
       label: Copiar número
       copied: Copiado
     telegramChoice:
-      heading: ¿Cómo prefieres contactarnos?
+      heading: ¿Cómo prefieres escribirnos?
       bot: A través del bot
       botHint: Cuéntanos qué coche buscas y un asesor te responderá en el mismo chat
-      manager: Directamente con un asesor
+      manager: Escribir directamente al asesor
       managerHint: Chat privado con un asesor en Telegram
     common:
       otherServicesLabel: 'Otros servicios:'
@@ -251,7 +251,7 @@ translations:
       channelLabel: Nuestro canal
       cookie:
         notice: Utilizamos cookies.
-        more: Más información en nuestra
+        more: Más información en la
         policyLink: política de privacidad
         accept: Aceptar
         decline: Rechazar
@@ -261,23 +261,23 @@ translations:
         next: Foto siguiente
   de:
     llms:
-      keyFacts: Das Wichtigste auf einen Blick
+      keyFacts: Wichtige Fakten
       other: Sonstiges
       languages: Weitere Sprachen
       countries: Leistungen nach Ländern
-      cities: Fahrzeugsuche nach Städten
+      cities: Autosuche nach Städten
       vehicleImport: Fahrzeugimport
     navHint:
-      vehicle-sourcing: Wir finden und prüfen Ihr Wunschauto
-      vehicle-import: Wir übernehmen Import und Zollabfertigung
+      vehicle-sourcing: Wir finden und prüfen Ihr Auto
+      vehicle-import: Wir importieren Ihr Auto und erledigen die Zollabfertigung
       vehicle-buyback: Wir kaufen Ihr Auto
       vehicle-inspection: Wir prüfen das Auto, das Sie gefunden haben
     nav:
-      vehicle-sourcing: Fahrzeugsuche
+      vehicle-sourcing: Autosuche
       vehicle-import: Autos aus Europa und China
-      vehicle-buyback: Autoankauf
-      vehicle-inspection: Fahrzeugcheck
-      cases: Erfolgreiche Autokäufe
+      vehicle-buyback: Ankauf
+      vehicle-inspection: Fahrzeugprüfung
+      cases: Erfolgreiche Vermittlungen
       contacts: Kontakt
     header:
       menuLabel: Menü
@@ -289,34 +289,34 @@ translations:
       servicesHeading: Leistungen
       companyHeading: Unternehmen
       privacyLabel: Datenschutz
-      tagline: Wir finden, prüfen und liefern Ihr Auto aus Europa. Wir übernehmen den gesamten Ablauf, von der Suche bis zur Lieferung.
-      contactManagerLabel: Berater kontaktieren
+      tagline: Wir finden, prüfen und liefern Ihr Auto aus Europa. Wir kümmern uns um den gesamten Prozess, von der Suche bis zur Lieferung.
+      contactManagerLabel: Manager kontaktieren
       hoursLine: Rund um die Uhr, auch am Wochenende
-      copyrightSuffix: Fahrzeugsuche, Fahrzeugcheck und Lieferung aus Europa
+      copyrightSuffix: Autosuche, Fahrzeugprüfung und Lieferung aus Europa
       cookieSettingsLabel: Cookie-Einstellungen
       channelLinkLabel: Unser Kanal
-      developerCredit: Website von Zikrasoft
+      developerCredit: Website erstellt von Zikrasoft
       aboutLabel: Über uns
     copyPhone:
-      label: Telefonnummer kopieren
+      label: Nummer kopieren
       copied: Kopiert
     telegramChoice:
       heading: Wie möchten Sie uns schreiben?
       bot: Über den Bot
-      botHint: Beschreiben Sie Ihr Wunschauto. Ein Berater antwortet Ihnen im selben Chat.
-      manager: Direkt an einen Berater
-      managerHint: Persönlicher Chat mit einem Berater auf Telegram
+      botHint: Schreiben Sie uns, welches Auto Sie suchen. Unser Manager antwortet im selben Chat.
+      manager: Direkt an den Manager
+      managerHint: Privater Chat mit einem Manager auf Telegram
     common:
       otherServicesLabel: 'Weitere Leistungen:'
-      alsoWorkingInLabel: 'Wir sind auch hier für Sie da:'
+      alsoWorkingInLabel: 'Wir sind auch tätig in:'
       homeLabel: Startseite
-      faqHeading: Häufige Fragen
-      viewAllCasesLabel: Alle Autokäufe
+      faqHeading: Häufig gestellte Fragen
+      viewAllCasesLabel: Alle Vermittlungen
       closeLabel: Schließen
       channelLabel: Unser Kanal
       cookie:
         notice: Wir verwenden Cookies.
-        more: Mehr dazu in unserer
+        more: Mehr dazu in der
         policyLink: Datenschutzerklärung
         accept: Akzeptieren
         decline: Ablehnen

@@ -15,42 +15,42 @@ published: true
 featured: true
 translations:
   sr:
-    title: "Audi S4 3.0 TFSI: zamena razvodnih lanaca i servis S tronic menjača"
+    title: "Audi S4 3.0 TFSI: zamena lanaca razvoda i servis S tronic menjača"
     body: |-
-      U **CarLab** je stigao **Audi S4 iz 2012. godine** sa benzinskim motorom **3.0 TFSI**. Uradili smo **veliki servis**, zamenili sva četiri razvodna lanca i servisirali menjač sa dvostrukim kvačilom **S tronic** (DSG).
+      U **CarLab** nam je stigao **Audi S4 iz 2012. godine** sa benzinskim motorom **3.0 TFSI**. Uradili smo veliki servis, zamenili sva četiri lanca razvoda i servisirali automatizovani **S tronic** menjač (DSG).
 
       Šta smo uradili:
 
-      - Zamenili sva četiri razvodna lanca sa pripadajućim kompletima lančanog razvoda.
-      - Zamenili zaptivke motora.
-      - Proverili dostupne sklopove motora.
-      - Servisirali S tronic menjač.
-      - Proverili rad vozila nakon popravke.
+      - Zamenili smo sva četiri lanca razvoda i komplete lančanog pogona.
+      - Zamenili smo zaptivke i semeringe motora.
+      - Proverili smo dostupne sklopove motora.
+      - Servisirali smo S tronic menjač.
+      - Proverili smo kako automobil radi nakon popravke.
 
-      Na motoru **3.0 TFSI** lančani razvod nalazi se sa strane menjača, pa zamena lanaca zahteva dosta vremena. Lanci se vremenom istežu, a zatezači i vođice se habaju. Simptomi su: **metalni zvuk pri hladnom startu**, greške u sinhronizaciji bregastih vratila, neravnomeran rad motora i upozorenja na instrument tabli.
+      Kod motora **3.0 TFSI**, lančani pogon razvoda nalazi se sa strane menjača, pa zamena lanaca traje dugo. Vremenom se lanci istežu, a zatezači i vođice habaju. Znaci za uzbunu su **metalni zvuk pri hladnom startu**, greške sinhronizacije bregastih osovina, neravnomeran rad motora i upozorenja na instrument tabli.
 
-      Pošto je motor već bio rasklopljen, zamenili smo i zaptivke kako bismo otklonili moguća mesta curenja ulja. Ovaj posao zahteva poseban alat i **precizno podešavanje faze razvoda**.
+      Pošto smo već rastavili motor, zamenili smo i zaptivke i semeringe kako bismo sprečili moguća curenja ulja. Za ovaj posao potreban je specijalan alat i **precizno podešavanje faze razvoda**.
 
-      S tronic menjač servisirali smo uz upotrebu tečnosti prema specifikaciji proizvođača. Redovno održavanje omogućava glatko menjanje brzina i smanjuje habanje menjača. Radove na motoru i menjaču obavili smo u okviru jedne posete.
+      S tronic menjač smo servisirali tečnostima prema specifikaciji proizvođača. Redovan servis pomaže da menjač menja brzine glatko i smanjuje njegovo habanje. Motor i menjač smo sredili tokom jedne posete.
     car: Audi S4
   en:
     title: "Audi S4 3.0 TFSI: timing chain replacement and S tronic service"
     body: |-
-      This **2012 Audi S4** came to **CarLab** with a **3.0 TFSI** petrol engine. We carried out a major service (**veliki servis**), replacing all four timing chains, and serviced the **S tronic** dual-clutch gearbox (DSG).
+      A **2012 Audi S4** with a **3.0 TFSI** petrol engine came to **CarLab** for a major service (**veliki servis**), including replacement of all four timing chains and servicing of the **S tronic** (DSG) transmission.
 
       Work carried out:
 
-      - Replaced all four timing chains and the associated timing chain kits.
-      - Replaced engine gaskets and seals.
-      - Inspected the accessible engine components.
-      - Serviced the S tronic gearbox.
+      - Replaced all four timing chains and the complete timing chain drive kits.
+      - Replaced the engine gaskets and seals.
+      - Checked the accessible engine components.
+      - Serviced the S tronic transmission.
       - Checked the car's operation after the repairs.
 
-      On the **3.0 TFSI**, the timing chains are at the gearbox end of the engine, making replacement a time-consuming job. Over time, the chains stretch and the tensioners and guides wear. Symptoms include **a metallic rattle on cold starts**, camshaft timing fault codes, rough running and dashboard warnings.
+      On the **3.0 TFSI**, the timing chain drive is located on the transmission side, so replacing the chains is a time-consuming job. Over time, the chains stretch and the tensioners and guides wear out. Signs can include **metallic noise on a cold start**, camshaft timing faults, rough running, and warning lights on the dashboard.
 
-      With the engine already apart, we also replaced gaskets and seals to address potential oil leaks. This work requires specialist tools and **precise valve timing adjustment**.
+      Since the engine was already apart, we also replaced the gaskets and seals to address potential sources of oil leaks. This job requires specialist tools and **precise camshaft timing**.
 
-      We serviced the S tronic gearbox using fluids that meet the manufacturer's specifications. Regular servicing helps maintain smooth gear changes and reduces gearbox wear. Both the engine work and gearbox service were completed in a single visit.
+      We serviced the S tronic transmission using fluids that meet the manufacturer's specifications. Regular servicing helps maintain smooth gear changes and reduce transmission wear. We completed the engine and transmission work in one visit.
     car: Audi S4
 translatedFrom: 7b2f7135414fde9e
 ---

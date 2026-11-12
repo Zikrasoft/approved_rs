@@ -76,17 +76,17 @@ translatedFrom: 3e57ae4bd88e3b50
 translations:
   sr:
     metaTitle: Korpa | CarLab
-    metaDescription: Auto delovi koje ste izabrali u katalogu CarLaba. Plaćanje gotovinom pri preuzimanju u auto servisu u Beogradu.
+    metaDescription: Auto delovi koje ste izabrali u katalogu CarLaba. Plaćanje gotovinom pri preuzimanju u servisu u Beogradu.
     heading: Korpa
     cartLink: Korpa
-    partsListNote: Delovi bez cene nalaze se u upitu, odvojeno od korpe. Pošaljite upit i javićemo Vam cenu i rok.
+    partsListNote: Auto delovi bez cene nalaze se u upitu, odvojeno od korpe. Pošaljite upit, a mi ćemo Vam javiti cenu i rok.
     loading: Proveravamo cene i dostupnost
     emptyHeading: Korpa je prazna
-    emptyBody: Otvorite stranicu dela u katalogu i kliknite na „Dodajte u korpu“.
-    emptyCta: Otvorite katalog delova
-    emptyInquiry: Niste pronašli deo koji Vam treba? Pošaljite upit i pronaći ćemo odgovarajući deo.
+    emptyBody: Otvorite stranicu auto dela u katalogu i izaberite „Dodajte u korpu“.
+    emptyCta: Katalog auto delova
+    emptyInquiry: Niste pronašli potreban auto deo? Pošaljite upit, a mi ćemo ga pronaći.
     emptyInquiryCta: Pošaljite upit
-    unitTemplate: '{price} po kom.'
+    unitTemplate: '{price} po komadu'
     increaseLabel: Dodajte još jedan
     decreaseLabel: Uklonite jedan
     toInquiryLabel: Pošaljite kao upit
@@ -95,132 +95,132 @@ translations:
     removeLabel: Uklonite iz korpe
     totalLabel: Ukupno
     addonTemplate: 'Dodajte: {service}'
-    addonPickup: Obavićemo u auto servisu CarLab kada dođete po porudžbinu
+    addonPickup: Uradite u auto servisu CarLab kada dođete po porudžbinu
     addonInCart: Uslugu možete dodati u korpi.
     installationLabel: Ugradnja u auto servisu CarLab
-    installationFree: Besplatna ugradnja
+    installationFree: Ugradnja je besplatna
     installationInCart: Ugradnju možete dodati u korpi.
     addonsInCart: Obe usluge možete dodati u korpi.
     freeLabel: Besplatno
-    priceChangeTemplate: '{name}: prethodna cena {before}, nova cena {after}'
+    priceChangeTemplate: '{name}: bilo je {before}, sada je {after}'
     summaryHeading: Vaša porudžbina
-    summaryCountTemplate: Delovi, {count} kom.
-    summaryAddons: Radovi pri preuzimanju
+    summaryCountTemplate: Auto delovi, {count} kom.
+    summaryAddons: Radovi prilikom preuzimanja
     contactStep: Kontakt
     pickupStep: Preuzimanje
     pickupMethod: Lično preuzimanje u auto servisu CarLab
     paymentStep: Plaćanje
     paymentMethod: Gotovinom pri preuzimanju
-    extrasToggle: Dodajte VIN ili komentar
+    extrasToggle: Dodajte broj šasije ili komentar
     submitNote: Saradnik će potvrditi dostupnost i vreme preuzimanja.
     commentLabel: Komentar uz porudžbinu (nije obavezno)
     commentPlaceholder: Na primer, kada Vam odgovara da preuzmete
-    submitLabel: Potvrdite porudžbinu
-    consentError: Bez Vaše saglasnosti ne možemo da prihvatimo porudžbinu
-    submitError: Porudžbina nije poslata. Proverite internet vezu i pokušajte ponovo
-    submitErrorContacts: 'Ili pošaljite porudžbinu putem WhatsAppa, spisak je već u poruci. Možete nas i pozvati ili nam pisati preko druge aplikacije:'
-    orderMessage: 'Dobar dan! Želim da poručim:'
-    checkoutBlocked: 'Trenutno nije moguće kupiti: {names}. Uklonite stavku ili je pošaljite kao upit, pa ćete moći da potvrdite porudžbinu.'
+    submitLabel: Poručite
+    consentError: Bez saglasnosti ne možemo da obradimo porudžbinu
+    submitError: Porudžbina nije poslata. Proverite vezu i pokušajte ponovo
+    submitErrorContacts: 'Ili pošaljite porudžbinu preko WhatsApp-a, spisak je već u poruci. Možete i da pozovete ili pišete u drugoj aplikaciji za poruke:'
+    orderMessage: 'Zdravo! Želim da poručim:'
+    checkoutBlocked: 'Trenutno ne možete da poručite: {names}. Uklonite stavku ili je pošaljite kao upit, pa ćete moći da završite porudžbinu.'
     notices:
-      priceChanged: Imamo Vaš kontakt i spisak delova. Saradnik će Vam se javiti. Cena se promenila dok ste unosili porudžbinu, pa smo ažurirali korpu. Proverite iznos i ponovo potvrdite porudžbinu.
-      unavailable: Imamo Vaš kontakt i spisak delova. Saradnik će Vam se javiti. Jedna od stavki više nije dostupna u traženoj količini. Uklonite je i ponovo potvrdite porudžbinu.
-      unreachable: Imamo Vaš kontakt i spisak delova. Saradnik će Vam se javiti. Porudžbina trenutno nije prihvaćena. Pokušajte ponovo za minut.
-      expired: Imamo Vaš kontakt i spisak delova. Saradnik će Vam se javiti. Ova korpa više nije važeća i porudžbina nije kreirana.
-      gone: Ova korpa više nije važeća, pa smo delove iz nje prebacili u upit. Pošaljite upit i javićemo Vam cenu i rok.
-      invalid: Nismo uspeli da prepoznamo kontakt. Unesite broj telefona ili korisničko ime na Telegramu i ponovo potvrdite porudžbinu.
-      cartChanged: Imamo Vaš kontakt i spisak delova. Saradnik će Vam se javiti. Korpa je izmenjena u drugoj kartici pregledača. Proverite stavke i iznos, pa ponovo potvrdite porudžbinu.
-      repriced: Cena se promenila od Vaše poslednje posete. Proverite iznos pre potvrde porudžbine.
-      offline: Prodavnica ne odgovara, sadržaj korpe nije promenjen. Pokušajte ponovo za minut.
-      stockLimit: Trenutno nema više komada ovog dela. U korpi je već sva dostupna količina.
-      orderLimit: Dostigli ste maksimalnu količinu ovog dela po porudžbini. Ako Vam treba više, pišite nam i poručićemo odvojeno.
-      moved: Prebacili smo stavku u upit. Pošaljite ga i javićemo Vam cenu i rok.
+      priceChanged: Imamo Vaš kontakt i spisak, saradnik će Vam se javiti. Cena se promenila dok ste popunjavali porudžbinu, pa smo ažurirali korpu. Proverite ukupan iznos i ponovo poručite.
+      unavailable: Imamo Vaš kontakt i spisak, saradnik će Vam se javiti. Jednog auto dela više nema u potrebnoj količini. Uklonite ga i ponovo poručite.
+      unreachable: Imamo Vaš kontakt i spisak, saradnik će Vam se javiti. Porudžbina trenutno nije poslata. Pokušajte ponovo za minut.
+      expired: Imamo Vaš kontakt i spisak, saradnik će Vam se javiti. Ova korpa je zastarela i porudžbina nije poslata.
+      gone: Ova korpa je zastarela, pa smo auto delove prebacili u upit. Pošaljite upit, a mi ćemo Vam javiti cenu i rok.
+      invalid: Nismo uspeli da prepoznamo kontakt. Unesite broj telefona ili korisničko ime na Telegramu i ponovo poručite.
+      cartChanged: Imamo Vaš kontakt i spisak, saradnik će Vam se javiti. Korpa je izmenjena u drugoj kartici. Proverite stavke i ukupan iznos, pa ponovo poručite.
+      repriced: Cena se promenila od Vaše prethodne posete. Proverite ukupan iznos pre poručivanja.
+      offline: Prodavnica nije odgovorila, korpa je ostala nepromenjena. Pokušajte ponovo za minut.
+      stockLimit: Trenutno nema više ovog auto dela. U korpi je već sve što je dostupno.
+      orderLimit: Ne možete dodati više ovog auto dela u jednu porudžbinu. Ako Vam treba više, pišite nam i poručićemo posebno.
+      moved: Prebacili smo stavku u upit. Pošaljite ga, a mi ćemo Vam javiti cenu i rok.
       movedCta: Otvorite upit
     orderedHeading: Porudžbina je primljena
-    orderedBody: Saradnik će proveriti dostupnost, a zatim Vam pisati ili Vas pozvati da potvrdi porudžbinu i vreme preuzimanja. Plaćanje je gotovinom pri preuzimanju.
+    orderedBody: Saradnik će proveriti dostupnost, a zatim Vam pisati ili pozvati da potvrdi porudžbinu i vreme preuzimanja. Plaćanje gotovinom pri preuzimanju.
     orderNumberTemplate: 'Broj porudžbine: {number}'
     orderedNext: Potvrdićemo dostupnost i vreme preuzimanja, obično u roku od sat vremena tokom radnog vremena.
-    orderedContact: 'Pisaćemo Vam putem {channel}: {contact}'
+    orderedContact: 'Javićemo Vam se na {channel}: {contact}'
     orderedCall: 'Pozvaćemo Vas: {contact}'
-    orderedCta: Vratite se u katalog
+    orderedCta: Nazad na katalog
     receiptQuantityTemplate: '{count} kom.'
-    stickyCta: Nastavite na poručivanje
+    stickyCta: Nastavite sa poručivanjem
     fallbackHeading: Prodavnica trenutno nije dostupna
-    fallbackBody: Korpa je sačuvana. Pokušajte da je ponovo otvorite za minut ili pošaljite delove kao upit, pa ćemo Vam javiti cenu i rok.
+    fallbackBody: Korpa je sačuvana. Pokušajte ponovo da je otvorite za minut ili pošaljite auto delove kao upit, a mi ćemo Vam javiti cenu i rok.
     fallbackRetry: Pokušajte ponovo
     fallbackCta: Pošaljite kao upit
-    noscriptBody: Korpa radi samo kada je JavaScript uključen. Pošaljite upit i javićemo Vam cenu i rok.
+    noscriptBody: Korpa radi samo kada je JavaScript uključen. Pošaljite upit, a mi ćemo Vam javiti cenu i rok.
   en:
     metaTitle: Cart | CarLab
-    metaDescription: Parts you've selected from the CarLab catalogue. Pay in cash when you collect from our workshop in Belgrade.
+    metaDescription: Parts you've picked from the CarLab catalogue. Pay cash on collection at our Belgrade workshop.
     heading: Cart
     cartLink: Cart
-    partsListNote: Parts without a price are kept in your enquiry, separate from your cart. Send the enquiry and we'll confirm prices and lead times.
+    partsListNote: Parts without a price are saved in your enquiry, separate from the cart. Send the enquiry and we'll let you know the price and lead time.
     loading: Checking prices and availability
     emptyHeading: Your cart is empty
-    emptyBody: Open a part's page in the catalogue and click "Add to cart".
+    emptyBody: Open a part page in the catalogue and click "Add to cart".
     emptyCta: Browse parts
-    emptyInquiry: Can't find the part you need? Send an enquiry and we'll find it for you.
+    emptyInquiry: Can't find the part you need? Send us an enquiry and we'll find it for you.
     emptyInquiryCta: Send an enquiry
-    unitTemplate: '{price} each'
+    unitTemplate: '{price} per pc'
     increaseLabel: Add one more
     decreaseLabel: Remove one
     toInquiryLabel: Send as an enquiry
     lowerToTemplate: Keep {count} pcs
-    unavailableTag: The quantity you need isn't currently available. Reduce the quantity, remove the item or send it as an enquiry.
+    unavailableTag: Not enough in stock right now. Reduce the quantity, remove this item, or send it as an enquiry.
     removeLabel: Remove from cart
     totalLabel: Total
     addonTemplate: 'Add: {service}'
-    addonPickup: We'll do this at the CarLab workshop when you collect your order
-    addonInCart: You can add this service in your cart.
-    installationLabel: Fitting at the CarLab workshop
-    installationFree: Free fitting
-    installationInCart: You can add fitting in your cart.
-    addonsInCart: You can add both services in your cart.
+    addonPickup: We'll do it at CarLab when you collect your order
+    addonInCart: You can add the service in the cart.
+    installationLabel: Installation at CarLab
+    installationFree: Free installation
+    installationInCart: You can add installation in the cart.
+    addonsInCart: You can add both services in the cart.
     freeLabel: Free
     priceChangeTemplate: '{name}: was {before}, now {after}'
     summaryHeading: Your order
     summaryCountTemplate: Parts, {count} pcs
-    summaryAddons: Services on collection
-    contactStep: Contact details
+    summaryAddons: Work at collection
+    contactStep: Contact
     pickupStep: Collection
-    pickupMethod: Collection from the CarLab workshop
+    pickupMethod: Collect from CarLab
     paymentStep: Payment
     paymentMethod: Cash on collection
-    extrasToggle: Add a VIN or comment
-    submitNote: Our team will confirm availability and when your order will be ready to collect.
+    extrasToggle: Add VIN or a comment
+    submitNote: Our team will confirm availability and when you can collect your order.
     commentLabel: Order comment (optional)
     commentPlaceholder: For example, when you'd like to collect
     submitLabel: Place order
-    consentError: We can't place your order without your consent
-    submitError: Your order wasn't sent. Check your connection and try again
-    submitErrorContacts: 'Or send your order via WhatsApp, the parts list is already in the message. You can also call us or use another messaging app:'
+    consentError: We need your consent to place the order
+    submitError: Your order couldn't be sent. Check your connection and try again.
+    submitErrorContacts: 'Or send your order via WhatsApp. The parts list is already in the message. You can also call or message us on another app:'
     orderMessage: "Hello! I'd like to order:"
-    checkoutBlocked: 'Currently unavailable to buy: {names}. Remove the item or send it as an enquiry to proceed with your order.'
+    checkoutBlocked: "You can't order these right now: {names}. Remove the item or send it as an enquiry, then you can place your order."
     notices:
-      priceChanged: We have your contact details and parts list, and our team will get in touch. A price changed while you were checking out, so we've updated your cart. Check the total and place your order again.
-      unavailable: We have your contact details and parts list, and our team will get in touch. One of the items is no longer available in the quantity you need. Remove it and place your order again.
-      unreachable: We have your contact details and parts list, and our team will get in touch. Your order couldn't be placed just now. Try again in a minute.
-      expired: We have your contact details and parts list, and our team will get in touch. This cart has expired and no order has been placed.
-      gone: This cart has expired, so we've moved its parts to an enquiry. Send the enquiry and we'll confirm prices and lead times.
+      priceChanged: We have your contact details and parts list. Our team will get in touch. The price changed while you were placing your order, so we've updated your cart. Check the total and place your order again.
+      unavailable: We have your contact details and parts list. Our team will get in touch. One of the parts is no longer available in the quantity you need. Remove it and place your order again.
+      unreachable: We have your contact details and parts list. Our team will get in touch. Your order couldn't be placed just now. Please try again in a minute.
+      expired: We have your contact details and parts list. Our team will get in touch. This cart has expired, so your order wasn't placed.
+      gone: This cart has expired, so we've moved its parts to your enquiry. Send the enquiry and we'll let you know the price and lead time.
       invalid: We couldn't recognise your contact details. Enter a phone number or Telegram username and place your order again.
-      cartChanged: We have your contact details and parts list, and our team will get in touch. Your cart was changed in another tab. Check the items and total, then place your order again.
-      repriced: A price has changed since your last visit. Check the total before placing your order.
-      offline: The shop didn't respond. Your cart is unchanged. Try again in a minute.
-      stockLimit: There are no more of this part available right now. Your cart already contains all the stock we have.
-      orderLimit: You've reached the limit for this part in a single order. If you need more, contact us and we'll arrange a separate order.
-      moved: We've moved the item to your enquiry. Send it and we'll confirm the price and lead time.
+      cartChanged: We have your contact details and parts list. Our team will get in touch. Your cart changed in another tab. Check the items and total, then place your order again.
+      repriced: The price has changed since your last visit. Check the total before placing your order.
+      offline: The shop didn't respond, so your cart is unchanged. Please try again in a minute.
+      stockLimit: There's no more of this part in stock right now. Your cart already has the available quantity.
+      orderLimit: You can't add more of this part to one order. If you need more, get in touch and we'll order it separately.
+      moved: We've moved the item to your enquiry. Send it and we'll let you know the price and lead time.
       movedCta: View enquiry
     orderedHeading: Order received
-    orderedBody: Our team will check availability, then message or call you to confirm your order and collection time. Payment is in cash on collection.
+    orderedBody: Our team will check availability, then message or call you to confirm your order and collection time. Pay cash on collection.
     orderNumberTemplate: 'Order number: {number}'
-    orderedNext: We'll confirm availability and collection time, usually within an hour during opening hours.
+    orderedNext: We'll confirm availability and collection time, usually within an hour during business hours.
     orderedContact: "We'll message you on {channel}: {contact}"
-    orderedCall: "We'll call you: {contact}"
-    orderedCta: Back to catalogue
+    orderedCall: "We'll call: {contact}"
+    orderedCta: Back to the catalogue
     receiptQuantityTemplate: '{count} pcs'
     stickyCta: Checkout
-    fallbackHeading: The shop is currently unavailable
-    fallbackBody: Your cart has been saved. Try opening it again in a minute, or send the parts as an enquiry and we'll confirm prices and lead times.
+    fallbackHeading: The shop is temporarily unavailable
+    fallbackBody: Your cart is saved. Try opening it again in a minute, or send the parts as an enquiry and we'll let you know the price and lead time.
     fallbackRetry: Try again
     fallbackCta: Send as an enquiry
-    noscriptBody: The cart requires JavaScript. Send an enquiry and we'll confirm prices and lead times.
+    noscriptBody: The cart only works with JavaScript enabled. Send an enquiry and we'll let you know the price and lead time.

@@ -13,40 +13,40 @@ date: 2026-09-15
 published: true
 translations:
   sr:
-    title: "Audi Q7 2008: ogibljenje, kočnice i curenje ulja"
+    title: "Audi Q7 2008: trap, kočnice i curenje ulja"
     body: |-
-      Kod nas je stigao Audi Q7 iz 2008. godine sa podužim spiskom kvarova. Automobilu su bili potrebni ozbiljniji radovi i na trapu i na motoru.
+      U CarLab nam je stigao Audi Q7 iz 2008. godine sa podužim spiskom kvarova. Automobilu je bila potrebna ozbiljna popravka trapa i motora.
 
-      Šta je urađeno:
+      Šta smo uradili:
 
-      - zamena ramena ogibljenja;
-      - zamena kočionih diskova i pločica;
-      - radovi u prostoru između glava motora;
-      - zamena zaptivki usisnog sistema;
-      - zamena EGR cevi;
-      - mali servis sa zamenom ulja i filtera.
+      - zamenili smo ramena trapa;
+      - zamenili smo kočione diskove i pločice;
+      - radili smo u prostoru između redova cilindara motora;
+      - zamenili smo zaptivke usisnog sistema;
+      - zamenili smo EGR cev;
+      - uradili smo mali servis, zamenili ulje i filtere.
 
-      Poseban problem bilo je stalno curenje motornog ulja. Prilikom prethodnog servisa čep za ispuštanje ulja nije bio pravilno postavljen, pa je ulje neprestano kapalo iz motora. Otklonili smo problem i sve doveli u red.
+      Poseban problem bilo je stalno curenje motornog ulja. Posle prethodnog servisa, čep za ispuštanje ulja nije bio pravilno postavljen, pa je ulje neprestano kapalo iz motora. Otklonili smo problem i sve doveli u red.
 
-      Audi Q7 prve generacije zahteva stručno održavanje, naročito kada je reč o starijim primercima sa velikom kilometražom. Važno je utvrditi zbog čega je kvar nastao i otkloniti uzrok, a ne samo ugraditi novi deo.
+      Audi Q7 prve generacije zahteva stručno održavanje, naročito kada je reč o starijim automobilima sa velikom kilometražom. Važno je utvrditi uzrok kvara i otkloniti ga, a ne samo ugraditi novi deo.
     car: Audi Q7
   en:
-    title: "2008 Audi Q7: suspension, brakes and an oil leak"
+    title: "Audi Q7 2008: suspension, brakes and an oil leak"
     body: |-
-      This 2008 Audi Q7 came to us with a long list of faults. Both the suspension and the engine needed serious attention.
+      A 2008 Audi Q7 came in with a long list of issues. It needed significant work on both the suspension and the engine.
 
       Work carried out:
 
-      - replaced the suspension arms;
+      - replaced the suspension control arms;
       - replaced the brake discs and pads;
-      - carried out work in the engine valley;
+      - carried out repairs in the engine valley;
       - resealed the intake system;
       - replaced the EGR pipe;
-      - carried out an interim service, including an oil and filter change.
+      - performed a minor service, including an oil and filter change.
 
-      A separate issue was a persistent engine oil leak. The drain plug had been fitted incorrectly during a previous service, leaving oil constantly dripping from the engine. We fixed the problem and put everything right.
+      There was also a persistent engine oil leak. The previous service had left the drain plug incorrectly fitted, causing oil to drip continuously from the engine. We fixed the issue and got everything back in order.
 
-      The first-generation Audi Q7 needs knowledgeable care, especially as these cars get older and cover more miles. The key is to find out why a fault has developed and address the root cause, rather than simply fit a new part.
+      The first-generation Audi Q7 needs proper maintenance, especially older, high-mileage vehicles. It's important to find out what's causing a fault and fix the underlying problem, rather than simply fitting a new part.
     car: Audi Q7
 translatedFrom: b51e5c674f457a99
 ---

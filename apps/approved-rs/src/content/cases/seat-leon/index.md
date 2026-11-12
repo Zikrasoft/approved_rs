@@ -4,99 +4,99 @@ translations:
   en:
     title: SEAT Leon
     body: |-
-      ## Car Sourcing in Spain: A SEAT Leon 2.0 TDI for Our Client
+      ## Car Sourcing in Spain: SEAT Leon 2.0 TDI for a Client
 
-      Another successful car search completed in Spain. This time, we were looking for a car for our client Maxim in Barcelona.
+      Another successful car-sourcing project in Spain. This time, we were looking for a car for our client Maxim in Barcelona.
 
-      The brief: find a **SEAT Leon** with a **2.0 TDI** diesel engine and the reliable DQ381 wet-clutch DSG transmission, in good mechanical condition, with verified mileage and a documented history.
+      The brief: find a **SEAT Leon** with a **2.0 TDI** diesel engine and a reliable DSG DQ381 dual-clutch transmission with wet clutches. The car had to be in good mechanical condition, with verified mileage and a clear history.
 
-      During the search, we found, inspected and checked four cars. Our assessment of each went well beyond the listing and its appearance. We took a detailed look at its mechanical condition, ownership and service history, and vehicle records.
+      During the search, we found, inspected, and checked four cars. We assessed each one based on more than just its listing and appearance. We carried out detailed checks of its mechanical condition, ownership and service history, and vehicle records.
 
-      Of the four candidates, this was the best option:
+      After comparing all four options, we chose the best one:
 
       - Red SEAT Leon
       - 2.0 TDI diesel engine
-      - DQ381 wet-clutch DSG transmission
-      - Approximately 100,000 km
-      - Sourced and inspected in Spain
+      - DSG DQ381 transmission with wet clutches
+      - Around 100,000 km on the odometer
+      - Found and inspected in Spain
 
-      Before the purchase, we carried out a comprehensive inspection. We checked the car's history through **CarVertical** and official SEAT dealer records. We also ran a full diagnostic scan of its electronic systems.
+      Before purchase, we carried out a comprehensive vehicle inspection. We checked its history through **CarVertical** and SEAT dealer records. We also performed a full computer diagnostic check of the vehicle's electronic systems.
 
-      Before the deal was finalised, we checked the car's mechanical condition, bodywork and interior, verified that the mileage was consistent with the available service history, and assessed its overall condition.
+      We also checked the car's mechanical condition, bodywork, interior, whether the mileage matched the available service history, and its overall condition before the deal was finalized.
 
-      After comparing all four cars, this SEAT Leon offered the best combination of condition, history, mileage and specifications.
+      After comparing the four cars, this SEAT Leon proved to be the best choice overall in terms of condition, history, mileage, and specifications.
   sr:
     title: SEAT Leon
     body: |-
-      ## Pronalaženje automobila u Španiji: SEAT Leon 2.0 TDI za klijenta
+      ## Odabir automobila u Španiji: SEAT Leon 2.0 TDI za klijenta
 
-      Još jedna uspešno završena potraga za automobilom u Španiji. Ovog puta tražili smo automobil za našeg klijenta Maksima u Barseloni.
+      Još jedan uspešno završen proces odabira automobila u Španiji. Ovog puta smo tražili automobil za našeg klijenta Maksima u Barseloni.
 
-      Zadatak: pronaći **SEAT Leon** sa dizel motorom **2.0 TDI** i pouzdanim DSG DQ381 menjačem sa mokrim kvačilima, u dobrom tehničkom stanju, sa potvrđenom kilometražom i jasnom istorijom.
+      Zadatak: pronaći **SEAT Leon** sa dizel motorom **2.0 TDI** i pouzdanim DSG DQ381 automatskim menjačem sa mokrim kvačilima, u dobrom tehničkom stanju, sa potvrđenom kilometražom i transparentnom istorijom.
 
-      Tokom potrage pronašli smo četiri automobila i za svaki obavili uslugu provera auta pre kupovine. Procena se nije zasnivala samo na oglasu i spoljašnjem izgledu. Detaljno smo proverili tehničko stanje, istoriju korišćenja, održavanje i podatke o svakom vozilu.
+      Tokom odabira pronašli smo, pregledali i proverili četiri automobila. Svaki kandidat procenjivali smo na osnovu više od samog oglasa i spoljašnjeg stanja. Detaljno smo proverili tehničko stanje, istoriju korišćenja, servisiranje i podatke o vozilu.
 
-      Od četiri razmatrana automobila izabrali smo najbolji:
+      Na kraju smo od četiri kandidata izabrali najbolji:
 
-      - SEAT Leon crvene boje
-      - dizel motor 2.0 TDI
+      - crveni SEAT Leon
+      - 2.0 TDI dizel motor
       - DSG DQ381 menjač sa mokrim kvačilima
-      - kilometraža oko 100.000 km
+      - oko 100.000 km na satu
       - automobil pronađen i proveren u Španiji
 
-      Pre kupovine obavljena je sveobuhvatna provera auta pre kupovine. Istoriju smo proverili putem servisa **CarVertical**, kao i u bazama ovlašćenog SEAT servisa. Uz to je urađena kompletna kompjuterska dijagnostika elektronskih sistema vozila.
+      Pre kupovine obavili smo kompletnu provera auta pre kupovine. Istoriju smo proverili preko **CarVertical** servisa, kao i u bazama ovlašćenog SEAT dilera. Uz to smo sproveli kompletnu kompjutersku dijagnostiku elektronskih sistema automobila.
 
-      Pre zaključenja kupovine proverili smo i tehničko stanje, karoseriju, enterijer, usklađenost kilometraže sa dostupnom servisnom istorijom i opšte stanje automobila.
+      Proverili smo i tehničko stanje, karoseriju, unutrašnjost, usklađenost kilometraže sa dostupnom servisnom istorijom i opšte stanje automobila pre sklapanja kupoprodajnog ugovora.
 
-      Nakon poređenja sva četiri automobila, ovaj SEAT Leon pokazao se kao najbolji izbor kada se zajedno uzmu u obzir stanje, istorija, kilometraža i karakteristike.
+      Nakon poređenja četiri automobila, ovaj SEAT Leon pokazao se kao najbolji izbor kada se uzmu u obzir stanje, istorija, kilometraža i karakteristike.
   es:
     title: SEAT Leon
     body: |-
-      ## Búsqueda de coche en España: un SEAT Leon 2.0 TDI para nuestro cliente
+      ## Búsqueda de coches en España: SEAT Leon 2.0 TDI para un cliente
 
-      Otra búsqueda de coche completada con éxito en España. Esta vez buscábamos un vehículo para nuestro cliente Maksim en Barcelona.
+      Otro proceso de búsqueda de coches en España que terminó con éxito. Esta vez buscamos un coche para nuestro cliente Maksim, en Barcelona.
 
-      El objetivo: encontrar un **SEAT Leon** con motor diésel **2.0 TDI** y la fiable caja de cambios de doble embrague en baño de aceite DSG DQ381, en buen estado mecánico, con kilometraje verificado y un historial transparente.
+      El objetivo: encontrar un **SEAT Leon** con motor diésel **2.0 TDI** y una fiable caja DSG DQ381 de doble embrague en baño de aceite, en buen estado mecánico, con kilometraje verificado e historial transparente.
 
-      Durante la búsqueda localizamos, inspeccionamos y comprobamos cuatro vehículos. No nos limitamos a valorar el anuncio y el aspecto exterior de cada uno. Revisamos a fondo su estado mecánico, su historial de uso y mantenimiento y los datos del vehículo.
+      Durante la búsqueda, encontramos, inspeccionamos y comprobamos cuatro coches. No evaluamos cada opción basándonos únicamente en el anuncio y el estado exterior. Revisamos en detalle la parte mecánica, el historial de uso, el mantenimiento y los datos del vehículo.
 
-      Tras comparar las cuatro opciones, elegimos la mejor:
+      De las cuatro opciones, finalmente elegimos la mejor:
 
       - SEAT Leon de color rojo
-      - Motor 2.0 TDI diésel
-      - Caja de cambios DSG DQ381 con embragues en baño de aceite
-      - Unos 100 000 km
-      - Vehículo localizado e inspeccionado en España
+      - motor 2.0 TDI Diesel
+      - caja DSG DQ381 de doble embrague en baño de aceite
+      - unos 100.000 km
+      - coche encontrado e inspeccionado en España
 
-      Antes de la compra realizamos una revisión integral del vehículo. Comprobamos su historial a través de **CarVertical** y de las bases de datos de la red oficial de SEAT. Además, realizamos una diagnosis completa de los sistemas electrónicos del coche.
+      Antes de la compra, realizamos una inspección exhaustiva del coche. Consultamos el historial en **CarVertical** y en las bases de datos del concesionario oficial de SEAT. Además, realizamos un diagnóstico informático completo de los sistemas electrónicos del vehículo.
 
-      También revisamos el estado mecánico, la carrocería y el habitáculo, contrastamos el kilometraje con el historial de mantenimiento disponible y evaluamos el estado general del vehículo antes de cerrar la operación.
+      También comprobamos el estado mecánico, la carrocería y el interior, verificamos que el kilometraje coincidiera con el historial de mantenimiento disponible y evaluamos el estado general del coche antes de cerrar la operación.
 
-      Tras comparar los cuatro coches, este SEAT Leon resultó ser la mejor opción por el conjunto de su estado, historial, kilometraje y características.
+      Tras comparar los cuatro coches, este SEAT Leon resultó ser la mejor opción por su estado general, historial, kilometraje y características.
   de:
     title: SEAT Leon
     body: |-
-      ## Fahrzeugsuche in Spanien: SEAT Leon 2.0 TDI für einen Kunden
+      ## Autosuche in Spanien: SEAT Leon 2.0 TDI für einen Kunden
 
-      Eine weitere erfolgreiche Fahrzeugsuche in Spanien ist abgeschlossen. Diesmal haben wir für unseren Kunden Maxim in Barcelona nach einem passenden Auto gesucht.
+      Ein weiterer erfolgreicher Fahrzeugkauf in Spanien. Dieses Mal suchten wir für unseren Kunden Maxim in Barcelona nach einem Auto.
 
-      Der Auftrag: einen **SEAT Leon** mit **2.0 TDI**-Dieselmotor und dem zuverlässigen DSG-Doppelkupplungsgetriebe DQ381 mit Nasskupplungen finden, in gutem technischen Zustand, mit belegbarer Laufleistung und nachvollziehbarer Historie.
+      Gesucht wurde ein **SEAT Leon** mit **2.0 TDI** Dieselmotor und dem zuverlässigen DSG-Doppelkupplungsgetriebe DQ381 mit Nasskupplung. Das Fahrzeug sollte sich in gutem technischen Zustand befinden und einen nachvollziehbaren Kilometerstand sowie eine transparente Fahrzeughistorie haben.
 
-      Im Rahmen der Suche haben wir vier Fahrzeuge gefunden, besichtigt und geprüft. Dabei haben wir uns nicht nur auf die Angaben im Inserat und den äußeren Eindruck verlassen. Wir haben auch die Technik, die bisherige Nutzung, die Wartungshistorie und die Fahrzeugdaten eingehend geprüft.
+      Im Rahmen der Suche fanden, besichtigten und prüften wir vier Fahrzeuge. Dabei bewerteten wir jede Option nicht nur anhand des Inserats und des äußeren Zustands. Wir prüften auch ausführlich die Technik, die Fahrzeugnutzung, die Wartungshistorie und die Fahrzeugdaten.
 
-      Aus den vier Kandidaten haben wir schließlich das beste Fahrzeug ausgewählt:
+      Von den vier Optionen fiel die Wahl schließlich auf das beste Fahrzeug:
 
-      - SEAT Leon in Rot
-      - 2.0 TDI-Dieselmotor
-      - DSG-Getriebe DQ381 mit Nasskupplungen
+      - roter SEAT Leon
+      - 2.0 TDI Dieselmotor
+      - DSG DQ381 mit Nasskupplungen
       - rund 100.000 km Laufleistung
       - in Spanien gefunden und geprüft
 
-      Vor dem Kauf wurde das Fahrzeug umfassend überprüft. Die Historie haben wir über **CarVertical** sowie anhand der Datenbanken eines SEAT-Vertragshändlers geprüft. Zusätzlich haben wir eine vollständige Computerdiagnose der Fahrzeugelektronik durchgeführt.
+      Vor dem Kauf führten wir eine umfassende Fahrzeugprüfung durch. Die Historie wurde über **CarVertical** sowie anhand der Datenbanken eines offiziellen SEAT-Händlers geprüft. Zusätzlich erfolgte eine vollständige computergestützte Diagnose der elektronischen Fahrzeugsysteme.
 
-      Außerdem haben wir vor dem Kaufabschluss den technischen Zustand, die Karosserie und den Innenraum geprüft, den Kilometerstand mit der vorliegenden Wartungshistorie abgeglichen und den Gesamtzustand des Fahrzeugs bewertet.
+      Außerdem prüften wir den technischen Zustand, die Karosserie und den Innenraum, verglichen den Kilometerstand mit der verfügbaren Wartungshistorie und beurteilten den Gesamtzustand des Fahrzeugs vor Vertragsabschluss.
 
-      Im Vergleich der vier Fahrzeuge erwies sich dieser SEAT Leon als die beste Wahl, gemessen an Zustand, Historie, Laufleistung und technischen Eigenschaften.
+      Nach dem Vergleich aller vier Fahrzeuge erwies sich dieser SEAT Leon insgesamt als die beste Wahl, was Zustand, Historie, Laufleistung und Ausstattung betrifft.
 car: SEAT Leon
 year: 2021
 price:

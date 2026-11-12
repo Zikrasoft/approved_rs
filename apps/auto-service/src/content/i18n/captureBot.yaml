@@ -41,87 +41,87 @@ profile:
   langCommand: Сменить язык
 translations:
   sr:
-    greeting: Dobar dan! Hvala što ste nam pisali. Primili smo Vaš upit, saradnik će Vam uskoro odgovoriti.
-    lookingFor: Napišite nam koji automobil vozite (marka, model, godište) i kakav problem imate ili koji su radovi potrebni.
-    phoneAsk: Nemate korisničko ime (username) na Telegramu, pa saradnik ne može da Vam piše. Ostavite broj telefona kako bismo mogli da Vas kontaktiramo.
+    greeting: Zdravo! Hvala što ste nam pisali. Primili smo Vaš upit, saradnik će Vam uskoro odgovoriti.
+    lookingFor: Recite nam koji automobil vozite (marka, model, godište) i šta se dogodilo ili koje su Vam popravke potrebne.
+    phoneAsk: Nemate korisničko ime (username) na Telegramu, pa saradnik neće moći da Vam piše. Ostavite broj telefona kako bismo mogli da Vas kontaktiramo.
     phoneButton: 📱 Podelite broj telefona
-    thanks: Hvala! Prosledili smo saradniku, uskoro će Vam se javiti.
-    received: Primili smo Vašu poruku, saradnik će je videti.
+    thanks: Hvala! Prosledili smo Vaš upit saradniku, uskoro će Vas kontaktirati.
+    received: Primili smo poruku, saradnik će je videti.
     menu:
       text: Kako možemo da Vam pomognemo? Izaberite šta Vas zanima.
       back: « Nazad
     services:
       button: Usluge
-      text: Ovo su usluge koje pružamo u auto servisu. Izaberite uslugu da vidite koliko traje i šta obuhvata.
+      text: Ovo su usluge koje pružamo u servisu. Izaberite uslugu da biste videli rokove i šta obuhvata.
     card:
       request: 📝 Pošaljite upit
-      site: Pogledajte više na sajtu
+      site: Više informacija na sajtu
     contacts:
       button: Kontakt
-      text: Nalazimo se u Beogradu, očekujemo Vas u auto servisu.
-      hours: Pon–Pet 09:00–18:00 · Sub 09:00–14:00
+      text: Nalazimo se u Beogradu, čekamo Vas u servisu.
+      hours: Pon–pet 09:00–18:00 · Sub 09:00–14:00
     manager:
       button: 👤 Pišite saradniku
-      text: Napišite svoje pitanje u jednoj poruci, saradnik će Vam odgovoriti ovde.
-      handoff: Saradnik je dostupan na Telegramu. Pritisnite dugme da otvorite razgovor.
-      chat: Otvorite razgovor sa saradnikom ↗
+      text: Pošaljite pitanje u jednoj poruci, saradnik će Vam odgovoriti ovde.
+      handoff: Saradnik je dostupan na Telegramu. Pritisnite da otvorite čet.
+      chat: Otvorite čet sa saradnikom ↗
     partners:
       button: Partneri
       text: Naši partneri. Izaberite kome želite da pišete.
     request:
       button: 📝 Pošaljite upit
       car: Koji automobil vozite? Napišite marku, model i godište.
-      service: Koji su radovi potrebni? Označite jednu ili više usluga.
-      done: Završite →
-      unsure: Nisam siguran, potreban mi je savet
+      service: Koje su Vam popravke potrebne? Izaberite jednu ili više.
+      done: Gotovo →
+      unsure: Ne znam, potreban mi je savet
     language:
       button: 🌐 Jezik
-      text: Izaberite jezik na kojem Vam najviše odgovara da komunicirate.
+      text: Izaberite jezik na kojem Vam je najlakše da komunicirate.
     profile:
-      description: 'Auto servis u Beogradu: dijagnostika, popravke i održavanje. Pritisnite „Start“ i opišite problem sa automobilom, saradnik će Vam odgovoriti ovde. Više Vam odgovara bez bota? Pišite saradniku direktno: {manager}'
-      shortDescription: 'Auto servis u Beogradu: dijagnostika, popravke, održavanje. Saradnik: {manager}'
+      description: 'Auto servis u Beogradu: dijagnostika, popravke i servis. Pritisnite „Start“ i recite nam šta nije u redu sa automobilom, saradnik će Vam odgovoriti ovde. Više Vam odgovara bez bota? Pišite direktno saradniku: {manager}'
+      shortDescription: 'Auto servis u Beogradu: dijagnostika, popravke i servis. Saradnik: {manager}'
       menuCommand: Glavni meni
       langCommand: Promenite jezik
   en:
-    greeting: Hi! Thanks for getting in touch. We've received your enquiry, and our team will reply shortly.
-    lookingFor: Tell us your car's make, model and year, and what's wrong or what work you need done.
-    phoneAsk: You don't have a Telegram username, so our team can't message you directly. Please share your phone number so we can get in touch.
+    greeting: Hello! Thanks for getting in touch. We've received your enquiry, and a service advisor will reply soon.
+    lookingFor: Tell us about your car (make, model and year) and what's happened or what work it needs.
+    phoneAsk: You don't have a Telegram username, so our service advisor won't be able to message you. Leave your phone number so we can get in touch.
     phoneButton: 📱 Share phone number
-    thanks: Thanks! We've passed your details on to our team. Someone will be in touch shortly.
-    received: Got it, our team will see your message.
+    thanks: Thanks! We've passed this on to our service advisor, who will be in touch soon.
+    received: Got it. Our service advisor will see your message.
     menu:
-      text: How can we help? Choose an option below.
+      text: How can we help? Choose what you're interested in.
       back: « Back
     services:
       button: Services
-      text: Here's what we do at our workshop. Choose a service to see how long it takes and what's included.
+      text: Here's what we do at our garage. Choose a service to see how long it takes and what's included.
     card:
       request: 📝 Send an enquiry
-      site: Read more on our website
+      site: More on our website
     contacts:
       button: Contact us
-      text: We're in Belgrade. We'd be happy to see you at our workshop.
-      hours: Mon–Fri 09:00–18:00 · Sat 09:00–14:00
+      text: We're in Belgrade. We look forward to seeing you at our garage.
+      hours: Mon-Fri 09:00-18:00 · Sat 09:00-14:00
     manager:
-      button: 👤 Message our team
-      text: Send your question in a single message, and our team will reply right here.
-      handoff: Our team is available on Telegram. Tap below to open a chat.
-      chat: Chat with our team ↗
+      button: 👤 Message our service advisor
+      text: Send your question in one message, and our service advisor will reply here.
+      handoff: Our service advisor is available on Telegram. Tap to open the chat.
+      chat: Open chat with our service advisor ↗
     partners:
       button: Partners
-      text: Here are our partners. Choose who you'd like to contact.
+      text: Our partners. Choose who you'd like to message.
     request:
       button: 📝 Send an enquiry
-      car: What car do you have? Tell us the make, model and year.
-      service: What work do you need done? Select one or more options.
+      car: What car do you have? Send us the make, model and year.
+      service: What work does your car need? Select one or more options.
       done: Done →
-      unsure: I'm not sure, I need some advice
+      unsure: Not sure, I'd like some advice
     language:
       button: 🌐 Language
-      text: Choose the language you're most comfortable with.
+      text: Choose the language you'd prefer to chat in.
     profile:
-      description: 'Car servicing and repairs in Belgrade, including diagnostics. Tap Start and tell us what your car needs. Our team will reply right here. Prefer not to use the bot? Message our team directly: {manager}'
-      shortDescription: 'Car servicing, repairs and diagnostics in Belgrade. Contact our team: {manager}'
+      description: 'Car service in Belgrade: diagnostics, repairs and servicing. Tap "Start" and tell us what''s wrong with your car. Our service advisor will reply here. Prefer not to use the bot? Message our service advisor directly: {manager}'
+      shortDescription: 'Car service in Belgrade: diagnostics, repairs and servicing. Service advisor: {manager}'
       menuCommand: Main menu
       langCommand: Change language
 translatedFrom: 248a5027562cd493

@@ -2,23 +2,23 @@
 title: Система охлаждения и вихревые заслонки BMW
 translations:
   en:
-    title: BMW cooling system service and swirl flap cleaning
+    title: BMW cooling system and swirl flaps
     body: |-
-      This BMW came to our Russian-speaking garage in Belgrade for cooling system servicing and preventive engine maintenance.
+      A BMW came to our Russian-speaking garage in Belgrade for cooling system maintenance and preventive engine work.
 
-      We carried out a partial coolant change. On **B47** engines, this usually takes **5–7 litres**. This time, we used green Valvoline HT-12 coolant.
+      We carried out a partial coolant replacement. With **B47** engines, a partial replacement usually takes **5-7 litres**. This time, we used green Valvoline HT-12 coolant.
 
-      We also cleaned the swirl flaps and intake system. On diesel engines, carbon deposits build up in the intake and on the swirl flaps over time, affecting how well the engine runs.
+      We also cleaned the swirl flaps and intake system. Over time, carbon deposits build up in the intake and on the flaps in diesel engines, which can affect how the engine runs.
     car: BMW
 
   sr:
-    title: Sistem hlađenja i vrtložne klapne na BMW-u
+    title: Sistem za hlađenje i vrtložne klapne BMW
     body: |-
-      BMW je stigao u naš ruski auto servis u Beogradu radi održavanja sistema hlađenja i preventivnih radova na motoru.
+      BMW je stigao u naš ruski auto servis u Beogradu na servis sistema za hlađenje i preventivni pregled motora.
 
-      Delimično smo zamenili rashladnu tečnost. Kod motora **B47** za delimičnu zamenu obično je potrebno **5–7 litara**. Ovog puta sipali smo zelenu rashladnu tečnost Valvoline HT-12.
+      Delimično smo zamenili rashladnu tečnost. Kod motora **B47** za delimičnu zamenu obično je potrebno **5–7 litara**. Ovog puta sipali smo zeleno ulje HT-12 kompanije Valvoline.
 
-      Usput smo očistili vrtložne klapne i usisni sistem. Kod dizel motora se u usisu i na klapnama vremenom nakuplja čađ, što ometa pravilan rad motora.
+      Usput smo očistili vrtložne klapne i usisni sistem. Kod dizel motora se vremenom u usisnom sistemu i na klapnama nakuplja čađ, što ometa rad motora.
     car: BMW
 car: BMW
 year: 2020

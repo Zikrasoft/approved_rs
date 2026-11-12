@@ -233,471 +233,471 @@ vin-parts-inquiry:
   honest: Цену и срок называем до оплаты. Если деталь редкая и идет под заказ, сразу скажем, сколько ждать, и предложим проверенный аналог, если он есть.
 translations:
   sr:
-    indexMetaTitle: 'Auto servis u Beogradu: popravke i održavanje | CarLab'
-    indexMetaDescription: Dijagnostika, mali servis, kočnice i trap, motor i menjač, limarija posle udesa, pregled pre kupovine i delovi po VIN-u. Obim radova i trajanje.
-    partsLink: Pronađite auto delove za ove radove
+    indexMetaTitle: 'Usluge auto servisa u Beogradu: popravka i servis | CarLab'
+    indexMetaDescription: Dijagnostika, servis i zamena ulja, kočnice i trap, motor i menjač, limarija posle udesa, pregled pre kupovine, izbor delova po broju šasije. Šta obuhvataju i koliko traju.
+    partsLink: Pronađite delove za ovaj posao
     heroHeadingTemplate: '{name} u Beogradu'
-    processHeading: Kako izgleda poseta servisu
+    processHeading: Kako izgleda poseta
     ctaHeadingTemplate: '{name}: zakažite termin koji Vam odgovara'
-    partsCtaHeadingTemplate: '{name}: saznajte cenu i rok'
-    ctaBody: Opišite problem sa automobilom. Pozvaćemo Vas tokom radnog vremena i dogovoriti termin dolaska.
-    indexHeading: Sve što je automobilu potrebno, u jednom servisu
-    indexLead: Šta obuhvata svaka usluga i koliko traje. Cenu saopštavamo nakon pregleda, pre početka radova.
+    partsCtaHeadingTemplate: '{name}: saznaćete cenu i rok'
+    ctaBody: Opišite nam šta se dešava sa automobilom. Pozvaćemo Vas tokom radnog vremena i dogovoriti termin.
+    indexHeading: Sve što je potrebno Vašem automobilu, na jednom mestu
+    indexLead: Saznajte šta obuhvata svaka usluga i koliko traje. Cenu dajemo nakon pregleda, pre početka radova.
     specsPriceLabel: Cena
     specsDurationLabel: Trajanje
     diagnostics:
       cta: Zakažite dijagnostiku
       name: Kompjuterska dijagnostika
       short: Otkrivamo šta se krije iza koda greške.
-      metaTitle: Kompjuterska dijagnostika u Beogradu | CarLab
-      metaDescription: Dijagnostika motora, trapa i elektrike u Beogradu. Besplatno očitavanje grešaka, a uzrok Vam pokazujemo direktno na automobilu.
-      heroTitle: Kod greške je simptom, a ne dijagnoza. Pronalazimo uzrok i pokazujemo ga na automobilu.
-      heroLead: Dijagnostički uređaj pokazuje koji senzor prijavljuje grešku. Da li je neispravan sam senzor ili ono što meri, utvrđuje se proverom na automobilu.
-      priceFrom: besplatno očitavanje grešaka
+      metaTitle: Kompjuterska dijagnostika automobila u Beogradu | CarLab
+      metaDescription: Dijagnostika motora, trapa i elektrike u Beogradu. Očitavanje grešaka je besplatno, a uzrok Vam pokazujemo na automobilu.
+      heroTitle: Kod greške je simptom, a ne dijagnoza. Pronalazimo uzrok i pokazujemo Vam ga na automobilu.
+      heroLead: Dijagnostika pokazuje koji senzor prijavljuje grešku. Ne može da utvrdi da li je problem u samom senzoru ili u onome što meri. To proveravamo na automobilu.
+      priceFrom: očitavanje grešaka je besplatno
       duration: od 40 minuta
-      bodyHeading: Šta radimo tokom dijagnostike
+      bodyHeading: Šta radimo na dijagnostici
       body: |
-        Prvo razgovaramo: kada je problem počeo, u kojim uslovima se javlja i šta je pre toga menjano. Neki uzroci se prepoznaju već tada: lupanje samo dok je motor hladan i stalno lupanje ukazuju na različite sklopove.
+        Najpre razgovaramo: kada je problem počeo, u kojim uslovima se javlja i šta je menjano pre toga. Neke uzroke utvrdimo već tada: „lupa samo kad je motor hladan“ i „stalno lupa“ ukazuju na različite delove.
 
-        Zatim dijagnostičkim uređajem proveravamo sve upravljačke jedinice: greška u ABS-u ili modulu komfora često objašnjava problem koji vozač primećuje. Sledi provera na automobilu: pregled na dizalici, provera zazora i ponašanja pod opterećenjem, a po potrebi merenje pritiska i provera osciloskopom.
+        Zatim očitavamo greške iz svih elektronskih blokova. Često greška u ABS-u ili bloku komfora objašnjava ono na šta se vozač žali. Potom proveravamo automobil: pregledamo trap, zazore i curenja, proveravamo delove pod opterećenjem i po potrebi merimo pritisak ili koristimo osciloskop.
 
-        Na kraju pokazujemo uzrok na automobilu i objašnjavamo jednostavnim rečima. Ako je potrebna popravka, odmah pripremamo predračun.
+        Na kraju Vam pokazujemo uzrok na automobilu i jasno objašnjavamo šta smo pronašli. Ako je potrebna popravka, odmah pripremamo predračun.
 
-        Koliko košta: očitavanje grešaka je besplatno. Dijagnostiku naplaćujemo samo kada je potrebno rasklapanje sklopa ili ispitivanje na stendu. Cenu saopštavamo pre početka radova, a ne na kraju.
-      includesHeading: Šta je obuhvaćeno
+        Koliko košta: očitavanje grešaka je besplatno. Dijagnostika se naplaćuje tek ako treba rasklopiti deo ili postaviti automobil na uređaj za ispitivanje. Cenu saopštavamo pre početka radova, ne na kraju.
+      includesHeading: Šta je uključeno
       includes:
         - Razgovor o simptomima i istoriji održavanja
-        - Očitavanje grešaka iz svih elektronskih upravljačkih jedinica
+        - Očitavanje grešaka iz svih elektronskih blokova
         - Pregled na dizalici, provera zazora i curenja
-        - Probna vožnja sa inženjerom ako se problem javlja u vožnji
+        - Probna vožnja sa majstorom ako se problem javlja u vožnji
         - Usmeno objašnjenje nalaza i pisani predračun za popravku
-      signsHeading: Kada je vreme da nas posetite
+      signsHeading: Kada treba da dođete
       signs:
-        - Svetli lampica motora ili druga lampica na instrument tabli
+        - Upalila se lampica „check engine“ ili neki drugi znak na instrument tabli
         - Automobil trza, motor radi neravnomerno ili teško pali
         - Potrošnja je porasla bez jasnog razloga
-        - Pojavio se nov zvuk, a ne znate odakle dolazi
+        - Čuje se novi zvuk, ali ne znate odakle dolazi
       honestHeading: Šta ne obećavamo
-      honest: Ne može se svaki kvar otkriti za četrdeset minuta. Povremeni problemi koji se javljaju jednom nedeljno ponekad zahtevaju ponovni dolazak ili da automobil ostane u servisu jedan dan. To ćemo Vam odmah reći i nećemo redom menjati delove o Vašem trošku.
+      honest: Ne može svaki kvar da se otkrije za četrdeset minuta. Povremeni problemi koji se javljaju jednom nedeljno nekad zahtevaju ponovnu posetu ili da automobil ostane kod nas ceo dan. To ćemo Vam odmah reći i nećemo menjati delove jedan po jedan na Vaš račun.
     servicing:
-      cta: Zakažite redovan servis
+      cta: Zakažite servis
       name: Redovan servis
-      short: Ulje, filteri, tečnosti i pregled prema servisnom planu za Vaš motor.
+      short: Ulje, filteri, tečnosti i pregled prema preporukama za Vaš motor.
       metaTitle: Redovan servis i zamena ulja u Beogradu | CarLab
-      metaDescription: 'Održavanje automobila u Beogradu: ulje, filteri, svećice, kočiona tečnost i antifriz. Prema planu proizvođača, uz evidenciju u servisnom kartonu.'
+      metaDescription: 'Servis automobila u Beogradu: ulje, filteri, svećice, kočiona tečnost i antifriz. Prema preporukama proizvođača, uz upis u servisnu knjižicu.'
       heroTitle: Najjeftinija popravka je ona koju ste izbegli
-      heroLead: Svaki motor ima svoj servisni interval i propisanu specifikaciju ulja. Proveravamo uputstvo za Vaš automobil i radimo prema njemu, a ne po univerzalnom pravilu „na deset hiljada“.
+      heroLead: Svaki motor ima svoj servisni interval i specifikaciju ulja. Proveravamo uputstvo za Vaš automobil i radimo ono što piše, a ne po pravilu „na svakih deset hiljada kilometara“.
       priceFrom: od 90 €
       duration: 2–4 sata
       bodyHeading: Kako određujemo servisni interval za Vaš automobil
       body: |
-        Intervali zamene mogu se višestruko razlikovati od motora do motora, a uslovi u Beogradu (gužve, prašina, letnje temperature blizu četrdeset stepeni) gotovo uvek spadaju u otežane uslove vožnje, za koje su propisani kraći intervali. Prema tome procenjujemo šta je Vašem automobilu zaista potrebno na trenutnoj kilometraži.
+        Intervali zamene razlikuju se od motora do motora, a uslovi u Beogradu (gužve, prašina, letnje temperature blizu četrdeset stepeni) gotovo uvek spadaju u „otežane uslove vožnje“, za koje je interval kraći. Prema tome procenjujemo šta je Vašem automobilu zaista potrebno na toj kilometraži.
 
-        Usput proveravamo i ono čega se vozači često sete prekasno: stanje zupčastog kaiša ili lanca, sadržaj vlage u kočionoj tečnosti, tačku smrzavanja antifriza i debljinu pločica i diskova u milimetrima.
-      includesHeading: Šta je obuhvaćeno
+        Usput proveravamo i ono na šta se često zaboravi: stanje zupčastog kaiša ili lanca, količinu vlage u kočionoj tečnosti, tačku mržnjenja antifriza i istrošenost kočionih pločica i diskova u milimetrima.
+      includesHeading: Šta je uključeno
       includes:
-        - Ulje i filter ulja koji odgovaraju specifikacijama proizvođača
-        - Filter vazduha, filter kabine i svećice prema servisnom planu
-        - Provera sadržaja vlage u kočionoj tečnosti
-        - Provera antifriza i njegove tačke smrzavanja
-        - Merenje preostale debljine pločica i diskova u milimetrima
-        - Evidentiranje svih radova i kilometraže u servisnom kartonu
-      signsHeading: Kada je vreme da nas posetite
+        - Motorno ulje i uljni filter prema specifikaciji proizvođača
+        - Filter vazduha i kabine, kao i svećice prema preporukama proizvođača
+        - Provera količine vlage u kočionoj tečnosti
+        - Provera antifriza i njegove tačke mržnjenja
+        - Merenje preostale debljine kočionih pločica i diskova u milimetrima
+        - Upis svih radova i kilometraže u servisnu knjižicu
+      signsHeading: Kada treba da dođete
       signs:
-        - Dostigli ste propisanu kilometražu ili je prošla godina od prethodnog servisa
-        - Tek ste kupili automobil, a nemate istoriju održavanja
-        - Predstoji Vam duži put
-        - Upalila se lampica za servis
+        - Došlo je vreme za servis prema kilometraži ili vremenu od prethodnog servisa
+        - Tek ste kupili automobil, a nema evidenciju o servisiranju
+        - Pred Vama je duže putovanje
+        - Upalila se lampica za servisni interval
       honestHeading: Šta ne radimo
-      honest: Ne menjamo delove pre vremena. Ako je filter tek na polovini svog radnog veka, nećemo ga menjati, već ćemo Vam reći kada da dođete.
+      honest: Ne menjamo delove kojima još nije vreme za zamenu. Ako je filter iskoristio tek polovinu radnog veka, ostavićemo ga i reći Vam kada da dođete.
     brakes-suspension:
       cta: Zakažite popravku
       name: Kočnice i trap
-      short: Sve od čega zavisi da li će se automobil zaustaviti.
+      short: Sve što utiče na to da li će se automobil zaustaviti.
       metaTitle: Popravka kočnica i trapa u Beogradu | CarLab
-      metaDescription: 'Kočnice i trap u Beogradu: pločice, diskovi, kočiona klešta, ramena i reglaža trapa. Merenja u milimetrima, predračun pre početka radova.'
-      heroTitle: Ovde se preostali vek meri u milimetrima
-      heroLead: 'Sa problemom na motoru ponekad možete stići do servisa. Sa neispravnim kočnicama ne smete rizikovati. Zato kod trapa ne zaokružujemo mere i ne odlažemo zamenu: ako je deo dotrajao, to kažemo otvoreno.'
+      metaDescription: 'Kočnice i trap u Beogradu: pločice, diskovi, kočiona klešta, ramena, geometrija trapa. Merenja u milimetrima, predračun pre radova.'
+      heroTitle: Ovde se istrošenost meri u milimetrima
+      heroLead: 'Sa motorom možete da stignete do servisa. Sa kočnicama ne možete da rizikujete. Zato kod trapa ništa ne zaokružujemo i ne odlažemo: ako je deo dotrajao, reći ćemo Vam otvoreno.'
       priceFrom: od 120 €
       duration: od 3 sata
       bodyHeading: Kako radimo
       body: |
-        Počinjemo merenjima: debljina diskova i pločica u milimetrima, bočno bacanje diskova, stanje kočionih creva i klešta. Na trapu proveravamo zazore na dizalici i vibracionom stendu, pregledamo zaštitne manžetne i nosače.
+        Počinjemo merenjem: debljine diskova i kočionih pločica u milimetrima, bacanja diskova i stanja creva i kočionih klešta. Na trapu proveravamo zazore, pregledamo manžetne i nosače.
 
-        Posle popravke trapa uvek radimo reglažu: čak i zamena jednog ramena menja geometriju, a loša geometrija može da potroši komplet guma za jednu sezonu.
-      includesHeading: Šta je obuhvaćeno
+        Posle popravke trapa uvek podešavamo geometriju točkova. Čak i zamena jednog ramena menja geometriju, a pogrešno podešeni točkovi mogu da unište komplet guma za jednu sezonu.
+      includesHeading: Šta je uključeno
       includes:
-        - Merenje diskova i pločica uz beleženje rezultata
-        - Zamena pločica, diskova i creva, popravka ili zamena kočionih klešta
-        - Odzračivanje kočionog sistema i zamena kočione tečnosti
+        - Merenje diskova i kočionih pločica uz beleženje rezultata
+        - Zamena kočionih pločica, diskova i creva, popravka ili zamena kočionih klešta
+        - Odzračivanje i zamena kočione tečnosti
         - Amortizeri, opruge, ramena, silen blokovi, nosači i ležajevi
-        - Reglaža trapa posle svakog zahvata na vešanju
-        - Kontrolna probna vožnja pre preuzimanja
-      signsHeading: Kada je vreme da nas posetite
+        - Podešavanje geometrije trapa posle svakog rada na trapu
+        - Probna vožnja pre predaje automobila
+      signsHeading: Kada treba da dođete
       signs:
-        - Škripanje, cviljenje ili struganje pri kočenju
-        - Pedala kočnice je mekana ili propada
+        - Škripa, cviljenje ili struganje pri kočenju
+        - Pedala kočnice je postala meka ili propada
         - Automobil vuče u stranu pri kočenju
-        - Lupanje na neravninama, neprecizan volan, neravnomerno trošenje guma
+        - Lupanje na neravninama, „plivajući“ volan ili neravnomerno trošenje guma
       honestHeading: Na šta ćemo Vas upozoriti
-      honest: Pločice i diskovi su potrošni delovi koji rade zajedno. Mogu se staviti nove pločice na istrošene diskove, ali će se tada brže potrošiti i za pola godine ćete ponovo doći. Izračunaćemo cenu obe varijante, a izbor prepustiti Vama.
+      honest: Kočione pločice i diskovi su potrošni delovi koji se menjaju u paru. Nove pločice mogu da se ugrade na istrošene diskove, ali će kraće trajati i za šest meseci ćete ponovo doći. Izračunaćemo obe varijante, a Vi ćete odlučiti.
     engine-gearbox:
       cta: Zakažite dijagnostiku
       name: Motor i menjač
-      short: Od zamene dihtunga do popravke uz rastavljanje, uz jasan predračun.
+      short: Od zamene dihtunga do generalne popravke, uz jasnu procenu troškova.
       metaTitle: Popravka motora i menjača u Beogradu | CarLab
-      metaDescription: 'Popravka motora i menjača u Beogradu: zupčasti kaiš, dihtunzi, kvačilo, zamena ulja u automatskom menjaču. Dijagnostika pre rastavljanja, predračun pre radova.'
-      heroTitle: Generalna popravka je potrebna ređe nego što se priča
-      heroLead: 'Pre nego što bilo šta rastavimo, proveravamo sve što se može proveriti spolja: kompresiju, pritisak ulja, greške i curenja.'
-      priceFrom: prema rezultatima dijagnostike
+      metaDescription: 'Popravka motora i menjača u Beogradu: zupčasti kaiš, dihtunzi, kvačilo, zamena ulja u automatskom menjaču. Dijagnostika i procena pre radova.'
+      heroTitle: Generalna popravka motora potrebna je ređe nego što se misli
+      heroLead: 'Pre nego što bilo šta rastavimo, proveravamo ono što može da se proveri spolja: kompresiju, pritisak ulja, greške i curenja.'
+      priceFrom: u zavisnosti od rezultata dijagnostike
       duration: od 1 dana
       bodyHeading: Kako radimo
       body: |
-        Prvo merimo kompresiju po cilindrima i pritisak ulja, proveravamo stanje svećica, očitavamo greške iz upravljačkih jedinica i ispitujemo curenja pod pritiskom. Tek onda odlučujemo da li motor treba otvarati.
+        Prvo merimo: kompresiju po cilindrima, pritisak ulja, stanje svećica, greške u upravljačkim jedinicama i curenja pod pritiskom. Tek nakon toga odlučujemo da li motor treba otvarati.
 
-        Kod menjača proveravamo stanje ulja i način menjanja brzina: kod automatskih menjača veliki deo „kvarova” rešava se pravilnim održavanjem, a ne zamenom celog sklopa. Ako je popravka ipak potrebna, dobijate predračun sa odvojeno prikazanim radom i delovima pre nego što bilo šta demontiramo.
-      includesHeading: Šta je obuhvaćeno
+        Kod menjača proveravamo stanje ulja i način promene brzina: kod automatskih menjača mnogi „kvarovi“ rešavaju se pravilnim servisom, a ne zamenom menjača. Ako je popravka ipak potrebna, dobijate procenu troškova, posebno za rad i delove, pre nego što išta skinemo.
+      includesHeading: Šta je uključeno
       includes:
         - Merenje kompresije i pritiska ulja
-        - Provera curenja pod pritiskom i traženje mesta uvlačenja falš vazduha
-        - Zamena zupčastog kaiša ili lanca, rolera i vodene pumpe
+        - Provera curenja pod pritiskom i traženje mesta gde uvlači vazduh
+        - Zamena zupčastog kaiša ili lanca, rolera i pumpe
         - Dihtunzi, semerinzi i gumice ventila
-        - Kvačilo, zamajac i zamena ulja u manuelnom i automatskom menjaču
-        - Detaljan predračun pre početka rastavljanja
-      signsHeading: Kada je vreme da nas posetite
+        - Kvačilo, zamajac, zamena ulja u manuelnom i automatskom menjaču
+        - Procena troškova sa odvojenim stavkama pre početka rastavljanja
+      signsHeading: Kada treba da dođete
       signs:
         - Motor troši ulje između zamena
-        - Lupanje, vibracije ili gubitak snage
+        - Čuje se lupanje, osećaju se vibracije ili motor gubi snagu
         - Trzaji i kašnjenje pri promeni brzina
-        - Dim iz auspuha koji se ranije nije pojavljivao
-      honestHeading: Kada savetujemo da odustanete
-      honest: Ako se cena popravke približi vrednosti automobila, reći ćemo Vam to. Ponekad je bolje prodati automobil u zatečenom stanju ili potražiti polovan motor ili menjač iz uvoza nego uložiti u popravku novac koji nikada nećete povratiti.
+        - Iz auspuha izlazi dim kojeg ranije nije bilo
+      honestHeading: Kada Vas savetujemo da odustanete
+      honest: Ako se cena popravke približava vrednosti automobila, reći ćemo Vam. Ponekad je bolje da ga prodate u postojećem stanju ili potražite polovan menjač ili motor nego da uložite iznos koji Vam se nikada neće vratiti.
     bodywork-painting:
       cta: Pošaljite fotografije oštećenja
       name: Limarija i farbanje
-      short: Popravka posle udesa, ispravljanje geometrije karoserije i farbanje uz uklapanje boje.
+      short: Popravka posle udesa, ispravljanje karoserije i farbanje uz uklapanje boje.
       metaTitle: Limarija i farbanje posle udesa u Beogradu | CarLab
-      metaDescription: 'Limarija u Beogradu: izvlačenje na stolu, merenje geometrije, ispravljanje i farbanje uz računarsko uklapanje boje. Saradnja sa osiguranjem i pomoć oko dokumentacije.'
-      heroTitle: Da se na automobilu ne vide tragovi udesa
-      heroLead: Kvalitetna limarska popravka ne primećuje se ni golim okom ni meračem debljine laka pri pregledu pre prodaje.
-      priceFrom: nakon pregleda
+      metaDescription: 'Limarija u Beogradu: merenje geometrije, ispravljanje i farbanje uz kompjutersko uklapanje boje. Radimo sa osiguranjima i pomažemo oko dokumentacije.'
+      heroTitle: Da se na automobilu ne vidi da je udaren
+      heroLead: Kvalitetna popravka karoserije ne primećuje se ni golim okom ni meračem debljine laka pri pregledu pre prodaje.
+      priceFrom: u zavisnosti od pregleda
       duration: od 3 dana
       bodyHeading: Šta obuhvata popravka
       body: |
-        Prvo merimo geometriju karoserije: posle udarca pomeranja mogu postojati i tamo gde sve deluje neoštećeno, a upravo ona kasnije izazivaju neravnomerno trošenje guma i zanošenje automobila. Po potrebi postavljamo vozilo na sto za izvlačenje i vraćamo karoseriju u mere prema kontrolnim tačkama.
+        Najpre merimo geometriju karoserije: posle udarca pomeranja mogu postojati i tamo gde sve deluje čitavo. Kasnije zbog njih gume mogu neravnomerno da se troše, a automobil da vuče u stranu. Po potrebi postavljamo automobil na sto za ispravljanje karoserije i vraćamo delove na mesto prema kontrolnim tačkama.
 
-        Boju proveravamo na dva načina: prema šifri iz dokumentacije i spektrofotometrom na samom vozilu, jer posle pet godina na suncu fabrička boja više ne odgovara potpuno originalnoj nijansi. Prelaz poliramo tako da se granica ne vidi ni na suncu ni pod lampom.
-      includesHeading: Šta je obuhvaćeno
+        Boju usklađujemo na dva načina: prema kodu u dokumentima i spektrofotometrom na samom automobilu, jer fabrička boja posle pet godina na suncu može da se razlikuje od originalne. Prelaz poliramo tako da se ne vidi ni na suncu ni pod svetlom.
+      includesHeading: Šta je uključeno
       includes:
         - Merenje geometrije karoserije prema kontrolnim tačkama
-        - Izvlačenje na stolu kod pomerene geometrije
-        - Ispravljanje limarije i zamena oštećenih delova
-        - Uklapanje boje prema šifri i spektrofotometrom
+        - Ispravljanje karoserije na stolu kada postoje pomeranja
+        - Ispravljanje i zamena oštećenih delova
+        - Usklađivanje boje prema kodu i spektrofotometrom
         - Farbanje u komori uz kontrolu temperature
-        - Poliranje prelaza i sklapanje uz proveru zazora
-      signsHeading: Kada je vreme da nas posetite
+        - Poliranje prelaza i montaža uz proveru zazora
+      signsHeading: Kada treba da dođete
       signs:
-        - Automobil je učestvovao u udesu, čak i ako oštećenja deluju mala
-        - Neujednačeni zazori između delova karoserije
-        - Automobil vuče u stranu, gume se troše po jednoj ivici
-        - Potrebno je srediti karoseriju pre prodaje
-      honestHeading: O osiguranju
-      honest: Sarađujemo sa osiguravajućim kućama i pomažemo oko dokumentacije, ali ne obećavamo da će osiguranje pokriti sve. Posle pregleda odmah pokazujemo šta je obuhvaćeno osiguranjem, a šta nije, da to ne biste saznali tek na kraju.
+        - Automobil je bio u udesu, čak i ako oštećenja deluju mala
+        - Zazori između delova karoserije nisu ravnomerni
+        - Automobil vuče u stranu, a gume se troše samo sa jedne strane
+        - Želite da sredite karoseriju pre prodaje
+      honestHeading: Osiguranje
+      honest: Radimo sa osiguranjima i pomažemo oko dokumentacije, ali ne obećavamo da će osiguranje pokriti sve. Posle pregleda odmah Vam pokazujemo šta je pokriveno osiguranjem, a šta nije, da to ne saznate tek na kraju.
     pre-purchase-inspection:
-      cta: Zakažite pregled
-      name: Pregled pre kupovine
+      cta: Zakažite proveru
+      name: Provera automobila pre kupovine
       short: Merač debljine laka, dizalica i dijagnostika pre nego što date novac.
-      metaTitle: Pregled automobila pre kupovine u Beogradu | CarLab
-      metaDescription: 'Pregled pre kupovine u Beogradu: merač debljine laka, dizalica, dijagnostika grešaka i kompresija. Pisani izveštaj kao osnov za pregovore o ceni.'
-      heroTitle: Što merač debljine laka pokaže, prodavac neće reći
-      heroLead: Prefarbani delovi, tragovi varenja, vraćena kilometraža, curenja ispod vozila. Za sat vremena na dizalici to se vidi, iako u oglasu ne piše.
+      metaTitle: Provera automobila pre kupovine u Beogradu | CarLab
+      metaDescription: 'Provera automobila pre kupovine u Beogradu: merač laka, dizalica, dijagnostika grešaka i kompresije. Pisani izveštaj za lakše cenkanje.'
+      heroTitle: Merač debljine laka otkriva ono što prodavac prećuti
+      heroLead: Prelakirani delovi, tragovi varenja, vraćena kilometraža i curenja odozdo. Sve to može da se vidi za sat vremena na dizalici, iako u oglasu ne piše.
       priceFrom: od 60 €
       duration: oko 1 sat
       bodyHeading: Šta proveravamo
       body: |
-        Meračem debljine laka proveravamo sve panele karoserije: tražimo prefarbane delove, git, tragove varenja i proveravamo zazore. Zatim automobil ide na dizalicu: pregledamo trap, curenja, stanje izduvnog sistema i zaštite podvozja, kao i tragove udaraca odozdo.
+        Karoseriju proveravamo meračem debljine laka na svim delovima: tražimo prelakirane delove, git, tragove varenja i proveravamo zazore. Zatim automobil podižemo i proveravamo trap, curenja, stanje izduvnog sistema i zaštite, kao i tragove udaraca odozdo.
 
-        Elektronika: očitavamo greške iz svih upravljačkih jedinica i tražimo tragove vraćanja kilometraže i brisanja grešaka. Na motoru proveravamo kompresiju i curenja. Na kraju dobijate pisani izveštaj sa spiskom uočenih nedostataka i procenom troškova popravke, koji Vam može poslužiti za pregovore o ceni.
-      includesHeading: Šta je obuhvaćeno
+        Kod elektronike očitavamo greške iz svih upravljačkih jedinica, uključujući obrisane greške. Na motoru proveravamo kompresiju i curenja. Na kraju dobijate pisani izveštaj sa spiskom pronađenih problema i procenom troškova popravke, koji možete da iskoristite za cenkanje.
+      includesHeading: Šta je uključeno
       includes:
-        - Merenje debljine laka na svim panelima karoserije
+        - Merenje debljine laka na svim delovima karoserije
         - Pregled na dizalici, provera curenja i tragova udaraca
-        - Očitavanje grešaka iz svih elektronskih upravljačkih jedinica
+        - Očitavanje grešaka iz svih elektronskih blokova
         - Merenje kompresije po cilindrima
-        - Provera tragova vraćanja kilometraže
-        - Pisani izveštaj sa procenom troškova otklanjanja nedostataka
-      signsHeading: Kada je pregled potreban
+        - Provera znakova vraćene kilometraže
+        - Pisani izveštaj sa procenom troškova popravke
+      signsHeading: Kada Vam je potrebna provera
       signs:
         - Kupujete automobil od privatnog prodavca
         - Prodavac Vas požuruje da odlučite
-        - Automobil je iz uvoza, a istorija nije poznata
+        - Automobil je uvezen, a istorija mu nije poznata
         - Cena je sumnjivo niža od tržišne
-      honestHeading: Šta pregled ne može da garantuje
-      honest: Iskreno ćemo Vam reći šta vidimo, ali nijedan pregled ne otkriva sve. Skriveni kvar koji se ne pokazuje ni na dizalici ni na dijagnostici može se pojaviti kasnije. To je ograničenje samog pregleda, a ne ograda napisana sitnim slovima.
+      honestHeading: Šta provera ne može da otkrije
+      honest: Iskreno ćemo Vam reći šta smo uočili, ali nijednim pregledom ne može da se otkrije sve. Skriveni kvar koji se ne pokaže na dizalici ni pri dijagnostici može da se pojavi kasnije. To je ograničenje provere, a ne sitna napomena u ugovoru.
     vin-parts-inquiry:
       cta: Pošaljite upit
-      name: Izbor auto delova
+      name: Pronalaženje auto delova
       short: Pronalazimo delove koji odgovaraju Vašem automobilu i saopštavamo cenu pre kupovine.
-      metaTitle: Auto delovi po VIN broju u Beogradu | CarLab
-      metaDescription: 'Izbor delova po VIN broju ili broju šasije u Beogradu: originalni i provereni zamenski delovi, provera kompatibilnosti, cena pre kupovine. Preuzimanje u CarLabu.'
-      heroTitle: Pronaći ćemo delove koji tačno odgovaraju Vašem automobilu
-      heroLead: Pošaljite VIN ili broj šasije i napišite šta Vam je potrebno. Proverićemo da li delovi odgovaraju, pronaći originalne i proverene zamenske delove i ponuditi najbolje opcije.
-      priceFrom: cenu saopštavamo nakon izbora delova
-      duration: rok saopštavamo zajedno sa cenom
-      bodyHeading: Kako biramo delove
-      body: |
-        Na osnovu VIN broja utvrđujemo tačnu specifikaciju vozila: motor, menjač, godište i tržište za koje je proizvedeno. Od toga zavisi koji deo odgovara, čak i kada je model isti.
+      metaTitle: Pronalaženje auto delova po VIN-u u Beogradu | CarLab
+      metaDescription: 'Auto delovi po VIN-u ili broju šasije u Beogradu: originalni i provereni zamenski delovi, provera kompatibilnosti i cena unapred. Preuzimanje u auto servisu CarLab.'
+      heroTitle: Pronaći ćemo delove koji sigurno odgovaraju Vašem automobilu
+      heroLead: Pošaljite nam VIN ili broj šasije i napišite šta Vam je potrebno. Proverićemo kompatibilnost, pronaći originalne i proverene zamenske delove i ponuditi najbolje opcije.
+      priceFrom: saopštavamo nakon izbora delova
+      duration: saopštavamo uz cenu
+      bodyHeading: Kako pronalazimo odgovarajuće delove
+      body: |-
+        Na osnovu broja šasije utvrđujemo tačnu konfiguraciju vozila: motor, menjač, godište i tržište za koje je proizvedeno. Od toga zavisi koji deo odgovara, čak i kada je model isti.
 
-        Zatim pronalazimo originalni kataloški broj dela i proverene zamenske delove, upoređujemo cene i rokove isporuke kod dobavljača i nudimo vam nekoliko opcija. Vi birate, mi naručujemo, a delove možete preuzeti u našem auto servisu u Beogradu.
+        Zatim pronalazimo kataloški broj dela kod proizvođača i proverene zamenske delove, upoređujemo cene i rokove isporuke kod dobavljača i predlažemo Vam nekoliko opcija. Vi birate, mi poručujemo, a delove možete preuzeti u našem servisu u Beogradu.
 
-        Ako vam je potrebna i ugradnja, i to možete obaviti kod nas: već smo proverili da deo odgovara vašem vozilu, a majstor zna šta ugrađuje.
-      includesHeading: Šta je obuhvaćeno
+        Ako Vam je potrebna i ugradnja, možemo je obaviti kod nas: proverili smo da deo odgovara, a majstor zna šta ugrađuje.
+      includesHeading: Šta je uključeno
       includes:
-        - Provera kompatibilnosti prema VIN broju ili broju šasije
+        - Provera kompatibilnosti po broju šasije ili VIN-u
         - Pronalaženje originalnog kataloškog broja dela
-        - Izbor proverenih zamenskih delova u različitim cenovnim rangovima
-        - Cena i rok isporuke pre bilo kakvog plaćanja
-        - Lično preuzimanje u auto servisu u Beogradu
-      signsHeading: Kada je pregled potreban
+        - Izbor proverenih zamenskih delova po različitim cenama
+        - Cena i rok isporuke pre nego što bilo šta platite
+        - Preuzimanje u servisu u Beogradu
+      signsHeading: Kada Vam je potrebna provera
       signs:
-        - Ne znate tačan naziv ili kataloški broj dela
+        - Ne znate tačan naziv ili broj dela
         - Brinete da ćete kupiti deo koji ne odgovara
-        - Potreban vam je redak deo ili deo koji se više ne proizvodi
-        - Želite da uporedite cene originalnih i zamenskih delova
-      honestHeading: Kako vas obaveštavamo o ceni
-      honest: Cenu i rok isporuke saopštavamo pre plaćanja. Ako je deo redak i nabavlja se po porudžbini, odmah ćemo vam reći koliko se čeka i ponuditi provereni zamenski deo, ako postoji.
+        - Potreban Vam je redak deo ili deo koji se više ne proizvodi
+        - Želite da uporedite cenu originalnog i zamenskog dela
+      honestHeading: Kako određujemo cenu
+      honest: Cenu i rok isporuke saopštavamo pre plaćanja. Ako je deo redak i poručuje se, odmah ćemo Vam reći koliko se čeka i ponuditi proveren zamenski deo, ako je dostupan.
   en:
-    indexMetaTitle: Car servicing and repairs in Belgrade | CarLab
-    indexMetaDescription: Diagnostics, servicing, oil changes, brakes, suspension, engine, gearbox, accident repairs, pre-purchase checks and VIN parts matching. Scope and times.
+    indexMetaTitle: 'Car servicing in Belgrade: repairs and maintenance | CarLab'
+    indexMetaDescription: Diagnostics, servicing and oil changes, brakes and suspension, engine and gearbox repairs, accident damage repairs, pre-purchase inspections and VIN parts matching. What's included and how long it takes.
     partsLink: Find parts for this job
     heroHeadingTemplate: '{name} in Belgrade'
-    processHeading: What to expect at your visit
-    ctaHeadingTemplate: '{name}: book a time that suits you'
-    partsCtaHeadingTemplate: '{name}: get a price and lead time'
-    ctaBody: Tell us what's wrong with your car. We'll call you back during working hours to arrange a visit.
-    indexHeading: Everything your car needs, all in one workshop
-    indexLead: Find out what each job includes and how long it takes. We quote after inspecting the car, before starting any work.
+    processHeading: What to expect
+    ctaHeadingTemplate: Book {name} at a time that suits you
+    partsCtaHeadingTemplate: Get a price and lead time for {name}
+    ctaBody: Tell us what's wrong with your car. We'll call you back during business hours and arrange a visit.
+    indexHeading: Everything your car needs, all in one place
+    indexLead: Find out what's included in each service and how long it takes. We confirm the price after inspecting your car, before starting work.
     specsPriceLabel: Price
-    specsDurationLabel: Time needed
+    specsDurationLabel: Time
     diagnostics:
       cta: Book a diagnostic check
       name: Computer diagnostics
       short: We find the cause behind the fault code.
-      metaTitle: Car computer diagnostics in Belgrade | CarLab
-      metaDescription: Engine, suspension and electrical diagnostics in Belgrade. Free fault code reading, with the cause shown to you on the car.
-      heroTitle: A fault code is a symptom, not a diagnosis. We find the cause and show you the problem on your car.
-      heroLead: A scanner tells you which sensor is reporting a problem. It can't tell you whether the sensor itself is faulty or something is wrong with what it measures. That takes hands-on checks.
-      priceFrom: free fault code reading
+      metaTitle: Car diagnostics in Belgrade | CarLab
+      metaDescription: Engine, suspension and electrical diagnostics in Belgrade. Fault codes read free of charge, and we show you the cause on your car.
+      heroTitle: A fault code is a symptom, not a diagnosis. We find the cause and show you what's wrong.
+      heroLead: A scanner can tell you which sensor is reporting a fault. It can't tell you whether the sensor itself is faulty or what it's measuring. That takes further checks on the car.
+      priceFrom: fault code reading is free
       duration: from 40 minutes
-      bodyHeading: What our diagnostics involve
+      bodyHeading: What our diagnostic check includes
       body: |
-        First, we talk: when did it start, under what conditions, and what work was done beforehand? Sometimes this already points to the cause. A knock only when cold and a constant knock can come from different components.
+        First, we ask about the symptoms: when they started, what conditions they occur in, and what work has been done recently. Sometimes that already points us in the right direction. A knock that happens only when the engine is cold may have a different cause from one that's always there.
 
-        Then we scan all control units. A fault in the ABS or body control module often explains the driver's complaint. Next come hands-on checks: on the lift, checking for play and inspecting components under load, with pressure measurements and oscilloscope testing where needed.
+        Then we scan all the car's control units. A fault in the ABS or comfort control module can often explain the issue you're experiencing. Next, we inspect the car: check for play on the ramp, examine components under load, and, if needed, measure pressure or use an oscilloscope.
 
-        Finally, we show you the cause on the car and explain it in plain English. If repairs are needed, we prepare an estimate straight away.
+        At the end, we'll show you the cause on the car and explain it in plain English. If repairs are needed, we'll give you a quote straight away.
 
-        What does it cost? Reading fault codes is free. Diagnostics only become chargeable if we need to dismantle a component or use a test rig. We agree the price before starting, not at the end.
+        How much does it cost? Reading fault codes is free. We only charge for diagnostics if we need to dismantle a component or put the car on a test bench. We'll tell you the price before we start, not after.
       includesHeading: What's included
       includes:
-        - Discussion of symptoms and service history
-        - Fault code reading from all electronic control units
-        - Inspection on the lift, checking for play and leaks
+        - Questions about symptoms and service history
+        - Fault code scan of all electronic control units
+        - Inspection on the ramp, including checks for play and leaks
         - Road test with a technician if the problem occurs while driving
-        - Verbal explanation of our findings and a written repair estimate
+        - A clear explanation and written repair estimate
       signsHeading: When to bring your car in
       signs:
-        - The check engine light or another dashboard warning light is on
-        - The car jerks, misfires or struggles to start
-        - Fuel consumption has increased for no obvious reason
+        - The check engine light or another warning light is on
+        - The car jerks, misfires or is hard to start
+        - Fuel consumption has gone up for no obvious reason
         - There's a new noise and you can't tell where it's coming from
       honestHeading: What we can't promise
-      honest: Not every fault can be found in forty minutes. Intermittent problems that appear once a week may need another visit or a full day in the workshop. We'll tell you upfront, and we won't replace parts one after another at your expense.
+      honest: Not every fault can be found in 40 minutes. Intermittent problems that occur only once a week may need a follow-up visit or for us to keep the car for a day. We'll tell you upfront and won't replace parts one by one at your expense.
     servicing:
       cta: Book a service
       name: Scheduled servicing
-      short: Oil, filters, fluids and checks to your engine's service schedule.
-      metaTitle: Scheduled servicing and oil changes in Belgrade | CarLab
-      metaDescription: "Car servicing in Belgrade: oil, filters, spark plugs, brake fluid and coolant. To the manufacturer's schedule, with all work recorded in your service record."
+      short: Oil, filters, fluids and checks to suit your engine's service schedule.
+      metaTitle: Car servicing and oil changes in Belgrade | CarLab
+      metaDescription: "Car servicing in Belgrade: oil, filters, spark plugs, brake fluid and coolant. Serviced to the manufacturer's schedule and recorded in your service book."
       heroTitle: The cheapest repair is the one you never need
-      heroLead: Every engine has its own service intervals and oil specification. We check the manual for your car and follow it, rather than applying a blanket 'every 10,000 km' rule.
+      heroLead: Every engine has its own service intervals and oil specifications. We check your car's manual and follow it, rather than relying on a one-size-fits-all 'every 10,000 km' rule.
       priceFrom: from €90
-      duration: 2–4 hours
-      bodyHeading: How we work out your car's service intervals
+      duration: 2-4 hours
+      bodyHeading: How we work out your car's service interval
       body: |
-        Replacement intervals vary widely between engines. Belgrade's conditions, with traffic jams, dust and summer temperatures nearing 40°C, almost always qualify as severe operating conditions with shorter service intervals. We use those intervals to work out what your car actually needs at its current mileage.
+        Service intervals can vary widely between engines. Belgrade driving conditions, with traffic, dust and summer temperatures approaching 40°C, often count as 'severe operating conditions', which means shorter intervals. We use that guidance to work out what your car actually needs at its current mileage.
 
-        We also check the things people often remember too late: timing belt or chain condition, moisture in the brake fluid, coolant freezing point, and brake pad and disc wear measured in millimetres.
+        We also check the things people often leave too late: the condition of the timing belt or chain, moisture in the brake fluid, the coolant's freezing point, and brake pad and disc wear in millimetres.
       includesHeading: What's included
       includes:
-        - Engine oil and oil filter meeting your manufacturer's specifications
-        - Air filter, cabin filter and spark plugs as scheduled
-        - Brake fluid moisture test
-        - Coolant condition and freezing point check
-        - Remaining brake pad and disc thickness measured in millimetres
-        - All work and mileage entered in the service record
+        - Engine oil and oil filter to the manufacturer's specification
+        - Air and cabin filters, plus spark plugs as required by the service schedule
+        - Brake fluid moisture check
+        - Coolant check, including its freezing point
+        - Brake pad and disc thickness measured in millimetres
+        - All work and mileage recorded in your service book
       signsHeading: When to bring your car in
       signs:
-        - You've reached the mileage interval or it's been a year since the last service
-        - You've just bought the car and it has no service history
+        - It's been a year or the recommended mileage since your last service
+        - You've just bought the car and there's no service history
         - You're planning a long journey
         - The service reminder light has come on
-      honestHeading: What we don't do
-      honest: We don't replace things before they're due. If a filter is only halfway through its service life, we'll leave it alone and tell you when to come back.
+      honestHeading: What we won't do
+      honest: We won't replace parts before they need changing. If a filter still has half its service life left, we'll leave it in and let you know when to come back.
     brakes-suspension:
       cta: Book a repair
       name: Brakes and suspension
-      short: Everything that determines whether your car stops safely.
+      short: Everything that helps your car stop safely and handle properly.
       metaTitle: Brake and suspension repairs in Belgrade | CarLab
-      metaDescription: 'Brakes and suspension in Belgrade: pads, discs, calipers, suspension arms and wheel alignment. Measurements in millimetres, an estimate before work starts.'
-      heroTitle: Here, service life is measured in millimetres
-      heroLead: "You might nurse an engine to the workshop. You can't take that chance with brakes. We don't round off measurements or put off repairs: if a component is worn out, we tell you straight."
+      metaDescription: 'Brakes and suspension in Belgrade: pads, discs, calipers, control arms and wheel alignment. Measurements in millimetres, quote before work starts.'
+      heroTitle: Here, wear is measured in millimetres
+      heroLead: You can nurse an engine to the garage. You can't do that with the brakes. We measure suspension and brake components carefully and tell you plainly when they're worn out.
       priceFrom: from €120
       duration: from 3 hours
-      bodyHeading: How we do it
+      bodyHeading: How we do the work
       body: |
-        We start with measurements: disc and pad thickness in millimetres, disc runout, and the condition of hoses and calipers. For the suspension, we check for play on the lift and on a suspension test rig, then inspect dust boots and mounts.
+        We start by measuring brake disc and pad thickness in millimetres, checking disc runout, and inspecting the hoses and calipers. We check suspension for play on the ramp and shaker plates, and inspect the boots and mounts.
 
-        After suspension repairs, we always carry out wheel alignment. Even replacing a single suspension arm changes the geometry, and incorrect alignment can wear out a set of tyres in one season.
+        After suspension work, we always check and adjust the wheel alignment. Even replacing one control arm can change the geometry, and poor alignment can wear out a set of tyres in a single season.
       includesHeading: What's included
       includes:
-        - Disc and pad measurements with results recorded
-        - Pad, disc and hose replacement, caliper repair or replacement
+        - Brake disc and pad measurements, with the results recorded
+        - Brake pad, disc and hose replacement, plus caliper repair or replacement
         - Brake bleeding and brake fluid replacement
-        - Struts, springs, suspension arms, bushes, mounts and bearings
+        - Shock absorbers, springs, control arms, bushes, mounts and bearings
         - Wheel alignment after any suspension work
-        - Final road test before handover
+        - A final road test before we hand the car back
       signsHeading: When to bring your car in
       signs:
-        - Squeaking, squealing or grinding when braking
-        - The brake pedal feels soft or sinks
+        - Squealing, squeaking or grinding when you brake
+        - The brake pedal feels soft or sinks to the floor
         - The car pulls to one side when braking
-        - Knocking over bumps, vague steering or uneven tyre wear
-      honestHeading: What we'll explain upfront
-      honest: Pads and discs are wear items that work together. New pads can be fitted to worn discs, but they won't last as long, and you could be back in six months. We'll price both options and leave the choice to you.
+        - Knocks over bumps, vague steering or uneven tyre wear
+      honestHeading: What we'll explain
+      honest: Brake pads and discs wear together. You can fit new pads on worn discs, but the pads won't last as long, and you may be back in six months. We'll price both options and leave the choice to you.
     engine-gearbox:
       cta: Book a diagnostic check
       name: Engine and gearbox
-      short: From gasket replacement to strip-down repairs, with a clear estimate.
+      short: From replacing a gasket to a full strip-down, with a clear estimate.
       metaTitle: Engine and gearbox repairs in Belgrade | CarLab
-      metaDescription: 'Engine and gearbox repairs in Belgrade: timing belts and chains, gaskets, clutches and automatic gearbox oil changes. Diagnosis and estimate before work.'
-      heroTitle: A full rebuild is needed less often than you might be told
+      metaDescription: 'Engine and transmission repairs in Belgrade: timing belts, gaskets, clutches and automatic transmission fluid changes. Diagnosis before strip-down, estimate before work.'
+      heroTitle: A full engine rebuild is less often needed than people think
       heroLead: 'Before taking anything apart, we check what we can from the outside: compression, oil pressure, fault codes and leaks.'
-      priceFrom: quoted after diagnostics
+      priceFrom: following diagnosis
       duration: from 1 day
       bodyHeading: How we work
       body: |
-        We start with checks: compression in each cylinder, oil pressure, spark plug condition, fault codes across control modules and pressure testing for leaks. Only then do we decide whether the engine needs to be opened up.
+        First, we take measurements: compression in each cylinder, oil pressure, spark plug condition, fault codes from the control units and leaks under pressure. Only then do we decide whether the engine needs to be opened up.
 
-        For gearboxes, we check the oil condition and how they shift. Many automatic gearbox problems can be resolved with proper servicing rather than replacing the unit. If repairs are needed, you get an estimate with labour and parts itemised before anything is removed.
+        For gearboxes, we check the fluid condition and how the gears shift. Many automatic transmission 'failures' can be fixed with proper servicing rather than replacing the unit. If repairs are needed, you get an itemised estimate for labour and parts before anything is removed.
       includesHeading: What's included
       includes:
-        - Compression and oil pressure tests
-        - Pressure testing for leaks and checking for intake air leaks
-        - Timing belt or chain, tensioner, idler and water pump replacement
-        - Gaskets, oil seals and valve stem seals
-        - Clutch, flywheel and manual or automatic gearbox oil changes
-        - Itemised estimate before dismantling
+        - Compression and oil pressure testing
+        - Pressure testing for leaks and checking for air leaks
+        - Timing belt or chain, tensioner and water pump replacement
+        - Gaskets, seals and valve stem seals
+        - Clutch and flywheel repairs, manual and automatic transmission fluid changes
+        - Itemised estimate before work begins
       signsHeading: When to bring your car in
       signs:
-        - Oil level drops between changes
+        - The engine is using oil between changes
         - Knocking, vibration or loss of power
-        - Jerky or delayed gear changes
+        - Jerking or delays when changing gears
         - Exhaust smoke that wasn't there before
-      honestHeading: When we advise against repairs
-      honest: If the repair cost is close to the car's value, we'll tell you. Sometimes the best advice is to sell it as it is or look for a used replacement engine or gearbox, rather than spend money on repairs that you'll never recover.
+      honestHeading: When we advise against it
+      honest: If the repair cost is close to the car's value, we'll tell you. Sometimes the right advice is to sell it as-is or look for a used replacement unit, rather than spend more on repairs than the car will ever be worth.
     bodywork-painting:
       cta: Send photos of the damage
-      name: Bodywork and respraying
-      short: Accident repairs, chassis alignment and colour-matched respraying.
-      metaTitle: Accident repairs and respraying in Belgrade | CarLab
-      metaDescription: 'Body repairs in Belgrade: chassis jig, alignment checks, panel repairs and colour-matched respraying. We work with insurers and help with paperwork.'
-      heroTitle: So your car doesn't look accident-damaged
-      heroLead: Good body repairs shouldn't stand out, whether checked by eye or with a paint thickness gauge during a pre-sale inspection.
-      priceFrom: quoted after inspection
+      name: Bodywork and painting
+      short: Accident repairs, body alignment and colour-matched paintwork.
+      metaTitle: Accident repairs and resprays in Belgrade | CarLab
+      metaDescription: 'Body repairs in Belgrade: jig work, alignment checks, panel beating and computer-matched paint. We work with insurers and help with paperwork.'
+      heroTitle: So your car doesn't look like it's been in a crash
+      heroLead: Good body repairs are hard to spot, even by eye or with a paint depth gauge during a pre-sale inspection.
+      priceFrom: following inspection
       duration: from 3 days
-      bodyHeading: What the repairs involve
+      bodyHeading: What's included in the repairs
       body: |
-        We start by measuring the body alignment. An impact can cause misalignment even where everything looks intact, leading to uneven tyre wear and the car pulling to one side. If needed, we put the car on a chassis jig and pull it back into alignment using the reference points.
+        First, we measure the body alignment. After an impact, panels can shift even where everything looks intact, leading to uneven tyre wear and the car pulling to one side. If needed, we put the car on a body jig and pull it back into shape using reference points.
 
-        We match the colour in two ways: using the paint code in the documents and measuring the actual paint with a spectrophotometer. After five years in the sun, the original finish can differ from its specified colour. We polish the blended area so the transition is invisible in sunlight or under workshop lighting.
+        We match the paint colour twice: using the code in the documents and with a spectrophotometer on the car itself. After five years in the sun, the factory paint may no longer match its original code. We blend and polish the paint so the transition can't be seen in sunlight or under workshop lights.
       includesHeading: What's included
       includes:
-        - Body alignment measurements at reference points
-        - Chassis jig straightening where alignment has shifted
-        - Panel straightening and replacement of damaged panels
+        - Body alignment measurement using reference points
+        - Body jig and straightening where panels have shifted
+        - Panel beating and replacement of damaged parts
         - Colour matching by paint code and spectrophotometer
-        - Respraying in a temperature-controlled spray booth
-        - Polishing blended areas and reassembly with panel gap checks
+        - Spray painting in a temperature-controlled booth
+        - Blending, polishing and refitting, with panel gaps checked
       signsHeading: When to bring your car in
       signs:
         - The car has been in an accident, even if the damage looks minor
         - Uneven gaps between body panels
-        - The car pulls to one side or tyres wear along one edge
-        - You want to tidy up the bodywork before selling
-      honestHeading: About insurance
-      honest: We work with insurers and help with the paperwork, but we can't promise your insurer will cover everything. After the inspection, we explain which damage falls within the claim and which doesn't, so there are no surprises at the end.
+        - The car pulls to one side or the tyres are wearing unevenly
+        - You want the bodywork tidied up before selling
+      honestHeading: Insurance claims
+      honest: We work with insurers and help with the paperwork, but we can't promise they'll cover everything. After inspecting the car, we'll show you straight away what is and isn't covered, so there are no surprises at the end.
     pre-purchase-inspection:
-      cta: Book a pre-purchase inspection
+      cta: Book an inspection
       name: Pre-purchase inspection
-      short: A paint thickness gauge, a lift and a diagnostic scanner, before you hand over your money.
+      short: Paint depth gauge, lift and diagnostic scan before you hand over the money.
       metaTitle: Pre-purchase car inspection in Belgrade | CarLab
-      metaDescription: 'Pre-purchase checks in Belgrade: paint thickness, lift inspection, fault scans and compression tests. Written report to help you negotiate the price.'
-      heroTitle: A paint gauge tells you what the seller won't
-      heroLead: Resprayed panels, signs of welding, clocked mileage and leaks underneath. An hour on the lift can reveal what the advert leaves out.
+      metaDescription: 'Pre-purchase car inspection in Belgrade: paint depth gauge, lift, fault code scan and compression test. Written report to help you negotiate.'
+      heroTitle: A paint depth gauge can reveal what the seller won't
+      heroLead: Repainted panels, weld marks, clocked mileage and leaks underneath. An hour on the lift can reveal what the listing leaves out.
       priceFrom: from €60
       duration: about 1 hour
       bodyHeading: What we check
       body: |
-        We check every body panel with a paint thickness gauge, looking for resprays, filler, signs of welding and uneven panel gaps. Then the car goes on the lift to check the suspension, leaks, exhaust, underbody protection and signs of impacts underneath.
+        We use a paint depth gauge across all body panels to check for repainting, filler, weld marks and uneven panel gaps. Then we put the car on the lift to inspect the suspension, leaks, exhaust, underbody protection and signs of impact damage underneath.
 
-        For the electronics, we scan all control modules for fault codes, looking for signs of tampering or cleared faults. We check engine compression and leaks. At the end, you receive a written report listing our findings and estimated repair costs, which you can use to negotiate the price.
+        We scan all control units for fault codes, including stored and cleared codes. We also test engine compression and check for leaks. At the end, you get a written report listing our findings and the estimated repair costs, which you can use to negotiate.
       includesHeading: What's included
       includes:
-        - Paint thickness measurements on every body panel
-        - Lift inspection for leaks and signs of impact damage
-        - Fault code reading from all electronic control units
+        - Paint thickness measurement across all body panels
+        - Inspection on the lift for leaks and signs of impact damage
+        - Fault code scan of all electronic control units
         - Compression test on each cylinder
-        - Checks for signs of mileage tampering
+        - Check for signs of clocked mileage
         - Written report with estimated repair costs
-      signsHeading: When you need it
+      signsHeading: When to get an inspection
       signs:
         - You're buying a car privately
-        - The seller is rushing you into a decision
-        - The car is an import with an unknown history
-        - The price is suspiciously below market value
-      honestHeading: What an inspection can't guarantee
-      honest: We'll be honest about what we find, but no inspection catches everything. A hidden fault that doesn't show up on the lift or during diagnostics may appear later. That's a limitation of the inspection, not a disclaimer buried in the small print.
+        - The seller is rushing you to decide
+        - The car was imported and its history is unknown
+        - The price seems suspiciously below market value
+      honestHeading: What an inspection can't tell you
+      honest: We'll give you an honest account of what we find, but no inspection catches everything. A hidden fault that doesn't show up on the lift or during diagnostics may appear later. That's a limitation of the inspection, not small print.
     vin-parts-inquiry:
-      cta: Send an enquiry
-      name: Parts sourcing
+      cta: Send a parts enquiry
+      name: Parts matching
       short: We find parts that fit your car and confirm the price before you buy.
-      metaTitle: Car parts sourcing by VIN in Belgrade | CarLab
-      metaDescription: Parts sourcing by VIN or chassis number in Belgrade. Genuine and trusted aftermarket parts, fit checked and priced before purchase. Collect at CarLab.
-      heroTitle: We'll find the right parts for your car
-      heroLead: Send us your VIN or chassis number and tell us what you need. We'll check fitment, find genuine parts and trusted aftermarket alternatives, and suggest the best options.
-      priceFrom: quoted once we've found the right parts
-      duration: confirmed with the price
+      metaTitle: Find car parts by VIN in Belgrade | CarLab
+      metaDescription: Find car parts by VIN or chassis number in Belgrade. Genuine parts and trusted alternatives, compatibility checks and a confirmed price before purchase. Collect at CarLab.
+      heroTitle: We'll find parts that fit your car
+      heroLead: Send us your VIN or chassis number and tell us what you need. We'll check compatibility, find genuine parts and trusted alternatives, and suggest the best options.
+      priceFrom: quoted after parts matching
+      duration: given with the price
       bodyHeading: How we find the right parts
       body: |
-        We use the VIN to identify your car's exact specification: engine, gearbox, year and intended market. These details determine which part fits, even on cars of the same model.
+        We use the VIN to identify the car's exact specification: engine, gearbox, year and the market it was built for. This determines which parts will fit, even if it's the same model.
 
-        We then look up the manufacturer's part number and trusted aftermarket alternatives, compare supplier prices and lead times, and offer you several options. You choose, we order, and you collect the parts from our workshop in Belgrade.
+        We then look up the manufacturer's part number and trusted alternatives, compare prices and delivery times from suppliers, and give you a few options. You choose, we order, and you can collect the parts from our service centre in Belgrade.
 
-        If you need fitting too, we can do it here: the part has already been checked for compatibility, and the mechanic knows exactly what's being fitted.
+        If you also need fitting, we can do that here too. The part has been checked for compatibility, and the mechanic knows exactly what they're fitting.
       includesHeading: What's included
       includes:
-        - Fitment check by VIN or chassis number
+        - Compatibility check by VIN or chassis number
         - Finding the original part number
-        - Sourcing trusted aftermarket alternatives at different price points
-        - Price and lead time confirmed before you pay
-        - Collection from our workshop in Belgrade
-      signsHeading: When you need it
+        - Choosing trusted alternatives at different prices
+        - Price and delivery time before you pay
+        - Collection from our service centre in Belgrade
+      signsHeading: When to get an inspection
       signs:
-        - You don't know the exact part name or number
+        - You're not sure of the exact part name or number
         - You're worried about buying a part that won't fit
         - You need a rare or discontinued part
-        - You want to compare prices for genuine parts and aftermarket alternatives
-      honestHeading: How we quote
-      honest: We confirm the price and lead time before you pay. If a rare part needs to be specially ordered, we'll tell you how long it will take and suggest a trusted alternative if one is available.
+        - You want to compare the price of the original part with alternatives
+      honestHeading: How we quote prices
+      honest: We tell you the price and delivery time before you pay. If a part is rare and has to be ordered in, we'll let you know how long it will take and suggest a trusted alternative if one is available.
 translatedFrom: ddd44cfed8b3f7f8

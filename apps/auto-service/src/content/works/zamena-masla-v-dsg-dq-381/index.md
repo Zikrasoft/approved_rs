@@ -15,36 +15,36 @@ translations:
   en:
     title: DSG DQ381 oil change on a Skoda Octavia
     body: |-
-      An oil change is one part of **DSG DQ381** maintenance you really shouldn't skip.
+      Changing the oil in a **DSG DQ381** is an important part of gearbox maintenance that should not be overlooked.
 
-      This car came in for a scheduled oil change. The customer chose **MEYLE** oil, which we filled the gearbox with before completing the rest of the required service work.
+      This time, we carried out a scheduled oil change. The customer chose **MEYLE** oil, which we filled along with completing the rest of the required maintenance.
 
-      The DQ381 is a modern seven-speed DSG dual-clutch gearbox with wet clutches, fitted to many Volkswagen, Audi, Škoda and SEAT models. With timely servicing, it can deliver a long service life without major problems.
+      The DQ381 is a modern seven-speed DSG dual-clutch transmission with wet clutches, fitted to many Volkswagen, Audi, Škoda and SEAT models. With regular maintenance, it can keep running for years without serious problems.
 
-      The same principle applies to the other common DSG gearboxes, the DQ250 and DQ200. Their designs and service schedules differ, but oil condition and timely maintenance directly affect gearbox life and the operation of the mechatronics unit and clutches.
+      The same goes for other common DSG transmissions, the DQ250 and DQ200. They have different designs and service schedules, but the condition of the oil and timely maintenance directly affect the gearbox's lifespan, as well as how the mechatronic unit and clutches work.
 
-      We recommend taking actual driving conditions into account, rather than relying solely on the official service schedule. If the service history is unknown, you certainly shouldn't drive 100,000 to 150,000 km on the same oil. At least every **100,000 km**, it's worth checking when and how the gearbox was last serviced. For the DQ381 and DQ250, changing the oil considerably sooner usually makes sense.
+      We recommend looking beyond the official service schedule and taking actual driving conditions into account. If the service history is unknown, it's definitely not a good idea to drive 100,000 to 150,000 km on the same oil. At **100,000 km**, it's worth finding out when and how the gearbox was last serviced. For the DQ381 and DQ250, an oil change is usually advisable well before then.
 
-      Fresh, high-quality oil maintains its properties across a range of temperatures and loads, providing lubrication and carrying heat away. That helps keep expensive repairs at bay.
+      Fresh, high-quality oil maintains its properties across a range of temperatures and loads, lubricates the gearbox and helps dissipate heat. This helps put off costly repairs.
 
-      Bought a used car and don't know when its DSG DQ381, DQ250 or DQ200 was last serviced? Have the gearbox condition and service history checked before problems arise.
+      Bought a used car and don't know when the DSG DQ381, DQ250 or DQ200 was last serviced? Have the gearbox condition and service history checked before problems arise.
     car: Skoda Octavia
   sr:
-    title: Zamena ulja u DSG DQ381 menjaču na Škodi Octaviji
+    title: Zamena ulja u DSG DQ381 na Skoda Octavia
     body: |-
-      Zamena ulja u **DSG DQ381** menjaču deo je održavanja koji ne treba zanemarivati.
+      Zamena ulja u **DSG DQ381** je deo održavanja menjača koji ne bi trebalo zanemariti.
 
-      Ovog puta radili smo redovan servis: klijent je izabrao **MEYLE** ulje, koje smo sipali i obavili ostale potrebne servisne radove.
+      Ovog puta smo uradili redovnu zamenu: klijent je izabrao ulje **MEYLE**, sipali smo ga i obavili sve ostalo što je bilo potrebno.
 
-      DQ381 je savremeni sedmostepeni DSG menjač sa dvostrukim kvačilom u uljnom kupatilu, koji se ugrađuje u mnoge modele marki Volkswagen, Audi, Škoda i SEAT. Uz pravovremeno održavanje, ovakav menjač može dugo da radi bez ozbiljnih problema.
+      DQ381 je moderan sedmostepeni DSG menjač sa mokrim kvačilima, koji se ugrađuje u mnoge modele Volkswagen, Audi, Škoda i SEAT. Ako ga redovno održavate, ovakav menjač može dugo da traje bez ozbiljnih problema.
 
-      Isto važi i za druge rasprostranjene DSG menjače, DQ250 i DQ200. Konstrukcija i propisani servisni intervali se razlikuju, ali stanje ulja i pravovremeno održavanje direktno utiču na vek menjača, rad mehatronike i kvačila.
+      Isto važi i za druge česte DSG menjače, DQ250 i DQ200. Njihova konstrukcija i intervali održavanja se razlikuju, ali stanje ulja i redovno održavanje direktno utiču na vek menjača, rad mehatronike i kvačila.
 
-      Savetujemo da se ne oslanjate samo na fabrički propisane intervale, već da uzmete u obzir i stvarne uslove vožnje. Ako servisna istorija nije poznata, nikako ne treba prelaziti 100–150 hiljada kilometara sa istim uljem. Na svakih **100 000 km** ima smisla makar proveriti kada je i kako menjač održavan, a kod DQ381 i DQ250 ulje je obično preporučljivo menjati znatno ranije.
+      Savetujemo Vam da se ne oslanjate samo na propisane intervale, već i na stvarne uslove vožnje. Ako ne znate istoriju održavanja, ne bi trebalo da vozite 100–150 hiljada kilometara sa istim uljem. Na svakih **100 000 km** ima smisla bar proveriti kada je i kako menjač održavan, a ulje u DQ381 i DQ250 obično vredi zameniti znatno ranije.
 
-      Sveže, kvalitetno ulje zadržava potrebna svojstva pri različitim temperaturama i opterećenjima, podmazuje i odvodi toplotu. Time se odlaže potreba za skupim popravkama.
+      Kvalitetno sveže ulje zadržava potrebna svojstva pri različitim temperaturama i opterećenjima, podmazuje i odvodi toplotu. Tako se odlaže potreba za skupom popravkom.
 
-      Kupili ste polovan automobil i ne znate kada je poslednji put servisiran DSG DQ381, DQ250 ili DQ200? Proverite stanje menjača i njegovu servisnu istoriju na vreme.
+      Kupili ste polovan automobil, a ne znate kada je poslednji put održavan DSG DQ381, DQ250 ili DQ200? Proverite stanje menjača i njegovu istoriju na vreme.
     car: Skoda Octavia
 translatedFrom: 7043d2285d2eddaf
 ---

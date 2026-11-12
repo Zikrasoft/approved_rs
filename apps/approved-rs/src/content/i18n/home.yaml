@@ -117,23 +117,23 @@ heroPhotoAlt: Седан на европейской трассе
 ctaPhotoAlt: Чистый кузов и колесо автомобиля крупным планом
 translations:
   en:
-    metaTitle: Car Sourcing, Imports and Buyouts Across Europe
-    metaDescription: Find a car locally or import one from Europe or China, with everything handled for you. Inspections and buyouts. Operating across Europe.
+    metaTitle: Car Sourcing, Import & Buyback in Europe
+    metaDescription: Find a car locally or import one from Europe or China, fully handled. Inspections and buyback. Serving all of Europe.
     journey:
-      - title: Sourcing
-        desc: We find, inspect and deliver a car within your budget in Germany, Spain, Serbia and Switzerland, handling everything for you.
-      - title: Importing
-        desc: Is your car in another country? We'll find it and bring it over from Germany, elsewhere in Europe or China, handling everything, including customs clearance.
+      - title: Car sourcing
+        desc: We find, inspect and deliver a car to fit your budget, fully handled in Germany, Spain, Serbia and Switzerland.
+      - title: Import
+        desc: The car isn't in your country? We'll find and import it from Germany, elsewhere in Europe or China, including customs clearance.
       - title: Inspection
-        desc: An independent expert carries out a 100+ point pre-purchase inspection, complete with video.
-        note: Found a car yourself? We can arrange a standalone inspection
-      - title: Buyout
-        desc: We handle the purchase and customs clearance of cars with foreign registration.
-        note: Car already abroad? We'll help with the paperwork
+        desc: An independent expert inspects the car before purchase, checks 100+ items and records a video.
+        note: Found a car yourself? Book an inspection on its own
+      - title: Buyback
+        desc: We handle the purchase and customs clearance of cars with foreign plates.
+        note: Car already abroad? We'll help you get the paperwork sorted
     heroLine1: We'll find your car.
     heroLine2: Inspect it.
-    heroLine3: Deliver it.
-    heroSubtext: We'll find your car in Germany, Spain, Switzerland or Serbia. If it's in another country, we'll bring it to you, handling the inspection, paperwork and customs clearance.
+    heroLine3: Bring it to you.
+    heroSubtext: We'll find a car in Germany, Spain, Switzerland or Serbia. If it's elsewhere, we'll bring it to you, with inspection, paperwork and customs clearance included.
     statClients:
       value: 200+
       label: clients
@@ -142,26 +142,26 @@ translations:
     statYears:
       value: 5 years
       label: in business
-    journeyHeading: One journey, from the search to the keys
-    journeySubtext: Sourcing, importing, inspection and buyout aren't separate services. They're stages of your car's journey. You can join at any stage.
+    journeyHeading: One journey, from search to keys
+    journeySubtext: Car sourcing, importing, inspection and buyback aren't separate services. They're steps in your car's journey, and you can start at any stage.
     whyUsHeading: Why choose us
-    whyUsSubtext: Buying a car abroad raises questions. Here's how we put your mind at ease.
+    whyUsSubtext: Buying a car from another country raises questions. Here's how we put your mind at ease.
     trustCards:
-      - title: Complete transparency
-        text: We send you a detailed 100+ point checklist and video of every detail, covering the bodywork, interior and suspension. See the car as if you were standing beside it.
-      - title: A secure purchase
-        text: Staged payments and clear terms. We handle the paperwork at every stage, from purchase to customs clearance and registration. No surprises.
+      - title: Full transparency
+        text: We send a detailed checklist of 100+ items and videos of every detail, from the body and interior to the suspension. You'll see the car as if you were right there.
+      - title: A secure transaction
+        text: 'Payments are made in stages, with clear terms. We handle the paperwork at every step: purchase, customs clearance and registration. No surprises.'
       - title: Local expertise
-        text: 'We know what to look for in each market: German autobahn mileage, bodywork issues on Spanish cars and the finer points of foreign-registration paperwork in Serbia.'
+        text: 'We know each market inside out: high-mileage German motorway cars, the bodywork quirks of Spanish cars, and the ins and outs of registering cars with foreign plates in Serbia.'
     testimonialsHeading: What our clients say
     testimonials:
-      - quote: '"They brought a BMW 3 Series from Munich to Belgrade. Everything went smoothly, from the inspection to registration. Saved me a lot of stress over the paperwork."'
+      - quote: '"They brought a BMW 3 Series from Munich to Belgrade. Everything went smoothly, from inspection to registration. They saved me a ton of stress with the paperwork."'
         name: Alexander
         caption: BMW 320d, Germany → Serbia
       - quote: '"I''d been looking for a Skoda Octavia in good condition for ages. The team found one in Spain and had an independent expert inspect it. Everything matched the description."'
         name: Mikhail
         caption: Skoda Octavia, Spain → Russia
-      - quote: '"The paperwork for foreign registration seemed complicated. The team guided me through every step, and a month later I was already driving. Highly recommended."'
+      - quote: '"Registering a car with foreign plates seemed complicated. The team guided me through every step, and a month later I was driving. Highly recommend."'
         name: Dmitry
         caption: VW Passat, Germany → Serbia
     ctaEyebrow: Ready to get started?
@@ -169,88 +169,88 @@ translations:
       line1: Tell us
       line2: about the car
       accentWord: you're looking for
-    ctaSubtext: We reply within 2 hours. Your consultation is free.
+    ctaSubtext: We reply within 2 hours. The consultation is free.
     ctaTelegramLabel: Message us on Telegram
     ctaStatResponse:
       value: 2 hrs
       label: response time
     origin:
       heading: Where we source cars
-      note: We can deliver to any country. Let's discuss it when you enquire
+      note: We deliver to any country. Let's discuss it when you get in touch
       euTitle: From Europe
-      euText: Germany, Spain, Switzerland and elsewhere in Europe. We source locally, inspect before purchase, handle export paperwork, transport and customs clearance. You'll know the total cost before you buy, not after the car crosses the border.
-      euCta: Get a quote for importing from Europe
+      euText: Germany, Spain, Switzerland and elsewhere in Europe. We source locally, inspect before purchase, handle export paperwork, transport and customs clearance. We tell you the total cost before the deal, not after the border.
+      euCta: Get an import quote from Europe
       chinaTitle: From China
-      chinaText: New and used cars from China through a trusted partner. We source within your budget, inspect before shipping, and handle delivery and customs clearance just as we do for European imports.
-      chinaCta: Get a quote for importing from China
+      chinaText: New and used cars from China through a trusted partner. We find one to fit your budget, inspect it before shipping, then handle delivery and customs clearance, just as we do for cars from Europe.
+      chinaCta: Get an import quote from China
       chinaTags:
         - New
         - Used
-        - Fully managed
+        - Fully handled
     catalogue:
-      heading: Recent purchases
-      subtext: These aren't listings. Every car here has been sourced, inspected, cleared and handed over to its owner. The price shown is what they paid.
+      heading: Recent deals
+      subtext: These aren't listings. Every car was found, inspected, processed and handed over to its new owner. The price shown is what they paid.
       allCountriesLabel: All countries
       moreLabel: Show {rest} more
     inspection:
-      heading: A hundred checks. Four areas that make or break a deal.
-      subtext: The checklist is long, but we usually advise against a purchase because of an issue in one of four areas. Tap a number on the diagram to see what our expert checks and what we've found.
-      hint: Tap a number on the diagram
+      heading: 100 checks. Four deal-breakers.
+      subtext: The checklist is long, but almost every reason to walk away comes down to one of four areas. Select a number on the diagram to see what the expert checks and what we've found.
+      hint: Select a number on the diagram
       ctaLabel: Book an inspection
-      pointsLabel: 100+ checks
-      mediaLabel: photos and video
+      pointsLabel: 100+ items
+      mediaLabel: photos and videos
       reportLabel: report before you decide
       zones:
         - title: Bodywork and paint
-          text: Paint depth readings on every panel, body opening alignment, and signs of welding or filler. These reveal repairs the seller may have forgotten to mention.
+          text: We measure paint thickness on every panel and check panel gaps, welds and filler. This reveals repairs the seller may have forgotten to mention.
           points:
-            - Resprayed panels and paint touch-ups
-            - Panel gaps and alignment after a collision
-            - Corrosion in sills and wheel arches
-            - Original glass and lights
-        - title: Engine and gearbox
-          text: Operating readings with the engine warm, gearbox adaptation values and stored fault codes. This is the most expensive area to repair and the most common reason to walk away.
+            - Repainted and touched-up panels
+            - Panel gaps and post-accident alignment
+            - Rust in sills and wheel arches
+            - Whether the glass and lights are original
+        - title: Engine and transmission
+          text: We check readings with the engine warm, transmission adaptations and fault codes in the control units. It's the most expensive area and the most common reason to walk away.
           points:
             - Timing chain stretch
-            - Leaks and oil seepage
-            - Gearbox adaptation values and harsh shifts
+            - Leaks and seepage
+            - Transmission adaptations and jerking
             - Compression and exhaust smoke
-          finding: 'A low-mileage 2025 BMW M340: diagnostics indicated around 20% timing chain stretch. We caught it before purchase, giving the client leverage to negotiate.'
+          finding: 'A 2025 BMW M340 with low mileage: diagnostics showed the timing chain had stretched by about 20%. We caught it before the deal, giving the client leverage to negotiate.'
         - title: Suspension and brakes
-          text: An inspection on a lift to check for play and assess the suspension and brakes. German autobahn mileage and Balkan roads wear a car differently.
+          text: We use a lift to check for play and assess the suspension and braking system. German motorway miles and Balkan roads wear a car differently.
           points:
             - Play in suspension arms and ball joints
             - Leaking shock absorbers
             - Brake disc and pad wear
-            - Steering rack and protective boots
+            - Steering rack and rubber boots
         - title: Electronics, VIN and paperwork
-          text: VIN-based service history, mileage tampering, electronic faults and legal checks for outstanding finance, registration restrictions and unresolved accident claims.
+          text: We check the service history by VIN, odometer tampering, electronic fault codes and legal status, including liens, registration restrictions and unresolved accident claims.
           points:
             - Mileage discrepancies in the vehicle history
-            - Stored fault codes
-            - Outstanding finance and registration restrictions
-            - Unresolved accident and insurance claims
-    findingLabel: 'What we found:'
-    heroPhotoAlt: A saloon on a European motorway
+            - Fault codes in the control units
+            - Liens and registration restrictions
+            - Unresolved accidents and insurance claims
+    findingLabel: 'We found:'
+    heroPhotoAlt: Sedan on a European highway
     ctaPhotoAlt: Close-up of a car's clean bodywork and wheel
   sr:
-    metaTitle: Pronalaženje, uvoz i otkup automobila u Evropi
-    metaDescription: Pronalazimo auto u vašoj zemlji ili ga uvozimo iz Evrope i Kine po sistemu ključ u ruke. Provera auta pre kupovine i otkup. Radimo širom Evrope.
+    metaTitle: Uvoz, pronalaženje i otkup automobila u Evropi
+    metaDescription: Pronalazimo automobile u vašoj zemlji ili ih uvozimo iz Evrope i Kine po sistemu ključ u ruke. Provera i otkup. Radimo širom Evrope.
     journey:
-      - title: Pronalaženje auta
-        desc: Pronalazimo, proveravamo i isporučujemo auto prema vašem budžetu, po sistemu ključ u ruke, u Nemačkoj, Španiji, Srbiji i Švajcarskoj.
+      - title: Pronalaženje
+        desc: Pronalazimo, proveravamo i dovozimo automobil u okviru vašeg budžeta, po sistemu ključ u ruke, u Nemačkoj, Španiji, Srbiji i Švajcarskoj.
       - title: Uvoz
-        desc: Auto nije u vašoj zemlji? Pronalazimo ga i dovozimo iz Nemačke, drugih evropskih zemalja ili Kine, po sistemu ključ u ruke, uz carinjenje.
-      - title: Provera auta pre kupovine
-        desc: Nezavisni stručnjak proverava više od 100 stavki na automobilu pre kupovine, uz video-snimke.
-        note: Sami ste našli auto? Organizujemo i samo proveru
+        desc: Automobil nije u vašoj zemlji? Pronaći ćemo ga i uvesti iz Nemačke, drugih evropskih zemalja ili Kine, po sistemu ključ u ruke, uključujući carinjenje.
+      - title: Provera
+        desc: Nezavisni stručnjak obavlja provera auta pre kupovine u više od 100 tačaka i snima video.
+        note: Već ste pronašli automobil? Možete zasebno naručiti proveru
       - title: Otkup
         desc: Obavljamo otkup i carinjenje automobila sa stranim tablicama.
-        note: Auto je već u inostranstvu? Pomoći ćemo oko papirologije
+        note: Automobil je već u inostranstvu? Pomoći ćemo vam oko papirologije
     heroLine1: Pronaći ćemo auto.
-    heroLine2: Proverićemo ga.
-    heroLine3: Dovešćemo ga.
-    heroSubtext: Pronalazimo auto u Nemačkoj, Španiji, Švajcarskoj ili Srbiji. Ako je u drugoj zemlji, dovozimo ga do vas, uz proveru, papirologiju i carinjenje.
+    heroLine2: Proveriti.
+    heroLine3: Dovesti.
+    heroSubtext: Pronaći ćemo automobil u Nemačkoj, Španiji, Švajcarskoj ili Srbiji. Ako je u nekoj drugoj zemlji, dovešćemo ga do vas, uz proveru, sređivanje dokumentacije i carinjenje.
     statClients:
       value: 200+
       label: klijenata
@@ -260,114 +260,114 @@ translations:
       value: 5 godina
       label: na tržištu
     journeyHeading: 'Jedan put: od potrage do ključeva'
-    journeySubtext: Pronalaženje, uvoz, provera i otkup nisu odvojene usluge, već koraci na putu do vašeg automobila. Možete nam se obratiti u bilo kojoj fazi.
+    journeySubtext: Pronalaženje, uvoz, provera i otkup automobila nisu različite usluge, već koraci na putu vašeg automobila do vas. Možete početi od bilo kog koraka.
     whyUsHeading: Zašto nas biraju
-    whyUsSubtext: Kupovina auta iz druge zemlje otvara mnoga pitanja. Evo kako ih rešavamo.
+    whyUsSubtext: Kupovina automobila iz druge zemlje otvara mnoga pitanja. Evo kako ih rešavamo.
     trustCards:
       - title: Potpuna transparentnost
-        text: 'Šaljemo detaljnu kontrolnu listu sa više od 100 stavki i video-snimke svakog detalja: karoserije, enterijera i trapa. Vidite auto kao da stojite pored njega.'
+        text: 'Šaljemo detaljnu kontrolnu listu sa više od 100 stavki i snimke svakog detalja: karoserije, enterijera i trapa. Videćete automobil kao da ste pored njega.'
       - title: Sigurna kupovina
-        text: 'Plaćanje po fazama i jasni uslovi. Vodimo računa o dokumentaciji u svakom koraku: kupovina, carinjenje i registracija. Bez iznenađenja.'
-      - title: Poznavanje lokalnih tržišta
-        text: 'Znamo osobenosti svakog tržišta: kilometražu sa nemačkih autoputeva, stanje karoserije automobila iz Španije i specifičnosti papirologije za vozila sa stranim tablicama u Srbiji.'
+        text: 'Plaćanje u fazama i jasni uslovi. Pratimo dokumentaciju u svakom koraku: sređivanje papira, carinjenje i registraciju. Bez neprijatnih iznenađenja.'
+      - title: Poznajemo lokalno tržište
+        text: 'Poznajemo specifičnosti svakog tržišta: veliku kilometražu na nemačkim autoputevima, stanje karoserije španskih automobila i procedure za strane tablice u Srbiji.'
     testimonialsHeading: Šta kažu naši klijenti
     testimonials:
-      - quote: „Dovezli su mi BMW serije 3 iz Minhena u Beograd. Sve je prošlo kako treba, od provere auta pre kupovine do registracije. Poštedeli su me gomile stresa oko papirologije.“
+      - quote: '"Dovezli su BMW serije 3 iz Minhena u Beograd. Sve je išlo glatko, od pregleda do registracije. Uštedeli su nam mnogo živaca oko papirologije."'
         name: Aleksandar
         caption: BMW 320d, Nemačka → Srbija
-      - quote: „Dugo sam tražio Skoda Octavia u dobrom stanju. Momci su našli auto u Španiji, organizovali proveru kod nezavisnog stručnjaka i sve je bilo kao u opisu.“
+      - quote: '"Dugo sam tražio dobro očuvanu Škodu Octaviju. Pronašli su je u Španiji i angažovali nezavisnog stručnjaka za proveru. Sve se poklapalo sa opisom."'
         name: Mihailo
-        caption: Skoda Octavia, Španija → Rusija
-      - quote: „Papirologija za strane tablice delovala mi je komplikovano. Tim me je proveo kroz svaki korak i posle mesec dana već sam vozio. Sve preporuke.“
+        caption: Škoda Octavia, Španija → Rusija
+      - quote: '"Mislio sam da će papirologija za strane tablice biti komplikovana. Tim me je vodio kroz svaki korak, a već mesec dana kasnije sam vozio automobil. Preporučujem."'
         name: Dmitrij
         caption: VW Passat, Nemačka → Srbija
-    ctaEyebrow: Spremni da krenemo?
+    ctaEyebrow: Spremni da počnemo?
     ctaHeading:
       line1: Recite nam
-      line2: kakav auto
+      line2: kakav automobil
       accentWord: tražite
     ctaSubtext: Odgovaramo u roku od 2 sata. Konsultacije su besplatne.
     ctaTelegramLabel: Pišite nam na Telegramu
     ctaStatResponse:
       value: 2 h
-      label: rok za odgovor
+      label: do odgovora
     origin:
-      heading: Odakle dovozimo automobile
-      note: Dostavljamo u bilo koju zemlju. Detalje dogovaramo kada nam se javite
+      heading: Odakle uvozimo
+      note: Dostavljamo u bilo koju zemlju, detalje dogovaramo nakon upita
       euTitle: Iz Evrope
-      euText: Nemačka, Španija, Švajcarska i druge evropske zemlje. Pronalazimo auto na licu mesta, radimo proveru auta pre kupovine, sređujemo izvoz, prevoz i carinjenje. Konačnu cenu znate pre kupovine, a ne tek posle prelaska granice.
-      euCta: Izračunajte troškove uvoza iz Evrope
+      euText: Nemačka, Španija, Švajcarska i druge evropske zemlje. Pronalazimo automobil na licu mesta, obavljamo provera auta pre kupovine, pripremamo izvoznu dokumentaciju, prevozimo i carinimo. Ukupnu cenu saopštavamo pre kupovine, ne nakon prelaska granice.
+      euCta: Izračunajte cenu uvoza iz Evrope
       chinaTitle: Iz Kine
-      chinaText: Novi i polovni automobili iz Kine preko proverenog partnera. Pronalazimo auto prema vašem budžetu, proveravamo ga pre slanja i organizujemo prevoz i carinjenje, po istom principu kao za Evropu.
-      chinaCta: Izračunajte troškove uvoza iz Kine
+      chinaText: Novi i polovni automobili iz Kine preko proverenog partnera. Pronalazimo automobil u okviru vašeg budžeta, proveravamo ga pre slanja, prevozimo i carinimo, kao i za automobile iz Evrope.
+      chinaCta: Izračunajte cenu uvoza iz Kine
       chinaTags:
         - Novi
         - Polovni
         - Ključ u ruke
     catalogue:
-      heading: Nedavne kupovine
-      subtext: 'Ovo nisu oglasi: svaki auto smo pronašli, proverili, završili papirologiju i predali vlasniku. Prikazana je cena koju je kupac zaista platio.'
+      heading: Poslednje realizovane kupovine
+      subtext: 'Ovo nisu oglasi: svaki automobil smo pronašli, proverili, sredili dokumentaciju i predali vlasniku. Prikazana je cena koju je platio.'
       allCountriesLabel: Sve zemlje
       moreLabel: Prikaži još {rest}
     inspection:
-      heading: Sto stavki, četiri ključne oblasti
-      subtext: Kontrolna lista je duga, ali razlozi da odustanete od kupovine gotovo uvek se kriju u jednoj od četiri oblasti. Kliknite na broj na šemi da vidite šta stručnjak proverava i šta smo tu već pronalazili.
+      heading: Od 100 tačaka, četiri najčešće presude
+      subtext: Kontrolna lista je duga, ali se od kupovine najčešće odustaje zbog problema u jednoj od četiri oblasti. Kliknite na broj na šemi i pokazaćemo šta stručnjak proverava i šta smo tamo otkrili.
       hint: Kliknite na broj na šemi
-      ctaLabel: Zakažite proveru auta pre kupovine
-      pointsLabel: 100+ stavki
-      mediaLabel: fotografije i video-snimci
+      ctaLabel: Naručite proveru
+      pointsLabel: 100+ tačaka
+      mediaLabel: fotografije i video
       reportLabel: izveštaj pre odluke
       zones:
         - title: Karoserija i lak
-          text: Merenje debljine laka na svakom panelu, geometrija otvora, tragovi varenja i gitovanja. Tako otkrivamo popravke koje je prodavac prećutao.
+          text: Merač debljine laka za svaki panel, geometrija otvora, tragovi varenja i gitovanja. Tako se vidi da li je automobil popravljan, a da prodavac to nije pomenuo.
           points:
-            - Prefarbani i dofarbavani paneli
-            - Zazori i geometrija posle udara
-            - Korozija na pragovima i rubovima blatobrana
-            - Originalnost stakala i svetlosnih sklopova
+            - Delovi karoserije koji su ponovo lakirani
+            - Razmaci između panela i geometrija nakon sudara
+            - Korozija na pragovima i u rubovima blatobrana
+            - Da li su stakla i svetla originalni
         - title: Motor i menjač
-          text: Radni parametri zagrejanog motora, adaptacione vrednosti menjača i memorisane greške u upravljačkim jedinicama. Ovde su kvarovi najskuplji i najčešće su razlog za odustajanje od kupovine.
+          text: Parametri zagrejanog motora, adaptacije menjača i greške sačuvane u upravljačkim jedinicama. Ovo je najskuplja oblast i najčešći razlog za odustajanje od kupovine.
           points:
-            - Istezanje razvodnog lanca
+            - Istezanje lanca razvoda
             - Curenje i orošavanje uljem
-            - Adaptacione vrednosti i trzaji menjača
-            - Kompresija i dim iz auspuha
-          finding: 'BMW M340 iz 2025. sa malom kilometražom: dijagnostika je pokazala istezanje razvodnog lanca od oko 20 %. Otkrili smo to pre kupovine i klijent je dobio argument za pregovore o ceni.'
+            - Adaptacije menjača i trzaji
+            - Kompresija i dim iz izduva
+          finding: 'BMW M340 iz 2025. sa malom kilometražom: dijagnostika je pokazala da je lanac razvoda istegnut oko 20%. Otkrili smo to pre kupovine, što je klijentu dalo osnov za pregovore o ceni.'
         - title: Trap i kočnice
-          text: Pregled na dizalici, provera lufta, stanja oslanjanja i kočionog sistema. Kilometri na nemačkim autoputevima i balkanski putevi ne troše auto na isti način.
+          text: Pregled na dizalici, zazori, stanje vešanja i kočionog sistema. Vožnja po nemačkim autoputevima i balkanskim putevima različito troši automobil.
           points:
-            - Luft u ramenima i kuglama
+            - Zazori na ramenima i kuglama
             - Curenje amortizera
             - Istrošenost diskova i pločica
             - Letva volana i manžetne
         - title: Elektronika, VIN i dokumentacija
-          text: 'Servisna istorija po VIN broju, vraćena kilometraža, greške elektronike i pravni status: zaloga, zabrana registracije i nerešeni predmeti vezani za saobraćajne nezgode.'
+          text: 'Servisna istorija prema VIN-u, vraćena kilometraža, greške elektronike i pravna provera: zaloga, zabrana registracije i nerešene saobraćajne nezgode.'
           points:
-            - Neslaganje kilometraže sa servisnom istorijom
-            - Memorisane greške u upravljačkim jedinicama
+            - Nepoklapanje kilometraže sa servisnom istorijom
+            - Greške sačuvane u upravljačkim jedinicama
             - Zaloga i zabrana registracije
-            - Nerešeni predmeti nezgoda i zahtevi za naknadu štete
+            - Nerešene saobraćajne nezgode i osiguravajući slučajevi
     findingLabel: 'Otkrili smo:'
     heroPhotoAlt: Limuzina na evropskom autoputu
-    ctaPhotoAlt: Čista karoserija i točak automobila u krupnom planu
+    ctaPhotoAlt: Krupni plan čiste karoserije i točka automobila
   es:
-    metaTitle: Búsqueda, importación y compra de coches en Europa
-    metaDescription: Buscamos coches en tu país o los importamos de Europa y China, con todo incluido. Inspección y compra. Trabajamos en toda Europa.
+    metaTitle: Compra, importación y venta de coches en Europa
+    metaDescription: Buscamos coches en tu país o los importamos de Europa y China. Inspección y compra. Servicio en toda Europa.
     journey:
       - title: Búsqueda
-        desc: Encontramos, revisamos y entregamos el coche que encaja con tu presupuesto en Alemania, España, Serbia y Suiza. Nos encargamos de todo.
+        desc: Encontramos, inspeccionamos y entregamos el coche que buscas, con todo incluido, en Alemania, España, Serbia y Suiza.
       - title: Importación
-        desc: ¿El coche está en otro país? Lo buscamos y te lo traemos de Alemania, del resto de Europa o de China, con todos los trámites y el despacho de aduanas incluidos.
+        desc: ¿El coche está en otro país? Lo buscamos y lo importamos de Alemania, Europa o China, con todo incluido y despacho de aduanas.
       - title: Inspección
-        desc: Un experto independiente revisa más de 100 puntos del coche antes de la compra y lo documenta en vídeo.
-        note: ¿Ya has encontrado un coche? También organizamos la inspección por separado
+        desc: Un experto independiente revisa el coche antes de la compra en más de 100 puntos y graba un vídeo.
+        note: ¿Ya encontraste un coche? Puedes encargar solo la inspección
       - title: Compra
-        desc: Gestionamos la compra y el despacho de aduanas de coches con matrícula extranjera.
+        desc: Nos ocupamos de la compra y del despacho de aduanas de coches con matrícula extranjera.
         note: ¿El coche ya está en el extranjero? Te ayudamos con los trámites
     heroLine1: Encontramos tu coche.
-    heroLine2: Lo revisamos.
-    heroLine3: Te lo traemos.
-    heroSubtext: Buscamos tu coche en Alemania, España, Suiza o Serbia. Si está en otro país, te lo traemos con la inspección, los trámites y el despacho de aduanas incluidos.
+    heroLine2: Lo inspeccionamos.
+    heroLine3: Lo importamos.
+    heroSubtext: Buscamos coches en Alemania, España, Suiza o Serbia. Si está en otro país, lo llevamos hasta ti con inspección, trámites y despacho de aduanas.
     statClients:
       value: 200+
       label: clientes
@@ -376,115 +376,115 @@ translations:
     statYears:
       value: 5 años
       label: en el sector
-    journeyHeading: 'Un solo camino: de la búsqueda a las llaves'
-    journeySubtext: La búsqueda, la importación, la inspección y la compra no son servicios aislados, sino etapas del mismo recorrido. Puedes empezar en cualquiera de ellas.
-    whyUsHeading: Por qué elegirnos
-    whyUsSubtext: Comprar un coche en otro país genera dudas. Así las resolvemos.
+    journeyHeading: 'Un solo recorrido: de la búsqueda a las llaves'
+    journeySubtext: La búsqueda, la importación, la inspección y la compra no son servicios distintos, sino etapas del recorrido de tu coche. Puedes empezar por cualquiera.
+    whyUsHeading: Por qué nos eligen
+    whyUsSubtext: Comprar un coche en otro país plantea dudas. Así las resolvemos.
     trustCards:
       - title: Transparencia total
-        text: 'Te enviamos un informe detallado con más de 100 puntos y vídeos de cada detalle: carrocería, interior y tren de rodaje. Verás el coche como si estuvieras allí.'
-      - title: Una operación segura
-        text: 'Pagos por etapas y condiciones claras. Gestionamos la documentación en cada fase: compra, despacho de aduanas y matriculación. Sin sorpresas.'
-      - title: Conocimiento de cada mercado
-        text: 'Conocemos las particularidades de cada mercado: los kilómetros de autopista en Alemania, el estado de las carrocerías en España y los trámites de los coches con matrícula extranjera en Serbia.'
+        text: 'Te enviamos una lista detallada de más de 100 puntos y vídeos de cada detalle: carrocería, interior y tren de rodaje. Verás el coche como si estuvieras allí.'
+      - title: Seguridad en la compra
+        text: 'Pagos por etapas y condiciones claras. Te acompañamos con la documentación en cada fase: trámites, despacho de aduanas y matriculación. Sin sorpresas.'
+      - title: Conocimiento local
+        text: 'Conocemos cada mercado: los kilómetros de autopista en Alemania, las particularidades de la carrocería de los coches españoles y los trámites para matricular coches extranjeros en Serbia.'
     testimonialsHeading: Lo que dicen nuestros clientes
     testimonials:
-      - quote: «Me trajeron un BMW Serie 3 de Múnich a Belgrado. Todo fue sobre ruedas, desde la inspección hasta la matriculación. Me ahorraron muchos quebraderos de cabeza con los trámites.»
+      - quote: '"Trajeron un BMW Serie 3 de Múnich a Belgrado. Todo perfecto, desde la inspección hasta la matriculación. Nos ahorraron un montón de quebraderos de cabeza con los trámites."'
         name: Aleksandr
         caption: BMW 320d, Alemania → Serbia
-      - quote: «Llevaba mucho tiempo buscando un Skoda Octavia en buen estado. Encontraron uno en España, lo revisó un experto independiente y todo coincidía con la descripción.»
+      - quote: '"Llevaba tiempo buscando un Skoda Octavia en buen estado. Encontraron uno en España y un experto independiente lo inspeccionó. Todo coincidía con la descripción."'
         name: Mijaíl
         caption: Skoda Octavia, España → Rusia
-      - quote: «Los trámites para un coche con matrícula extranjera parecían complicados. El equipo me guio en cada paso y al mes ya estaba conduciendo. Los recomiendo.»
+      - quote: '"Matricular un coche con matrícula extranjera parecía complicado. El equipo me guio en cada paso y al mes ya estaba conduciendo. Lo recomiendo."'
         name: Dmitri
         caption: VW Passat, Alemania → Serbia
     ctaEyebrow: ¿Empezamos?
     ctaHeading:
       line1: Cuéntanos
       line2: qué coche
-      accentWord: estás buscando
-    ctaSubtext: Respondemos en un plazo de 2 horas. La consulta es gratuita.
+      accentWord: buscas
+    ctaSubtext: Respondemos en un plazo de 2 horas. Consulta gratuita.
     ctaTelegramLabel: Escríbenos por Telegram
     ctaStatResponse:
       value: 2 h
-      label: para responder
+      label: respuesta
     origin:
-      heading: De dónde traemos los coches
-      note: Entregamos en cualquier país. Lo concretamos al recibir tu solicitud
-      euTitle: De Europa
-      euText: Alemania, España, Suiza y otros países europeos. Buscamos el coche sobre el terreno, lo inspeccionamos antes de comprarlo y gestionamos la exportación, el transporte y el despacho de aduanas. Conocerás el precio final antes de comprar, no después de cruzar la frontera.
-      euCta: Calcular la importación desde Europa
-      chinaTitle: De China
-      chinaText: Coches nuevos y de segunda mano de China a través de un colaborador de confianza. Buscamos según tu presupuesto, revisamos el coche antes del envío y gestionamos el transporte y el despacho de aduanas, igual que desde Europa.
-      chinaCta: Calcular la importación desde China
+      heading: De dónde importamos
+      note: Entregamos en cualquier país. Cuéntanos tu caso al contactarnos
+      euTitle: Desde Europa
+      euText: Alemania, España, Suiza y otros países europeos. Buscamos coches allí, los inspeccionamos antes de la compra, tramitamos la exportación, los transportamos y hacemos el despacho de aduanas. Te damos el precio final antes de cerrar el trato, no al cruzar la frontera.
+      euCta: Calcula la importación desde Europa
+      chinaTitle: Desde China
+      chinaText: Coches nuevos y usados de China a través de un socio de confianza. Los buscamos según tu presupuesto, los inspeccionamos antes del envío, los transportamos y hacemos el despacho de aduanas, igual que con los coches europeos.
+      chinaCta: Calcula la importación desde China
       chinaTags:
         - Nuevos
-        - De segunda mano
+        - Usados
         - Todo incluido
     catalogue:
       heading: Últimas operaciones
-      subtext: 'Esto no son anuncios: cada coche ya se ha buscado, revisado, tramitado y entregado a su dueño. El precio que ves es el que pagó.'
+      subtext: 'No son anuncios: cada coche fue encontrado, inspeccionado y tramitado antes de entregárselo a su nuevo dueño. El precio indicado es el que pagó.'
       allCountriesLabel: Todos los países
-      moreLabel: Mostrar otros {rest}
+      moreLabel: Mostrar más {rest}
     inspection:
-      heading: Cien puntos de revisión, cuatro áreas decisivas
-      subtext: La lista es larga, pero casi siempre desaconsejamos una compra por problemas en una de estas cuatro áreas. Pulsa un número del esquema para ver qué revisa el experto y qué hemos encontrado.
+      heading: Más de 100 puntos, pero cuatro son decisivos
+      subtext: La lista de revisión es larga, pero casi siempre recomendamos no seguir adelante por problemas en una de estas cuatro áreas. Pulsa un número del esquema para ver qué revisa el experto y qué hemos encontrado.
       hint: Pulsa un número del esquema
-      ctaLabel: Solicitar una inspección
+      ctaLabel: Encargar una inspección
       pointsLabel: Más de 100 puntos
       mediaLabel: fotos y vídeos
       reportLabel: informe antes de decidir
       zones:
         - title: Carrocería y pintura
-          text: Medimos el espesor de la pintura en cada panel, comprobamos la geometría de los huecos y buscamos rastros de soldadura y masilla. Así detectamos reparaciones que el vendedor ha olvidado mencionar.
+          text: Medimos el espesor de pintura en cada panel y revisamos la geometría de las aberturas y los rastros de soldadura y masilla. Así detectamos reparaciones que el vendedor quizá no mencione.
           points:
-            - Paneles repintados y retoques de pintura
+            - Paneles repintados o retocados
             - Holguras y geometría tras un golpe
-            - Corrosión en los estribos y pasos de rueda
+            - Óxido en los bajos y los pasos de rueda
             - Cristales y faros originales
         - title: Motor y caja de cambios
-          text: Comprobamos los parámetros con el motor caliente, las adaptaciones de la caja de cambios y los códigos de avería almacenados en las centralitas. Es el área más cara de reparar y el motivo más frecuente para descartar una compra.
+          text: Comprobamos los parámetros con el motor caliente, las adaptaciones de la caja de cambios y los fallos registrados en las centralitas. Es el área más cara y el motivo más frecuente para descartar un coche.
           points:
             - Estiramiento de la cadena de distribución
-            - Fugas y rezumes
+            - Fugas y sudoración de aceite
             - Adaptaciones y tirones de la caja de cambios
             - Compresión y humos de escape
-          finding: 'BMW M340 de 2025 con pocos kilómetros: el diagnóstico reveló un estiramiento de la cadena de distribución de alrededor del 20 %. Lo detectamos antes de la compra y el cliente pudo usarlo para negociar el precio.'
-        - title: Tren de rodaje y frenos
-          text: 'Revisamos el coche en el elevador: holguras, estado de la suspensión y sistema de frenos. Los kilómetros de autopista en Alemania y las carreteras de los Balcanes desgastan el coche de formas distintas.'
+          finding: 'BMW M340 de 2025 con poco kilometraje: el diagnóstico detectó un estiramiento de la cadena de distribución de cerca del 20 %. Lo descubrimos antes de cerrar el trato y el cliente pudo negociar el precio.'
+        - title: Suspensión y frenos
+          text: Revisamos el coche en un elevador, las holguras, la suspensión y el sistema de frenos. Los kilómetros de autopista en Alemania y las carreteras de los Balcanes desgastan el coche de forma distinta.
           points:
-            - Holguras en brazos de suspensión y rótulas
+            - Holguras en brazos y rótulas
             - Fugas en los amortiguadores
-            - Desgaste de discos y pastillas de freno
+            - Desgaste de discos y pastillas
             - Cremallera de dirección y guardapolvos
         - title: Electrónica, VIN y documentación
-          text: 'Comprobamos el historial de mantenimiento por VIN, posibles manipulaciones del kilometraje, fallos electrónicos y la situación legal: cargas, restricciones de matriculación y siniestros pendientes de cierre.'
+          text: 'Consultamos el historial de mantenimiento por VIN, comprobamos si han manipulado el cuentakilómetros, revisamos los fallos electrónicos y verificamos la situación legal: embargos, prohibiciones de matriculación y accidentes sin resolver.'
           points:
             - Kilometraje que no coincide con el historial
-            - Códigos de avería almacenados en las centralitas
-            - Cargas y restricciones de matriculación
-            - Accidentes y partes de seguro pendientes de cierre
+            - Fallos registrados en las centralitas
+            - Embargos y prohibiciones de matriculación
+            - Accidentes y siniestros pendientes de resolución
     findingLabel: 'Detectamos:'
-    heroPhotoAlt: Berlina en una autopista europea
-    ctaPhotoAlt: Primer plano de la carrocería limpia y una rueda de un coche
+    heroPhotoAlt: Berlina en una carretera europea
+    ctaPhotoAlt: Detalle de la carrocería impecable y la rueda de un coche
   de:
-    metaTitle: Autosuche, Import und Ankauf in Europa
-    metaDescription: Wir finden Ihr Auto vor Ort oder importieren es aus Europa und China. Alles aus einer Hand, inklusive Prüfung und Ankauf. Europaweit für Sie da.
+    metaTitle: Auto finden, importieren und verkaufen in Europa
+    metaDescription: Auto finden oder aus Europa und China importieren lassen. Mit Prüfung und Kaufabwicklung. Wir sind europaweit tätig.
     journey:
-      - title: Autosuche
-        desc: Wir finden, prüfen und liefern Ihr Wunschauto passend zu Ihrem Budget. Alles aus einer Hand, in Deutschland, Spanien, Serbien und der Schweiz.
+      - title: Fahrzeugsuche
+        desc: Wir finden, prüfen und liefern Ihr Wunschauto zum passenden Budget, schlüsselfertig in Deutschland, Spanien, Serbien und der Schweiz.
       - title: Import
-        desc: Ihr Wunschauto steht im Ausland? Wir finden es und importieren es aus Deutschland, Europa oder China. Inklusive Zollabwicklung und aller Formalitäten.
+        desc: Das Auto steht nicht in Ihrem Land? Wir finden und importieren es schlüsselfertig aus Deutschland, Europa oder China, inklusive Zollabwicklung.
       - title: Fahrzeugprüfung
-        desc: Ein unabhängiger Sachverständiger prüft das Auto vor dem Kauf anhand von über 100 Punkten und dokumentiert alles per Video.
-        note: Auto selbst gefunden? Wir organisieren auch eine separate Prüfung
-      - title: Ankauf
-        desc: Wir übernehmen den Ankauf und die Zollabwicklung für Fahrzeuge mit ausländischer Zulassung.
-        note: Das Auto steht bereits im Ausland? Wir helfen bei den Formalitäten
+        desc: Ein unabhängiger Experte prüft das Auto vor dem Kauf anhand von über 100 Punkten und dokumentiert alles per Video.
+        note: Auto selbst gefunden? Prüfung separat beauftragen
+      - title: Kauf und Abwicklung
+        desc: Wir übernehmen Kaufabwicklung und Zollabfertigung für Fahrzeuge mit ausländischen Kennzeichen.
+        note: Auto bereits im Ausland? Wir helfen bei der Zulassung
     heroLine1: Wir finden Ihr Auto.
-    heroLine2: Prüfen es.
-    heroLine3: Bringen es zu Ihnen.
-    heroSubtext: Wir finden Ihr Auto in Deutschland, Spanien, der Schweiz oder Serbien. Steht es in einem anderen Land, bringen wir es zu Ihnen, inklusive Prüfung, Formalitäten und Zollabwicklung.
+    heroLine2: Wir prüfen es.
+    heroLine3: Wir liefern es.
+    heroSubtext: Wir finden Ihr Auto in Deutschland, Spanien, der Schweiz oder Serbien. Steht es in einem anderen Land, bringen wir es zu Ihnen, inklusive Prüfung, Abwicklung und Zoll.
     statClients:
       value: 200+
       label: Kunden
@@ -493,33 +493,33 @@ translations:
     statYears:
       value: 5 Jahre
       label: am Markt
-    journeyHeading: 'Ein Weg: von der Suche bis zur Schlüsselübergabe'
-    journeySubtext: Autosuche, Import, Prüfung und Ankauf sind keine voneinander getrennten Leistungen, sondern Etappen auf dem Weg zu Ihrem Auto. Sie können bei jedem Schritt einsteigen.
+    journeyHeading: Ein Weg, von der Suche bis zum Schlüssel
+    journeySubtext: Fahrzeugsuche, Import, Prüfung und Kaufabwicklung sind keine getrennten Leistungen, sondern Schritte auf dem Weg zu Ihrem Auto. Sie können jederzeit einsteigen.
     whyUsHeading: Warum Kunden uns wählen
     whyUsSubtext: Ein Autokauf im Ausland wirft Fragen auf. So schaffen wir Klarheit.
     trustCards:
       - title: Volle Transparenz
-        text: 'Sie erhalten eine ausführliche Checkliste mit über 100 Prüfpunkten und Videos zu jedem Detail: Karosserie, Innenraum und Fahrwerk. Sie sehen das Auto, als stünden Sie selbst daneben.'
-      - title: Sicherer Kauf
-        text: 'Zahlung in Etappen und klare Bedingungen. Wir begleiten sämtliche Formalitäten: Kaufabwicklung, Verzollung und Zulassung. Ohne Überraschungen.'
+        text: 'Sie erhalten eine ausführliche Checkliste mit über 100 Prüfpunkten und Videos zu allen Details: Karosserie, Innenraum und Fahrwerk. So sehen Sie das Auto, als wären Sie selbst vor Ort.'
+      - title: Sichere Abwicklung
+        text: 'Zahlung in Etappen und klare Bedingungen. Wir begleiten Sie bei allen Unterlagen: Kaufabwicklung, Zollabfertigung und Zulassung. Keine bösen Überraschungen.'
       - title: Marktkenntnis vor Ort
-        text: 'Wir kennen die Besonderheiten jedes Marktes: hohe Autobahn-Laufleistungen in Deutschland, typische Karosseriethemen bei spanischen Autos und die Formalitäten für Fahrzeuge mit ausländischer Zulassung in Serbien.'
+        text: 'Wir kennen die Besonderheiten jedes Marktes: hohe Autobahnkilometer in Deutschland, typische Karosserieprobleme spanischer Autos und die Zulassung mit ausländischen Kennzeichen in Serbien.'
     testimonialsHeading: Das sagen unsere Kunden
     testimonials:
-      - quote: „Sie haben einen BMW 3er von München nach Belgrad gebracht. Alles lief reibungslos, von der Besichtigung bis zur Zulassung. Bei den Formalitäten haben sie uns jede Menge Nerven gespart.“
+      - quote: '"Wir haben einen BMW 3er aus München nach Belgrad gebracht. Alles lief reibungslos, von der Prüfung bis zur Zulassung. Die ganze Abwicklung hat uns viel Stress erspart."'
         name: Alexander
         caption: BMW 320d, Deutschland → Serbien
-      - quote: „Ich habe lange nach einem Skoda Octavia in gutem Zustand gesucht. Das Team hat einen in Spanien gefunden und von einem unabhängigen Sachverständigen prüfen lassen. Alles entsprach der Beschreibung.“
-        name: Michail
+      - quote: '"Ich habe lange nach einem gut erhaltenen Skoda Octavia gesucht. Das Team fand ein passendes Auto in Spanien und ließ es unabhängig prüfen. Alles entsprach der Beschreibung."'
+        name: Mikhail
         caption: Skoda Octavia, Spanien → Russland
-      - quote: „Die Abwicklung mit ausländischen Kennzeichen erschien mir kompliziert. Das Team hat mich durch jeden Schritt begleitet, und nach einem Monat war ich schon unterwegs. Klare Empfehlung.“
+      - quote: '"Die Zulassung mit ausländischen Kennzeichen erschien kompliziert. Das Team hat mich durch jeden Schritt begleitet, und nach einem Monat war ich schon unterwegs. Klare Empfehlung."'
         name: Dmitri
         caption: VW Passat, Deutschland → Serbien
-    ctaEyebrow: Bereit für den ersten Schritt?
+    ctaEyebrow: Bereit loszulegen?
     ctaHeading:
-      line1: Erzählen Sie uns
-      line2: von dem Auto,
-      accentWord: das Sie suchen
+      line1: Erzählen Sie uns,
+      line2: welches Auto
+      accentWord: Sie suchen
     ctaSubtext: Wir antworten innerhalb von 2 Stunden. Die Beratung ist kostenlos.
     ctaTelegramLabel: Auf Telegram schreiben
     ctaStatResponse:
@@ -527,61 +527,61 @@ translations:
       label: Antwortzeit
     origin:
       heading: Woher wir Autos importieren
-      note: Wir liefern in jedes Land. Die Details klären wir bei Ihrer Anfrage.
+      note: Wir liefern in jedes Land. Details besprechen wir bei Ihrer Anfrage.
       euTitle: Aus Europa
-      euText: Deutschland, Spanien, die Schweiz und weitere europäische Länder. Wir suchen vor Ort, prüfen vor dem Kauf und übernehmen Export, Transport und Verzollung. Den Gesamtpreis nennen wir vor dem Kauf, nicht erst nach dem Grenzübertritt.
-      euCta: Importkosten aus Europa berechnen
+      euText: Deutschland, Spanien, die Schweiz und weitere Länder Europas. Wir suchen vor Ort, prüfen das Auto vor dem Kauf, erledigen die Ausfuhr, liefern es und kümmern uns um die Zollabfertigung. Den Gesamtpreis nennen wir vor dem Kauf, nicht erst nach der Grenze.
+      euCta: Import aus Europa berechnen
       chinaTitle: Aus China
-      chinaText: Neu- und Gebrauchtwagen aus China über einen bewährten Partner. Wir suchen passend zu Ihrem Budget, prüfen vor dem Versand und übernehmen Transport und Verzollung. Der Ablauf ist derselbe wie beim Import aus Europa.
-      chinaCta: Importkosten aus China berechnen
+      chinaText: Neue und gebrauchte Autos aus China über einen geprüften Partner. Wir suchen passend zu Ihrem Budget, prüfen vor dem Versand und organisieren Lieferung und Zollabfertigung, wie bei Importen aus Europa.
+      chinaCta: Import aus China berechnen
       chinaTags:
         - Neuwagen
         - Gebrauchtwagen
-        - Alles aus einer Hand
+        - Komplettservice
     catalogue:
-      heading: Zuletzt vermittelte Fahrzeuge
-      subtext: 'Hier stehen keine Inserate: Jedes Auto wurde gefunden, geprüft, vollständig abgewickelt und an seinen Besitzer übergeben. Angegeben ist der tatsächlich gezahlte Preis.'
+      heading: Unsere letzten Käufe
+      subtext: 'Keine Inserate: Jedes Auto wurde für einen Kunden gefunden, geprüft, abgewickelt und übergeben. Angegeben ist der tatsächlich gezahlte Preis.'
       allCountriesLabel: Alle Länder
       moreLabel: Weitere {rest} anzeigen
     inspection:
-      heading: Hundert Prüfpunkte, vier entscheidende Bereiche
-      subtext: 'Die Checkliste ist lang. Doch wenn wir vom Kauf abraten, liegt es fast immer an einem von vier Bereichen. Klicken Sie auf eine Nummer in der Grafik: Wir zeigen, was der Sachverständige prüft und was wir dabei schon entdeckt haben.'
-      hint: Klicken Sie auf eine Nummer in der Grafik
-      ctaLabel: Fahrzeugprüfung beauftragen
+      heading: 100 Prüfpunkte, vier entscheidende Bereiche
+      subtext: Die Checkliste ist lang, doch meist sind es vier Bereiche, die vom Kauf abraten lassen. Klicken Sie auf eine Nummer, um zu sehen, was der Experte prüft und was wir dort schon gefunden haben.
+      hint: Nummer in der Grafik anklicken
+      ctaLabel: Prüfung beauftragen
       pointsLabel: 100+ Prüfpunkte
       mediaLabel: Fotos und Videos
-      reportLabel: Prüfbericht vor der Kaufentscheidung
+      reportLabel: Bericht vor Ihrer Entscheidung
       zones:
         - title: Karosserie und Lack
-          text: Lackschichtmessung an jedem Karosserieteil, Geometrie der Karosserieöffnungen sowie Schweiß- und Spachtelspuren. So erkennen wir Reparaturen, die der Verkäufer nicht erwähnt hat.
+          text: Lackschichtmessung an jedem Karosserieteil, Prüfung der Spaltmaße sowie Suche nach Schweiß- und Spachtelspuren. So erkennen wir Reparaturen, die der Verkäufer vielleicht nicht erwähnt hat.
           points:
-            - Ganz- und Teillackierungen von Karosserieteilen
-            - Spaltmaße und Karosseriegeometrie nach Unfällen
+            - Nachlackierte und ausgebesserte Teile
+            - Spaltmaße und Karosseriegeometrie nach einem Unfall
             - Rost an Schwellern und Radläufen
-            - Originalität von Scheiben und Leuchten
+            - Originalität von Scheiben und Scheinwerfern
         - title: Motor und Getriebe
-          text: Messwerte bei betriebswarmem Motor, Getriebeadaptionswerte und Fehlerspeicher der Steuergeräte. Hier drohen die höchsten Kosten, und hier liegt der häufigste Grund, vom Kauf abzuraten.
+          text: Messwerte bei warmem Motor, Getriebeanpassungen und gespeicherte Steuergerätefehler. Der teuerste Bereich und der häufigste Grund, vom Kauf abzuraten.
           points:
-            - Steuerkettenlängung
-            - Undichtigkeiten und Ölnebel
-            - Getriebeadaptionswerte und Schaltruckeln
+            - Gelängte Steuerkette
+            - Öllecks und Undichtigkeiten
+            - Getriebeanpassungen und Schaltrucke
             - Kompression und Abgasrauch
-          finding: 'BMW M340, Baujahr 2025, mit geringer Laufleistung: Die Diagnose ergab eine Steuerkettenlängung von rund 20 %. Wir haben sie vor dem Kauf entdeckt und dem Kunden damit ein Argument für die Preisverhandlung geliefert.'
+          finding: 'BMW M340 aus dem Jahr 2025 mit geringer Laufleistung: Die Diagnose zeigte, dass die Steuerkette um etwa 20 % gelängt war. Wir entdeckten es vor dem Kauf, sodass der Kunde einen guten Grund zum Verhandeln hatte.'
         - title: Fahrwerk und Bremsen
-          text: Auf der Hebebühne prüfen wir Spiel sowie den Zustand von Fahrwerk und Bremsanlage. Deutsche Autobahnkilometer beanspruchen ein Auto anders als Straßen auf dem Balkan.
+          text: Prüfung auf der Hebebühne, Spiel sowie Zustand von Fahrwerk und Bremsanlage. Autobahnkilometer in Deutschland und Straßen auf dem Balkan beanspruchen Autos unterschiedlich.
           points:
-            - Spiel an Querlenkern und Traggelenken
+            - Spiel an Lenkern und Traggelenken
             - Undichte Stoßdämpfer
             - Verschleiß an Bremsscheiben und Bremsbelägen
-            - Lenkgetriebe und Staubschutzmanschetten
-        - title: Elektronik, FIN und Fahrzeugpapiere
-          text: 'Servicehistorie anhand der FIN, Tachomanipulation, Elektronikfehler und rechtlicher Status: Pfandrechte, Zulassungssperren und offene Unfallschäden.'
+            - Lenkgetriebe und Manschetten
+        - title: Elektronik, VIN und Dokumente
+          text: 'Servicehistorie anhand der VIN, Tachomanipulation, Elektronikfehler und rechtliche Prüfung: bestehende Finanzierung, Zulassungssperren und nicht abgeschlossene Unfallschäden.'
           points:
-            - Abweichungen zwischen Kilometerstand und Historie
-            - Fehlerspeicher der Steuergeräte
-            - Pfandrechte und Zulassungssperren
-            - Offene Unfall- und Versicherungsfälle
-    findingLabel: 'Entdeckt:'
-    heroPhotoAlt: Limousine auf einer europäischen Fernstraße
-    ctaPhotoAlt: Nahaufnahme einer sauberen Autokarosserie und eines Rads
+            - Abweichende Laufleistung laut Historie
+            - Fehler in den Steuergeräten
+            - Finanzierung und Zulassungssperre
+            - Nicht abgeschlossene Unfallschäden und Versicherungsfälle
+    findingLabel: 'Festgestellt:'
+    heroPhotoAlt: Limousine auf einer europäischen Autobahn
+    ctaPhotoAlt: Nahaufnahme einer sauberen Karosserie und eines Autorads
 translatedFrom: e5b6d6fe353a097f

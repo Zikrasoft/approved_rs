@@ -16,43 +16,43 @@ translations:
   en:
     title: BMW X3
     body: |-
-      **Car sourcing in France: BMW X3 with verified mileage**\
-      We recently sourced another car for a client in France: this time, a **BMW X3** with verified mileage and in good mechanical condition.\
-      We carried out a comprehensive inspection, including computer diagnostics and an underbody check on a lift. Arranging access to a lift in France can be tricky, but we managed to inspect the car from underneath and confirmed that it was **dry, with no oil leaks**, and in good mechanical condition.\
-      When the seller and inspection conditions allow, we also run diagnostics using **ISTA**, review the service history, verify the mileage, and check the bodywork, engine, transmission and other key mechanical components.\
-      **Car sourcing and inspections throughout France:** Paris, Marseille, Lyon, Toulouse, Nice, Nantes, Bordeaux, Strasbourg, Montpellier, Lille and other cities.\
-      On-site inspections are available anywhere in France. Travel and inspection costs are quoted individually based on the car's location. An additional travel fee applies to more remote locations.\
-      Looking for a good car in France? Get in touch: we can help you find the right car and inspect it thoroughly.
+      **Car sourcing in France: BMW X3 with verified original mileage**\
+      We found another car for a client in France, this time a **BMW X3** with verified original mileage and in good technical condition.\
+      We carried out a comprehensive inspection, including computer diagnostics and an inspection on a lift. Arranging this kind of inspection in France can be difficult, but we managed to check the car underneath. It was **dry, with no oil leaks**, and in good technical condition.\
+      If the seller and inspection arrangements allow, we also check the car using **ISTA**, review its service history, verify the mileage, and assess the body, engine, transmission, and other important technical details.\
+      **Car sourcing and inspections across France:** Paris, Marseille, Lyon, Toulouse, Nice, Nantes, Bordeaux, Strasbourg, Montpellier, Lille, and other cities.\
+      On-site inspections are available in any city in France. The travel and inspection fee is calculated individually based on the car's location. An additional travel fee applies for more distant cities.\
+      Looking for a good car in France? Get in touch. We'll help you find and thoroughly inspect a car worth buying.
   sr:
     title: BMW X3
     body: |-
       **Pronalaženje automobila u Francuskoj: BMW X3 sa originalnom kilometražom**\
-      Ponovo smo pronašli automobil za klijenta u Francuskoj. Ovog puta bio je to **BMW X3** sa potvrđenom originalnom kilometražom, u dobrom tehničkom stanju.\
-      Obavljena je detaljna provera auta pre kupovine, uključujući kompjutersku dijagnostiku i pregled na dizalici. U Francuskoj nije uvek lako organizovati takav pregled, ali smo uspeli da proverimo i donji deo automobila: bio je **suv, bez curenja ulja** i u dobrom tehničkom stanju.\
-      Kada prodavac i uslovi pregleda to dozvoljavaju, automobil proveravamo i pomoću dijagnostičkog softvera **ISTA**. Proučavamo servisnu istoriju, proveravamo kilometražu, stanje karoserije, motora, menjača i druge važne tehničke detalje.\
-      **Pronalaženje automobila i provera auta pre kupovine širom Francuske:** Pariz, Marselj, Lion, Tuluz, Nica, Nant, Bordo, Strazbur, Monpelje, Lil i drugi gradovi.\
-      Provera na terenu moguća je u bilo kom gradu u Francuskoj. Cena izlaska na teren i provere obračunava se pojedinačno, u zavisnosti od lokacije automobila. Za udaljene gradove naplaćuje se doplata za izlazak na teren.\
-      Tražite dobar automobil u Francuskoj? Javite nam se: pomoći ćemo vam da pronađete kvalitetan primerak i detaljno proverite njegovo stanje.
+      U Francuskoj smo ponovo pronašli automobil za klijenta. Ovog puta našli smo **BMW X3** sa potvrđenom originalnom kilometražom i u dobrom tehničkom stanju.\
+      Obavili smo kompletnu provera auta pre kupovine, uključujući kompjutersku dijagnostiku i pregled na dizalici. U Francuskoj ponekad nije lako organizovati takav pregled, ali uspeli smo da proverimo automobil odozdo. Bio je **suv, bez curenja ulja** i u dobrom tehničkom stanju.\
+      Ako prodavac i uslovi pregleda to dozvoljavaju, proveravamo automobil i pomoću sistema **ISTA**, proučavamo servisnu istoriju, proveravamo kilometražu, stanje karoserije, motora, menjača i druge važne tehničke detalje.\
+      **Pronalaženje i provera automobila širom Francuske:** Pariz, Marselj, Lion, Tuluz, Nica, Nant, Bordo, Strazbur, Monpelje, Lil i drugi gradovi.\
+      Pregled na licu mesta moguć je u bilo kom gradu u Francuskoj. Cena dolaska i provere određuje se individualno, u zavisnosti od lokacije automobila. Za udaljene gradove dodatno se naplaćuje dolazak.\
+      Tražite dobar automobil u Francuskoj? Javite nam se i pomoći ćemo vam da pronađete i detaljno proverite pravi automobil.
   es:
     title: BMW X3
     body: |-
-      **Búsqueda de coches en Francia: BMW X3 con kilometraje real**\
-      Hemos vuelto a encontrar un coche en Francia para un cliente. Esta vez, un **BMW X3** con kilometraje real verificado y en buen estado mecánico.\
-      Realizamos una revisión completa del vehículo, con diagnóstico electrónico e inspección en un elevador. En Francia no siempre es fácil organizar una revisión de este tipo, pero pudimos inspeccionar los bajos y comprobar que estaban **secos, sin fugas de aceite** y en buen estado.\
-      Siempre que el vendedor y las condiciones de la inspección lo permiten, también comprobamos el vehículo con **ISTA**, revisamos el historial de mantenimiento y verificamos el kilometraje, el estado de la carrocería, el motor, la caja de cambios y otros aspectos técnicos importantes.\
+      **Búsqueda de coches en Francia: BMW X3 con kilometraje original**\
+      En Francia hemos encontrado otro coche para un cliente. Esta vez dimos con un **BMW X3** con kilometraje original verificado y en buen estado técnico.\
+      Realizamos una inspección completa del vehículo, incluido un diagnóstico electrónico y una revisión en elevador. En Francia, a veces no es fácil organizar este tipo de inspección, pero conseguimos revisar el coche por debajo: estaba **seco, sin fugas de aceite** y en buen estado técnico.\
+      Si el vendedor y las condiciones de inspección lo permiten, también revisamos el coche con **ISTA**, consultamos su historial de mantenimiento, verificamos el kilometraje y comprobamos el estado de la carrocería, el motor, la caja de cambios y otros aspectos técnicos importantes.\
       **Búsqueda e inspección de coches en toda Francia:** París, Marsella, Lyon, Toulouse, Niza, Nantes, Burdeos, Estrasburgo, Montpellier, Lille y otras ciudades.\
-      Podemos desplazarnos para inspeccionar un vehículo en cualquier ciudad de Francia. El coste del desplazamiento y de la revisión se calcula de forma individual según la ubicación del coche. Los desplazamientos a ciudades más alejadas tienen un suplemento.\
-      ¿Buscas un buen coche en Francia? Contacta con nosotros: te ayudaremos a encontrar una buena opción y a revisarla a fondo.
+      Podemos desplazarnos para inspeccionar el coche en cualquier ciudad de Francia. El coste del desplazamiento y de la inspección se calcula individualmente, según la ubicación del vehículo. Para las ciudades más alejadas se aplica un suplemento por desplazamiento.\
+      ¿Buscas un buen coche en Francia? Ponte en contacto con nosotros: te ayudaremos a encontrar una buena opción y a inspeccionarla a fondo.
   de:
     title: BMW X3
     body: |-
-      **Fahrzeugsuche in Frankreich: BMW X3 mit nachgewiesener Laufleistung**\
-      Wir haben erneut ein Fahrzeug in Frankreich für einen Kunden gefunden: diesmal einen **BMW X3** mit nachgewiesener Originallaufleistung und in gutem technischen Zustand.\
-      Wir haben das Fahrzeug umfassend geprüft, einschließlich Computerdiagnose und Inspektion auf der Hebebühne. Eine solche Inspektion lässt sich in Frankreich nicht immer einfach organisieren. Dennoch konnten wir das Fahrzeug auch von unten prüfen: Es war **trocken, ohne Ölverlust** und in gutem technischen Zustand.\
-      Wenn der Verkäufer und die Bedingungen vor Ort es zulassen, führen wir außerdem eine Fahrzeugdiagnose mit **ISTA** durch. Wir prüfen die Wartungshistorie, die Laufleistung sowie den Zustand von Karosserie, Motor und Getriebe und achten auf weitere wichtige technische Details.\
-      **Fahrzeugsuche und Fahrzeugprüfung in ganz Frankreich:** Paris, Marseille, Lyon, Toulouse, Nizza, Nantes, Bordeaux, Straßburg, Montpellier, Lille und weitere Städte.\
-      Eine Besichtigung vor Ort ist in jeder Stadt Frankreichs möglich. Die Kosten für Anfahrt und Prüfung werden je nach Fahrzeugstandort individuell berechnet. Bei weiter entfernten Städten fällt ein zusätzlicher Anfahrtszuschlag an.\
-      Sie suchen ein gutes Fahrzeug in Frankreich? Kontaktieren Sie uns: Wir helfen Ihnen, ein passendes Fahrzeug zu finden und es gründlich zu prüfen.
+      **Fahrzeugvermittlung in Frankreich: BMW X3 mit originalem Kilometerstand**\
+      In Frankreich haben wir erneut ein Fahrzeug für einen Kunden gefunden: Dieses Mal war es ein **BMW X3** mit nachweislich originalem Kilometerstand und in gutem technischen Zustand.\
+      Wir haben das Fahrzeug umfassend geprüft, einschließlich computergestützter Diagnose und einer Inspektion auf der Hebebühne. Eine solche Prüfung in Frankreich zu organisieren, ist nicht immer einfach. Dennoch konnten wir das Fahrzeug auch von unten begutachten: Es war **trocken, ohne Ölverlust** und technisch in gutem Zustand.\
+      Wenn der Verkäufer und die Prüfbedingungen es zulassen, prüfen wir das Fahrzeug außerdem mit **ISTA**, sehen uns die Wartungshistorie an und kontrollieren den Kilometerstand, den Zustand der Karosserie, des Motors und des Getriebes sowie weitere wichtige technische Details.\
+      **Fahrzeugvermittlung und -prüfung in ganz Frankreich:** Paris, Marseille, Lyon, Toulouse, Nizza, Nantes, Bordeaux, Straßburg, Montpellier, Lille und weitere Städte.\
+      Eine Prüfung vor Ort ist in jeder Stadt Frankreichs möglich. Die Kosten für Anfahrt und Prüfung werden individuell berechnet und richten sich nach dem Standort des Fahrzeugs. Bei weiter entfernten Städten fällt eine zusätzliche Anfahrtspauschale an.\
+      Sie suchen ein gutes Auto in Frankreich? Kontaktieren Sie uns: Wir helfen Ihnen, ein passendes Fahrzeug zu finden und gründlich zu prüfen.
 translatedFrom: 3190cf27204c3be9
 ---
 **Автоподбор во Франции: BMW X3 с оригинальным пробегом**\

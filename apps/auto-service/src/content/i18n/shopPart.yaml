@@ -95,42 +95,42 @@ translatedFrom: d76e119ba6dbf0a4
 translations:
   sr:
     metaTitleSuffix: CarLab
-    metaDescription: Brendovi, zamenski delovi, cene i dostupnost ovog dela u katalogu CarLaba. Lično preuzimanje u auto servisu u Beogradu.
-    metaDescriptionClosed: Originalni brojevi, zamenski delovi i kompatibilnost. Proverićemo po VIN-u, nabaviti i ugraditi deo u auto servisu CarLab u Beogradu.
+    metaDescription: Proizvođači, zamene, cene i dostupnost ovog auto dela u katalogu CarLab. Lično preuzimanje u servisu u Beogradu.
+    metaDescriptionClosed: Originalni brojevi, zamene i primena ovog auto dela. Proverićemo po broju šasije, nabaviti i ugraditi u CarLab servisu u Beogradu.
     eyebrow: Auto deo
-    equivalentsHeading: Zamenski delovi
-    noEquivalents: Pronaći ćemo odgovarajući deo drugog proizvođača. Pišite nam.
-    equivalentsCta: Pronađite zamenski deo
-    equivalentsLead: Delovi drugih proizvođača koji mogu da zamene ovaj deo.
+    equivalentsHeading: Zamene za ovaj auto deo
+    noEquivalents: Pronaći ćemo zamenu drugog proizvođača. Pišite nam.
+    equivalentsCta: Pronađite zamenu
+    equivalentsLead: Auto delovi drugih proizvođača koji se ugrađuju umesto ovog.
     numberSupersededNotice: Proizvođač više ne koristi broj {number}.
-    partReplacedNotice: Proizvođač je deo {number} zamenio novim.
+    partReplacedNotice: Proizvođač je zamenio auto deo {number} novim.
     previousNumber: Prethodni broj
-    previousNumberCurrent: Novi broj
-    earlierNumbers: 'Ranije:'
+    previousNumberCurrent: Broj je zamenjen brojem
+    earlierNumbers: 'Raniji brojevi:'
     alsoNumbers: 'Takođe:'
     previousNumbersHeading: Prethodni brojevi
-    currentNumberLabel: 'Važeći broj:'
-    currentNumbersLabel: 'Važeći brojevi:'
-    successorOffersHeading: Kupite deo koji ga zamenjuje
-    successorOrderHeading: Poručite deo koji ga zamenjuje
+    currentNumberLabel: 'Aktuelni broj:'
+    currentNumbersLabel: 'Aktuelni brojevi:'
+    successorOffersHeading: Kupite aktuelni auto deo
+    successorOrderHeading: Naručite aktuelni auto deo
     attributesHeading: Karakteristike
     attributeYes: Da
     attributeNo: Ne
-    categoryLink: Svi delovi iz kategorije
+    categoryLink: Svi auto delovi iz kategorije
     priceOnRequestHeading: Cena na upit
-    priceOnRequestBody: 'U katalogu ima previše delova da bismo sve cene stalno ažurirali. Pošaljite upit: proverićemo po VIN-u da li deo odgovara i pronaći najbolju cenu.'
-    priceOnRequestCta: Proverite cenu i rok isporuke
-    pricedEquivalentLabel: Zamenski deo sa cenom
-    orderBody: 'Pošaljite upit: proverićemo po VIN-u koji deo odgovara i javiti vam cenu i rok isporuke.'
-    orderHeading: Nabavićemo ovaj deo
-    orderBodyClosed: Pošaljite VIN ili samo ostavite kontakt. Proverićemo da li deo odgovara vašem vozilu i javiti vam cenu i rok isporuke.
-    fitsLabel: Odgovara za
+    priceOnRequestBody: 'U katalogu ima previše auto delova da bismo sve cene stalno ažurirali. Pošaljite upit: proverićemo po broju šasije da li auto deo odgovara i pronaći najbolju cenu.'
+    priceOnRequestCta: Saznajte cenu i rok
+    pricedEquivalentLabel: Zamena sa cenom
+    orderBody: 'Pošaljite upit: proverićemo po broju šasije šta odgovara i reći Vam cenu i rok.'
+    orderHeading: Naručićemo ovaj auto deo
+    orderBodyClosed: Pošaljite broj šasije ili ostavite kontakt. Proverićemo da li auto deo odgovara Vašem vozilu i reći Vam cenu i rok.
+    fitsLabel: Odgovara vozilima
     fitsMore: i još {count}
     oemLabel: Originalni broj
-    askInMessenger: Ili nam pišite putem aplikacije za poruke
+    askInMessenger: Ili nam pišite u aplikaciji za poruke
     offersHeading: Cena i dostupnost
     moreOffers: 'Još jedna ponuda: {offer}'
-    moreOffersCheaper: 'Dostupno jeftinije: {offer}'
+    moreOffersCheaper: 'Ima povoljnije: {offer}'
     moreOffersSeveral:
       one: Još {count} ponuda, od {price}
       few: Još {count} ponude, od {price}
@@ -159,72 +159,72 @@ translations:
     buyButtonLabel: Dodajte u korpu
     buyAdding: Dodajemo…
     addedLabel: U korpi
-    outOfStock: Nema na stanju
-    askSupplyCta: Proverite cenu i rok isporuke
-    orderViaManagerCta: Poručite preko saradnika
-    askedNotice: Dodali smo deo u upit. Proverićemo cenu i kada možete da ga preuzmete, pa ćemo vam javiti.
-    stockLimitNotice: Trenutno nema više komada ovog dela. Svi dostupni komadi su već u korpi.
+    outOfStock: Nije na stanju
+    askSupplyCta: Saznajte cenu i rok
+    orderViaManagerCta: Naručite preko saradnika
+    askedNotice: Dodali smo auto deo u upit. Proverićemo cenu i kada možete da ga preuzmete, pa ćemo Vam se javiti.
+    stockLimitNotice: Trenutno nema više ovog auto dela. Sve dostupne komade već ste dodali u korpu.
     fromPrice: od {price}
     priceOnRequestTag: Cena na upit
-    addedNotice: Dodali smo deo u korpu. Cenu ćemo ponovo proveriti prilikom poručivanja.
+    addedNotice: Dodali smo auto deo u korpu. Ponovo ćemo proveriti cenu prilikom završetka kupovine.
     addedCta: Otvorite korpu
-    inquiryNotice: Trenutno ne možemo da potvrdimo cenu i dostupnost, pa smo deo dodali u upit. Javićemo vam cenu.
+    inquiryNotice: Trenutno ne možemo da potvrdimo cenu i dostupnost, pa smo dodali auto deo u upit. Javićemo Vam cenu.
     inquiryCta: Otvorite upit
     photoLabel: Fotografija {n} od {total}
-    categoryIllustration: Ilustracija kategorije, nije fotografija ovog dela
+    categoryIllustration: Ilustracija kategorije, nije fotografija ovog auto dela
     illustrationLabel: ilustracija
-    installHeading: Ugradite kod nas
-    installBody: Ugradićemo ovaj deo u auto servisu CarLab u Beogradu. Ostavite kontakt i predložićemo vam termin koji vam odgovara.
+    installHeading: Ugradnja kod nas
+    installBody: Ugradićemo ovaj auto deo u CarLab servisu u Beogradu. Ostavite kontakt i predložićemo Vam termin koji Vam odgovara.
     installCta: Zakažite ugradnju
-    askAboutPart: Pitajte za ovaj deo
+    askAboutPart: Pitajte za ovaj auto deo
     askAboutPartMessage: '{part}: da li odgovara mom vozilu?'
     askAboutPartVin: 'VIN: {vin}'
-    askAboutPriceMessage: '{part}: koja je cena i rok isporuke?'
+    askAboutPriceMessage: '{part}: koja je cena i rok?'
     askAboutReplacedPart: '{part} (zamena za {replaced})'
     crossReferencesHeading: Brojevi drugih proizvođača
-    worksHeading: Već smo pronalazili ovaj deo za naša vozila
-    applicabilityHeading: Odgovarajuća vozila prema katalogu
-    supplierDataNote: Podaci iz kataloga. Pre poručivanja proverićemo kompatibilnost po VIN-u.
-    requirementCarsLabel: 'Prema specifikacijama odgovara za:'
+    worksHeading: Već smo tražili ovaj auto deo
+    applicabilityHeading: Primena prema podacima iz kataloga
+    supplierDataNote: Podaci iz kataloga. Pre naručivanja proverićemo kompatibilnost po broju šasije.
+    requirementCarsLabel: 'Odgovara prema specifikaciji za:'
     kitCarsLabel: 'U kompletu za servis za:'
   en:
     metaTitleSuffix: CarLab
-    metaDescription: Brands, equivalents, prices and availability for this part in the CarLab catalogue. Collection from our workshop in Belgrade.
-    metaDescriptionClosed: OE numbers, equivalents and vehicle fitment for this part. We'll check compatibility by VIN, source it and fit it at CarLab in Belgrade.
-    eyebrow: Car part
+    metaDescription: Brands, equivalents, prices and availability in the CarLab parts catalogue. Collect from our Belgrade service centre.
+    metaDescriptionClosed: OEM numbers, equivalents and fitment. We'll check by VIN, source the part and fit it at CarLab in Belgrade.
+    eyebrow: Part
     equivalentsHeading: Equivalent parts
-    noEquivalents: Contact us and we'll find an equivalent from another manufacturer.
+    noEquivalents: We'll find a replacement from another manufacturer. Get in touch.
     equivalentsCta: Find an equivalent
-    equivalentsLead: Parts from other manufacturers that can be fitted in place of this one.
-    numberSupersededNotice: Part number {number} is no longer used by the manufacturer.
+    equivalentsLead: Parts from other manufacturers that can be fitted instead.
+    numberSupersededNotice: Number {number} is no longer used by the manufacturer.
     partReplacedNotice: The manufacturer has replaced part {number} with a new one.
-    previousNumber: Previous part number
-    previousNumberCurrent: Superseded by
+    previousNumber: Previous number
+    previousNumberCurrent: Replaced by
     earlierNumbers: 'Previously:'
     alsoNumbers: 'Also:'
-    previousNumbersHeading: Previous part numbers
-    currentNumberLabel: 'Current part number:'
-    currentNumbersLabel: 'Current part numbers:'
-    successorOffersHeading: Buy the replacement part
-    successorOrderHeading: Order the replacement part
+    previousNumbersHeading: Previous numbers
+    currentNumberLabel: 'Current number:'
+    currentNumbersLabel: 'Current numbers:'
+    successorOffersHeading: Buy the current part
+    successorOrderHeading: Order the current part
     attributesHeading: Specifications
     attributeYes: Yes
     attributeNo: No
     categoryLink: All parts in this category
     priceOnRequestHeading: Price on request
-    priceOnRequestBody: "There are too many parts in the catalogue to keep every price up to date. Send an enquiry: we'll check compatibility using your VIN and find the best price."
-    priceOnRequestCta: Get a price and lead time
-    pricedEquivalentLabel: Equivalent with a listed price
-    orderBody: "Send an enquiry: we'll check compatibility by VIN and confirm the price and lead time."
-    orderHeading: We'll order this part for you
-    orderBodyClosed: Send your VIN or just leave your contact details. We'll check that the part fits your car and confirm the price and lead time.
+    priceOnRequestBody: We have too many parts to keep every price up to date. Send us an enquiry and we'll check fitment by VIN and find you the best price.
+    priceOnRequestCta: Check price and lead time
+    pricedEquivalentLabel: Priced equivalent
+    orderBody: Send us an enquiry. We'll check fitment by VIN and confirm the price and lead time.
+    orderHeading: We'll order this part
+    orderBodyClosed: Send us your VIN or just leave your contact details. We'll check that the part fits your car and confirm the price and lead time.
     fitsLabel: Fits
     fitsMore: and {count} more
-    oemLabel: OE number
+    oemLabel: OEM number
     askInMessenger: Or message us
     offersHeading: Price and availability
     moreOffers: 'Another offer: {offer}'
-    moreOffersCheaper: 'Cheaper option: {offer}'
+    moreOffersCheaper: 'Cheaper option available: {offer}'
     moreOffersSeveral:
       one: '{count} more offer, from {price}'
       few: '{count} more offers, from {price}'
@@ -254,30 +254,30 @@ translations:
     buyAdding: Adding to cart…
     addedLabel: In cart
     outOfStock: Out of stock
-    askSupplyCta: Get a price and lead time
+    askSupplyCta: Check price and lead time
     orderViaManagerCta: Order through our team
-    askedNotice: Added to your enquiry. We'll confirm the price and collection date and get back to you.
-    stockLimitNotice: You've already added all available stock of this part to your cart.
+    askedNotice: Added to your enquiry. We'll check the price and when it's available for collection, then get back to you.
+    stockLimitNotice: No more of this part is available right now. All available stock is already in your cart.
     fromPrice: from {price}
     priceOnRequestTag: Price on request
     addedNotice: Added to cart. We'll confirm the price again at checkout.
     addedCta: View cart
-    inquiryNotice: We can't confirm the price and availability right now, so we've added this part to your enquiry. We'll get back to you with a price.
+    inquiryNotice: We can't confirm the price or availability right now, so we've added the part to your enquiry. We'll let you know the price.
     inquiryCta: View enquiry
     photoLabel: Photo {n} of {total}
     categoryIllustration: Category illustration, not a photo of this part
     illustrationLabel: illustration
-    installHeading: Have it fitted by us
-    installBody: We'll fit this part at the CarLab workshop in Belgrade. Leave your contact details and we'll arrange a convenient time.
-    installCta: Book fitting
+    installHeading: Have it fitted at our workshop
+    installBody: We'll fit this part at CarLab in Belgrade. Leave your contact details and we'll suggest a convenient time.
+    installCta: Book a fitting
     askAboutPart: Ask about this part
     askAboutPartMessage: '{part}: will it fit my car?'
     askAboutPartVin: 'VIN: {vin}'
     askAboutPriceMessage: "{part}: what's the price and lead time?"
-    askAboutReplacedPart: '{part} (replacement for {replaced})'
+    askAboutReplacedPart: '{part} (replaces {replaced})'
     crossReferencesHeading: Other manufacturers' part numbers
     worksHeading: We've sourced this part before
-    applicabilityHeading: Fits these cars, according to the catalogue
-    supplierDataNote: Catalogue data. We'll check compatibility using your VIN before you order.
-    requirementCarsLabel: 'Meets the required specifications for:'
+    applicabilityHeading: Fitment according to the catalogue
+    supplierDataNote: Catalogue data. We'll check compatibility by VIN before ordering.
+    requirementCarsLabel: 'Meets service requirements for:'
     kitCarsLabel: 'Included in the service kit for:'

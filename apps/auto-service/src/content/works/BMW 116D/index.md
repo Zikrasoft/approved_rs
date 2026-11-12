@@ -16,28 +16,28 @@ translations:
     body: |-
       **BMW 116d u našem auto servisu u Beogradu.**
 
-      Ovog puta nam je stigao BMW 116d kojem su bili potrebni detaljan servis i otklanjanje nekoliko kvarova. Kod BMW vozila važno je poznavati specifičnosti motora i pažljivo pregledati svaki detalj: ne menjamo samo delove, već tražimo i uzrok njihovog otkazivanja.
+      Ovog puta nam je dovezen BMW 116d kome su bili potrebni sveobuhvatan servis i otklanjanje nekoliko kvarova. Kod BMW vozila važno je poznavati specifičnosti motora i pažljivo pregledati svaki deo. Ne menjamo samo delove, već tražimo uzrok njihovog kvara.
 
-      **Koje smo radove obavili na BMW-u 116d?**
+      **Koje radove smo obavili na BMW 116d?**
 
-      1. **Zamena antifriza.** Zamenili smo rashladnu tečnost kako bismo obezbedili pravilan rad sistema za hlađenje motora. Pravovremena zamena antifriza pomaže u zaštiti delova sistema od korozije, održavanju optimalne radne temperature i sprečavanju pregrevanja motora.
-      2. **Podmazivanje klapne za regulaciju protivpritiska u izduvnom sistemu, koja učestvuje u radu EGR sistema.** Servisirali smo klapnu koja se nalazi u izduvnoj cevi i učestvuje u radu sistema za recirkulaciju izduvnih gasova. Ovaj deo reguliše protivpritisak izduvnih gasova i doprinosi radu EGR sistema na BMW dizel motorima. Vremenom se na mehanizmu mogu nakupiti nečistoće, zbog čega može da zapinje i radi nepravilno. Obavili smo potrebno podmazivanje mehanizma klapne.
-      3. **Zamena nosača motora.** Zamenili smo dotrajali nosač motora na BMW-u 116d. Nosači drže motor na mestu i smanjuju prenos vibracija na karoseriju vozila. Njihova istrošenost može dovesti do pojačanih vibracija, neprijatnosti u kabini i dodatnog opterećenja drugih delova.
-      4. **Utvrđeno je da je potrebna zamena prigušivača torzionih vibracija.** Tokom servisa utvrdili smo i da će biti potrebno zameniti prigušivač torzionih vibracija radilice. Ovaj deo ublažava vibracije i obezbeđuje stabilan rad remenskog pogona pomoćnih agregata. Zamenu dotrajalog prigušivača ne treba odlagati, jer njegovo otkazivanje može dovesti do dodatnih kvarova i skupih popravki.
+      1. **Zamena antifriza.** Zamenili smo rashladnu tečnost kako bi sistem za hlađenje motora pravilno radio. Pravovremena zamena antifriza štiti delove sistema od korozije, održava optimalnu radnu temperaturu i sprečava pregrevanje motora.
+      2. **Podmazivanje povratnog ventila EGR-a u izduvnom sistemu.** Servisirali smo povratni ventil sistema za recirkulaciju izduvnih gasova, koji se nalazi u izduvnoj cevi. Ovaj deo reguliše protivpritisak izduvnih gasova i rad EGR sistema kod dizel motora BMW vozila. Vremenom mehanizam može da se zaprlja, zaglavljuje i ne radi kako treba. Podmazali smo mehanizam ventila.
+      3. **Zamena nosača motora.** Zamenili smo dotrajali nosač motora na BMW 116d. Nosači motora drže motor i menjač i smanjuju prenos vibracija na karoseriju. Kada se istroše, mogu da izazovu pojačane vibracije, neprijatnosti u kabini i dodatno opterećenje drugih delova.
+      4. **Utvrđeno je da treba zameniti prigušivač torzionih oscilacija.** Tokom servisa utvrdili smo i da će biti potrebna zamena prigušivača torzionih oscilacija radilice. Ovaj deo prigušuje oscilacije i omogućava stabilan rad remenskog pogona pomoćnih uređaja. Ne preporučujemo odlaganje zamene dotrajalog prigušivača, jer njegovo oštećenje može da izazove dodatne kvarove i skupe popravke.
     car: BMW 116d
   en:
-    title: "BMW 116d: coolant, engine mount and EGR exhaust flap"
+    title: "BMW 116d: coolant, engine mount and EGR valve"
     body: |-
-      **BMW 116d at our workshop in Belgrade.**
+      **BMW 116d at our garage in Belgrade.**
 
-      This BMW 116d came to us for comprehensive servicing and several repairs. Working on BMWs requires a good understanding of their engines and close attention to detail. We do more than replace parts: we look for the underlying causes of their failure.
+      This time, a BMW 116d came in for a comprehensive service and to address several issues. BMWs require a good understanding of their engine designs and careful attention to detail. We don't just replace parts, we look for the cause of the failure.
 
-      **What work did we carry out on this BMW 116d?**
+      **What work did we carry out on the BMW 116d?**
 
-      1. **Coolant replacement.** We replaced the coolant to keep the engine's cooling system working properly. Changing coolant on schedule helps protect cooling system components from corrosion, maintain the correct operating temperature and prevent engine overheating.
-      2. **Lubricating the EGR exhaust backpressure flap.** We serviced the backpressure flap in the exhaust pipe, which helps regulate exhaust backpressure and supports exhaust gas recirculation on BMW diesel engines. Over time, deposits can build up in the mechanism, causing it to stick and operate incorrectly. We lubricated the flap mechanism as required.
-      3. **Engine mount replacement.** We replaced the worn engine mount on this BMW 116d. Engine mounts secure the engine and reduce the vibration transmitted to the body. Worn mounts can cause excessive vibration, discomfort in the cabin and additional stress on other components.
-      4. **Crankshaft vibration damper replacement needed.** During the service, we also found that the crankshaft torsional vibration damper would need replacing. This component absorbs torsional vibrations and helps the auxiliary belt drive run smoothly. Replacing a worn damper should not be put off, as its failure can cause further damage and costly repairs.
+      1. **Coolant replacement.** We replaced the coolant to ensure the engine cooling system works properly. Replacing coolant on time helps protect system components from corrosion, maintain the correct operating temperature and prevent the engine from overheating.
+      2. **Lubrication of the EGR back-pressure valve in the exhaust system.** We serviced the exhaust back-pressure valve, which is part of the exhaust gas recirculation system and is located in the exhaust pipe. This component helps regulate exhaust back pressure and the operation of the EGR system in BMW diesel engines. Over time, the mechanism can become dirty, stick or stop working properly. We lubricated the valve mechanism as needed.
+      3. **Engine mount replacement.** We replaced the worn engine mount on the BMW 116d. Engine mounts secure the powertrain and reduce the amount of vibration transferred to the body. When they wear out, they can cause excessive vibration, discomfort in the cabin and added stress on other components.
+      4. **The crankshaft torsional vibration damper needs replacing.** During the service, we also found that the crankshaft torsional vibration damper will need to be replaced. This component helps absorb vibrations and keep the auxiliary belt drive running smoothly. We don't recommend putting off replacement of a worn damper, as it can fail and cause further damage and costly repairs.
     car: BMW 116d
 translatedFrom: 1f3baa78a27a10dd
 ---

@@ -12,23 +12,23 @@ date: 2026-03-10
 published: true
 translations:
   en:
-    title: 2023 BMW X6, sourcing in Germany
+    title: 2023 BMW X6, sourced in Germany
     body: |-
-      ## Importing a BMW X6 from Germany to Serbia
+      ## Bringing a BMW X6 from Germany to Serbia
 
-      The client came to us having already chosen a **BMW X6** in Germany. We researched the market, suggested several better options with lower mileage, and helped them choose the best one.
+      The client came to us after choosing a **BMW X6** in Germany. We analyzed the market, suggested several more attractive alternatives with lower mileage, and helped the client choose the best option.
 
-      We carried out a professional vehicle inspection in Germany (inspection fees range **from €300 to €500** per car), arranged transport by car carrier to Subotica, handled customs clearance, and handed over the car to its owner in Serbia, **fully ready to drive**.
+      We carried out a professional inspection of the car in Germany (inspection costs **€300 to €500** per vehicle), arranged transport by car carrier to Subotica, handled customs clearance, and handed over the **fully prepared car** to its owner in Serbia.
 
-      The client also received a **complimentary professional body polish**.
+      As a gift, the client received **professional body polishing**.
   sr:
-    title: BMW X6 2023, pronalaženje i odabir u Nemačkoj
+    title: BMW X6 2023, izbor automobila u Nemačkoj
     body: |-
-      ## Uvoz BMW X6 iz Nemačke u Srbiju
+      ## Uvoz BMW-a X6 iz Nemačke u Srbiju
 
-      Klijent nam se obratio nakon što je već izabrao **BMW X6** u Nemačkoj. Analizirali smo tržište, predložili nekoliko boljih opcija sa manjom kilometražom i pomogli mu da izabere najbolju.
+      Klijent nam se obratio pošto je već pronašao **BMW X6** u Nemačkoj. Analizirali smo tržište, predložili nekoliko zanimljivijih alternativa sa manjom kilometražom i pomogli mu da izabere najbolju opciju.
 
-      Obavljena je stručna provera auta pre kupovine u Nemačkoj (cena provere **od 300 do 500 €** po automobilu), a zatim smo organizovali prevoz kamionom za transport vozila do Subotice, završili carinjenje i vlasniku predali **potpuno spreman automobil** u Srbiji.
+      Obavili smo provera auta pre kupovine u Nemačkoj (cena provere iznosi **od 300 do 500 €** po automobilu), organizovali prevoz auto-transporterom do Subotice, završili carinjenje i predali **potpuno spreman automobil** vlasniku u Srbiji.
 
       Klijent je na poklon dobio **profesionalno poliranje karoserije**.
   es:
@@ -36,21 +36,21 @@ translations:
     body: |-
       ## Importación de un BMW X6 de Alemania a Serbia
 
-      El cliente acudió a nosotros tras haber elegido un **BMW X6** en Alemania. Analizamos el mercado, le propusimos varias alternativas más interesantes y con menos kilómetros, y le ayudamos a elegir la mejor opción.
+      El cliente se puso en contacto con nosotros después de elegir un **BMW X6** en Alemania. Analizamos el mercado, le propusimos varias alternativas más interesantes y con menos kilómetros, y le ayudamos a elegir la mejor opción.
 
-      Realizamos una inspección profesional del vehículo en Alemania (con un coste de **entre 300 y 500 €** por vehículo), organizamos el transporte en camión portavehículos hasta Subotica, nos encargamos de los trámites aduaneros y entregamos al propietario el **coche listo para circular** en Serbia.
+      Realizamos una inspección profesional del vehículo en Alemania (el coste de la revisión es de **300 a 500 €** por vehículo), organizamos su transporte en camión hasta Subotica, nos encargamos del despacho de aduanas y entregamos el **vehículo listo para circular** a su propietario en Serbia.
 
-      Como obsequio, el cliente recibió un **pulido profesional de la carrocería**.
+      Como regalo, el cliente recibió un **pulido profesional de la carrocería**.
   de:
-    title: BMW X6 2023, Fahrzeugsuche in Deutschland
+    title: BMW X6 2023, Suche in Deutschland
     body: |-
-      ## Import eines BMW X6 aus Deutschland nach Serbien
+      ## BMW X6 aus Deutschland nach Serbien importiert
 
-      Der Kunde hatte bereits einen **BMW X6** in Deutschland ins Auge gefasst, als er sich an uns wandte. Wir analysierten den Markt, schlugen mehrere attraktivere Alternativen mit geringerer Laufleistung vor und halfen ihm, das beste Fahrzeug auszuwählen.
+      Der Kunde wandte sich an uns, nachdem er sich bereits für einen **BMW X6** in Deutschland entschieden hatte. Wir analysierten den Markt, schlugen einige attraktivere Alternativen mit geringerer Laufleistung vor und halfen ihm, die beste Option auszuwählen.
 
-      Wir führten eine professionelle Fahrzeugprüfung in Deutschland durch (Kosten: **300 bis 500 €** pro Fahrzeug), organisierten den Transport per Autotransporter nach Subotica, erledigten die Zollabfertigung und übergaben dem Besitzer das **vollständig abgewickelte und übergabefertige Fahrzeug** in Serbien.
+      Wir führten eine professionelle Fahrzeugprüfung in Deutschland durch (Kosten: **300 bis 500 €** pro Fahrzeug), organisierten den Transport per Autotransporter nach Subotica, erledigten die Zollabfertigung und übergaben dem Besitzer das **komplett fahrbereite Fahrzeug** in Serbien.
 
-      Als Geschenk erhielt der Kunde eine **professionelle Karosseriepolitur**.
+      Als Geschenk erhielt der Kunde eine **professionelle Lackpolitur**.
 translatedFrom: 46147303bdb5949a
 ---
 

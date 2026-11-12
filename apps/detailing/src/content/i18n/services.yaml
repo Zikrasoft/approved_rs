@@ -135,275 +135,275 @@ steering-wheel-restoration:
   honest: Мы не беремся за рули со сработавшей подушкой безопасности или следами ее замены без сервисной истории. Это вопрос вашей безопасности, а не косметики. В таком случае сначала сервис, потом мы.
 translations:
   sr:
-    indexMetaTitle: 'Detailing u Beogradu: PPF, poliranje, volan | Details'
-    indexMetaDescription: PPF zaštitna folija, promena boje, poliranje sa keramičkom zaštitom i restauracija volana. Cene, rokovi i iskreno o ograničenjima svake usluge.
+    indexMetaTitle: 'Auto detailing usluge u Beogradu: PPF, poliranje, volan | Details'
+    indexMetaDescription: Zaštitna PPF folija, promena boje, poliranje s keramičkom zaštitom i restauracija volana. Cene, rokovi i iskreno o ograničenjima svake usluge.
     indexEyebrow: Usluge
-    indexHeading: Četiri usluge, svaka do poslednjeg detalja
-    indexLead: 'Za svaku uslugu ispod postoji posebna stranica: šta obuhvata, koliko traje, kome je namenjena i kada je iskreno ne preporučujemo.'
+    indexHeading: Četiri usluge, svaku radimo do kraja
+    indexLead: 'Svaka usluga ima svoju stranicu: šta obuhvata, koliko traje, kome odgovara i kada vam iskreno savetujemo da odustanete.'
     specsPriceLabel: Cena
-    specsDurationLabel: Trajanje
+    specsDurationLabel: Rok
     paint-protection-film:
-      name: Zaštitna folija (PPF)
-      short: Providni poliuretanski oklop protiv kamenčića, peska i četki u auto-perionici.
+      name: Zaštitna PPF folija
+      short: Providna poliuretanska zaštita od kamenčića, peska i četki u perionici.
       metaTitle: Ugradnja PPF zaštitne folije u Beogradu | Details
-      metaDescription: 'Providna zaštitna folija za karoseriju u Beogradu: prednji deo ili celo vozilo, sa podvijanjem ivica. Koristimo XPEL i SunTek folije.'
+      metaDescription: 'Ugradnja providne zaštitne folije u Beogradu: prednji deo, celo vozilo, uvlačenje ivica. XPEL i SunTek folije.'
       heroEyebrow: Zaštita karoserije
-      heroTitle: Folija koja se ne vidi. Oštećenja od kamenčića koja ne nastaju.
-      heroLead: Poliuretan debljine 190 mikrona prima udarce kamenčića sa puta, pesak i tragove četki. Fabrička boja ispod ostaje sačuvana, a upravo se ona proverava pri prodaji.
+      heroTitle: Folija koja se ne vidi i bez ogrebotina od kamenčića
+      heroLead: Poliuretan debljine 190 mikrona štiti od kamenčića s puta, peska i tragova četki. Lak ispod nje ostaje fabrički, a upravo njega gledaju pri prodaji.
       priceFrom: od 690 € za prednji deo
       duration: 2–6 dana
       bodyHeading: Šta dobijate
       body: |
-        Glavna vrednost folije nije sjaj, već očuvana fabrička boja. Prefarban blatobran otkriva svaki merač debljine laka, a pri pregledu pre kupovine to odmah obara cenu. Folija prima udarce umesto laka: sitne ogrebotine na njoj same se povlače na suncu, dok duboke ostaju na foliji, a ne na karoseriji.
+        Najveća prednost folije nije "sjaj", već očuvan fabrički lak. Prefarbano krilo otkrije svaki merač debljine laka, a na pregledu pre kupovine to odmah obara cenu. Folija prima udarce umesto laka: sitne ogrebotine na njoj same zarastaju na suncu, a dublje ostaju na foliji, ne na karoseriji.
 
-        Foliju sečemo na ploteru prema šablonu za konkretan model, a zahtevne delove, poput branika, retrovizora i stubova, prilagođavamo ručno. Gde oblik panela to dozvoljava, ivice podvijamo ka unutra. Tako se na spojevima ne skuplja prljavština i posle godinu dana nema tanke sive linije koja otkriva foliju.
+        Foliju sečemo po meri konkretnog modela na kateru, a složene delove, poput branika, retrovizora i stubova, prilagođavamo ručno. Gde god oblik panela dozvoljava, uvlačimo ivicu unutra: spoj tako ne skuplja prljavštinu i ne odaje se tankom sivom linijom posle godinu dana.
 
-        Koristimo XPEL i SunTek folije. Koju ćemo postaviti na vaš automobil, kažemo vam na pregledu, pre nego što prihvatite ponudu.
+        Koristimo XPEL i SunTek folije. Koju ćemo staviti na vaš automobil, reći ćemo vam na pregledu, pre nego što prihvatite ponudu.
       includesHeading: Šta je uključeno
       includes:
-        - Pranje u dve faze, dekontaminacija glinom i odmašćivanje pre postavljanja folije
+        - Dvofazno pranje, dekontaminacija glinom i odmašćivanje pre ugradnje
         - Lokalno poliranje oštećenja koja bi inače ostala zarobljena ispod folije
-        - Šablon za vaš model i ručno prilagođavanje zahtevnih delova
-        - Podvijanje ivica gde geometrija panela to dozvoljava
-        - Demontaža kvaka, retrovizora i svetala kada je to potrebno
+        - Kroj po meri vašeg modela i ručno prilagođavanje složenih delova
+        - Uvlačenje ivica gde to oblik panela dozvoljava
+        - Demontaža kvaka, retrovizora i svetala po potrebi
         - Kontrolni pregled nedelju dana nakon preuzimanja
-      forWhomHeading: Kome je namenjeno
+      forWhomHeading: Kome je namenjena
       forWhom:
-        - Vlasnicima novih automobila koji žele da sačuvaju fabričko stanje
-        - Vlasnicima automobila tamne ili mat boje, na kojoj se vidi svaka ogrebotina
-        - Onima koji često voze na otvorenom putu, uz rizik od kamenčića sa bankine
-        - Za automobile na lizing ili pred prodaju, kada je važno dokumentovano stanje laka
-      honestHeading: Kada je ne preporučujemo
-      honest: 'Ako je automobil već prefarban nekvalitetnim lakom ili se na panelu vide tragovi gita, foliju ne treba postavljati: pri skidanju može povući i premaz. To ćemo vam otvoreno reći na pregledu i predložiti da se prvo sanira lak.'
+        - Nov automobil koji želite da sačuvate u fabričkom stanju
+        - Tamna ili mat boja na kojoj se vidi svaka ogrebotina
+        - Česta vožnja između gradova i rizla uz put
+        - Automobil na lizing ili pred prodajom, kada je bitan izveštaj o laku
+      honestHeading: Kada vam savetujemo da odustanete
+      honest: 'Ako je automobil već prefarban nekvalitetnim lakom ili se na panelu vide tragovi gitovanja, folija se ne sme postavljati: pri skidanju može povući lak sa sobom. To ćemo vam iskreno reći na pregledu i predložiti da prvo sredimo lak.'
     colour-change-wrap:
       name: Promena boje folijom
-      short: Nova boja bez farbanja, uz mogućnost povratka na fabričku.
+      short: Nova boja bez farbanja, uz mogućnost vraćanja na fabričku.
       metaTitle: Promena boje automobila folijom u Beogradu | Details
-      metaDescription: 'Oblaganje vozila folijom u boji u Beogradu: mat, saten, sjaj i teksture. Bez farbanja, uz očuvan fabrički lak. Uzorke biramo na vašem automobilu.'
+      metaDescription: 'Kompletno oblaganje vozila folijom u Beogradu: mat, saten, sjaj i teksture. Može da se ukloni, bez farbanja i uz očuvan fabrički lak. Uzorci na vašem automobilu.'
       heroEyebrow: Boja
-      heroTitle: Druga boja. Isti fabrički lak ispod.
-      heroLead: Folija potpuno menja izgled automobila, ali ta promena nije trajna. Za dve godine možete je skinuti i ponovo imati istu fabričku boju, što nijedno farbanje ne omogućava.
-      priceFrom: od 1 900 € za celu karoseriju
+      heroTitle: Druga boja. Ispod nje isti fabrički lak.
+      heroLead: Folija potpuno menja izgled automobila, ali može da se ukloni. Posle dve godine možete je skinuti i dobiti isti lak koji je automobil imao iz fabrike, što farbanje ne može da omogući.
+      priceFrom: od 1 900 € za karoseriju
       duration: 4–7 dana
       bodyHeading: Zašto folija, a ne farbanje
       body: |
-        Farbanje je trajno i ostaje deo istorije automobila. Folija je, s druge strane, rešenje za nekoliko godina koje možete ukloniti. Pre prodaje je skinete i automobil predajete u originalnoj boji, sa fabričkim lakom.
+        Farbanje je trajno i ostaje zabeleženo u istoriji vozila. Folija je rešenje na nekoliko godina koje možete da poništite. Kada prodajete automobil, skinete je i predate vozilo u originalnoj boji, sa fabričkim lakom ispod.
 
-        Boju uvek biramo na vašem automobilu, a ne iz kataloga na stolu: uzorke postavljamo na karoseriju pri dnevnom svetlu i gledamo kako boja izgleda na njenim linijama. Mat završnica na jednom modelu deluje luksuzno, a na drugom bezizražajno. To se vidi tek uživo.
+        Boju biramo na vašem automobilu, a ne iz kataloga na stolu: postavljamo uzorke na karoseriju na dnevnom svetlu i gledamo kako izgledaju na njenim linijama. Mat na jednom modelu izgleda luksuzno, a na drugom ravno, što se vidi samo uživo.
 
-        Koristimo folije u boji brendova 3M i HEXIS. Tačnu foliju navodimo u ponudi, zajedno sa cenom i rokom izrade.
+        Koristimo folije u boji proizvođača 3M i HEXIS. Tačan tip folije navodimo u ponudi, zajedno sa cenom i rokom.
       includesHeading: Šta je uključeno
       includes:
-        - Izbor boje pomoću uzoraka na vašoj karoseriji pri dnevnom svetlu
+        - Izbor boje uzoraka na vašoj karoseriji, na dnevnom svetlu
         - Demontaža kvaka, lajsni, svetala i maski
-        - Oblaganje folijom uz podvijanje ivica u otvorima karoserije
-        - Učvršćivanje spojeva i termička obrada uglova fenom
-        - Uputstvo za održavanje mat ili satenske folije
-        - Besplatno popravljanje manjih odlepljivanja tokom prvog meseca
-      forWhomHeading: Kome je namenjeno
+        - Postavljanje folije sa uvlačenjem ivica u otvore
+        - Obrada spojeva i zagrevanje uglova fenom
+        - Uputstvo za održavanje mat ili saten folije
+        - Besplatna popravka sitnih odlepljenih delova tokom prvog meseca
+      forWhomHeading: Kome je namenjena
       forWhom:
-        - Želite drugu boju, ali bez gubitka fabričkog laka
-        - Želite mat, saten ili teksturu koji nisu u fabričkoj ponudi
-        - Imate automobil na lizing čiji ugovor ne dozvoljava farbanje
-        - Imate poslovno vozilo koje treba da bude prepoznatljivo
-      honestHeading: Šta treba znati unapred
-      honest: Folija ne skriva udubljenja i neravnine na karoseriji. Naprotiv, mat folija ih ističe više nego sjajna. Ako paneli nisu ravni, prvo je potrebna limarska popravka, pa tek onda promena boje. To ćemo vam reći na pregledu, a ne nakon postavljanja folije.
+        - Želite drugu boju, ali ne želite da izgubite fabrički lak
+        - Želite mat, saten ili teksturu koji ne postoje fabrički
+        - Automobil je na lizing, a ugovor zabranjuje farbanje
+        - Komercijalno vozilo koje mora da ostane prepoznatljivo
+      honestHeading: Šta treba unapred da znate
+      honest: Folija ne skriva udubljenja ni neravnine na karoseriji. Mat folija ih čak više ističe nego sjajna. Ako paneli imaju deformacije, prvo je potreban limarski popravak, pa tek onda promena boje. Reći ćemo vam to na pregledu, ne nakon postavljanja folije.
     polishing-ceramic:
       name: Poliranje i keramička zaštita
-      short: Uklanjamo ogrebotine i kružne tragove, a rezultat čuvamo keramičkom zaštitom godinama.
-      metaTitle: Poliranje i keramička zaštita u Beogradu | Details
-      metaDescription: Višestepeno poliranje uz merenje debljine laka i keramička zaštita na 2–5 godina. Lak pregledamo pod lampom i pokazujemo rezultate merenja. Details, Beograd.
+      short: Uklanjamo ogrebotine i paučinu, pa rezultat štitimo keramikom na više godina.
+      metaTitle: Poliranje karoserije i keramika u Beogradu | Details
+      metaDescription: Višefazno poliranje uz merenje debljine laka i keramička zaštita na 2–5 godina. Pregledamo lak pod lampom i pokazujemo rezultate merenja. Details, Beograd.
       heroEyebrow: Lak
       heroTitle: Prvo uklanjamo ogrebotine. Tek onda nanosimo zaštitu.
-      heroLead: Keramika preko neispoliranog laka samo zarobi kružne tragove na nekoliko godina. Zato prvo uklanjamo oštećenja, a zaštitu nanosimo tek na pripremljenu površinu.
+      heroLead: Keramička zaštita preko neisprepoliranog laka samo će konzervirati paučinu na nekoliko godina. Prvo uklanjamo oštećenja, a zaštitu nanosimo tek na pripremljenu površinu.
       priceFrom: od 450 € po automobilu
       duration: 2–3 dana
       bodyHeading: Kako radimo
       body: |
-        Poliranjem se uklanja izuzetno tanak sloj laka zajedno sa ogrebotinama. Debljina tog sloja je ograničena, zato počinjemo meračem debljine laka: merimo svaki panel i procenjujemo koliko prostora imamo za korekciju. Ako je lak na krovu ili blatobranima već tanak, biramo blaži postupak ili taj panel uopšte ne poliramo.
+        Poliranjem se skida najtanji sloj laka zajedno sa ogrebotinama. Taj sloj nije beskonačan, zato počinjemo merenjem debljine laka: proveravamo svaki panel i utvrđujemo kolika je rezerva. Ako je lak na krovu ili krilima već tanak, radimo blaže ili taj panel uopšte ne diramo.
 
-        Zatim slede dve ili tri faze poliranja: abrazivna pasta uklanja glavna oštećenja, a završna uklanja holograme od mašinskog poliranja. Rezultat proveravamo pod lampom koja otkriva ono što se napolju ne vidi. Tek nakon toga slede odmašćivanje i keramička zaštita. Poliramo pastama Koch-Chemie, a za keramičku zaštitu koristimo Gtechniq.
+        Zatim sledi dva ili tri prolaza: abrazivna pasta uklanja glavna oštećenja, a završna uklanja holograme od mašinskog poliranja. Rezultat proveravamo pod lampom koja otkriva ono što se napolju ne vidi. Tek tada odmašćujemo površinu i nanosimo keramičku zaštitu. Poliramo pastama Koch-Chemie, a keramičku zaštitu nanosimo proizvodima Gtechniq.
       includesHeading: Šta je uključeno
       includes:
-        - Merenje debljine laka na svim panelima uz beleženje rezultata
-        - Poliranje u dve ili tri faze uz kontrolu pod lampom
+        - Merenje debljine laka na svim panelima i beleženje rezultata
+        - Dvofazno ili trofazno poliranje pod kontrolom lampe
         - Odmašćivanje površine pre nanošenja zaštite
-        - Nanošenje keramičke zaštite uz vreme za očvršćavanje u radionici
-        - Nanošenje vodoodbojnog premaza na stakla
-        - Fotografije pre i posle, pod istim osvetljenjem
-      forWhomHeading: Kome je namenjeno
+        - Keramička zaštita uz vreme potrebno za sušenje u radionici
+        - Tretman stakala sredstvom za odbijanje vode
+        - Fotografije pre i posle, snimljene pod istim osvetljenjem
+      forWhomHeading: Kome je namenjena
       forWhom:
-        - Automobil koji je godinama pran u automatskim perionicama
-        - Tamna boja na kojoj se mreža sitnih ogrebotina vidi čim izađe na sunce
-        - Priprema za prodaju, kada je prvi utisak presudan
-        - Tek uvezen automobil, nakon transporta i stajanja na placevima
-      honestHeading: Kada je ne preporučujemo
-      honest: Ako merač debljine laka pokaže da je lak kritično tanak, poliranje nije bezbedno jer se može probiti sloj sve do prajmera. U tom slučaju predložićemo blag tretman bez skidanja laka ili samo zaštitni premaz i objasniti šta smo tačno utvrdili merenjem.
+        - Automobil posle nekoliko godina pranja u automatskim perionicama
+        - Tamna boja na kojoj se paučinaste ogrebotine vide na svakom suncu
+        - Priprema za prodaju, kada je prvi utisak najvažniji
+        - Tek uvezen automobil posle transporta i stajanja
+      honestHeading: Kada vam savetujemo da odustanete
+      honest: Ako merač debljine laka pokaže da je lak kritično tanak, poliranje nije bezbedno jer možemo da probijemo do prajmera. U tom slučaju predložićemo blažu opciju bez skidanja sloja laka ili samo zaštitni premaz, i objasniti šta smo tačno utvrdili merenjem.
     steering-wheel-restoration:
       name: Restauracija volana
-      short: Pohabanoj koži, uglancanom obruču i oljuštenoj plastici vraćamo prvobitan izgled.
-      metaTitle: Restauracija i presvlačenje volana u Beogradu | Details
-      metaDescription: 'Obnova kože volana u Beogradu: farbanje, presvlačenje, popravka plastike i tastera. Demontaža i montaža volana sa vazdušnim jastukom. Rok: 2–3 dana.'
+      short: Istrošenu kožu, uglačan obruč i oljuštenu plastiku vraćamo u prvobitno stanje.
+      metaTitle: Restauracija volana i presvlačenje kože u Beogradu | Details
+      metaDescription: 'Obnova kože na volanu u Beogradu: farbanje, presvlačenje, popravka plastike i dugmića. Demontaža i montaža volana sa airbagom. 2-3 dana.'
       heroEyebrow: Enterijer
-      heroTitle: Prvo što dodirnete. I prvo na čemu se vide godine.
-      heroLead: 'Volan se haba brže od ostatka enterijera: znoj, sunce i krema za ruke istroše boju za svega nekoliko godina. Obnova košta višestruko manje od novog volana, a vraća mu fabrički izgled.'
+      heroTitle: Prvo što dodirnete. I prvo što stari.
+      heroLead: 'Volan se najbrže haba od svih delova enterijera: znoj, sunce i krema za ruke skidaju boju za svega nekoliko godina. Obnova košta neuporedivo manje od novog volana, a izgleda kao fabrički.'
       priceFrom: od 150 €
       duration: 2–3 dana
-      bodyHeading: Kako obnavljamo volan
+      bodyHeading: Šta radimo
       body: |
-        Najpre pažljivo skidamo ceo volan, uz prethodno odvajanje akumulatora i bezbednu demontažu vazdušnog jastuka. Dalji postupak zavisi od stanja: ako je koža čitava, a istrošena je samo boja, čistimo je, obnavljamo teksturu i farbamo premazom koji nije lepljiv i ne ostavlja tragove na rukama. Ako je koža pocepana ili su šavovi popustili, presvlačimo volan novom kožom i ručno šijemo po originalnom uzorku.
+        Najpre pažljivo demontiramo ceo volan, uz isključivanje akumulatora i airbaga. Dalji postupak zavisi od stanja: ako je koža cela, a pohabana je samo boja, čistimo je, obnavljamo teksturu i nanosimo novu boju koja se ne lepi i ne ostavlja tragove na rukama. Ako je koža pocepana ili se šav rašio, presvlačimo volan novom kožom i ručno šijemo po originalnom uzorku.
 
-        Usput sređujemo i delove koji se obično habaju zajedno s njim: oljuštene tastere, izlizane plastične obloge i uglancane polugice za menjanje brzina.
+        Usput sređujemo i delove koji se obično oštete u blizini: oljuštene dugmiće, izgrebanu plastiku na oblogama oko volana i sjaj na ručicama za menjanje brzina.
       includesHeading: Šta je uključeno
       includes:
-        - Demontaža i montaža volana uz bezbedno rukovanje vazdušnim jastukom
-        - Čišćenje i obnova teksture kože
-        - Farbanje ili kompletno presvlačenje uz ručno šivenje
-        - Obnova tastera i plastičnih obloga
-        - Usklađivanje boje i vrste šava sa enterijerom vašeg automobila
-        - Provera lampice vazdušnog jastuka nakon montaže
-      forWhomHeading: Kome je namenjeno
+        - Demontaža i montaža volana uz pravilno rukovanje airbagom
+        - Čišćenje kože i obnova njene teksture
+        - Farbanje ili potpuno presvlačenje uz ručno šivenje
+        - Obnova dugmića i plastičnih obloga
+        - Usklađivanje boje i vrste šava sa enterijerom
+        - Provera lampice airbaga nakon sklapanja
+      forWhomHeading: Kome je namenjena
       forWhom:
-        - Obruč je izlizan, sjaji se poput plastike ili je promenio boju
-        - Koža je ispucala ili se razdvojila na šavu
+        - Obruč je pohaban do sjajne plastike ili je promenio boju
+        - Koža je ispucala ili se šav rašio
         - Automobil se priprema za prodaju, a volan odaje kilometražu
-        - Želite drugi materijal, na primer alkantaru na gornjem delu obruča
-      honestHeading: Šta treba znati unapred
-      honest: Ne radimo volane sa aktiviranim vazdušnim jastukom niti one na kojima postoje tragovi njegove zamene bez dokumentovane servisne istorije. To je pitanje vaše bezbednosti, a ne estetike. U tom slučaju prvo posetite servis, pa dođite kod nas.
+        - Želite drugačiji materijal, na primer alkantaru na gornjem delu volana
+      honestHeading: Šta treba unapred da znate
+      honest: Ne radimo volane sa aktiviranim airbagom niti one na kojima se vide tragovi zamene airbaga bez servisne istorije. To je pitanje vaše bezbednosti, a ne estetike. U tom slučaju prvo posetite servis, pa onda nas.
   en:
-    indexMetaTitle: 'Detailing in Belgrade: PPF, Polishing, Steering Wheels'
-    indexMetaDescription: PPF, colour-change wraps, machine polishing with ceramic coating and steering-wheel restoration. Prices, turnaround times and honest advice on each service.
+    indexMetaTitle: 'Detailing Services in Belgrade: PPF, Polishing, Wheels | Details'
+    indexMetaDescription: Paint protection film, colour-change wraps, machine polishing with ceramic coating, and steering-wheel restoration. Prices, turnaround times, and honest advice for each service.
     indexEyebrow: Services
-    indexHeading: Four specialisms. No half measures.
-    indexLead: Each service below has its own page covering what's included, how long it takes, who it's for and when we'll honestly advise against it.
+    indexHeading: Four services, each done right
+    indexLead: "Each service has its own page below: what's included, how long it takes, who it's for, and when we'll honestly advise against it."
     specsPriceLabel: Price
     specsDurationLabel: Turnaround
     paint-protection-film:
       name: Paint protection film (PPF)
-      short: Clear polyurethane protection against stone chips, road grit and car wash brush marks.
-      metaTitle: Paint Protection Film (PPF) in Belgrade | Details
-      metaDescription: 'Clear paint protection film in Belgrade: front-end packages, full-car coverage and wrapped edges. XPEL and SunTek films.'
+      short: Clear polyurethane protection against stones, grit, and car-wash brushes.
+      metaTitle: Paint Protection Film in Belgrade | Details
+      metaDescription: 'Clear paint protection film in Belgrade: front-end coverage or full-body wraps, with wrapped edges. XPEL and SunTek films.'
       heroEyebrow: Paint protection
-      heroTitle: Film you won't see. Stone chips you won't get.
-      heroLead: 190-micron polyurethane takes the impact of motorway stones, road grit and car wash brushes. The factory paint underneath stays intact, and that's what buyers check.
+      heroTitle: A film you can't see, and stone chips you won't get
+      heroLead: 190-micron polyurethane takes the hit from road stones, grit, and brush marks. The factory paint stays intact, and that's what buyers check when you sell.
       priceFrom: from €690 for the front end
       duration: 2–6 days
-      bodyHeading: What you gain
+      bodyHeading: What it does
       body: |
-        The real value of PPF isn't extra shine. It's preserving the factory paint. Any paint thickness gauge will reveal a resprayed wing, and that can immediately reduce the price at a pre-purchase inspection. The film takes the impact instead of your clear coat: light scratches self-heal in the sun, while deeper ones stay in the film rather than reaching the paintwork.
+        The real value of paint protection film isn't 'shine', it's preserving the factory paint. A repaint shows up on any paint depth gauge, and that's an immediate knock to the price during a pre-purchase inspection. The film takes the impact instead of the clear coat: fine scratches in the film self-heal in the sun, while deeper ones stay in the film, not the paintwork.
 
-        We plotter-cut patterns for your specific model and hand-fit complex areas such as bumpers, mirrors and pillars. Wherever the panel allows, we wrap the edges around to the inside. This keeps dirt out of the edges and prevents that telltale thin grey line appearing a year later.
+        We plot the pattern for your specific model on a cutting plotter, then hand-fit complex areas such as bumpers, mirrors, and pillars. Where the panel shape allows, we wrap the edges underneath. That keeps dirt out of the joins and avoids a thin grey line giving the film away a year later.
 
-        We use XPEL and SunTek films. At the inspection, before you approve the quote, we'll tell you exactly which film we recommend for your car.
+        We use films from XPEL and SunTek. We'll tell you which one is right for your car during the inspection, before you agree to the quote.
       includesHeading: What's included
       includes:
-        - Two-stage wash, clay decontamination and degreasing before installation
+        - Two-stage wash, clay bar treatment, and degreasing before installation
         - Spot polishing of defects that would otherwise be sealed beneath the film
-        - Model-specific patterns with hand fitting on complex panels
+        - A pattern cut for your model, with complex areas hand-fitted
         - Wrapped edges wherever the panel shape allows
-        - Removal of handles, mirrors and lights where access requires it
-        - Follow-up inspection one week after collection
+        - Removal of handles, mirrors, and lights where needed
+        - A follow-up inspection one week after collection
       forWhomHeading: Who it's for
       forWhom:
-        - You have a new car you want to keep in factory condition
-        - Your car has dark or matte paint that shows every scratch
-        - You do plenty of motorway driving or encounter loose gravel
-        - Your car is leased or due to be sold soon, and its paint condition matters
-      honestHeading: When we advise against it
-      honest: "If the car has been resprayed with poor-quality clear coat or a panel shows signs of body filler, we won't apply film: removing it could lift the paint with it. We'll flag this during the inspection and recommend putting the paintwork right first."
+        - A new car you want to keep in factory condition
+        - Dark or matte paint, where every mark shows
+        - Frequent motorway driving and loose gravel on the roads
+        - A leased car or one you're planning to sell soon, where the paint condition report matters
+      honestHeading: When we'll advise against it
+      honest: "If the car has been repainted with low-quality clear coat or there are signs of body filler, we can't install film: it may pull the finish off when removed. We'll be upfront about this during the inspection and recommend getting the paintwork sorted first."
     colour-change-wrap:
       name: Colour-change wrap
-      short: A new colour without a respray, with the option to return to the factory finish.
+      short: A new colour without repainting, and the option to go back to the original.
       metaTitle: Colour-Change Car Wraps in Belgrade | Details
-      metaDescription: 'Full colour-change wraps in Belgrade: matte, satin, gloss and textured finishes. Reversible, preserving factory paint. Samples viewed on your car.'
+      metaDescription: 'Full colour-change wraps in Belgrade: matte, satin, gloss, and textured finishes. Reversible, with no repainting and factory paint preserved. See samples on your car.'
       heroEyebrow: Colour
       heroTitle: A different colour. The same factory paint underneath.
-      heroLead: A wrap transforms your car without making the change permanent. Two years later, you can remove it to reveal the original factory paint. No respray can offer that.
-      priceFrom: from €1,900 for a full wrap
+      heroLead: A wrap transforms your car, but it's reversible. Remove it in two years and you'll have the same factory paint as before. No repaint can offer that.
+      priceFrom: from €1,900 for the body
       duration: 4–7 days
-      bodyHeading: Why wrap rather than respray?
+      bodyHeading: Why wrap instead of repaint
       body: |
-        A respray is permanent and becomes part of the car's history. A wrap is a change for a few years that you can reverse. When it's time to sell, you can remove it and hand over the car in its original colour, with its factory paint intact.
+        A repaint is permanent and becomes part of the car's history. A wrap is a choice you can undo after a few years. When it's time to sell, remove it and return the car to its original colour, with the factory paint underneath.
 
-        We always choose the colour on your car, not from a catalogue on a desk. We place samples against the bodywork in daylight to see how the colour works with its curves. Matte can look premium on one model and flat on another. You only see the difference in person.
+        We always choose the colour on your car, not from a catalogue on a desk: we place samples on the bodywork in daylight and see how the colour works with its curves. Matte can look premium on one model and flat on another. You can only tell in person.
 
-        We use colour-change films from 3M and HEXIS. The exact film is listed in your quote, alongside the price and turnaround time.
+        We use colour-change films from 3M and HEXIS. The exact film is listed in your quote, along with the price and turnaround time.
       includesHeading: What's included
       includes:
         - Colour selection using samples on your car in daylight
-        - Removal of handles, mouldings, lights and grilles
-        - Installation with edges wrapped into panel openings
-        - Secure seams and heat-gun finishing around corners
+        - Removal of handles, trim, lights, and grilles
+        - Wrap installation with edges tucked into the door shuts
+        - Sealed joins and heat-treated corners
         - Care instructions for matte or satin finishes
-        - Free correction of minor lifting during the first month
+        - Free repair of minor lifting during the first month
       forWhomHeading: Who it's for
       forWhom:
-        - You want a different colour without sacrificing the factory paint
-        - You want a matte, satin or textured finish not offered by the factory
-        - Your lease agreement prohibits respraying
-        - Your business vehicle needs a distinctive, recognisable look
-      honestHeading: What to know before you book
-      honest: A wrap won't hide dents or ripples in the bodywork. In fact, matte film highlights them more than gloss. If the panels aren't straight, body repairs come first, then the colour change. We'll tell you at the inspection, not after wrapping the car.
+        - You want a different colour without losing the factory paint
+        - You want a matte, satin, or textured finish not offered from the factory
+        - Your leased car's contract doesn't allow repainting
+        - A commercial vehicle that needs to stay recognisable
+      honestHeading: What to know beforehand
+      honest: A wrap won't hide dents or ripples in the bodywork. Matte film can actually make them more noticeable than gloss. If the panels have shape defects, get the bodywork repaired before changing the colour. We'll tell you during the inspection, not after the wrap is installed.
     polishing-ceramic:
       name: Machine polishing and ceramic coating
-      short: We remove scratches and swirl marks, then protect the finish with a ceramic coating for years to come.
-      metaTitle: Car Polishing & Ceramic Coating in Belgrade | Details
-      metaDescription: Multi-stage polishing with paint thickness checks and ceramic protection for 2–5 years. We inspect under detailing lights and share readings. Details, Belgrade.
+      short: We remove scratches and swirl marks, then protect the finish with a long-lasting ceramic coating.
+      metaTitle: Machine Polishing and Ceramic Coating | Details
+      metaDescription: Multi-stage polishing with paint depth measurements, plus ceramic coating lasting 2–5 years. We inspect the paint under a lamp and show you the readings. Details, Belgrade.
       heroEyebrow: Paintwork
-      heroTitle: Remove the scratches first. Apply protection second.
-      heroLead: Ceramic coating over unpolished paint simply seals in swirl marks for years. We correct the defects first, then apply the coating to the properly prepared finish.
+      heroTitle: Remove the scratches first. Then apply the protection.
+      heroLead: Ceramic coating over unpolished paint simply seals swirl marks in for years. We correct the defects first, then apply the coating to the prepared surface.
       priceFrom: from €450 per car
       duration: 2–3 days
       bodyHeading: How it works
       body: |
-        Polishing removes a very thin layer of clear coat along with the scratches. There's only so much clear coat to work with, so we start with a paint thickness gauge, measuring every panel to assess the margin available. If the finish on the roof or wings is already thin, we take a gentler approach or leave that panel untouched.
+        Machine polishing removes an extremely thin layer of clear coat along with the scratches. That layer isn't unlimited, so we start with a paint depth gauge: we measure every panel and check how much clear coat is available. If the paint is already thin on the roof or wings, we use a gentler approach or leave that panel alone.
 
-        Next come two or three polishing stages: a cutting compound removes the main defects, then a finishing polish removes machine-induced holograms. We check the result under a detailing light that reveals defects you wouldn't see outdoors. Only then do we degrease the surface and apply the ceramic coating. We polish with Koch-Chemie products and use Gtechniq ceramic coatings.
+        Next come two or three polishing stages: a cutting compound removes the main defects, and a finishing polish clears up machine holograms. We inspect the result under a detailing lamp that reveals what daylight can hide. Only then do we degrease the surface and apply ceramic coating. We polish with Koch-Chemie compounds and apply Gtechniq ceramic coating.
       includesHeading: What's included
       includes:
-        - Paint thickness readings across all panels, with results recorded
-        - Two- or three-stage machine polishing, checked under detailing lights
-        - Surface degreasing before coating application
-        - Ceramic coating application with indoor curing time
-        - Water-repellent treatment for the glass
-        - Before-and-after photos taken under the same lighting
+        - Paint depth measurements across all panels, with results recorded
+        - Two- or three-stage polishing under a detailing lamp
+        - Surface degreasing before application
+        - Ceramic coating, cured in the studio
+        - Glass treated with a water-repellent coating
+        - Before-and-after photo report under the same lighting
       forWhomHeading: Who it's for
       forWhom:
         - Cars that have spent years going through automatic car washes
-        - Dark paint that shows swirl marks whenever the sun comes out
-        - Preparing a car for sale, when first impressions matter
-        - Newly imported cars after transport and storage
-      honestHeading: When we advise against it
-      honest: 'If paint depth readings indicate critically thin clear coat, polishing is not safe: it could cut through to the primer. In that case, we will suggest a gentle, non-abrasive treatment or a protective coating alone, and explain exactly what the readings showed.'
+        - Dark paint, where swirl marks show in any sunlight
+        - Cars being prepared for sale, where first impressions matter
+        - Recently imported cars after transport and time in storage
+      honestHeading: When we'll advise against it
+      honest: "If the paint thickness gauge shows critically thin paint, polishing is not an option: it could cut through to the primer. In that case, we'll recommend a gentler option that removes no paint, or apply a protective coating only. We'll explain exactly what we found in the measurements."
     steering-wheel-restoration:
-      name: Steering wheel restoration
-      short: We restore worn leather, shiny rims and peeling plastic to their original finish.
-      metaTitle: Steering Wheel Restoration & Retrimming Belgrade | Details
-      metaDescription: 'Steering wheel leather restoration in Belgrade: recolouring, retrimming, plastic and button repairs. Safe removal and refitting with airbag. 2–3 days.'
+      name: Steering Wheel Restoration
+      short: We restore worn leather, a shiny steering wheel rim and peeling plastic to their original condition.
+      metaTitle: Steering Wheel Restoration in Belgrade | Details
+      metaDescription: 'Steering wheel leather restoration in Belgrade: recolouring, reupholstery, plastic and button repairs. Airbag-safe removal and refitting. 2-3 days.'
       heroEyebrow: Interior
-      heroTitle: The first thing you touch. The first to show its age.
-      heroLead: 'Your steering wheel wears faster than the rest of the interior: sweat, sunlight and hand cream can wear away the colour in just a couple of years. Restoration costs a fraction of a new wheel and delivers a factory-style finish.'
-      priceFrom: from €150
+      heroTitle: The first thing you touch. And the first thing to show its age.
+      heroLead: 'The steering wheel wears faster than any other part of the interior: sweat, sun and hand cream can wear away the finish in just a couple of years. Restoration costs far less than a new steering wheel and looks factory-fresh.'
+      priceFrom: from 150 €
       duration: 2–3 days
       bodyHeading: What we do
       body: |
-        First, we carefully remove the complete steering wheel, disconnecting the car battery and airbag safely. What happens next depends on its condition: if the leather is intact and only the colour has worn away, we clean it, restore the grain and recolour it with a finish that will not feel sticky or transfer onto your hands. If the leather is torn or the stitching has come apart, we retrim it and hand-stitch it to match the original pattern.
+        First, we remove the steering wheel carefully, disconnecting the battery and airbag. The next steps depend on its condition: if the leather is intact and only the finish has worn away, we clean it, restore its texture and recolour it with a finish that won't feel sticky or stain your hands. If the leather is torn or the stitching has come apart, we reupholster it with hand stitching that matches the original pattern.
 
-        We also restore the parts around it that tend to wear: peeling buttons, scuffed plastic trim and paddle shifters worn shiny.
+        We also restore parts that commonly wear alongside it: peeling buttons, worn plastic trim around the steering column and glossy paddle shifters.
       includesHeading: What's included
       includes:
-        - Steering wheel removal and refitting with safe airbag handling
-        - Leather cleaning and grain restoration
-        - Recolouring or a full retrim with hand stitching
+        - Steering wheel removal and refitting, with proper airbag handling
+        - Leather cleaning and texture restoration
+        - Recolouring or full reupholstery with hand stitching
         - Button and plastic trim restoration
-        - Colour and stitching style matched to your interior
+        - Colour and stitching matched to your interior
         - Airbag warning light check after reassembly
       forWhomHeading: Who it's for
       forWhom:
-        - The rim has worn smooth and shiny or changed colour
-        - The leather has cracked or split at the seam
-        - You are preparing the car for sale, but the steering wheel gives away its mileage
-        - You want a different material, such as Alcantara on the upper section
-      honestHeading: What to know before you book
-      honest: We do not work on steering wheels with a deployed airbag or signs of an airbag replacement without a documented service history. This is about your safety, not appearance. In that case, have a qualified workshop inspect it before bringing it to us.
+        - The rim is worn through to shiny plastic or has changed colour
+        - The leather is cracked or split along the seam
+        - The car is being prepared for sale and the steering wheel gives away its mileage
+        - You'd like a different material, such as Alcantara on the upper section
+      honestHeading: What to know beforehand
+      honest: We don't work on steering wheels with deployed airbags or signs of airbag replacement without a service history. This is about your safety, not cosmetics. In that case, have it checked by a service centre first, then bring it to us.
 translatedFrom: 9f2055d0e0918a32

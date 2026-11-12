@@ -4,31 +4,31 @@ translations:
   en:
     title: "Car sourcing in Serbia: how we found a BMW 320 GT for Nikita and his wife"
     body: |-
-      Buying a used car in Serbia takes more than browsing listings and going for a quick test drive. With a BMW, you need to check the bodywork, mechanical condition, service history, actual mileage and components that need particular attention on that engine.
+      Buying a used car in Serbia involves more than browsing listings and taking a quick test drive. With a BMW, it's important to check the bodywork and mechanical condition, service history, actual mileage, and components specific to that engine.
 
-      Through our **car sourcing service in Serbia**, we helped Nikita and his wife find a BMW 320 GT that met their needs for comfort, practicality and mechanical condition.
+      As part of our **car sourcing service in Serbia**, we helped Nikita and his wife find a BMW 320 GT that suited them in terms of comfort, practicality, and condition.
 
-      ### BMW 320 GT with the N47 engine
+      ### BMW 320 GT with an N47 engine
 
-      We selected a **BMW 320d Gran Turismo** with a 2.0-litre **N47D20** diesel engine. This version produces **184 hp (135 kW)**.
+      We chose a **BMW 320d Gran Turismo** with a **2.0-liter N47D20 diesel engine**, producing **184 hp (135 kW)**.
 
       Our priority was to make sure this particular car was in good condition.
 
-      We paid particular attention to the **timing chain**. Its condition is a key consideration when buying a car with the N47 engine, so we checked for chain stretch and found no serious issues.
+      We paid special attention to the **timing chain**. Its condition is a key consideration when buying a car with an N47 engine, so we checked for chain stretch and found no critical issues.
 
       ### Full BMW service history
 
-      This car has a **full service history with an authorised BMW dealer**.
+      This car had a **complete service history with an authorized BMW dealer**.
 
-      We checked the service records and cross-referenced the details: the car had been serviced regularly, and its condition was consistent with its documented use.
+      We reviewed the service records and cross-checked the details. The car had been serviced regularly, and the records matched its actual use.
 
-      This is especially important when buying a car in Serbia, where some vehicles have incomplete histories, unclear origins or mileage readings that do not match their actual condition.
+      This is especially important when buying a car in Serbia, where some vehicles have incomplete records, unclear origins, or a stated mileage that doesn't match their actual condition.
 
       ### Originally from Germany, four years in Serbia
 
       The BMW was originally purchased in **Germany** and then driven in Serbia for around four years.
 
-      This gave us a clearer picture of its history, including where it came from and how long it had been used in Serbia.
+      This gives the car a more transparent history: its origin is known, as is how long it has been on the Serbian market.
 
       For the buyer, that means more information about the car and fewer unknowns when making a decision.
 
@@ -36,135 +36,135 @@ translations:
 
       The car came with **two sets of wheels**:
 
-      - summer tyres on their own rims;
-      - winter tyres on their own rims.
+      - a summer set with rims;
+      - a winter set with rims.
 
-      The owners will not need to buy a second set straight after purchase: they are already equipped for both seasons.
+      The new owners won't need to buy a second set right away. They're already equipped for both seasons.
 
-      **The result for Nikita and his wife:** a BMW 320 GT with a 184 hp N47 engine, a full service history with an authorised BMW dealer, verified origins in Germany, four years of use in Serbia, a checked timing chain and two sets of wheels.
+      **The result for Nikita and his wife:** we found a BMW 320 GT with an N47 engine producing 184 hp, a complete service history with an authorized BMW dealer, confirmed German origins, four years of use in Serbia, a checked timing chain, and two sets of wheels.
   sr:
-    title: "Pronalaženje automobila u Srbiji: kako smo pronašli BMW 320 GT za Nikitu i njegovu suprugu"
+    title: "Auto-podbor u Srbiji: kako smo pronašli BMW 320 GT za Nikitu i njegovu suprugu"
     body: |-
-      Kupovina polovnog automobila u Srbiji zahteva više od prelistavanja oglasa i kratke probne vožnje. Kod BMW-a posebnu pažnju treba posvetiti karoseriji i tehničkom stanju, servisnoj istoriji, stvarnoj kilometraži i sklopovima specifičnim za konkretan motor.
+      Kupovina polovnog automobila u Srbiji podrazumeva više od pregledanja oglasa i kratke probne vožnje. Kod BMW-a posebno se proveravaju karoserija i tehničko stanje, istorija održavanja, stvarna kilometraža i komponente karakteristične za konkretan motor.
 
-      U okviru naše usluge **pronalaženja automobila u Srbiji**, pomogli smo Nikiti i njegovoj supruzi da pronađu BMW 320 GT koji im je odgovarao po udobnosti, praktičnosti i tehničkom stanju.
+      U okviru **auto-podbora u Srbiji** pomogli smo Nikiti i njegovoj supruzi da pronađu BMW 320 GT koji im odgovara po udobnosti, praktičnosti i tehničkom stanju.
 
       ### BMW 320 GT sa motorom N47
 
-      Izabrali smo **BMW 320d Gran Turismo** sa dizel motorom **N47D20** zapremine 2,0 litra. Ova verzija razvija **184 KS (135 kW)**.
+      Izabrali smo **BMW 320d Gran Turismo** sa dizel motorom **N47D20** zapremine 2,0 litra. Snaga ove verzije iznosi **184 KS (135 kW)**.
 
-      Bilo nam je važno da kroz proveru auta pre kupovine utvrdimo da je baš ovaj primerak u dobrom stanju.
+      Bilo nam je važno da se uverimo da je baš ovaj primerak u dobrom stanju.
 
-      Posebno smo proverili **razvodni lanac**. Kod motora N47 stanje lanca je jedna od ključnih stavki pri kupovini, pa smo proverili koliko je istegnut i nismo uočili kritične probleme.
+      Posebno smo proverili **lanac razvoda**. Kod motora N47 stanje lanca je veoma važno pri kupovini, pa smo procenili koliko je istegnut i nismo pronašli ozbiljne probleme.
 
-      ### Kompletna servisna istorija BMW-a
+      ### Kompletna istorija održavanja BMW-a
 
       Ovaj automobil ima **kompletnu servisnu istoriju u ovlašćenom BMW servisu**.
 
-      Proverili smo servisnu istoriju i uporedili podatke sa zatečenim stanjem: automobil je redovno održavan, a podaci o korišćenju odgovarali su njegovom stvarnom stanju.
+      Proverili smo istoriju održavanja i uporedili podatke: automobil je redovno servisiran, a informacije o njegovom korišćenju odgovarale su stvarnom stanju.
 
       To je posebno važno pri kupovini automobila u Srbiji, gde se mogu naći vozila sa nepotpunom istorijom, nepoznatim poreklom ili kilometražom koja ne odgovara stvarnom stanju automobila.
 
       ### Automobil iz Nemačke, četiri godine u Srbiji
 
-      BMW je prvobitno kupljen u **Nemačkoj**, a zatim je oko četiri godine vožen u Srbiji.
+      BMW je prvobitno kupljen u **Nemačkoj**, a zatim je oko četiri godine korišćen u Srbiji.
 
-      Kod ovakvog automobila lakše je pratiti istoriju korišćenja: poznato je poreklo, kao i koliko dugo je vožen u Srbiji.
+      Kod takvog automobila istorija korišćenja je jasnija: poznati su i poreklo i period tokom kog je korišćen na srpskom tržištu.
 
-      Za kupca to znači više informacija o automobilu i manje nepoznanica pri donošenju odluke.
+      Kupac tako ima više informacija o vozilu i manje nepoznanica pri donošenju odluke.
 
       ### Dva kompleta točkova
 
       Uz automobil su došla **dva kompleta točkova**:
 
-      - letnje gume na felnama;
-      - zimske gume na felnama.
+      - letnji komplet sa felnama;
+      - zimski komplet sa felnama.
 
-      Novi vlasnici zato ne moraju odmah nakon kupovine da nabavljaju drugi komplet točkova: već su spremni za obe sezone.
+      Novi vlasnici neće morati odmah da kupuju drugi komplet točkova, jer su već spremni i za letnju i za zimsku sezonu.
 
-      **Rezultat potrage za Nikitu i njegovu suprugu:** pronađen je BMW 320 GT sa motorom N47 snage 184 KS, kompletnom servisnom istorijom u ovlašćenom BMW servisu, potvrđenim poreklom iz Nemačke, četiri godine korišćenja u Srbiji, proverenim razvodnim lancem i dva kompleta točkova.
+      **Rezultat za Nikitu i njegovu suprugu:** pronašli smo BMW 320 GT sa motorom N47 snage 184 KS, kompletnom istorijom održavanja u ovlašćenom BMW servisu, potvrđenim poreklom iz Nemačke, četiri godine korišćenja u Srbiji, proverenim lancem razvoda i dva kompleta točkova.
   es:
     title: "Búsqueda de coches en Serbia: cómo encontramos un BMW 320 GT para Nikita y su esposa"
     body: |-
-      Comprar un coche de segunda mano en Serbia requiere algo más que mirar anuncios y hacer una breve prueba de conducción. En un BMW, hay que revisar la carrocería y el estado mecánico, el historial de mantenimiento, el kilometraje real y los componentes específicos de cada motor.
+      Comprar un coche de segunda mano en Serbia requiere más que revisar anuncios y hacer una breve prueba de conducción. En un BMW, hay que prestar especial atención a la carrocería y al estado mecánico, el historial de mantenimiento, el kilometraje real y los componentes característicos de cada motor.
 
-      Como parte de nuestro **servicio de búsqueda de coches en Serbia**, ayudamos a Nikita y a su esposa a encontrar un BMW 320 GT que encajaba con lo que buscaban en comodidad, practicidad y estado mecánico.
+      Como parte de nuestro servicio de **búsqueda de coches en Serbia**, ayudamos a Nikita y a su esposa a encontrar un BMW 320 GT que se ajustaba a lo que buscaban en cuanto a comodidad, practicidad y estado mecánico.
 
       ### BMW 320 GT con motor N47
 
       Elegimos un **BMW 320d Gran Turismo** con motor diésel **N47D20** de 2,0 litros. Esta versión desarrolla **184 CV (135 kW)**.
 
-      Lo importante era comprobar que esta unidad en concreto estuviera en buen estado.
+      Era importante comprobar que este ejemplar concreto estuviera en buen estado.
 
-      Revisamos con especial atención la **cadena de distribución**. En el motor N47, su estado es un punto clave antes de comprar, por lo que evaluamos su grado de estiramiento y no detectamos problemas graves.
+      Revisamos especialmente la **cadena de distribución**. En el motor N47, su estado es fundamental a la hora de comprar, así que evaluamos cuánto se había estirado y no encontramos problemas graves.
 
-      ### Historial de mantenimiento completo en BMW
+      ### Historial de mantenimiento completo de BMW
 
-      Este coche cuenta con un **historial de mantenimiento completo en un concesionario oficial BMW**.
+      Este coche tiene un **historial de mantenimiento completo en un concesionario oficial BMW**.
 
-      Revisamos el historial y contrastamos los datos: el coche había recibido mantenimiento periódico y la información sobre su uso se correspondía con su estado real.
+      Revisamos el historial de mantenimiento y contrastamos los datos: el coche había recibido mantenimiento con regularidad y la información sobre su uso coincidía con su estado real.
 
-      Esto es especialmente importante al comprar un coche en Serbia, donde se pueden encontrar vehículos con un historial incompleto, una procedencia desconocida o un kilometraje anunciado que no concuerda con su estado real.
+      Esto es especialmente importante al comprar un coche en Serbia, donde hay vehículos con historiales incompletos, procedencia desconocida o un kilometraje anunciado que no se corresponde con el estado real del coche.
 
-      ### Un coche procedente de Alemania, con cuatro años de uso en Serbia
+      ### Un coche de Alemania, cuatro años en Serbia
 
-      El BMW se compró originalmente en **Alemania** y después circuló durante unos cuatro años en Serbia.
+      El BMW se compró originalmente en **Alemania** y después se utilizó en Serbia durante unos cuatro años.
 
-      En este caso, la trayectoria del coche resulta más transparente: conocemos tanto su procedencia como el tiempo que lleva en circulación en Serbia.
+      En un coche así, el historial de uso es más transparente: se conocen tanto su procedencia como el tiempo que ha circulado en el mercado serbio.
 
-      Para el comprador, esto supone disponer de más información sobre el vehículo y tener menos incógnitas a la hora de decidir.
+      Para el comprador, esto significa disponer de más información sobre el coche y tener menos incógnitas al tomar una decisión.
 
       ### Dos juegos de ruedas
 
       El coche incluía **dos juegos de ruedas**:
 
-      - un juego de verano con llantas;
-      - un juego de invierno con llantas.
+      - juego de verano con llantas;
+      - juego de invierno con llantas.
 
-      Los propietarios no tendrán que comprar un segundo juego de ruedas nada más adquirir el coche: ya disponen de ambos juegos para cada temporada.
+      Después de la compra, los nuevos propietarios no tendrán que comprar de inmediato un segundo juego de ruedas: ya tienen cubiertas ambas temporadas.
 
-      **Resultado de la búsqueda para Nikita y su esposa:** encontramos un BMW 320 GT con motor N47 de 184 CV, historial de mantenimiento completo en un concesionario oficial BMW, procedencia alemana verificada, cuatro años de uso en Serbia, cadena de distribución revisada y dos juegos de ruedas.
+      **Resultado del caso de Nikita y su esposa:** encontramos un BMW 320 GT con motor N47 de 184 CV, historial de mantenimiento completo en un concesionario oficial BMW, procedencia de Alemania confirmada, cuatro años de uso en Serbia, cadena de distribución revisada y dos juegos de ruedas.
   de:
-    title: "Fahrzeugsuche in Serbien: Wie wir einen BMW 320 GT für Nikita und seine Frau gefunden haben"
+    title: "Autokauf in Serbien: Wie wir für Nikita und seine Frau einen BMW 320 GT gefunden haben"
     body: |-
-      Wer in Serbien einen Gebrauchtwagen kauft, sollte sich nicht mit Inseraten und einer kurzen Probefahrt begnügen. Bei einem BMW prüfen wir neben Karosserie und Technik auch die Wartungshistorie, die tatsächliche Laufleistung und die für den jeweiligen Motor typischen Schwachstellen.
+      Beim Kauf eines Gebrauchtwagens in Serbien reicht es nicht, Anzeigen durchzusehen und eine kurze Probefahrt zu machen. Bei einem BMW prüfen wir die Karosserie und den technischen Zustand, die Wartungshistorie, den tatsächlichen Kilometerstand sowie die für den jeweiligen Motor typischen Bauteile.
 
-      Im Rahmen unserer **Fahrzeugsuche in Serbien** haben wir Nikita und seiner Frau geholfen, einen BMW 320 GT zu finden, der ihre Anforderungen an Komfort, Alltagstauglichkeit und technischen Zustand erfüllte.
+      Im Rahmen unserer **Fahrzeugsuche in Serbien** halfen wir Nikita und seiner Frau, einen BMW 320 GT zu finden, der ihren Ansprüchen an Komfort und Alltagstauglichkeit entsprach und in einem guten technischen Zustand war.
 
       ### BMW 320 GT mit N47-Motor
 
-      Die Wahl fiel auf einen **BMW 320d Gran Turismo** mit dem 2,0-Liter-Dieselmotor **N47D20**. Diese Version leistet **184 PS (135 kW)**.
+      Die Wahl fiel auf einen **BMW 320d Gran Turismo** mit einem 2,0-Liter-Dieselmotor des Typs **N47D20**. Diese Version leistet **184 PS (135 kW)**.
 
-      Uns war wichtig, sicherzustellen, dass sich dieses konkrete Fahrzeug in einem guten Zustand befand.
+      Für uns war es wichtig, sicherzustellen, dass sich genau dieses Fahrzeug in einem guten Zustand befand.
 
-      Besonderes Augenmerk legten wir auf die **Steuerkette**. Ihr Zustand ist beim Kauf eines Fahrzeugs mit N47-Motor entscheidend. Deshalb prüften wir die Kettenlängung und stellten keine kritischen Auffälligkeiten fest.
+      Besonders genau prüften wir die **Steuerkette**. Bei einem N47-Motor ist ihr Zustand beim Kauf entscheidend. Deshalb kontrollierten wir, wie stark sie gelängt war, und stellten keine kritischen Probleme fest.
 
-      ### Lückenlose BMW-Servicehistorie
+      ### Lückenlose BMW-Wartungshistorie
 
-      Das Fahrzeug verfügt über eine **lückenlose Servicehistorie bei einem BMW-Vertragshändler**.
+      Für dieses Fahrzeug lag eine **lückenlose Wartungshistorie bei einem BMW-Vertragshändler** vor.
 
-      Wir prüften die Wartungshistorie und glichen die Angaben ab: Das Fahrzeug war regelmäßig gewartet worden, und die dokumentierte Nutzung passte zum tatsächlichen Zustand.
+      Wir prüften die Wartungshistorie und glichen die Angaben ab: Das Fahrzeug war regelmäßig gewartet worden, und die Informationen zur Nutzung stimmten mit dem tatsächlichen Zustand überein.
 
-      Das ist beim Gebrauchtwagenkauf in Serbien besonders wichtig. Hier werden auch Fahrzeuge mit lückenhafter Historie, unklarer Herkunft oder einem Zustand angeboten, der nicht zur angegebenen Laufleistung passt.
+      Das ist beim Autokauf in Serbien besonders wichtig. Hier gibt es Fahrzeuge mit lückenhafter Historie, unbekannter Herkunft oder einem Kilometerstand, der nicht zum tatsächlichen Zustand des Fahrzeugs passt.
 
       ### Aus Deutschland, seit vier Jahren in Serbien
 
-      Der BMW wurde ursprünglich in **Deutschland** gekauft und anschließend rund vier Jahre in Serbien gefahren.
+      Der BMW wurde ursprünglich in **Deutschland** gekauft und anschließend etwa vier Jahre lang in Serbien gefahren.
 
-      Bei diesem Fahrzeug ließ sich die Nutzungsgeschichte gut nachvollziehen: Sowohl die Herkunft als auch die Dauer der Nutzung in Serbien waren bekannt.
+      Bei einem solchen Fahrzeug lässt sich die Nutzung besser nachvollziehen: Sowohl die Herkunft als auch die Zeit auf dem serbischen Markt sind bekannt.
 
-      Für die Käufer bedeutet das mehr Informationen über das Fahrzeug und weniger offene Fragen bei der Kaufentscheidung.
+      Für den Käufer bedeutet das mehr Informationen über das Fahrzeug und weniger offene Fragen bei der Kaufentscheidung.
 
       ### Zwei Radsätze
 
-      Zum Fahrzeug gehörten **zwei komplette Radsätze**:
+      Zum Fahrzeug gehörten **zwei Radsätze**:
 
-      - Sommerräder auf Felgen;
-      - Winterräder auf Felgen.
+      - ein Sommerradsatz auf Felgen;
+      - ein Winterradsatz auf Felgen.
 
-      Die neuen Besitzer müssen also nicht direkt nach dem Kauf einen zweiten Radsatz anschaffen: Für beide Jahreszeiten ist bereits vorgesorgt.
+      Nach dem Kauf müssen die neuen Besitzer nicht gleich einen zweiten Radsatz kaufen. Beide Saisons sind bereits abgedeckt.
 
-      **Das Ergebnis für Nikita und seine Frau:** Wir haben einen BMW 320 GT mit N47-Motor und 184 PS gefunden, mit lückenloser Servicehistorie bei einem BMW-Vertragshändler, belegter Herkunft aus Deutschland, vier Jahren Nutzung in Serbien, geprüfter Steuerkette und zwei kompletten Radsätzen.
+      **Fazit zum Fall von Nikita und seiner Frau:** Wir fanden einen BMW 320 GT mit einem 184 PS starken N47-Motor, lückenloser Wartungshistorie bei einem BMW-Vertragshändler, bestätigter Herkunft aus Deutschland, vier Jahren Nutzung in Serbien, geprüfter Steuerkette und zwei Radsätzen.
 car: BMW 320GT
 year: 2014
 price:
