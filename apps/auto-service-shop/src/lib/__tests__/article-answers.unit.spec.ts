@@ -12,9 +12,8 @@ const article = {
   description: null,
   specs: {},
   fits: [],
-  category_id: null,
 };
-const categories = [{ id: 'cat_oil', name: 'Масляные фильтры' }];
+const category = { id: 'cat_oil', name: 'Масляные фильтры' };
 
 describe('cached article answers', () => {
   it('answers a repeated article from the cache without asking again', async () => {
@@ -22,18 +21,13 @@ describe('cached article answers', () => {
     fake.name = 'Масляный фильтр MANN-FILTER HU 816 x';
     const { bucket } = memoryBucket();
 
-    const first = await cachedArticleAnswer(
-      fake.ai,
-      bucket,
-      article,
-      categories,
-    );
+    const first = await cachedArticleAnswer(fake.ai, bucket, article, category);
     fake.name = 'Другое имя';
     const second = await cachedArticleAnswer(
       fake.ai,
       bucket,
       article,
-      categories,
+      category,
     );
 
     expect(second).toEqual(first);
@@ -45,16 +39,16 @@ describe('cached article answers', () => {
     const fake = createFakeShopAi();
     const { bucket } = memoryBucket();
 
-    await cachedArticleAnswer(fake.ai, bucket, article, categories);
+    await cachedArticleAnswer(fake.ai, bucket, article, category);
     await cachedArticleAnswer(
       fake.ai,
       bucket,
       { ...article, number: 'W 712' },
-      categories,
+      category,
     );
-    await cachedArticleAnswer(fake.ai, bucket, article, []);
+    await cachedArticleAnswer(fake.ai, bucket, article, null);
     fake.model = 'gpt-4o';
-    await cachedArticleAnswer(fake.ai, bucket, article, categories);
+    await cachedArticleAnswer(fake.ai, bucket, article, category);
 
     expect(fake.articlesAsked).toHaveLength(4);
   });
@@ -62,7 +56,7 @@ describe('cached article answers', () => {
   it('asks again over a stored answer it cannot read', async () => {
     const fake = createFakeShopAi();
     const { bucket, objects } = memoryBucket();
-    await cachedArticleAnswer(fake.ai, bucket, article, categories);
+    await cachedArticleAnswer(fake.ai, bucket, article, category);
     for (const stored of objects.values()) {
       stored.body = Buffer.from('{"name":"Оpruga"}');
     }
@@ -71,7 +65,7 @@ describe('cached article answers', () => {
       fake.ai,
       bucket,
       article,
-      categories,
+      category,
     );
 
     expect(answer.name).toBe('Filter ulja');
@@ -87,7 +81,7 @@ describe('cached article answers', () => {
       { invalid: true },
     );
     const { bucket } = memoryBucket();
-    const ask = () => cachedArticleAnswer(fake.ai, bucket, article, categories);
+    const ask = () => cachedArticleAnswer(fake.ai, bucket, article, category);
 
     await expect(ask()).rejects.toMatchObject({ code: 'ARTICLE_UNREADABLE' });
     await expect(ask()).rejects.toThrow(/Оpruga/u);
@@ -104,7 +98,7 @@ describe('cached article answers', () => {
       { invalid: false },
     );
     const { bucket } = memoryBucket();
-    const ask = () => cachedArticleAnswer(fake.ai, bucket, article, categories);
+    const ask = () => cachedArticleAnswer(fake.ai, bucket, article, category);
 
     await expect(ask()).rejects.toMatchObject({ code: 'ARTICLE_UNREADABLE' });
     await expect(ask()).rejects.toMatchObject({ code: 'ARTICLE_UNREADABLE' });
@@ -116,7 +110,7 @@ describe('cached article answers', () => {
     const fake = createFakeShopAi();
     fake.failure = new Error('OpenAI is down');
     const { bucket } = memoryBucket();
-    const ask = () => cachedArticleAnswer(fake.ai, bucket, article, categories);
+    const ask = () => cachedArticleAnswer(fake.ai, bucket, article, category);
 
     await expect(ask()).rejects.toThrow('OpenAI is down');
     fake.failure = null;
@@ -128,8 +122,8 @@ describe('cached article answers', () => {
   it('asks every time without storage', async () => {
     const fake = createFakeShopAi();
 
-    await cachedArticleAnswer(fake.ai, null, article, categories);
-    await cachedArticleAnswer(fake.ai, null, article, categories);
+    await cachedArticleAnswer(fake.ai, null, article, category);
+    await cachedArticleAnswer(fake.ai, null, article, category);
 
     expect(fake.articlesAsked).toHaveLength(2);
   });

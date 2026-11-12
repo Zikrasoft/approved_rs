@@ -82,7 +82,6 @@ medusaIntegrationTestRunner({
           category: 'IC-BATTERY',
           specs: { Kapacitet: '60 Ah', 'Startna struja': '540 A' },
         });
-        shopAi.category = batteries.id;
         shopAi.name = 'Аккумулятор';
         shopAi.attributes = {
           voltage: 12,

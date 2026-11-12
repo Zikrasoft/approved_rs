@@ -94,7 +94,6 @@ const valuesThatFit = z
 
 export const articleAnswerSchema = z.object({
   name: russianText,
-  category_id: z.string().nullable(),
   attributes: valuesThatFit,
   description: russianText.nullable(),
 });
@@ -126,13 +125,10 @@ export type ArticleFacts = {
   fits: string[];
 };
 
-export type ArticleInput = ArticleFacts & { category_id: string | null };
-
 export type ArticleQuestion = {
   model: string;
   system: string;
   user: string;
-  categoryIds: string[];
 };
 
 export type ShopAi = {
@@ -142,8 +138,8 @@ export type ShopAi = {
     brands: string[],
   ) => Promise<QuoteReading>;
   articleQuestion: (
-    article: ArticleInput,
-    categories: CategoryChoice[],
+    article: ArticleFacts,
+    category: CategoryChoice | null,
   ) => ArticleQuestion;
   answerArticle: (question: ArticleQuestion) => Promise<ArticleAnswer>;
 };

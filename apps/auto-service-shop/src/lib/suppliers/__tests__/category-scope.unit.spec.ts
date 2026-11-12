@@ -15,7 +15,7 @@ describe('categoryScope', () => {
     expect(scopeOf('EDM Filter')).toEqual({ skipped: 'unmapped' });
   });
 
-  it('leaves every article to AI for a supplier that maps no category', () => {
-    expect(categoryScope([])('anything')).toEqual({ categoryId: undefined });
+  it('skips every article of a supplier that maps no category', () => {
+    expect(categoryScope([])('anything')).toEqual({ skipped: 'unmapped' });
   });
 });

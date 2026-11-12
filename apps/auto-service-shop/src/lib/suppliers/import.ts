@@ -36,7 +36,7 @@ import {
   type supplierQuoteSchema,
 } from './adapter';
 import { parseEnv } from '../env';
-import { START_STOP } from '../production-seed';
+import { crawledPartType, START_STOP } from '../production-seed';
 import { batteryName, isBattery } from './part-name';
 import { errorMessage } from '../errors';
 import { emitIndexChanges } from '../index-changes';
@@ -144,6 +144,9 @@ async function categoryChoices(
   }));
 }
 
+const categoryOf = ({ categories }: Context, id: string | null) =>
+  categories.find((category) => category.id === id) ?? null;
+
 async function answerOf(
   context: Context,
   article: Article,
@@ -153,8 +156,8 @@ async function answerOf(
     return await cachedArticleAnswer(
       context.ai,
       context.storage?.pages ?? null,
-      { ...factsOf(article), category_id: categoryId },
-      context.categories,
+      factsOf(article),
+      categoryOf(context, categoryId),
     );
   } catch (error) {
     const reason = errorMessage(error);
@@ -210,49 +213,43 @@ const withBrandAndNumber = (name: string, { brand, number }: Article) =>
     ? name
     : `${name} ${brand} ${number}`;
 
-const batteryCategory = (
-  { categories }: Context,
-  categoryId: string | null | undefined,
-) => isBattery(categories.find(({ id }) => id === categoryId)?.fields ?? []);
-
-const nameOf = (
+const composedName = (
   context: Context,
   article: Article,
-  aiName: string,
-  categoryId: string | null | undefined,
+  categoryId: string | null,
   attributes: Readonly<Record<string, unknown>>,
-) =>
-  batteryCategory(context, categoryId)
-    ? batteryName(attributes, article.brand, article.number)
-    : withBrandAndNumber(aiName, article);
+) => {
+  if (isBattery(categoryOf(context, categoryId)?.fields ?? [])) {
+    return batteryName(attributes, article.brand, article.number);
+  }
+  const type = crawledPartType(context.adapter.key, article.category);
+  return type && `${type} ${article.brand} ${article.number}`;
+};
 
 function classificationOf(
-  { categories, summary }: Context,
+  context: Context,
   article: Article,
-  mappedCategoryId: string | undefined,
+  categoryId: string | null,
   answer: ArticleAnswer | null,
 ): PartClassification {
-  const picked = categories.find(({ id }) => id === answer?.category_id);
-  const categoryId = mappedCategoryId ?? picked?.id ?? null;
-  const category = categories.find(({ id }) => id === categoryId);
+  const category = categoryOf(context, categoryId);
   const fields = category?.fields ?? [];
-  const mapped =
-    answer && categoryId && article.specs && answer.category_id === categoryId;
-  const attributes = mapped
-    ? withStartStop(fields, fittingAttributes(fields, answer.attributes))
-    : {};
+  const attributes =
+    answer && article.specs
+      ? withStartStop(fields, fittingAttributes(fields, answer.attributes))
+      : {};
   const missing = fields.filter(
     ({ key, required }) => required && !(key in attributes),
   );
   if (category && missing.length) {
-    summary.missing_fields.push({
+    context.summary.missing_fields.push({
       number: article.number,
       category: category.name,
       fields: missing.map(({ label }) => label),
     });
     return { category_id: null, attributes: {} };
   }
-  return { category_id: categoryId, attributes };
+  return { category_id: category?.id ?? null, attributes };
 }
 
 const descriptionOf = async (
@@ -281,46 +278,27 @@ const descriptionOf = async (
 const refusedAttributes = (error: unknown) =>
   MedusaError.isMedusaError(error) && error.code === 'INVALID_ATTRIBUTES';
 
-async function filed<T>(
-  classification: PartClassification,
-  write: (attempt: PartClassification) => Promise<T>,
-  unfiled: () => Promise<T>,
-): Promise<{ written: T; categorized: boolean }> {
-  let categorized = Boolean(classification.category_id);
-  const written = await write(classification).catch((error: unknown) => {
-    if (!refusedAttributes(error)) throw error;
-    categorized = false;
-    return unfiled();
-  });
-  return { written, categorized };
-}
-
 async function createPart(
   context: Context,
   article: Article,
   brandId: string,
-  mappedCategoryId: string | undefined,
-): Promise<FoundPart & { categorized: boolean }> {
+  categoryId: string,
+): Promise<FoundPart> {
   const { adapter, catalog } = context;
-  const answer = await answerOf(context, article, mappedCategoryId ?? null);
-  const classification = classificationOf(
+  const answer = await answerOf(context, article, categoryId);
+  const classification = classificationOf(context, article, categoryId, answer);
+  const composed = composedName(
     context,
     article,
-    mappedCategoryId,
-    answer,
+    classification.category_id,
+    classification.attributes,
   );
-  const name = answer
-    ? nameOf(
-        context,
-        article,
-        answer.name,
-        classification.category_id,
-        classification.attributes ?? {},
-      )
-    : article.name;
+  const name =
+    composed ??
+    (answer ? withBrandAndNumber(answer.name, article) : article.name);
   const part = {
     name,
-    source_name: answer && article.name,
+    source_name: composed || answer ? article.name : null,
     description: await descriptionOf(context, article, name, answer),
     identifier: {
       type: 'manufacturer-number' as const,
@@ -332,23 +310,22 @@ async function createPart(
   };
   const create = (attempt: Partial<PartClassification>) =>
     catalog.findOrCreatePart({ ...part, ...attempt });
-  const { written, categorized } = await filed(classification, create, () =>
-    create({}),
-  );
-  return { ...written, categorized };
+  return create(classification).catch((error: unknown) => {
+    if (!refusedAttributes(error)) throw error;
+    return create({});
+  });
 }
 
 async function matchArticle(
   context: Context,
   article: Article,
   brandId: string,
-  categoryId: string | undefined,
+  categoryId: string,
 ): Promise<{
   identifierId: string;
   partId: string;
   created: boolean;
   changedPartId?: string;
-  categorized?: boolean;
 } | null> {
   const { adapter, catalog } = context;
   const [hit] = await catalog.listPartIdentifiers(
@@ -365,10 +342,7 @@ async function matchArticle(
       identifierId: found.part_identifier_id,
       partId: found.part_id,
       created: found.created,
-      ...(found.created && {
-        changedPartId: found.part_id,
-        categorized: found.categorized,
-      }),
+      ...(found.created && { changedPartId: found.part_id }),
     };
   }
   const { part } = hit;
@@ -381,59 +355,51 @@ async function matchArticle(
   }
   const edited = new Set(part.edited_fields);
   const fileable = !part.category_id && !edited.has('category_id');
-  const answer = lazily(() =>
-    answerOf(
-      context,
-      article,
-      part.category_id ?? (fileable ? (categoryId ?? null) : null),
-    ),
-  );
-  const classification = fileable
-    ? classificationOf(context, article, categoryId, await answer())
-    : undefined;
+  const classifiedUnder = part.category_id ?? (fileable ? categoryId : null);
+  const answer = lazily(() => answerOf(context, article, classifiedUnder));
+  const refreshable =
+    Boolean(part.category_id) &&
+    !edited.has('attributes') &&
+    Boolean(article.specs) &&
+    Boolean(categoryOf(context, part.category_id)?.fields?.length);
+  const classification =
+    fileable || (refreshable && (await answer()))
+      ? classificationOf(context, article, classifiedUnder, await answer())
+      : undefined;
   const nameable = !edited.has('name') && !context.matched.has(hit.id);
-  const categoryOfPart = classification?.category_id ?? part.category_id;
-  const attributesOfPart = classification?.attributes ?? part.attributes ?? {};
-  const composed =
-    nameable && batteryCategory(context, categoryOfPart)
-      ? batteryName(attributesOfPart, article.brand, article.number)
-      : null;
+  const composed = nameable
+    ? composedName(
+        context,
+        article,
+        classification?.category_id ?? part.category_id,
+        classification?.attributes ?? part.attributes ?? {},
+      )
+    : null;
   const renaming =
     composed || !nameable || part.source_name === article.name
       ? null
       : await answer();
   const name =
     (composed !== part.name && composed) ||
-    (renaming &&
-      nameOf(
-        context,
-        article,
-        renaming.name,
-        categoryOfPart,
-        attributesOfPart,
-      ));
+    (renaming && withBrandAndNumber(renaming.name, article));
   const description =
     edited.has('description') || part.description
       ? null
       : await descriptionOf(
           context,
           article,
-          name ?? part.name,
+          name || part.name,
           await answer(),
         );
   if (!classification && !name && !description) {
     return unchanged;
   }
-  const { changed, categorized } = await catalog.applySourceChange(part.id, {
+  const { changed } = await catalog.applySourceChange(part.id, {
     ...(name && { name, source_name: article.name }),
     ...(description && { description }),
     classification,
   });
-  return {
-    ...unchanged,
-    categorized,
-    ...(changed && { changedPartId: part.id }),
-  };
+  return { ...unchanged, ...(changed && { changedPartId: part.id }) };
 }
 
 async function storeOffer(
@@ -451,7 +417,7 @@ async function storeOffer(
 }
 
 async function stagedImages(
-  { scope, storage, logger }: Context,
+  { scope, storage, logger, summary }: Context,
   images: string[],
 ): Promise<{ items: string[]; sources?: Record<string, string> }> {
   if (!storage) return { items: images };
@@ -459,6 +425,7 @@ async function stagedImages(
   for (const source of images) {
     const mirrored = await mirroredImage(scope, storage, source, logger);
     if (mirrored) sources[mirrored] ??= source;
+    else summary.images_failed += 1;
   }
   return { items: Object.keys(sources), sources };
 }
@@ -494,7 +461,7 @@ async function importArticle(
   { tally, listed, changedPartIds }: ImportState,
   article: Article,
   brandId: string,
-  categoryId: string | undefined,
+  categoryId: string,
   quote: Quote | undefined,
 ): Promise<void> {
   const match = await matchArticle(context, article, brandId, categoryId);
@@ -502,7 +469,7 @@ async function importArticle(
     tally.skip('rejected');
     return;
   }
-  const { identifierId, partId, created, changedPartId, categorized } = match;
+  const { identifierId, partId, created, changedPartId } = match;
   context.matched.add(identifierId);
   if (changedPartId) {
     changedPartIds.add(changedPartId);
@@ -527,9 +494,6 @@ async function importArticle(
       article.vehicles.filter(({ engine_codes }) => !engine_codes.length)
         .length,
     );
-  }
-  if (categorized === false) {
-    tally.summary.needs_category.push(article.number);
   }
   tally.imported(
     created
@@ -631,19 +595,19 @@ export async function importSupplier(
   );
   const brandOfArticle = (article: Article) =>
     brandOf.get(nameKey(article.brand));
-  const categoryOfArticle = (article: Article) => {
-    const decision = scopeOf(article.category);
-    return 'categoryId' in decision ? decision.categoryId : undefined;
-  };
   const state: ImportState = {
     tally,
     listed: new Set(),
     listedBrandNumbers: new Set(),
     changedPartIds: new Set(),
   };
+  const categoryOfArticle = new Map<Article, string>();
   const inScope = (article: Article) => {
     const decision = scopeOf(article.category);
-    if (!('skipped' in decision)) return true;
+    if ('categoryId' in decision) {
+      categoryOfArticle.set(article, decision.categoryId);
+      return true;
+    }
     if (decision.skipped === 'unmapped') tally.unmapped(article.category);
     else tally.skip('excluded');
     return false;
@@ -690,7 +654,7 @@ export async function importSupplier(
           state,
           article,
           brandOfArticle(article)!,
-          categoryOfArticle(article),
+          categoryOfArticle.get(article)!,
           quotes.get(article.article_id),
         );
       } catch (error) {

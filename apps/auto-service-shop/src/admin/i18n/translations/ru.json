@@ -195,7 +195,7 @@
     "importWithoutEngineCode": "Строк применимости без кода двигателя, подобраны к поколению модели: {{count}}.",
     "importRejected": "Пропущено номеров, удаленных из каталога сотрудниками: {{count}}.",
     "importWithoutNumber": "Пропущено товаров без латинских букв и цифр в номере: {{count}}.",
-    "importWithoutCategory": "Добавлены без категории: {{count}}.",
+    "importImagesFailed": "Картинок не скопировано, повтор через неделю: {{count}}.",
     "importWithoutCategoryLink": "Открыть в «Запчастях»",
     "importMissingFields": "Не разложены по категориям, нет обязательного поля: {{articles}}. Заполните его в разделе «Запчасти».",
     "importUnanswered": "ИИ не ответил, оставлено название поставщика: {{articles}}.",

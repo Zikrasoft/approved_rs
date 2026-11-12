@@ -1,3 +1,5 @@
+import { isDeepStrictEqual } from 'node:util';
+
 import type { SqlEntityManager } from '@medusajs/framework/mikro-orm/postgresql';
 import type { Context } from '@medusajs/framework/types';
 import {
@@ -113,12 +115,14 @@ export type SourceChange = {
   classification?: PartClassification;
 };
 
-export type AppliedSourceChange = {
-  changed: boolean;
-  categorized?: boolean;
-};
+export type AppliedSourceChange = { changed: boolean };
 
-const STAFF_OWNED_FIELDS = ['name', 'description', 'category_id'] as const;
+const STAFF_OWNED_FIELDS = [
+  'name',
+  'description',
+  'category_id',
+  'attributes',
+] as const;
 
 const definedOf = <Row extends object>(row: Row): Partial<Row> =>
   Object.fromEntries(
@@ -1518,7 +1522,7 @@ class CatalogModuleService extends CatalogModuleBase {
       { select: ['category_id', 'attributes', 'edited_fields'] },
       sharedContext,
     );
-    const edit = { ...columns, category_id };
+    const edit = { ...columns, category_id, attributes };
     await this.updateParts(
       {
         id,
@@ -1562,7 +1566,7 @@ class CatalogModuleService extends CatalogModuleBase {
     await this.lockRow('part', id, sharedContext);
     const part = await this.retrievePart(
       id,
-      { select: ['category_id', 'description', 'edited_fields'] },
+      { select: ['category_id', 'attributes', 'description', 'edited_fields'] },
       sharedContext,
     );
     const owned = new Set(part.edited_fields);
@@ -1576,35 +1580,52 @@ class CatalogModuleService extends CatalogModuleBase {
         !owned.has('description') &&
         !part.description && { description: change.description }),
     };
-    const categorized =
-      classification && !part.category_id && !owned.has('category_id')
-        ? await this.fileFromSource(id, classification, sharedContext)
-        : undefined;
+    const fileable = !part.category_id && !owned.has('category_id');
+    const refreshable =
+      Boolean(part.category_id) &&
+      classification?.category_id === part.category_id &&
+      !owned.has('attributes');
+    const classified =
+      classification && (fileable || refreshable)
+        ? await this.classifyFromSource(id, classification, part, sharedContext)
+        : false;
     const renamed = Object.keys(columns).length > 0;
     if (renamed) {
       await this.updateParts({ id, ...columns }, sharedContext);
     }
-    return { changed: renamed || categorized === true, categorized };
+    return { changed: renamed || classified };
   }
 
-  private async fileFromSource(
+  private async classifyFromSource(
     id: string,
     classification: PartClassification,
+    current: PartClassification,
     sharedContext: Context,
   ): Promise<boolean> {
     if (!classification.category_id) return false;
-    return this.classifyPart(id, classification, sharedContext).then(
-      () => true,
-      (error: unknown) => {
-        if (
-          MedusaError.isMedusaError(error) &&
-          error.code === 'INVALID_ATTRIBUTES'
-        ) {
-          return false;
-        }
-        throw error;
-      },
-    );
+    try {
+      const values = await this.classifiedAttributes(
+        classification.category_id,
+        classification.attributes,
+        sharedContext,
+      );
+      if (
+        classification.category_id === current.category_id &&
+        isDeepStrictEqual(values, current.attributes)
+      ) {
+        return false;
+      }
+      await this.classifyPart(id, classification, sharedContext);
+      return true;
+    } catch (error) {
+      if (
+        MedusaError.isMedusaError(error) &&
+        error.code === 'INVALID_ATTRIBUTES'
+      ) {
+        return false;
+      }
+      throw error;
+    }
   }
 
   @InjectTransactionManager()

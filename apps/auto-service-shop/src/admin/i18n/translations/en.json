@@ -187,7 +187,7 @@
     "importWithoutEngineCode": "Applicability rows without an engine code, fitted to the model generation: {{count}}.",
     "importRejected": "Skipped as numbers staff deleted from the catalogue: {{count}}.",
     "importWithoutNumber": "Skipped as numbers with no Latin letter or digit: {{count}}.",
-    "importWithoutCategory": "Added without a Category: {{count}}.",
+    "importImagesFailed": "Images not copied, retried in a week: {{count}}.",
     "importWithoutCategoryLink": "Open in Parts",
     "importMissingFields": "Not filed, a required field is missing: {{articles}}. Fill it under Parts.",
     "importUnanswered": "AI gave no answer, kept the supplier name: {{articles}}.",

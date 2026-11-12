@@ -32,7 +32,6 @@ const importSummarySchema = z.object({
   unmapped_categories: z
     .array(z.object({ code: z.string(), count: z.number() }))
     .default([]),
-  needs_category: z.array(z.string()),
   missing_fields: z
     .array(
       z.object({
@@ -42,6 +41,7 @@ const importSummarySchema = z.object({
       }),
     )
     .default([]),
+  images_failed: count,
   unanswered: z
     .array(z.object({ number: z.string(), reason: z.string() }))
     .default([]),
@@ -107,10 +107,8 @@ const useSummaryLines = () => {
         }),
       skipped.no_make > 0 &&
         t('suppliers.importWithoutMake', { count: skipped.no_make }),
-      summary.needs_category.length > 0 &&
-        t('suppliers.importWithoutCategory', {
-          count: summary.needs_category.length,
-        }),
+      summary.images_failed > 0 &&
+        t('suppliers.importImagesFailed', { count: summary.images_failed }),
       summary.missing_fields.length > 0 &&
         t('suppliers.importMissingFields', {
           articles: summary.missing_fields
@@ -164,7 +162,7 @@ export const ImportRunReport = ({ run }: { run: ImportRun }) => {
           {line}
         </Text>
       ))}
-      {run.status !== 'running' && run.report?.needs_category.length ? (
+      {run.status !== 'running' && run.report?.missing_fields.length ? (
         <Link
           to="/parts?category=none"
           className="txt-small text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
