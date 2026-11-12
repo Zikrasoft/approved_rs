@@ -8,6 +8,8 @@ runs:
     # source of truth (a hardcoded version here previously drifted out of
     # sync between workflow files, breaking pnpm/action-setup outright).
     - uses: pnpm/action-setup@v4
+      with:
+        dest: ${{ runner.temp }}/setup-pnpm
 
     - uses: actions/setup-node@v4
       with:

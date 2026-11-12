@@ -30,10 +30,10 @@ awk -v placeholder=ci-placeholder-of-thirty-two-characters '
       if (!(order[i] in written)) print order[i] "=" stack[order[i]]
     }
   }
-' - "$template" <<'STACK'
-DATABASE_URL=postgres://postgres:postgres@127.0.0.1:55432/medusa
+' - "$template" <<STACK
+DATABASE_URL=postgres://postgres:postgres@127.0.0.1:${SHOP_TEST_DB_PORT:-55432}/medusa
 TYPESENSE_HOST=127.0.0.1
-TYPESENSE_PORT=58108
+TYPESENSE_PORT=${SHOP_TEST_TYPESENSE_PORT:-58108}
 TYPESENSE_API_KEY=xyz
 FILE_URL=https://carlab-public.s3.eu-central-1.amazonaws.com
 S3_ENDPOINT=
