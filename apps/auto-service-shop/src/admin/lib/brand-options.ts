@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { spellingKey } from '../../modules/_shared/spelling';
+import { nameKey } from '../../modules/_shared/keys';
 
 export const brandOptionsSchema = z.object({
   brands: z.array(
@@ -14,13 +14,13 @@ export const brandOptionsSchema = z.object({
 export type BrandOption = z.infer<typeof brandOptionsSchema>['brands'][number];
 
 export const isNewBrand = (typed: string, brands: BrandOption[]): boolean => {
-  const key = spellingKey(typed);
+  const key = nameKey(typed);
   return (
     key !== '' &&
     !brands.some(
       (brand) =>
-        spellingKey(brand.name) === key ||
-        brand.spellings.some(({ value }) => spellingKey(value) === key),
+        nameKey(brand.name) === key ||
+        brand.spellings.some(({ value }) => nameKey(value) === key),
     )
   );
 };

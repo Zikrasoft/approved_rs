@@ -11,7 +11,7 @@ import {
 import type { PartOffer, STAGED_DATA_KINDS } from '@podbor/catalog-contract';
 
 import { runBoundSql } from '../_shared/bound-sql';
-import { spellingKey } from '../_shared/spelling';
+import { nameKey } from '../_shared/keys';
 
 import StagedRecord from './models/staged-record';
 import Supplier from './models/supplier';
@@ -32,7 +32,7 @@ type CodeInput = { code: string } & Record<string, unknown>;
 
 const withCodeKey = (row: CodeInput) => ({
   ...row,
-  code_key: spellingKey(row.code),
+  code_key: nameKey(row.code),
 });
 
 export type SupplierOfferInput = {

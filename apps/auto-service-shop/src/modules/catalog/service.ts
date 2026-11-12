@@ -32,6 +32,7 @@ import Fitment from './models/fitment';
 import Make from './models/make';
 import MakeSpelling from './models/make-spelling';
 import Part from './models/part';
+import RejectedNumber from './models/rejected-number';
 import Requirement from './models/requirement';
 import PartIdentifier, {
   type PART_IDENTIFIER_TYPES,
@@ -46,7 +47,7 @@ import { runBoundSql } from '../_shared/bound-sql';
 import { chunksOf } from '../_shared/chunks';
 import { keysetPages } from '../_shared/keyset-pages';
 import { modelSlugOf, slugOf, vehicleSlugOf } from '../_shared/slug';
-import { spellingKey } from '../_shared/spelling';
+import { nameKey } from '../_shared/keys';
 import {
   countRowsBySource,
   lockSourcedRows,
@@ -212,10 +213,10 @@ export type VehicleFilter = {
 
 type FilteredVehicle = {
   model_id: string;
-  engine_id: string;
+  engine_id: string | null;
   year_from: number | null;
   year_to: number | null;
-  engine: { family: string };
+  engine: { family: string } | null;
   model: {
     chassis_id: string;
     chassis: { series_id: string; series: { make_id: string } };
@@ -231,7 +232,7 @@ export const matchesFilter =
       [filter.chassis_id, model.chassis_id],
       [filter.model_id, vehicle.model_id],
       [filter.engine_id, vehicle.engine_id],
-      [filter.engine_family, engine.family],
+      [filter.engine_family, engine?.family],
     ].every(([wanted, actual]) => wanted === undefined || wanted === actual) &&
     (filter.year_from === undefined ||
       vehicle.year_to === null ||
@@ -266,7 +267,7 @@ const VEHICLE_IDENTITY = [
 
 export type NewVehicle = Provenance & {
   model_id: string;
-  engine_id: string;
+  engine_id: string | null;
   power_kw?: number | null;
   drive?: (typeof VEHICLE_DRIVES)[number] | null;
   market?: string | null;
@@ -363,6 +364,7 @@ const CatalogModuleBase = MedusaService({
   VehicleIdentifier,
   Fitment,
   Requirement,
+  RejectedNumber,
   SlugRedirect,
 });
 
@@ -372,7 +374,7 @@ type SpellingInput = { value: string } & Record<string, unknown>;
 
 const withValueKey = (row: SpellingInput) => ({
   ...row,
-  value_key: spellingKey(row.value),
+  value_key: nameKey(row.value),
 });
 
 class CatalogModuleService extends CatalogModuleBase {
@@ -470,13 +472,24 @@ class CatalogModuleService extends CatalogModuleBase {
       });
     }
     if (kind === 'vehicle') {
-      const engine = await this.retrieveEngine(
-        String(row.engine_id),
-        { select: ['code'] },
-        context,
-      );
+      const engine =
+        typeof row.engine_id === 'string'
+          ? await this.retrieveEngine(
+              row.engine_id,
+              { select: ['code'] },
+              context,
+            )
+          : null;
+      const model = engine
+        ? null
+        : await this.retrieveVehicleModel(
+            String(row.model_id),
+            { select: ['name'] },
+            context,
+          );
       return vehicleSlugOf({
-        engine: engine.code,
+        engine: engine?.code ?? null,
+        variant: model?.name ?? '',
         power_kw: typeof row.power_kw === 'number' ? row.power_kw : null,
       });
     }
@@ -915,6 +928,7 @@ class CatalogModuleService extends CatalogModuleBase {
     await this.refuseUnknownBrands(identifiers, sharedContext);
     await this.lockNumbers(identifiers, sharedContext);
     await this.refuseTakenNumbers(identifiers, sharedContext);
+    await this.takeBackRejectedNumbers(identifiers, sharedContext);
     const created = await this.createParts(
       {
         name,
@@ -962,6 +976,19 @@ class CatalogModuleService extends CatalogModuleBase {
         created: false,
       };
     }
+    if (
+      await this.isRejectedNumber(
+        identifier.brand_id,
+        identifier.value,
+        sharedContext,
+      )
+    ) {
+      throw adminError(
+        MedusaError.Types.NOT_ALLOWED,
+        'REJECTED_NUMBER',
+        `${identifier.value} was deleted from the catalogue by staff`,
+      );
+    }
     const partId = await this.createPartWithIdentifiers(
       { ...part, identifiers: [identifier] },
       sharedContext,
@@ -972,6 +999,113 @@ class CatalogModuleService extends CatalogModuleBase {
       sharedContext,
     );
     return { part_id: partId, part_identifier_id: created.id, created: true };
+  }
+
+  @InjectManager()
+  async isRejectedNumber(
+    brandId: string,
+    value: string,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<boolean> {
+    const [, count] = await this.listAndCountRejectedNumbers(
+      { brand_id: brandId, normalized_value: normalizePartNumber(value) },
+      { select: ['id'], take: 1 },
+      sharedContext,
+    );
+    return count > 0;
+  }
+
+  @InjectTransactionManager()
+  async deletePartRejectingNumbers(
+    id: string,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<void> {
+    const identifiers = await this.listPartIdentifiers(
+      { part_id: id },
+      { select: ['brand_id', 'normalized_value'], take: null },
+      sharedContext,
+    );
+    const rejected = identifiers.length
+      ? await this.listRejectedNumbers(
+          {
+            $or: identifiers.map(({ brand_id, normalized_value }) => ({
+              brand_id,
+              normalized_value,
+            })),
+          },
+          { select: ['brand_id', 'normalized_value'], take: null },
+          sharedContext,
+        )
+      : [];
+    const known = new Set(
+      rejected.map((row) => `${row.brand_id} ${row.normalized_value}`),
+    );
+    const fresh = identifiers.filter(
+      (row) => !known.has(`${row.brand_id} ${row.normalized_value}`),
+    );
+    if (fresh.length) {
+      await this.createRejectedNumbers(
+        fresh.map(({ brand_id, normalized_value }) => ({
+          brand_id,
+          normalized_value,
+        })),
+        sharedContext,
+      );
+    }
+    await this.deleteParts(id, sharedContext);
+  }
+
+  private async takeBackRejectedNumbers(
+    identifiers: NewPartIdentifier[],
+    context: Context,
+  ): Promise<void> {
+    const rejected = await this.listRejectedNumbers(
+      {
+        $or: identifiers.map(({ brand_id, value }) => ({
+          brand_id,
+          normalized_value: normalizePartNumber(value),
+        })),
+      },
+      { select: ['id'], take: null },
+      context,
+    );
+    if (rejected.length) {
+      await this.softDeleteRejectedNumbers(
+        rejected.map(({ id }) => id),
+        {},
+        context,
+      );
+    }
+  }
+
+  @InjectManager()
+  async brandByAnyName(
+    name: string,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<{ id: string; name: string; slug: string } | null> {
+    const key = nameKey(name);
+    const named = (
+      await this.listBrands(
+        {},
+        { select: ['id', 'name', 'slug'], take: null },
+        sharedContext,
+      )
+    ).find((brand) => nameKey(brand.name) === key);
+    if (named) return named;
+    const spellings = await this.listBrandSpellings(
+      { value_key: key },
+      { relations: ['brand'], take: null },
+      sharedContext,
+    );
+    const spelled =
+      spellings.find(({ supplier_id }) => supplier_id === null) ?? spellings[0];
+    return spelled
+      ? {
+          id: spelled.brand.id,
+          name: spelled.brand.name,
+          slug: spelled.brand.slug,
+        }
+      : null;
   }
 
   @InjectTransactionManager()
@@ -1032,6 +1166,7 @@ class CatalogModuleService extends CatalogModuleBase {
     await this.refuseUnknownBrands([identifier], sharedContext);
     await this.lockNumbers([identifier], sharedContext);
     await this.refuseTakenNumbers([identifier], sharedContext);
+    await this.takeBackRejectedNumbers([identifier], sharedContext);
     await this.createPartIdentifiers(
       {
         ...identifier,

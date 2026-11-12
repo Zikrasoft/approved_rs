@@ -23,10 +23,11 @@ const importSummarySchema = z.object({
     excluded: count,
     currency: z.number(),
     unreadable: z.number(),
-    no_engine_code: z.number(),
     no_make: count,
     not_in_scope: z.number(),
+    rejected: count,
   }),
+  without_engine_code: count,
   unmapped_categories: z
     .array(z.object({ code: z.string(), count: z.number() }))
     .default([]),
@@ -95,9 +96,11 @@ const useSummaryLines = () => {
         t('suppliers.importNotInScope', { count: skipped.not_in_scope }),
       skipped.currency > 0 &&
         t('suppliers.importWithoutPrice', { count: skipped.currency }),
-      skipped.no_engine_code > 0 &&
+      skipped.rejected > 0 &&
+        t('suppliers.importRejected', { count: skipped.rejected }),
+      summary.without_engine_code > 0 &&
         t('suppliers.importWithoutEngineCode', {
-          count: skipped.no_engine_code,
+          count: summary.without_engine_code,
         }),
       skipped.no_make > 0 &&
         t('suppliers.importWithoutMake', { count: skipped.no_make }),

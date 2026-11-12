@@ -36,7 +36,10 @@ medusaIntegrationTestRunner({
           await post('/admin/series', {
             make_id: make.id,
             name: '5 серия',
-            translations: { sr: 'Serija 5', en: '5 Series' },
+            translations: {
+              sr: { name: 'Serija 5' },
+              en: { name: '5 Series' },
+            },
           })
         ).data.series;
         const chassis = (

@@ -104,8 +104,16 @@ export const HAND_WRITTEN_TYPES: Record<string, string> = {
 
 const UNIQUE_ACROSS_NULLS =
   /^CREATE UNIQUE INDEX .* NULLS NOT DISTINCT WHERE \(deleted_at IS NULL\)$/;
-const ON_NAME_KEY =
-  /^CREATE UNIQUE INDEX .*upper\(regexp_replace\(btrim\(NORMALIZE\(name, NFKC\)\)/;
+const containing = (text: string) =>
+  new RegExp(text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+const withoutMarks = (column: string) =>
+  `regexp_replace(NORMALIZE(${column}, NFKD), '[\\u0300-\\u036f]'::text, ''::text, 'g'::text)`;
+const ON_NAME_KEY = containing(
+  `upper(btrim(regexp_replace(${withoutMarks('name')}, '[\\s._-]+'::text, ' '::text, 'g'::text)))`,
+);
+const ON_CODE_KEY = containing(
+  `upper(regexp_replace(${withoutMarks('code')}, '[\\s.-]+'::text, ''::text, 'g'::text))) WHERE (deleted_at IS NULL)`,
+);
 const OVER_TOMBSTONES_TOO = /^CREATE INDEX .* USING btree \([^)]*\)$/;
 const TRIGRAM = /USING gin .*gin_trgm_ops/;
 
@@ -116,6 +124,8 @@ export const HAND_WRITTEN_INDEXES: Record<string, RegExp> = {
   IDX_make_name_key_unique: ON_NAME_KEY,
   IDX_category_name_key_unique: ON_NAME_KEY,
   IDX_series_make_id_name_key_unique: ON_NAME_KEY,
+  IDX_engine_code_key_unique: ON_CODE_KEY,
+  IDX_chassis_series_id_code_key_unique: ON_CODE_KEY,
   IDX_fitment_part_vehicle_all: OVER_TOMBSTONES_TOO,
   IDX_fitment_vehicle_all: OVER_TOMBSTONES_TOO,
   IDX_vehicle_model_name_trigram: TRIGRAM,
@@ -139,6 +149,7 @@ export const HAND_WRITTEN_CONSTRAINTS: Record<string, RegExp> = {
   supplier_markup_percentage:
     /^CHECK \(\(markup_percentage >= \(0\)::numeric\)\)$/,
   part_category_id_foreign: / ON DELETE RESTRICT$/,
+  vehicle_engine_id_foreign: / ON DELETE RESTRICT$/,
 };
 
 const signature = (type: string, nullable: boolean) =>

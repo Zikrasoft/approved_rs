@@ -106,7 +106,7 @@ async function seedVehiclesAndFitment(
   const series = await catalog.createSeries({
     make_id: make.id,
     name: '3 серия',
-    translations: { sr: 'Serija 3', en: '3 Series' },
+    translations: { sr: { name: 'Serija 3' }, en: { name: '3 Series' } },
   });
   const chassis = await catalog.createChassis({
     series_id: series.id,

@@ -15,7 +15,7 @@ import {
 import type { SupplierAdapterName } from './env';
 import { slugOf } from '../modules/_shared/slug';
 import { MAKE_ALIASES } from './suppliers/makes';
-import { spellingKey } from '../modules/_shared/spelling';
+import { nameKey } from '../modules/_shared/keys';
 import { CATALOG_MODULE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../modules/supplier';
@@ -438,6 +438,38 @@ const CRAWLED_CATALOGUES: Record<
   },
 };
 
+export const GLOBAL_BRAND_ALIASES: Record<string, string[]> = {
+  Bosch: ['Robert Bosch'],
+  Elring: ['ElringKlinger', 'Elring Klinger'],
+  FILTRON: [],
+  Febi: ['febi bilstein'],
+  SWAG: [],
+  'Blue Print': ['Blueprint'],
+  'MANN-FILTER': ['MANN'],
+  MAHLE: ['Knecht', 'MAHLE Knecht', 'MAHLE Original'],
+  Hengst: [],
+  Meyle: [],
+  TRW: ['TRW Automotive', 'ZF TRW'],
+  KYB: ['Kayaba'],
+  Continental: ['ContiTech'],
+  INA: [],
+  HEPU: [],
+  Lemförder: ['Lemfoerder'],
+  Corteco: [],
+  Bosal: [],
+  'Victor Reinz': ['Reinz'],
+  Delphi: ['Delphi Technologies'],
+  Dayco: [],
+  Gates: [],
+  SKF: [],
+  Valeo: [],
+  Sachs: ['ZF Sachs'],
+  LUK: [],
+  NGK: [],
+  Denso: [],
+  VARTA: [],
+};
+
 const CRAWLED_SUPPLIER = { released_kinds: [...STAGED_DATA_KINDS] };
 
 async function seedCrawledSupplier(
@@ -474,9 +506,7 @@ async function seedNamed<Row extends Seeded & { name: string; slug: string }>(
 ) {
   const rows = await list();
   const row =
-    rows.find(
-      (candidate) => spellingKey(candidate.name) === spellingKey(name),
-    ) ??
+    rows.find((candidate) => nameKey(candidate.name) === nameKey(name)) ??
     rows.find(({ slug }) => slug === slugOf(name)) ??
     rows.find(({ id }) => id === spelledId);
   return upsert(row, { name }, () => create({ name }), update);
@@ -489,7 +519,7 @@ const spelledOwner = <Row extends Seeded & { value_key: string }>(
 ) => {
   const row = existing.find(
     (candidate) =>
-      candidate.value_key === spellingKey(value) && !candidate.deleted_at,
+      candidate.value_key === nameKey(value) && !candidate.deleted_at,
   );
   return row && owner(row);
 };
@@ -505,7 +535,7 @@ async function seedSpellings<
 ) {
   for (const [value, owner] of wanted) {
     await upsert(
-      liveFirst(existing, ({ value_key }) => value_key === spellingKey(value)),
+      liveFirst(existing, ({ value_key }) => value_key === nameKey(value)),
       owner,
       () => create(value, owner),
       update,
@@ -594,7 +624,7 @@ async function seedCrawledCatalogues(container: MedusaContainer) {
     ];
     for (const [code, category_id] of wanted) {
       await upsert(
-        liveFirst(mapped, ({ code_key }) => code_key === spellingKey(code)),
+        liveFirst(mapped, ({ code_key }) => code_key === nameKey(code)),
         { category_id },
         () =>
           suppliers.createSupplierCategories({
@@ -606,6 +636,34 @@ async function seedCrawledCatalogues(container: MedusaContainer) {
       );
     }
   }
+}
+
+async function seedGlobalBrandAliases(container: MedusaContainer) {
+  const catalog: CatalogModuleService = container.resolve(CATALOG_MODULE);
+  const seeded = await catalog.listBrandSpellings(
+    { supplier_id: null },
+    WITH_DELETED,
+  );
+  const aliases: [string, { brand_id: string }][] = [];
+  for (const [name, values] of Object.entries(GLOBAL_BRAND_ALIASES)) {
+    const brand = await seedNamed(
+      name,
+      values
+        .map((value) => spelledOwner(seeded, value, (row) => row.brand_id))
+        .find(Boolean),
+      () => catalog.listBrands({}, { take: null }),
+      (data) => catalog.createBrands(data),
+      (update) => catalog.updateBrands(update),
+    );
+    for (const value of values) aliases.push([value, { brand_id: brand.id }]);
+  }
+  await seedSpellings(
+    seeded,
+    aliases,
+    (value, owner) =>
+      catalog.createBrandSpellings({ supplier_id: null, value, ...owner }),
+    (update) => catalog.updateBrandSpellings(update),
+  );
 }
 
 export async function seedProductionCatalogue(
@@ -643,4 +701,5 @@ export async function seedProductionCatalogue(
     await catalog.updateCategories({ id: row.id, ...category, image });
   }
   await seedCrawledCatalogues(container);
+  await seedGlobalBrandAliases(container);
 }

@@ -1,4 +1,4 @@
-import { spellingKey } from '../../modules/_shared/spelling';
+import { nameKey } from '../../modules/_shared/keys';
 
 const ARTICLE_SKIPS = [
   'brand',
@@ -6,9 +6,10 @@ const ARTICLE_SKIPS = [
   'excluded',
   'unreadable',
   'not_in_scope',
+  'rejected',
 ] as const;
 
-const ROW_SKIPS = ['currency', 'no_engine_code', 'no_make'] as const;
+const ROW_SKIPS = ['currency', 'no_make'] as const;
 
 export type SkipReason =
   (typeof ARTICLE_SKIPS)[number] | (typeof ROW_SKIPS)[number];
@@ -24,6 +25,7 @@ export type ImportSummary = {
   unchanged: number;
   skipped: number;
   skipped_by_reason: Record<SkipReason, number>;
+  without_engine_code: number;
   unmapped_categories: { code: string; count: number }[];
   needs_category: string[];
   missing_fields: { number: string; category: string; fields: string[] }[];
@@ -41,6 +43,7 @@ export const importTally = (supplier: string) => {
     skipped_by_reason: Object.fromEntries(
       [...ARTICLE_SKIPS, ...ROW_SKIPS].map((reason) => [reason, 0]),
     ) as Record<SkipReason, number>,
+    without_engine_code: 0,
     unmapped_categories: [],
     needs_category: [],
     missing_fields: [],
@@ -59,13 +62,16 @@ export const importTally = (supplier: string) => {
     skip,
     unmapped(code: string) {
       skip('unmapped');
-      const key = spellingKey(code);
+      const key = nameKey(code);
       const tally = unmapped.get(key) ?? { code, count: 0 };
       tally.count += 1;
       unmapped.set(key, tally);
       summary.unmapped_categories = [...unmapped.values()]
         .map((entry) => ({ ...entry }))
         .sort((a, b) => b.count - a.count || a.code.localeCompare(b.code));
+    },
+    withoutEngineCode(count: number) {
+      summary.without_engine_code += count;
     },
     imported(outcome: ImportOutcome) {
       summary[outcome] += 1;

@@ -108,7 +108,7 @@ const VEHICLE = {
       body_style: 'sedan',
       series: {
         name: '3 серия',
-        translations: { sr: 'Serija 3', en: '3 Series' },
+        translations: { sr: { name: 'Serija 3' }, en: { name: '3 Series' } },
         make: { slug: 'bmw', name: 'BMW' },
       },
     },
@@ -753,6 +753,62 @@ describe('catalogue.carPages', () => {
       ['brake-pads', 'front', false, [[2, 'textar-2512101']]],
       ['brake-pads', 'rear', false, [[2, 'textar-2512201']]],
     ]);
+  });
+
+  describe('a car and the Vehicle without an engine of its generation', () => {
+    const generation = {
+      ...VEHICLE,
+      id: 'veh_generation',
+      slug: '320d-140kw',
+      engine: null,
+      year_from: 2012,
+      year_to: 2016,
+    };
+    const generationCars = (fitments: unknown[]) =>
+      catalogueWith(
+        backend({
+          pages: [frontPads, rearPads],
+          categories: [brakePads],
+          fitments,
+          vehicles: [VEHICLE, generation],
+        }),
+      )
+        .snapshot()
+        .then(({ cars }) => cars);
+    const fitsOf = (car: { groups: { fitments: unknown[] }[] }) =>
+      car.groups.flatMap(({ fitments }) =>
+        (fitments as { part: { id: string }; generation: boolean }[]).map(
+          ({ part, generation: borrowed }) => [part.id, borrowed],
+        ),
+      );
+
+    it('lists the Parts fitted to its generation beside its own, marked to confirm the engine', async () => {
+      const [car, generationCar] = await generationCars([
+        fitment('fit_front', 'part_front', { axle: 'front' }),
+        fitment('fit_rear', 'part_rear', {
+          axle: 'rear',
+          vehicle_id: generation.id,
+        }),
+      ]);
+
+      expect(fitsOf(car)).toEqual([
+        ['part_front', false],
+        ['part_rear', true],
+      ]);
+      expect(fitsOf(generationCar)).toEqual([['part_rear', false]]);
+    });
+
+    it('lists a Part fitted to both once, as its own', async () => {
+      const [car] = await generationCars([
+        fitment('fit_front', 'part_front', { axle: 'front' }),
+        fitment('fit_generation', 'part_front', {
+          axle: 'front',
+          vehicle_id: generation.id,
+        }),
+      ]);
+
+      expect(fitsOf(car)).toEqual([['part_front', false]]);
+    });
   });
 
   it('asks to confirm the variant when two parts share a position', async () => {

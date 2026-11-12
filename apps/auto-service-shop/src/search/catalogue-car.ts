@@ -44,7 +44,7 @@ type ModelRow = {
     body_style: string | null;
     series: {
       name: string;
-      translations: { sr?: string; en?: string } | null;
+      translations: Record<string, Record<string, string>> | null;
       make: MakeRow;
     };
   };
@@ -56,7 +56,7 @@ type VehicleRow = {
   power_kw: number | null;
   year_from: number | null;
   year_to: number | null;
-  engine: { code: string; family: string };
+  engine: { code: string; family: string } | null;
   model: ModelRow;
 };
 
@@ -192,8 +192,8 @@ export function carDocuments(vehicles: VehicleRow[], counts: PartCounts) {
       ...makeTerms(row),
       ...termsOf(
         series.name,
-        series.translations?.sr,
-        series.translations?.en,
+        series.translations?.sr?.name,
+        series.translations?.en?.name,
         code,
         row.model.name,
       ),
@@ -224,14 +224,14 @@ export function carDocuments(vehicles: VehicleRow[], counts: PartCounts) {
       document(
         vehicleKey(row.id),
         'vehicle',
-        [...modelTerms(row), ...termsOf(row.engine.code, row.engine.family)],
+        [...modelTerms(row), ...termsOf(row.engine?.code, row.engine?.family)],
         {
           make: make(row),
           model: modelCard(row.model),
           vehicle: {
             id: row.id,
             slug: row.slug,
-            engine: { code: row.engine.code },
+            engine: row.engine && { code: row.engine.code },
             power_kw: row.power_kw,
             year_from: row.year_from,
             year_to: row.year_to,

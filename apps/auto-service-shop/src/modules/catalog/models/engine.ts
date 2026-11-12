@@ -8,7 +8,7 @@ import Vehicle from './vehicle';
 const Engine = model
   .define('engine', {
     id: model.id().primaryKey(),
-    code: model.text().unique(),
+    code: model.text(),
     family: model.text(),
     fuel: model.enum([...ENGINE_FUELS]).nullable(),
     displacement_cc: model.number().nullable(),

@@ -1,4 +1,4 @@
-import { spellingKey } from '../../modules/_shared/spelling';
+import { nameKey } from '../../modules/_shared/keys';
 
 export type CategoryMapping = { code: string; category_id: string | null };
 
@@ -7,11 +7,11 @@ export type CategoryDecision =
 
 export const categoryScope = (mappings: CategoryMapping[]) => {
   const mapped = new Map(
-    mappings.map(({ code, category_id }) => [spellingKey(code), category_id]),
+    mappings.map(({ code, category_id }) => [nameKey(code), category_id]),
   );
   return (category: string): CategoryDecision => {
     if (!mapped.size) return { categoryId: undefined };
-    const key = spellingKey(category);
+    const key = nameKey(category);
     if (!mapped.has(key)) return { skipped: 'unmapped' };
     const categoryId = mapped.get(key);
     return categoryId ? { categoryId } : { skipped: 'excluded' };

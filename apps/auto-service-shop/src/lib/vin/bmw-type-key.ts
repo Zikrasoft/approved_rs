@@ -116,6 +116,7 @@ const typeKeyDescribes = (key: TypeKey, vehicle: Vehicle): boolean => {
     Boolean(family) &&
     key.power_kw !== null &&
     chassisCodes(vehicle.model.chassis.code).includes(key.chassis) &&
+    vehicle.engine !== null &&
     compact(vehicle.engine.family) === family &&
     vehicle.power_kw === key.power_kw &&
     sameDisplacement(key, vehicle.engine.displacement_cc) &&

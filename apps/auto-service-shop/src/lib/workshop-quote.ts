@@ -9,7 +9,7 @@ import type { Provenance } from '../modules/catalog/service';
 import { VIN_LOOKUP_MODULE } from '../modules/vin-lookup';
 import { adminError } from '../modules/_shared/admin-error';
 import { slugOf } from '../modules/_shared/slug';
-import { spellingKey } from '../modules/_shared/spelling';
+import { nameKey } from '../modules/_shared/keys';
 import { shopAi, type CategoryChoice } from './ai';
 import { readCapped, uploadType } from './uploads';
 import { vinDecoders } from './vin/chain';
@@ -102,11 +102,11 @@ async function quoteBrand(
   provenance: Provenance,
   context: Context,
 ): Promise<string> {
-  const key = spellingKey(name);
+  const key = nameKey(name);
   const slug = slugOf(name);
   const known = brands.find(
     (brand) =>
-      spellingKey(brand.name) === key ||
+      nameKey(brand.name) === key ||
       brand.slug === slug ||
       brand.spellings.some(({ value_key }) => value_key === key),
   );

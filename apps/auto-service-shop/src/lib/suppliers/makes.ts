@@ -1,4 +1,4 @@
-import { spellingKey } from '../../modules/_shared/spelling';
+import { nameKey } from '../../modules/_shared/keys';
 
 export const CAR_MAKES: Record<string, string[]> = {
   'Alfa Romeo': [],
@@ -86,10 +86,10 @@ const CAR_MAKE_NAMES = new Map(
   [
     ...Object.keys(CAR_MAKES).map((name) => [name, name]),
     ...Object.entries(MAKE_ALIASES),
-  ].map(([spelling, name]) => [spellingKey(spelling), name]),
+  ].map(([spelling, name]) => [nameKey(spelling), name]),
 );
 
 export const carMakeName = (spelling: string): string | null =>
-  CAR_MAKE_NAMES.get(spellingKey(spelling)) ??
-  CAR_MAKE_NAMES.get(spellingKey(withoutOwner(spelling))) ??
+  CAR_MAKE_NAMES.get(nameKey(spelling)) ??
+  CAR_MAKE_NAMES.get(nameKey(withoutOwner(spelling))) ??
   null;

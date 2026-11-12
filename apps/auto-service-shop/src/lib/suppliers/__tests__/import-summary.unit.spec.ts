@@ -1,28 +1,30 @@
 import { importTally } from '../import-summary';
 
 describe('importTally', () => {
-  it('counts skipped articles by reason and only articles in the skipped total', () => {
+  it('counts skipped articles by reason and only articles in the skipped total, apart from rows without an engine code', () => {
     const tally = importTally('MANN-FILTER');
 
     tally.skip('brand', 2);
     tally.skip('excluded');
     tally.skip('not_in_scope', 3);
     tally.skip('currency');
-    tally.skip('no_engine_code', 4);
+    tally.skip('rejected', 4);
+    tally.withoutEngineCode(7);
     tally.skip('no_make', 5);
 
     expect(tally.summary).toMatchObject({
-      skipped: 6,
+      skipped: 10,
       skipped_by_reason: {
         brand: 2,
         excluded: 1,
         not_in_scope: 3,
         currency: 1,
-        no_engine_code: 4,
+        rejected: 4,
         no_make: 5,
         unmapped: 0,
         unreadable: 0,
       },
+      without_engine_code: 7,
     });
   });
 
