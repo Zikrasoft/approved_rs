@@ -875,7 +875,7 @@ medusaIntegrationTestRunner({
             `Заказ #${placed.data.order.display_id}, самовывоз, оплата при получении`,
             'Нужно подтвердить наличие и время самовывоза',
             'BMW 3 серия F30 320d, B47D20O0',
-            'Oil filter (BMW 11 42 8575211) × 2: 3\u00a0700 RSD, в наличии, demo-intercars',
+            'Oil filter (BMW 11 42 8575211) × 2: 3\u00a0700 RSD, в наличии, Intercars',
             'Итого: 3\u00a0700 RSD',
             'Pozvati posle 17h',
           ].join('\n'),
@@ -894,7 +894,7 @@ medusaIntegrationTestRunner({
           ),
         );
         expect(lead?.comment.split('\n')[3]).toBe(
-          'Oil filter (BMW 11 42 8575211) × 2: 3\u00a0700 RSD, забрать через 4 дня, demo-intercars',
+          'Oil filter (BMW 11 42 8575211) × 2: 3\u00a0700 RSD, забрать через 4 дня, Intercars',
         );
       });
 
@@ -910,7 +910,7 @@ medusaIntegrationTestRunner({
           ),
         );
         expect(lead?.comment.split('\n')[3]).toBe(
-          'Oil filter (BMW 11 42 8575211) × 2: 3\u00a0700 RSD, забрать через 4 дня, demo-intercars',
+          'Oil filter (BMW 11 42 8575211) × 2: 3\u00a0700 RSD, забрать через 4 дня, Intercars',
         );
       });
 
@@ -1187,7 +1187,7 @@ medusaIntegrationTestRunner({
             ),
           );
           expect(lead?.comment.split('\n').slice(3, 6)).toEqual([
-            'Аккумулятор AGM 80 Ач (Varta 580 901 080) × 1: 10\u00a0000 RSD, в наличии, varta',
+            'Аккумулятор AGM 80 Ач (Varta 580 901 080) × 1: 10\u00a0000 RSD, в наличии, Battery shop',
             `+ ${SERVICE}: 2\u00a0500 RSD`,
             'Итого: 12\u00a0500 RSD',
           ]);

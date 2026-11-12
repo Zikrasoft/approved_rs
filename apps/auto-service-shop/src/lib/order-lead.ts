@@ -17,6 +17,8 @@ import {
 } from '@podbor/lead-crm/shop-orders-wire';
 import { z } from 'zod';
 
+import { SUPPLIER_MODULE } from '../modules/supplier';
+import type SupplierModuleService from '../modules/supplier/service';
 import { MANUAL_SUPPLIER } from './suppliers/manual-offers';
 import { parseEnv } from './env';
 import { readPlacedOrder } from './placed-order';
@@ -46,6 +48,7 @@ export const leadOrderSchema = z.object({
       })
       .transform(({ detail, ...item }) => ({ ...item, ...detail })),
   ),
+  supplier_names: z.record(z.string(), z.string()).optional(),
 });
 
 export type LeadOrder = z.infer<typeof leadOrderSchema>;
@@ -72,7 +75,8 @@ export function orderLeadPayload(
           source:
             line.supplier === MANUAL_SUPPLIER
               ? PARTS_ORDER_COPY.manualOffer
-              : line.supplier,
+              : line.supplier &&
+                (order.supplier_names?.[line.supplier] ?? line.supplier),
         },
         currency,
       ),
@@ -134,7 +138,22 @@ export async function readLeadOrder(
       'items.metadata',
     ],
   });
-  return leadOrderSchema.parse(row);
+  const order = leadOrderSchema.parse(row);
+  const keys = [
+    ...new Set(
+      readPlacedOrder(order).lines.flatMap(({ supplier }) => supplier ?? []),
+    ),
+  ];
+  const suppliers: SupplierModuleService = container.resolve(SUPPLIER_MODULE);
+  const named = keys.length
+    ? await suppliers.listSuppliers({ key: keys }, { select: ['key', 'name'] })
+    : [];
+  return {
+    ...order,
+    supplier_names: Object.fromEntries(
+      named.map(({ key, name }) => [key, name]),
+    ),
+  };
 }
 
 const telegramReplySchema = z.object({ ok: z.literal(true) });

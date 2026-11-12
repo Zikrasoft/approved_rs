@@ -94,7 +94,7 @@ describe('orderLeadPayload', () => {
     ]);
   });
 
-  it('names the supplier, so two lines of one part from two suppliers differ', () => {
+  it('names the supplier by its display name, so two lines of one part from two suppliers differ', () => {
     const line = (supplier: string) => ({
       title: 'Pads',
       unit_price: 100,
@@ -103,14 +103,25 @@ describe('orderLeadPayload', () => {
     });
     const comment = summaryOf(
       order({
-        items: [line('Intercars'), line('Autodelovi'), line('manual')],
+        items: [
+          line('demo-intercars'),
+          line('bilstein'),
+          line('manual'),
+          line('gone'),
+        ],
+        supplier_names: {
+          'demo-intercars': 'Intercars',
+          bilstein: 'bilstein group',
+          manual: 'manual',
+        },
       }),
     );
 
-    expect(comment.split('\n').slice(3, 6)).toEqual([
+    expect(comment.split('\n').slice(3, 7)).toEqual([
       'Pads × 1: 100 RSD, в наличии, Intercars',
-      'Pads × 1: 100 RSD, в наличии, Autodelovi',
+      'Pads × 1: 100 RSD, в наличии, bilstein group',
       'Pads × 1: 100 RSD, в наличии, ручное предложение',
+      'Pads × 1: 100 RSD, в наличии, gone',
     ]);
   });
 
