@@ -379,13 +379,14 @@ token. What fires and when: [analytics.md](analytics.md#the-server-lead-event-fr
 
 ### Shop Orders (ADR-0053)
 
-| Variable                    | approved.rs | carlab.rs | details.rs | Without it                                                                                                 |
-| --------------------------- | ----------- | --------- | ---------- | ---------------------------------------------------------------------------------------------------------- |
-| `SHOP_API_URL`              | ✅          | ✅        | no         | ✅/❌ on a `parts-order` Lead never completes or cancels its shop Order; no «🔎 Искал» lines               |
-| `SHOP_ORDER_OUTCOME_SECRET` | ✅ secret   | no        | no         | same                                                                                                       |
-| `SHOP_LEAD_SECRET`          | ✅ secret   | ✅ secret | no         | `/api/shop-orders` answers 401 to the shop, a shop cancel never marks a Lead lost, «Сделать кейс» gets 401 |
-| `SHOP_CLIENT_SECRET`        | no          | ✅ secret | no         | all shoppers share one store rate-limit bucket                                                             |
-| `SHOP_EVENTS_SECRET`        | no          | ✅ secret | no         | carlab.rs sends no Events to the shop's log; the shop's own Events still log                               |
+| Variable                       | approved.rs | carlab.rs | details.rs | Without it                                                                                                 |
+| ------------------------------ | ----------- | --------- | ---------- | ---------------------------------------------------------------------------------------------------------- |
+| `SHOP_API_URL`                 | ✅          | ✅        | no         | ✅/❌ on a `parts-order` Lead never completes or cancels its shop Order; no «🔎 Искал» lines               |
+| `SHOP_ORDER_OUTCOME_SECRET`    | ✅ secret   | no        | no         | same                                                                                                       |
+| `SHOP_LEAD_SECRET`             | no          | ✅ secret | no         | `/api/shop-orders` answers 401 to the shop, a shop cancel never marks a Lead lost, «Сделать кейс» gets 401 |
+| `SHOP_VISITOR_SEARCHES_SECRET` | ✅ secret   | ✅ secret | no         | no «🔎 Искал» lines                                                                                        |
+| `SHOP_CLIENT_SECRET`           | no          | ✅ secret | no         | all shoppers share one store rate-limit bucket                                                             |
+| `SHOP_EVENTS_SECRET`           | no          | ✅ secret | no         | carlab.rs sends no Events to the shop's log; the shop's own Events still log                               |
 
 `SHOP_API_URL` is the shop's public API origin, `https://api.carlab.rs`. When
 the bot marks a `parts-order` Lead ✅ it completes the Order, ❌ cancels it,
@@ -407,11 +408,15 @@ to someone else's Order. The same secret goes the other way for «Сделать
 and the RSD total of a completed Order. The draft Work is then committed with
 the staff member's own Keystatic GitHub login; the shop holds no repository
 token.
-The CRM bot uses `SHOP_API_URL` and `SHOP_LEAD_SECRET` to read
+The CRM bot uses `SHOP_API_URL` and `SHOP_VISITOR_SEARCHES_SECRET` to read
 `GET /hooks/visitors/:visitor_id/vin-lookups`, the last three VIN searches of a
-Lead's visitor, and lists them as «🔎 Искал» lines on the group card (sent by
-carlab.rs) and on the DM detail (built by approved.rs's webhook). Either side
-without both variables shows the card without them; a shop that does not answer
+CarLab Lead's visitor, and lists them as «🔎 Искал» lines on the group card
+(sent by carlab.rs) and on the DM detail (built by approved.rs's webhook).
+approved.rs and details.rs Leads never query the shop. The secret is one more
+value set twice, on carlab.rs and approved.rs and in the shop's `.env`, apart
+from `SHOP_LEAD_SECRET`, so approved.rs holds a key that can only read VIN
+searches and never post an Order to carlab.rs. Either side without both
+variables shows the card without them; a shop that does not answer
 within three seconds does too. The visitor id reaches the shop because
 `bootSiteKit` mirrors it into the first-party `visitor_id` cookie, which the
 server-rendered VIN search reads and sends in the `/store/vin-lookups` body.
@@ -432,8 +437,9 @@ answers 401.
 
 **Rotating either secret without downtime.** Every side that checks a Bearer
 secret also accepts `<NAME>_PREVIOUS`, optional: the shop checks
-`SHOP_ORDER_OUTCOME_SECRET`, `SHOP_LEAD_SECRET`, `SHOP_CLIENT_SECRET` and
-`SHOP_EVENTS_SECRET`, carlab.rs checks `SHOP_LEAD_SECRET`; a side only ever
+`SHOP_ORDER_OUTCOME_SECRET`, `SHOP_LEAD_SECRET`, `SHOP_CLIENT_SECRET`,
+`SHOP_EVENTS_SECRET` and `SHOP_VISITOR_SEARCHES_SECRET`, carlab.rs checks
+`SHOP_LEAD_SECRET`; a side only ever
 sends the current value.
 
 1. Make a new value (`openssl rand -hex 32`).
@@ -444,7 +450,9 @@ sends the current value.
    there, it only sends) and
    `/srv/carlab/.env`, for
    `SHOP_ORDER_OUTCOME_SECRET` approved.rs (no `_PREVIOUS` there, it only sends)
-   and `/srv/carlab/.env`. Redeploy carlab.rs or approved.rs and restart the
+   and `/srv/carlab/.env`, for `SHOP_VISITOR_SEARCHES_SECRET` carlab.rs and
+   approved.rs (no `_PREVIOUS` on either, they only send) and
+   `/srv/carlab/.env`. Redeploy carlab.rs or approved.rs and restart the
    shop (`docker compose up -d medusa`), in any order: while the sides differ,
    each still takes the other's old or new value.
 3. Once both sides run the new value, empty `<NAME>_PREVIOUS` everywhere and
@@ -1002,9 +1010,7 @@ number gets its CI value in that script. The non-obvious parts:
   path; the shop refuses to start on one with a path): the `order.placed`
   subscriber posts a placed order to `/api/shop-orders` on it as a
   `parts-order` Lead, which reaches Telegram like every other Lead, and the
-  admin's order screen links there. It replaced `LEAD_ROUTE_URL`, the
-  `/api/leads` URL the shop fell back to for a storefront without
-  `/api/shop-orders`; that fallback is gone, so any non-2xx answer, a 404
+  admin's order screen links there. Any non-2xx answer, a 404
   included, is a failed handoff that the retry job sends again. Empty, orders
   are placed but reach nobody, and the log says so. **A new
   `shopOrderEventSchema` event reaches carlab.rs before the shop sends it**:

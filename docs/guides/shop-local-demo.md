@@ -74,7 +74,6 @@ The sections below are what the command does, for reference.
 Orders go to `/api/shop-orders` on that origin (deploy.md, `STOREFRONT_ORIGIN`).
 It names `127.0.0.1`, not `localhost`: Node resolves `localhost` to `[::1]`
 first, and anything else listening on IPv6 port 4321 gets the order.
-`shop:prepare` rewrites a `LEAD_ROUTE_URL` left in an existing `.env` into it.
 
 Leave `OPENAI_API_KEY` and `PUBLISH_DISPATCH_TOKEN` unset. Leave `SHOP_OPEN`
 unset too: outside `NODE_ENV=production` the backend sells to everyone. Set
