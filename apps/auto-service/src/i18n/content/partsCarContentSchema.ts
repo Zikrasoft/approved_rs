@@ -57,6 +57,7 @@ export const partsCarContentSchema = z
         formHeading: z.string(),
         confirmVariantLead: z.string(),
         confirmVariant: z.string(),
+        generationFit: z.string(),
         otherParts: z.string(),
         notYourCar: z.string(),
         vinMatched: z.string(),

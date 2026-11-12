@@ -30,6 +30,7 @@ car:
   formHeading: Заявка на запчасти
   confirmVariantLead: Несколько вариантов.
   confirmVariant: Какой стоит на вашей машине, подберем по VIN.
+  generationFit: Подходит к поколению модели, уточните двигатель.
   otherParts: Другие запчасти
   notYourCar: Это не ваш автомобиль? Проверьте VIN или отправьте заявку, и мы разберемся вручную.
   vinMatched: Подобрали по VIN {vin}
@@ -148,6 +149,7 @@ translations:
       formHeading: Upit za delove
       confirmVariantLead: Postoji više varijanti.
       confirmVariant: Po VIN-u ćemo proveriti koja odgovara Vašem automobilu.
+      generationFit: Odgovara ovoj generaciji modela, proverite motor.
       otherParts: Ostali delovi
       notYourCar: Ovo nije Vaš automobil? Proverite VIN ili pošaljite upit, pa ćemo proveriti ručno.
       vinMatched: Pronađeno po VIN-u {vin}
@@ -264,6 +266,7 @@ translations:
       formHeading: Parts enquiry
       confirmVariantLead: Several versions available.
       confirmVariant: We'll use the VIN to check which one is fitted to your car.
+      generationFit: Fits this model generation; please confirm the engine.
       otherParts: Other parts
       notYourCar: Not your car? Check the VIN or send an enquiry and we'll look into it manually.
       vinMatched: Matched by VIN {vin}

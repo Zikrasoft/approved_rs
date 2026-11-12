@@ -78,7 +78,7 @@ const quantity = (count: number) =>
     { one: fitment.quantityOne, other: fitment.quantity },
     BCP47_BY_LOCALE[locale],
   ).replace('{count}', count.toLocaleString(BCP47_BY_LOCALE[locale]));
-const variant = vehicleVariant(vehicle, locale);
+const variant = vehicleVariant(vehicle, locale) || vehicle.model.name;
 const name = `${carName(vehicle.model, locale)}, ${variant}`;
 const { engine, model } = vehicle;
 const { make } = model.chassis.series;
@@ -124,12 +124,15 @@ const years =
   `${vehicle.year_from}–${vehicle.year_to ?? copy.yearsOngoing}`;
 
 const specs = [
-  { label: copy.engineLabel, value: `${engine.code} (${engine.family})` },
-  { label: copy.fuelLabel, value: engine.fuel && copy.fuel[engine.fuel] },
+  {
+    label: copy.engineLabel,
+    value: engine && `${engine.code} (${engine.family})`,
+  },
+  { label: copy.fuelLabel, value: engine?.fuel && copy.fuel[engine.fuel] },
   {
     label: copy.displacementLabel,
     value:
-      engine.displacement_cc &&
+      engine?.displacement_cc &&
       `${engine.displacement_cc} ${copy.displacementUnit}`,
   },
   {
@@ -154,7 +157,7 @@ const specs = [
   Boolean(spec.value),
 );
 const specsSummary = [
-  engine.code,
+  engine?.code,
   vehicle.power_kw && `${vehicle.power_kw} ${copy.powerUnit}`,
   years,
 ]
@@ -372,6 +375,11 @@ const specsSummary = [
                               quantity={quantity(fit.quantity)}
                             >
                               <FitLine fit={fit} quantity={false} />
+                              {fit.generation && (
+                                <p class="text-sm text-ink-2">
+                                  {copy.generationFit}
+                                </p>
+                              )}
                             </FittedPart>
                           </li>
                         ))}

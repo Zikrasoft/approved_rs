@@ -27,7 +27,9 @@ describe('byModelName', () => {
   });
 });
 
-const model = (translations: { sr?: string; en?: string } | null) => ({
+const model = (
+  translations: { sr?: { name: string }; en?: { name: string } } | null,
+) => ({
   name: '320d',
   chassis: {
     code: 'F30',
@@ -41,7 +43,7 @@ const model = (translations: { sr?: string; en?: string } | null) => ({
 
 describe('carName', () => {
   it('names the car in the page locale', () => {
-    expect(carName(model({ en: '3 Series' }), 'en')).toBe(
+    expect(carName(model({ en: { name: '3 Series' } }), 'en')).toBe(
       'BMW 3 Series F30 320d',
     );
   });
@@ -74,9 +76,18 @@ describe('carName', () => {
     ).toBe('N47D20');
   });
 
+  it('names a variant without an engine by its power and years', () => {
+    expect(
+      vehicleVariant(
+        { engine: null, power_kw: 120, year_from: 2005, year_to: 2012 },
+        'ru',
+      ),
+    ).toBe('120 кВт, 2005–2012');
+  });
+
   it('falls back to the Russian series name until a translation exists', () => {
     expect(carName(model(null), 'sr')).toBe('BMW 3 серия F30 320d');
-    expect(carName(model({ en: '3 Series' }), 'ru')).toBe(
+    expect(carName(model({ en: { name: '3 Series' } }), 'ru')).toBe(
       'BMW 3 серия F30 320d',
     );
   });
@@ -97,7 +108,7 @@ describe('modelName', () => {
   });
 
   it('names the model without its make', () => {
-    expect(modelName(model({ en: '3 Series' }), 'en')).toBe(
+    expect(modelName(model({ en: { name: '3 Series' } }), 'en')).toBe(
       '3 Series F30 320d',
     );
   });
