@@ -13,18 +13,18 @@ const count = z.number().default(0);
 
 const importSummarySchema = z.object({
   supplier: z.string(),
-  created: z.number(),
+  created: count,
   updated: count,
   unchanged: count,
-  skipped: z.number(),
+  skipped: count,
   skipped_by_reason: z.object({
-    brand: z.number(),
+    brand: count,
     unmapped: count,
     excluded: count,
-    currency: z.number(),
-    unreadable: z.number(),
+    currency: count,
+    unreadable: count,
     no_make: count,
-    not_in_scope: z.number(),
+    not_in_scope: count,
     rejected: count,
     no_number: count,
   }),
@@ -48,7 +48,9 @@ const importSummarySchema = z.object({
   unanswered: z
     .array(z.object({ number: z.string(), reason: z.string() }))
     .default([]),
-  failed: z.array(z.object({ number: z.string(), reason: z.string() })),
+  failed: z
+    .array(z.object({ number: z.string(), reason: z.string() }))
+    .default([]),
 });
 
 type ImportSummary = z.infer<typeof importSummarySchema>;
@@ -57,7 +59,7 @@ export const importRunSchema = z.object({
   id: z.string(),
   status: z.enum(['running', 'succeeded', 'failed']),
   error: z.string().nullable(),
-  report: importSummarySchema.nullable(),
+  report: importSummarySchema.nullable().catch(null),
   created_at: z.string(),
   finished_at: z.string().nullable(),
 });
