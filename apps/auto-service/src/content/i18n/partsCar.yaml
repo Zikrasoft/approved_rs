@@ -49,7 +49,11 @@ car:
     petrol: бензин
     diesel: дизель
     hybrid: гибрид
+    mild-hybrid: мягкий гибрид
+    plug-in-hybrid: подключаемый гибрид
     electric: электро
+    lpg: газ (пропан)
+    cng: газ (метан)
   drive:
     rwd: задний
     fwd: передний
@@ -62,7 +66,10 @@ car:
     convertible: кабриолет
     gran-coupe: Gran Coupe
     suv: внедорожник
-    van: минивэн
+    crossover: кроссовер
+    minivan: минивэн
+    van: фургон
+    pickup: пикап
   steering:
     left: левый
     right: правый
@@ -168,7 +175,11 @@ translations:
         petrol: benzin
         diesel: dizel
         hybrid: hibrid
+        mild-hybrid: blagi hibrid
+        plug-in-hybrid: plug-in hibrid
         electric: električni
+        lpg: auto-gas (TNG)
+        cng: metan (KPG)
       drive:
         rwd: zadnji
         fwd: prednji
@@ -181,7 +192,10 @@ translations:
         convertible: kabriolet
         gran-coupe: Gran Coupe
         suv: terenac
-        van: miniven
+        crossover: krosover
+        minivan: monovolumen
+        van: kombi
+        pickup: pikap
       steering:
         left: levi
         right: desni
@@ -285,7 +299,11 @@ translations:
         petrol: petrol
         diesel: diesel
         hybrid: hybrid
+        mild-hybrid: mild hybrid
+        plug-in-hybrid: plug-in hybrid
         electric: electric
+        lpg: LPG
+        cng: CNG
       drive:
         rwd: rear-wheel drive
         fwd: front-wheel drive
@@ -298,7 +316,10 @@ translations:
         convertible: convertible
         gran-coupe: Gran Coupe
         suv: SUV
-        van: MPV
+        crossover: crossover
+        minivan: MPV
+        van: van
+        pickup: pickup
       steering:
         left: left
         right: right

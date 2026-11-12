@@ -198,6 +198,31 @@ describe('vehiclesResponseSchema', () => {
     });
   });
 
+  it.each([
+    ['pickup', 'lpg'],
+    ['minivan', 'cng'],
+    ['crossover', 'plug-in-hybrid'],
+    ['van', 'mild-hybrid'],
+  ])('reads a %s body and %s fuel', (body_style, fuel) => {
+    const parsed = vehiclesResponseSchema.parse({
+      vehicles: [
+        {
+          ...vehicle,
+          model: {
+            ...vehicle.model,
+            chassis: { ...vehicle.model.chassis, body_style },
+          },
+          engine: { ...vehicle.engine, fuel },
+        },
+      ],
+    });
+
+    expect(parsed.vehicles[0]).toMatchObject({
+      model: { chassis: { body_style } },
+      engine: { fuel },
+    });
+  });
+
   it('reads a vocabulary value newer than the contract as null', () => {
     const parsed = vehiclesResponseSchema.parse({
       vehicles: [
