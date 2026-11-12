@@ -257,6 +257,8 @@ translations:
         - Dizalica, osciloskop i oprema za merenje kompresije
       makesHeading: Koje automobile servisiramo
       makesLead: Marke iz naših primera radova.
+      loungeHeading: Gde možete sačekati
+      loungeText: Dok radimo na Vašem automobilu, možete sačekati kod nas uz kafu, na udobnoj sofi.
       ownerHeading: Ko je vlasnik sajta
       ownerText: Sajt je u vlasništvu auto servisa CarLab. Kako postupamo sa podacima posetilaca opisano je u odeljku
     notFound:
@@ -422,6 +424,8 @@ translations:
         - Vehicle lift, oscilloscope and compression testing equipment
       makesHeading: Cars we work on
       makesLead: Makes featured in our recent jobs.
+      loungeHeading: Waiting area
+      loungeText: Make yourself comfortable while we work on your car. There's a sofa and coffee.
       ownerHeading: Who owns the website
       ownerText: This website belongs to CarLab. How we handle visitor data is explained in our
     notFound:
@@ -496,4 +500,4 @@ translations:
       ctaHeading: Tell us what's wrong with your car
       ctaBody: Tell us the model, year, engine and symptoms. We'll suggest where to start and tell you what diagnostics will cost.
       ctaCommentPlaceholder: Model, year and symptoms
-translatedFrom: 6e26db7d67f6a20b
+translatedFrom: cbd4cc618028bac7

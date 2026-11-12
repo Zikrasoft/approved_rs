@@ -174,11 +174,14 @@ translations:
       facts:
         - Govorimo srpski, ruski i engleski
         - Plaćanje gotovinom ili karticom
+        - Dok popravljamo Vaš automobil, možete sačekati kod nas uz kafu i udoban kauč
     photos:
       heroMechanic: Mehaničar u CarLabu popravlja motor izvađen iz automobila na dizalici
       workshopBay: Automobil sa otvorenom haubom u radionici CarLaba između stubova dizalice
       facade: Ulaz u auto servis CarLab na Zvezdari, natpis AUTO SERVIS CARLAB.RS
       wallSign: Logo CarLab na zidu radionice i mehaničar pored automobila sa otvorenom haubom
+      loungeSofas: Čekaonica u CarLabu, kauč, fotelja i stočić sa časopisima
+      loungeCoffee: Aparat za kafu i kapsule u čekaonici u CarLabu
     googleRating:
       rating: '{rating} na Google-u'
       reviews:
@@ -289,11 +292,14 @@ translations:
       facts:
         - We speak Serbian, Russian and English
         - Pay by cash or card
+        - You're welcome to wait while we work on your car, with a sofa and coffee available
     photos:
       heroMechanic: A CarLab mechanic repairs an engine removed from a car on a lift
       workshopBay: A car with its bonnet open between the lift posts in the CarLab workshop
       facade: Entrance to the CarLab workshop in Zvezdara, with the AUTO SERVIS CARLAB.RS sign
       wallSign: The CarLab logo on the workshop wall and a mechanic beside a car with its bonnet open
+      loungeSofas: CarLab waiting area with a sofa, armchair and coffee table with magazines
+      loungeCoffee: Coffee machine and capsules in the CarLab waiting area
     googleRating:
       rating: '{rating} on Google'
       reviews:
@@ -349,4 +355,4 @@ translations:
       accept: OK
       decline: No
       settings: Cookie settings
-translatedFrom: 9a1635337b8933ae
+translatedFrom: aaf63287c9baf8b6
