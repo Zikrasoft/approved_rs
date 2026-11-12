@@ -318,7 +318,7 @@ medusaIntegrationTestRunner({
         await runImport();
         const deadline = Date.now() + 10_000;
         while (
-          loggedEvents('catalogue.run').length < 2 &&
+          loggedEvents('catalogue.run').length < 3 &&
           Date.now() < deadline
         ) {
           await new Promise((resolve) => setTimeout(resolve, 50));
@@ -336,6 +336,7 @@ medusaIntegrationTestRunner({
             }),
           }),
           expect.objectContaining({ kind: 'import', supplier: warehouseId }),
+          expect.objectContaining({ kind: 'import', supplier: partsfinderId }),
         ]);
         jest.restoreAllMocks();
       });
@@ -1786,7 +1787,7 @@ medusaIntegrationTestRunner({
           next.data.imports.map(
             ({ supplier }: { supplier: string }) => supplier,
           ),
-        ).toEqual(['Warehouse']);
+        ).toEqual(['Warehouse', 'Partsfinder']);
         expect(await page('W1130')).toBeUndefined();
       });
 
@@ -1854,7 +1855,7 @@ medusaIntegrationTestRunner({
           skipped.data.imports.map(
             ({ supplier }: { supplier: string }) => supplier,
           ),
-        ).toEqual(['Warehouse']);
+        ).toEqual(['Warehouse', 'Partsfinder']);
         expect(switched.data.supplier.import_enabled).toBe(true);
         expect(imported.data.imports[0]).toMatchObject({
           supplier: 'Intercars',
