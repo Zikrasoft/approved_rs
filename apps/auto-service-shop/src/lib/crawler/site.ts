@@ -17,5 +17,5 @@ export type CrawledSite = {
   interact?: (page: Page) => Promise<void>;
   isPage: (url: string) => boolean;
   sitemapPage?: (entry: SitemapEntry) => boolean;
-  parse: (html: string) => SupplierArticle | null;
+  parse: (html: string, categoryHint?: string | null) => SupplierArticle | null;
 };

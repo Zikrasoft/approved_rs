@@ -300,7 +300,7 @@ medusaIntegrationTestRunner({
         ]);
       });
 
-      it('maps the VARTA battery category to «Аккумуляторы», the MANN-FILTER families to their Categories and excludes the industrial ones', async () => {
+      it('maps the VARTA battery category to «Аккумуляторы», the MANN-FILTER, FILTRON and bilstein group families to their Categories and excludes the industrial ones', async () => {
         const [varta] = await suppliers.listSuppliers({ name: 'VARTA' });
         const [mann] = await suppliers.listSuppliers({ name: 'MANN-FILTER' });
         const [batteries] = await catalog.listCategories({ slug: 'batteries' });
@@ -315,6 +315,31 @@ medusaIntegrationTestRunner({
         const [transmission] = await catalog.listCategories({
           slug: 'transmission',
         });
+        const [suspension] = await catalog.listCategories({
+          slug: 'suspension',
+        });
+        const [bilstein] = await suppliers.listSuppliers({
+          name: 'bilstein group',
+        });
+        const bilsteinCodes: [string, string][] = [
+          ['kočioni disk', brakes.id],
+          ['Set kočione obloge', brakes.id],
+          ['kočiona čeljust', brakes.id],
+          ['kočiono crevo', brakes.id],
+          ['doboš kočnice', brakes.id],
+          ['sajla ručne kočnice', brakes.id],
+          ['amortizer', suspension.id],
+          ['rame', suspension.id],
+          ['nosač ramena', suspension.id],
+          ['nosač stabilizatora', suspension.id],
+          ['aksijalni zglob', suspension.id],
+          ['uljni filter', maintenance.id],
+          ['vazdušni filter', maintenance.id],
+          ['filter goriva', maintenance.id],
+          ['filter kabine', maintenance.id],
+          ['kanalni kaiš', engine.id],
+          ['garnitura zupčastih kaiševa', engine.id],
+        ];
         const mappings = await suppliers.listSupplierCategories(
           {},
           { take: null },
@@ -389,6 +414,11 @@ medusaIntegrationTestRunner({
               category_id: null,
             })),
             { supplier_id: filtron.id, code: 'Hidraulika', category_id: null },
+            ...bilsteinCodes.map(([code, category_id]) => ({
+              supplier_id: bilstein.id,
+              code,
+              category_id,
+            })),
           ].sort((a, b) => key(a).localeCompare(key(b))),
         );
       });

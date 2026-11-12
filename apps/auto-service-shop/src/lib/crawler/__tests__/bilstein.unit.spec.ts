@@ -12,7 +12,7 @@ const page = (name: string) => gunzipSync(fixture(name)).toString('utf8');
 
 describe('bilstein group partsfinder', () => {
   it('seeds only febi, SWAG and Blue Print pages of the families the catalogue covers', () => {
-    const { pages } = sitemapLinks(
+    const { pages, hints } = sitemapLinks(
       fixture('sr-sitemap-1.xml'),
       bilstein.sitemapPage,
     );
@@ -22,6 +22,14 @@ describe('bilstein group partsfinder', () => {
       'https://partsfinder.bilsteingroup.com/sr/article/blueprint/ADA102116',
       'https://partsfinder.bilsteingroup.com/sr/article/febi/01934',
     ]);
+    expect(
+      hints.get(
+        'https://partsfinder.bilsteingroup.com/sr/article/SWAG/20%2092%201466',
+      ),
+    ).toBe('rame');
+    expect(
+      hints.get('https://partsfinder.bilsteingroup.com/sr/article/febi/01934'),
+    ).toBe('nosač  stabilizatora');
     expect(bilstein.sitemaps).toEqual([
       'https://partsfinder.bilsteingroup.com/sitemaps/sr/sitemap-index.xml',
     ]);
@@ -47,7 +55,7 @@ describe('bilstein group partsfinder', () => {
 
   it('reads a febi brake disc with its criteria, OE numbers, images and vehicles', () => {
     const article = supplierArticleSchema.parse(
-      bilstein.parse(page('febi-27699.html.gz')),
+      bilstein.parse(page('febi-27699.html.gz'), 'kočioni disk'),
     );
     expect(article).toEqual({
       article_id: 'febi/27699',
@@ -103,16 +111,16 @@ describe('bilstein group partsfinder', () => {
     });
   });
 
-  it('reads a SWAG control arm with the contents of its set', () => {
+  it('reads a SWAG control arm with the contents of its set, filed under its generic article name', () => {
     const article = supplierArticleSchema.parse(
-      bilstein.parse(page('swag-20-92-1466.html.gz')),
+      bilstein.parse(page('swag-20-92-1466.html.gz'), 'rame'),
     );
     expect(article).toEqual({
       article_id: 'SWAG/20 92 1466',
       brand: 'SWAG',
       number: '20 92 1466',
       name: 'rame sa ležištem, zglobom, držačem i sigurnosnom navrtkom',
-      category: 'rame sa ležištem, zglobom, držačem i sigurnosnom navrtkom',
+      category: 'rame',
       specs: {
         'Strana ugradnje': 'prednja osovina dole, levo',
         materijal: 'Celicni liv',
@@ -189,6 +197,17 @@ describe('bilstein group partsfinder', () => {
       brand: 'Jeep',
       number: 'K68032204AA',
     });
+  });
+
+  it('files an article under the generic name its sitemap entry gave, spaced as words, and under its own name without one', () => {
+    const blueprint = page('blueprint-ada102116.html.gz');
+
+    expect(bilstein.parse(blueprint, '  uljni   filter ')?.category).toBe(
+      'uljni filter',
+    );
+    expect(bilstein.parse(blueprint, null)?.category).toBe(
+      'uljni filter sa zaptivnim prstenom',
+    );
   });
 
   it('reads the fuel and body of a vehicle list the site sent in English', () => {

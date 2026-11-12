@@ -681,8 +681,12 @@ test run that stops after that many stored pages, picked at random across the
 whole sitemap), reads the site's sitemap, and fetches one page at a time, at
 least 2 seconds apart (more if robots.txt
 asks, and Retry-After is waited out). Postgres keeps the queue (`crawl_run`,
-`crawl_page`, with the object key in `crawl_page.body_key`); the gzipped HTML goes
-to the private S3 bucket. A page the site's own parser reads as out of scope
+`crawl_page`, with the object key in `crawl_page.body_key` and the page's first
+sitemap image title in `crawl_page.category_hint`); the gzipped HTML goes
+to the private S3 bucket. The import hands that title to the site's parser:
+bilstein files each article under it, the supplier's generic article name
+(`rame` for «rame sa ležištem, zglobom...»), because its article pages name no
+category; the other sites ignore it. A page the site's own parser reads as out of scope
 (a MANN+HUMMEL spare part, a febi page outside the families we sell, a VARTA
 placeholder) is marked `out_of_scope` with no copy in S3 and is fetched again
 only once its last fetch is 30 days old. Requests go through Crawlee with browser-like headers and rotating
@@ -1201,7 +1205,11 @@ It also configures the crawled catalogues, from `CRAWLED_CATALOGUES` in
 `apps/auto-service-shop/src/lib/production-seed.ts`, one entry per crawled site: the
 Supplier (with cross-references, applicability and images released), its Brands with the spelling the site prints (MANN-FILTER, FILTRON,
 VARTA, and febi, SWAG and Blue Print for bilstein group), its known category
-mappings (VARTA `battery` to «Аккумуляторы»; the nine MANN-FILTER filter families to «ТО и расходники», `Ventilator` to «Двигатель» and `Hydraulic Transmission Filter` to «Трансмиссия и приводы»; five FILTRON families to «ТО и расходники», `Sušač` to «Тормозная система» and `Filter hidrauličnog prenosa` to «Трансмиссия и приводы») and, for the three sites that list cars,
+mappings (VARTA `battery` to «Аккумуляторы»; the nine MANN-FILTER filter families to «ТО и расходники», `Ventilator` to «Двигатель» and `Hydraulic Transmission Filter` to «Трансмиссия и приводы»; five FILTRON families to «ТО и расходники», `Sušač` to «Тормозная система» and `Filter hidrauličnog prenosa` to «Трансмиссия и приводы»; bilstein group's generic article names seen so far:
+brake discs, pads, calipers, hoses, drums and handbrake cables to «Тормозная
+система», shock absorbers, control arms and their mounts, stabiliser mounts and
+axial joints to «Подвеска и рулевое», oil, air, fuel and cabin filters to «ТО и
+расходники», V-ribbed belts and timing belt kits to «Двигатель») and, for the three sites that list cars,
 every Make alias of the car Make table `CAR_MAKES` in
 `apps/auto-service-shop/src/lib/suppliers/makes.ts` (`SKODA` on Škoda, `VOLVO CARS` on
 Volvo, `VW (VOLKSWAGEN)` on Volkswagen, ...). The
@@ -1215,7 +1223,7 @@ instead of mapping it (a mapping with no Category; the seed excludes MANN-FILTER
 `Hydraulics`, `Compressed Air-Oil Separation` and `EDM Filter` and FILTRON's
 `Hidraulika`). An import skips every article of an unmapped or excluded
 category and its report counts them, unmapped ones by code; a Supplier with no
-mapping at all (bilstein group) is filed by AI instead.
+mapping at all is still filed by AI.
 
 It seeds no Parts or offers: the manual supplier is created on the first
 hand-entered offer, and the demo data lives in `seed.ts` / `seed-demo.ts`, which
@@ -1637,7 +1645,7 @@ Steps 1, 5 and 6 are one `terraform apply`: see `infra/auto-service-shop/terrafo
    fields, their options and the battery registration service (label, price,
    note). Check the price is still right and upload the Category's picture,
    which the seed does not ship.
-   The crawled Suppliers, their Brands and spellings, the VARTA, MANN-FILTER and FILTRON category mappings
+   The crawled Suppliers, their Brands and spellings, the VARTA, MANN-FILTER, FILTRON and bilstein group category mappings
    and the Volkswagen aliases are seeded too: nothing to set up before the first
    crawl and Import.
    Done: signing in works, the eight seeded Categories are in the admin,
