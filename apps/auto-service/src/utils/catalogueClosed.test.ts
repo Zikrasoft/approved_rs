@@ -137,22 +137,22 @@ const closed = (fetch: ReturnType<typeof vi.fn>, preview = false) =>
   });
 
 describe('a closed shop', () => {
-  it('builds part pages with no price and no add-on price', async () => {
+  it('builds part pages with no Part price and with the workshop prices', async () => {
     const [built] = await closed(backend()).partPages();
 
     expect(built.offers).toEqual([]);
     expect(built.priceOnRequest).toBe(true);
-    expect(built.category?.service_price).toBeNull();
-    expect(built.category?.installation_price).toBeNull();
-    expect(built.part.installation_price).toBeNull();
+    expect(built.category?.service_price).toBe(2500);
+    expect(built.category?.installation_price).toBe(1500);
+    expect(built.part.installation_price).toBe(0);
     expect(built.category?.service_label).toBe('Регистрация аккумулятора');
   });
 
-  it('lists Categories with no add-on price', async () => {
+  it('lists Categories with the workshop prices', async () => {
     const [category] = await closed(backend()).categories();
 
-    expect(category.service_price).toBeNull();
-    expect(category.installation_price).toBeNull();
+    expect(category.service_price).toBe(2500);
+    expect(category.installation_price).toBe(1500);
   });
 
   it('searches with no price, no price filter and no stock filter', async () => {

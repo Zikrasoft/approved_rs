@@ -20,15 +20,13 @@ export async function GET(
   const suppliers: SupplierModuleService = req.scope.resolve(SUPPLIER_MODULE);
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
   const shown = pricesShown(req);
-  const [offers, identifiers] = shown
-    ? await Promise.all([
-        suppliers.storeOffersFor(ids),
-        catalog.listPartIdentifiers(
-          { id: ids },
-          { relations: ['part', 'part.category'], take: null },
-        ),
-      ])
-    : [new Map<string, PartOffer[]>(), []];
+  const [offers, identifiers] = await Promise.all([
+    shown ? suppliers.storeOffersFor(ids) : new Map<string, PartOffer[]>(),
+    catalog.listPartIdentifiers(
+      { id: ids },
+      { relations: ['part', 'part.category'], take: null },
+    ),
+  ]);
   const installation = new Map(
     identifiers.map(({ id, part }) => [id, installationPrice(part)]),
   );

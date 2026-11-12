@@ -221,13 +221,8 @@ export function createCatalogue({
   };
 
   const categories = async (): Promise<Category[]> =>
-    categoriesResponseSchema
-      .parse(await request('/store/categories'))
-      .categories.map((category) =>
-        pricesHidden
-          ? { ...category, service_price: null, installation_price: null }
-          : category,
-      );
+    categoriesResponseSchema.parse(await request('/store/categories'))
+      .categories;
 
   const vehicles = (): Promise<Vehicle[]> =>
     paged('/store/vehicles', (body) => {
@@ -263,17 +258,7 @@ export function createCatalogue({
         paged('/store/part-pages', (body) => {
           const { pages, next } = partPagesResponseSchema.parse(body);
           return {
-            items: pages.map((page) =>
-              unpriced({
-                ...page,
-                part: {
-                  ...page.part,
-                  installation_price: pricesHidden
-                    ? null
-                    : page.part.installation_price,
-                },
-              }),
-            ),
+            items: pages.map((page) => unpriced(page)),
             next,
           };
         }),

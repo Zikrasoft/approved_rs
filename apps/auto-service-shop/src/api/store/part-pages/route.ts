@@ -132,7 +132,7 @@ export async function GET(
       replaced_by: replacedBy(identifier.part.replaced_by_id),
       category_id: identifier.part.category_id,
       attributes: identifier.part.attributes,
-      installation_price: shown ? installationPrice(identifier.part) : null,
+      installation_price: installationPrice(identifier.part),
     },
     equivalents: siblings
       .filter(
