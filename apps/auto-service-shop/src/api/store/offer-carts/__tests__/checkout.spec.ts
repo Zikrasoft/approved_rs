@@ -5,13 +5,14 @@ import { asValue } from '@medusajs/framework/awilix';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 import { Modules } from '@medusajs/framework/utils';
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
-import { cartFingerprint, normalizePartNumber } from '@podbor/catalog-contract';
+import { cartFingerprint } from '@podbor/catalog-contract';
 
 import { createFakeSupplier } from '../../../../../integration-tests/fakeSupplierAdapter';
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
 import { seedCashAtPickupCommerceDefaults } from '../../../../lib/commerce-defaults';
 import { SUPPLIER_ADAPTERS_REGISTRATION } from '../../../../lib/suppliers/adapter';
 import { PUBLIC_ROUTES } from '../../../public-routes';
+import { partNumberKey } from '../../../../modules/_shared/keys';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import retryOrderLeads, {
   retryOrderLeadsAt,
@@ -116,7 +117,7 @@ medusaIntegrationTestRunner({
           type: 'oem',
           brand_id: bmw.id,
           value: '11 42 8575211',
-          normalized_value: normalizePartNumber('11 42 8575211'),
+          normalized_value: partNumberKey('11 42 8575211'),
         });
         identifierId = identifier.id;
         const [supplier, warehouse] = await suppliers.createSuppliers([
@@ -969,7 +970,7 @@ medusaIntegrationTestRunner({
             type: 'manufacturer-number',
             brand_id: varta.id,
             value: '580 901 080',
-            normalized_value: normalizePartNumber('580 901 080'),
+            normalized_value: partNumberKey('580 901 080'),
           });
           const shop = await suppliers.createSuppliers({
             name: 'Battery shop',

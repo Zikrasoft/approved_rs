@@ -5,7 +5,6 @@ import {
 } from '@medusajs/framework/utils';
 import {
   type AttributeValues,
-  normalizePartNumber,
   STAGED_DATA_KINDS,
   validateAttributes,
 } from '@podbor/catalog-contract';
@@ -44,7 +43,11 @@ import { emitIndexChanges } from '../index-changes';
 import { shopStorage, type ShopStorage } from '../storage';
 import { mirroredImage } from './mirrored-images';
 import { quotedFields } from './live-quote';
-import { nameKey } from '../../modules/_shared/keys';
+import {
+  nameKey,
+  normalizePartNumber,
+  partNumberKey,
+} from '../../modules/_shared/keys';
 import { categoryScope } from './category-scope';
 import {
   type ImportSummary,
@@ -203,7 +206,7 @@ const withStartStop = (
 };
 
 const withBrandAndNumber = (name: string, { brand, number }: Article) =>
-  normalizePartNumber(name).includes(normalizePartNumber(number))
+  normalizePartNumber(name)?.includes(partNumberKey(number))
     ? name
     : `${name} ${brand} ${number}`;
 
@@ -351,7 +354,7 @@ async function matchArticle(
   const [hit] = await catalog.listPartIdentifiers(
     {
       brand_id: brandId,
-      normalized_value: normalizePartNumber(article.number),
+      normalized_value: partNumberKey(article.number),
     },
     { relations: ['part'], take: 1 },
   );
@@ -562,7 +565,7 @@ async function eachAtOnce<T>(
 }
 
 const listedKey = (brandId: string, { number }: Article) =>
-  `${brandId} ${normalizePartNumber(number)}`;
+  `${brandId} ${partNumberKey(number)}`;
 
 const sameNumberRuns = (
   articles: Article[],
@@ -570,7 +573,7 @@ const sameNumberRuns = (
 ): Article[][] => {
   const runs = new Map<string, Article[]>();
   for (const article of articles) {
-    const key = `${brandOf(article)} ${normalizePartNumber(article.number)}`;
+    const key = `${brandOf(article)} ${partNumberKey(article.number)}`;
     runs.set(key, [...(runs.get(key) ?? []), article]);
   }
   return [...runs.values()];
@@ -658,13 +661,17 @@ export async function importSupplier(
     tally.skip('unreadable', page.unreadable.length);
     tally.skip('not_in_scope', page.not_in_scope);
     const branded = page.articles.filter(brandOfArticle);
-    for (const article of branded) {
+    const numbered = branded.filter(({ number }) =>
+      normalizePartNumber(number),
+    );
+    for (const article of numbered) {
       state.listedBrandNumbers.add(
         listedKey(brandOfArticle(article)!, article),
       );
     }
     tally.skip('brand', page.articles.length - branded.length);
-    const wanted = branded.filter(inScope);
+    tally.skip('no_number', branded.length - numbered.length);
+    const wanted = numbered.filter(inScope);
     const { quotes: quoted, refused } = wanted.length
       ? parsedQuotes(
           z

@@ -476,6 +476,7 @@ async function seedCrawledSupplier(
   suppliers: SupplierModuleService,
   name: string,
 ) {
+  // TODO: find the crawled Supplier by its key once supplier.key exists, so a staff rename does not seed a second one.
   const [row] = await suppliers.listSuppliers({ name });
   return upsert(
     row,
@@ -543,6 +544,19 @@ async function seedSpellings<
   }
 }
 
+async function seededCategoryBySlug(catalog: CatalogModuleService) {
+  const live = await catalog.listCategories({}, { take: null });
+  const retired = await catalog.listSlugRedirects(
+    { kind: 'category' },
+    { select: ['from_id', 'from_slug'], take: null },
+  );
+  return (slug: string) =>
+    live.find((row) => row.slug === slug) ??
+    live.find(({ id }) =>
+      retired.some((row) => row.from_slug === slug && row.from_id === id),
+    );
+}
+
 async function seedCrawledCatalogues(container: MedusaContainer) {
   const catalog: CatalogModuleService = container.resolve(CATALOG_MODULE);
   const suppliers: SupplierModuleService = container.resolve(SUPPLIER_MODULE);
@@ -607,19 +621,14 @@ async function seedCrawledCatalogues(container: MedusaContainer) {
       { supplier_id },
       WITH_DELETED,
     );
-    const categoryIds = Object.fromEntries(
-      (
-        await catalog.listCategories(
-          { slug: Object.values(categories) },
-          { take: null },
-        )
-      ).map(({ id, slug }) => [slug, id]),
-    );
+    const categoryOf = await seededCategoryBySlug(catalog);
     const wanted: [string, string | null][] = [
-      ...Object.entries(categories).map(([code, slug]): [string, string] => [
-        code,
-        categoryIds[slug],
-      ]),
+      ...Object.entries(categories).map(
+        ([code, slug]): [string, string | null] => [
+          code,
+          categoryOf(slug)?.id ?? null,
+        ],
+      ),
       ...excluded.map((code): [string, null] => [code, null]),
     ];
     for (const [code, category_id] of wanted) {
@@ -674,15 +683,11 @@ export async function seedProductionCatalogue(
   const catalog: CatalogModuleService = container.resolve(CATALOG_MODULE);
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
   const categories = [...CATEGORIES, BATTERY_CATEGORY];
-  const existing = await catalog.listCategories(
-    { slug: categories.map(({ slug }) => slug) },
-    { take: null },
-  );
+  const existing = await seededCategoryBySlug(catalog);
   const photos = readdirSync(IMAGES);
   for (const category of categories) {
     const row =
-      existing.find(({ slug }) => slug === category.slug) ??
-      (await catalog.createCategories(category));
+      existing(category.slug) ?? (await catalog.createCategories(category));
     const fields = CATEGORY_FIELDS[category.slug];
     if (fields) await seedCategoryFields(catalog, row.id, fields, logger);
     if (row.updated_by) continue;

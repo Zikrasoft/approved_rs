@@ -12,7 +12,6 @@ import type {
   MedusaContainer,
 } from '@medusajs/framework/types';
 import { Modules } from '@medusajs/framework/utils';
-import { normalizePartNumber } from '@podbor/catalog-contract';
 import {
   createApiKeysWorkflow,
   linkSalesChannelsToApiKeyWorkflow,
@@ -31,6 +30,7 @@ import {
   seedProductionCatalogue,
 } from '../lib/production-seed';
 import { DEMO_SUPPLIERS } from '../lib/suppliers/demo-adapter';
+import { partNumberKey } from '../modules/_shared/keys';
 import { CATALOG_MODULE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
 import type { NewPart } from '../modules/catalog/service';
@@ -186,7 +186,7 @@ async function seedPart(
   for (const identifier of part.identifiers) {
     const [found] = await catalog.listPartIdentifiers({
       brand_id: identifier.brand_id,
-      normalized_value: normalizePartNumber(identifier.value),
+      normalized_value: partNumberKey(identifier.value),
     });
     if (found) taken ??= found.part_id;
     else free.push(identifier);
@@ -812,7 +812,7 @@ async function applyDemoAttributes(catalog: CatalogModuleService) {
   );
   for (const [slug, number, attributes, name] of DEMO_ATTRIBUTES) {
     const [identifier] = await catalog.listPartIdentifiers(
-      { brand_id: brand[slug], normalized_value: normalizePartNumber(number) },
+      { brand_id: brand[slug], normalized_value: partNumberKey(number) },
       { relations: ['part'] },
     );
     const part = identifier?.part;
@@ -1012,7 +1012,7 @@ async function seedFilterVariety(
   );
   const existing = async (slug: string, number: string) => {
     const [identifier] = await catalog.listPartIdentifiers(
-      { brand_id: brand[slug], normalized_value: normalizePartNumber(number) },
+      { brand_id: brand[slug], normalized_value: partNumberKey(number) },
       { relations: ['part'] },
     );
     return identifier;

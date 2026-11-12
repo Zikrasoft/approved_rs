@@ -13,7 +13,6 @@ import {
   type CatalogLocale,
   categoryFieldSchema,
   describeFacet,
-  imageSchema,
   IN_STOCK,
   IN_STOCK_FACET,
   partNumberQuery,
@@ -33,7 +32,11 @@ import {
 import { vinOf } from '@podbor/lead-crm/vin';
 import { z } from 'zod';
 
-import { imagesSchema } from '../../../lib/images';
+import {
+  imagesSchema,
+  publicFileUrl,
+  storedImageSchema,
+} from '../../../lib/images';
 import {
   loggedQuery,
   logEvent,
@@ -79,7 +82,7 @@ const hitSchema = brandNumberSchema.extend({
     id: z.string(),
     attributes: attributeValuesSchema.nullable().catch(null),
     category: named
-      .extend({ slug: z.string(), image: imageSchema.nullable() })
+      .extend({ slug: z.string(), image: storedImageSchema.nullable() })
       .nullable(),
   }),
 });
@@ -90,13 +93,19 @@ const thumbnail = (
 ) => {
   const [own] = images.items;
   if (own)
-    return { thumbnail: smallestImage(own), thumbnail_illustration: false };
+    return {
+      thumbnail: publicFileUrl(smallestImage(own)),
+      thumbnail_illustration: false,
+    };
   if (supplierImage) {
-    return { thumbnail: supplierImage, thumbnail_illustration: false };
+    return {
+      thumbnail: publicFileUrl(supplierImage),
+      thumbnail_illustration: false,
+    };
   }
   return part.category?.image
     ? {
-        thumbnail: smallestImage(part.category.image),
+        thumbnail: publicFileUrl(smallestImage(part.category.image)),
         thumbnail_illustration: true,
       }
     : { thumbnail: null, thumbnail_illustration: false };

@@ -674,7 +674,7 @@ account. All of it is described in `infra/auto-service-shop/`:
 | `backup.env.example`                     | the template for `/srv/carlab/.env.backup`, the off-host backup bucket                                                                                                                           |
 | `deploy.sh`, `backup.sh`, `restore.sh`   | shipping, the nightly backup and its off-host copy (`backup.sh fetch` pulls one back), restore                                                                                                   |
 | `crawler-role.sh`                        | the crawler's Postgres role, run by `deploy.sh` and `restore.sh` after the migrations                                                                                                            |
-| `move-static-to-s3.sh`                   | once: copies the old `static` volume to the public bucket and rewrites the stored image URLs                                                                                                     |
+| `move-static-to-s3.sh`                   | once: copies the old `static` volume to the public bucket; stored image keys need no rewrite                                                                                                     |
 | `bootstrap-host.sh`, `harden-ssh.sh`     | first-time server setup (once, by hand)                                                                                                                                                          |
 | `test/*.test.sh`                         | the compose shape, the Caddy rules against a live Caddy, the crawler role against a live Postgres, the scripts' behaviour against a stubbed `docker`, run in `check`                             |
 
@@ -911,10 +911,10 @@ requires it, but the worker never writes there and the policy would refuse it.
 Moving an existing server off the old `static` volume, once, after the first
 deploy with the S3 settings: `/srv/carlab/move-static-to-s3.sh` copies the volume
 into the public bucket with `aws s3 sync` (in a pinned `amazon/aws-cli` container,
-keys through a temporary env file) and rewrites `https://$API_HOST/static` to
-`FILE_URL` in `part_identifier.images` and `category.image`. File ids keep working
-because the keys stay the file names. Then a Publish, and `docker volume rm
-carlab_static` once the images show.
+keys through a temporary env file). The database needs no rewrite:
+`part_identifier.images` and `category.image` store object keys, never a host, and
+the keys stay the file names. Then `docker volume rm carlab_static` once the
+images show.
 
 ### `.env`
 
@@ -1052,9 +1052,10 @@ number gets its CI value in that script. The non-obvious parts:
 
 - `TYPESENSE_API_KEY` has a local default only outside production; with
   `NODE_ENV=production` an empty one stops the server at startup.
-- `FILE_URL` is the public base URL of shop images, stored into every image URL
-  at upload time: `https://media.carlab.rs`, so what serves the domain can change
-  without rewriting a stored URL. Without it production stops at startup.
+- `FILE_URL` is the public base URL of shop images, `https://media.carlab.rs`.
+  The database stores object keys only and the shop puts `FILE_URL` in front of
+  them when it answers, so the host can change without rewriting a stored row.
+  Without it production stops at startup.
 - `MEDIA_ORIGIN` is where Caddy fetches `media.carlab.rs` from, the public
   bucket's endpoint (`https://<bucket>.s3.<region>.amazonaws.com`). Caddy
   answers GET and HEAD only and marks every image cacheable for a year: image

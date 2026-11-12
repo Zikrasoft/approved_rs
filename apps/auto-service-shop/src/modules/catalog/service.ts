@@ -16,7 +16,6 @@ import {
   guardDefinitionChange,
   type SteeringSide,
   type VEHICLE_DRIVES,
-  normalizePartNumber,
   requirementErrors,
   validateAttributes,
 } from '@podbor/catalog-contract';
@@ -47,7 +46,7 @@ import { runBoundSql } from '../_shared/bound-sql';
 import { chunksOf } from '../_shared/chunks';
 import { keysetPages } from '../_shared/keyset-pages';
 import { modelSlugOf, slugOf, vehicleSlugOf } from '../_shared/slug';
-import { nameKey } from '../_shared/keys';
+import { nameKey, partNumberKey } from '../_shared/keys';
 import {
   countRowsBySource,
   lockSourcedRows,
@@ -948,7 +947,7 @@ class CatalogModuleService extends CatalogModuleBase {
     await this.createPartIdentifiers(
       identifiers.map((identifier) => ({
         ...identifier,
-        normalized_value: normalizePartNumber(identifier.value),
+        normalized_value: partNumberKey(identifier.value),
         part_id: created.id,
         ...provenance,
       })),
@@ -963,7 +962,7 @@ class CatalogModuleService extends CatalogModuleBase {
     @MedusaContext() sharedContext: Context = {},
   ): Promise<FoundPart> {
     await this.lockNumbers([identifier], sharedContext);
-    const normalized = normalizePartNumber(identifier.value);
+    const normalized = partNumberKey(identifier.value);
     const [existing] = await this.listPartIdentifiers(
       { brand_id: identifier.brand_id, normalized_value: normalized },
       { select: ['id', 'part_id'], take: 1 },
@@ -1008,7 +1007,7 @@ class CatalogModuleService extends CatalogModuleBase {
     @MedusaContext() sharedContext: Context = {},
   ): Promise<boolean> {
     const [, count] = await this.listAndCountRejectedNumbers(
-      { brand_id: brandId, normalized_value: normalizePartNumber(value) },
+      { brand_id: brandId, normalized_value: partNumberKey(value) },
       { select: ['id'], take: 1 },
       sharedContext,
     );
@@ -1063,7 +1062,7 @@ class CatalogModuleService extends CatalogModuleBase {
       {
         $or: identifiers.map(({ brand_id, value }) => ({
           brand_id,
-          normalized_value: normalizePartNumber(value),
+          normalized_value: partNumberKey(value),
         })),
       },
       { select: ['id'], take: null },
@@ -1170,7 +1169,7 @@ class CatalogModuleService extends CatalogModuleBase {
     await this.createPartIdentifiers(
       {
         ...identifier,
-        normalized_value: normalizePartNumber(identifier.value),
+        normalized_value: partNumberKey(identifier.value),
         part_id: partId,
         ...provenance,
       },
@@ -1227,7 +1226,7 @@ class CatalogModuleService extends CatalogModuleBase {
     const keys = [
       ...new Set(
         identifiers.map(
-          ({ brand_id, value }) => `${brand_id}:${normalizePartNumber(value)}`,
+          ({ brand_id, value }) => `${brand_id}:${partNumberKey(value)}`,
         ),
       ),
     ].sort();
@@ -1247,7 +1246,7 @@ class CatalogModuleService extends CatalogModuleBase {
       {
         $or: identifiers.map(({ brand_id, value }) => ({
           brand_id,
-          normalized_value: normalizePartNumber(value),
+          normalized_value: partNumberKey(value),
         })),
       },
       { relations: ['part'], take: 1 },

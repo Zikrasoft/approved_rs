@@ -1,4 +1,20 @@
-import { modelSlugOf, vehicleSlugOf } from '../slug';
+import { modelSlugOf, slugOf, vehicleSlugOf } from '../slug';
+
+describe('slugOf', () => {
+  it.each([
+    ['Đurđevac', 'djurdjevac'],
+    ['ĐURĐEVAC', 'djurdjevac'],
+    ['Ölfilter für Straße', 'olfilter-fur-strasse'],
+    ['Łódź', 'lodz'],
+    ['Søren Ørsted', 'soren-orsted'],
+    ['Ærø', 'aero'],
+    ['Œuvre cœur', 'oeuvre-coeur'],
+    ['Kočnice i vešanje', 'kocnice-i-vesanje'],
+    ['Citroën C4', 'citroen-c4'],
+  ])('slugs %j as %j', (name, slug) => {
+    expect(slugOf(name)).toBe(slug);
+  });
+});
 
 describe('modelSlugOf', () => {
   it('reads series, chassis and model', () => {

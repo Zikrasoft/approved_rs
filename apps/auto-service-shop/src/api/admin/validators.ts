@@ -35,7 +35,7 @@ const partNumber = z
   .string()
   .trim()
   .max(MAX_PART_NUMBER_LENGTH)
-  .refine((value) => normalizePartNumber(value).length > 0);
+  .refine((value) => normalizePartNumber(value) !== null);
 
 const isEan = (value: string) => {
   const digits = value.replace(/\s/g, '');

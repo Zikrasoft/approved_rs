@@ -9,17 +9,19 @@ describe('importTally', () => {
     tally.skip('not_in_scope', 3);
     tally.skip('currency');
     tally.skip('rejected', 4);
+    tally.skip('no_number', 6);
     tally.withoutEngineCode(7);
     tally.skip('no_make', 5);
 
     expect(tally.summary).toMatchObject({
-      skipped: 10,
+      skipped: 16,
       skipped_by_reason: {
         brand: 2,
         excluded: 1,
         not_in_scope: 3,
         currency: 1,
         rejected: 4,
+        no_number: 6,
         no_make: 5,
         unmapped: 0,
         unreadable: 0,

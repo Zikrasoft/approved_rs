@@ -19,7 +19,16 @@ export const VEHICLE_IDENTIFIER_TYPES = [
   SUPPLIER_VEHICLE_ID,
 ] as const;
 export const VEHICLE_DRIVES = ['rwd', 'fwd', 'awd'] as const;
-export const ENGINE_FUELS = ['petrol', 'diesel', 'hybrid', 'electric'] as const;
+export const ENGINE_FUELS = [
+  'petrol',
+  'diesel',
+  'hybrid',
+  'mild-hybrid',
+  'plug-in-hybrid',
+  'electric',
+  'lpg',
+  'cng',
+] as const;
 export const BODY_STYLES = [
   'sedan',
   'touring',
@@ -28,7 +37,10 @@ export const BODY_STYLES = [
   'convertible',
   'gran-coupe',
   'suv',
+  'crossover',
+  'minivan',
   'van',
+  'pickup',
 ] as const;
 
 export type VehicleIdentifierType = (typeof VEHICLE_IDENTIFIER_TYPES)[number];

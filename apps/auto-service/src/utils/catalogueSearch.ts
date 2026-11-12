@@ -60,7 +60,7 @@ const LETTER_LED_NUMBER = /^\p{L}{2}\d{2,}\p{L}?$/u;
 
 const letterLedNumber = (q: string): string | null => {
   const number = normalizePartNumber(q);
-  return LETTER_LED_NUMBER.test(number) ? number : null;
+  return number && LETTER_LED_NUMBER.test(number) ? number : null;
 };
 
 export const missingNumber = (q: string, results: PartResult[]): boolean => {

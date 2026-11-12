@@ -9,6 +9,12 @@ const RejectedNumber = model
     normalized_value: model.text(),
     ...provenance(),
   })
-  .indexes([{ on: ['brand_id', 'normalized_value'], unique: true }]);
+  .indexes([{ on: ['brand_id', 'normalized_value'], unique: true }])
+  .checks([
+    {
+      name: 'rejected_number_normalized_value_key',
+      expression: "normalized_value SIMILAR TO '[A-Z0-9]+'",
+    },
+  ]);
 
 export default RejectedNumber;

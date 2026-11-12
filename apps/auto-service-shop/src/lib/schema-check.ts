@@ -126,6 +126,8 @@ export const HAND_WRITTEN_INDEXES: Record<string, RegExp> = {
   IDX_series_make_id_name_key_unique: ON_NAME_KEY,
   IDX_engine_code_key_unique: ON_CODE_KEY,
   IDX_chassis_series_id_code_key_unique: ON_CODE_KEY,
+  IDX_slug_redirect_kind_scope_id_from_slug_unique:
+    /\(kind, scope_id, from_slug\) NULLS NOT DISTINCT WHERE \(\(kind <> 'part'::text\) AND \(deleted_at IS NULL\)\)$/,
   IDX_fitment_part_vehicle_all: OVER_TOMBSTONES_TOO,
   IDX_fitment_vehicle_all: OVER_TOMBSTONES_TOO,
   IDX_vehicle_model_name_trigram: TRIGRAM,

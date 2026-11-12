@@ -25,7 +25,6 @@ export type Bucket = {
 export type ShopStorage = {
   pages: Bucket;
   images: Bucket;
-  publicUrl: (key: string) => string;
 };
 
 const missing = (error: unknown) =>
@@ -77,18 +76,17 @@ export const s3Client = (config: S3Config) =>
 export const s3PagesBucket = (config: S3Config): Bucket =>
   s3Bucket(s3Client(config), config.privateBucket);
 
-export const s3Storage = (config: S3Config, fileUrl: string): ShopStorage => {
+export const s3Storage = (config: S3Config): ShopStorage => {
   const client = s3Client(config);
   return {
     pages: s3PagesBucket(config),
     images: s3Bucket(client, config.publicBucket),
-    publicUrl: (key) => `${fileUrl}/${key}`,
   };
 };
 
 export const configuredStorage = (): ShopStorage | null => {
   const env = parseEnv(process.env);
-  return env.S3 ? s3Storage(env.S3, env.FILE_URL) : null;
+  return env.S3 ? s3Storage(env.S3) : null;
 };
 
 export const shopStorage = (scope: MedusaContainer): ShopStorage | null =>

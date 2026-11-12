@@ -110,7 +110,7 @@ export class Migration20261112045154 extends Migration {
     );
 
     this.addSql(
-      `create table if not exists "engine" ("id" text not null, "code" text not null, "family" text not null, "fuel" text check ("fuel" in ('petrol', 'diesel', 'hybrid', 'electric')) null, "displacement_cc" integer null, "source" text not null default 'manual', "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "engine_pkey" primary key ("id"));`,
+      `create table if not exists "engine" ("id" text not null, "code" text not null, "family" text not null, "fuel" text check ("fuel" in ('petrol', 'diesel', 'hybrid', 'mild-hybrid', 'plug-in-hybrid', 'electric', 'lpg', 'cng')) null, "displacement_cc" integer null, "source" text not null default 'manual', "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "engine_pkey" primary key ("id"));`,
     );
     this.addSql(
       `CREATE INDEX IF NOT EXISTS "IDX_engine_deleted_at" ON "engine" ("deleted_at") WHERE deleted_at IS NULL;`,
@@ -156,7 +156,7 @@ export class Migration20261112045154 extends Migration {
     );
 
     this.addSql(
-      `create table if not exists "part_identifier" ("id" text not null, "type" text check ("type" in ('oem', 'manufacturer-number', 'ean')) not null, "value" text not null, "normalized_value" text not null, "superseded" boolean not null default false, "images" jsonb not null default '{"items":[]}', "brand_id" text not null, "part_id" text not null, "source" text not null default 'manual', "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "part_identifier_pkey" primary key ("id"));`,
+      `create table if not exists "part_identifier" ("id" text not null, "type" text check ("type" in ('oem', 'manufacturer-number', 'ean')) not null, "value" text not null, "normalized_value" text not null, "superseded" boolean not null default false, "images" jsonb not null default '{"items":[]}', "brand_id" text not null, "part_id" text not null, "source" text not null default 'manual', "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "part_identifier_pkey" primary key ("id"), constraint part_identifier_normalized_value_key check (normalized_value SIMILAR TO '[A-Z0-9]+'));`,
     );
     this.addSql(
       `CREATE INDEX IF NOT EXISTS "IDX_part_identifier_brand_id" ON "part_identifier" ("brand_id") WHERE deleted_at IS NULL;`,
@@ -175,7 +175,7 @@ export class Migration20261112045154 extends Migration {
     );
 
     this.addSql(
-      `create table if not exists "rejected_number" ("id" text not null, "brand_id" text not null, "normalized_value" text not null, "source" text not null default 'manual', "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "rejected_number_pkey" primary key ("id"));`,
+      `create table if not exists "rejected_number" ("id" text not null, "brand_id" text not null, "normalized_value" text not null, "source" text not null default 'manual', "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "rejected_number_pkey" primary key ("id"), constraint rejected_number_normalized_value_key check (normalized_value SIMILAR TO '[A-Z0-9]+'));`,
     );
     this.addSql(
       `CREATE INDEX IF NOT EXISTS "IDX_rejected_number_deleted_at" ON "rejected_number" ("deleted_at") WHERE deleted_at IS NULL;`,
@@ -195,7 +195,7 @@ export class Migration20261112045154 extends Migration {
     );
 
     this.addSql(
-      `create table if not exists "chassis" ("id" text not null, "code" text not null, "body_style" text check ("body_style" in ('sedan', 'touring', 'hatchback', 'coupe', 'convertible', 'gran-coupe', 'suv', 'van')) null, "year_from" integer null, "year_to" integer null, "series_id" text not null, "source" text not null default 'manual', "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "chassis_pkey" primary key ("id"), constraint chassis_years_ordered check (year_from <= year_to));`,
+      `create table if not exists "chassis" ("id" text not null, "code" text not null, "body_style" text check ("body_style" in ('sedan', 'touring', 'hatchback', 'coupe', 'convertible', 'gran-coupe', 'suv', 'crossover', 'minivan', 'van', 'pickup')) null, "year_from" integer null, "year_to" integer null, "series_id" text not null, "source" text not null default 'manual', "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "chassis_pkey" primary key ("id"), constraint chassis_years_ordered check (year_from <= year_to));`,
     );
     this.addSql(
       `CREATE INDEX IF NOT EXISTS "IDX_chassis_series_id" ON "chassis" ("series_id") WHERE deleted_at IS NULL;`,

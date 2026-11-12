@@ -6,6 +6,7 @@ import {
   loggedEvents,
   watchEvents,
 } from '../../../../../integration-tests/loggedEvents';
+import { parseEnv } from '../../../../lib/env';
 import { PUBLISH_MODULE } from '../../../../modules/publish';
 import type PublishModuleService from '../../../../modules/publish/service';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
@@ -226,14 +227,15 @@ medusaIntegrationTestRunner({
       it('gives each result its own brand-number photo, else its released supplier photo, else its Category photo', async () => {
         const catalog: CatalogModuleService =
           getContainer().resolve(CATALOG_MODULE);
+        const { FILE_URL } = parseEnv(process.env);
         const image = (name: string) => ({
           id: name,
-          src: `http://localhost/static/${name}-480.webp`,
+          src: `${name}-480.webp`,
           width: 480,
           height: 480,
           srcset: [
-            { url: `http://localhost/static/${name}-160.webp`, width: 160 },
-            { url: `http://localhost/static/${name}-480.webp`, width: 480 },
+            { url: `${name}-160.webp`, width: 160 },
+            { url: `${name}-480.webp`, width: 480 },
           ],
           file_ids: [`${name}-160.webp`, `${name}-480.webp`],
           source: 'manual',
@@ -269,7 +271,7 @@ medusaIntegrationTestRunner({
             supplier_id: released.id,
             part_identifier_id: await identifierOf(oilFilterId, '11428575211'),
             kind: 'images',
-            payload: { items: ['https://cdn.supplier.test/bmw.jpg'] },
+            payload: { items: ['supplier-images/bmw'] },
           },
           {
             supplier_id: held.id,
@@ -299,11 +301,11 @@ medusaIntegrationTestRunner({
         );
 
         expect(thumbnails).toEqual({
-          '15F6E3': ['http://localhost/static/edge-160.webp', false],
-          '15C94E': ['http://localhost/static/oil-160.webp', true],
+          '15F6E3': [`${FILE_URL}/edge-160.webp`, false],
+          '15C94E': [`${FILE_URL}/oil-160.webp`, true],
           '13 71 8511877': [null, false],
-          'HU 816 x': ['http://localhost/static/mann-160.webp', false],
-          '11 42 8575211': ['https://cdn.supplier.test/bmw.jpg', false],
+          'HU 816 x': [`${FILE_URL}/mann-160.webp`, false],
+          '11 42 8575211': [`${FILE_URL}/supplier-images/bmw`, false],
         });
       });
 
