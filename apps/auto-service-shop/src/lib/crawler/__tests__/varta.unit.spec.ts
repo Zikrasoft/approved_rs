@@ -111,6 +111,32 @@ describe('VARTA', () => {
     expect(varta.parse(html)?.specs).toMatchObject({ Tehnologija: 'AGM' });
   });
 
+  it.each([
+    ['BLUE DYNAMIC E11 574012068', 'SLI'],
+    ['Silver Dynamic 563400061', 'SLI'],
+    ['BLACK DYNAMIC C14 556400048', 'SLI'],
+    ['PROMOTIVE BLUE 640400080', 'SLI'],
+    ['Powersports Freshpack 509015009', 'SLI'],
+    ['BLUE DYNAMIC EFB 570500065', 'EFB'],
+    ['SILVER DYNAMIC AGM 570901076', 'AGM'],
+    ['PROMOTIVE EFB 640500080', 'EFB'],
+    ['PROFESSIONAL LI-ION 850050000', 'Li-ion'],
+  ])('reads the technology of the %s line', (name, technology) => {
+    const html = page('574013068k262.html.gz').replaceAll(
+      'DYNAMIC SLI 574013068',
+      name,
+    );
+    expect(varta.parse(html)?.specs).toMatchObject({ Tehnologija: technology });
+  });
+
+  it('names no technology for a line that does not tell it', () => {
+    const html = page('574013068k262.html.gz').replaceAll(
+      'DYNAMIC SLI 574013068',
+      'Powersports 522451034',
+    );
+    expect(varta.parse(html)?.specs).not.toHaveProperty('Tehnologija');
+  });
+
   it("reads nothing from VARTA's placeholder product", () => {
     expect(varta.parse(page('123456789z992.html.gz'))).toBe(null);
   });
