@@ -116,7 +116,7 @@ describe('searchResponseSchema', () => {
           body_style: 'sedan',
           series: {
             name: '3 серия',
-            translations: { en: '3 Series' },
+            translations: { en: { name: '3 Series' } },
             make: { slug: 'bmw', name: 'BMW' },
           },
         },
