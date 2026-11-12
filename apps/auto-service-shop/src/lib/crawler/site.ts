@@ -1,12 +1,12 @@
 import type { Page } from 'playwright';
 
-import type { SupplierAdapterName } from '../env';
+import type { CrawledSupplierKey } from '../../modules/supplier/keys';
 import type { SupplierArticle } from '../suppliers/adapter';
 import type { FetchMode } from './fetcher';
 import type { SitemapEntry } from './sitemap';
 
 export type CrawledSite = {
-  key: SupplierAdapterName;
+  key: CrawledSupplierKey;
   name: string;
   origin: string;
   sitemaps: string[];

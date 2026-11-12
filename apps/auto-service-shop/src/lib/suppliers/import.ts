@@ -159,7 +159,7 @@ async function answerOf(
   } catch (error) {
     const reason = errorMessage(error);
     context.logger.warn(
-      `Supplier import ${context.adapter.name}, ${article.number}: AI failed, ${reason}`,
+      `Supplier import ${context.adapter.key}, ${article.number}: AI failed, ${reason}`,
     );
     context.summary.unanswered.push({ number: article.number, reason });
     return null;
@@ -327,7 +327,7 @@ async function createPart(
       brand_id: brandId,
       value: article.number,
     },
-    source: adapter.name,
+    source: adapter.key,
     source_url: article.source_url ?? null,
   };
   const create = (attempt: Partial<PartClassification>) =>
@@ -373,7 +373,7 @@ async function matchArticle(
   }
   const { part } = hit;
   const unchanged = { identifierId: hit.id, partId: part.id, created: false };
-  if (part.source !== adapter.name) {
+  if (part.source !== adapter.key) {
     return unchanged;
   }
   if (article.source_url && part.source_url !== article.source_url) {
@@ -588,11 +588,11 @@ export async function importSupplier(
   const catalog: CatalogModuleService = scope.resolve(CATALOG_MODULE);
   const suppliers: SupplierModuleService = scope.resolve(SUPPLIER_MODULE);
   const { IMPORT_CONCURRENCY } = parseEnv(process.env);
-  const [supplier] = await suppliers.listSuppliers({ name: adapter.name });
+  const supplier = await suppliers.supplierByKey(adapter.key);
   if (!supplier) {
-    throw new Error(`No Supplier is named ${adapter.name}`);
+    throw new Error(`No Supplier has the key ${adapter.key}`);
   }
-  const tally = importTally(adapter.name);
+  const tally = importTally(supplier.name);
   const { summary } = tally;
   const context: Context = {
     scope,
@@ -604,7 +604,7 @@ export async function importSupplier(
     categories: await categoryChoices(catalog),
     logger: scope.resolve(ContainerRegistrationKeys.LOGGER),
     matched: new Set(),
-    vehicles: vehicleMatcher(catalog, adapter.name, supplier.id),
+    vehicles: vehicleMatcher(catalog, adapter.key, supplier.id),
     storage: shopStorage(scope),
     summary,
     descriptions: new Set(),
@@ -612,7 +612,7 @@ export async function importSupplier(
   };
   if (!context.storage) {
     context.logger.warn(
-      `${adapter.name}: S3 is not configured, so AI answers are not cached and every article is asked again`,
+      `${adapter.key}: S3 is not configured, so AI answers are not cached and every article is asked again`,
     );
   }
   const scopeOf = categoryScope(
@@ -655,7 +655,7 @@ export async function importSupplier(
     for (const { url, reason } of page.unreadable) {
       unreadableUrls.add(url);
       context.logger.warn(
-        `${adapter.name}: skipped unreadable ${url}: ${reason}`,
+        `${adapter.key}: skipped unreadable ${url}: ${reason}`,
       );
     }
     tally.skip('unreadable', page.unreadable.length);
@@ -695,7 +695,7 @@ export async function importSupplier(
         );
       } catch (error) {
         context.logger.warn(
-          `Supplier import ${adapter.name}, ${article.number}: failed, ${errorMessage(error)}`,
+          `Supplier import ${adapter.key}, ${article.number}: failed, ${errorMessage(error)}`,
         );
         summary.failed.push({
           number: article.number,
@@ -720,7 +720,7 @@ export async function importSupplier(
 
   if (unreadableUrls.size) {
     context.logger.warn(
-      `${adapter.name}: kept the offers of unlisted articles, ${unreadableUrls.size} pages were unreadable`,
+      `${adapter.key}: kept the offers of unlisted articles, ${unreadableUrls.size} pages were unreadable`,
     );
   } else {
     const dropped = await suppliers.dropUnlistedOffers(supplier.id, [
@@ -737,7 +737,7 @@ export async function importSupplier(
     }
   }
   await catalog.flagUnlistedParts(
-    adapter.name,
+    adapter.key,
     [...state.listedBrandNumbers],
     [...unreadableUrls],
   );
@@ -751,12 +751,12 @@ export async function importSupplierCatalogues(
   const suppliers: SupplierModuleService = scope.resolve(SUPPLIER_MODULE);
   const skipped = new Set(
     (await suppliers.listSuppliers({ import_enabled: false })).map(
-      ({ name }) => name,
+      ({ key }) => key,
     ),
   );
   const summaries: ImportSummary[] = [];
   for (const adapter of supplierAdapters(scope)) {
-    if (skipped.has(adapter.name)) {
+    if (skipped.has(adapter.key)) {
       continue;
     }
     summaries.push(await importSupplier(scope, adapter));

@@ -11,6 +11,7 @@ import { SHOP_CURRENCY } from '../../modules/supplier/pricing';
 import { crawledSupplierAdapter } from '../crawler/adapter';
 import { enabledCrawledSites } from '../crawler/sites';
 import { crawlStore } from '../crawler/store';
+import type { AdapterSupplierKey } from '../../modules/supplier/keys';
 import { parseEnv } from '../env';
 import { shopStorage } from '../storage';
 import { demoAdapters } from './demo-adapter';
@@ -79,7 +80,7 @@ export type UnreadablePage = z.infer<typeof unreadablePageSchema>;
 export type SupplierQuote = z.input<typeof supplierQuoteSchema>;
 
 export type SupplierAdapter = {
-  name: string;
+  key: AdapterSupplierKey;
   listCatalogue: (cursor: string | null) => Promise<CataloguePage>;
   quote: (articleIds: string[]) => Promise<unknown[]>;
 };

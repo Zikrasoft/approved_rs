@@ -20,14 +20,14 @@ type LookupRecord = {
   decoder_version: number | null;
   raw: Record<string, unknown> | null;
   facts: Record<string, unknown>;
-  make: string | null;
+  make_key: string | null;
   code: string | null;
   code_type: VehicleIdentifierType | null;
   vehicle_id: string | null;
 };
 
 export type UnresolvedCode = {
-  make: string;
+  make_key: string;
   code: string;
   count: number;
   customers: number;
@@ -150,7 +150,7 @@ class VinLookupModuleService extends MedusaService({
     return {
       codes: rows.map(
         ({
-          make,
+          make_key,
           code,
           count,
           customers,
@@ -160,7 +160,7 @@ class VinLookupModuleService extends MedusaService({
           admin,
           last_seen,
         }) => ({
-          make,
+          make_key,
           code,
           count,
           customers,

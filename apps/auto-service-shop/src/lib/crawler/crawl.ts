@@ -85,14 +85,14 @@ export async function crawlOrPause(
 ): Promise<void> {
   try {
     await crawlSite(site, deps);
-    crashes.delete(site.name);
+    crashes.delete(site.key);
   } catch (error) {
-    const count = (crashes.get(site.name) ?? 0) + 1;
+    const count = (crashes.get(site.key) ?? 0) + 1;
     if (count < MAX_CONSECUTIVE_CRASHES) {
-      crashes.set(site.name, count);
+      crashes.set(site.key, count);
     } else {
-      crashes.delete(site.name);
-      await deps.store.pause(site.name, 'worker_error');
+      crashes.delete(site.key);
+      await deps.store.pause(site.key, 'worker_error');
     }
     throw error;
   }
@@ -203,7 +203,7 @@ async function crawlWith(
       if (reason) return reason;
     }
     await store.seed(
-      site.name,
+      site.key,
       [...new Set(found.filter(site.isPage))],
       at(),
       hints,
@@ -216,7 +216,7 @@ async function crawlWith(
     error: FailureReason,
     http_status: number | null = null,
   ) => {
-    await store.update(site.name, page.url, {
+    await store.update(site.key, page.url, {
       status: 'failed',
       error,
       http_status,
@@ -235,7 +235,7 @@ async function crawlWith(
     holdUntil = Math.max(holdUntil, clock.now() + waitMs);
     const attempts = page.attempts + 1;
     const gaveUp = attempts >= MAX_ATTEMPTS;
-    await store.update(site.name, page.url, {
+    await store.update(site.key, page.url, {
       status: gaveUp ? 'failed' : 'queued',
       attempts,
       next_attempt_at: new Date(clock.now() + waitMs),
@@ -273,9 +273,9 @@ async function crawlWith(
     serverErrors = 0;
     const settled = { http_status: status, fetched_at: at(), error: null };
     if (status === 304) {
-      await store.update(site.name, page.url, { status: 'done', ...settled });
+      await store.update(site.key, page.url, { status: 'done', ...settled });
     } else if (succeeded(fetched) && outOfScope(site, fetched.body)) {
-      await store.update(site.name, page.url, {
+      await store.update(site.key, page.url, {
         status: 'out_of_scope',
         ...settled,
         body: null,
@@ -283,16 +283,16 @@ async function crawlWith(
         last_modified: null,
       });
     } else if (succeeded(fetched)) {
-      await store.update(site.name, page.url, {
+      await store.update(site.key, page.url, {
         status: 'done',
         ...settled,
         body: gzipSync(fetched.body),
         etag: fetched.headers.etag ?? null,
         last_modified: fetched.headers['last-modified'] ?? null,
       });
-      if (await store.spendPageLimit(site.name)) return 'idle';
+      if (await store.spendPageLimit(site.key)) return 'idle';
     } else if (status === 404 || status === 410) {
-      await store.update(site.name, page.url, { status: 'gone', ...settled });
+      await store.update(site.key, page.url, { status: 'gone', ...settled });
     } else {
       await fail(page, 'http', status);
     }
@@ -307,28 +307,28 @@ async function crawlWith(
     if (stale) return stale;
     if (!seeded) return seed();
     const page = await store.claim(
-      site.name,
+      site.key,
       at(),
       new Date(clock.now() + LEASE_MS),
       pages_left === null ? null : sampleSeed,
     );
     if (page) return fetchPage(page);
-    const due = await store.nextDue(site.name);
+    const due = await store.nextDue(site.key);
     if (!due) return 'idle';
     await clock.sleep(Math.max(due.getTime() - clock.now(), IDLE_MS));
     return null;
   };
 
   for (;;) {
-    const run = await store.run(site.name);
+    const run = await store.run(site.key);
     if (run?.status !== 'running') return;
     const outcome = await step(run);
     if (outcome === 'idle') {
-      await store.finish(site.name, at());
+      await store.finish(site.key, at());
       return;
     }
     if (outcome) {
-      await store.pause(site.name, outcome);
+      await store.pause(site.key, outcome);
       return;
     }
   }

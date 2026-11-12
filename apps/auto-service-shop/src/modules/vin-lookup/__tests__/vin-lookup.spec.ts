@@ -14,7 +14,7 @@ const CUSTOMER_VISITOR = '1c9b5a6f-7d2e-4f3a-8b4c-8d9e0f1a2b3c';
 
 const lookup = (
   vin: string,
-  make: string,
+  makeKey: string,
   code: string,
   codeType: VehicleIdentifierType,
 ) => ({
@@ -23,7 +23,7 @@ const lookup = (
   decoder_version: 1,
   raw: null,
   facts: {},
-  make,
+  make_key: makeKey,
   code,
   code_type: codeType,
   vehicle_id: null,
@@ -45,11 +45,11 @@ medusaIntegrationTestRunner({
         const vin = 'WBAAB12070N000001';
 
         await vinLookups.saveLookup(
-          lookup(vin, 'bmw', 'AB12', 'bmw-type-code'),
+          lookup(vin, 'BMW', 'AB12', 'bmw-type-code'),
           SITE,
         );
         await vinLookups.saveLookup(
-          lookup(vin, 'bmw', 'AB13', 'bmw-type-code'),
+          lookup(vin, 'BMW', 'AB13', 'bmw-type-code'),
           QUOTE,
         );
 
@@ -62,11 +62,11 @@ medusaIntegrationTestRunner({
         const vin = 'WBAAB14070N000004';
 
         await vinLookups.saveLookup(
-          lookup(vin, 'bmw', 'AB14', 'bmw-type-code'),
+          lookup(vin, 'BMW', 'AB14', 'bmw-type-code'),
           { source: 'storefront', bot: true, visitor_id: CUSTOMER_VISITOR },
         );
         await vinLookups.saveLookup(
-          lookup(vin, 'bmw', 'AB14', 'bmw-type-code'),
+          lookup(vin, 'BMW', 'AB14', 'bmw-type-code'),
           QUOTE,
         );
 
@@ -93,7 +93,7 @@ medusaIntegrationTestRunner({
           origin: Parameters<VinLookupModuleService['saveLookup']>[1],
         ) =>
           vinLookups.saveLookup(
-            lookup(vin, 'bmw', 'EF56', 'bmw-type-code'),
+            lookup(vin, 'BMW', 'EF56', 'bmw-type-code'),
             origin,
           );
         await save('WBAEF56070N000005', SITE);
@@ -123,7 +123,7 @@ medusaIntegrationTestRunner({
         });
 
         expect(codes.find(({ code }) => code === 'EF56')).toEqual({
-          make: 'bmw',
+          make_key: 'BMW',
           code: 'EF56',
           count: 6,
           customers: 2,
@@ -135,15 +135,15 @@ medusaIntegrationTestRunner({
 
       it('hides a code no real customer searched until staff ask for every code', async () => {
         await vinLookups.saveLookup(
-          lookup('WBAGH78070N000010', 'bmw', 'GH78', 'bmw-type-code'),
+          lookup('WBAGH78070N000010', 'BMW', 'GH78', 'bmw-type-code'),
           QUOTE,
         );
         await vinLookups.saveLookup(
-          lookup('WBAGH78070N000011', 'bmw', 'GH78', 'bmw-type-code'),
+          lookup('WBAGH78070N000011', 'BMW', 'GH78', 'bmw-type-code'),
           { source: 'storefront', bot: false, visitor_id: STAFF_VISITOR },
         );
         await vinLookups.saveLookup(
-          lookup('WBAGH79070N000012', 'bmw', 'GH79', 'bmw-type-code'),
+          lookup('WBAGH79070N000012', 'BMW', 'GH79', 'bmw-type-code'),
           { source: 'storefront', bot: true, visitor_id: null },
         );
         const page = (all: boolean) =>
@@ -165,7 +165,7 @@ medusaIntegrationTestRunner({
       it('forgets the lookups of a VIN together with the VIN', async () => {
         const vin = 'WBAJK90070N000013';
         await vinLookups.saveLookup(
-          lookup(vin, 'bmw', 'JK90', 'bmw-type-code'),
+          lookup(vin, 'BMW', 'JK90', 'bmw-type-code'),
           SITE,
         );
         const [{ id }] = await vinLookups.listVinLookups({ vin });
@@ -180,13 +180,13 @@ medusaIntegrationTestRunner({
       it('drops a code from the unresolved list only once a Vehicle has it under its own type', async () => {
         await createVehicleFixture(catalog, { typeCode: 'CD34' });
         await vinLookups.saveLookup(
-          lookup('WBACD34070N000002', 'bmw', 'CD34', 'bmw-type-code'),
+          lookup('WBACD34070N000002', 'BMW', 'CD34', 'bmw-type-code'),
           SITE,
         );
         await vinLookups.saveLookup(
           lookup(
             'WDDCD34070N000003',
-            'mercedes-benz',
+            'MERCEDES BENZ',
             'CD34',
             'mercedes-baumuster',
           ),
@@ -201,8 +201,10 @@ medusaIntegrationTestRunner({
         });
 
         expect(
-          codes.filter(({ code }) => code === 'CD34').map(({ make }) => make),
-        ).toEqual(['mercedes-benz']);
+          codes
+            .filter(({ code }) => code === 'CD34')
+            .map(({ make_key }) => make_key),
+        ).toEqual(['MERCEDES BENZ']);
       });
     });
   },

@@ -97,8 +97,8 @@ describe('demo supplier adapter', () => {
     process.env = { ...previous, SUPPLIER_ADAPTERS: 'demo' };
     try {
       expect(
-        supplierAdapters(createMedusaContainer()).map(({ name }) => name),
-      ).toEqual(DEMO_SUPPLIERS.map(({ name }) => name));
+        supplierAdapters(createMedusaContainer()).map(({ key }) => key),
+      ).toEqual(DEMO_SUPPLIERS.map(({ key }) => key));
     } finally {
       process.env = previous;
     }

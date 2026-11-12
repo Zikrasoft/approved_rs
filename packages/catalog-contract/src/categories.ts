@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { CATEGORY_FIELD_TYPES } from './attributes.ts';
+import { CATEGORY_FIELD_TYPES, ofKnownFieldTypes } from './attributes.ts';
 import { imageSchema } from './images.ts';
 import { BRAND_SLUG_PATTERN } from './partPages.ts';
 import { translationsSchema } from './translations.ts';
@@ -47,7 +47,7 @@ export const categorySchema = z.object({
   service_note: z.string().nullable(),
   installation_price: z.number().int().nonnegative().nullable().default(null),
   image: imageSchema.nullable(),
-  fields: z.array(categoryFieldSchema),
+  fields: ofKnownFieldTypes(categoryFieldSchema),
 });
 
 export const categoriesResponseSchema = z.object({

@@ -69,7 +69,7 @@ medusaIntegrationTestRunner({
         expect(stored).toMatchObject({
           decoder: 'mercedes-baumuster',
           decoder_version: 2,
-          make: 'mercedes-benz',
+          make_key: 'MERCEDES BENZ',
           code: '205004',
           facts: { steering: 'left' },
           vehicle_id: vehicle.id,
@@ -261,7 +261,7 @@ medusaIntegrationTestRunner({
         });
         expect(stored).toMatchObject({
           decoder: 'mercedes-baumuster',
-          make: 'mercedes-benz',
+          make_key: 'MERCEDES BENZ',
           code: '3G1CB',
           facts: {},
           vehicle_id: null,

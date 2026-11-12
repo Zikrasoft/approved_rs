@@ -29,7 +29,7 @@ export async function GET(
       offers.map((offer) => ({
         id: offer.id,
         source: offer.supplier.name,
-        manual: offer.supplier.name === MANUAL_SUPPLIER,
+        manual: offer.supplier.key === MANUAL_SUPPLIER,
         cost_price: offer.cost_price,
         price: sellPrice(offer.cost_price, offer.supplier.markup_percentage),
         markup_percentage: offer.supplier.markup_percentage,

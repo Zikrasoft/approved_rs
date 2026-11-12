@@ -149,7 +149,7 @@ medusaIntegrationTestRunner({
           expect(stored).toMatchObject({
             decoder: 'vag-model-code',
             decoder_version: 1,
-            make: crawled.make,
+            make_key: crawled.make.toUpperCase(),
             code: vin.slice(6, 8),
             code_type: 'vag-model-code',
             vehicle_id: vehicle.id,
@@ -301,7 +301,7 @@ medusaIntegrationTestRunner({
         });
         expect(stored).toMatchObject({
           decoder: 'vag-model-code',
-          make: 'volkswagen',
+          make_key: 'VOLKSWAGEN',
           code: '00',
           code_type: 'vag-model-code',
           vehicle_id: null,
@@ -316,7 +316,7 @@ medusaIntegrationTestRunner({
         });
         expect(stored).toMatchObject({
           decoder: 'bmw-type-code',
-          make: 'bmw',
+          make_key: 'BMW',
         });
       });
     });

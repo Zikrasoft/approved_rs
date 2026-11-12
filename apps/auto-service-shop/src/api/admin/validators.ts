@@ -280,6 +280,7 @@ export type AdminBulkDetachFitmentsType = z.infer<
 
 export const AdminUpdateSupplier = z
   .strictObject({
+    name: z.string().trim().min(1).max(100).optional(),
     markup_percentage: z.number().min(0).max(500).multipleOf(0.01).optional(),
     released_kinds: z
       .array(z.enum(STAGED_DATA_KINDS))

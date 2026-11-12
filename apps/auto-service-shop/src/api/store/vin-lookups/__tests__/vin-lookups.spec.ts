@@ -107,7 +107,7 @@ medusaIntegrationTestRunner({
         expect(stored).toMatchObject({
           decoder: 'bmw-type-code',
           decoder_version: 2,
-          make: 'bmw',
+          make_key: 'BMW',
           code: '35BG',
           vehicle_id: vehicle.id,
           raw: { wmi: 'WBA', typeCode: '35BG' },
@@ -309,7 +309,7 @@ medusaIntegrationTestRunner({
           decoder: 'bmw-type-code',
           decoder_version: 0,
           facts: {},
-          make: 'bmw',
+          make_key: 'BMW',
           code: 'OLD1',
           vehicle_id: stale.vehicle.id,
         });
@@ -465,6 +465,7 @@ medusaIntegrationTestRunner({
           ({ code }: { code: string }) => code === '3K11',
         );
         expect(entry).toEqual({
+          make_key: 'BMW',
           make: 'bmw',
           code: '3K11',
           count: 1,

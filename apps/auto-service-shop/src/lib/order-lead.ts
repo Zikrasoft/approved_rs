@@ -3,15 +3,7 @@ import type {
   MedusaContainer,
 } from '@medusajs/framework/types';
 import { ContainerRegistrationKeys, MathBN } from '@medusajs/framework/utils';
-import { PARTS_ORDER_SERVICE } from '@podbor/brands';
 import { fitComment } from '@podbor/catalog-contract';
-import {
-  AD_SOURCE_FIELD,
-  META_IDS_FIELD,
-  ORDER_CANCELED,
-  ORDER_ID_FIELD,
-  ORDER_OUTCOME_FIELD,
-} from '@podbor/lead-crm/fields';
 import { MAX_COMMENT_LENGTH } from '@podbor/lead-crm/limits';
 import {
   orderLineText,
@@ -103,61 +95,22 @@ export class LeadRouteRefusal extends Error {
   }
 }
 
-// TODO: drop the origin header and redirect: 'manual' with the /api/leads fallback below; only that form route needs them, for Astro's origin check and its redirect to /thanks/.
-const post = (url: string | URL, body: BodyInit, secret: string) =>
-  fetch(url, {
-    method: 'POST',
-    headers: {
-      origin: new URL(url).origin,
-      authorization: `Bearer ${secret}`,
-      ...(typeof body === 'string'
-        ? { 'content-type': 'application/json' }
-        : {}),
-    },
-    body,
-    redirect: 'manual',
-    signal: AbortSignal.timeout(LEAD_ROUTE_TIMEOUT_MS),
-  });
-
-const legacyForm = (event: ShopOrderEvent): URLSearchParams =>
-  event.event === 'canceled'
-    ? new URLSearchParams({
-        [ORDER_ID_FIELD]: event.order_id,
-        [ORDER_OUTCOME_FIELD]: ORDER_CANCELED,
-      })
-    : new URLSearchParams({
-        contact: event.contact.contact,
-        contact_channel: event.contact.contact_channel ?? '',
-        name: event.contact.name ?? '',
-        vin: event.contact.vin ?? '',
-        locale: event.contact.locale ?? '',
-        comment: event.summary,
-        service: PARTS_ORDER_SERVICE,
-        consent: '1',
-        source_url: event.contact.source_url ?? '',
-        visitor_id: event.contact.visitor_id ?? '',
-        [AD_SOURCE_FIELD]: event.contact[AD_SOURCE_FIELD] ?? '',
-        [META_IDS_FIELD]: event.contact[META_IDS_FIELD] ?? '',
-        [ORDER_ID_FIELD]: event.order_id,
-      });
-
 export async function sendShopOrderEvent(
-  leadRouteUrl: string,
+  storefrontOrigin: string,
   event: ShopOrderEvent,
   secret: string,
 ): Promise<void> {
-  const response = await post(
-    new URL(SHOP_ORDERS_PATH, leadRouteUrl),
-    JSON.stringify(event),
-    secret,
-  );
+  const response = await fetch(new URL(SHOP_ORDERS_PATH, storefrontOrigin), {
+    method: 'POST',
+    headers: {
+      authorization: `Bearer ${secret}`,
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify(event),
+    signal: AbortSignal.timeout(LEAD_ROUTE_TIMEOUT_MS),
+  });
   await response.body?.cancel();
-  if (response.ok) return;
-  if (response.status !== 404) throw new LeadRouteRefusal(response.status);
-  // TODO: drop this /api/leads fallback, and read LEAD_ROUTE_URL as the storefront origin, one release after every storefront serves SHOP_ORDERS_PATH.
-  const legacy = await post(leadRouteUrl, legacyForm(event), secret);
-  await legacy.body?.cancel();
-  if (legacy.status >= 400) throw new LeadRouteRefusal(legacy.status);
+  if (!response.ok) throw new LeadRouteRefusal(response.status);
 }
 
 export async function readLeadOrder(

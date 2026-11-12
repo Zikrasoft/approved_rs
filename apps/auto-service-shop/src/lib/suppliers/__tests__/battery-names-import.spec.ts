@@ -18,7 +18,7 @@ import {
 import { SHOP_STORAGE_REGISTRATION } from '../../storage';
 import { SUPPLIER_ADAPTERS_REGISTRATION } from '../adapter';
 
-const supplier = createFakeSupplier('Intercars');
+const supplier = createFakeSupplier('demo-intercars');
 const shopAi = createFakeShopAi();
 const storage = memoryStorage();
 const COMPOSED = 'Аккумулятор 12 В 60 А·ч 540 А VARTA 560408054';
@@ -59,6 +59,7 @@ medusaIntegrationTestRunner({
           slug: BATTERY_CATEGORY.slug,
         });
         const intercars = await suppliers.createSuppliers({
+          key: 'demo-intercars',
           name: 'Intercars',
           markup_percentage: 20,
         });

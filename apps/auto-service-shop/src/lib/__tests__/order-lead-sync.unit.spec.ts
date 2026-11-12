@@ -188,7 +188,7 @@ describe('createOrderLeadSync', () => {
     expect(fakes.sent).toEqual([]);
   });
 
-  it.each([404, 409, 410])(
+  it.each([409, 410])(
     'stops telling the CRM a cancel it refused with %i',
     async (status) => {
       const { sync, fakes, metadataOf } = memorySync([
@@ -359,9 +359,9 @@ describe('the order.handoff event', () => {
     ],
     [new TypeError('fetch failed'), 'network', 'TypeError: fetch failed'],
     [
-      new Error('LEAD_ROUTE_URL is not set'),
+      new Error('STOREFRONT_ORIGIN is not set'),
       'error',
-      'Error: LEAD_ROUTE_URL is not set',
+      'Error: STOREFRONT_ORIGIN is not set',
     ],
   ])('names why a hand-off failed: %s', async (error, reason, cause) => {
     const { sync, fakes } = memorySync([pending()]);

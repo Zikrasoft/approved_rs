@@ -2,13 +2,14 @@ import type { MedusaContainer } from '@medusajs/framework/types';
 import { MedusaError } from '@medusajs/framework/utils';
 import { z } from '@medusajs/framework/zod';
 
-import { CATALOG_MODULE, MANUAL_SOURCE } from '../../modules/catalog';
+import { CATALOG_MODULE } from '../../modules/catalog';
 import type CatalogModuleService from '../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../modules/supplier';
+import { MANUAL_SUPPLIER_KEY } from '../../modules/supplier/keys';
 import type SupplierModuleService from '../../modules/supplier/service';
 import { emitIndexChanges } from '../index-changes';
 
-export const MANUAL_SUPPLIER = MANUAL_SOURCE;
+export const MANUAL_SUPPLIER = MANUAL_SUPPLIER_KEY;
 export const MANUAL_MARKUP_PERCENTAGE = 20;
 export const MAX_MANUAL_COST_PRICE = 10_000_000;
 export const MAX_MANUAL_STOCK = 100_000;
@@ -36,11 +37,12 @@ async function manualSupplierId(
   suppliers: SupplierModuleService,
   actorId: string,
 ): Promise<string> {
-  const [existing] = await suppliers.listSuppliers({ name: MANUAL_SUPPLIER });
+  const existing = await suppliers.supplierByKey(MANUAL_SUPPLIER);
   if (existing) {
     return existing.id;
   }
   const created = await suppliers.createSuppliers({
+    key: MANUAL_SUPPLIER,
     name: MANUAL_SUPPLIER,
     markup_percentage: MANUAL_MARKUP_PERCENTAGE,
     import_enabled: false,
@@ -80,7 +82,7 @@ export async function deleteManualOffer(
   const catalog: CatalogModuleService = scope.resolve(CATALOG_MODULE);
   const suppliers: SupplierModuleService = scope.resolve(SUPPLIER_MODULE);
   const identifier = await catalog.retrievePartIdentifier(partIdentifierId);
-  const [supplier] = await suppliers.listSuppliers({ name: MANUAL_SUPPLIER });
+  const supplier = await suppliers.supplierByKey(MANUAL_SUPPLIER);
   const [existing] = supplier
     ? await suppliers.listSupplierOffers({
         supplier_id: supplier.id,

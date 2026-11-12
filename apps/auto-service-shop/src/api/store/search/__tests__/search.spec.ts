@@ -260,11 +260,12 @@ medusaIntegrationTestRunner({
           getContainer().resolve(SUPPLIER_MODULE);
         const [released, held] = await suppliers.createSuppliers([
           {
+            key: 'varta',
             name: 'Released',
             markup_percentage: 10,
             released_kinds: ['images'],
           },
-          { name: 'Held', markup_percentage: 10 },
+          { key: 'filtron', name: 'Held', markup_percentage: 10 },
         ]);
         await suppliers.createStagedRecords([
           {
@@ -816,6 +817,7 @@ medusaIntegrationTestRunner({
           superseded: true,
         });
         const supplier = await suppliers.createSuppliers({
+          key: 'mann-filter',
           name: 'Ranking supplier',
           markup_percentage: 0,
         });
@@ -877,6 +879,7 @@ medusaIntegrationTestRunner({
           part_id: buyablePartId,
         });
         const supplier = await suppliers.createSuppliers({
+          key: 'bilstein',
           name: 'Relevance supplier',
           markup_percentage: 0,
         });

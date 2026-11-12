@@ -17,7 +17,7 @@ import type CatalogModuleService from '../../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../../modules/supplier';
 import type SupplierModuleService from '../../../../modules/supplier/service';
 
-const supplier = createFakeSupplier('Nightly supplier');
+const supplier = createFakeSupplier('mann-filter');
 const shopAi = createFakeShopAi();
 
 const SERBIAN = new Map([
@@ -188,6 +188,7 @@ medusaIntegrationTestRunner({
         const suppliers: SupplierModuleService =
           getContainer().resolve(SUPPLIER_MODULE);
         const nightly = await suppliers.createSuppliers({
+          key: 'mann-filter',
           name: 'Nightly supplier',
           markup_percentage: 20,
         });

@@ -65,6 +65,19 @@ class SupplierModuleService extends SupplierModuleBase {
       sharedContext,
     )) as SupplierModuleBase['createSupplierCategories'];
 
+  @InjectManager()
+  async supplierByKey(
+    key: string,
+    @MedusaContext() sharedContext: Context = {},
+  ) {
+    const [supplier] = await this.listSuppliers(
+      { key },
+      { take: 1 },
+      sharedContext,
+    );
+    return supplier ?? null;
+  }
+
   @InjectTransactionManager()
   async upsertSupplierOffer(
     { created_by, ...offer }: SupplierOfferInput,

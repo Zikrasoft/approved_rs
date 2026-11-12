@@ -20,6 +20,30 @@
           "enumItems": [],
           "mappedType": "text"
         },
+        "key": {
+          "name": "key",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [
+            "mann-filter",
+            "varta",
+            "bilstein",
+            "filtron",
+            "demo-intercars",
+            "demo-autodelovi",
+            "manual"
+          ],
+          "mappedType": "enum"
+        },
         "name": {
           "name": "name",
           "type": "text",
@@ -169,13 +193,13 @@
       "schema": "public",
       "indexes": [
         {
-          "keyName": "IDX_supplier_name_unique",
+          "keyName": "IDX_supplier_key_unique",
           "columnNames": [],
           "composite": false,
           "constraint": false,
           "primary": false,
           "unique": false,
-          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_supplier_name_unique\" ON \"supplier\" (\"name\") WHERE deleted_at IS NULL"
+          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_supplier_key_unique\" ON \"supplier\" (\"key\") WHERE deleted_at IS NULL"
         },
         {
           "keyName": "IDX_supplier_deleted_at",

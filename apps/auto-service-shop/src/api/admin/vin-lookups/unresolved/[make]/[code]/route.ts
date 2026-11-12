@@ -7,7 +7,11 @@ import { MedusaError } from '@medusajs/framework/utils';
 
 import { adminError } from '../../../../../../modules/_shared/admin-error';
 import { createdBy } from '../../../../../../lib/editors';
-import { LINKABLE_CODE_TYPES } from '../../../../../../lib/vin/linkable';
+import {
+  isMakeOfKey,
+  LINKABLE_CODE_TYPES,
+} from '../../../../../../lib/vin/linkable';
+import { nameKey } from '../../../../../../modules/_shared/keys';
 import { CATALOG_MODULE } from '../../../../../../modules/catalog';
 import type CatalogModuleService from '../../../../../../modules/catalog/service';
 import { VIN_LOOKUP_MODULE } from '../../../../../../modules/vin-lookup';
@@ -24,7 +28,8 @@ export async function POST(
   req: AuthenticatedMedusaRequest<AdminLinkVinCodeType>,
   res: MedusaResponse,
 ): Promise<void> {
-  const { make, code } = req.params;
+  const { code } = req.params;
+  const make = nameKey(req.params.make);
   const type = LINKABLE_CODE_TYPES[make];
   if (!type || !IDENTIFIER_FORMATS[type].test(code)) {
     throw invalid('code', 'code: Only a BMW type code can be linked');
@@ -37,9 +42,12 @@ export async function POST(
   );
   if (
     vehicles.length !== ids.length ||
-    vehicles.some(({ model }) => model.chassis.series.make.slug !== make)
+    vehicles.some(({ model }) => !isMakeOfKey(make, model.chassis.series.make))
   ) {
-    throw invalid('vehicle_ids', `vehicle_ids: Choose Vehicles of ${make}`);
+    throw invalid(
+      'vehicle_ids',
+      `vehicle_ids: Choose Vehicles of ${req.params.make}`,
+    );
   }
   const linked = new Set(
     (
@@ -61,20 +69,21 @@ export async function POST(
     );
   }
 
-  res.json({ make, code, linked: fresh.length });
+  res.json({ make: req.params.make, code, linked: fresh.length });
 }
 
 export async function DELETE(
   req: MedusaRequest,
   res: MedusaResponse,
 ): Promise<void> {
-  const { make, code } = req.params;
+  const { code } = req.params;
+  const make = nameKey(req.params.make);
   const vinLookups: VinLookupModuleService =
     req.scope.resolve(VIN_LOOKUP_MODULE);
 
   const ids = (
     await vinLookups.listVinLookups(
-      { make, code, vehicle_id: null },
+      { make_key: make, code, vehicle_id: null },
       { select: ['id'], take: null },
     )
   ).map(({ id }) => id);
@@ -82,5 +91,5 @@ export async function DELETE(
     await vinLookups.deleteVinLookups(ids);
   }
 
-  res.json({ make, code, deleted: ids.length });
+  res.json({ make: req.params.make, code, deleted: ids.length });
 }

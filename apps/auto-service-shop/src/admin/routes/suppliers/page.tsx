@@ -50,6 +50,7 @@ import { importRunning } from '../../lib/import-run';
 
 const supplierSchema = editedBySchema.extend({
   id: z.string(),
+  key: z.string(),
   name: z.string(),
   markup_percentage: z.number(),
   released_kinds: z.array(z.enum(STAGED_DATA_KINDS)),
@@ -185,7 +186,7 @@ const SuppliersPage = () => {
       });
       toast.success(
         t('suppliers.markupSaved', {
-          supplier: sourceName(supplier.name),
+          supplier: sourceName(supplier.key),
           markup: markup_percentage.toLocaleString(i18n.language),
         }),
       );
@@ -201,7 +202,7 @@ const SuppliersPage = () => {
         variant: 'confirmation',
         title: t('suppliers.confirmReleaseTitle', {
           kind: kindName,
-          supplier: sourceName(supplier.name),
+          supplier: sourceName(supplier.key),
         }),
         description: t('suppliers.confirmReleaseBody'),
         confirmText: t('suppliers.confirmRelease'),
@@ -219,7 +220,7 @@ const SuppliersPage = () => {
       toast.success(
         t(releasing ? 'suppliers.released' : 'suppliers.hidden', {
           kind: kindName,
-          supplier: sourceName(supplier.name),
+          supplier: sourceName(supplier.key),
         }),
       );
     }
@@ -232,7 +233,7 @@ const SuppliersPage = () => {
       !(await prompt({
         variant: 'confirmation',
         title: t(`suppliers.importSwitch.${state}.title`, {
-          supplier: sourceName(supplier.name),
+          supplier: sourceName(supplier.key),
         }),
         description: t(`suppliers.importSwitch.${state}.body`),
         confirmText: t(`suppliers.importSwitch.${state}.confirm`),
@@ -244,7 +245,7 @@ const SuppliersPage = () => {
     if (await update(supplier.id, { import_enabled: enabling })) {
       toast.success(
         t(`suppliers.importSwitch.${state}.done`, {
-          supplier: sourceName(supplier.name),
+          supplier: sourceName(supplier.key),
         }),
       );
     }
@@ -259,7 +260,7 @@ const SuppliersPage = () => {
     );
     if (data) {
       toast.success(
-        t('suppliers.importStarted', { supplier: sourceName(supplier.name) }),
+        t('suppliers.importStarted', { supplier: sourceName(supplier.key) }),
       );
       await load();
     }
@@ -268,7 +269,7 @@ const SuppliersPage = () => {
 
   const withdrawOffers = async (supplier: Supplier) => {
     let deleted = 0;
-    const name = sourceName(supplier.name);
+    const name = sourceName(supplier.key);
     const withdrawn = await confirmed({
       title: t('suppliers.withdraw.title', { supplier: name }),
       description: t('suppliers.withdraw.body', {
@@ -381,7 +382,9 @@ const SuppliersPage = () => {
   };
 
   const sourceName = (source: string) =>
-    t(`sources.names.${source}`, { defaultValue: source });
+    t(`sources.names.${source}`, {
+      defaultValue: suppliers.find(({ key }) => key === source)?.name ?? source,
+    });
 
   const categoryName = (id: string | null) =>
     id === null
@@ -422,7 +425,7 @@ const SuppliersPage = () => {
               <Table.Body>
                 {suppliers.map((supplier) => (
                   <Table.Row key={supplier.id}>
-                    <Table.Cell>{sourceName(supplier.name)}</Table.Cell>
+                    <Table.Cell>{sourceName(supplier.key)}</Table.Cell>
                     <Table.Cell>
                       <Input
                         type="number"
@@ -431,7 +434,7 @@ const SuppliersPage = () => {
                         max={500}
                         step={0.01}
                         aria-label={t('suppliers.markupLabel', {
-                          supplier: sourceName(supplier.name),
+                          supplier: sourceName(supplier.key),
                         })}
                         value={
                           drafts[supplier.id] ??
@@ -466,7 +469,7 @@ const SuppliersPage = () => {
                       </Button>
                     </Table.Cell>
                     <Table.Cell>
-                      {supplier.name !== MANUAL_SOURCE && (
+                      {supplier.key !== MANUAL_SOURCE && (
                         <div className="flex flex-col gap-y-1 py-2">
                           {STAGED_DATA_KINDS.map((kind) => (
                             <div
@@ -496,7 +499,7 @@ const SuppliersPage = () => {
                       <EditedBy row={supplier} />
                     </Table.Cell>
                     <Table.Cell>
-                      {supplier.name !== MANUAL_SOURCE && (
+                      {supplier.key !== MANUAL_SOURCE && (
                         <div className="flex items-center justify-between gap-x-2">
                           <div className="flex flex-col gap-y-2 py-2">
                             <div className="flex items-center gap-x-2">
@@ -528,7 +531,7 @@ const SuppliersPage = () => {
                                 size="small"
                                 variant="secondary"
                                 aria-label={t('suppliers.importOneLabel', {
-                                  supplier: sourceName(supplier.name),
+                                  supplier: sourceName(supplier.key),
                                 })}
                                 isLoading={
                                   importingId === supplier.id ||
@@ -542,7 +545,7 @@ const SuppliersPage = () => {
                             )}
                             <RowActions
                               label={t('common.actionsFor', {
-                                name: sourceName(supplier.name),
+                                name: sourceName(supplier.key),
                               })}
                               disabled={writing}
                               deleteLabel={t('suppliers.withdraw.action')}
@@ -566,7 +569,7 @@ const SuppliersPage = () => {
       </Container>
 
       <ImportReports
-        suppliers={suppliers.filter(({ name }) => name !== MANUAL_SOURCE)}
+        suppliers={suppliers.filter(({ key }) => key !== MANUAL_SOURCE)}
       />
 
       <Crawls />
@@ -586,7 +589,7 @@ const SuppliersPage = () => {
               <Select.Content>
                 {suppliers.map((supplier) => (
                   <Select.Item key={supplier.id} value={supplier.id}>
-                    {sourceName(supplier.name)}
+                    {sourceName(supplier.key)}
                   </Select.Item>
                 ))}
               </Select.Content>

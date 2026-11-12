@@ -9,6 +9,7 @@ import type SupplierModuleService from '../../../modules/supplier/service';
 
 const supplierSchema = z.object({
   id: z.string(),
+  key: z.string(),
   name: z.string(),
   markup_percentage: z.number(),
   released_kinds: z.array(z.enum(STAGED_DATA_KINDS)),

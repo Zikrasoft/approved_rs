@@ -44,7 +44,7 @@ medusaIntegrationTestRunner({
         };
 
         const [supplier] = await supplierService.createSuppliers([
-          { name: 'Intercars', markup_percentage: 20 },
+          { key: 'demo-intercars', name: 'Intercars', markup_percentage: 20 },
         ]);
 
         const [bmw] = await catalog.createBrands([

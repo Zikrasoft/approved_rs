@@ -855,7 +855,7 @@ the file>`, with the source URL in the object's `source-url` metadata, and a
   staged nowhere, so the site never links the brand's server, and is tried again
   on the next import.
 - **Private bucket** (`S3_PRIVATE_BUCKET`): the crawler's raw pages, gzipped, under
-  `crawl/<site>/<sha256 of the URL>.html.gz`. The import reads them back from there.
+  `crawl/<supplier key>/<sha256 of the URL>.html.gz`, such as `crawl/mann-filter/…`. The import reads them back from there.
 
 Bucket setup: keep Object Ownership on "Bucket owner enforced" (ACLs off; the file
 provider runs with `acl: false`), and make the public bucket readable with a
@@ -998,13 +998,20 @@ number gets its CI value in that script. The non-obvious parts:
   build bakes the prices current at that moment into the pages' structured data.
 - `TELEGRAM_BOT_TOKEN` and `TELEGRAM_GROUP_ID` are the CRM bot's own values: when an order's Lead still has not reached the storefront after the last retry, the shop posts an alert to that group. Empty, the failure only reaches the log.
 - `ADMIN_HOST` is where staff open the admin (`admin.carlab.rs`): Caddy proxies it to the same Medusa, sends `/` to `/app`, and redirects `api.carlab.rs/app` there. `ADMIN_CORS` and `AUTH_CORS` name that origin; the admin calls the API on its own origin, so `admin.backendUrl` stays unset.
-- `LEAD_ROUTE_URL` is the storefront's `/api/leads` URL, and its origin is where a placed order goes:
-  the `order.placed` subscriber posts it to `/api/shop-orders` on that origin as
-  a `parts-order` Lead, which reaches Telegram like every other Lead. The full
-  `/api/leads` URL is only the fallback for a storefront too old to serve
-  `/api/shop-orders` (it answers 404); once that fallback is dropped (the
-  `TODO:` in `order-lead.ts`) the value becomes the bare origin. Empty, orders are placed but reach
-  nobody, and the log says so. A delivered order is stamped
+- `STOREFRONT_ORIGIN` is the storefront's bare origin (`https://carlab.rs`, no
+  path; the shop refuses to start on one with a path): the `order.placed`
+  subscriber posts a placed order to `/api/shop-orders` on it as a
+  `parts-order` Lead, which reaches Telegram like every other Lead, and the
+  admin's order screen links there. It replaced `LEAD_ROUTE_URL`, the
+  `/api/leads` URL the shop fell back to for a storefront without
+  `/api/shop-orders`; that fallback is gone, so any non-2xx answer, a 404
+  included, is a failed handoff that the retry job sends again. Empty, orders
+  are placed but reach nobody, and the log says so. **A new
+  `shopOrderEventSchema` event reaches carlab.rs before the shop sends it**:
+  the event joins `@podbor/lead-crm/shop-orders-wire`, carlab.rs deploys with
+  `/api/shop-orders` reading it, and only then does a shop release send it. A
+  storefront that cannot parse an event refuses it, and the shop retries it
+  until it gives up and alerts the group. A delivered order is stamped
   `lead_handed_off_at`; every 10 minutes `src/jobs/retry-order-leads.ts`
   re-sends each order from the last two days (older than two minutes) that
   lacks the stamp, six attempts in all, timeouts included. That also catches
@@ -1676,8 +1683,8 @@ Steps 1, 5 and 6 are one `terraform apply`: see `infra/auto-service-shop/terrafo
    «Аккумуляторы» shows its fields, the registration service and a picture, and
    the Suppliers screen lists the four crawled sites.
 10. **The shop's `.env` values for carlab.rs.** In `/srv/carlab/.env`:
-    `LEAD_ROUTE_URL=https://carlab.rs/api/leads` (orders go to `/api/shop-orders`
-    on its origin, see [`.env`](#env)), `SHOP_OPEN=false` while the shop is
+    `STOREFRONT_ORIGIN=https://carlab.rs` (orders go to its `/api/shop-orders`,
+    see [`.env`](#env)), `SHOP_OPEN=false` while the shop is
     closed, `PUBLISH_DISPATCH_TOKEN` and `OPENAI_API_KEY` as described in
     [`.env`](#env); `docker compose up -d medusa` after editing.
     Done: `cut -d= -f1 /srv/carlab/.env` lists all four names.

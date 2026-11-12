@@ -15,7 +15,7 @@ import type SupplierModuleService from '../../../../modules/supplier/service';
 import { PUBLISH_MODULE } from '../../../../modules/publish';
 import type PublishModuleService from '../../../../modules/publish/service';
 
-const intercars = createFakeSupplier('Intercars');
+const intercars = createFakeSupplier('demo-intercars');
 
 type AdminOffer = {
   source: string;
@@ -112,6 +112,7 @@ medusaIntegrationTestRunner({
           part_id: partId,
         });
         const supplier = await suppliers.createSuppliers({
+          key: 'demo-intercars',
           name: 'Intercars',
           markup_percentage: 20,
         });

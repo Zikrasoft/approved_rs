@@ -402,7 +402,7 @@ medusaIntegrationTestRunner({
         const lookup = await vinLookups.createVinLookups({
           vin: 'WBA00000000DEL001',
           facts: {},
-          make: 'bmw',
+          make_key: 'BMW',
           code: 'DEL1',
           vehicle_id: vehicle.id,
         });

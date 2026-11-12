@@ -17,9 +17,9 @@ export const crawledSupplierAdapter = (
   store: CrawlStore,
   pageSize = SNAPSHOTS_PER_PAGE,
 ): SupplierAdapter => ({
-  name: site.name,
+  key: site.key,
   listCatalogue: async (cursor) => {
-    const snapshots = await store.snapshots(site.name, cursor, pageSize);
+    const snapshots = await store.snapshots(site.key, cursor, pageSize);
     const articles: SupplierArticle[] = [];
     const unreadable: UnreadablePage[] = [];
     let notInScope = 0;

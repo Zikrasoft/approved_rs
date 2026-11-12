@@ -38,6 +38,7 @@ import {
 const SHOWN_VEHICLES = 100;
 
 const unresolvedCodeSchema = z.object({
+  make_key: z.string(),
   make: z.string(),
   code: z.string(),
   customers: z.number(),
@@ -151,7 +152,7 @@ const LinkDrawer = ({
     if (!entry) return;
     setSaving(true);
     const linked = await adminFetch(
-      `/admin/vin-lookups/unresolved/${encodeURIComponent(entry.make)}/${encodeURIComponent(entry.code)}`,
+      `/admin/vin-lookups/unresolved/${encodeURIComponent(entry.make_key)}/${encodeURIComponent(entry.code)}`,
       linkedSchema,
       {
         method: 'POST',
@@ -291,7 +292,7 @@ const VinLookupsPage = () => {
 
   const pageCount = Math.max(1, Math.ceil(count / PAGE_SIZE));
 
-  const dismiss = async ({ make, code }: UnresolvedCode) => {
+  const dismiss = async ({ make_key, code }: UnresolvedCode) => {
     if (
       await confirmed({
         title: t('vinLookups.confirmDismissTitle', { code }),
@@ -300,7 +301,7 @@ const VinLookupsPage = () => {
         done: t('vinLookups.dismissed', { code }),
         run: () =>
           adminFetch(
-            `/admin/vin-lookups/unresolved/${encodeURIComponent(make)}/${encodeURIComponent(code)}`,
+            `/admin/vin-lookups/unresolved/${encodeURIComponent(make_key)}/${encodeURIComponent(code)}`,
             acknowledged,
             { method: 'DELETE' },
           ),
@@ -360,7 +361,7 @@ const VinLookupsPage = () => {
               </Table.Header>
               <Table.Body>
                 {codes.map((entry) => (
-                  <Table.Row key={`${entry.make}-${entry.code}`}>
+                  <Table.Row key={`${entry.make_key}-${entry.code}`}>
                     <Table.Cell>
                       {t(`vinLookups.makes.${entry.make}`, {
                         defaultValue: entry.make,
@@ -394,7 +395,7 @@ const VinLookupsPage = () => {
                     </Table.Cell>
                     <Table.Cell>
                       <div className="flex items-center justify-end gap-x-2">
-                        {LINKABLE_CODE_TYPES[entry.make] && (
+                        {LINKABLE_CODE_TYPES[entry.make_key] && (
                           <Button
                             size="small"
                             variant="secondary"

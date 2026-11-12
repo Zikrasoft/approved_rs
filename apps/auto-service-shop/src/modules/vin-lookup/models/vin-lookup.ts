@@ -12,7 +12,7 @@ const VinLookup = model
     decoder_version: model.number().nullable(),
     raw: model.json().nullable(),
     facts: model.json(),
-    make: model.text().nullable(),
+    make_key: model.text().nullable(),
     code: model.text().nullable(),
     code_type: model.enum([...VEHICLE_IDENTIFIER_TYPES]).nullable(),
     vehicle_id: model.text().nullable(),
@@ -24,7 +24,7 @@ const VinLookup = model
       unique: true,
     },
     { on: ['vehicle_id'] },
-    { on: ['make', 'code'], where: { vehicle_id: null } },
+    { on: ['make_key', 'code'], where: { vehicle_id: null } },
   ])
   .checks([
     {

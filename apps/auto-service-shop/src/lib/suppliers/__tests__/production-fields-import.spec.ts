@@ -15,7 +15,7 @@ import { seedProductionCatalogue } from '../../production-seed';
 import { SHOP_STORAGE_REGISTRATION } from '../../storage';
 import { SUPPLIER_ADAPTERS_REGISTRATION } from '../adapter';
 
-const supplier = createFakeSupplier('Intercars');
+const supplier = createFakeSupplier('demo-intercars');
 const shopAi = createFakeShopAi();
 const storage = memoryStorage();
 
@@ -48,6 +48,7 @@ medusaIntegrationTestRunner({
         });
         maintenanceId = maintenance.id;
         const intercars = await suppliers.createSuppliers({
+          key: 'demo-intercars',
           name: 'Intercars',
           markup_percentage: 20,
         });

@@ -75,12 +75,12 @@ export const LISTED_PART_COUNTS = `
 
 export const UNRESOLVED_VIN_CODES = `
   with hits as (
-    select l.make, l.code, h.source, h.created_at, h.visitor_id,
+    select l.make_key, l.code, h.source, h.created_at, h.visitor_id,
       h.source = 'storefront' and h.bot is not true
         and (h.visitor_id is null or h.visitor_id <> all(?::text[])) as customer
     from vin_lookup l
     join vin_lookup_hit h on h.vin_lookup_id = l.id and h.deleted_at is null
-    where l.vehicle_id is null and l.make is not null and l.code is not null
+    where l.vehicle_id is null and l.make_key is not null and l.code is not null
       and l.deleted_at is null
       and not exists (
         select 1 from vehicle_identifier vi
@@ -88,7 +88,7 @@ export const UNRESOLVED_VIN_CODES = `
           and vi.supplier_id is null and vi.deleted_at is null
       )
   )
-  select make, code, count(*)::int as count,
+  select make_key, code, count(*)::int as count,
     (count(*) filter (where customer))::int as customers,
     coalesce(array_agg(distinct left(visitor_id, 8))
       filter (where customer and visitor_id is not null), '{}') as visitors,
@@ -98,9 +98,9 @@ export const UNRESOLVED_VIN_CODES = `
     max(created_at) as last_seen,
     (count(*) over ())::int as total
   from hits
-  group by make, code
+  group by make_key, code
   having ?::boolean or bool_or(customer)
-  order by customers desc, count desc, make, code
+  order by customers desc, count desc, make_key, code
   offset ? limit ?`;
 
 const missingIdentifier = (column: string) =>
