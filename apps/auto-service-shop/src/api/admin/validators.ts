@@ -11,7 +11,6 @@ import {
   STAGED_DATA_KINDS,
   STEERING_SIDES,
   UNIVERSAL_FACET_KEYS,
-  vinSchema,
 } from '@podbor/catalog-contract';
 
 import { DEMAND_REPORT_DAYS } from '../../modules/demand/ranking';
@@ -444,7 +443,7 @@ export const AdminCreateRequirement = z
 export type AdminCreateRequirementType = z.infer<typeof AdminCreateRequirement>;
 
 export const AdminConfirmWorkshopQuote = z.strictObject({
-  vin: vinSchema.nullable(),
+  vehicle_ids: z.array(z.string().min(1)).max(MAX_LIST_LENGTH),
   lines: z
     .array(
       z.strictObject({

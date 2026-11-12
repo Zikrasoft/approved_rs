@@ -1,7 +1,7 @@
 import type { MedusaRequest } from '@medusajs/framework/http';
 import type { Context, MedusaContainer } from '@medusajs/framework/types';
 import { MedusaError } from '@medusajs/framework/utils';
-import type { Vehicle } from '@podbor/catalog-contract';
+import { vehicleName, vinSchema, type Vehicle } from '@podbor/catalog-contract';
 
 import { CATALOG_MODULE, WORKSHOP_QUOTE_SOURCE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
@@ -11,30 +11,24 @@ import { adminError } from '../modules/_shared/admin-error';
 import { slugOf } from '../modules/_shared/slug';
 import { nameKey } from '../modules/_shared/keys';
 import { shopAi, type CategoryChoice } from './ai';
+import { type QuoteDraftLine, quoteLineResolver } from './quote-line';
+import { listVehicleResponses } from './store-response';
 import { readCapped, uploadType } from './uploads';
+import { generationOf, type VinGeneration } from './vin/car-for';
 import { vinDecoders } from './vin/chain';
 import { resolveVin } from './vin/resolve';
 
 export const MAX_QUOTE_BYTES = 10 * 1024 * 1024;
-export const CONFIDENT_BRAND = 0.8;
 
 const PDF_TYPE = 'application/pdf';
 const PDF_SIGNATURE = '%PDF-';
-
-export type QuoteDraftLine = {
-  name: string;
-  number: string;
-  quantity: number;
-  brand: string | null;
-  brand_confidence: number;
-  brand_uncertain: boolean;
-  category: CategoryChoice | null;
-};
 
 export type QuoteDraft = {
   vin: string | null;
   vehicle_text: string | null;
   vehicle: Vehicle | null;
+  generation: string | null;
+  candidates: Vehicle[];
   lines: QuoteDraftLine[];
 };
 
@@ -58,21 +52,49 @@ export async function readQuoteUpload(req: MedusaRequest): Promise<Buffer> {
   return body;
 }
 
+const generationLabel = (
+  generation: VinGeneration | null,
+  candidates: Vehicle[],
+): string | null => {
+  if (generation?.model) {
+    return [generation.model, generation.chassis ?? generation.code]
+      .filter(Boolean)
+      .join(' ');
+  }
+  const [first] = candidates;
+  if (
+    first &&
+    candidates.every(({ model }) => model.slug === first.model.slug)
+  ) {
+    return vehicleName(first.model).full;
+  }
+  return generation && (generation.model_slug ?? generation.code);
+};
+
 async function quoteVehicle(
   scope: MedusaContainer,
-  vin: string | null,
-): Promise<Vehicle | null> {
-  if (!vin) return null;
+  typed: string | null,
+): Promise<Pick<QuoteDraft, 'vehicle' | 'generation' | 'candidates'>> {
+  const vin = vinSchema.safeParse(typed);
+  if (!vin.success) return { vehicle: null, generation: null, candidates: [] };
+  const catalog: CatalogModuleService = scope.resolve(CATALOG_MODULE);
   const lookup = await resolveVin(
-    vin,
+    vin.data,
     vinDecoders(scope),
-    {
-      catalog: scope.resolve(CATALOG_MODULE),
-      vinLookups: scope.resolve(VIN_LOOKUP_MODULE),
-    },
+    { catalog, vinLookups: scope.resolve(VIN_LOOKUP_MODULE) },
     { source: 'workshop-quote' },
   );
-  return lookup.resolved ? lookup.vehicle : null;
+  if (lookup.resolved) {
+    return { vehicle: lookup.vehicle, generation: null, candidates: [] };
+  }
+  const candidates = lookup.vehicle_ids.length
+    ? await listVehicleResponses(catalog, { id: lookup.vehicle_ids })
+    : [];
+  return {
+    vehicle: null,
+    generation: generationLabel(generationOf(lookup), candidates),
+    candidates,
+  };
 }
 
 export type WorkshopQuoteLine = {
@@ -139,7 +161,7 @@ async function quoteCategory(
 const createFromWorkshopQuote = (
   catalog: CatalogModuleService,
   lines: WorkshopQuoteLine[],
-  vehicleId: string | null,
+  vehicleIds: string[],
   provenance: Provenance,
 ): Promise<WorkshopQuoteResult> =>
   catalog.transaction(async (context) => {
@@ -176,7 +198,7 @@ const createFromWorkshopQuote = (
           },
           context,
         );
-      if (vehicleId) {
+      for (const vehicleId of vehicleIds) {
         const { created } = await catalog.attachPartToVehicles(
           partId,
           { vehicle_id: vehicleId },
@@ -190,22 +212,26 @@ const createFromWorkshopQuote = (
     return result;
   });
 
-export type ConfirmedQuote = WorkshopQuoteResult & { vehicle: Vehicle | null };
+export type ConfirmedQuote = WorkshopQuoteResult & { vehicles: Vehicle[] };
 
 export async function confirmQuote(
   scope: MedusaContainer,
-  { vin, lines }: { vin: string | null; lines: WorkshopQuoteLine[] },
+  { vehicle_ids, lines }: { vehicle_ids: string[]; lines: WorkshopQuoteLine[] },
   editor: { created_by: string; updated_by: string },
 ): Promise<ConfirmedQuote> {
-  const vehicle = await quoteVehicle(scope, vin);
   const catalog: CatalogModuleService = scope.resolve(CATALOG_MODULE);
-  const created = await createFromWorkshopQuote(
-    catalog,
-    lines,
-    vehicle?.id ?? null,
-    editor,
-  );
-  return { vehicle, ...created };
+  const ids = [...new Set(vehicle_ids)];
+  const vehicles = ids.length
+    ? await listVehicleResponses(catalog, { id: ids })
+    : [];
+  if (vehicles.length !== ids.length) {
+    throw new MedusaError(
+      MedusaError.Types.NOT_FOUND,
+      'A Vehicle picked for the Workshop quote does not exist',
+    );
+  }
+  const created = await createFromWorkshopQuote(catalog, lines, ids, editor);
+  return { vehicles, ...created };
 }
 
 export async function draftQuote(
@@ -216,22 +242,20 @@ export async function draftQuote(
   const categories: CategoryChoice[] = (
     await catalog.listCategories({}, { select: ['id', 'name'], take: null })
   ).map(({ id, name }) => ({ id, name }));
-  const byId = new Map(categories.map((category) => [category.id, category]));
+  const brands = (
+    await catalog.listBrands({}, { select: ['name'], take: null })
+  ).map(({ name }) => name);
 
-  const reading = await shopAi(scope).readQuote(pdf, categories);
+  const reading = await shopAi(scope).readQuote(pdf, categories, brands);
+
+  const resolveLine = quoteLineResolver(catalog, categories);
+  const lines: QuoteDraftLine[] = [];
+  for (const line of reading.lines) lines.push(await resolveLine(line));
 
   return {
     vin: reading.vin,
     vehicle_text: reading.vehicle,
-    vehicle: await quoteVehicle(scope, reading.vin),
-    lines: reading.lines.map((line) => ({
-      name: line.name,
-      number: line.number,
-      quantity: line.quantity,
-      brand: line.brand,
-      brand_confidence: line.brand_confidence,
-      brand_uncertain: !line.brand || line.brand_confidence < CONFIDENT_BRAND,
-      category: (line.category_id && byId.get(line.category_id)) || null,
-    })),
+    ...(await quoteVehicle(scope, reading.vin)),
+    lines,
   };
 }

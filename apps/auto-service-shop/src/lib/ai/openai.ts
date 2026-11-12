@@ -30,6 +30,7 @@ const categoryList = (categories: CategoryChoice[]) =>
 
 const quotePrompt = (
   categories: CategoryChoice[],
+  brands: string[],
 ) => `You read a Workshop quote of ${CARLAB.name}, a car service in Belgrade, Serbia: a Serbian «ponuda» PDF for one car, with its VIN, make and model, and lines of parts each with a name, a catalogue number, a quantity and a price. The quote has no brand column.
 
 Answer with one JSON object and nothing else:
@@ -39,11 +40,13 @@ Answer with one JSON object and nothing else:
   "lines": [
     {
       "name": string,
+      "name_ru": string,
       "number": string,
-      "quantity": positive integer,
+      "quantity": positive number,
       "brand": string or null,
       "brand_confidence": number from 0 to 1,
-      "category_id": string or null
+      "category_id": string or null,
+      "catalogue_part": boolean
     }
   ]
 }
@@ -51,12 +54,24 @@ Answer with one JSON object and nothing else:
 Rules:
 - "vin" is the 17-character VIN exactly as printed, or null when the quote has none.
 - "vehicle" is the make and model text as printed, or null.
-- One entry in "lines" per part line. Skip labour, services and totals.
-- "number" is the catalogue number exactly as printed.
-- "brand" is the manufacturer the catalogue number belongs to, judged from its format (for example "HU 816 x" is MANN-FILTER, an 11-digit number starting with 1 or 3 is BMW original). Use null when you cannot tell.
+- One entry in "lines" per part line, in the printed order. Skip labour, services and totals.
+- "name" is the line's name exactly as printed.
+- "name_ru" is the Russian name of the part type as a Russian parts shop names it, with a lowercase rest, e.g. «Поликлиновой ремень» for «Klinasti rebrasti kaiš», «Масляный фильтр» for «Filter za ulje». Translate the meaning, never the sound: no Serbian or English word stays, in any script. No brand, no number. The glossary below gives the Russian term for Serbian part words.
+- "number" is the catalogue number exactly as printed, with any letters in front of it.
+- "quantity" is the quantity as printed; a decimal quantity such as «4,5» is 4.5.
+- "brand" is the manufacturer the catalogue number belongs to, judged from its format (for example "HU 816 x" is MANN-FILTER, an 11-digit number starting with 1 or 3 is BMW original). Copy it exactly as written in the brand list below. Use null when the manufacturer is not in the list or you cannot tell.
 - "brand_confidence" is how sure you are of "brand": 0.9 or more only when the number format is unmistakable, 0 when "brand" is null.
 - "category_id" is the id of the one category below the part belongs to, or null when none fits. Never invent an id.
+- "catalogue_part" is false for a line that is not one new catalogue part: a used part (marked «Б/У», «polovno» or «korišćen»), engine oil, gear oil, coolant or another fluid sold by volume, and small material. Otherwise true.
 - Never return prices, sums, discounts or VAT.
+
+In "name_ru": never use the Cyrillic letter yo (U+0451), write «е» instead. Never use the em dash (U+2014).
+
+Serbian to Russian part glossary (Serbian words: Russian term):
+${glossaryLines}
+
+Brands:
+${brands.join('\n') || '(none)'}
 
 Categories (id: name):
 ${categoryList(categories)}`;
@@ -248,11 +263,12 @@ const inHouseStyle = (text: string) =>
   text.replaceAll('ё', 'е').replaceAll('Ё', 'Е').replaceAll('—', '-');
 
 export const openAiShopAi = (apiKey: string | undefined): ShopAi => ({
-  readQuote: (pdf, categories) =>
-    ask({
+  readQuote: async (pdf, categories, brands) => {
+    const reading = await ask({
       apiKey,
       model: OPENAI_MODEL,
-      system: quotePrompt(categories),
+      system: quotePrompt(categories, brands),
+      // TODO: the whole PDF, customer name and phone included, goes to OpenAI; send only the vehicle row and the line table once a PDF text extractor is a dependency.
       user: [
         {
           type: 'file',
@@ -265,7 +281,17 @@ export const openAiShopAi = (apiKey: string | undefined): ShopAi => ({
       schema: quoteReadingSchema,
       code: 'QUOTE_UNREADABLE',
       what: 'The Workshop quote',
-    }),
+      retries: 1,
+    });
+    return {
+      ...reading,
+      lines: reading.lines.map((line) =>
+        'unreadable' in line
+          ? line
+          : { ...line, name_ru: capitalized(inHouseStyle(line.name_ru)) },
+      ),
+    };
+  },
   articleQuestion: ({ category_id, ...article }, categories) => ({
     model: OPENAI_MODEL,
     system: articlePrompt(categories),

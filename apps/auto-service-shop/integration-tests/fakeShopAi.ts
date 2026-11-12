@@ -10,7 +10,7 @@ import type {
 export type FakeShopAi = {
   ai: ShopAi;
   reading: QuoteReading;
-  quotesRead: { pdf: Buffer; categories: CategoryChoice[] }[];
+  quotesRead: { pdf: Buffer; categories: CategoryChoice[]; brands: string[] }[];
   model: string;
   name: string | null;
   category: string | null;
@@ -40,8 +40,8 @@ export const createFakeShopAi = (): FakeShopAi => {
     inFlight: 0,
     mostInFlight: 0,
     ai: {
-      readQuote: async (pdf, categories) => {
-        fake.quotesRead.push({ pdf, categories });
+      readQuote: async (pdf, categories, brands) => {
+        fake.quotesRead.push({ pdf, categories, brands });
         return fake.reading;
       },
       articleQuestion: (article, categories) => ({
