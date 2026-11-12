@@ -13,11 +13,9 @@ export async function GET(
   const { id } = await req.scope
     .resolve(Modules.ORDER)
     .retrieveOrder(req.params.id);
-  const { LEAD_ROUTE_URL } = parseEnv(process.env);
+  const { STOREFRONT_ORIGIN } = parseEnv(process.env);
   res.json({
     order: carlabOrderView(await readLeadOrder(req.scope, id)),
-    storefront_url: LEAD_ROUTE_URL
-      ? new URL(LEAD_ROUTE_URL).origin
-      : CARLAB.url,
+    storefront_url: STOREFRONT_ORIGIN ?? CARLAB.url,
   });
 }

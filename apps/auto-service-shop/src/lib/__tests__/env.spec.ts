@@ -112,6 +112,20 @@ describe('parseEnv', () => {
     ).toThrow();
   });
 
+  it('reads the storefront origin, refusing a URL with a path', () => {
+    expect(
+      parseEnv({ ...VALID_ENV, STOREFRONT_ORIGIN: 'https://carlab.rs/' })
+        .STOREFRONT_ORIGIN,
+    ).toBe('https://carlab.rs');
+    expect(parseEnv(VALID_ENV).STOREFRONT_ORIGIN).toBeUndefined();
+    expect(() =>
+      parseEnv({
+        ...VALID_ENV,
+        STOREFRONT_ORIGIN: 'https://carlab.rs/api/leads',
+      }),
+    ).toThrow(/STOREFRONT_ORIGIN/);
+  });
+
   it('coerces TYPESENSE_PORT from a string env value', () => {
     const env = parseEnv({ ...VALID_ENV, TYPESENSE_PORT: '58108' });
 

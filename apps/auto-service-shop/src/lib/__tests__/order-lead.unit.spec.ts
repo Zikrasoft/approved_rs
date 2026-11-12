@@ -264,7 +264,7 @@ describe('sendShopOrderEvent', () => {
     await new Promise<void>((resolve) => server.listen(0, resolve));
     const { port } = server.address() as AddressInfo;
     try {
-      await run(`http://localhost:${port}/api/leads`);
+      await run(`http://localhost:${port}`);
     } finally {
       server.close();
     }
@@ -300,36 +300,8 @@ describe('sendShopOrderEvent', () => {
     },
   );
 
-  it('falls back to the lead form route of a storefront without the shop orders route', async () => {
+  it('takes a 404 for a refusal rather than posting anywhere else', async () => {
     const seen = await serve(
-      (path) => (path === '/api/shop-orders' ? 404 : 302),
-      (url) => sendShopOrderEvent(url, placed, 's3cret'),
-    );
-
-    expect(seen.map(({ path }) => path)).toEqual([
-      '/api/shop-orders',
-      '/api/leads',
-    ]);
-    expect(Object.fromEntries(new URLSearchParams(seen[1]!.body))).toEqual({
-      contact: '+381601234567',
-      contact_channel: 'whatsapp',
-      name: '',
-      vin: 'WBA35BG070N074158',
-      locale: 'sr',
-      comment: placed.summary,
-      service: 'parts-order',
-      consent: '1',
-      source_url: '',
-      visitor_id: '',
-      ad_source: '',
-      meta_ids: '',
-      order_id: 'order_1',
-    });
-  });
-
-  it('sends a cancel to the old route as the old form, and its refusal back', async () => {
-    let body = '';
-    await serve(
       () => 404,
       (url) =>
         expect(
@@ -339,12 +311,9 @@ describe('sendShopOrderEvent', () => {
             's3cret',
           ),
         ).rejects.toThrow('The lead route answered 404'),
-    ).then((seen) => (body = seen[1]!.body));
+    );
 
-    expect(Object.fromEntries(new URLSearchParams(body))).toEqual({
-      order_id: 'order_1',
-      order_outcome: 'canceled',
-    });
+    expect(seen.map(({ path }) => path)).toEqual(['/api/shop-orders']);
   });
 });
 
