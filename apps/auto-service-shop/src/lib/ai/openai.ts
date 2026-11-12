@@ -187,7 +187,6 @@ type Ask<T> = {
   code: AdminErrorCode;
   what: string;
   retries?: number;
-  temperature?: number;
 };
 
 const ask = async <T>({ retries = 0, ...question }: Ask<T>): Promise<T> => {
@@ -216,7 +215,6 @@ const askOnce = async <T>({
   schema,
   code,
   what,
-  temperature,
 }: Omit<Ask<T>, 'retries'> & { apiKey: string }): Promise<T> => {
   const client = new OpenAI({
     apiKey,
@@ -225,7 +223,6 @@ const askOnce = async <T>({
   });
   const response = await client.chat.completions.create({
     model,
-    temperature,
     response_format: { type: 'json_object' },
     messages: [
       { role: 'system', content: system },
@@ -287,7 +284,6 @@ export const openAiShopAi = (apiKey: string | undefined): ShopAi => ({
       code: 'ARTICLE_UNREADABLE',
       what: 'The article',
       retries: 1,
-      temperature: 0,
     });
     return {
       ...answer,

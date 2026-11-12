@@ -131,7 +131,7 @@ describe('OpenAI shop AI', () => {
     JSON.parse(
       ((fetch as jest.Mock).mock.calls[call] as [unknown, { body: string }])[1]
         .body,
-    ) as { model: string; temperature: number };
+    ) as { model: string; temperature?: number };
 
   it('answers an article in one call on the one model, with the most likely answer', async () => {
     globalThis.fetch = answering(reply);
@@ -139,10 +139,8 @@ describe('OpenAI shop AI', () => {
     await expect(answerOf()).resolves.toEqual(answer);
 
     expect(globalThis.fetch).toHaveBeenCalledTimes(1);
-    expect(sentBody(globalThis.fetch)).toMatchObject({
-      model: 'gpt-6-luna',
-      temperature: 0,
-    });
+    expect(sentBody(globalThis.fetch)).toMatchObject({ model: 'gpt-6-luna' });
+    expect(sentBody(globalThis.fetch).temperature).toBeUndefined();
     expect(shopAi().articleQuestion(article, CATEGORIES).model).toBe(
       'gpt-6-luna',
     );
