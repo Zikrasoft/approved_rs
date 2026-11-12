@@ -70,6 +70,13 @@
       },
       "default": "./src/shopOrdersWire.ts"
     },
+    "./visitor-searches-wire": {
+      "require": {
+        "types": "./dist/cjs/visitorSearchesWire.d.ts",
+        "default": "./dist/cjs/visitorSearchesWire.js"
+      },
+      "default": "./src/visitorSearchesWire.ts"
+    },
     "./compose-e164": "./src/composeE164.ts",
     "./phone-input": "./src/phoneInput.ts",
     "./phone-kit": "./src/phoneKit.ts",

@@ -1,37 +1,41 @@
 import { STORAGE_KEY as CONSENT_KEY, analyticsDeclined } from './consent.ts';
 
 export const VISITOR_ID_STORAGE_KEY = 'visitor_id';
+export const VISITOR_ID_COOKIE = 'visitor_id';
+export const VISITOR_ID_COOKIE_MAX_AGE = 60 * 60 * 24 * 400;
 
-export interface VisitorIdEnvironment {
-  storage: Pick<Storage, 'getItem' | 'setItem'>;
-  randomId: () => string;
+function mirrorIntoCookie(id: string): void {
+  try {
+    document.cookie = `${VISITOR_ID_COOKIE}=${encodeURIComponent(id)}; path=/; max-age=${id ? VISITOR_ID_COOKIE_MAX_AGE : 0}; samesite=lax; secure`;
+  } catch {
+    return;
+  }
 }
 
-// The id only exists to tie a visitor's contact clicks to the lead they
-// later submit, which is the tracking the banner asks about — a visitor who
-// said no gets no id, and the lead is stored without one.
-export function readOrCreateVisitorId({
-  storage,
-  randomId,
-}: VisitorIdEnvironment): string {
+function storedOrMintedId(): string {
   try {
-    if (analyticsDeclined(storage.getItem(CONSENT_KEY))) return '';
-    const existing = storage.getItem(VISITOR_ID_STORAGE_KEY);
+    if (analyticsDeclined(localStorage.getItem(CONSENT_KEY))) return '';
+    const existing = localStorage.getItem(VISITOR_ID_STORAGE_KEY);
     if (existing) return existing;
-    const id = randomId();
-    storage.setItem(VISITOR_ID_STORAGE_KEY, id);
+    const id = crypto.randomUUID();
+    localStorage.setItem(VISITOR_ID_STORAGE_KEY, id);
     return id;
   } catch {
     return '';
   }
 }
 
-// A refusal has to clear what was already minted, otherwise a visitor who
-// later accepts is silently re-identified under their pre-refusal id.
-export function forgetVisitorId(storage: Pick<Storage, 'removeItem'>): void {
+export function getOrCreateVisitorId(): string {
+  const id = storedOrMintedId();
+  mirrorIntoCookie(id);
+  return id;
+}
+
+export function forgetVisitorId(): void {
+  mirrorIntoCookie('');
   try {
-    storage.removeItem(VISITOR_ID_STORAGE_KEY);
+    localStorage.removeItem(VISITOR_ID_STORAGE_KEY);
   } catch {
-    // Blocked storage never held an id to begin with.
+    return;
   }
 }

@@ -68,7 +68,7 @@ export function defineCookieConsent(tagName = 'cookie-consent'): void {
             const analytics = button.hasAttribute(CONSENT_ACCEPT_ATTRIBUTE);
             saveConsent(analytics, version);
             if (!analytics) {
-              forgetVisitorId(localStorage);
+              forgetVisitorId();
               forgetAdTouch(localStorage);
             }
             this.hidden = true;

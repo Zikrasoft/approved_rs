@@ -177,12 +177,14 @@ Approved's trust/verification semantics.
   `packages/site-kit/src` are the shape: idempotent `define(tagName?)`, no
   auto-registration on import, no styles shipped, the app supplying the markup.
   A run-once page effect with no per-instance state is the one exception —
-  analytics, the Ad visit (`rememberAdTouch`), contact-click tracking,
-  contact preference and funnel tracking are armed by `bootSiteKit` from `@podbor/site-kit/browser`, called once from
+  analytics, the visitor id (`getOrCreateVisitorId`, which mirrors it into
+  the first-party `visitor_id` cookie the server-rendered VIN search reads,
+  and is cleared with it on a refusal), the Ad visit (`rememberAdTouch`),
+  contact-click tracking, contact preference and funnel tracking are armed by `bootSiteKit` from `@podbor/site-kit/browser`, called once from
   each app's layout with its `ymCounterId` and
   `analytics: !import.meta.env.DEV`. `bootSiteKit` also registers the
   language-suggestion custom element (`defineLanguageSuggestion`), which keeps
-  its own instance state like any other element. No app imports the six
+  its own instance state like any other element. No app imports the seven
   parts, so none can arm one twice or forget one. `bootSiteKit` and each
   part guard against being armed twice — a second call that re-attaches
   listeners doubles whatever it counts, silently. A new page-level effect joins
@@ -227,7 +229,7 @@ Approved's trust/verification semantics.
   `packages/catalog-contract`, `packages/brands`, `@podbor/i18n`'s
   `./translate/core` and `./section`, and `@podbor/lead-crm`'s
   `./contact-channel`, `./limits`, `./fields`, `./parts-order-copy`, `./phone`,
-  `./vin`, `./verify-secret` and `./shop-orders-wire`; they export
+  `./vin`, `./verify-secret`, `./shop-orders-wire` and `./visitor-searches-wire`; they export
   `{ "require": dist/cjs…, "default": src/….ts }`, build with
   `tsc -p tsconfig.cjs.json` (`module: CommonJS`, `rewriteRelativeImportExtensions`)
   and stamp `dist/cjs/package.json` with `{"type":"commonjs"}`. Their `test` task

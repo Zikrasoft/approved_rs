@@ -23,6 +23,7 @@
     "src/phone.ts",
     "src/shopOrdersWire.ts",
     "src/verifySecret.ts",
-    "src/vin.ts"
+    "src/vin.ts",
+    "src/visitorSearchesWire.ts"
   ]
 }
