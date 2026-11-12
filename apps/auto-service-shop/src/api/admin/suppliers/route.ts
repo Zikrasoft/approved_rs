@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { importRunsOf } from '../../../lib/catalogue-writer';
 import { withEditors } from '../../../lib/editors';
 import { SUPPLIER_MODULE } from '../../../modules/supplier';
+import { CRAWLED_SUPPLIER_KEYS } from '../../../modules/supplier/keys';
 import type SupplierModuleService from '../../../modules/supplier/service';
 
 const supplierSchema = z.object({
@@ -30,13 +31,16 @@ export async function GET(
   );
 
   const counted = await Promise.all(
-    suppliers.map(async ({ id }) => {
+    suppliers.map(async ({ id, key }) => {
       const [, offer_count] = await supplier.listAndCountSupplierOffers(
         { supplier_id: id },
         { select: ['id'], take: 1 },
       );
       const [latest_import = null] = await importRunsOf(req.scope, id, 1);
-      return { offer_count, latest_import };
+      const priced = !(CRAWLED_SUPPLIER_KEYS as readonly string[]).includes(
+        key,
+      );
+      return { offer_count, latest_import, priced };
     }),
   );
 

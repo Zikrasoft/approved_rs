@@ -56,6 +56,7 @@ const supplierSchema = editedBySchema.extend({
   released_kinds: z.array(z.enum(STAGED_DATA_KINDS)),
   import_enabled: z.boolean(),
   offer_count: z.number(),
+  priced: z.boolean(),
   latest_import: importRunSchema.nullable(),
 });
 
@@ -426,48 +427,61 @@ const SuppliersPage = () => {
                 {suppliers.map((supplier) => (
                   <Table.Row key={supplier.id}>
                     <Table.Cell>{sourceName(supplier.key)}</Table.Cell>
-                    <Table.Cell>
-                      <Input
-                        type="number"
-                        className="w-24"
-                        min={0}
-                        max={500}
-                        step={0.01}
-                        aria-label={t('suppliers.markupLabel', {
-                          supplier: sourceName(supplier.key),
-                        })}
-                        value={
-                          drafts[supplier.id] ??
-                          String(supplier.markup_percentage)
-                        }
-                        onChange={(event) =>
-                          setDrafts((prev) => ({
-                            ...prev,
-                            [supplier.id]: event.target.value,
-                          }))
-                        }
-                        onKeyDown={(event) => {
-                          if (
-                            event.key === 'Enter' &&
-                            drafts[supplier.id] !== undefined &&
-                            !writing
-                          ) {
-                            saveMarkup(supplier);
-                          }
-                        }}
-                      />
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Button
-                        size="small"
-                        variant="secondary"
-                        isLoading={savingId === supplier.id}
-                        disabled={drafts[supplier.id] === undefined || writing}
-                        onClick={() => saveMarkup(supplier)}
-                      >
-                        {t('suppliers.save')}
-                      </Button>
-                    </Table.Cell>
+                    {supplier.priced ? (
+                      <>
+                        <Table.Cell>
+                          <Input
+                            type="number"
+                            className="w-24"
+                            min={0}
+                            max={500}
+                            step={0.01}
+                            aria-label={t('suppliers.markupLabel', {
+                              supplier: sourceName(supplier.key),
+                            })}
+                            value={
+                              drafts[supplier.id] ??
+                              String(supplier.markup_percentage)
+                            }
+                            onChange={(event) =>
+                              setDrafts((prev) => ({
+                                ...prev,
+                                [supplier.id]: event.target.value,
+                              }))
+                            }
+                            onKeyDown={(event) => {
+                              if (
+                                event.key === 'Enter' &&
+                                drafts[supplier.id] !== undefined &&
+                                !writing
+                              ) {
+                                saveMarkup(supplier);
+                              }
+                            }}
+                          />
+                        </Table.Cell>
+                        <Table.Cell>
+                          <Button
+                            size="small"
+                            variant="secondary"
+                            isLoading={savingId === supplier.id}
+                            disabled={
+                              drafts[supplier.id] === undefined || writing
+                            }
+                            onClick={() => saveMarkup(supplier)}
+                          >
+                            {t('suppliers.save')}
+                          </Button>
+                        </Table.Cell>
+                      </>
+                    ) : (
+                      <>
+                        <Table.Cell className="text-ui-fg-muted">
+                          {t('suppliers.unpriced')}
+                        </Table.Cell>
+                        <Table.Cell />
+                      </>
+                    )}
                     <Table.Cell>
                       {supplier.key !== MANUAL_SOURCE && (
                         <div className="flex flex-col gap-y-1 py-2">

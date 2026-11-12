@@ -435,6 +435,27 @@ medusaIntegrationTestRunner({
         expect(response.data.code).toBe('MANUAL_SOURCE');
       });
 
+      it('marks only the suppliers that quote prices as priced', async () => {
+        await supplierService.createSuppliers({
+          key: 'demo-intercars',
+          name: 'Priced supplier',
+          markup_percentage: 10,
+        });
+
+        const listed = await call('get', '/admin/suppliers');
+
+        expect(
+          Object.fromEntries(
+            listed.data.suppliers.map(
+              ({ key, priced }: { key: string; priced: boolean }) => [
+                key,
+                priced,
+              ],
+            ),
+          ),
+        ).toEqual({ varta: false, 'demo-intercars': true });
+      });
+
       it('returns a 404 for an unknown supplier', async () => {
         const response = await api
           .post(
