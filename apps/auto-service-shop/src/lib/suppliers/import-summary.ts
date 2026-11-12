@@ -28,6 +28,7 @@ export type ImportSummary = {
   skipped_by_reason: Record<SkipReason, number>;
   without_engine_code: number;
   unmapped_categories: { code: string; count: number }[];
+  unknown_makes: { make: string; count: number }[];
   images_failed: number;
   missing_fields: { number: string; category: string; fields: string[] }[];
   unanswered: Problem[];
@@ -46,12 +47,14 @@ export const importTally = (supplier: string) => {
     ) as Record<SkipReason, number>,
     without_engine_code: 0,
     unmapped_categories: [],
+    unknown_makes: [],
     images_failed: 0,
     missing_fields: [],
     unanswered: [],
     failed: [],
   };
   const unmapped = new Map<string, { code: string; count: number }>();
+  const unknownMakes = new Map<string, { make: string; count: number }>();
   const skip = (reason: SkipReason, count = 1) => {
     summary.skipped_by_reason[reason] += count;
     if ((ARTICLE_SKIPS as readonly string[]).includes(reason)) {
@@ -70,6 +73,16 @@ export const importTally = (supplier: string) => {
       summary.unmapped_categories = [...unmapped.values()]
         .map((entry) => ({ ...entry }))
         .sort((a, b) => b.count - a.count || a.code.localeCompare(b.code));
+    },
+    unknownMake(make: string) {
+      skip('no_make');
+      const key = nameKey(make);
+      const tally = unknownMakes.get(key) ?? { make, count: 0 };
+      tally.count += 1;
+      unknownMakes.set(key, tally);
+      summary.unknown_makes = [...unknownMakes.values()]
+        .map((entry) => ({ ...entry }))
+        .sort((a, b) => b.count - a.count || a.make.localeCompare(b.make));
     },
     withoutEngineCode(count: number) {
       summary.without_engine_code += count;

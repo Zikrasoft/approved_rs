@@ -84,6 +84,8 @@ type Context = {
 
 const MOST_FITTED = 6;
 
+const PROGRESS_EVERY = 10;
+
 const mostFitted = ({ vehicles = [] }: Article) => {
   const counts = new Map<string, number>();
   for (const { make, model } of vehicles) {
@@ -483,10 +485,10 @@ async function importArticle(
   await stage(context, identifierId, article);
   if (article.vehicles) {
     const vehicles = article.vehicles;
-    const { noMake } = await context.oneAtATime(() =>
+    const { unknownMakes } = await context.oneAtATime(() =>
       fitVehicles(context.vehicles, partId, vehicles),
     );
-    tally.skip('no_make', noMake);
+    for (const make of unknownMakes) tally.unknownMake(make);
     tally.withoutEngineCode(
       article.vehicles.filter(({ engine_codes }) => !engine_codes.length)
         .length,
@@ -544,7 +546,7 @@ const sameNumberRuns = (
 export async function importSupplier(
   scope: MedusaContainer,
   adapter: SupplierAdapter,
-  onPage?: (progress: ImportSummary) => Promise<unknown>,
+  onProgress?: (progress: ImportSummary) => Promise<unknown>,
 ): Promise<ImportSummary> {
   const catalog: CatalogModuleService = scope.resolve(CATALOG_MODULE);
   const suppliers: SupplierModuleService = scope.resolve(SUPPLIER_MODULE);
@@ -610,6 +612,10 @@ export async function importSupplier(
     return false;
   };
   const unreadableUrls = new Set<string>();
+  let reported: Promise<unknown> = Promise.resolve();
+  const report = () =>
+    (reported = reported.then(() => onProgress?.(structuredClone(summary))));
+  let handled = 0;
 
   for (let cursor: string | null = null; ;) {
     const page = cataloguePageSchema.parse(await adapter.listCatalogue(cursor));
@@ -664,6 +670,8 @@ export async function importSupplier(
         });
         state.listed.add(article.article_id);
       }
+      handled += 1;
+      if (handled % PROGRESS_EVERY === 0) await report();
     };
     await eachAtOnce(
       sameNumberRuns(wanted, brandOfArticle),
@@ -672,7 +680,7 @@ export async function importSupplier(
         for (const article of run) await importOne(article);
       },
     );
-    await onPage?.(structuredClone(summary));
+    await report();
     if (!page.next) {
       break;
     }

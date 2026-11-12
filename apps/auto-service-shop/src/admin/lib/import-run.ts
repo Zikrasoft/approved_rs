@@ -4,4 +4,4 @@ export const importRunning = (
 
 export const importedSoFar = (
   report: { created: number; updated: number; unchanged: number } | null,
-) => (report ? report.created + report.updated + report.unchanged : 0);
+) => (report ? report.created + report.updated + report.unchanged : null);

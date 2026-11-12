@@ -28,7 +28,7 @@ describe('importedSoFar', () => {
     expect(importedSoFar({ created: 3, updated: 5, unchanged: 2 })).toBe(10);
   });
 
-  it('is zero before the first page is reported', () => {
-    expect(importedSoFar(null)).toBe(0);
+  it('is unknown before the first progress is reported', () => {
+    expect(importedSoFar(null)).toBeNull();
   });
 });

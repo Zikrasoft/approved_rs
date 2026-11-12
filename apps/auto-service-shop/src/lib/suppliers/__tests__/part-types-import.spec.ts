@@ -17,6 +17,7 @@ import { SUPPLIER_ADAPTERS_REGISTRATION } from '../adapter';
 
 const mann = createFakeSupplier('mann-filter');
 const bilstein = createFakeSupplier('bilstein');
+const filtron = createFakeSupplier('filtron');
 const shopAi = createFakeShopAi();
 const storage = memoryStorage();
 
@@ -27,7 +28,7 @@ medusaIntegrationTestRunner({
     beforeServerStart: async (container) => {
       container.register(
         SUPPLIER_ADAPTERS_REGISTRATION,
-        asValue([mann.adapter, bilstein.adapter]),
+        asValue([mann.adapter, bilstein.adapter, filtron.adapter]),
       );
       container.register(SHOP_AI_REGISTRATION, asValue(shopAi.ai));
       container.register(SHOP_STORAGE_REGISTRATION, asValue(storage.storage));
@@ -74,9 +75,24 @@ medusaIntegrationTestRunner({
           name: 'filter kabine',
           category: 'filter kabine',
         });
+        bilstein.articles.push({
+          article_id: '24359',
+          brand: 'febi',
+          number: '24359',
+          name: 'zupčasti kaiš',
+          category: 'zupčasti kaiš',
+        });
+        filtron.articles.push({
+          article_id: 'PE 973/3',
+          brand: 'FILTRON',
+          number: 'PE 973/3',
+          name: 'PE 973/3',
+          category: 'Filter goriva | Za dizel',
+        });
         shopAi.name = 'Фильтр салона угольный';
         await run('mann-filter');
         await run('bilstein');
+        await run('filtron');
       });
 
       it('names a Part by the one type its supplier category stands for, whatever the AI calls it', async () => {
@@ -84,6 +100,18 @@ medusaIntegrationTestRunner({
           'Салонный фильтр MANN-FILTER CUK 2939',
         );
         expect((await partOf('17532')).name).toBe('Салонный фильтр febi 17532');
+        expect((await partOf('24359')).name).toBe('Зубчатый ремень febi 24359');
+      });
+
+      it('files and names an article of a code with a subtype by its mapped base code', async () => {
+        const part = await partOf('PE9733');
+        const [maintenance] = await catalog.listCategories({
+          slug: 'maintenance-consumables',
+        });
+        expect(part).toMatchObject({
+          name: 'Топливный фильтр FILTRON PE 973/3',
+          category_id: maintenance.id,
+        });
       });
 
       it('renames a Part imported under another name for its type', async () => {

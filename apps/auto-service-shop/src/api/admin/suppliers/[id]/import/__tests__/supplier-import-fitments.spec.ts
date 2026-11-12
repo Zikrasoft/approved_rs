@@ -73,6 +73,28 @@ medusaIntegrationTestRunner({
           { key: 'bilstein', name: 'bilstein group', markup_percentage: 0 },
         ]);
         for (const { id, name } of created) supplierIds[name] = id;
+        const filters = await catalog.createCategories({
+          slug: 'filters',
+          name: 'Фильтры',
+        });
+        await suppliers.createSupplierCategories(
+          [
+            ...[
+              'Oil Filter',
+              'Air Filter',
+              'Cabin Air Filter',
+              'Fuel Filter',
+              'Ventilator',
+            ].map((code) => ({
+              supplier_id: supplierIds['MANN-FILTER'],
+              code,
+            })),
+            ...['uljni filter', 'filter kabine'].map((code) => ({
+              supplier_id: supplierIds['bilstein group'],
+              code,
+            })),
+          ].map((mapping) => ({ ...mapping, category_id: filters.id })),
+        );
         const [mannBrand, febi] = await catalog.createBrands([
           { name: 'Mann-Filter', slug: 'mann-filter' },
           { name: 'febi', slug: 'febi' },
@@ -344,7 +366,7 @@ medusaIntegrationTestRunner({
         ]);
       });
 
-      it('fits no construction, agricultural, truck or bus maker, makes no Make of it and counts the rows', async () => {
+      it('fits no construction or agricultural maker, makes no Make of it and reports each unknown make with its rows', async () => {
         mann.articles.push({
           article_id: 'WK9406',
           brand: 'MANN-FILTER',
@@ -354,25 +376,46 @@ medusaIntegrationTestRunner({
           vehicles: [
             golf('VOLVO CONSTRUCTION EQUIPMENT'),
             golf('MASSEY-FERGUSON TRAKTOREN (AGCO)'),
-            golf('DAF TRUCKS'),
-            golf('IVECO BUS'),
+            { ...golf('MASSEY-FERGUSON TRAKTOREN (AGCO)'), model: 'Polo' },
           ],
         });
 
         const summary = await runImport('MANN-FILTER');
 
-        expect(summary.skipped_by_reason.no_make).toBe(4);
+        expect(summary.skipped_by_reason.no_make).toBe(3);
+        expect(summary.unknown_makes).toEqual([
+          { make: 'MASSEY-FERGUSON TRAKTOREN (AGCO)', count: 2 },
+          { make: 'VOLVO CONSTRUCTION EQUIPMENT', count: 1 },
+        ]);
         expect(await fitmentsOf('WK 940/6')).toEqual([]);
         expect(
           await catalog.listMakes({
-            slug: [
-              'volvo-construction-equipment',
-              'massey-ferguson-traktoren',
-              'daf-trucks',
-              'iveco-bus',
-            ],
+            slug: ['volvo-construction-equipment', 'massey-ferguson-traktoren'],
           }),
         ).toEqual([]);
+      });
+
+      it('fits a truck or bus maker under its one Make', async () => {
+        mann.articles.push({
+          article_id: 'WK9407',
+          brand: 'MANN-FILTER',
+          number: 'WK 940/7',
+          name: 'Fuel Filter WK 940/7',
+          category: 'Fuel Filter',
+          vehicles: [
+            golf('DAF TRUCKS'),
+            { ...golf('IVECO BUS'), model: 'Crossway' },
+          ],
+        });
+
+        const summary = await runImport('MANN-FILTER');
+
+        expect(summary.unknown_makes).toEqual([]);
+        expect(
+          (await fitmentsOf('WK 940/7'))
+            .map(({ vehicle }) => vehicle.model.chassis.series.make.name)
+            .sort(),
+        ).toEqual(['DAF', 'Iveco']);
       });
 
       it('resolves a spelling staff added to a Make in the admin, and lists and removes it there', async () => {
@@ -906,14 +949,14 @@ medusaIntegrationTestRunner({
         expect(summary.failed).toEqual([]);
       });
 
-      it('names an imported Part in Russian and renames it only when the source name changes', async () => {
+      it('names an imported Part of a category with no one type in Russian and renames it only when the source name changes', async () => {
         shopAi.name = 'Масляный фильтр MANN-FILTER W 712/95';
         mann.articles.push({
           article_id: 'W71295',
           brand: 'MANN-FILTER',
           number: 'W 712/95',
           name: 'Oil Filter W 712/95',
-          category: 'Oil Filter',
+          category: 'Ventilator',
         });
 
         await runImport('MANN-FILTER');

@@ -351,10 +351,10 @@ export async function fitVehicles(
   matcher: VehicleMatcher,
   partId: string,
   facts: VehicleFacts[],
-): Promise<{ noMake: number }> {
+): Promise<{ unknownMakes: string[] }> {
   const { catalog, source } = matcher;
   const notes = new Map<string, string | null>();
-  let noMake = 0;
+  const unknownMakes: string[] = [];
   for (const row of facts) {
     for (const id of await vehiclesOf(matcher, row)) {
       if (!notes.has(id)) notes.set(id, row.notes.join('; ') || null);
@@ -362,10 +362,10 @@ export async function fitVehicles(
     const unknownMake =
       row.engine_codes.length > 0 &&
       matcher.makes.get(nameKey(row.make)) === null;
-    if (unknownMake) noMake += 1;
+    if (unknownMake) unknownMakes.push(row.make);
   }
   await dropUnlisted(matcher, partId, new Set(notes.keys()));
-  if (!notes.size) return { noMake };
+  if (!notes.size) return { unknownMakes };
   const fitted = new Set(
     (
       await catalog.listFitments(
@@ -384,5 +384,5 @@ export async function fitVehicles(
       fitting.map((fitment) => ({ ...fitment, part_id: partId, source })),
     );
   }
-  return { noMake };
+  return { unknownMakes };
 }

@@ -32,6 +32,9 @@ const importSummarySchema = z.object({
   unmapped_categories: z
     .array(z.object({ code: z.string(), count: z.number() }))
     .default([]),
+  unknown_makes: z
+    .array(z.object({ make: z.string(), count: z.number() }))
+    .default([]),
   missing_fields: z
     .array(
       z.object({
@@ -106,7 +109,12 @@ const useSummaryLines = () => {
           count: summary.without_engine_code,
         }),
       skipped.no_make > 0 &&
-        t('suppliers.importWithoutMake', { count: skipped.no_make }),
+        t('suppliers.importWithoutMake', {
+          count: skipped.no_make,
+          makes: summary.unknown_makes
+            .map(({ make, count }) => `${make}: ${count}`)
+            .join(', '),
+        }),
       summary.images_failed > 0 &&
         t('suppliers.importImagesFailed', { count: summary.images_failed }),
       summary.missing_fields.length > 0 &&
@@ -138,9 +146,14 @@ export const ImportRunReport = ({ run }: { run: ImportRun }) => {
   const { t, i18n } = useTranslation('carlabAdmin');
   const summaryLines = useSummaryLines();
   const errorKey = knownError(run.error);
+  const imported = importedSoFar(run.report);
   const lines =
     run.status === 'running'
-      ? [t('suppliers.importRunning', { count: importedSoFar(run.report) })]
+      ? [
+          imported === null
+            ? t('suppliers.importPending')
+            : t('suppliers.importRunning', { count: imported }),
+        ]
       : [
           ...(run.report ? summaryLines(run.report) : []),
           run.error &&

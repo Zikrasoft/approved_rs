@@ -356,6 +356,9 @@ medusaIntegrationTestRunner({
           ['filter kabine', maintenance.id],
           ['kanalni kaiš', engine.id],
           ['garnitura zupčastih kaiševa', engine.id],
+          ['zupčasti kaiš', engine.id],
+          ['kočioni cilindar točka', brakes.id],
+          ['kontakt istrošenosti', brakes.id],
         ];
         const mappings = await suppliers.listSupplierCategories(
           {},
@@ -371,6 +374,7 @@ medusaIntegrationTestRunner({
           'Cabin Air Filter | Activated carbon',
           'Cabin Air Filter | Biofunctional',
           'Secondary Element',
+          'Cooling Liquid Filter',
         ];
         const key = (row: { supplier_id: string; code: string }) =>
           `${row.supplier_id}:${row.code}`;

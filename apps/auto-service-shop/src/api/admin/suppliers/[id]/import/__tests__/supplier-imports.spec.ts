@@ -495,6 +495,7 @@ medusaIntegrationTestRunner({
           },
           without_engine_code: 0,
           unmapped_categories: [],
+          unknown_makes: [],
           missing_fields: [],
           images_failed: 0,
           unanswered: [],
@@ -560,6 +561,7 @@ medusaIntegrationTestRunner({
           },
           without_engine_code: 0,
           unmapped_categories: [],
+          unknown_makes: [],
           missing_fields: [],
           images_failed: 0,
           unanswered: [],
@@ -1962,6 +1964,28 @@ medusaIntegrationTestRunner({
             report: { supplier: 'Intercars', created: 3, failed: [] },
           });
           expect(await latestImportOf(intercarsId)).toEqual(finished);
+        });
+
+        it('writes progress every ten articles, not only once a catalogue page is done', async () => {
+          intercars.pageSize = 20;
+          shopAi.delayMs = 150;
+          pushFilters(
+            intercars,
+            Array.from({ length: 20 }, (_, index) => `TEN ${index}`),
+          );
+
+          await imports.start(intercarsId);
+          const deadline = Date.now() + 30_000;
+          let during = await latestImportOf(intercarsId);
+          while (!during.report && Date.now() < deadline) {
+            await new Promise((resolve) => setTimeout(resolve, 50));
+            during = await latestImportOf(intercarsId);
+          }
+          await imports.finished(intercarsId);
+
+          expect(during.status).toBe('running');
+          expect(during.report.created).toBeGreaterThanOrEqual(10);
+          expect(during.report.created).toBeLessThan(20);
         });
 
         it('keeps every report readable later, newest first', async () => {

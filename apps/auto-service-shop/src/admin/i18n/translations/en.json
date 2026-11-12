@@ -147,7 +147,7 @@
     "importSummary": "{{supplier}}: {{created}} created, {{updated}} updated, {{unchanged}} unchanged.",
     "importUnmapped": "Skipped in unmapped categories: {{count}} ({{categories}}). Map or exclude them under Supplier categories.",
     "importExcluded": "Skipped in excluded categories: {{count}}.",
-    "importWithoutMake": "Applicability rows with an unknown make, fitted to no Vehicle: {{count}}.",
+    "importWithoutMake": "Applicability rows with an unknown make, fitted to no Vehicle: {{count}} ({{makes}}).",
     "releasedHint": "Checked data is shown on the site. Check it only once the supplier has allowed it in writing: this data may come from TecDoc.",
     "kinds": {
       "cross_references": "Cross references",
@@ -172,6 +172,7 @@
       "confirmRemoveBody": "The next import skips this supplier category.",
       "removed": "Mapping {{code}} deleted."
     },
+    "unpriced": "No prices",
     "markupLabel": "Markup of {{supplier}}, %",
     "markupSaved": "{{supplier}} markup: {{markup}}%. The site updates after the next publish.",
     "confirmReleaseTitle": "Show \"{{kind}}\" from {{supplier}} on the site?",
@@ -218,6 +219,7 @@
     "importOne": "Import",
     "importOneLabel": "Import {{supplier}}",
     "importStarted": "{{supplier}}: import started. The progress and the report appear in its row.",
+    "importPending": "Importing…",
     "importRunning": "Importing: {{count}} articles so far",
     "importFailed": "The import stopped: {{error}}",
     "importArticlesFailed": "Not imported because of an error: {{articles}}. Fix the cause and import again.",

@@ -14,6 +14,7 @@ import {
 
 import type { CrawledSupplierKey } from '../modules/supplier/keys';
 import { slugOf } from '../modules/_shared/slug';
+import { scopedCodeOf } from './suppliers/category-scope';
 import { MAKE_ALIASES } from './suppliers/makes';
 import { nameKey } from '../modules/_shared/keys';
 import { CATALOG_MODULE } from '../modules/catalog';
@@ -395,6 +396,10 @@ const CRAWLED_CATALOGUES: Record<CrawledSupplierKey, CrawledCatalogue> = {
       'Secondary Element': SECONDARY_ELEMENT,
       Ventilator: ['engine-parts', null],
       'Hydraulic Transmission Filter': TRANSMISSION_FILTER,
+      'Cooling Liquid Filter': [
+        MAINTENANCE_SLUG,
+        'Фильтр охлаждающей жидкости',
+      ],
     },
     excluded: ['Hydraulics', 'Compressed Air-Oil Separation', 'EDM Filter'],
     makes: MAKE_ALIASES,
@@ -439,17 +444,22 @@ const CRAWLED_CATALOGUES: Record<CrawledSupplierKey, CrawledCatalogue> = {
       'filter kabine': CABIN_FILTER,
       'kanalni kaiš': ['engine-parts', 'Поликлиновой ремень'],
       'garnitura zupčastih kaiševa': ['engine-parts', 'Комплект ремня ГРМ'],
+      'zupčasti kaiš': ['engine-parts', 'Зубчатый ремень'],
+      'kočioni cilindar točka': ['brakes', 'Колесный тормозной цилиндр'],
+      'kontakt istrošenosti': ['brakes', 'Датчик износа тормозных колодок'],
     },
     excluded: [],
     makes: MAKE_ALIASES,
   },
 };
 
-export const crawledPartType = (supplierKey: string, code: string) =>
-  Object.entries(
+export const crawledPartType = (supplierKey: string, code: string) => {
+  const categories =
     Object.entries(CRAWLED_CATALOGUES).find(([key]) => key === supplierKey)?.[1]
-      .categories ?? {},
-  ).find(([mapped]) => nameKey(mapped) === nameKey(code))?.[1][1] ?? null;
+      .categories ?? {};
+  const mapped = scopedCodeOf(Object.keys(categories))(code);
+  return mapped === null ? null : categories[mapped][1];
+};
 
 export const GLOBAL_BRAND_ALIASES: Record<string, string[]> = {
   Bosch: ['Robert Bosch'],

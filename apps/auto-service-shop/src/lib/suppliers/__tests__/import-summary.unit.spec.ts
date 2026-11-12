@@ -53,6 +53,29 @@ describe('importTally', () => {
     });
   });
 
+  it('lists unknown vehicle makes once under their first spelling, most rows first, and counts them as rows without a make', () => {
+    const tally = importTally('MANN-FILTER');
+
+    for (const make of [
+      'LIEBHERR',
+      'New Holland',
+      'NEW HOLLAND',
+      'LIEBHERR',
+      'NEW  HOLLAND',
+    ]) {
+      tally.unknownMake(make);
+    }
+
+    expect(tally.summary).toMatchObject({
+      skipped: 0,
+      skipped_by_reason: { no_make: 5 },
+      unknown_makes: [
+        { make: 'New Holland', count: 3 },
+        { make: 'LIEBHERR', count: 2 },
+      ],
+    });
+  });
+
   it('counts each imported article as created, updated or unchanged', () => {
     const tally = importTally('MANN-FILTER');
 
