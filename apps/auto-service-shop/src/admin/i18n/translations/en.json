@@ -145,9 +145,9 @@
     "save": "Save",
     "importLead": "An import reads a supplier's catalogue into the shop and puts its prices on the site. Press Import in the supplier's row: it runs in the background, so you can leave this page and the report stays here. Publishing does not import. The import takes only mapped categories and Brands with this supplier's spellings.",
     "importSummary": "{{supplier}}: {{created}} created, {{updated}} updated, {{unchanged}} unchanged.",
-    "importUnmapped": "Skipped in unmapped categories: {{count}} ({{categories}}). Map or exclude them under Supplier categories.",
+    "importUnmapped": "Skipped in unmapped categories: {{count}}. Map or exclude them under Supplier categories.",
     "importExcluded": "Skipped in excluded categories: {{count}}.",
-    "importWithoutMake": "Applicability rows with an unknown make, fitted to no Vehicle: {{count}} ({{makes}}).",
+    "importWithoutMake": "Applicability rows with an unknown make, fitted to no Vehicle: {{count}}.",
     "releasedHint": "Checked data is shown on the site. Check it only once the supplier has allowed it in writing: this data may come from TecDoc.",
     "kinds": {
       "cross_references": "Cross references",
@@ -190,8 +190,8 @@
     "importWithoutNumber": "Skipped as numbers with no Latin letter or digit: {{count}}.",
     "importImagesFailed": "Images not copied, retried in a week: {{count}}.",
     "importWithoutCategoryLink": "Open in Parts",
-    "importMissingFields": "Not filed, a required field is missing: {{articles}}. Fill it under Parts.",
-    "importUnanswered": "AI gave no answer, kept the supplier name: {{articles}}.",
+    "importMissingFields": "Not filed, a required field is missing: {{count}}. Fill it under Parts.",
+    "importUnanswered": "AI gave no answer, kept the supplier name: {{count}}.",
     "importOn": "On",
     "importOff": "Off",
     "importSwitch": {
@@ -222,7 +222,7 @@
     "importPending": "Importing…",
     "importRunning": "Importing: {{count}} articles so far",
     "importFailed": "The import stopped: {{error}}",
-    "importArticlesFailed": "Not imported because of an error: {{articles}}. Fix the cause and import again.",
+    "importArticlesFailed": "Not imported because of an error: {{count}}. Fix the cause and import again.",
     "importFinishedAt": "Finished {{time}}.",
     "reports": {
       "heading": "Import reports",
@@ -1038,6 +1038,7 @@
       "created": "Added"
     },
     "open": "Open",
+    "retry": "Read again",
     "pickVehicle": "Pick the car",
     "wholeGeneration": "Whole generation: {{generation}}, engine unknown ({{count}} variants)",
     "noFitment": "No fitment",

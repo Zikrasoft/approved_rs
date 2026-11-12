@@ -17,7 +17,7 @@ import {
   STAGED_DATA_KINDS,
   type StagedDataKind,
 } from '@podbor/catalog-contract';
-import { useEffect, useState } from 'react';
+import { type FormEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
@@ -296,10 +296,12 @@ const SuppliersPage = () => {
 
   const chooseSupplier = (supplierId: string) => {
     setMappedSupplierId(supplierId);
+    setLoaded((current) => ({ ...current, [`mappings-${supplierId}`]: false }));
     loadMappings(supplierId);
   };
 
-  const addMapping = async () => {
+  const addMapping = async (event: FormEvent) => {
+    event.preventDefault();
     const created = await adminFetch(
       `/admin/suppliers/${mappedSupplierId}/categories`,
       acknowledged,
@@ -431,6 +433,7 @@ const SuppliersPage = () => {
                       <>
                         <Table.Cell>
                           <Input
+                            size="small"
                             type="number"
                             className="w-24"
                             min={0}
@@ -583,7 +586,9 @@ const SuppliersPage = () => {
       </Container>
 
       <ImportReports
-        suppliers={suppliers.filter(({ key }) => key !== MANUAL_SOURCE)}
+        suppliers={suppliers
+          .filter(({ key }) => key !== MANUAL_SOURCE)
+          .map(({ id, key }) => ({ id, name: sourceName(key) }))}
       />
 
       <Crawls />
@@ -595,7 +600,9 @@ const SuppliersPage = () => {
         >
           <div className="max-w-xs">
             <Select value={mappedSupplierId} onValueChange={chooseSupplier}>
-              <Select.Trigger>
+              <Select.Trigger
+                aria-label={t('suppliers.mappings.supplierPlaceholder')}
+              >
                 <Select.Value
                   placeholder={t('suppliers.mappings.supplierPlaceholder')}
                 />
@@ -656,17 +663,21 @@ const SuppliersPage = () => {
             ) : (
               <ListEmpty hint={t('suppliers.mappings.empty')} />
             )}
-            <div className="flex flex-wrap gap-2 px-6 py-4">
+            <form
+              className="flex flex-wrap gap-2 px-6 py-4"
+              onSubmit={addMapping}
+            >
               <Input
                 size="small"
                 className="max-w-xs"
+                aria-label={t('suppliers.mappings.code')}
                 placeholder={t('suppliers.mappings.codePlaceholder')}
                 value={code}
                 onChange={(event) => setCode(event.target.value)}
               />
               <div className="w-64">
                 <Select value={categoryId} onValueChange={setCategoryId}>
-                  <Select.Trigger>
+                  <Select.Trigger aria-label={t('suppliers.mappings.category')}>
                     <Select.Value
                       placeholder={t('suppliers.mappings.categoryPlaceholder')}
                     />
@@ -685,12 +696,12 @@ const SuppliersPage = () => {
               </div>
               <Button
                 size="small"
+                type="submit"
                 disabled={!code.trim() || !categoryId || writing}
-                onClick={addMapping}
               >
                 {t('suppliers.mappings.add')}
               </Button>
-            </div>
+            </form>
           </>
         )}
       </Container>

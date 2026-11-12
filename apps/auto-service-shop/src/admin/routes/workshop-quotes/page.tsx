@@ -254,6 +254,11 @@ const WorkshopQuotesPage = () => {
     ]);
   };
 
+  const retry = (key: number) => {
+    started.current.delete(key);
+    change(key, { state: 'waiting' });
+  };
+
   const active = quotes.find(({ key }) => key === activeKey) ?? null;
   const draft = active?.state === 'ready' ? active.draft : null;
   const lines = active?.lines ?? [];
@@ -431,6 +436,15 @@ const WorkshopQuotesPage = () => {
                 <Badge size="2xsmall" color={STATE_COLOR[quote.state]}>
                   {t(`workshopQuotes.state.${quote.state}`)}
                 </Badge>
+                {quote.state === 'failed' && (
+                  <Button
+                    size="small"
+                    variant="transparent"
+                    onClick={() => retry(quote.key)}
+                  >
+                    {t('workshopQuotes.retry')}
+                  </Button>
+                )}
                 {(quote.state === 'ready' || quote.state === 'created') &&
                   quote.key !== activeKey && (
                     <Button
