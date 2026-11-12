@@ -1179,7 +1179,7 @@ every deploy and is idempotent. It creates the cash-at-pickup commerce defaults
 Categories carlab.rs's old `/{locale}/parts/{slug}/` pages 301 to, with their
 Russian name and text and the old picture from `apps/auto-service-shop/assets/categories`
 (the image copies that directory to `/server/assets`), and «Аккумуляторы»
-(`batteries`) with its nine fields, their options and the battery registration
+(`batteries`) with its twelve fields, their options and the battery registration
 service (label, price, note), from the same definitions the demo seed uses.
 Batteries ship without a picture: upload one in the admin. Serbian and English
 come from the admin's Publish chain like any other catalogue text. A Category,
@@ -1190,7 +1190,7 @@ It also configures the crawled catalogues, from `CRAWLED_CATALOGUES` in
 `apps/auto-service-shop/src/lib/production-seed.ts`, one entry per crawled site: the
 Supplier (with cross-references, applicability and images released), its Brands with the spelling the site prints (MANN-FILTER, FILTRON,
 VARTA, and febi, SWAG and Blue Print for bilstein group), its known category
-mapping (VARTA `battery` to «Аккумуляторы») and, for the three sites that list cars,
+mappings (VARTA `battery` to «Аккумуляторы»; the nine MANN-FILTER filter families to «ТО и расходники», `Ventilator` to «Двигатель» and `Hydraulic Transmission Filter` to «Трансмиссия и приводы»; five FILTRON families to «ТО и расходники», `Sušač` to «Тормозная система» and `Filter hidrauličnog prenosa` to «Трансмиссия и приводы») and, for the three sites that list cars,
 every Make alias of the car Make table `CAR_MAKES` in
 `apps/auto-service-shop/src/lib/suppliers/makes.ts` (`SKODA` on Škoda, `VOLVO CARS` on
 Volvo, `VW (VOLKSWAGEN)` on Volkswagen, ...). The
@@ -1615,11 +1615,11 @@ Steps 1, 5 and 6 are one `terraform apply`: see `infra/auto-service-shop/terrafo
    at `https://admin.carlab.rs`, and in Settings → Publishable API Keys create the
    key carlab.rs uses, with the `CarLab parts shop` sales channel added to it (the
    production seed created the channel).
-   Then open «Аккумуляторы»: the production seed created it with its nine
+   Then open «Аккумуляторы»: the production seed created it with its twelve
    fields, their options and the battery registration service (label, price,
    note). Check the price is still right and upload the Category's picture,
    which the seed does not ship.
-   The crawled Suppliers, their Brands and spellings, the VARTA battery mapping
+   The crawled Suppliers, their Brands and spellings, the VARTA, MANN-FILTER and FILTRON category mappings
    and the Volkswagen aliases are seeded too: nothing to set up before the first
    crawl and Import.
    Done: signing in works, the eight seeded Categories are in the admin,

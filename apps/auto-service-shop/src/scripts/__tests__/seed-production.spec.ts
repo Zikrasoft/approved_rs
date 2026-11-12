@@ -300,22 +300,87 @@ medusaIntegrationTestRunner({
         ]);
       });
 
-      it('maps the VARTA battery category to «Аккумуляторы»', async () => {
+      it('maps the VARTA battery category to «Аккумуляторы» and the MANN-FILTER families to their Categories', async () => {
         const [varta] = await suppliers.listSuppliers({ name: 'VARTA' });
+        const [mann] = await suppliers.listSuppliers({ name: 'MANN-FILTER' });
         const [batteries] = await catalog.listCategories({ slug: 'batteries' });
+        const [maintenance] = await catalog.listCategories({
+          slug: 'maintenance-consumables',
+        });
+        const [filtron] = await suppliers.listSuppliers({ name: 'FILTRON' });
+        const [brakes] = await catalog.listCategories({ slug: 'brakes' });
+        const [engine] = await catalog.listCategories({
+          slug: 'engine-parts',
+        });
+        const [transmission] = await catalog.listCategories({
+          slug: 'transmission',
+        });
         const mappings = await suppliers.listSupplierCategories(
           {},
           { take: null },
         );
+        const maintenanceCodes = [
+          'Oil Filter',
+          'Air Filter',
+          'Fuel Filter | For diesel',
+          'Fuel Filter | For gasoline',
+          'Fuel Filter | Water Separator',
+          'Cabin Air Filter | Particulate',
+          'Cabin Air Filter | Activated carbon',
+          'Cabin Air Filter | Biofunctional',
+          'Secondary Element',
+        ];
+        const key = (row: { supplier_id: string; code: string }) =>
+          `${row.supplier_id}:${row.code}`;
         expect(
-          mappings.map(({ supplier_id, code, category_id }) => ({
-            supplier_id,
-            code,
-            category_id,
-          })),
-        ).toEqual([
-          { supplier_id: varta.id, code: 'battery', category_id: batteries.id },
-        ]);
+          mappings
+            .map(({ supplier_id, code, category_id }) => ({
+              supplier_id,
+              code,
+              category_id,
+            }))
+            .sort((a, b) => key(a).localeCompare(key(b))),
+        ).toEqual(
+          [
+            {
+              supplier_id: varta.id,
+              code: 'battery',
+              category_id: batteries.id,
+            },
+            ...maintenanceCodes.map((code) => ({
+              supplier_id: mann.id,
+              code,
+              category_id: maintenance.id,
+            })),
+            ...[
+              'Filter vazduha',
+              'Filter goriva',
+              'Filter kabine',
+              'Filter ulja',
+              'Sekundarni element',
+            ].map((code) => ({
+              supplier_id: filtron.id,
+              code,
+              category_id: maintenance.id,
+            })),
+            { supplier_id: filtron.id, code: 'Sušač', category_id: brakes.id },
+            {
+              supplier_id: filtron.id,
+              code: 'Filter hidrauličnog prenosa',
+              category_id: transmission.id,
+            },
+            {
+              supplier_id: mann.id,
+              code: 'Ventilator',
+              category_id: engine.id,
+            },
+            {
+              supplier_id: mann.id,
+              code: 'Hydraulic Transmission Filter',
+              category_id: transmission.id,
+            },
+          ].sort((a, b) => key(a).localeCompare(key(b))),
+        );
       });
 
       it('files each crawled spelling of one manufacturer under its one Make', async () => {

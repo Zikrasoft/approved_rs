@@ -367,18 +367,40 @@ type CrawledCatalogue = {
   makes: Record<string, string>;
 };
 
+const MAINTENANCE_SLUG = 'maintenance-consumables';
+
 const CRAWLED_CATALOGUES: Record<
   Exclude<SupplierAdapterName, 'demo'>,
   CrawledCatalogue
 > = {
   'mann-filter': {
     brands: { 'MANN-FILTER': ['MANN-FILTER'] },
-    categories: {},
+    categories: {
+      'Oil Filter': MAINTENANCE_SLUG,
+      'Air Filter': MAINTENANCE_SLUG,
+      'Fuel Filter | For diesel': MAINTENANCE_SLUG,
+      'Fuel Filter | For gasoline': MAINTENANCE_SLUG,
+      'Fuel Filter | Water Separator': MAINTENANCE_SLUG,
+      'Cabin Air Filter | Particulate': MAINTENANCE_SLUG,
+      'Cabin Air Filter | Activated carbon': MAINTENANCE_SLUG,
+      'Cabin Air Filter | Biofunctional': MAINTENANCE_SLUG,
+      'Secondary Element': MAINTENANCE_SLUG,
+      Ventilator: 'engine-parts',
+      'Hydraulic Transmission Filter': 'transmission',
+    },
     makes: MAKE_ALIASES,
   },
   filtron: {
     brands: { FILTRON: ['FILTRON'] },
-    categories: {},
+    categories: {
+      'Filter vazduha': MAINTENANCE_SLUG,
+      'Filter goriva': MAINTENANCE_SLUG,
+      'Filter kabine': MAINTENANCE_SLUG,
+      'Filter ulja': MAINTENANCE_SLUG,
+      'Sekundarni element': MAINTENANCE_SLUG,
+      'Sušač': 'brakes',
+      'Filter hidrauličnog prenosa': 'transmission',
+    },
     makes: MAKE_ALIASES,
   },
   varta: {
