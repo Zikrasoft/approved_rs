@@ -2,6 +2,7 @@ import { MedusaError } from '@medusajs/framework/utils';
 import { CARLAB } from '@podbor/brands';
 import { CATALOG_TRANSLATION_LOCALES } from '@podbor/catalog-contract';
 import {
+  fieldsPrompt,
   SERBIAN_CAR_TRADE_GUIDANCE,
   sha256Hex,
   translateFields,
@@ -23,7 +24,7 @@ const LOCALE_GUIDANCE: Partial<Record<TargetLocale, string>> = {
   en: '"Подходит, в том числе, для" is "Fits vehicles including", never "Fits, among others,".',
 };
 
-const BUSINESS_DESCRIPTION = `${CARLAB.name}, a car service in Belgrade, Serbia, with a parts shop for BMW and Mercedes-Benz`;
+const BUSINESS_DESCRIPTION = `${CARLAB.name}, a car service in Belgrade, Serbia, with a parts catalogue for all common car makes`;
 
 const ROWS_PER_REQUEST = 50;
 const ROWS_PER_PAGE = 2_000;
@@ -175,7 +176,7 @@ export const TRANSLATABLE_ENTITIES = new Map<string, TranslatableEntity>([
 type Item = {
   id: string;
   source: Record<string, string>;
-  hash: string;
+  hash: Record<TargetLocale, string>;
   translations: Translations;
   translatedFrom: TranslatedFrom;
 };
@@ -192,7 +193,23 @@ const itemOf = (entity: TranslatableEntity, row: StoredRow): Item => {
   return {
     id: row.id,
     source,
-    hash: sha256Hex(JSON.stringify(source)),
+    hash: Object.fromEntries(
+      CATALOG_TRANSLATION_LOCALES.map((locale) => [
+        locale,
+        sha256Hex(
+          JSON.stringify([
+            fieldsPrompt(
+              LANGUAGE_NAME[locale],
+              BUSINESS_DESCRIPTION,
+              entity.subject,
+              LOCALE_GUIDANCE[locale],
+            ),
+            OPENAI_MODEL,
+            source,
+          ]),
+        ),
+      ]),
+    ) as Record<TargetLocale, string>,
     translations: decode(row.translations),
     translatedFrom:
       translatedFromSchema.parse(row.translated_from ?? null) ?? {},
@@ -252,7 +269,7 @@ async function translateLocale(
   apiKey: string | undefined,
 ): Promise<void> {
   const stale = items.filter(
-    (item) => item.translatedFrom[locale] !== item.hash,
+    (item) => item.translatedFrom[locale] !== item.hash[locale],
   );
   for (const chunk of requestBatches(stale, locale)) {
     const fields = Object.fromEntries(
@@ -284,7 +301,10 @@ async function translateLocale(
             ]),
           ),
         };
-        item.translatedFrom = { ...item.translatedFrom, [locale]: item.hash };
+        item.translatedFrom = {
+          ...item.translatedFrom,
+          [locale]: item.hash[locale],
+        };
         return {
           id: item.id,
           translations: item.translations,
@@ -389,7 +409,7 @@ export async function editTranslation(
     {
       id,
       translations: translations,
-      translated_from: { ...item.translatedFrom, [locale]: item.hash },
+      translated_from: { ...item.translatedFrom, [locale]: item.hash[locale] },
       updated_by: actorId,
     },
   ]);
