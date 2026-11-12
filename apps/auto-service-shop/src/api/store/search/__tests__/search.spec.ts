@@ -719,6 +719,63 @@ medusaIntegrationTestRunner({
         });
       });
 
+      it('finds a Part by a released cross-reference number and never by a held one', async () => {
+        const catalog: CatalogModuleService =
+          getContainer().resolve(CATALOG_MODULE);
+        const suppliers: SupplierModuleService =
+          getContainer().resolve(SUPPLIER_MODULE);
+        const [mann] = await catalog.listBrands({ slug: 'mann-filter' });
+        const partId = await catalog.createPartWithIdentifiers({
+          name: 'Масляный фильтр',
+          identifiers: [
+            {
+              type: 'manufacturer-number',
+              brand_id: mann.id,
+              value: 'HU 7020 z',
+            },
+          ],
+        });
+        const [identifier] = await catalog.listPartIdentifiers({
+          part_id: partId,
+        });
+        const [released, held] = await suppliers.createSuppliers([
+          {
+            key: 'bilstein',
+            name: 'Cross released',
+            markup_percentage: 0,
+            released_kinds: ['cross_references'],
+          },
+          { key: 'demo-autodelovi', name: 'Cross held', markup_percentage: 0 },
+        ]);
+        await suppliers.createStagedRecords([
+          {
+            supplier_id: released.id,
+            part_identifier_id: identifier.id,
+            kind: 'cross_references',
+            payload: { items: [{ brand: 'BMW', number: '11 42 7 557 012' }] },
+          },
+          {
+            supplier_id: held.id,
+            part_identifier_id: identifier.id,
+            kind: 'cross_references',
+            payload: { items: [{ brand: 'VAG', number: '03L 115 562' }] },
+          },
+        ]);
+        await getContainer()
+          .resolve<PublishModuleService>(PUBLISH_MODULE)
+          .publishAll();
+        await getContainer()
+          .resolve(Modules.SEARCH)
+          .reindex({ index: 'part_identifier' });
+
+        const values = async (q: string) =>
+          (await results({ q, locale: 'ru' })).map(({ value }) => value);
+
+        expect(await values('11 42 7 557 012')).toEqual(['HU 7020 z']);
+        expect(await values('11427557012')).toEqual(['HU 7020 z']);
+        expect(await values('03L115562')).toEqual([]);
+      });
+
       it('builds a new collection on reindex and swaps reads to it', async () => {
         const collections = async () => {
           const response = await fetch(
