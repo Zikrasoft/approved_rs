@@ -57,7 +57,8 @@ jobs:
 
       - run: sh infra/auto-service-shop/test/scripts.test.sh
       - run: sh infra/auto-service-shop/test/compose.test.sh
-      - run: sh infra/auto-service-shop/test/logs.test.sh
+      - if: runner.os == 'Linux'
+        run: sh infra/auto-service-shop/test/logs.test.sh
       - run: sh infra/auto-service-shop/test/crawler-role.test.sh
       - run: sh infra/auto-service-shop/test/harden-ssh.test.sh
       - run: sh .github/scripts/shop-backend-up.test.sh
