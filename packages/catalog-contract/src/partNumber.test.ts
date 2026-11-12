@@ -17,11 +17,15 @@ describe('normalizePartNumber', () => {
     ['A_123#4', 'A1234'],
     ['Ｗ７１２', 'W712'],
     ['é-123', 'E123'],
+    ['HU816Х', 'HU816X'],
+    ['нu 816 х', 'HU816X'],
+    ['АВЕКМНОРСТУХ123', 'ABEKMHOPCTYX123'],
+    ['ј-12ѕ', 'J12S'],
   ])('reads %j as %j', (raw, normalized) => {
     expect(normalizePartNumber(raw)).toBe(normalized);
   });
 
-  it.each(['', '  ', '-/.', 'фильтр', '—'])(
+  it.each(['', '  ', '-/.', 'шлиф', '—'])(
     'refuses %j, which keeps no letter or digit of a key',
     (raw) => {
       expect(normalizePartNumber(raw)).toBeNull();

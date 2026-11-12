@@ -1,7 +1,14 @@
+const CYRILLIC_LOOKALIKES = 'АВЕКМНОРСТУХЈЅ';
+const LATIN_TWINS = 'ABEKMHOPCTYXJS';
+
 export const normalizePartNumber = (raw: string): string | null =>
   raw
     .normalize('NFKD')
     .toUpperCase()
+    .replace(
+      new RegExp(`[${CYRILLIC_LOOKALIKES}]`, 'g'),
+      (letter) => LATIN_TWINS[CYRILLIC_LOOKALIKES.indexOf(letter)],
+    )
     .replace(/[^A-Z0-9]/g, '') || null;
 
 export const partPageSlug = (
