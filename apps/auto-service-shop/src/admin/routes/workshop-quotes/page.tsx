@@ -19,6 +19,11 @@ import { z } from 'zod';
 
 import { ScrollArea } from '../../components/scroll-area';
 import { adminFetch } from '../../lib/admin-fetch';
+import {
+  type BrandOption,
+  brandOptionsSchema,
+  isNewBrand,
+} from '../../lib/brand-options';
 import { breadcrumb } from '../../lib/breadcrumb';
 import { type Category, categoriesSchema } from '../../lib/categories';
 import {
@@ -111,11 +116,19 @@ const WorkshopQuotesPage = () => {
   const [draft, setDraft] = useState<Draft | null>(null);
   const [lines, setLines] = useState<EditedLine[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [brands, setBrands] = useState<BrandOption[]>([]);
+  const brandListId = useId();
   const [confirmed, setConfirmed] = useState<Confirmed | null>(null);
 
   useEffect(() => {
     adminFetch('/admin/categories', categoriesSchema).then((data) => {
       if (data) setCategories(data.categories);
+    });
+  }, []);
+
+  useEffect(() => {
+    adminFetch('/admin/brands', brandOptionsSchema).then((data) => {
+      if (data) setBrands(data.brands);
     });
   }, []);
 
@@ -317,6 +330,11 @@ const WorkshopQuotesPage = () => {
                   })}
                 </Text>
               )}
+              <datalist id={brandListId}>
+                {brands.map(({ name }) => (
+                  <option key={name} value={name} />
+                ))}
+              </datalist>
               <ScrollArea>
                 <Table>
                   <Table.Header>
@@ -394,6 +412,7 @@ const WorkshopQuotesPage = () => {
                               <Input
                                 size="small"
                                 value={line.brand}
+                                list={brandListId}
                                 placeholder={t(
                                   'workshopQuotes.brandPlaceholder',
                                 )}
@@ -403,6 +422,14 @@ const WorkshopQuotesPage = () => {
                                   edit(line.key, { brand: event.target.value })
                                 }
                               />
+                              {isNewBrand(line.brand, brands) && (
+                                <Text
+                                  size="xsmall"
+                                  className="text-ui-fg-subtle"
+                                >
+                                  {t('workshopQuotes.newBrand')}
+                                </Text>
+                              )}
                               {suggestion.brand_uncertain && (
                                 <div className="flex flex-wrap items-center gap-2">
                                   <Badge size="2xsmall" color="orange">

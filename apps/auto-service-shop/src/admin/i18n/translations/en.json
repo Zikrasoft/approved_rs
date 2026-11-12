@@ -988,6 +988,7 @@
       "actions": "Actions"
     },
     "checkBrand": "Check the brand",
+    "newBrand": "A new brand will be created",
     "noCategory": "No category",
     "brandPlaceholder": "Enter the brand",
     "useSuggestion": "Use {{brand}} ({{confidence}})",
