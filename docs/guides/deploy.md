@@ -1015,6 +1015,9 @@ number gets its CI value in that script. The non-obvious parts:
     records). A VIN matches the crawled Vehicles of its make whose Chassis
     code starts with one of those types and whose years hold the model year
     in character 10.
+  - `wmi-make`: every other make, from the WMI alone, last in the chain. It
+    names the make so the lookup is saved and the visitor reaches the make's
+    page; it matches no Vehicle.
 
   A code a decoder reads but cannot match lands on the admin Unresolved VINs
   screen with what the open data says about it.
