@@ -9,7 +9,6 @@ const OFFER: LiveOfferRow = {
   id: 'offer_1',
   part_identifier_id: 'pi_1',
   cost_price: 1000,
-  currency: 'RSD',
   stock_quantity: 3,
   lead_time_days: 0,
   supplier: { name: 'Intercars', markup_percentage: 10 },

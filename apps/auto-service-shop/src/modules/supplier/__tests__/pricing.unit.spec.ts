@@ -39,11 +39,9 @@ describe('storeOffers', () => {
     cost_price: number,
     stock_quantity: number,
     lead_time_days: number,
-    currency = 'RSD',
   ) => ({
     id,
     cost_price,
-    currency,
     stock_quantity,
     lead_time_days,
     supplier_article_id: `art-${id}`,
@@ -99,15 +97,6 @@ describe('storeOffers', () => {
     ).toEqual(['back-order', 'cheap-but-gone']);
   });
 
-  it('leaves out an offer in another currency than the shop sells in', () => {
-    expect(
-      storeOffers([
-        offer('euro', 10, 5, 0, 'EUR'),
-        offer('dinar', 1000, 1, 0),
-      ]).map(({ id }) => id),
-    ).toEqual(['dinar']);
-  });
-
   it('leaves out an offer that would sell for nothing', () => {
     expect(
       storeOffers([offer('free', 0.4, 5, 0), offer('paid', 1000, 1, 0)]).map(
@@ -118,31 +107,28 @@ describe('storeOffers', () => {
 });
 
 describe('isSellable', () => {
-  const row = (cost_price: number, currency = 'RSD') => ({
+  const row = (cost_price: number) => ({
     cost_price,
-    currency,
     supplier: { markup_percentage: 20 },
   });
 
-  it('sells a priced row in the shop currency only', () => {
+  it('sells a row only when it sells for something', () => {
     expect(isSellable(row(1542))).toBe(true);
-    expect(isSellable(row(1542, 'eur'))).toBe(false);
     expect(isSellable(row(0.1))).toBe(false);
   });
 });
 
 describe('one priced offer', () => {
-  const row = (part_identifier_id: string, id: string, currency = 'RSD') => ({
+  const row = (part_identifier_id: string, id: string, cost_price = 1000) => ({
     id,
     part_identifier_id,
-    cost_price: 1000,
-    currency,
+    cost_price,
     stock_quantity: 2,
     lead_time_days: 1,
     supplier: { markup_percentage: 10 },
   });
 
-  it('prices a sellable row and refuses one in another currency', () => {
+  it('prices a sellable row in dinars and refuses one that sells for nothing', () => {
     expect(storeOffer(row('pi_1', 'o1'))).toEqual({
       id: 'o1',
       price: 1100,
@@ -150,14 +136,14 @@ describe('one priced offer', () => {
       stock_quantity: 2,
       lead_time_days: 1,
     });
-    expect(storeOffer(row('pi_1', 'o2', 'EUR'))).toBeNull();
+    expect(storeOffer(row('pi_1', 'o2', 0))).toBeNull();
   });
 
   it('groups the sellable offers by number in one pass', () => {
     const grouped = offersByIdentifier([
       row('pi_1', 'o1'),
       row('pi_2', 'o2'),
-      row('pi_1', 'o3', 'EUR'),
+      row('pi_1', 'o3', 0),
     ]);
 
     expect([...grouped.keys()]).toEqual(['pi_1', 'pi_2']);

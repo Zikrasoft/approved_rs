@@ -22,7 +22,13 @@ export const CRAWL_RUN_STATUSES = [
   'done',
 ] as const;
 
-export const PAGE_STATUSES = ['queued', 'done', 'failed', 'gone'] as const;
+export const PAGE_STATUSES = [
+  'queued',
+  'done',
+  'out_of_scope',
+  'failed',
+  'gone',
+] as const;
 
 type PageStatus = (typeof PAGE_STATUSES)[number];
 
@@ -63,7 +69,7 @@ export type PageUpdate = Partial<{
   etag: string | null;
   last_modified: string | null;
   fetched_at: Date;
-  body: Buffer;
+  body: Buffer | null;
 }>;
 
 export type CrawlProgress = {
@@ -74,6 +80,7 @@ export type CrawlProgress = {
 };
 
 const SEED_BATCH = 1000;
+const OUT_OF_SCOPE_RECHECK_DAYS = 30;
 
 const tally = <Key extends string>(
   keys: readonly Key[],
@@ -151,19 +158,21 @@ export const crawlStore = (pg: Knex, pages: Bucket | null = null) => ({
   async seed(site: string, urls: string[], now: Date): Promise<void> {
     await pg.transaction(async (trx) => {
       for (let start = 0; start < urls.length; start += SEED_BATCH) {
-        await trx('crawl_page')
-          .insert(
-            urls
-              .slice(start, start + SEED_BATCH)
-              .map((url) => ({ site, url, next_attempt_at: now })),
-          )
-          .onConflict(['site', 'url'])
-          .merge({
-            status: 'queued',
-            attempts: 0,
-            next_attempt_at: now,
-            error: null,
-          });
+        await trx.raw(
+          `insert into crawl_page (site, url, next_attempt_at)
+           select ?, url, ? from unnest(?::text[]) as url
+           on conflict (site, url) do update set
+             status = 'queued', attempts = 0, next_attempt_at = excluded.next_attempt_at, error = null
+           where crawl_page.status <> 'out_of_scope'
+             or crawl_page.fetched_at < ?::timestamptz - make_interval(days => ?)`,
+          [
+            site,
+            now,
+            urls.slice(start, start + SEED_BATCH),
+            now,
+            OUT_OF_SCOPE_RECHECK_DAYS,
+          ],
+        );
       }
       await trx('crawl_run').where({ site }).update({ seeded: true });
     });
@@ -205,8 +214,9 @@ export const crawlStore = (pg: Knex, pages: Bucket | null = null) => ({
     url: string,
     { body, ...update }: PageUpdate,
   ): Promise<void> {
-    const stored = body && { body_key: pageKey(site, url) };
-    if (stored) {
+    const stored =
+      body === undefined ? {} : { body_key: body && pageKey(site, url) };
+    if (body && stored.body_key) {
       await pagesBucket(pages).put(stored.body_key, body, {
         contentType: 'application/gzip',
       });

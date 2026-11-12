@@ -475,7 +475,7 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
+          "nullable": true,
           "unique": false,
           "length": null,
           "precision": null,
@@ -703,22 +703,6 @@
           "enumItems": [],
           "mappedType": "integer"
         },
-        "currency": {
-          "name": "currency",
-          "type": "text",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "unique": false,
-          "length": null,
-          "precision": null,
-          "scale": null,
-          "default": "'RSD'",
-          "comment": null,
-          "enumItems": [],
-          "mappedType": "text"
-        },
         "stock_quantity": {
           "name": "stock_quantity",
           "type": "integer",
@@ -927,11 +911,6 @@
           "name": "supplier_offer_lead_time",
           "expression": "lead_time_days >= 0",
           "definition": "check ((lead_time_days >= 0))"
-        },
-        {
-          "name": "supplier_offer_currency",
-          "expression": "currency similar to '[A-Z]{3}'",
-          "definition": "check ((currency similar to '[A-Z]{3}'))"
         }
       ],
       "foreignKeys": {

@@ -18,7 +18,6 @@ export const sellPrice = (
 
 type PricedRow = {
   cost_price: number;
-  currency: string;
   supplier: { markup_percentage: number };
 };
 
@@ -29,7 +28,6 @@ export type PricedOfferRow = PricedRow & {
 };
 
 export const isSellable = (row: PricedRow): boolean =>
-  inShopCurrency(row) &&
   sellPrice(row.cost_price, row.supplier.markup_percentage) > 0;
 
 export const storeOffer = (row: PricedOfferRow): PartOffer | null =>
@@ -37,7 +35,7 @@ export const storeOffer = (row: PricedOfferRow): PartOffer | null =>
     ? {
         id: row.id,
         price: sellPrice(row.cost_price, row.supplier.markup_percentage),
-        currency: row.currency,
+        currency: SHOP_CURRENCY,
         stock_quantity: row.stock_quantity,
         lead_time_days: row.lead_time_days,
       }

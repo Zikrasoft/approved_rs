@@ -40,7 +40,6 @@ export type SupplierOfferInput = {
   supplier_article_id: string;
   part_identifier_id: string;
   cost_price: number;
-  currency?: string;
   stock_quantity: number;
   stock_by_location?: Record<string, number>;
   lead_time_days: number;

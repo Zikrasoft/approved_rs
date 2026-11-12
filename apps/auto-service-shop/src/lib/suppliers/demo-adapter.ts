@@ -11,8 +11,10 @@ import type {
 const DEMO_PAGE_SIZE = 3;
 const DEMO_LOCATION = 'Beograd';
 
+type DemoQuote = Omit<SupplierQuote, 'currency'> & { currency: string };
+
 type DemoArticle = SupplierArticle & {
-  offer: Omit<SupplierQuote, 'article_id'>;
+  offer: Omit<DemoQuote, 'article_id'>;
 };
 
 export type DemoSupplier = {
@@ -403,7 +405,7 @@ export const readDemoOverrides = (path: string | undefined): DemoOverrides => {
 const quoteOf = (
   { article_id, offer: base }: DemoArticle,
   overrides: DemoOverrides,
-): SupplierQuote => {
+): DemoQuote => {
   const override = overrides[article_id] ?? {};
   return {
     article_id,

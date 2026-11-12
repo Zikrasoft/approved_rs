@@ -10,7 +10,7 @@ export type FakeSupplier = {
   articles: SupplierArticle[];
   unreadable: UnreadablePage[];
   notInScope: number;
-  quotes: Map<string, SupplierQuote>;
+  quotes: Map<string, Omit<SupplierQuote, 'currency'> & { currency: string }>;
   laterPages: Promise<void> | null;
   pageSize: number;
 };

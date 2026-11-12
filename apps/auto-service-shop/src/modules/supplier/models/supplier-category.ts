@@ -8,7 +8,7 @@ const SupplierCategory = model
     supplier: model.belongsTo(() => Supplier, { mappedBy: 'categories' }),
     code: model.text(),
     code_key: model.text(),
-    category_id: model.text().index(),
+    category_id: model.text().index().nullable(),
     created_by: model.text().nullable(),
     updated_by: model.text().nullable(),
   })

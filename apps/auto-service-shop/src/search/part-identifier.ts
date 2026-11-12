@@ -221,7 +221,6 @@ const source = {
           'id',
           'part_identifier_id',
           'cost_price',
-          'currency',
           'stock_quantity',
           'lead_time_days',
           'supplier.markup_percentage',
