@@ -13,7 +13,7 @@ const STRANGER = '0b8a4f5e-6c1d-4e2f-9a3b-7c8d9e0f1a2b';
 
 const record = (
   vin: string,
-  make: string,
+  make_key: string,
   code: string,
   vehicleId: string | null = null,
 ) => ({
@@ -22,7 +22,7 @@ const record = (
   decoder_version: 1,
   raw: null,
   facts: {},
-  make,
+  make_key,
   code,
   code_type: 'bmw-type-code' as const,
   vehicle_id: vehicleId,
@@ -59,13 +59,13 @@ medusaIntegrationTestRunner({
           typeCode: 'HOOK1',
         });
         const saves: [ReturnType<typeof record>, string | null][] = [
-          [record('WBA8E9G50GNT11111', 'bmw', 'HOOK1', vehicle.id), VISITOR],
-          [record('WBAUK51070VA22222', 'bmw', 'UK51'), VISITOR],
-          [record('WBA8E9G50GNT11111', 'bmw', 'HOOK1', vehicle.id), VISITOR],
-          [record('WBAZZ99070VA33333', 'bmw', 'ZZ99'), VISITOR],
-          [record('WBAZZ98070VA44444', 'bmw', 'ZZ98'), VISITOR],
-          [record('WBAZZ97070VA55555', 'bmw', 'ZZ97'), STRANGER],
-          [record('WBAZZ96070VA66666', 'bmw', 'ZZ96'), null],
+          [record('WBA8E9G50GNT11111', 'BMW', 'HOOK1', vehicle.id), VISITOR],
+          [record('WBAUK51070VA22222', 'BMW', 'UK51'), VISITOR],
+          [record('WBA8E9G50GNT11111', 'BMW', 'HOOK1', vehicle.id), VISITOR],
+          [record('WBAZZ99070VA33333', 'BMW', 'ZZ99'), VISITOR],
+          [record('WBAZZ98070VA44444', 'BMW', 'ZZ98'), VISITOR],
+          [record('WBAZZ97070VA55555', 'BMW', 'ZZ97'), STRANGER],
+          [record('WBAZZ96070VA66666', 'BMW', 'ZZ96'), null],
         ];
         for (const [lookup, visitorId] of saves) {
           await vinLookups.saveLookup(lookup, site(visitorId));
@@ -114,7 +114,7 @@ medusaIntegrationTestRunner({
           getContainer().resolve(VIN_LOOKUP_MODULE);
         const visitor = '2d0c6b7a-8e3f-4a4b-9c5d-9e0f1a2b3c4d';
         await vinLookups.saveLookup(
-          record('WBAUK51070VA77777', 'bmw', 'UK51'),
+          record('WBAUK51070VA77777', 'BMW', 'UK51'),
           site(visitor),
         );
 

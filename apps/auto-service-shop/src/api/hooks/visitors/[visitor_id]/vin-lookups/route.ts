@@ -11,7 +11,9 @@ import {
 import { z } from 'zod';
 
 import { listVehicleResponses } from '../../../../../lib/store-response';
+import { isMakeOfKey } from '../../../../../lib/vin/linkable';
 import { openDataReference } from '../../../../../lib/vin/open-data-reference';
+import { slugOf } from '../../../../../modules/_shared/slug';
 import { CATALOG_MODULE } from '../../../../../modules/catalog';
 import type CatalogModuleService from '../../../../../modules/catalog/service';
 import { VIN_LOOKUP_MODULE } from '../../../../../modules/vin-lookup';
@@ -45,26 +47,21 @@ export async function GET(
       : []
     ).map((vehicle) => [vehicle.id, vehicle]),
   );
-  const makeSlugs = lookups.flatMap(({ make }) => make ?? []);
-  const makes = new Map(
-    (makeSlugs.length
-      ? await catalog.listMakes(
-          { slug: makeSlugs },
-          { select: ['slug', 'name'] },
-        )
-      : []
-    ).map(({ slug, name }) => [slug, name]),
-  );
+  const makes = lookups.some(({ make_key }) => make_key)
+    ? await catalog.listMakes({}, { select: ['slug', 'name'], take: null })
+    : [];
+  const makeName = (makeKey: string) =>
+    makes.find((make) => isMakeOfKey(makeKey, make))?.name ?? makeKey;
   res.json({
-    lookups: lookups.map(({ vin, make, code, vehicle_id, at }) => {
+    lookups: lookups.map(({ vin, make_key, code, vehicle_id, at }) => {
       const vehicle = vehicle_id ? vehicles.get(vehicle_id) : undefined;
       return {
         make: vehicle
           ? vehicleName(vehicle.model).make
-          : make && (makes.get(make) ?? make),
+          : make_key && makeName(make_key),
         model: vehicle
           ? vehicleName(vehicle.model).model
-          : unresolvedModel(make, code),
+          : unresolvedModel(make_key && slugOf(make_key), code),
         vin_last4: vin?.slice(-4) ?? null,
         at: at.toISOString(),
         vehicle: vehicle ? vehicleLabel(vehicle) : null,
