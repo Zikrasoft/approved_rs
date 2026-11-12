@@ -61,6 +61,41 @@ describe('the about page', () => {
     ).toBe(true);
   });
 
+  it('shows the waiting area with its sofa and coffee photos before the owner block', async () => {
+    const root = await page();
+    const heading = [...root.querySelectorAll('h2')].find(
+      (h) => h.textContent?.trim() === about.loungeHeading,
+    )!;
+    const owner = [...root.querySelectorAll('h2')].find(
+      (h) => h.textContent?.trim() === about.ownerHeading,
+    )!;
+    const photos = [...root.querySelectorAll('img')].filter((image) =>
+      image.getAttribute('src')?.includes('client-lounge'),
+    );
+
+    expect(heading.parentElement?.textContent).toContain(about.loungeText);
+    expect(photos.map((image) => image.getAttribute('alt'))).toEqual([
+      site.photos.loungeSofas,
+      site.photos.loungeCoffee,
+    ]);
+    photos.forEach((image) => {
+      expect(image.getAttribute('loading')).toBe('lazy');
+      expect(image.getAttribute('width')).toBeTruthy();
+      expect(image.getAttribute('height')).toBeTruthy();
+      expect(image.classList.contains('aspect-[4/5]')).toBe(true);
+    });
+    expect(photos[0]!.getAttribute('sizes')).toBe(
+      '(min-width: 1224px) 378px, (min-width: 1024px) calc(50vw - 214px), calc(50vw - 26px)',
+    );
+    expect(photos[1]!.getAttribute('sizes')).toContain(
+      '(min-width: 1224px) calc(378px * 2.22)',
+    );
+    expect(
+      heading.compareDocumentPosition(owner) &
+        heading.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+  });
+
   it('ends with the visit panel and keeps who owns the site', async () => {
     const root = await page();
 

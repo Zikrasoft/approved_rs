@@ -39,6 +39,14 @@ describe('VisitPanel', () => {
     expect(facts).toEqual(site.visit.facts);
   });
 
+  it('tells the visitor they can wait for the repair on site', async () => {
+    const facts = [...(await panel()).querySelectorAll('li')].map((item) =>
+      item.textContent?.trim(),
+    );
+
+    expect(facts).toContain('Ремонт можно подождать у нас, есть диван и кофе');
+  });
+
   it('leads with the orange call and offers a route to the garage', async () => {
     const root = await panel();
     const call = root.querySelector('a[href^="tel:"]')!;

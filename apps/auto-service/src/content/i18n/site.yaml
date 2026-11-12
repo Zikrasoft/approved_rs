@@ -53,12 +53,15 @@ visit:
   facts:
     - Говорим по-сербски, по-русски и по-английски
     - Оплата наличными или картой
+    - Ремонт можно подождать у нас, есть диван и кофе
 photos:
   # TODO: owner to supply a higher-quality original of the facade photo; at 1280 px it is upscaled in the visit panel.
   heroMechanic: Мастер CarLab ремонтирует двигатель, снятый с автомобиля на подъемнике
   workshopBay: Автомобиль с открытым капотом в цехе CarLab между стойками подъемника
   facade: Въезд в автосервис CarLab на Звездаре, вывеска AUTO SERVIS CARLAB.RS
   wallSign: Логотип CarLab на стене цеха и мастер у автомобиля с открытым капотом
+  loungeSofas: Зона ожидания в CarLab, диван, кресло и столик с журналами
+  loungeCoffee: Кофемашина и капсулы в зоне ожидания CarLab
 googleRating:
   rating: '{rating} в Google'
   reviews:

@@ -83,6 +83,8 @@ export const siteContentSchema = z
         workshopBay: z.string(),
         facade: z.string(),
         wallSign: z.string(),
+        loungeSofas: z.string(),
+        loungeCoffee: z.string(),
       })
       .strict(),
     googleRating: z
