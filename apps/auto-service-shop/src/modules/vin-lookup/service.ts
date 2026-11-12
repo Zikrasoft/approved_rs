@@ -60,7 +60,6 @@ export type VisitorLookup = {
   at: Date;
 };
 
-// TODO: vin_lookup_hit has no index on visitor_id, so this scans every hit; add one when the table grows past a quick scan
 const VISITOR_LOOKUPS = `
   select vin, make_key, code, vehicle_id, at from (
     select distinct on (l.id) l.vin, l.make_key, l.code, l.vehicle_id, h.created_at as at

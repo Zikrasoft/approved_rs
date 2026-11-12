@@ -30,6 +30,9 @@ export class Migration20261112063538 extends Migration {
     this.addSql(
       `CREATE INDEX IF NOT EXISTS "IDX_vin_lookup_hit_deleted_at" ON "vin_lookup_hit" ("deleted_at") WHERE deleted_at IS NULL;`,
     );
+    this.addSql(
+      `CREATE INDEX IF NOT EXISTS "IDX_vin_lookup_hit_visitor_id" ON "vin_lookup_hit" ("visitor_id") WHERE visitor_id IS NOT NULL AND deleted_at IS NULL;`,
+    );
 
     this.addSql(
       `alter table if exists "vin_lookup_hit" add constraint "vin_lookup_hit_vin_lookup_id_foreign" foreign key ("vin_lookup_id") references "vin_lookup" ("id") on update cascade on delete cascade;`,

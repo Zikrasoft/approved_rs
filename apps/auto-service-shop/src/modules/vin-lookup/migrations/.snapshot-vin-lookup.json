@@ -445,6 +445,15 @@
           "expression": "CREATE INDEX IF NOT EXISTS \"IDX_vin_lookup_hit_deleted_at\" ON \"vin_lookup_hit\" (\"deleted_at\") WHERE deleted_at IS NULL"
         },
         {
+          "keyName": "IDX_vin_lookup_hit_visitor_id",
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "primary": false,
+          "unique": false,
+          "expression": "CREATE INDEX IF NOT EXISTS \"IDX_vin_lookup_hit_visitor_id\" ON \"vin_lookup_hit\" (\"visitor_id\") WHERE visitor_id IS NOT NULL AND deleted_at IS NULL"
+        },
+        {
           "keyName": "vin_lookup_hit_pkey",
           "columnNames": ["id"],
           "composite": false,
