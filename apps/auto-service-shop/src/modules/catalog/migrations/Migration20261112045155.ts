@@ -73,9 +73,15 @@ export class Migration20261112045155 extends Migration {
     this.addSql(
       `ALTER TABLE "vehicle" DROP CONSTRAINT IF EXISTS "vehicle_engine_id_foreign", ADD CONSTRAINT "vehicle_engine_id_foreign" FOREIGN KEY ("engine_id") REFERENCES "engine" ("id") ON UPDATE CASCADE ON DELETE RESTRICT;`,
     );
+    this.addSql(
+      `ALTER TABLE "rejected_number" DROP CONSTRAINT IF EXISTS "rejected_number_brand_id_foreign", ADD CONSTRAINT "rejected_number_brand_id_foreign" FOREIGN KEY ("brand_id") REFERENCES "brand" ("id") ON UPDATE CASCADE ON DELETE RESTRICT;`,
+    );
   }
 
   override async down(): Promise<void> {
+    this.addSql(
+      `ALTER TABLE "rejected_number" DROP CONSTRAINT IF EXISTS "rejected_number_brand_id_foreign";`,
+    );
     this.addSql(
       `ALTER TABLE "vehicle" DROP CONSTRAINT IF EXISTS "vehicle_engine_id_foreign", ADD CONSTRAINT "vehicle_engine_id_foreign" FOREIGN KEY ("engine_id") REFERENCES "engine" ("id") ON UPDATE CASCADE ON DELETE SET NULL;`,
     );

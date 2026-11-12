@@ -299,6 +299,26 @@ medusaIntegrationTestRunner({
         expect(await catalog.listBrands({ id: brand.id })).toHaveLength(1);
       });
 
+      it('refuses to delete a Brand its RejectedNumbers use', async () => {
+        const brand = await catalog.createBrands({
+          name: 'Rejecting',
+          slug: 'rejecting',
+        });
+        await catalog.createRejectedNumbers({
+          brand_id: brand.id,
+          normalized_value: 'REJECTED1',
+        });
+
+        const response = await remove(`/admin/brands/${brand.id}`);
+
+        expect(response.status).toBe(409);
+        expect(response.data).toMatchObject({
+          code: 'IN_USE',
+          holders: [{ entity: 'rejected_number', count: 1 }],
+        });
+        expect(await catalog.listBrands({ id: brand.id })).toHaveLength(1);
+      });
+
       it('returns a 404 for an unknown Brand', async () => {
         expect((await remove('/admin/brands/brand_missing')).status).toBe(404);
       });

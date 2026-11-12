@@ -311,6 +311,11 @@ export const BRANDS: Pick<
       entity: 'part_identifier',
       column: 'brand_id',
     },
+    {
+      plural: 'RejectedNumbers',
+      entity: 'rejected_number',
+      column: 'brand_id',
+    },
   ],
 };
 export const CATEGORIES: Pick<

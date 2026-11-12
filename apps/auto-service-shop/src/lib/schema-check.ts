@@ -136,6 +136,9 @@ export const HAND_WRITTEN_INDEXES: Record<string, RegExp> = {
   IDX_part_description_hash: /USING hash \(description\)$/,
   IDX_order_created_at: /\(created_at\) WHERE \(deleted_at IS NULL\)$/,
   IDX_order_updated_at: /\(updated_at\) WHERE \(deleted_at IS NULL\)$/,
+  IDX_vin_lookup_scrub_due: /\(updated_at\) WHERE \(vin IS NOT NULL\)$/,
+  IDX_vin_lookup_hit_visitor_scrub_due:
+    /\(created_at\) WHERE \(visitor_id IS NOT NULL\)$/,
   IDX_crawl_page_due:
     /\(site, next_attempt_at\) WHERE \(status = 'queued'::text\)$/,
 };
@@ -152,6 +155,8 @@ export const HAND_WRITTEN_CONSTRAINTS: Record<string, RegExp> = {
     /^CHECK \(\(markup_percentage >= \(0\)::numeric\)\)$/,
   part_category_id_foreign: / ON DELETE RESTRICT$/,
   vehicle_engine_id_foreign: / ON DELETE RESTRICT$/,
+  rejected_number_brand_id_foreign:
+    /^FOREIGN KEY \(brand_id\) REFERENCES brand\(id\) ON UPDATE CASCADE ON DELETE RESTRICT$/,
 };
 
 const signature = (type: string, nullable: boolean) =>
