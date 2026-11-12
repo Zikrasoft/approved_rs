@@ -1,5 +1,3 @@
-import { type AttributeValues } from '@podbor/catalog-contract';
-
 const BATTERY_NAME_PARTS: [key: string, suffix: string][] = [
   ['voltage', ' В'],
   ['capacity', ' А·ч'],
@@ -10,7 +8,7 @@ export const isBattery = (fields: { key: string }[]) =>
   fields.some(({ key }) => key === 'cold-cranking');
 
 export function batteryName(
-  attributes: AttributeValues,
+  attributes: Readonly<Record<string, unknown>>,
   brand: string,
   number: string,
 ) {

@@ -217,7 +217,7 @@ const nameOf = (
   article: Article,
   aiName: string,
   categoryId: string | null | undefined,
-  attributes: AttributeValues,
+  attributes: Readonly<Record<string, unknown>>,
 ) =>
   batteryCategory(context, categoryId)
     ? batteryName(attributes, article.brand, article.number)
