@@ -216,18 +216,21 @@ const withBrandAndNumber = (name: string, { brand, number }: Article) =>
     ? name
     : `${name} ${brand} ${number}`;
 
-const nameOf = (
+const batteryCategory = (
   { categories }: Context,
+  categoryId: string | null | undefined,
+) => isBattery(categories.find(({ id }) => id === categoryId)?.fields ?? []);
+
+const nameOf = (
+  context: Context,
   article: Article,
   aiName: string,
   categoryId: string | null | undefined,
   attributes: AttributeValues,
-) => {
-  const fields = categories.find(({ id }) => id === categoryId)?.fields ?? [];
-  return isBattery(fields)
+) =>
+  batteryCategory(context, categoryId)
     ? batteryName(attributes, article.brand, article.number)
     : withBrandAndNumber(aiName, article);
-};
 
 function classificationOf(
   { categories, summary }: Context,
@@ -393,21 +396,27 @@ async function matchArticle(
   const classification = fileable
     ? classificationOf(context, article, categoryId, await answer())
     : undefined;
+  const nameable = !edited.has('name') && !context.matched.has(hit.id);
+  const categoryOfPart = classification?.category_id ?? part.category_id;
+  const attributesOfPart = classification?.attributes ?? part.attributes ?? {};
+  const composed =
+    nameable && batteryCategory(context, categoryOfPart)
+      ? batteryName(attributesOfPart, article.brand, article.number)
+      : null;
   const renaming =
-    edited.has('name') ||
-    context.matched.has(hit.id) ||
-    part.source_name === article.name
+    composed || !nameable || part.source_name === article.name
       ? null
       : await answer();
   const name =
-    renaming &&
-    nameOf(
-      context,
-      article,
-      renaming.name,
-      classification?.category_id ?? part.category_id,
-      classification?.attributes ?? part.attributes ?? {},
-    );
+    (composed !== part.name && composed) ||
+    (renaming &&
+      nameOf(
+        context,
+        article,
+        renaming.name,
+        categoryOfPart,
+        attributesOfPart,
+      ));
   const description =
     edited.has('description') || part.description
       ? null
