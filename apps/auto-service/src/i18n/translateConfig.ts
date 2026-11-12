@@ -1,3 +1,4 @@
+import { SERBIAN_CAR_TRADE_GUIDANCE } from '@podbor/i18n/translate';
 import type { TranslatableLocale } from './config';
 
 export const TARGET_LANGUAGE_NAME: Record<TranslatableLocale, string> = {
@@ -17,13 +18,16 @@ export const LOCALE_GUIDANCE: Partial<Record<TranslatableLocale, string>> = {
     'sentence: "u CarLabu", "iz CarLaba"; a title keeps " | CarLab" as it is. ' +
     '"Автосервис" is "auto servis" and "автозапчасти" is "auto delovi", two words as on the CarLab ' +
     'sign, declined normally ("u auto servisu", "auto delova"), never "auto-servis", "autoservis" ' +
-    'or "auto-delovi".',
+    'or "auto-delovi". ' +
+    SERBIAN_CAR_TRADE_GUIDANCE,
   en:
     'Write interface labels and headings the way an English shop would, in sentence case: ' +
     '"Подходит для автомобилей" is "Fits these cars", never "Fits for Vehicles". ' +
     '"Корзина" is always "cart", never "basket": "Add to cart", "In cart", "View cart", "Adding to cart…". ' +
     '"Заявка" is always "enquiry", never "inquiry". "{count} шт." is "{count} pc" for one item and ' +
-    '"{count} pcs" for several. "Ищу: {q}", the visitor\'s own message to us, is "Looking for: {q}".',
+    '"{count} pcs" for several. "Ищу: {q}", the visitor\'s own message to us, is "Looking for: {q}". ' +
+    'Write plain, friendly shop English a local garage would use, never stiff phrasing such as "among ' +
+    'others" or "is chargeable".',
 };
 
 export const BUSINESS_DESCRIPTION =

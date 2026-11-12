@@ -17,7 +17,7 @@ import type CatalogModuleService from '../../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../../modules/supplier';
 import type SupplierModuleService from '../../../../modules/supplier/service';
 
-const supplier = createFakeSupplier('Nightly supplier');
+const supplier = createFakeSupplier('mann-filter');
 const shopAi = createFakeShopAi();
 
 const SERBIAN = new Map([
@@ -188,6 +188,7 @@ medusaIntegrationTestRunner({
         const suppliers: SupplierModuleService =
           getContainer().resolve(SUPPLIER_MODULE);
         const nightly = await suppliers.createSuppliers({
+          key: 'mann-filter',
           name: 'Nightly supplier',
           markup_percentage: 20,
         });
@@ -365,7 +366,7 @@ medusaIntegrationTestRunner({
         const series = await catalog.createSeries({
           make_id: make.id,
           name: '3 серия',
-          translations: { sr: 'Serija 3' },
+          translations: { sr: { name: 'Serija 3' } },
         });
 
         await publish();
@@ -375,7 +376,10 @@ medusaIntegrationTestRunner({
             .translations,
         ).toEqual({ sr: { name: 'Serija 3' }, en: { name: '3 Series' } });
         const [stored] = await catalog.listSeries({ id: series.id });
-        expect(stored.translations).toEqual({ sr: 'Serija 3', en: '3 Series' });
+        expect(stored.translations).toEqual({
+          sr: { name: 'Serija 3' },
+          en: { name: '3 Series' },
+        });
       });
 
       it('translates a Category with its field and option labels', async () => {

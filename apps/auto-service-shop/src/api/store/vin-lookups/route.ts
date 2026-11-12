@@ -15,10 +15,12 @@ export async function POST(
   res: MedusaResponse,
 ): Promise<void> {
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
+  const { vin, bot, visitor_id } = req.validatedBody;
   const lookup = await resolveVin(
-    req.validatedBody.vin,
+    vin,
     vinDecoders(req.scope),
     { catalog, vinLookups: req.scope.resolve(VIN_LOOKUP_MODULE) },
+    { source: 'storefront', bot, visitor_id },
   );
   logEvent(
     'vin.lookup',
@@ -28,7 +30,7 @@ export async function POST(
           reason: null,
           make: lookup.vehicle.model.chassis.series.make.slug,
           code: null,
-          ...vinFields(req.validatedBody.vin),
+          ...vinFields(vin),
           candidates: 1,
         }
       : {
@@ -40,7 +42,7 @@ export async function POST(
               : 'no_vehicle',
           make: lookup.make,
           code: lookup.code,
-          ...vinFields(req.validatedBody.vin),
+          ...vinFields(vin),
           candidates: lookup.vehicle_ids.length,
         },
     req.requestId ?? null,

@@ -117,6 +117,7 @@ medusaIntegrationTestRunner({
           identifiers[slug] = identifier.id;
         }
         const supplier = await suppliers.createSuppliers({
+          key: 'demo-intercars',
           name: 'Intercars',
           markup_percentage: 20,
         });

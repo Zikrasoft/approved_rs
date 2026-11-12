@@ -3,6 +3,7 @@ import type { IRegionModuleService } from '@medusajs/framework/types';
 import { Modules } from '@medusajs/framework/utils';
 
 import { createAdminAuth } from '../../../integration-tests/adminAuth';
+import { GLOBAL_BRAND_ALIASES } from '../../lib/production-seed';
 import { CATALOG_MODULE } from '../../modules/catalog';
 import type CatalogModuleService from '../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../modules/supplier';
@@ -273,9 +274,10 @@ medusaIntegrationTestRunner({
         );
         expect(
           spellings
+            .filter(({ supplier_id }) => supplier_id !== null)
             .map(
               ({ supplier_id, value, brand }) =>
-                `${supplierNames.get(supplier_id)}: ${value} -> ${brand.name}`,
+                `${supplierNames.get(supplier_id!)}: ${value} -> ${brand.name}`,
             )
             .sort(),
         ).toEqual([
@@ -286,36 +288,160 @@ medusaIntegrationTestRunner({
           'bilstein group: SWAG -> SWAG',
           'bilstein group: febi -> Febi',
         ]);
-        expect(
-          (await catalog.listBrands({}, { take: null }))
-            .map(({ slug }) => slug)
-            .sort(),
-        ).toEqual([
-          'blue-print',
-          'febi',
-          'filtron',
-          'mann-filter',
-          'swag',
-          'varta',
-        ]);
+        const brands = await catalog.listBrands({}, { take: null });
+        expect(brands.map(({ slug }) => slug)).toEqual(
+          expect.arrayContaining([
+            'blue-print',
+            'febi',
+            'filtron',
+            'mann-filter',
+            'swag',
+            'varta',
+          ]),
+        );
+        expect(brands).toHaveLength(Object.keys(GLOBAL_BRAND_ALIASES).length);
       });
 
-      it('maps the VARTA battery category to «Аккумуляторы»', async () => {
+      it('resolves every global alias and common spelling of a seeded Brand to it', async () => {
+        const named = async (name: string) =>
+          (await catalog.brandByAnyName(name))?.name;
+
+        for (const [brand, aliases] of Object.entries(GLOBAL_BRAND_ALIASES)) {
+          for (const alias of [brand, ...aliases]) {
+            expect(await named(alias)).toBe(brand);
+          }
+        }
+        expect(await named('FEBI BILSTEIN')).toBe('Febi');
+        expect(await named('LEMFORDER')).toBe('Lemförder');
+        expect(await named('Mann Filter')).toBe('MANN-FILTER');
+        expect(await named('knecht')).toBe('MAHLE');
+      });
+
+      it('maps the VARTA battery category to «Аккумуляторы», the MANN-FILTER, FILTRON and bilstein group families to their Categories and excludes the industrial ones', async () => {
         const [varta] = await suppliers.listSuppliers({ name: 'VARTA' });
+        const [mann] = await suppliers.listSuppliers({ name: 'MANN-FILTER' });
         const [batteries] = await catalog.listCategories({ slug: 'batteries' });
+        const [maintenance] = await catalog.listCategories({
+          slug: 'maintenance-consumables',
+        });
+        const [filtron] = await suppliers.listSuppliers({ name: 'FILTRON' });
+        const [brakes] = await catalog.listCategories({ slug: 'brakes' });
+        const [engine] = await catalog.listCategories({
+          slug: 'engine-parts',
+        });
+        const [transmission] = await catalog.listCategories({
+          slug: 'transmission',
+        });
+        const [suspension] = await catalog.listCategories({
+          slug: 'suspension',
+        });
+        const [bilstein] = await suppliers.listSuppliers({
+          name: 'bilstein group',
+        });
+        const bilsteinCodes: [string, string][] = [
+          ['kočioni disk', brakes.id],
+          ['Set kočione obloge', brakes.id],
+          ['kočiona čeljust', brakes.id],
+          ['kočiono crevo', brakes.id],
+          ['doboš kočnice', brakes.id],
+          ['sajla ručne kočnice', brakes.id],
+          ['amortizer', suspension.id],
+          ['rame', suspension.id],
+          ['nosač ramena', suspension.id],
+          ['nosač stabilizatora', suspension.id],
+          ['aksijalni zglob', suspension.id],
+          ['uljni filter', maintenance.id],
+          ['vazdušni filter', maintenance.id],
+          ['filter goriva', maintenance.id],
+          ['filter kabine', maintenance.id],
+          ['kanalni kaiš', engine.id],
+          ['garnitura zupčastih kaiševa', engine.id],
+          ['zupčasti kaiš', engine.id],
+          ['kočioni cilindar točka', brakes.id],
+          ['kontakt istrošenosti', brakes.id],
+        ];
         const mappings = await suppliers.listSupplierCategories(
           {},
           { take: null },
         );
+        const maintenanceCodes = [
+          'Oil Filter',
+          'Air Filter',
+          'Fuel Filter | For diesel',
+          'Fuel Filter | For gasoline',
+          'Fuel Filter | Water Separator',
+          'Cabin Air Filter | Particulate',
+          'Cabin Air Filter | Activated carbon',
+          'Cabin Air Filter | Biofunctional',
+          'Secondary Element',
+          'Cooling Liquid Filter',
+        ];
+        const key = (row: { supplier_id: string; code: string }) =>
+          `${row.supplier_id}:${row.code}`;
         expect(
-          mappings.map(({ supplier_id, code, category_id }) => ({
-            supplier_id,
-            code,
-            category_id,
-          })),
-        ).toEqual([
-          { supplier_id: varta.id, code: 'battery', category_id: batteries.id },
-        ]);
+          mappings
+            .map(({ supplier_id, code, category_id }) => ({
+              supplier_id,
+              code,
+              category_id,
+            }))
+            .sort((a, b) => key(a).localeCompare(key(b))),
+        ).toEqual(
+          [
+            {
+              supplier_id: varta.id,
+              code: 'battery',
+              category_id: batteries.id,
+            },
+            ...maintenanceCodes.map((code) => ({
+              supplier_id: mann.id,
+              code,
+              category_id: maintenance.id,
+            })),
+            ...[
+              'Filter vazduha',
+              'Filter goriva',
+              'Filter kabine',
+              'Filter ulja',
+              'Sekundarni element',
+            ].map((code) => ({
+              supplier_id: filtron.id,
+              code,
+              category_id: maintenance.id,
+            })),
+            { supplier_id: filtron.id, code: 'Sušač', category_id: brakes.id },
+            {
+              supplier_id: filtron.id,
+              code: 'Filter hidrauličnog prenosa',
+              category_id: transmission.id,
+            },
+            {
+              supplier_id: mann.id,
+              code: 'Ventilator',
+              category_id: engine.id,
+            },
+            {
+              supplier_id: mann.id,
+              code: 'Hydraulic Transmission Filter',
+              category_id: transmission.id,
+            },
+            ...[
+              'Hydraulics',
+              'Compressed Air-Oil Separation',
+              'EDM Filter',
+            ].map((code) => ({
+              supplier_id: mann.id,
+              code,
+              category_id: null,
+            })),
+            { supplier_id: filtron.id, code: 'Hidraulika', category_id: null },
+            ...bilsteinCodes.map(([code, category_id]) => ({
+              supplier_id: bilstein.id,
+              code,
+              category_id,
+            })),
+          ].sort((a, b) => key(a).localeCompare(key(b))),
+        );
       });
 
       it('files each crawled spelling of one manufacturer under its one Make', async () => {
@@ -605,6 +731,37 @@ medusaIntegrationTestRunner({
         expect(
           await suppliers.listSupplierCategories({ supplier_id: varta.id }),
         ).toEqual([]);
+      });
+
+      it('finds a Category again after staff renamed its slug, and keeps its supplier mappings on it', async () => {
+        const [transmission] = await catalog.listCategories({
+          slug: 'transmission',
+        });
+        const mappedBefore = await suppliers.listSupplierCategories(
+          { category_id: transmission.id },
+          { take: null },
+        );
+        await catalog.renameSlug('category', transmission.id, 'gearbox', {
+          created_by: 'user_1',
+          updated_by: 'user_1',
+        });
+
+        await run();
+
+        expect(
+          (await catalog.listCategories({}, { take: null })).filter(
+            ({ name }) => name.startsWith('Трансмиссия'),
+          ),
+        ).toEqual([
+          expect.objectContaining({ id: transmission.id, slug: 'gearbox' }),
+        ]);
+        expect(mappedBefore.length).toBeGreaterThan(0);
+        expect(
+          await suppliers.listSupplierCategories(
+            { category_id: transmission.id },
+            { take: null },
+          ),
+        ).toHaveLength(mappedBefore.length);
       });
     });
   },

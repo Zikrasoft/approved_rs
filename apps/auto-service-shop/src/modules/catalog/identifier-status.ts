@@ -1,7 +1,7 @@
 import type { Knex } from '@medusajs/framework/mikro-orm/knex';
-import { normalizePartNumber } from '@podbor/catalog-contract';
 import { z } from 'zod';
 
+import { normalizePartNumber } from '../_shared/keys';
 import { literalLike } from '../_shared/like';
 
 const statusRowSchema = z.object({

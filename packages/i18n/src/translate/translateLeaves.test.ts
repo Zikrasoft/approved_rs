@@ -238,7 +238,7 @@ describe('translateLeaves', () => {
   const base = {
     systemPrompt: PROMPT,
     apiKey: 'k',
-    model: 'gpt-6.1-sol',
+    model: 'gpt-6-luna',
     neverTranslated: false,
   };
 

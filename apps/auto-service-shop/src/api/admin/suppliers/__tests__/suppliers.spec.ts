@@ -31,6 +31,7 @@ medusaIntegrationTestRunner({
         );
 
         const supplier = await supplierService.createSuppliers({
+          key: 'varta',
           name: 'Admin-test supplier',
           markup_percentage: 10,
         });
@@ -88,8 +89,29 @@ medusaIntegrationTestRunner({
         ).toEqual([]);
       });
 
+      it('excludes a supplier category with a mapping to no Category', async () => {
+        const created = await call(
+          'post',
+          `/admin/suppliers/${supplierId}/categories`,
+          { code: 'Hydraulics', category_id: null },
+        );
+        expect(created.status).toBe(200);
+
+        expect(
+          (await call('get', `/admin/suppliers/${supplierId}/categories`)).data
+            .categories,
+        ).toEqual([
+          expect.objectContaining({ code: 'Hydraulics', category_id: null }),
+        ]);
+        await call(
+          'delete',
+          `/admin/suppliers/${supplierId}/categories/${created.data.category.id}`,
+        );
+      });
+
       it.each([
         ['an empty code', { code: '', category_id: 'cat_1' }],
+        ['no category key', { code: 'IC-AIR' }],
         ['an unknown key', { code: 'IC-AIR', category_id: 'cat_1', x: 1 }],
       ])('returns a 400 for a category mapping with %s', async (_, body) => {
         expect(
@@ -154,6 +176,7 @@ medusaIntegrationTestRunner({
         expect(listed.data.suppliers).toEqual([
           expect.objectContaining({
             id: supplierId,
+            key: 'varta',
             name: 'Admin-test supplier',
             markup_percentage: 10,
             released_kinds: ['cross_references', 'applicability'],
@@ -184,6 +207,24 @@ medusaIntegrationTestRunner({
 
         const supplier = await supplierService.retrieveSupplier(supplierId);
         expect(supplier.markup_percentage).toBe(50);
+      });
+
+      it('renames a supplier for staff and keeps its key', async () => {
+        const response = await api.post(
+          `/admin/suppliers/${supplierId}`,
+          { name: 'Varta Clarios' },
+          adminHeaders,
+        );
+
+        expect(response.status).toBe(200);
+        expect(response.data.supplier).toMatchObject({
+          key: 'varta',
+          name: 'Varta Clarios',
+        });
+        const blank = await api
+          .post(`/admin/suppliers/${supplierId}`, { name: ' ' }, adminHeaders)
+          .catch(({ response }) => response);
+        expect(blank.status).toBe(400);
       });
 
       it('keeps a decimal markup as typed', async () => {
@@ -334,8 +375,8 @@ medusaIntegrationTestRunner({
           part_id: partId,
         });
         const [leaving, staying] = await supplierService.createSuppliers([
-          { name: 'Leaving supplier', markup_percentage: 10 },
-          { name: 'Staying supplier', markup_percentage: 10 },
+          { key: 'bilstein', name: 'Leaving supplier', markup_percentage: 10 },
+          { key: 'filtron', name: 'Staying supplier', markup_percentage: 10 },
         ]);
         for (const supplier of [leaving, leaving, staying]) {
           await supplierService.createSupplierOffers({
@@ -379,6 +420,7 @@ medusaIntegrationTestRunner({
 
       it('refuses to take the manual supplier offers off in bulk', async () => {
         const manual = await supplierService.createSuppliers({
+          key: 'manual',
           name: 'manual',
           markup_percentage: 20,
           import_enabled: false,
@@ -391,6 +433,27 @@ medusaIntegrationTestRunner({
 
         expect(response.status).toBe(400);
         expect(response.data.code).toBe('MANUAL_SOURCE');
+      });
+
+      it('marks only the suppliers that quote prices as priced', async () => {
+        await supplierService.createSuppliers({
+          key: 'demo-intercars',
+          name: 'Priced supplier',
+          markup_percentage: 10,
+        });
+
+        const listed = await call('get', '/admin/suppliers');
+
+        expect(
+          Object.fromEntries(
+            listed.data.suppliers.map(
+              ({ key, priced }: { key: string; priced: boolean }) => [
+                key,
+                priced,
+              ],
+            ),
+          ),
+        ).toEqual({ varta: false, 'demo-intercars': true });
       });
 
       it('returns a 404 for an unknown supplier', async () => {

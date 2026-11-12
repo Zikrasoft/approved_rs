@@ -11,6 +11,7 @@ export const sitemapLinks = (
   keep: (entry: SitemapEntry) => boolean = () => true,
 ) => {
   const pages: string[] = [];
+  const hints = new Map<string, string>();
   const sitemaps: string[] = [];
   const open: string[] = [];
   let text = '';
@@ -37,7 +38,11 @@ export const sitemapLinks = (
           sitemaps.push(detachedFromChunk(value));
         }
         if (name === 'image:title') entry.imageTitles.push(value);
-        if (name === 'url' && entry.loc && keep(entry)) pages.push(entry.loc);
+        if (name === 'url' && entry.loc && keep(entry)) {
+          pages.push(entry.loc);
+          const [title] = entry.imageTitles;
+          if (title) hints.set(entry.loc, detachedFromChunk(title));
+        }
       },
     },
     { xmlMode: true, decodeEntities: true },
@@ -49,5 +54,5 @@ export const sitemapLinks = (
     );
   }
   parser.end(decoder.decode());
-  return { pages, sitemaps };
+  return { pages, hints, sitemaps };
 };

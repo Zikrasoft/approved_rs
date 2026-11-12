@@ -1,4 +1,20 @@
-import { modelSlugOf, vehicleSlugOf } from '../slug';
+import { modelSlugOf, slugOf, vehicleSlugOf } from '../slug';
+
+describe('slugOf', () => {
+  it.each([
+    ['Đurđevac', 'djurdjevac'],
+    ['ĐURĐEVAC', 'djurdjevac'],
+    ['Ölfilter für Straße', 'olfilter-fur-strasse'],
+    ['Łódź', 'lodz'],
+    ['Søren Ørsted', 'soren-orsted'],
+    ['Ærø', 'aero'],
+    ['Œuvre cœur', 'oeuvre-coeur'],
+    ['Kočnice i vešanje', 'kocnice-i-vesanje'],
+    ['Citroën C4', 'citroen-c4'],
+  ])('slugs %j as %j', (name, slug) => {
+    expect(slugOf(name)).toBe(slug);
+  });
+});
 
 describe('modelSlugOf', () => {
   it('reads series, chassis and model', () => {
@@ -94,14 +110,30 @@ describe('modelSlugOf', () => {
 
 describe('vehicleSlugOf', () => {
   it('reads engine and kW', () => {
-    expect(vehicleSlugOf({ engine: 'N52 B30A', power_kw: 160 })).toBe(
-      'n52-b30a-160kw',
-    );
+    expect(
+      vehicleSlugOf({ engine: 'N52 B30A', variant: '330i', power_kw: 160 }),
+    ).toBe('n52-b30a-160kw');
   });
 
   it('reads the engine alone without a power', () => {
-    expect(vehicleSlugOf({ engine: 'B47D20O0', power_kw: null })).toBe(
-      'b47d20o0',
-    );
+    expect(
+      vehicleSlugOf({ engine: 'B47D20O0', variant: '320d', power_kw: null }),
+    ).toBe('b47d20o0');
+  });
+
+  it('reads the variant and kW of a Vehicle without an engine', () => {
+    expect(
+      vehicleSlugOf({
+        engine: null,
+        variant: '320 d (E90/E91)',
+        power_kw: 120,
+      }),
+    ).toBe('320-d-120kw');
+  });
+
+  it('reads the variant alone without an engine or a power', () => {
+    expect(
+      vehicleSlugOf({ engine: null, variant: '320d', power_kw: null }),
+    ).toBe('320d');
   });
 });

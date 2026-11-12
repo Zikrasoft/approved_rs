@@ -11,6 +11,6 @@ export async function POST(
   res: MedusaResponse,
 ): Promise<void> {
   const { site, store } = crawlTarget(req);
-  await store.start(site.name, new Date(), req.validatedBody.limit ?? null);
+  await store.start(site.key, new Date(), req.validatedBody.limit ?? null);
   res.json({ started: site.key });
 }

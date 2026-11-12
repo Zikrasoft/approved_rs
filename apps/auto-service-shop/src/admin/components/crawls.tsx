@@ -34,6 +34,7 @@ const crawlSchema = z.object({
   pages: z.object({
     queued: z.number(),
     done: z.number(),
+    out_of_scope: z.number().default(0),
     failed: z.number(),
     gone: z.number(),
   }),
@@ -84,9 +85,10 @@ const CrawlRow = ({
   const writing = useWriting();
   const number = (value: number) => value.toLocaleString(i18n.language);
   const date = (iso: string) => new Date(iso).toLocaleString(i18n.language);
-  const { queued, done, failed, gone } = crawl.pages;
-  const total = queued + done + failed + gone;
-  const share = total ? (done + failed + gone) / total : 0;
+  const { queued, done, out_of_scope: outOfScope, failed, gone } = crawl.pages;
+  const settled = done + outOfScope + failed + gone;
+  const total = queued + settled;
+  const share = total ? settled / total : 0;
   const active = crawl.status === 'running' || crawl.status === 'queued';
 
   return (
@@ -145,7 +147,7 @@ const CrawlRow = ({
             aria-label={t('crawls.progressLabel', { supplier: crawl.supplier })}
             aria-valuemin={0}
             aria-valuemax={total}
-            aria-valuenow={done + failed + gone}
+            aria-valuenow={settled}
             className="bg-ui-bg-component h-2 overflow-hidden rounded-full"
           >
             <div
@@ -164,6 +166,11 @@ const CrawlRow = ({
             <Text size="small">
               {t('crawls.queued', { value: number(queued) })}
             </Text>
+            {outOfScope > 0 && (
+              <Text size="small">
+                {t('crawls.outOfScope', { value: number(outOfScope) })}
+              </Text>
+            )}
             {failed > 0 && (
               <Text size="small">
                 {t('crawls.failed', { value: number(failed) })} (

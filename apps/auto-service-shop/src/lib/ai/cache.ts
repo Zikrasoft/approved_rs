@@ -8,7 +8,7 @@ import type { Bucket } from '../storage';
 import {
   type ArticleAnswer,
   articleAnswerSchema,
-  type ArticleInput,
+  type ArticleFacts,
   type CategoryChoice,
   type ShopAi,
 } from './contract';
@@ -51,10 +51,10 @@ const store = (bucket: Bucket, key: string, value: unknown) =>
 export async function cachedArticleAnswer(
   ai: ShopAi,
   bucket: Bucket | null,
-  article: ArticleInput,
-  categories: CategoryChoice[],
+  article: ArticleFacts,
+  category: CategoryChoice | null,
 ): Promise<ArticleAnswer> {
-  const question = ai.articleQuestion(article, categories);
+  const question = ai.articleQuestion(article, category);
   if (!bucket) return ai.answerArticle(question);
   const key = `ai-answers/${createHash('sha256')
     .update(JSON.stringify([question.model, question.system, question.user]))

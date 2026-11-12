@@ -26,7 +26,7 @@ import {
   buildOpenList,
   buildStats,
   formatDateRu,
-  buildLeadDetail,
+  leadDetail,
   buildDeleteConfirm,
   buildRemindPicker,
   editLeadDetailMessage,
@@ -360,7 +360,7 @@ async function listOpen(ctx: Ctx): Promise<void> {
 async function openLead(ctx: Ctx, id: number): Promise<void> {
   const lead = await getLead(id);
   if (lead) {
-    const { text, reply_markup } = buildLeadDetail(lead, ctx.role);
+    const { text, reply_markup } = await leadDetail(lead, ctx.role);
     await sendMessage(ctx.chatId, text, { reply_markup });
   }
   await ack(ctx);
@@ -583,7 +583,7 @@ async function afterEdit(
   headline: string,
 ): Promise<void> {
   await afterStatusChange(lead);
-  const { text, reply_markup } = buildLeadDetail(lead, reply.role);
+  const { text, reply_markup } = await leadDetail(lead, reply.role);
   await sendMessage(reply.chatId, `${headline}\n\n${text}`, { reply_markup });
 }
 
@@ -766,7 +766,7 @@ async function handlePrivateMessage(msg: TelegramMessage): Promise<void> {
     if (leadMatch) {
       const lead = await getLead(Number(leadMatch[1]));
       if (lead) {
-        const { text: detailText, reply_markup } = buildLeadDetail(lead, role);
+        const { text: detailText, reply_markup } = await leadDetail(lead, role);
         await sendMessage(chatId, detailText, { reply_markup });
         return;
       }

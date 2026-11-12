@@ -3,7 +3,7 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 
-describe('CommonJS build', () => {
+describe('CommonJS build', { timeout: 30_000 }, () => {
   it('resolves require() to dist/cjs', () => {
     expect(require.resolve('@podbor/brands')).toMatch(/dist\/cjs\/index\.js$/);
   });

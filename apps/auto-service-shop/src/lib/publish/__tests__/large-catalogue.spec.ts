@@ -74,6 +74,7 @@ medusaIntegrationTestRunner({
         const vinLookups: VinLookupModuleService =
           getContainer().resolve(VIN_LOOKUP_MODULE);
         const supplier = await suppliers.createSuppliers({
+          key: 'filtron',
           name: 'Orphaned',
           markup_percentage: 10,
         });
@@ -92,11 +93,10 @@ medusaIntegrationTestRunner({
           payload: {},
         });
         await pg()('published_number').insert({ id: 'pi_gone' });
-        await suppliers.createSupplierCategories({
-          supplier_id: supplier.id,
-          code: 'Gone',
-          category_id: 'cat_gone',
-        });
+        await suppliers.createSupplierCategories([
+          { supplier_id: supplier.id, code: 'Gone', category_id: 'cat_gone' },
+          { supplier_id: supplier.id, code: 'Excluded', category_id: null },
+        ]);
         await vinLookups.createVinLookups({
           vin: 'WBA00000000000001',
           facts: {},
@@ -108,7 +108,11 @@ medusaIntegrationTestRunner({
         expect(await countOf('supplier_offer')).toBe(0);
         expect(await countOf('staged_record')).toBe(0);
         expect(await countOf('published_number')).toBe(0);
-        expect(await countOf('supplier_category')).toBe(0);
+        expect(
+          (await suppliers.listSupplierCategories({}, { take: null })).map(
+            ({ code }) => code,
+          ),
+        ).toEqual(['Excluded']);
         expect(
           (await vinLookups.listVinLookups({ vin: 'WBA00000000000001' }))[0],
         ).toMatchObject({ vehicle_id: null });

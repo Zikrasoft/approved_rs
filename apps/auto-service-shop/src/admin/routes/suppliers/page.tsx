@@ -17,7 +17,7 @@ import {
   STAGED_DATA_KINDS,
   type StagedDataKind,
 } from '@podbor/catalog-contract';
-import { useEffect, useState } from 'react';
+import { type FormEvent, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
@@ -46,14 +46,17 @@ import {
 import { breadcrumb } from '../../lib/breadcrumb';
 import { useConfirmed } from '../../lib/confirm';
 import { type Category, categoriesSchema } from '../../lib/categories';
+import { importRunning } from '../../lib/import-run';
 
 const supplierSchema = editedBySchema.extend({
   id: z.string(),
+  key: z.string(),
   name: z.string(),
   markup_percentage: z.number(),
   released_kinds: z.array(z.enum(STAGED_DATA_KINDS)),
   import_enabled: z.boolean(),
   offer_count: z.number(),
+  priced: z.boolean(),
   latest_import: importRunSchema.nullable(),
 });
 
@@ -62,8 +65,10 @@ type Supplier = z.infer<typeof supplierSchema>;
 const mappingSchema = editedBySchema.extend({
   id: z.string(),
   code: z.string(),
-  category_id: z.string(),
+  category_id: z.string().nullable(),
 });
+
+const EXCLUDED = 'excluded';
 
 type Mapping = z.infer<typeof mappingSchema>;
 
@@ -135,18 +140,16 @@ const SuppliersPage = () => {
     }
   };
 
-  const importRunning = suppliers.some(
-    ({ latest_import }) => latest_import?.status === 'running',
-  );
+  const polling = importRunning(suppliers);
 
   useEffect(() => {
-    if (!importRunning) return;
-    const timer = setTimeout(() => {
+    if (!polling) return;
+    const timer = setInterval(() => {
       load();
       loadSources();
     }, POLL_MS);
-    return () => clearTimeout(timer);
-  }, [suppliers]);
+    return () => clearInterval(timer);
+  }, [polling]);
 
   useEffect(() => {
     load();
@@ -184,7 +187,7 @@ const SuppliersPage = () => {
       });
       toast.success(
         t('suppliers.markupSaved', {
-          supplier: sourceName(supplier.name),
+          supplier: sourceName(supplier.key),
           markup: markup_percentage.toLocaleString(i18n.language),
         }),
       );
@@ -200,7 +203,7 @@ const SuppliersPage = () => {
         variant: 'confirmation',
         title: t('suppliers.confirmReleaseTitle', {
           kind: kindName,
-          supplier: sourceName(supplier.name),
+          supplier: sourceName(supplier.key),
         }),
         description: t('suppliers.confirmReleaseBody'),
         confirmText: t('suppliers.confirmRelease'),
@@ -218,7 +221,7 @@ const SuppliersPage = () => {
       toast.success(
         t(releasing ? 'suppliers.released' : 'suppliers.hidden', {
           kind: kindName,
-          supplier: sourceName(supplier.name),
+          supplier: sourceName(supplier.key),
         }),
       );
     }
@@ -231,7 +234,7 @@ const SuppliersPage = () => {
       !(await prompt({
         variant: 'confirmation',
         title: t(`suppliers.importSwitch.${state}.title`, {
-          supplier: sourceName(supplier.name),
+          supplier: sourceName(supplier.key),
         }),
         description: t(`suppliers.importSwitch.${state}.body`),
         confirmText: t(`suppliers.importSwitch.${state}.confirm`),
@@ -243,7 +246,7 @@ const SuppliersPage = () => {
     if (await update(supplier.id, { import_enabled: enabling })) {
       toast.success(
         t(`suppliers.importSwitch.${state}.done`, {
-          supplier: sourceName(supplier.name),
+          supplier: sourceName(supplier.key),
         }),
       );
     }
@@ -258,7 +261,7 @@ const SuppliersPage = () => {
     );
     if (data) {
       toast.success(
-        t('suppliers.importStarted', { supplier: sourceName(supplier.name) }),
+        t('suppliers.importStarted', { supplier: sourceName(supplier.key) }),
       );
       await load();
     }
@@ -267,7 +270,7 @@ const SuppliersPage = () => {
 
   const withdrawOffers = async (supplier: Supplier) => {
     let deleted = 0;
-    const name = sourceName(supplier.name);
+    const name = sourceName(supplier.key);
     const withdrawn = await confirmed({
       title: t('suppliers.withdraw.title', { supplier: name }),
       description: t('suppliers.withdraw.body', {
@@ -293,24 +296,31 @@ const SuppliersPage = () => {
 
   const chooseSupplier = (supplierId: string) => {
     setMappedSupplierId(supplierId);
+    setLoaded((current) => ({ ...current, [`mappings-${supplierId}`]: false }));
     loadMappings(supplierId);
   };
 
-  const addMapping = async () => {
+  const addMapping = async (event: FormEvent) => {
+    event.preventDefault();
     const created = await adminFetch(
       `/admin/suppliers/${mappedSupplierId}/categories`,
       acknowledged,
       {
         method: 'POST',
-        body: JSON.stringify({ code, category_id: categoryId }),
+        body: JSON.stringify({
+          code,
+          category_id: categoryId === EXCLUDED ? null : categoryId,
+        }),
       },
     );
     if (created) {
       toast.success(
-        t('suppliers.mappings.added', {
-          code: code.trim(),
-          category: categoryName(categoryId),
-        }),
+        categoryId === EXCLUDED
+          ? t('suppliers.mappings.addedExcluded', { code: code.trim() })
+          : t('suppliers.mappings.added', {
+              code: code.trim(),
+              category: categoryName(categoryId),
+            }),
       );
       setCode('');
       setCategoryId('');
@@ -375,10 +385,14 @@ const SuppliersPage = () => {
   };
 
   const sourceName = (source: string) =>
-    t(`sources.names.${source}`, { defaultValue: source });
+    t(`sources.names.${source}`, {
+      defaultValue: suppliers.find(({ key }) => key === source)?.name ?? source,
+    });
 
-  const categoryName = (id: string) =>
-    categories.find((category) => category.id === id)?.name ?? id;
+  const categoryName = (id: string | null) =>
+    id === null
+      ? t('suppliers.mappings.excluded')
+      : (categories.find((category) => category.id === id)?.name ?? id);
 
   return (
     <div className="flex flex-col gap-y-4">
@@ -414,51 +428,65 @@ const SuppliersPage = () => {
               <Table.Body>
                 {suppliers.map((supplier) => (
                   <Table.Row key={supplier.id}>
-                    <Table.Cell>{sourceName(supplier.name)}</Table.Cell>
+                    <Table.Cell>{sourceName(supplier.key)}</Table.Cell>
+                    {supplier.priced ? (
+                      <>
+                        <Table.Cell>
+                          <Input
+                            size="small"
+                            type="number"
+                            className="w-24"
+                            min={0}
+                            max={500}
+                            step={0.01}
+                            aria-label={t('suppliers.markupLabel', {
+                              supplier: sourceName(supplier.key),
+                            })}
+                            value={
+                              drafts[supplier.id] ??
+                              String(supplier.markup_percentage)
+                            }
+                            onChange={(event) =>
+                              setDrafts((prev) => ({
+                                ...prev,
+                                [supplier.id]: event.target.value,
+                              }))
+                            }
+                            onKeyDown={(event) => {
+                              if (
+                                event.key === 'Enter' &&
+                                drafts[supplier.id] !== undefined &&
+                                !writing
+                              ) {
+                                saveMarkup(supplier);
+                              }
+                            }}
+                          />
+                        </Table.Cell>
+                        <Table.Cell>
+                          <Button
+                            size="small"
+                            variant="secondary"
+                            isLoading={savingId === supplier.id}
+                            disabled={
+                              drafts[supplier.id] === undefined || writing
+                            }
+                            onClick={() => saveMarkup(supplier)}
+                          >
+                            {t('suppliers.save')}
+                          </Button>
+                        </Table.Cell>
+                      </>
+                    ) : (
+                      <>
+                        <Table.Cell className="text-ui-fg-muted">
+                          {t('suppliers.unpriced')}
+                        </Table.Cell>
+                        <Table.Cell />
+                      </>
+                    )}
                     <Table.Cell>
-                      <Input
-                        type="number"
-                        className="w-24"
-                        min={0}
-                        max={500}
-                        step={0.01}
-                        aria-label={t('suppliers.markupLabel', {
-                          supplier: sourceName(supplier.name),
-                        })}
-                        value={
-                          drafts[supplier.id] ??
-                          String(supplier.markup_percentage)
-                        }
-                        onChange={(event) =>
-                          setDrafts((prev) => ({
-                            ...prev,
-                            [supplier.id]: event.target.value,
-                          }))
-                        }
-                        onKeyDown={(event) => {
-                          if (
-                            event.key === 'Enter' &&
-                            drafts[supplier.id] !== undefined &&
-                            !writing
-                          ) {
-                            saveMarkup(supplier);
-                          }
-                        }}
-                      />
-                    </Table.Cell>
-                    <Table.Cell>
-                      <Button
-                        size="small"
-                        variant="secondary"
-                        isLoading={savingId === supplier.id}
-                        disabled={drafts[supplier.id] === undefined || writing}
-                        onClick={() => saveMarkup(supplier)}
-                      >
-                        {t('suppliers.save')}
-                      </Button>
-                    </Table.Cell>
-                    <Table.Cell>
-                      {supplier.name !== MANUAL_SOURCE && (
+                      {supplier.key !== MANUAL_SOURCE && (
                         <div className="flex flex-col gap-y-1 py-2">
                           {STAGED_DATA_KINDS.map((kind) => (
                             <div
@@ -488,7 +516,7 @@ const SuppliersPage = () => {
                       <EditedBy row={supplier} />
                     </Table.Cell>
                     <Table.Cell>
-                      {supplier.name !== MANUAL_SOURCE && (
+                      {supplier.key !== MANUAL_SOURCE && (
                         <div className="flex items-center justify-between gap-x-2">
                           <div className="flex flex-col gap-y-2 py-2">
                             <div className="flex items-center gap-x-2">
@@ -520,7 +548,7 @@ const SuppliersPage = () => {
                                 size="small"
                                 variant="secondary"
                                 aria-label={t('suppliers.importOneLabel', {
-                                  supplier: sourceName(supplier.name),
+                                  supplier: sourceName(supplier.key),
                                 })}
                                 isLoading={
                                   importingId === supplier.id ||
@@ -534,7 +562,7 @@ const SuppliersPage = () => {
                             )}
                             <RowActions
                               label={t('common.actionsFor', {
-                                name: sourceName(supplier.name),
+                                name: sourceName(supplier.key),
                               })}
                               disabled={writing}
                               deleteLabel={t('suppliers.withdraw.action')}
@@ -558,7 +586,9 @@ const SuppliersPage = () => {
       </Container>
 
       <ImportReports
-        suppliers={suppliers.filter(({ name }) => name !== MANUAL_SOURCE)}
+        suppliers={suppliers
+          .filter(({ key }) => key !== MANUAL_SOURCE)
+          .map(({ id, key }) => ({ id, name: sourceName(key) }))}
       />
 
       <Crawls />
@@ -570,7 +600,9 @@ const SuppliersPage = () => {
         >
           <div className="max-w-xs">
             <Select value={mappedSupplierId} onValueChange={chooseSupplier}>
-              <Select.Trigger>
+              <Select.Trigger
+                aria-label={t('suppliers.mappings.supplierPlaceholder')}
+              >
                 <Select.Value
                   placeholder={t('suppliers.mappings.supplierPlaceholder')}
                 />
@@ -578,7 +610,7 @@ const SuppliersPage = () => {
               <Select.Content>
                 {suppliers.map((supplier) => (
                   <Select.Item key={supplier.id} value={supplier.id}>
-                    {sourceName(supplier.name)}
+                    {sourceName(supplier.key)}
                   </Select.Item>
                 ))}
               </Select.Content>
@@ -631,22 +663,29 @@ const SuppliersPage = () => {
             ) : (
               <ListEmpty hint={t('suppliers.mappings.empty')} />
             )}
-            <div className="flex flex-wrap gap-2 px-6 py-4">
+            <form
+              className="flex flex-wrap gap-2 px-6 py-4"
+              onSubmit={addMapping}
+            >
               <Input
                 size="small"
                 className="max-w-xs"
+                aria-label={t('suppliers.mappings.code')}
                 placeholder={t('suppliers.mappings.codePlaceholder')}
                 value={code}
                 onChange={(event) => setCode(event.target.value)}
               />
               <div className="w-64">
                 <Select value={categoryId} onValueChange={setCategoryId}>
-                  <Select.Trigger>
+                  <Select.Trigger aria-label={t('suppliers.mappings.category')}>
                     <Select.Value
                       placeholder={t('suppliers.mappings.categoryPlaceholder')}
                     />
                   </Select.Trigger>
                   <Select.Content>
+                    <Select.Item value={EXCLUDED}>
+                      {t('suppliers.mappings.exclude')}
+                    </Select.Item>
                     {categories.map((category) => (
                       <Select.Item key={category.id} value={category.id}>
                         {category.name}
@@ -657,12 +696,12 @@ const SuppliersPage = () => {
               </div>
               <Button
                 size="small"
+                type="submit"
                 disabled={!code.trim() || !categoryId || writing}
-                onClick={addMapping}
               >
                 {t('suppliers.mappings.add')}
               </Button>
-            </div>
+            </form>
           </>
         )}
       </Container>

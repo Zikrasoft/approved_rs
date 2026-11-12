@@ -114,6 +114,8 @@ export type CatalogueConfig = {
   preview?: boolean;
   previewToken?: string;
   requestId?: string;
+  bot?: boolean;
+  visitorId?: string;
   client?: { address: string; secret: string };
 };
 
@@ -126,6 +128,8 @@ export function createCatalogue({
   preview = false,
   previewToken,
   requestId,
+  bot,
+  visitorId,
   client,
 }: CatalogueConfig) {
   const pricesHidden = !shopOpen && !preview;
@@ -221,13 +225,8 @@ export function createCatalogue({
   };
 
   const categories = async (): Promise<Category[]> =>
-    categoriesResponseSchema
-      .parse(await request('/store/categories'))
-      .categories.map((category) =>
-        pricesHidden
-          ? { ...category, service_price: null, installation_price: null }
-          : category,
-      );
+    categoriesResponseSchema.parse(await request('/store/categories'))
+      .categories;
 
   const vehicles = (): Promise<Vehicle[]> =>
     paged('/store/vehicles', (body) => {
@@ -263,17 +262,7 @@ export function createCatalogue({
         paged('/store/part-pages', (body) => {
           const { pages, next } = partPagesResponseSchema.parse(body);
           return {
-            items: pages.map((page) =>
-              unpriced({
-                ...page,
-                part: {
-                  ...page.part,
-                  installation_price: pricesHidden
-                    ? null
-                    : page.part.installation_price,
-                },
-              }),
-            ),
+            items: pages.map((page) => unpriced(page)),
             next,
           };
         }),
@@ -580,7 +569,11 @@ export function createCatalogue({
     async resolveVin(vin: string): Promise<VinOutcome> {
       try {
         const lookup = vinLookupResponseSchema.parse(
-          await request('/store/vin-lookups', { vin }),
+          await request('/store/vin-lookups', {
+            vin,
+            bot: bot ?? null,
+            visitor_id: visitorId ?? null,
+          }),
         );
         return lookup.resolved
           ? {

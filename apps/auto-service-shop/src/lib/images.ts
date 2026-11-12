@@ -8,11 +8,12 @@ import {
   MedusaError,
   Modules,
 } from '@medusajs/framework/utils';
-import { imageSchema } from '@podbor/catalog-contract';
+import type { Image } from '@podbor/catalog-contract';
 import sharp from 'sharp';
 import { z } from 'zod';
 
 import { adminError } from '../modules/_shared/admin-error';
+import { parseEnv } from './env';
 import { readCapped, uploadType } from './uploads';
 import { MANUAL_SOURCE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
@@ -26,8 +27,15 @@ export const IMAGE_TYPES: Record<string, string> = {
   'image/webp': 'webp',
 };
 
-export const storedImageSchema = imageSchema.extend({
+const fileKey = z.string().min(1);
+const width = z.number().int().positive();
+
+export const storedImageSchema = z.object({
   id: z.string(),
+  src: fileKey,
+  width,
+  height: width,
+  srcset: z.array(z.object({ url: fileKey, width })),
   file_ids: z.array(z.string()),
   source: z.string(),
   created_by: z.string().nullable(),
@@ -37,7 +45,35 @@ export type StoredImage = z.infer<typeof storedImageSchema>;
 
 export const imagesSchema = z.object({ items: z.array(storedImageSchema) });
 
-export const adminImage = ({ file_ids: _, ...image }: StoredImage) => image;
+const publicBase = () => `${parseEnv(process.env).FILE_URL}/`;
+
+export const publicFileUrl = (keyOrUrl: string): string =>
+  URL.canParse(keyOrUrl) ? keyOrUrl : `${publicBase()}${keyOrUrl}`;
+
+export const publicFileKey = (url: string): string | null => {
+  const base = publicBase();
+  return url.startsWith(base) ? url.slice(base.length) : null;
+};
+
+export const publicImage = ({
+  src,
+  width,
+  height,
+  srcset,
+}: Pick<StoredImage, 'src' | 'width' | 'height' | 'srcset'>): Image => ({
+  src: publicFileUrl(src),
+  width,
+  height,
+  srcset: srcset.map((variant) => ({
+    url: publicFileUrl(variant.url),
+    width: variant.width,
+  })),
+});
+
+export const adminImage = ({ file_ids: _, ...image }: StoredImage) => ({
+  ...image,
+  ...publicImage(image),
+});
 
 const invalidImage = (message: string) =>
   adminError(MedusaError.Types.INVALID_DATA, 'INVALID_IMAGE', message);
@@ -100,11 +136,11 @@ export async function storeImage(
   const largest = variants[variants.length - 1];
   return {
     id: generateEntityId(undefined, 'img'),
-    src: largest.file.url,
+    src: largest.file.id,
     width: largest.info.width,
     height: largest.info.height,
     srcset: variants.map(({ file, info }) => ({
-      url: file.url,
+      url: file.id,
       width: info.width,
     })),
     file_ids: variants.map(({ file }) => file.id),

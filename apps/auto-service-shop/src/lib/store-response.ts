@@ -43,7 +43,7 @@ const ownedRequirements = z.object({
 });
 
 const inheritedRequirements = ownedRequirements.extend({
-  engine: ownedRequirements,
+  engine: ownedRequirements.nullable(),
   model: z.object({ chassis: ownedRequirements }),
 });
 
@@ -84,7 +84,7 @@ const toVehicleResponse = (
       ({ type }) => type !== SUPPLIER_VEHICLE_ID,
     ),
     requirements: [
-      ...engine.requirements,
+      ...(engine?.requirements ?? []),
       ...model.chassis.requirements,
       ...requirements,
     ],

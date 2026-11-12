@@ -5,13 +5,14 @@ import { asValue } from '@medusajs/framework/awilix';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 import { Modules } from '@medusajs/framework/utils';
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
-import { cartFingerprint, normalizePartNumber } from '@podbor/catalog-contract';
+import { cartFingerprint } from '@podbor/catalog-contract';
 
 import { createFakeSupplier } from '../../../../../integration-tests/fakeSupplierAdapter';
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
 import { seedCashAtPickupCommerceDefaults } from '../../../../lib/commerce-defaults';
 import { SUPPLIER_ADAPTERS_REGISTRATION } from '../../../../lib/suppliers/adapter';
 import { PUBLIC_ROUTES } from '../../../public-routes';
+import { partNumberKey } from '../../../../modules/_shared/part-number-key';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import retryOrderLeads, {
   retryOrderLeadsAt,
@@ -24,7 +25,7 @@ import type CatalogModuleService from '../../../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../../../modules/supplier';
 import type SupplierModuleService from '../../../../modules/supplier/service';
 
-const intercars = createFakeSupplier('Intercars');
+const intercars = createFakeSupplier('demo-intercars');
 const ARTICLE = 'IC-11428575211';
 
 const quote = (cost_price: number, quantity: number, lead_time_days = 0) =>
@@ -81,13 +82,11 @@ medusaIntegrationTestRunner({
             const { contact, summary, ...event } = JSON.parse(body);
             leads.push({ ...event, ...contact, comment: summary });
             authorizations.push(request.headers.authorization);
-            response
-              .writeHead(leadRouteStatus, { location: '/sr/thanks/' })
-              .end();
+            response.writeHead(leadRouteStatus).end();
           });
         });
         await new Promise<void>((resolve) => leadRoute.listen(0, resolve));
-        process.env.LEAD_ROUTE_URL = `http://localhost:${(leadRoute.address() as AddressInfo).port}/api/leads`;
+        process.env.STOREFRONT_ORIGIN = `http://localhost:${(leadRoute.address() as AddressInfo).port}`;
         process.env.SHOP_LEAD_SECRET = SHOP_LEAD_SECRET;
 
         const container = getContainer();
@@ -116,12 +115,16 @@ medusaIntegrationTestRunner({
           type: 'oem',
           brand_id: bmw.id,
           value: '11 42 8575211',
-          normalized_value: normalizePartNumber('11 42 8575211'),
+          normalized_value: partNumberKey('11 42 8575211'),
         });
         identifierId = identifier.id;
         const [supplier, warehouse] = await suppliers.createSuppliers([
-          { name: 'Intercars', markup_percentage: 20 },
-          { name: 'CarLab warehouse', markup_percentage: 10 },
+          { key: 'demo-intercars', name: 'Intercars', markup_percentage: 20 },
+          {
+            key: 'demo-autodelovi',
+            name: 'CarLab warehouse',
+            markup_percentage: 10,
+          },
         ]);
         const [offer, own] = await suppliers.createSupplierOffers([
           {
@@ -162,7 +165,7 @@ medusaIntegrationTestRunner({
       };
 
       afterAll(async () => {
-        delete process.env.LEAD_ROUTE_URL;
+        delete process.env.STOREFRONT_ORIGIN;
         delete process.env.SHOP_LEAD_SECRET;
         await new Promise((resolve) => leadRoute.close(resolve));
       });
@@ -969,9 +972,10 @@ medusaIntegrationTestRunner({
             type: 'manufacturer-number',
             brand_id: varta.id,
             value: '580 901 080',
-            normalized_value: normalizePartNumber('580 901 080'),
+            normalized_value: partNumberKey('580 901 080'),
           });
           const shop = await suppliers.createSuppliers({
+            key: 'varta',
             name: 'Battery shop',
             markup_percentage: 0,
           });

@@ -4,17 +4,50 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
 import { createFakeShopAi } from '../../../../../integration-tests/fakeShopAi';
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
-import { SHOP_AI_REGISTRATION } from '../../../../lib/ai';
+import {
+  type QuoteReadingLine,
+  SHOP_AI_REGISTRATION,
+} from '../../../../lib/ai';
 import { bmwTypeCodeDecoder } from '../../../../lib/vin/bmw-type-code';
 import { VIN_DECODERS_REGISTRATION } from '../../../../lib/vin/chain';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
+import { VIN_LOOKUP_MODULE } from '../../../../modules/vin-lookup';
+import type VinLookupModuleService from '../../../../modules/vin-lookup/service';
 
 const OWNER_VIN = 'WBA35BG070N074158';
 const UNKNOWN_VIN = 'WBA99ZZ070N000001';
 const QUOTE_PDF = Buffer.from('%PDF-1.4\n% ponuda\n%%EOF\n');
 
 const ai = createFakeShopAi();
+
+const quoteLine = (
+  fields: Partial<Extract<QuoteReadingLine, { name_ru: string }>> = {},
+) => ({
+  name: 'Filter ulja',
+  name_ru: 'Масляный фильтр',
+  number: 'HU 816 x',
+  quantity: 1,
+  brand: 'MANN-FILTER',
+  brand_confidence: 0.95,
+  category_id: null,
+  catalogue_part: true,
+  ...fields,
+});
+
+const draftLine = (fields: Record<string, unknown>) => ({
+  readable: true,
+  catalogue_part: true,
+  original_name: 'Filter ulja',
+  name: 'Масляный фильтр',
+  printed_number: 'HU 816 x',
+  number: 'HU 816 x',
+  quantity: 1,
+  category: null,
+  part: null,
+  candidates: [],
+  ...fields,
+});
 
 medusaIntegrationTestRunner({
   moduleName: 'workshop_quotes',
@@ -66,34 +99,39 @@ medusaIntegrationTestRunner({
           slug: 'oil-filters',
           name: 'Масляные фильтры',
         });
+        const mann = await catalog.createBrands({
+          name: 'MANN-FILTER',
+          slug: 'mann-filter',
+        });
+        await catalog.createBrands({ name: 'BMW', slug: 'bmw' });
         ai.reading = {
           vin: OWNER_VIN,
           vehicle: 'BMW 320d F30',
           lines: [
-            {
-              name: 'Filter ulja',
-              number: 'HU 816 x',
-              quantity: 1,
-              brand: 'MANN-FILTER',
+            quoteLine({
+              brand: 'Mann Filter',
               brand_confidence: 0.95,
               category_id: oilFilters.id,
-            },
-            {
+            }),
+            quoteLine({
               name: 'Pločice',
+              name_ru: 'Тормозные колодки',
               number: '34116860016',
               quantity: 2,
               brand: 'BMW',
               brand_confidence: 0.4,
               category_id: 'not-a-category',
-            },
-            {
+            }),
+            quoteLine({
               name: 'Sitni materijal',
+              name_ru: 'Расходный материал',
               number: 'X-1',
-              quantity: 1,
               brand: null,
               brand_confidence: 0,
               category_id: null,
-            },
+              catalogue_part: false,
+            }),
+            { unreadable: true, name: 'Kaiš', number: '' },
           ],
         };
         const before = await catalogueRows();
@@ -107,42 +145,213 @@ medusaIntegrationTestRunner({
             { id: oilFilters.id, name: 'Масляные фильтры' },
           ]),
         );
+        expect(ai.quotesRead[0].brands.sort()).toEqual(
+          [mann.name, 'BMW'].sort(),
+        );
         expect(response.data.draft).toEqual({
           vin: OWNER_VIN,
           vehicle_text: 'BMW 320d F30',
           vehicle: expect.objectContaining({ id: vehicle.id }),
+          generation: null,
+          candidates: [],
           lines: [
-            {
-              name: 'Filter ulja',
-              number: 'HU 816 x',
-              quantity: 1,
+            draftLine({
               brand: 'MANN-FILTER',
               brand_confidence: 0.95,
               brand_uncertain: false,
               category: { id: oilFilters.id, name: 'Масляные фильтры' },
-            },
-            {
-              name: 'Pločice',
+            }),
+            draftLine({
+              original_name: 'Pločice',
+              name: 'Тормозные колодки',
+              printed_number: '34116860016',
               number: '34116860016',
               quantity: 2,
               brand: 'BMW',
               brand_confidence: 0.4,
               brand_uncertain: true,
-              category: null,
-            },
-            {
-              name: 'Sitni materijal',
+            }),
+            draftLine({
+              catalogue_part: false,
+              original_name: 'Sitni materijal',
+              name: 'Расходный материал',
+              printed_number: 'X-1',
               number: 'X-1',
-              quantity: 1,
               brand: null,
               brand_confidence: 0,
               brand_uncertain: true,
-              category: null,
-            },
+            }),
+            draftLine({
+              readable: false,
+              original_name: 'Kaiš',
+              name: 'Kaiš',
+              printed_number: '',
+              number: '',
+              quantity: null,
+              brand: null,
+              brand_confidence: 0,
+              brand_uncertain: true,
+            }),
           ],
         });
         expect(JSON.stringify(response.data)).not.toMatch(/price/i);
         expect(await catalogueRows()).toEqual(before);
+      });
+
+      it('settles the brand through the catalogue and its spellings', async () => {
+        const febi = await catalog.createBrands({ name: 'Febi', slug: 'febi' });
+        await catalog.createBrands({ name: 'FILTRON', slug: 'filtron' });
+        const mahle = await catalog.createBrands({
+          name: 'MAHLE',
+          slug: 'mahle',
+        });
+        await catalog.createBrands({ name: 'Knecht', slug: 'knecht' });
+        await catalog.createBrandSpellings([
+          { supplier_id: null, value: 'febi bilstein', brand_id: febi.id },
+          { supplier_id: null, value: 'Knecht', brand_id: mahle.id },
+        ]);
+        ai.reading = {
+          vin: null,
+          vehicle: null,
+          lines: [
+            quoteLine({ number: '12281', brand: 'FEBI BILSTEIN' }),
+            quoteLine({ number: 'AP 139/5', brand: 'Filtron' }),
+            quoteLine({ number: '0 451 103 336', brand: 'Bosch' }),
+            quoteLine({ number: 'OC 90', brand: 'Knecht' }),
+          ],
+        };
+
+        const response = await upload(QUOTE_PDF);
+
+        expect(
+          response.data.draft.lines.map(
+            ({ brand, brand_uncertain }: Record<string, unknown>) => ({
+              brand,
+              brand_uncertain,
+            }),
+          ),
+        ).toEqual([
+          { brand: 'Febi', brand_uncertain: false },
+          { brand: 'FILTRON', brand_uncertain: false },
+          { brand: 'Bosch', brand_uncertain: true },
+          { brand: 'MAHLE', brand_uncertain: false },
+        ]);
+      });
+
+      it('finds the Part by its number once the software code is stripped', async () => {
+        const elring = await catalog.createBrands({
+          name: 'Elring',
+          slug: 'elring',
+        });
+        const partId = await catalog.createPartWithIdentifiers({
+          name: 'Уплотнительное кольцо',
+          identifiers: [
+            {
+              type: 'manufacturer-number',
+              brand_id: elring.id,
+              value: '567.640',
+            },
+          ],
+        });
+        ai.reading = {
+          vin: null,
+          vehicle: null,
+          lines: [
+            quoteLine({
+              name: 'Zaptivni prsten',
+              name_ru: 'Кольцо',
+              number: 'EL567640',
+              brand: null,
+              brand_confidence: 0,
+            }),
+          ],
+        };
+
+        const response = await upload(QUOTE_PDF);
+
+        expect(response.data.draft.lines).toEqual([
+          draftLine({
+            original_name: 'Zaptivni prsten',
+            name: 'Уплотнительное кольцо',
+            printed_number: 'EL567640',
+            number: '567.640',
+            brand: 'Elring',
+            brand_confidence: 1,
+            brand_uncertain: false,
+            part: { id: partId, name: 'Уплотнительное кольцо' },
+          }),
+        ]);
+      });
+
+      it('offers every Part sharing the number and names a prefix brand', async () => {
+        const [febi, meyle] = await Promise.all(
+          ['Febi', 'Meyle'].map((name) =>
+            catalog.createBrands({ name, slug: name.toLowerCase() }),
+          ),
+        );
+        const parts = await Promise.all(
+          [febi, meyle].map((brand) =>
+            catalog.createPartWithIdentifiers({
+              name: `Сайлентблок ${brand.name}`,
+              identifiers: [
+                {
+                  type: 'manufacturer-number',
+                  brand_id: brand.id,
+                  value: '12281',
+                },
+              ],
+            }),
+          ),
+        );
+        ai.reading = {
+          vin: null,
+          vehicle: null,
+          lines: [
+            quoteLine({ number: 'FE12281', brand: 'Meyle' }),
+            quoteLine({ number: 'DRM01587', brand: null, brand_confidence: 0 }),
+          ],
+        };
+
+        const response = await upload(QUOTE_PDF);
+
+        const [shared, drMotor] = response.data.draft.lines;
+        expect(shared).toMatchObject({
+          number: '12281',
+          brand: 'Febi',
+          brand_uncertain: true,
+          part: null,
+        });
+        expect(
+          shared.candidates.map(({ part_id }: { part_id: string }) => part_id),
+        ).toEqual(expect.arrayContaining(parts));
+        expect(shared.candidates).toHaveLength(2);
+        expect(drMotor).toMatchObject({
+          number: 'DRM01587',
+          brand: 'Dr.Motor',
+          brand_confidence: 0.9,
+          brand_uncertain: false,
+          candidates: [],
+        });
+      });
+
+      it('offers the Vehicles of an ambiguous VIN and their generation', async () => {
+        const { vehicle: first } = await createVehicleFixture(catalog);
+        const { vehicle: second } = await createVehicleFixture(catalog, {
+          engineCode: 'N47D20C',
+          engineFamily: 'N47',
+        });
+        ai.reading = { vin: OWNER_VIN, vehicle: 'BMW 320d', lines: [] };
+
+        const response = await upload(QUOTE_PDF);
+
+        expect(response.data.draft).toMatchObject({
+          vehicle: null,
+          generation: expect.stringContaining('320d'),
+        });
+        expect(
+          response.data.draft.candidates.map(({ id }: { id: string }) => id),
+        ).toEqual(expect.arrayContaining([first.id, second.id]));
+        expect(response.data.draft.candidates).toHaveLength(2);
       });
 
       it('says the VIN resolves to no Vehicle', async () => {
@@ -155,6 +364,15 @@ medusaIntegrationTestRunner({
           vin: UNKNOWN_VIN,
           vehicle: null,
         });
+        const vinLookups: VinLookupModuleService =
+          getContainer().resolve(VIN_LOOKUP_MODULE);
+        const [lookup] = await vinLookups.listVinLookups({ vin: UNKNOWN_VIN });
+        const hits = await vinLookups.listVinLookupHits({
+          vin_lookup_id: lookup.id,
+        });
+        expect(new Set(hits.map(({ source }) => source))).toEqual(
+          new Set(['workshop-quote']),
+        );
       });
 
       it('keeps a quote without a readable VIN', async () => {
@@ -213,7 +431,7 @@ medusaIntegrationTestRunner({
         catalog = getContainer().resolve(CATALOG_MODULE);
       });
 
-      it('creates Parts, Brand-numbers and manual Fitments on the VIN Vehicle', async () => {
+      it('creates Parts, Brand-numbers and manual Fitments on the picked Vehicle', async () => {
         const { vehicle } = await createVehicleFixture(catalog);
         const oilFilters = await catalog.createCategories({
           slug: 'oil-filters',
@@ -222,7 +440,7 @@ medusaIntegrationTestRunner({
         const bmw = await catalog.createBrands({ name: 'BMW', slug: 'bmw' });
 
         const response = await confirm({
-          vin: OWNER_VIN,
+          vehicle_ids: [vehicle.id],
           lines: [
             line({ category_id: oilFilters.id }),
             line({
@@ -236,7 +454,7 @@ medusaIntegrationTestRunner({
 
         expect(response.status).toBe(200);
         expect(response.data.confirmed).toMatchObject({
-          vehicle: { id: vehicle.id },
+          vehicles: [{ id: vehicle.id }],
           fitments: 2,
         });
         const mann = await catalog.listBrands({ name: 'MANN-FILTER' });
@@ -308,7 +526,7 @@ medusaIntegrationTestRunner({
         });
 
         const response = await confirm({
-          vin: OWNER_VIN,
+          vehicle_ids: [vehicle.id],
           lines: [line({ brand: 'Mann-Filter', quantity: 3 })],
         });
 
@@ -328,10 +546,10 @@ medusaIntegrationTestRunner({
       });
 
       it('refuses a line without a confirmed brand and creates nothing', async () => {
-        await createVehicleFixture(catalog);
+        const { vehicle } = await createVehicleFixture(catalog);
 
         const response = await confirm({
-          vin: OWNER_VIN,
+          vehicle_ids: [vehicle.id],
           lines: [line({}), line({ number: 'X-1', brand: null })],
         });
 
@@ -342,10 +560,10 @@ medusaIntegrationTestRunner({
       });
 
       it('rolls back every line when one line fails', async () => {
-        await createVehicleFixture(catalog);
+        const { vehicle } = await createVehicleFixture(catalog);
 
         const response = await confirm({
-          vin: OWNER_VIN,
+          vehicle_ids: [vehicle.id],
           lines: [line({}), line({ number: 'X-1', brand: 'Бош' })],
         });
 
@@ -358,17 +576,93 @@ medusaIntegrationTestRunner({
         expect(await catalog.listFitments()).toEqual([]);
       });
 
-      it('creates Parts without Fitments when the VIN resolves to no Vehicle', async () => {
-        await createVehicleFixture(catalog);
+      it('fits a whole generation on its engine-less Vehicle', async () => {
+        const { vehicle: first, model } = await createVehicleFixture(catalog);
+        const { vehicle: second } = await createVehicleFixture(catalog, {
+          engineCode: 'N47D20C',
+          engineFamily: 'N47',
+          powerKw: 135,
+          years: [2012, 2016],
+        });
 
         const response = await confirm({
-          vin: UNKNOWN_VIN,
+          vehicle_ids: [first.id, second.id],
+          generation: true,
           lines: [line({})],
         });
 
         expect(response.status).toBe(200);
+        const [generation] = await catalog.listVehicles({
+          model_id: model.id,
+          engine_id: null,
+        });
+        expect(generation).toMatchObject({
+          power_kw: null,
+          year_from: 2012,
+          year_to: 2019,
+          source: 'workshop-quote',
+        });
         expect(response.data.confirmed).toMatchObject({
-          vehicle: null,
+          vehicles: [{ id: generation!.id, engine: null }],
+          fitments: 1,
+        });
+        expect(
+          (await catalog.listFitments()).map(({ vehicle_id }) => vehicle_id),
+        ).toEqual([generation!.id]);
+      });
+
+      it('fits a whole generation on the engine-less Vehicle it already has', async () => {
+        const { vehicle, model } = await createVehicleFixture(catalog);
+        const known = await catalog.createVehicles({
+          model_id: model.id,
+          engine_id: null,
+          power_kw: null,
+          year_from: 2014,
+          year_to: 2018,
+        });
+
+        const response = await confirm({
+          vehicle_ids: [vehicle.id],
+          generation: true,
+          lines: [line({})],
+        });
+
+        expect(response.status).toBe(200);
+        expect(
+          await catalog.listVehicles({ model_id: model.id, engine_id: null }),
+        ).toHaveLength(1);
+        expect(
+          (await catalog.listFitments()).map(({ vehicle_id }) => vehicle_id),
+        ).toEqual([known.id]);
+      });
+
+      it('fits every Vehicle staff picked', async () => {
+        const { vehicle: first } = await createVehicleFixture(catalog);
+        const { vehicle: second } = await createVehicleFixture(catalog, {
+          engineCode: 'N47D20C',
+          engineFamily: 'N47',
+        });
+
+        const response = await confirm({
+          vehicle_ids: [first.id, second.id],
+          lines: [line({})],
+        });
+
+        expect(response.status).toBe(200);
+        expect(response.data.confirmed.fitments).toBe(2);
+        expect(
+          (await catalog.listFitments()).map(({ vehicle_id }) => vehicle_id),
+        ).toEqual(expect.arrayContaining([first.id, second.id]));
+      });
+
+      it('creates Parts without Fitments when staff chose no fitment', async () => {
+        await createVehicleFixture(catalog);
+
+        const response = await confirm({ vehicle_ids: [], lines: [line({})] });
+
+        expect(response.status).toBe(200);
+        expect(response.data.confirmed).toMatchObject({
+          vehicles: [],
           fitments: 0,
           lines: [{ reused: false }],
         });
@@ -377,11 +671,18 @@ medusaIntegrationTestRunner({
         expect(await catalog.listFitments()).toEqual([]);
       });
 
-      it('refuses a VIN that is not one and creates nothing', async () => {
+      it('refuses an unknown Vehicle and creates nothing', async () => {
         const response = await confirm({
-          vin: 'nečitljivo',
+          vehicle_ids: ['veh_missing'],
           lines: [line({})],
         });
+
+        expect(response.status).toBe(404);
+        expect(await catalog.listParts()).toEqual([]);
+      });
+
+      it('wants the fitment choice stated', async () => {
+        const response = await confirm({ lines: [line({})] });
 
         expect(response.status).toBe(400);
         expect(await catalog.listParts()).toEqual([]);
@@ -389,7 +690,7 @@ medusaIntegrationTestRunner({
 
       it('takes no price from the quote', async () => {
         const response = await confirm({
-          vin: null,
+          vehicle_ids: [],
           lines: [line({ price: 4200 })],
         });
 

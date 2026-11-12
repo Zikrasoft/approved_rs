@@ -42,6 +42,7 @@ export const {
   sendNoteNotice,
   renameLeadTopic,
   editLeadDetailMessage,
+  leadDetail,
   unpinLeadCard,
 } = notifier;
 

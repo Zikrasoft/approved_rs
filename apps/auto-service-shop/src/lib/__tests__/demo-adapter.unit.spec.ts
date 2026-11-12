@@ -4,7 +4,7 @@ import { join } from 'node:path';
 
 import { createMedusaContainer } from '@medusajs/framework/utils';
 
-import { supplierAdapters } from '../suppliers/adapter';
+import { parsedQuotes, supplierAdapters } from '../suppliers/adapter';
 import {
   DEMO_SUPPLIER_IMAGES,
   DEMO_SUPPLIERS,
@@ -75,10 +75,12 @@ describe('demo supplier adapter', () => {
     const path = overridesFile({ 'IC-1001': { cost_price: 1300 } });
     const [intercars] = demoAdapters(path, FILE_URL);
 
-    expect((await intercars.quote(['IC-1001']))[0].cost_price).toBe(1300);
+    const quoted = async () =>
+      parsedQuotes(await intercars.quote(['IC-1001'])).quotes;
+    expect((await quoted())[0].cost_price).toBe(1300);
 
     writeFileSync(path, JSON.stringify({ 'IC-1001': { stock: 0 } }));
-    const [quote] = await intercars.quote(['IC-1001']);
+    const [quote] = await quoted();
 
     expect(quote.cost_price).toBe(1000);
     expect(quote.stock).toEqual([{ location: 'Beograd', quantity: 0 }]);
@@ -95,8 +97,8 @@ describe('demo supplier adapter', () => {
     process.env = { ...previous, SUPPLIER_ADAPTERS: 'demo' };
     try {
       expect(
-        supplierAdapters(createMedusaContainer()).map(({ name }) => name),
-      ).toEqual(DEMO_SUPPLIERS.map(({ name }) => name));
+        supplierAdapters(createMedusaContainer()).map(({ key }) => key),
+      ).toEqual(DEMO_SUPPLIERS.map(({ key }) => key));
     } finally {
       process.env = previous;
     }

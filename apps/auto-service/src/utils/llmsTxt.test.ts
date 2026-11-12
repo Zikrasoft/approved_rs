@@ -276,13 +276,12 @@ describe('generateLlmsTxt', () => {
     );
   });
 
-  it('names no price and orders parts by inquiry, priced by staff, while the shop is closed', async () => {
+  it('keeps the workshop prices and orders parts by inquiry, priced by staff, while the shop is closed', async () => {
     const body = await withBackend('false');
 
     expect(body).toContain(
-      '[Motorno ulje](https://carlab.rs/sr/parts/c/engine-oil/): Ulje za motor.\n',
+      '[Motorno ulje](https://carlab.rs/sr/parts/c/engine-oil/): Ulje za motor. Zamena ulja: 2.500 RSD. Ugradnja u auto servisu CarLab: 1.500 RSD.\n',
     );
-    expect(body).not.toContain('RSD');
     const ru = await generateLlmsTxt('ru');
     expect(ru).toContain(
       '](https://carlab.rs/ru/parts/): Каталог запчастей CarLab: у каждого номера запчасти своя страница с аналогами и характеристиками. Запчасти заказывают по заявке',

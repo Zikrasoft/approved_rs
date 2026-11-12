@@ -1,7 +1,7 @@
 import OpenAI from 'openai';
 import { z } from 'zod';
 
-export const DEFAULT_TRANSLATE_MODEL = 'gpt-6.1-sol';
+export const DEFAULT_TRANSLATE_MODEL = 'gpt-6-luna';
 
 export const OPENAI_TIMEOUT_MS = 60_000;
 export const OPENAI_MAX_RETRIES = 1;

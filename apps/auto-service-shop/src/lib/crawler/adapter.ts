@@ -17,16 +17,19 @@ export const crawledSupplierAdapter = (
   store: CrawlStore,
   pageSize = SNAPSHOTS_PER_PAGE,
 ): SupplierAdapter => ({
-  name: site.name,
+  key: site.key,
   listCatalogue: async (cursor) => {
-    const snapshots = await store.snapshots(site.name, cursor, pageSize);
+    const snapshots = await store.snapshots(site.key, cursor, pageSize);
     const articles: SupplierArticle[] = [];
     const unreadable: UnreadablePage[] = [];
     let notInScope = 0;
-    for (const { url, body } of snapshots) {
+    for (const { url, category_hint, body } of snapshots) {
       try {
         if (!body) throw new Error('The stored page is missing from S3');
-        const article = site.parse(gunzipSync(body).toString('utf8'));
+        const article = site.parse(
+          gunzipSync(body).toString('utf8'),
+          category_hint,
+        );
         if (!article) {
           notInScope += 1;
           continue;

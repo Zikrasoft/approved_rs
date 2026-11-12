@@ -10,6 +10,6 @@ export async function POST(
   res: MedusaResponse,
 ): Promise<void> {
   const { site, store } = crawlTarget(req);
-  await store.pause(site.name, 'staff');
+  await store.pause(site.key, 'staff');
   res.json({ paused: site.key });
 }

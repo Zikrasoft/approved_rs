@@ -1,111 +1,103 @@
-import { describe, it, expect, vi } from 'vitest';
-import { forgetVisitorId, readOrCreateVisitorId } from './visitorId.ts';
+// @vitest-environment jsdom
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import {
+  forgetVisitorId,
+  getOrCreateVisitorId,
+  VISITOR_ID_COOKIE,
+  VISITOR_ID_COOKIE_MAX_AGE,
+} from './visitorId.ts';
 
-function memoryStorage(initial: Record<string, string> = {}) {
-  const data = new Map(Object.entries(initial));
-  return {
-    getItem: (key: string) => data.get(key) ?? null,
-    setItem: (key: string, value: string) => void data.set(key, value),
-    data,
-  };
-}
+const UUID = '0f8fad5b-d9cb-469f-a165-70867728950e';
+let written: string[];
 
-describe('readOrCreateVisitorId', () => {
-  it('returns the id already stored for this browser', () => {
-    const storage = memoryStorage({ visitor_id: 'existing' });
-    expect(readOrCreateVisitorId({ storage, randomId: () => 'fresh' })).toBe(
-      'existing',
-    );
+beforeEach(() => {
+  localStorage.clear();
+  written = [];
+  vi.restoreAllMocks();
+  vi.spyOn(document, 'cookie', 'set').mockImplementation((value: string) => {
+    written.push(value);
+  });
+  vi.stubGlobal('crypto', { randomUUID: () => UUID });
+});
+
+const mirrored = (id: string) =>
+  `${VISITOR_ID_COOKIE}=${id}; path=/; max-age=${VISITOR_ID_COOKIE_MAX_AGE}; samesite=lax; secure`;
+const cleared = `${VISITOR_ID_COOKIE}=; path=/; max-age=0; samesite=lax; secure`;
+
+describe('getOrCreateVisitorId', () => {
+  it('returns the id already stored for this browser and mirrors it into the cookie', () => {
+    localStorage.setItem('visitor_id', 'existing');
+    expect(getOrCreateVisitorId()).toBe('existing');
+    expect(written).toEqual([mirrored('existing')]);
   });
 
   it('generates and persists an id on first use', () => {
-    const storage = memoryStorage();
-    expect(readOrCreateVisitorId({ storage, randomId: () => 'fresh' })).toBe(
-      'fresh',
-    );
-    expect(storage.data.get('visitor_id')).toBe('fresh');
+    expect(getOrCreateVisitorId()).toBe(UUID);
+    expect(localStorage.getItem('visitor_id')).toBe(UUID);
+    expect(written).toEqual([mirrored(UUID)]);
   });
 
-  it('returns an empty id instead of throwing when storage is blocked', () => {
-    const storage = {
-      getItem: vi.fn(() => {
-        throw new Error('SecurityError');
-      }),
-      setItem: vi.fn(),
-    };
-    expect(readOrCreateVisitorId({ storage, randomId: () => 'fresh' })).toBe(
-      '',
+  it('mints an id for a visitor who accepted', () => {
+    localStorage.setItem(
+      'cookie_consent',
+      JSON.stringify({ version: '1', at: 'now', analytics: true }),
     );
+    expect(getOrCreateVisitorId()).toBe(UUID);
   });
 
-  it('returns an empty id when writing is blocked after a successful read', () => {
-    const storage = {
-      getItem: () => null,
-      setItem: vi.fn(() => {
-        throw new Error('QuotaExceededError');
-      }),
-    };
-    expect(readOrCreateVisitorId({ storage, randomId: () => 'fresh' })).toBe(
-      '',
+  it('mints no id and clears the cookie for a visitor who declined', () => {
+    localStorage.setItem(
+      'cookie_consent',
+      JSON.stringify({ version: '1', at: 'now', analytics: false }),
     );
-  });
-});
-
-describe('readOrCreateVisitorId and consent', () => {
-  it('mints no id for a visitor who declined', () => {
-    const storage = memoryStorage({
-      cookie_consent: JSON.stringify({
-        version: '1',
-        at: 'now',
-        analytics: false,
-      }),
-    });
-    expect(readOrCreateVisitorId({ storage, randomId: () => 'fresh' })).toBe(
-      '',
-    );
-    expect(storage.data.get('visitor_id')).toBeUndefined();
+    expect(getOrCreateVisitorId()).toBe('');
+    expect(localStorage.getItem('visitor_id')).toBeNull();
+    expect(written).toEqual([cleared]);
   });
 
   it('stops handing back an id already stored before the refusal', () => {
-    const storage = memoryStorage({
-      visitor_id: 'existing',
-      cookie_consent: 'denied',
-    });
-    expect(readOrCreateVisitorId({ storage, randomId: () => 'fresh' })).toBe(
-      '',
-    );
+    localStorage.setItem('visitor_id', 'existing');
+    localStorage.setItem('cookie_consent', 'denied');
+    expect(getOrCreateVisitorId()).toBe('');
+    expect(written).toEqual([cleared]);
   });
 
-  it('mints an id once the visitor accepts', () => {
-    const storage = memoryStorage({
-      cookie_consent: JSON.stringify({
-        version: '1',
-        at: 'now',
-        analytics: true,
-      }),
+  it('returns an empty id instead of throwing when storage is blocked', () => {
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+      throw new Error('SecurityError');
     });
-    expect(readOrCreateVisitorId({ storage, randomId: () => 'fresh' })).toBe(
-      'fresh',
-    );
+    expect(getOrCreateVisitorId()).toBe('');
+    expect(written).toEqual([cleared]);
+  });
+
+  it('returns an empty id when writing is blocked after a successful read', () => {
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('QuotaExceededError');
+    });
+    expect(getOrCreateVisitorId()).toBe('');
+  });
+
+  it('still answers when the cookie cannot be written', () => {
+    vi.spyOn(document, 'cookie', 'set').mockImplementation(() => {
+      throw new Error('SecurityError');
+    });
+    expect(getOrCreateVisitorId()).toBe(UUID);
   });
 });
 
 describe('forgetVisitorId', () => {
-  it('drops the id so a later acceptance starts a new one', () => {
-    const storage = memoryStorage({ visitor_id: 'existing' });
-    forgetVisitorId({
-      removeItem: (key: string) => void storage.data.delete(key),
-    });
-    expect(storage.data.get('visitor_id')).toBeUndefined();
+  it('drops the id and its cookie so a later acceptance starts a new one', () => {
+    localStorage.setItem('visitor_id', 'existing');
+    forgetVisitorId();
+    expect(localStorage.getItem('visitor_id')).toBeNull();
+    expect(written).toEqual([cleared]);
   });
 
   it('says nothing when storage refuses the delete', () => {
-    expect(() =>
-      forgetVisitorId({
-        removeItem: () => {
-          throw new Error('SecurityError');
-        },
-      }),
-    ).not.toThrow();
+    vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => {
+      throw new Error('SecurityError');
+    });
+    expect(() => forgetVisitorId()).not.toThrow();
+    expect(written).toEqual([cleared]);
   });
 });

@@ -74,18 +74,33 @@ export const LISTED_PART_COUNTS = `
   group by p.model_id`;
 
 export const UNRESOLVED_VIN_CODES = `
-  select make, code, count(*)::int as count, max(updated_at) as last_seen,
+  with hits as (
+    select l.make_key, l.code, h.source, h.created_at, h.visitor_id,
+      h.source = 'storefront' and h.bot is not true
+        and (h.visitor_id is null or h.visitor_id <> all(?::text[])) as customer
+    from vin_lookup l
+    join vin_lookup_hit h on h.vin_lookup_id = l.id and h.deleted_at is null
+    where l.vehicle_id is null and l.make_key is not null and l.code is not null
+      and l.deleted_at is null
+      and not exists (
+        select 1 from vehicle_identifier vi
+        where vi.type = l.code_type and vi.value = l.code
+          and vi.supplier_id is null and vi.deleted_at is null
+      )
+  )
+  select make_key, code, count(*)::int as count,
+    (count(*) filter (where customer))::int as customers,
+    coalesce(array_agg(distinct left(visitor_id, 8))
+      filter (where customer and visitor_id is not null), '{}') as visitors,
+    (count(*) filter (where source = 'storefront'))::int as storefront,
+    (count(*) filter (where source = 'workshop-quote'))::int as workshop_quote,
+    (count(*) filter (where source = 'admin'))::int as admin,
+    max(created_at) as last_seen,
     (count(*) over ())::int as total
-  from vin_lookup l
-  where vehicle_id is null and make is not null and code is not null
-    and deleted_at is null
-    and not exists (
-      select 1 from vehicle_identifier vi
-      where vi.type = l.code_type and vi.value = l.code
-        and vi.supplier_id is null and vi.deleted_at is null
-    )
-  group by make, code
-  order by count desc, make, code
+  from hits
+  group by make_key, code
+  having ?::boolean or bool_or(customer)
+  order by customers desc, count desc, make_key, code
   offset ? limit ?`;
 
 const missingIdentifier = (column: string) =>
@@ -95,7 +110,7 @@ export const ORPHAN_SWEEPS = [
   `delete from supplier_offer o where ${missingIdentifier('o.part_identifier_id')}`,
   `delete from staged_record r where ${missingIdentifier('r.part_identifier_id')}`,
   `delete from published_number n where ${missingIdentifier('n.id')}`,
-  `delete from supplier_category s where not exists
+  `delete from supplier_category s where s.category_id is not null and not exists
    (select 1 from category c where c.id = s.category_id and c.deleted_at is null)`,
   `update vin_lookup l set vehicle_id = null where vehicle_id is not null
    and not exists (select 1 from vehicle v where v.id = l.vehicle_id and v.deleted_at is null)`,

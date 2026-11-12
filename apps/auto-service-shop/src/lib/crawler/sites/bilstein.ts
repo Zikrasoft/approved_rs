@@ -258,7 +258,10 @@ const setContentsOf = ($: CheerioAPI) =>
     })
     .join('; ');
 
-export const parseBilsteinArticle = (html: string): SupplierArticle | null => {
+export const parseBilsteinArticle = (
+  html: string,
+  categoryHint: string | null = null,
+): SupplierArticle | null => {
   const $ = load(html);
   const [brand, , name] = $('title').text().split(' | ').map(words);
   const app = $('#app');
@@ -285,7 +288,7 @@ export const parseBilsteinArticle = (html: string): SupplierArticle | null => {
     brand,
     number,
     name,
-    category: name,
+    category: categoryHint ? words(categoryHint) : name,
     ...(description && { description }),
     specs,
     cross_references: crossReferences,

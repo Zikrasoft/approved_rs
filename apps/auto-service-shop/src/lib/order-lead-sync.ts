@@ -252,7 +252,7 @@ export function createOrderLeadSync({
 
 export function orderLeadSync(container: MedusaContainer) {
   const orderModule = container.resolve(Modules.ORDER);
-  const { LEAD_ROUTE_URL, SHOP_LEAD_SECRET, ADMIN_CORS } = parseEnv(
+  const { STOREFRONT_ORIGIN, SHOP_LEAD_SECRET, ADMIN_CORS } = parseEnv(
     process.env,
   );
   return createOrderLeadSync({
@@ -288,9 +288,9 @@ export function orderLeadSync(container: MedusaContainer) {
     },
     lock: lockOf(container),
     async send(event) {
-      if (!LEAD_ROUTE_URL || !SHOP_LEAD_SECRET)
-        throw new Error('LEAD_ROUTE_URL or SHOP_LEAD_SECRET is not set');
-      await sendShopOrderEvent(LEAD_ROUTE_URL, event, SHOP_LEAD_SECRET);
+      if (!STOREFRONT_ORIGIN || !SHOP_LEAD_SECRET)
+        throw new Error('STOREFRONT_ORIGIN or SHOP_LEAD_SECRET is not set');
+      await sendShopOrderEvent(STOREFRONT_ORIGIN, event, SHOP_LEAD_SECRET);
     },
     alert: (text) => alertOwner(text),
     adminOrigin: ADMIN_CORS.split(',')[0]!,

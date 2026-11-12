@@ -5,7 +5,6 @@ import {
 } from '@medusajs/framework/utils';
 import {
   type AttributeValues,
-  normalizePartNumber,
   STAGED_DATA_KINDS,
   validateAttributes,
 } from '@podbor/catalog-contract';
@@ -17,7 +16,7 @@ import type {
   FoundPart,
   PartClassification,
 } from '../../modules/catalog/service';
-import { inShopCurrency, SUPPLIER_MODULE } from '../../modules/supplier';
+import { SUPPLIER_MODULE } from '../../modules/supplier';
 import type SupplierModuleService from '../../modules/supplier/service';
 import {
   type ArticleAnswer,
@@ -31,45 +30,38 @@ import { cachedArticleAnswer } from '../ai/cache';
 import { plainDescription } from '../ai/description';
 import {
   cataloguePageSchema,
+  parsedQuotes,
   type SupplierAdapter,
   supplierAdapters,
-  supplierQuoteSchema,
+  type supplierQuoteSchema,
 } from './adapter';
 import { parseEnv } from '../env';
-import { START_STOP } from '../production-seed';
+import { crawledPartType, START_STOP } from '../production-seed';
+import { batteryName, isBattery } from './part-name';
 import { errorMessage } from '../errors';
 import { emitIndexChanges } from '../index-changes';
 import { shopStorage, type ShopStorage } from '../storage';
 import { mirroredImage } from './mirrored-images';
 import { quotedFields } from './live-quote';
-import { spellingKey } from '../../modules/_shared/spelling';
+import { nameKey, normalizePartNumber } from '../../modules/_shared/keys';
+import { partNumberKey } from '../../modules/_shared/part-number-key';
+import { categoryScope } from './category-scope';
+import {
+  type ImportSummary,
+  importTally,
+  type ImportTally,
+} from './import-summary';
 import { fitVehicles, type VehicleMatcher, vehicleMatcher } from './vehicles';
 
 type Article = z.output<typeof cataloguePageSchema>['articles'][number];
 type Quote = z.output<typeof supplierQuoteSchema>;
 
-export type ImportSummary = {
-  supplier: string;
-  imported: number;
-  created: number;
-  skipped: number;
-  skipped_by_reason: {
-    brand: number;
-    currency: number;
-    unreadable: number;
-    no_engine_code: number;
-    not_in_scope: number;
-  };
-  needs_category: string[];
-  missing_fields: { number: string; category: string; fields: string[] }[];
-  unanswered: { number: string; reason: string }[];
-  failed: { number: string; reason: string }[];
-};
+export type { ImportSummary };
 
 type ImportState = {
-  summary: ImportSummary;
+  tally: ImportTally;
   listed: Set<string>;
-  listedNumbers: Set<string>;
+  listedBrandNumbers: Set<string>;
   changedPartIds: Set<string>;
 };
 
@@ -91,6 +83,8 @@ type Context = {
 };
 
 const MOST_FITTED = 6;
+
+const PROGRESS_EVERY = 10;
 
 const mostFitted = ({ vehicles = [] }: Article) => {
   const counts = new Map<string, number>();
@@ -149,6 +143,9 @@ async function categoryChoices(
   }));
 }
 
+const categoryOf = ({ categories }: Context, id: string | null) =>
+  categories.find((category) => category.id === id) ?? null;
+
 async function answerOf(
   context: Context,
   article: Article,
@@ -158,13 +155,13 @@ async function answerOf(
     return await cachedArticleAnswer(
       context.ai,
       context.storage?.pages ?? null,
-      { ...factsOf(article), category_id: categoryId },
-      context.categories,
+      factsOf(article),
+      categoryOf(context, categoryId),
     );
   } catch (error) {
     const reason = errorMessage(error);
     context.logger.warn(
-      `Supplier import ${context.adapter.name}, ${article.number}: AI failed, ${reason}`,
+      `Supplier import ${context.adapter.key}, ${article.number}: AI failed, ${reason}`,
     );
     context.summary.unanswered.push({ number: article.number, reason });
     return null;
@@ -211,37 +208,47 @@ const withStartStop = (
 };
 
 const withBrandAndNumber = (name: string, { brand, number }: Article) =>
-  normalizePartNumber(name).includes(normalizePartNumber(number))
+  normalizePartNumber(name)?.includes(partNumberKey(number))
     ? name
     : `${name} ${brand} ${number}`;
 
-function classificationOf(
-  { categories, summary }: Context,
+const composedName = (
+  context: Context,
   article: Article,
-  mappedCategoryId: string | undefined,
+  categoryId: string | null,
+  attributes: Readonly<Record<string, unknown>>,
+) => {
+  if (isBattery(categoryOf(context, categoryId)?.fields ?? [])) {
+    return batteryName(attributes, article.brand, article.number);
+  }
+  const type = crawledPartType(context.adapter.key, article.category);
+  return type && `${type} ${article.brand} ${article.number}`;
+};
+
+function classificationOf(
+  context: Context,
+  article: Article,
+  categoryId: string | null,
   answer: ArticleAnswer | null,
 ): PartClassification {
-  const picked = categories.find(({ id }) => id === answer?.category_id);
-  const categoryId = mappedCategoryId ?? picked?.id ?? null;
-  const category = categories.find(({ id }) => id === categoryId);
+  const category = categoryOf(context, categoryId);
   const fields = category?.fields ?? [];
-  const mapped =
-    answer && categoryId && article.specs && answer.category_id === categoryId;
-  const attributes = mapped
-    ? withStartStop(fields, fittingAttributes(fields, answer.attributes))
-    : {};
+  const attributes =
+    answer && article.specs
+      ? withStartStop(fields, fittingAttributes(fields, answer.attributes))
+      : {};
   const missing = fields.filter(
     ({ key, required }) => required && !(key in attributes),
   );
   if (category && missing.length) {
-    summary.missing_fields.push({
+    context.summary.missing_fields.push({
       number: article.number,
       category: category.name,
       fields: missing.map(({ label }) => label),
     });
     return { category_id: null, attributes: {} };
   }
-  return { category_id: categoryId, attributes };
+  return { category_id: category?.id ?? null, attributes };
 }
 
 const descriptionOf = async (
@@ -270,90 +277,76 @@ const descriptionOf = async (
 const refusedAttributes = (error: unknown) =>
   MedusaError.isMedusaError(error) && error.code === 'INVALID_ATTRIBUTES';
 
-async function filed<T>(
-  classification: PartClassification,
-  write: (attempt: PartClassification) => Promise<T>,
-  unfiled: () => Promise<T>,
-): Promise<{ written: T; categorized: boolean }> {
-  let categorized = Boolean(classification.category_id);
-  const written = await write(classification).catch((error: unknown) => {
-    if (!refusedAttributes(error)) throw error;
-    categorized = false;
-    return unfiled();
-  });
-  return { written, categorized };
-}
-
 async function createPart(
   context: Context,
   article: Article,
   brandId: string,
-  mappedCategoryId: string | undefined,
-): Promise<FoundPart & { categorized: boolean }> {
+  categoryId: string,
+): Promise<FoundPart> {
   const { adapter, catalog } = context;
-  const answer = await answerOf(context, article, mappedCategoryId ?? null);
-  const classification = classificationOf(
+  const answer = await answerOf(context, article, categoryId);
+  const classification = classificationOf(context, article, categoryId, answer);
+  const composed = composedName(
     context,
     article,
-    mappedCategoryId,
-    answer,
+    classification.category_id,
+    classification.attributes,
   );
-  const name = answer ? withBrandAndNumber(answer.name, article) : article.name;
+  const name =
+    composed ??
+    (answer ? withBrandAndNumber(answer.name, article) : article.name);
   const part = {
     name,
-    source_name: answer && article.name,
+    source_name: composed || answer ? article.name : null,
     description: await descriptionOf(context, article, name, answer),
     identifier: {
       type: 'manufacturer-number' as const,
       brand_id: brandId,
       value: article.number,
     },
-    source: adapter.name,
+    source: adapter.key,
     source_url: article.source_url ?? null,
   };
   const create = (attempt: Partial<PartClassification>) =>
     catalog.findOrCreatePart({ ...part, ...attempt });
-  const { written, categorized } = await filed(classification, create, () =>
-    create({}),
-  );
-  return { ...written, categorized };
+  return create(classification).catch((error: unknown) => {
+    if (!refusedAttributes(error)) throw error;
+    return create({});
+  });
 }
 
 async function matchArticle(
   context: Context,
   article: Article,
   brandId: string,
-  categoryId: string | undefined,
+  categoryId: string,
 ): Promise<{
   identifierId: string;
   partId: string;
   created: boolean;
   changedPartId?: string;
-  categorized?: boolean;
-}> {
+} | null> {
   const { adapter, catalog } = context;
   const [hit] = await catalog.listPartIdentifiers(
     {
       brand_id: brandId,
-      normalized_value: normalizePartNumber(article.number),
+      normalized_value: partNumberKey(article.number),
     },
     { relations: ['part'], take: 1 },
   );
   if (!hit) {
+    if (await catalog.isRejectedNumber(brandId, article.number)) return null;
     const found = await createPart(context, article, brandId, categoryId);
     return {
       identifierId: found.part_identifier_id,
       partId: found.part_id,
       created: found.created,
-      ...(found.created && {
-        changedPartId: found.part_id,
-        categorized: found.categorized,
-      }),
+      ...(found.created && { changedPartId: found.part_id }),
     };
   }
   const { part } = hit;
   const unchanged = { identifierId: hit.id, partId: part.id, created: false };
-  if (part.source !== adapter.name) {
+  if (part.source !== adapter.key) {
     return unchanged;
   }
   if (article.source_url && part.source_url !== article.source_url) {
@@ -361,45 +354,51 @@ async function matchArticle(
   }
   const edited = new Set(part.edited_fields);
   const fileable = !part.category_id && !edited.has('category_id');
-  const answer = lazily(() =>
-    answerOf(
-      context,
-      article,
-      part.category_id ?? (fileable ? (categoryId ?? null) : null),
-    ),
-  );
-  const classification = fileable
-    ? classificationOf(context, article, categoryId, await answer())
-    : undefined;
+  const classifiedUnder = part.category_id ?? (fileable ? categoryId : null);
+  const answer = lazily(() => answerOf(context, article, classifiedUnder));
+  const refreshable =
+    Boolean(part.category_id) &&
+    !edited.has('attributes') &&
+    Boolean(article.specs) &&
+    Boolean(categoryOf(context, part.category_id)?.fields?.length);
+  const classification =
+    fileable || (refreshable && (await answer()))
+      ? classificationOf(context, article, classifiedUnder, await answer())
+      : undefined;
+  const nameable = !edited.has('name') && !context.matched.has(hit.id);
+  const composed = nameable
+    ? composedName(
+        context,
+        article,
+        classification?.category_id ?? part.category_id,
+        classification?.attributes ?? part.attributes ?? {},
+      )
+    : null;
   const renaming =
-    edited.has('name') ||
-    context.matched.has(hit.id) ||
-    part.source_name === article.name
+    composed || !nameable || part.source_name === article.name
       ? null
       : await answer();
-  const name = renaming && withBrandAndNumber(renaming.name, article);
+  const name =
+    (composed !== part.name && composed) ||
+    (renaming && withBrandAndNumber(renaming.name, article));
   const description =
     edited.has('description') || part.description
       ? null
       : await descriptionOf(
           context,
           article,
-          name ?? part.name,
+          name || part.name,
           await answer(),
         );
   if (!classification && !name && !description) {
     return unchanged;
   }
-  const { changed, categorized } = await catalog.applySourceChange(part.id, {
+  const { changed } = await catalog.applySourceChange(part.id, {
     ...(name && { name, source_name: article.name }),
     ...(description && { description }),
     classification,
   });
-  return {
-    ...unchanged,
-    categorized,
-    ...(changed && { changedPartId: part.id }),
-  };
+  return { ...unchanged, ...(changed && { changedPartId: part.id }) };
 }
 
 async function storeOffer(
@@ -417,7 +416,7 @@ async function storeOffer(
 }
 
 async function stagedImages(
-  { scope, storage, logger }: Context,
+  { scope, storage, logger, summary }: Context,
   images: string[],
 ): Promise<{ items: string[]; sources?: Record<string, string> }> {
   if (!storage) return { items: images };
@@ -425,6 +424,7 @@ async function stagedImages(
   for (const source of images) {
     const mirrored = await mirroredImage(scope, storage, source, logger);
     if (mirrored) sources[mirrored] ??= source;
+    else summary.images_failed += 1;
   }
   return { items: Object.keys(sources), sources };
 }
@@ -457,20 +457,27 @@ async function stage(
 
 async function importArticle(
   context: Context,
-  { summary, listed, changedPartIds }: ImportState,
+  { tally, listed, changedPartIds }: ImportState,
   article: Article,
   brandId: string,
-  categoryId: string | undefined,
+  categoryId: string,
   quote: Quote | undefined,
 ): Promise<void> {
-  const { identifierId, partId, created, changedPartId, categorized } =
-    await matchArticle(context, article, brandId, categoryId);
+  const match = await matchArticle(context, article, brandId, categoryId);
+  if (!match) {
+    tally.skip('rejected');
+    return;
+  }
+  const { identifierId, partId, created, changedPartId } = match;
   context.matched.add(identifierId);
   if (changedPartId) {
     changedPartIds.add(changedPartId);
   }
+  const offerChanged = quote
+    ? await storeOffer(context, identifierId, quote)
+    : false;
   if (quote) {
-    if (await storeOffer(context, identifierId, quote)) {
+    if (offerChanged) {
       changedPartIds.add(partId);
     }
     listed.add(article.article_id);
@@ -478,18 +485,22 @@ async function importArticle(
   await stage(context, identifierId, article);
   if (article.vehicles) {
     const vehicles = article.vehicles;
-    await context.oneAtATime(() =>
+    const { unknownMakes } = await context.oneAtATime(() =>
       fitVehicles(context.vehicles, partId, vehicles),
     );
-    summary.skipped_by_reason.no_engine_code += article.vehicles.filter(
-      ({ engine_codes }) => !engine_codes.length,
-    ).length;
+    for (const make of unknownMakes) tally.unknownMake(make);
+    tally.withoutEngineCode(
+      article.vehicles.filter(({ engine_codes }) => !engine_codes.length)
+        .length,
+    );
   }
-  if (categorized === false) {
-    summary.needs_category.push(article.number);
-  }
-  summary.imported += Number(!created);
-  summary.created += Number(created);
+  tally.imported(
+    created
+      ? 'created'
+      : changedPartId || offerChanged
+        ? 'updated'
+        : 'unchanged',
+  );
 }
 
 const oneAtATime = () => {
@@ -516,13 +527,16 @@ async function eachAtOnce<T>(
   );
 }
 
+const listedKey = (brandId: string, { number }: Article) =>
+  `${brandId} ${partNumberKey(number)}`;
+
 const sameNumberRuns = (
   articles: Article[],
   brandOf: (article: Article) => string | undefined,
 ): Article[][] => {
   const runs = new Map<string, Article[]>();
   for (const article of articles) {
-    const key = `${brandOf(article)} ${normalizePartNumber(article.number)}`;
+    const key = `${brandOf(article)} ${partNumberKey(article.number)}`;
     runs.set(key, [...(runs.get(key) ?? []), article]);
   }
   return [...runs.values()];
@@ -532,32 +546,17 @@ const sameNumberRuns = (
 export async function importSupplier(
   scope: MedusaContainer,
   adapter: SupplierAdapter,
-  onPage?: (progress: ImportSummary) => Promise<unknown>,
+  onProgress?: (progress: ImportSummary) => Promise<unknown>,
 ): Promise<ImportSummary> {
   const catalog: CatalogModuleService = scope.resolve(CATALOG_MODULE);
   const suppliers: SupplierModuleService = scope.resolve(SUPPLIER_MODULE);
   const { IMPORT_CONCURRENCY } = parseEnv(process.env);
-  const [supplier] = await suppliers.listSuppliers({ name: adapter.name });
+  const supplier = await suppliers.supplierByKey(adapter.key);
   if (!supplier) {
-    throw new Error(`No Supplier is named ${adapter.name}`);
+    throw new Error(`No Supplier has the key ${adapter.key}`);
   }
-  const summary: ImportSummary = {
-    supplier: adapter.name,
-    imported: 0,
-    created: 0,
-    skipped: 0,
-    skipped_by_reason: {
-      brand: 0,
-      currency: 0,
-      unreadable: 0,
-      no_engine_code: 0,
-      not_in_scope: 0,
-    },
-    needs_category: [],
-    missing_fields: [],
-    unanswered: [],
-    failed: [],
-  };
+  const tally = importTally(supplier.name);
+  const { summary } = tally;
   const context: Context = {
     scope,
     adapter,
@@ -568,7 +567,7 @@ export async function importSupplier(
     categories: await categoryChoices(catalog),
     logger: scope.resolve(ContainerRegistrationKeys.LOGGER),
     matched: new Set(),
-    vehicles: vehicleMatcher(catalog, adapter.name, supplier.id),
+    vehicles: vehicleMatcher(catalog, adapter.key, supplier.id),
     storage: shopStorage(scope),
     summary,
     descriptions: new Set(),
@@ -576,16 +575,14 @@ export async function importSupplier(
   };
   if (!context.storage) {
     context.logger.warn(
-      `${adapter.name}: S3 is not configured, so AI answers are not cached and every article is asked again`,
+      `${adapter.key}: S3 is not configured, so AI answers are not cached and every article is asked again`,
     );
   }
-  const categoryOf = new Map(
-    (
-      await suppliers.listSupplierCategories(
-        { supplier_id: supplier.id },
-        { take: null },
-      )
-    ).map(({ code_key, category_id }) => [code_key, category_id]),
+  const scopeOf = categoryScope(
+    await suppliers.listSupplierCategories(
+      { supplier_id: supplier.id },
+      { select: ['code', 'category_id'], take: null },
+    ),
   );
   const brandOf = new Map(
     (
@@ -596,47 +593,63 @@ export async function importSupplier(
     ).map(({ value_key, brand_id }) => [value_key, brand_id]),
   );
   const brandOfArticle = (article: Article) =>
-    brandOf.get(spellingKey(article.brand));
-  const categoryOfArticle = (article: Article) =>
-    categoryOf.get(spellingKey(article.category));
+    brandOf.get(nameKey(article.brand));
   const state: ImportState = {
-    summary,
+    tally,
     listed: new Set(),
-    listedNumbers: new Set(),
+    listedBrandNumbers: new Set(),
     changedPartIds: new Set(),
   };
+  const categoryOfArticle = new Map<Article, string>();
+  const inScope = (article: Article) => {
+    const decision = scopeOf(article.category);
+    if ('categoryId' in decision) {
+      categoryOfArticle.set(article, decision.categoryId);
+      return true;
+    }
+    if (decision.skipped === 'unmapped') tally.unmapped(article.category);
+    else tally.skip('excluded');
+    return false;
+  };
   const unreadableUrls = new Set<string>();
+  let reported: Promise<unknown> = Promise.resolve();
+  const report = () =>
+    (reported = reported.then(() => onProgress?.(structuredClone(summary))));
+  let handled = 0;
 
   for (let cursor: string | null = null; ;) {
     const page = cataloguePageSchema.parse(await adapter.listCatalogue(cursor));
     for (const { url, reason } of page.unreadable) {
       unreadableUrls.add(url);
       context.logger.warn(
-        `${adapter.name}: skipped unreadable ${url}: ${reason}`,
+        `${adapter.key}: skipped unreadable ${url}: ${reason}`,
       );
     }
-    summary.skipped += page.unreadable.length;
-    summary.skipped_by_reason.unreadable += page.unreadable.length;
-    summary.skipped += page.not_in_scope;
-    summary.skipped_by_reason.not_in_scope += page.not_in_scope;
-    for (const { number } of page.articles) {
-      state.listedNumbers.add(normalizePartNumber(number));
-    }
-    const wanted = page.articles.filter(brandOfArticle);
-    const unbranded = page.articles.length - wanted.length;
-    summary.skipped += unbranded;
-    summary.skipped_by_reason.brand += unbranded;
-    const quoted = wanted.length
-      ? z
-          .array(supplierQuoteSchema)
-          .parse(
-            await adapter.quote(wanted.map(({ article_id }) => article_id)),
-          )
-      : [];
-    const quotes = new Map(
-      quoted.filter(inShopCurrency).map((quote) => [quote.article_id, quote]),
+    tally.skip('unreadable', page.unreadable.length);
+    tally.skip('not_in_scope', page.not_in_scope);
+    const branded = page.articles.filter(brandOfArticle);
+    const numbered = branded.filter(({ number }) =>
+      normalizePartNumber(number),
     );
-    summary.skipped_by_reason.currency += quoted.length - quotes.size;
+    for (const article of numbered) {
+      state.listedBrandNumbers.add(
+        listedKey(brandOfArticle(article)!, article),
+      );
+    }
+    tally.skip('brand', page.articles.length - branded.length);
+    tally.skip('no_number', branded.length - numbered.length);
+    const wanted = numbered.filter(inScope);
+    const { quotes: quoted, refused } = wanted.length
+      ? parsedQuotes(
+          z
+            .array(z.unknown())
+            .parse(
+              await adapter.quote(wanted.map(({ article_id }) => article_id)),
+            ),
+        )
+      : { quotes: [], refused: 0 };
+    const quotes = new Map(quoted.map((quote) => [quote.article_id, quote]));
+    tally.skip('currency', refused);
     const importOne = async (article: Article) => {
       try {
         await importArticle(
@@ -644,12 +657,12 @@ export async function importSupplier(
           state,
           article,
           brandOfArticle(article)!,
-          categoryOfArticle(article),
+          categoryOfArticle.get(article)!,
           quotes.get(article.article_id),
         );
       } catch (error) {
         context.logger.warn(
-          `Supplier import ${adapter.name}, ${article.number}: failed, ${errorMessage(error)}`,
+          `Supplier import ${adapter.key}, ${article.number}: failed, ${errorMessage(error)}`,
         );
         summary.failed.push({
           number: article.number,
@@ -657,6 +670,8 @@ export async function importSupplier(
         });
         state.listed.add(article.article_id);
       }
+      handled += 1;
+      if (handled % PROGRESS_EVERY === 0) await report();
     };
     await eachAtOnce(
       sameNumberRuns(wanted, brandOfArticle),
@@ -665,7 +680,7 @@ export async function importSupplier(
         for (const article of run) await importOne(article);
       },
     );
-    await onPage?.(structuredClone(summary));
+    await report();
     if (!page.next) {
       break;
     }
@@ -674,7 +689,7 @@ export async function importSupplier(
 
   if (unreadableUrls.size) {
     context.logger.warn(
-      `${adapter.name}: kept the offers of unlisted articles, ${unreadableUrls.size} pages were unreadable`,
+      `${adapter.key}: kept the offers of unlisted articles, ${unreadableUrls.size} pages were unreadable`,
     );
   } else {
     const dropped = await suppliers.dropUnlistedOffers(supplier.id, [
@@ -691,8 +706,8 @@ export async function importSupplier(
     }
   }
   await catalog.flagUnlistedParts(
-    adapter.name,
-    [...state.listedNumbers],
+    adapter.key,
+    [...state.listedBrandNumbers],
     [...unreadableUrls],
   );
   await emitIndexChanges(scope, { partIds: state.changedPartIds });
@@ -705,12 +720,12 @@ export async function importSupplierCatalogues(
   const suppliers: SupplierModuleService = scope.resolve(SUPPLIER_MODULE);
   const skipped = new Set(
     (await suppliers.listSuppliers({ import_enabled: false })).map(
-      ({ name }) => name,
+      ({ key }) => key,
     ),
   );
   const summaries: ImportSummary[] = [];
   for (const adapter of supplierAdapters(scope)) {
-    if (skipped.has(adapter.name)) {
+    if (skipped.has(adapter.key)) {
       continue;
     }
     summaries.push(await importSupplier(scope, adapter));

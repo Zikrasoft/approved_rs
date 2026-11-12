@@ -10,6 +10,7 @@ import { createNotifier } from './notify.ts';
 import { LEAD_STATUSES } from '../schema.ts';
 import type { StoredLead } from '../schema.ts';
 import type { LedgerOperation } from '../ledgerStore.ts';
+import type { VisitorVinLookup } from '../visitorSearchesWire.ts';
 
 import { buildSearchResults, buildMenu, buildOpenList } from './menu.ts';
 import {
@@ -1694,5 +1695,91 @@ describe('the Lead topic', () => {
     expect(urls(formatter.deepLinkKeyboard(makeLead()))).not.toContain(
       'https://t.me/c/9876543210/9',
     );
+  });
+});
+
+describe('the VIN searches of the visitor behind a Lead', () => {
+  const VISITOR = '0f8fad5b-d9cb-469f-a165-70867728950e';
+  const searched = (overrides: Partial<VisitorVinLookup> = {}) => ({
+    make: 'BMW',
+    model: '116d E81',
+    vin_last4: '1234',
+    at: '2026-11-10T09:00:00.000Z',
+    vehicle: null,
+    ...overrides,
+  });
+  const SEARCHES = [
+    searched(),
+    searched({ vehicle: 'BMW 3 серия F30 320d, B47D20O0', vin_last4: '5678' }),
+    searched({ make: null, model: 'ZZ<9>', vin_last4: null }),
+    searched({ vin_last4: '0000' }),
+  ];
+  const LINES = [
+    '🔎 Искал: BMW 116d E81, VIN …1234',
+    '🔎 Искал: BMW 3 серия F30 320d, B47D20O0, VIN …5678',
+    '🔎 Искал: ZZ&lt;9&gt;',
+  ];
+  const visitorSearches = vi.fn(async () => SEARCHES);
+  const searching = createNotifier({
+    client,
+    formatter,
+    groupId: '-1009876543210',
+    ownerIds: [111],
+    adminIds: [222],
+    visitorSearches,
+  });
+  const lead = makeLead({
+    visitorId: VISITOR,
+    telegramChatId: -1009876543210,
+    telegramMessageId: 555,
+  });
+
+  beforeEach(() => {
+    mockFetchOk();
+    visitorSearches.mockClear();
+  });
+  afterEach(() => mockFetch.mockReset());
+
+  const sentText = () => JSON.parse(mockFetch.mock.calls[0][1].body).text;
+
+  it('lists at most three searches on the card, without the full VIN', () => {
+    const text = formatter.formatTeaser(lead, SEARCHES);
+    expect(text).toContain(LINES.join('\n'));
+    expect(text).not.toContain('0000');
+  });
+
+  it('lists them on the DM detail', () => {
+    expect(formatter.buildLeadDetail(lead, 'owner', SEARCHES).text).toContain(
+      LINES.join('\n'),
+    );
+  });
+
+  it('adds nothing for a visitor who searched nothing', () => {
+    expect(formatter.formatTeaser(lead)).not.toContain('🔎');
+    expect(formatter.buildLeadDetail(lead, 'owner').text).not.toContain('🔎');
+  });
+
+  it('fetches them for the card the group gets', async () => {
+    await searching.sendLeadNotification(lead);
+    expect(visitorSearches).toHaveBeenCalledWith(lead);
+    expect(sentText()).toContain(LINES[0]);
+  });
+
+  it('fetches them again when the card is redrawn', async () => {
+    await searching.refreshLeadCard(lead);
+    expect(sentText()).toContain(LINES[0]);
+  });
+
+  it('fetches them for the DM detail, edited or sent', async () => {
+    await searching.editLeadDetailMessage(111, 555, lead, 'owner');
+    expect(sentText()).toContain(LINES[0]);
+    expect((await searching.leadDetail(lead, 'admin')).text).toContain(
+      LINES[0],
+    );
+  });
+
+  it('asks nobody by default', async () => {
+    expect((await notifier.leadDetail(lead, 'owner')).text).not.toContain('🔎');
+    expect(mockFetch).not.toHaveBeenCalled();
   });
 });

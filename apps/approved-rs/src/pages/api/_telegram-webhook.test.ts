@@ -12,6 +12,8 @@ import type { StoredLead } from '@/lib/store';
 const memory = vi.hoisted(() => {
   process.env.TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB =
     '1003:test-carlab-capture-token';
+  process.env.SHOP_API_URL = 'https://shop.test';
+  process.env.SHOP_VISITOR_SEARCHES_SECRET = 'test-visitor-searches-secret';
   const storages = new Map<string, MemoryStorage>();
   return {
     storages,
@@ -62,7 +64,25 @@ import {
 import { ledgerStore } from '@/lib/crm';
 
 const api = recordBotApi();
-vi.stubGlobal('fetch', api.fetch);
+const VISITOR = '0f8fad5b-d9cb-469f-a165-70867728950e';
+const shopFetch = vi.fn((url: string | URL | Request, init?: RequestInit) =>
+  String(url) === `https://shop.test/hooks/visitors/${VISITOR}/vin-lookups`
+    ? Promise.resolve(
+        Response.json({
+          lookups: [
+            {
+              make: 'BMW',
+              model: '116d E81',
+              vin_last4: '1234',
+              at: '2026-11-10T09:00:00.000Z',
+              vehicle: null,
+            },
+          ],
+        }),
+      )
+    : api.fetch(url, init),
+);
+vi.stubGlobal('fetch', shopFetch);
 
 const SECRET = 'test-webhook-secret';
 const CRM_TOKEN = '1001:test-bot-token';
@@ -1655,6 +1675,20 @@ describe('POST /api/telegram-webhook', () => {
       expect(sentTo(OWNER_ID)).toEqual([
         view(buildLeadDetail(await stored(), 'owner')),
       ]);
+    });
+
+    it("/start lead_<id> lists the VIN searches of a CarLab Lead's visitor", async () => {
+      seed(makeLead({ brand: 'CarLab', visitorId: VISITOR }));
+      await message('/start lead_5', OWNER_ID);
+      expect(textsTo(OWNER_ID)[0]).toContain(
+        '🔎 Искал: BMW 116d E81, VIN …1234',
+      );
+    });
+
+    it('/start lead_<id> never asks the shop about an Approved.rs Lead', async () => {
+      seed(makeLead({ visitorId: VISITOR }));
+      await message('/start lead_5', OWNER_ID);
+      expect(textsTo(OWNER_ID)[0]).not.toContain('🔎 Искал');
     });
 
     it('/start lead_<id> for an unknown lead falls back to the menu', async () => {

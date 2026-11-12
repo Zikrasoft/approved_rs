@@ -32,6 +32,10 @@ const Part = model
   .indexes([{ on: ['source'] }])
   .checks([
     { name: 'part_installation_price', expression: 'installation_price >= 0' },
+    {
+      name: 'part_not_replaced_by_itself',
+      expression: 'replaced_by_id <> id',
+    },
   ]);
 
 export default Part;

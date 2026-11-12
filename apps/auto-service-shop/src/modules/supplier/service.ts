@@ -11,7 +11,7 @@ import {
 import type { PartOffer, STAGED_DATA_KINDS } from '@podbor/catalog-contract';
 
 import { runBoundSql } from '../_shared/bound-sql';
-import { spellingKey } from '../_shared/spelling';
+import { nameKey } from '../_shared/keys';
 
 import StagedRecord from './models/staged-record';
 import Supplier from './models/supplier';
@@ -32,7 +32,7 @@ type CodeInput = { code: string } & Record<string, unknown>;
 
 const withCodeKey = (row: CodeInput) => ({
   ...row,
-  code_key: spellingKey(row.code),
+  code_key: nameKey(row.code),
 });
 
 export type SupplierOfferInput = {
@@ -40,7 +40,6 @@ export type SupplierOfferInput = {
   supplier_article_id: string;
   part_identifier_id: string;
   cost_price: number;
-  currency?: string;
   stock_quantity: number;
   stock_by_location?: Record<string, number>;
   lead_time_days: number;
@@ -65,6 +64,19 @@ class SupplierModuleService extends SupplierModuleBase {
       Array.isArray(data) ? data.map(withCodeKey) : withCodeKey(data),
       sharedContext,
     )) as SupplierModuleBase['createSupplierCategories'];
+
+  @InjectManager()
+  async supplierByKey(
+    key: string,
+    @MedusaContext() sharedContext: Context = {},
+  ) {
+    const [supplier] = await this.listSuppliers(
+      { key },
+      { take: 1 },
+      sharedContext,
+    );
+    return supplier ?? null;
+  }
 
   @InjectTransactionManager()
   async upsertSupplierOffer(

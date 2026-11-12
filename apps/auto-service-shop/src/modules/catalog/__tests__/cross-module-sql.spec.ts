@@ -16,7 +16,7 @@ const STATEMENTS: [string, string, Knex.RawBinding[]][] = [
   ['REFRESH_LISTED', REFRESH_LISTED, []],
   ['PUBLISHED_PAGE', PUBLISHED_PAGE, [null, null, 10]],
   ['LISTED_PART_COUNTS', LISTED_PART_COUNTS, [[], [], [], 2, 2]],
-  ['UNRESOLVED_VIN_CODES', UNRESOLVED_VIN_CODES, [0, 10]],
+  ['UNRESOLVED_VIN_CODES', UNRESOLVED_VIN_CODES, [[], true, 0, 10]],
   ...ORPHAN_SWEEPS.map((sql, index): [string, string, Knex.RawBinding[]] => [
     `ORPHAN_SWEEPS[${index}]`,
     sql,

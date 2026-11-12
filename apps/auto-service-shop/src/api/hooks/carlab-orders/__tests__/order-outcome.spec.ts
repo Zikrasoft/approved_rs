@@ -72,7 +72,7 @@ medusaIntegrationTestRunner({
           });
         });
         await new Promise<void>((resolve) => leadRoute.listen(0, resolve));
-        process.env.LEAD_ROUTE_URL = `http://localhost:${(leadRoute.address() as AddressInfo).port}/api/leads`;
+        process.env.STOREFRONT_ORIGIN = `http://localhost:${(leadRoute.address() as AddressInfo).port}`;
         process.env.SHOP_LEAD_SECRET = SHOP_LEAD_SECRET;
         process.env.SHOP_ORDER_OUTCOME_SECRET = SHOP_ORDER_OUTCOME_SECRET;
 
@@ -90,7 +90,7 @@ medusaIntegrationTestRunner({
       });
 
       afterAll(async () => {
-        delete process.env.LEAD_ROUTE_URL;
+        delete process.env.STOREFRONT_ORIGIN;
         delete process.env.SHOP_LEAD_SECRET;
         delete process.env.SHOP_ORDER_OUTCOME_SECRET;
         await new Promise((resolve) => leadRoute.close(resolve));

@@ -1,4 +1,4 @@
-import { spellingKey } from '../../modules/_shared/spelling';
+import { nameKey } from '../../modules/_shared/keys';
 
 export const CAR_MAKES: Record<string, string[]> = {
   'Alfa Romeo': [],
@@ -7,6 +7,7 @@ export const CAR_MAKES: Record<string, string[]> = {
   Audi: [],
   Bentley: [],
   BMW: [],
+  BMC: [],
   BYD: [],
   Cadillac: [],
   Chevrolet: ['CHEVROLET EUROPE / DAEWOO'],
@@ -15,20 +16,26 @@ export const CAR_MAKES: Record<string, string[]> = {
   Cupra: [],
   Dacia: [],
   Daewoo: [],
+  DAF: ['DAF TRUCKS'],
   Daihatsu: [],
   Dodge: [],
+  Dongfeng: [],
   DS: ['DS AUTOMOBILES'],
+  ERF: [],
   Ferrari: [],
   Fiat: [],
+  Foden: [],
   Ford: ['FORD USA'],
+  Freightliner: [],
   Genesis: [],
   Honda: [],
   Hyundai: [],
   Infiniti: [],
   Isuzu: [],
-  Iveco: [],
+  Iveco: ['IVECO BUS', 'IRISBUS'],
   Jaguar: [],
   Jeep: [],
+  KamAZ: [],
   Kia: ['KIA MOTORS'],
   Lada: [],
   Lamborghini: ['LAMBORGHINI AUTOMOBILI'],
@@ -38,11 +45,12 @@ export const CAR_MAKES: Record<string, string[]> = {
   Lexus: [],
   Lotus: [],
   'Lynk & Co': [],
+  MAN: [],
   Maserati: [],
   Maxus: [],
   Mazda: [],
   McLaren: [],
-  'Mercedes-Benz': [],
+  'Mercedes-Benz': ['MERCEDES-BENZ TRUCKS'],
   MG: [],
   MINI: [],
   Mitsubishi: [],
@@ -53,20 +61,28 @@ export const CAR_MAKES: Record<string, string[]> = {
   Porsche: [],
   Ram: [],
   Renault: [],
+  'Renault Trucks': [],
   'Rolls-Royce': [],
   Rover: [],
   Saab: [],
+  Scania: [],
   SEAT: [],
+  Sisu: ['SISU AUTO'],
   Škoda: ['SKODA'],
   Smart: [],
   SsangYong: ['KGM'],
   Subaru: [],
   Suzuki: [],
+  'Tata Daewoo': ['DAEWOO / TATA-DAEWOO'],
+  Tatra: [],
   Tesla: [],
   Toyota: [],
-  Vauxhall: [],
+  'Van Hool': [],
+  Vauxhall: ['VAUXHALL-BEDFORD'],
+  VDL: ['VDL BUS + COACH', 'DAF BUS'],
   Volkswagen: ['VW', 'VW (VOLKSWAGEN)', 'Volkswagen (VW)'],
   Volvo: ['VOLVO CARS'],
+  'Volvo Trucks': [],
   Zastava: [],
 };
 
@@ -86,10 +102,10 @@ const CAR_MAKE_NAMES = new Map(
   [
     ...Object.keys(CAR_MAKES).map((name) => [name, name]),
     ...Object.entries(MAKE_ALIASES),
-  ].map(([spelling, name]) => [spellingKey(spelling), name]),
+  ].map(([spelling, name]) => [nameKey(spelling), name]),
 );
 
 export const carMakeName = (spelling: string): string | null =>
-  CAR_MAKE_NAMES.get(spellingKey(spelling)) ??
-  CAR_MAKE_NAMES.get(spellingKey(withoutOwner(spelling))) ??
+  CAR_MAKE_NAMES.get(nameKey(spelling)) ??
+  CAR_MAKE_NAMES.get(nameKey(withoutOwner(spelling))) ??
   null;

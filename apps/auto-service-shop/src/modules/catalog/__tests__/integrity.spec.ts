@@ -180,7 +180,7 @@ medusaIntegrationTestRunner({
           },
         });
 
-        expect(applied).toEqual({ changed: true, categorized: true });
+        expect(applied).toEqual({ changed: true });
         expect(await catalog.retrievePart(id)).toMatchObject({
           name: 'Staff name',
           source_name: null,
@@ -202,7 +202,7 @@ medusaIntegrationTestRunner({
           classification: { category_id: second.category.id, attributes: {} },
         });
 
-        expect(applied).toEqual({ changed: false, categorized: undefined });
+        expect(applied).toEqual({ changed: false });
         expect(await catalog.retrievePart(id)).toMatchObject({
           category_id: first.category.id,
           description: 'Earlier text',
@@ -221,21 +221,69 @@ medusaIntegrationTestRunner({
           },
         });
 
-        expect(applied).toEqual({ changed: true, categorized: false });
+        expect(applied).toEqual({ changed: true });
         expect(await catalog.retrievePart(id)).toMatchObject({
           name: 'AI name',
           category_id: null,
         });
       });
 
-      it('counts a classification without a Category as not filed', async () => {
+      it('changes nothing for a classification without a Category', async () => {
         const id = await part();
 
         expect(
           await catalog.applySourceChange(id, {
             classification: { category_id: null, attributes: {} },
           }),
-        ).toEqual({ changed: false, categorized: false });
+        ).toEqual({ changed: false });
+      });
+
+      it('refreshes the attributes of a Part filed under the same Category, and only when they change', async () => {
+        const { category } = await oilCategory();
+        const id = await part();
+        const classified = (viscosity: string) => ({
+          classification: {
+            category_id: category.id,
+            attributes: { viscosity },
+          },
+        });
+        await catalog.applySourceChange(id, classified('0w-20'));
+
+        const same = await catalog.applySourceChange(id, classified('0w-20'));
+        const moved = await catalog.applySourceChange(id, classified('5w-30'));
+        const refused = await catalog.applySourceChange(id, classified('nope'));
+
+        expect([same, moved, refused]).toEqual([
+          { changed: false },
+          { changed: true },
+          { changed: false },
+        ]);
+        expect((await catalog.retrievePart(id)).attributes).toEqual({
+          viscosity: '5w-30',
+        });
+      });
+
+      it('never refreshes attributes a person edited', async () => {
+        const { category } = await oilCategory();
+        const id = await part();
+        await catalog.editPart(
+          id,
+          { category_id: category.id, attributes: { viscosity: '0w-20' } },
+          'user_staff',
+        );
+
+        const applied = await catalog.applySourceChange(id, {
+          classification: {
+            category_id: category.id,
+            attributes: { viscosity: '5w-30' },
+          },
+        });
+
+        expect(applied).toEqual({ changed: false });
+        expect(await catalog.retrievePart(id)).toMatchObject({
+          attributes: { viscosity: '0w-20' },
+          edited_fields: expect.arrayContaining(['attributes']),
+        });
       });
 
       it('passes on an error other than a refusal of the attributes', async () => {
@@ -262,7 +310,7 @@ medusaIntegrationTestRunner({
         );
 
         expect(raced).toEqual({
-          value: { changed: false, categorized: undefined },
+          value: { changed: false },
         });
         expect((await catalog.retrievePart(id)).name).toBe('Staff name');
       });

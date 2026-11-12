@@ -5,6 +5,7 @@ import { globSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 
 import { schemaProblems, SNAPSHOT_TABLES } from '../../../lib/schema-check';
+import { codeKey, nameKey } from '../../_shared/keys';
 import orderTimeIndexes from '../../../migration-scripts/order-time-indexes';
 import checkSchema from '../../../scripts/check-schema';
 
@@ -51,8 +52,8 @@ medusaIntegrationTestRunner({
         ],
         [
           'the unresolved VIN codes',
-          `select make, code, count(*) from vin_lookup where vehicle_id is null and code is not null and deleted_at is null group by make, code`,
-          /Index.*IDX_vin_lookup_make_code/,
+          `select make_key, code, count(*) from vin_lookup where vehicle_id is null and code is not null and deleted_at is null group by make_key, code`,
+          /Index.*IDX_vin_lookup_make_key_code/,
         ],
         [
           'the VIN lookups of a Vehicle',
@@ -145,6 +146,16 @@ medusaIntegrationTestRunner({
           'a column left at the generated type',
           ['alter table requirement alter column min type real'],
           'requirement.min: expected numeric, found real',
+        ],
+        [
+          'a retired-slug index left unique over nulls',
+          [
+            'drop index "IDX_slug_redirect_kind_scope_id_from_slug_unique"',
+            `create unique index "IDX_slug_redirect_kind_scope_id_from_slug_unique" on slug_redirect (kind, scope_id, from_slug) where kind <> 'part' and deleted_at is null`,
+          ],
+          expect.stringMatching(
+            /^IDX_slug_redirect_kind_scope_id_from_slug_unique is defined as/,
+          ),
         ],
         [
           'a missing hand-written index',
@@ -280,6 +291,7 @@ medusaIntegrationTestRunner({
           'supplier',
           {
             id: 's',
+            key: 'varta',
             name: 's',
             markup_percentage: 10,
             released_kinds: ['prices'],
@@ -288,8 +300,13 @@ medusaIntegrationTestRunner({
         ],
         [
           'supplier',
-          { id: 's', name: 's', markup_percentage: -1 },
+          { id: 's', key: 'varta', name: 's', markup_percentage: -1 },
           'supplier_markup_percentage',
+        ],
+        [
+          'supplier',
+          { id: 's', key: 'Varta', name: 's', markup_percentage: 0 },
+          'supplier_key_check',
         ],
         [
           'vin_lookup',
@@ -297,9 +314,31 @@ medusaIntegrationTestRunner({
           'vin_lookup_code_type_needs_code',
         ],
         [
+          'part',
+          { id: 'p', name: 'p', replaced_by_id: 'p' },
+          'part_not_replaced_by_itself',
+        ],
+        [
           'vin_lookup',
           { id: 'l', facts: {}, code: 'X', code_type: 'bogus' },
           'vin_lookup_code_type_check',
+        ],
+        [
+          'part_identifier',
+          {
+            id: 'pi',
+            type: 'oem',
+            value: 'w 712',
+            normalized_value: 'W 712',
+            brand_id: 'b',
+            part_id: 'p',
+          },
+          'part_identifier_normalized_value_key',
+        ],
+        [
+          'rejected_number',
+          { id: 'r', brand_id: 'b', normalized_value: '' },
+          'rejected_number_normalized_value_key',
         ],
       ])('refuses a %s row breaking %#', async (table, row, constraint) => {
         expect(await refusal(table, row)).toBe(constraint);
@@ -323,12 +362,14 @@ medusaIntegrationTestRunner({
           'supplier',
           {
             id: 's',
+            key: 'varta',
             name: 's',
             markup_percentage: 0,
             released_kinds: ['images'],
           },
         ],
         ['vin_lookup', { id: 'l', facts: {}, code: 'X', code_type: null }],
+        ['vehicle', { id: 'v', slug: 'v', model_id: 'm', engine_id: null }],
       ])('accepts a valid %s row', async (table, row) => {
         expect(await refusal(table, row)).toBeNull();
       });
@@ -347,6 +388,190 @@ medusaIntegrationTestRunner({
         });
         await pg()('slug_redirect').where({ id: 'sr1' }).delete();
       });
+
+      const secondRefusal = async (
+        table: string,
+        first: Record<string, unknown>,
+        second: Record<string, unknown>,
+      ) => {
+        const trx = await pg().transaction();
+        try {
+          await trx.raw('set local session_replication_role = replica');
+          await trx(table).insert(first);
+          await trx(table).insert(second);
+          return null;
+        } catch (error) {
+          return (error as { constraint?: string }).constraint;
+        } finally {
+          await trx.rollback();
+        }
+      };
+      const engine = (id: string, code: string) => ({
+        id,
+        code,
+        family: 'N47',
+      });
+      const chassis = (id: string, code: string, series_id = 's') => ({
+        id,
+        code,
+        series_id,
+      });
+      const rejected = (id: string) => ({
+        id,
+        brand_id: 'b',
+        normalized_value: 'W71295',
+      });
+      const retired = (
+        id: string,
+        kind: string,
+        scope_id: string | null,
+        deleted_at: string | null = null,
+      ) => ({
+        id,
+        kind,
+        from_id: `${id}-row`,
+        from_slug: 'oil-filters',
+        scope_id,
+        deleted_at,
+      });
+      const spelling = (id: string, value: string, value_key: string) => ({
+        id,
+        supplier_id: 's',
+        value,
+        value_key,
+        brand_id: 'b',
+      });
+
+      it.each([
+        [
+          'an engine code spelled with a space and a hyphen',
+          'engine',
+          engine('e1', 'N47 D20'),
+          engine('e2', 'n47-d20'),
+          'IDX_engine_code_key_unique',
+        ],
+        [
+          'a chassis code of one series spelled another way',
+          'chassis',
+          chassis('c1', 'E90'),
+          chassis('c2', 'e 90'),
+          'IDX_chassis_series_id_code_key_unique',
+        ],
+        [
+          'a Category slug retired twice',
+          'slug_redirect',
+          retired('sr1', 'category', null),
+          retired('sr2', 'category', null),
+          'IDX_slug_redirect_kind_scope_id_from_slug_unique',
+        ],
+        [
+          'a Model slug retired twice under one Make',
+          'slug_redirect',
+          retired('sr1', 'model', 'make_1'),
+          retired('sr2', 'model', 'make_1'),
+          'IDX_slug_redirect_kind_scope_id_from_slug_unique',
+        ],
+        [
+          'a number already rejected for the Brand',
+          'rejected_number',
+          rejected('r1'),
+          rejected('r2'),
+          'IDX_rejected_number_brand_id_normalized_value_unique',
+        ],
+      ])('refuses %s', async (_, table, first, second, constraint) => {
+        expect(await secondRefusal(table, first, second)).toBe(constraint);
+      });
+
+      it.each([
+        [
+          'one chassis code in two series',
+          'chassis',
+          chassis('c1', 'E90', 's1'),
+          chassis('c2', 'E90', 's2'),
+        ],
+        [
+          'one Model slug retired under two Makes',
+          'slug_redirect',
+          retired('sr1', 'model', 'make_1'),
+          retired('sr2', 'model', 'make_2'),
+        ],
+        [
+          'a slug retired again after its redirect was deleted',
+          'slug_redirect',
+          retired('sr1', 'category', null, '2026-01-01'),
+          retired('sr2', 'category', null),
+        ],
+        [
+          'a Brand spelling key taken by the value check alone',
+          'brand_spelling',
+          spelling('bs1', 'MANN', 'MANN'),
+          spelling('bs2', 'MANN', 'MANN-FILTER'),
+        ],
+      ])('accepts %s', async (_, table, first, second) => {
+        expect(await secondRefusal(table, first, second)).toBeNull();
+      });
+
+      it.each([
+        ['Lemförder', 'LEMFORDER'],
+        ['Citroën', 'citroen'],
+        ['MANN-FILTER', 'mann filter'],
+        ['Febi  Bilstein', 'FEBI.BILSTEIN'],
+        ['Ｂｏｓｃｈ', 'BOSCH'],
+        ['Blue Print', 'Blueprint'],
+        ['Febi', 'Febi Bilstein'],
+      ])('keys Brand names %j and %j the way nameKey does', async (a, b) => {
+        const brand = (id: string, name: string) => ({ id, name, slug: id });
+        expect(
+          await secondRefusal('brand', brand('b1', a), brand('b2', b)),
+        ).toBe(nameKey(a) === nameKey(b) ? 'IDX_brand_name_key_unique' : null);
+      });
+
+      it.each([
+        ['N47 D20', 'n47-d20'],
+        ['OM 654.920', 'OM654920'],
+        ['E90/E91', 'E90E91'],
+        ['N47', 'N57'],
+      ])('keys engine codes %j and %j the way codeKey does', async (a, b) => {
+        expect(
+          await secondRefusal('engine', engine('e1', a), engine('e2', b)),
+        ).toBe(codeKey(a) === codeKey(b) ? 'IDX_engine_code_key_unique' : null);
+      });
+
+      it('refuses a second global alias with one key', async () => {
+        const alias = (id: string, brand_id: string) => ({
+          id,
+          supplier_id: null,
+          value: 'febi bilstein',
+          value_key: 'FEBI BILSTEIN',
+          brand_id,
+        });
+        expect(
+          await secondRefusal(
+            'brand_spelling',
+            alias('a1', 'b1'),
+            alias('a2', 'b2'),
+          ),
+        ).toBe('IDX_brand_spelling_value_key_unique');
+      });
+
+      it.each([
+        ['brand', 'IDX_brand_name_unique'],
+        ['brand_spelling', 'IDX_brand_spelling_supplier_id_value_unique'],
+        ['make_spelling', 'IDX_make_spelling_supplier_id_value_unique'],
+        ['engine', 'IDX_engine_code_unique'],
+        ['chassis', 'IDX_chassis_series_id_code_unique'],
+      ])(
+        'keeps no raw unique index on %s beside its key',
+        async (table, index) => {
+          const { rows } = await pg().raw(
+            'select indexname from pg_indexes where tablename = ?',
+            [table],
+          );
+          expect(
+            rows.map(({ indexname }: { indexname: string }) => indexname),
+          ).not.toContain(index);
+        },
+      );
     });
   },
 });

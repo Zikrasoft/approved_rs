@@ -3,6 +3,7 @@ import { displayEnum } from './displayEnum.ts';
 import { requirementSchema } from './attributes.ts';
 import { pageFields } from './page.ts';
 import { STEERING_SIDES } from './steering.ts';
+import { translationsSchema } from './translations.ts';
 import { vinOf } from '@podbor/lead-crm/vin';
 
 export { STEERING_SIDES, type SteeringSide } from './steering.ts';
@@ -18,7 +19,16 @@ export const VEHICLE_IDENTIFIER_TYPES = [
   SUPPLIER_VEHICLE_ID,
 ] as const;
 export const VEHICLE_DRIVES = ['rwd', 'fwd', 'awd'] as const;
-export const ENGINE_FUELS = ['petrol', 'diesel', 'hybrid', 'electric'] as const;
+export const ENGINE_FUELS = [
+  'petrol',
+  'diesel',
+  'hybrid',
+  'mild-hybrid',
+  'plug-in-hybrid',
+  'electric',
+  'lpg',
+  'cng',
+] as const;
 export const BODY_STYLES = [
   'sedan',
   'touring',
@@ -27,16 +37,26 @@ export const BODY_STYLES = [
   'convertible',
   'gran-coupe',
   'suv',
+  'crossover',
+  'minivan',
   'van',
+  'pickup',
 ] as const;
 
 export type VehicleIdentifierType = (typeof VEHICLE_IDENTIFIER_TYPES)[number];
 export type ManufacturerVehicleIdentifierType =
   (typeof MANUFACTURER_VEHICLE_IDENTIFIER_TYPES)[number];
 
-const translationsSchema = z
+const flatSeriesTranslationsSchema = z
   .object({ sr: z.string().optional(), en: z.string().optional() })
-  .nullable();
+  .transform(({ sr, en }) => ({
+    ...(sr !== undefined && { sr: { name: sr } }),
+    ...(en !== undefined && { en: { name: en } }),
+  }));
+
+const seriesTranslationsSchema = z
+  .union([translationsSchema, flatSeriesTranslationsSchema])
+  .catch(null);
 
 export const vehicleIdentifierSchema = z.object({
   type: displayEnum(VEHICLE_IDENTIFIER_TYPES),
@@ -60,17 +80,19 @@ export const vehicleSchema = z.object({
       body_style: displayEnum(BODY_STYLES),
       series: z.object({
         name: z.string(),
-        translations: translationsSchema,
+        translations: seriesTranslationsSchema,
         make: z.object({ slug: z.string(), name: z.string() }),
       }),
     }),
   }),
-  engine: z.object({
-    code: z.string(),
-    family: z.string(),
-    fuel: displayEnum(ENGINE_FUELS),
-    displacement_cc: z.number().nullable(),
-  }),
+  engine: z
+    .object({
+      code: z.string(),
+      family: z.string(),
+      fuel: displayEnum(ENGINE_FUELS),
+      displacement_cc: z.number().nullable(),
+    })
+    .nullable(),
   identifiers: z.array(vehicleIdentifierSchema),
   requirements: z.array(requirementSchema),
 });
@@ -114,7 +136,7 @@ export const carHitSchema = z.object({
       year_from: true,
       year_to: true,
     })
-    .extend({ engine: vehicleSchema.shape.engine.pick({ code: true }) })
+    .extend({ engine: z.object({ code: z.string() }).nullable() })
     .nullable(),
 });
 
@@ -172,5 +194,41 @@ export const vehicleLabel = ({
   engine,
 }: {
   model: NamedModel;
-  engine: { code: string };
-}): string => `${vehicleName(model).full}, ${engine.code}`;
+  engine: { code: string } | null;
+}): string =>
+  engine
+    ? `${vehicleName(model).full}, ${engine.code}`
+    : vehicleName(model).full;
+
+type GenerationMember = {
+  engine: object | null;
+  power_kw: number | null;
+  year_from: number | null;
+  year_to: number | null;
+  model: { slug: string; chassis: { series: { make: { slug: string } } } };
+};
+
+const sameModel = (a: GenerationMember, b: GenerationMember) =>
+  a.model.slug === b.model.slug &&
+  a.model.chassis.series.make.slug === b.model.chassis.series.make.slug;
+
+const yearsOverlap = (a: GenerationMember, b: GenerationMember) =>
+  (a.year_from ?? -Infinity) <= (b.year_to ?? Infinity) &&
+  (b.year_from ?? -Infinity) <= (a.year_to ?? Infinity);
+
+const powerAgrees = (a: GenerationMember, b: GenerationMember) =>
+  a.power_kw === null || b.power_kw === null || a.power_kw === b.power_kw;
+
+export const generationOf = <Member extends GenerationMember>(
+  vehicle: GenerationMember,
+  vehicles: Member[],
+): Member[] =>
+  vehicle.engine === null
+    ? []
+    : vehicles.filter(
+        (other) =>
+          other.engine === null &&
+          sameModel(vehicle, other) &&
+          yearsOverlap(vehicle, other) &&
+          powerAgrees(vehicle, other),
+      );

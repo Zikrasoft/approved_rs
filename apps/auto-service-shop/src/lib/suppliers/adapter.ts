@@ -7,9 +7,11 @@ import {
 } from '@podbor/catalog-contract';
 import { z } from 'zod';
 
+import { SHOP_CURRENCY } from '../../modules/supplier/pricing';
 import { crawledSupplierAdapter } from '../crawler/adapter';
 import { enabledCrawledSites } from '../crawler/sites';
 import { crawlStore } from '../crawler/store';
+import type { AdapterSupplierKey } from '../../modules/supplier/keys';
 import { parseEnv } from '../env';
 import { shopStorage } from '../storage';
 import { demoAdapters } from './demo-adapter';
@@ -60,8 +62,8 @@ export const cataloguePageSchema = z.object({
 
 export const supplierQuoteSchema = z.object({
   article_id: z.string(),
-  cost_price: z.number().nonnegative(),
-  currency: z.string().length(3),
+  cost_price: z.number().int().nonnegative(),
+  currency: z.literal(SHOP_CURRENCY),
   stock: z.array(
     z.object({
       location: z.string(),
@@ -78,9 +80,9 @@ export type UnreadablePage = z.infer<typeof unreadablePageSchema>;
 export type SupplierQuote = z.input<typeof supplierQuoteSchema>;
 
 export type SupplierAdapter = {
-  name: string;
+  key: AdapterSupplierKey;
   listCatalogue: (cursor: string | null) => Promise<CataloguePage>;
-  quote: (articleIds: string[]) => Promise<SupplierQuote[]>;
+  quote: (articleIds: string[]) => Promise<unknown[]>;
 };
 
 const configuredAdapters = (scope: MedusaContainer): SupplierAdapter[] => {
@@ -101,6 +103,14 @@ const configuredAdapters = (scope: MedusaContainer): SupplierAdapter[] => {
       : []),
     ...crawled,
   ];
+};
+
+export const parsedQuotes = (quotes: unknown[]) => {
+  const parsed = quotes.map((quote) => supplierQuoteSchema.safeParse(quote));
+  return {
+    quotes: parsed.flatMap((result) => (result.success ? [result.data] : [])),
+    refused: parsed.filter((result) => !result.success).length,
+  };
 };
 
 export const supplierAdapters = (scope: MedusaContainer): SupplierAdapter[] =>

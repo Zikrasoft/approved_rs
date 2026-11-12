@@ -59,6 +59,7 @@ import {
   requireOrderOutcomeSecret,
   requireShopEventsSecret,
   requireShopLeadSecret,
+  requireVisitorSearchesSecret,
 } from '../lib/bearer-secret';
 import {
   StoreAddLineAddon,
@@ -305,6 +306,11 @@ export default defineMiddlewares({
       matcher: '/hooks/carlab-orders/:id/case-summary',
       method: 'GET',
       middlewares: [requireShopLeadSecret],
+    },
+    {
+      matcher: '/hooks/visitors/:visitor_id/vin-lookups',
+      method: 'GET',
+      middlewares: [requireVisitorSearchesSecret],
     },
     {
       matcher: '/admin/workshop-quotes',

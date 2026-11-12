@@ -34,6 +34,29 @@ describe('categorySchema', () => {
     expect(categorySchema.parse(category)).toEqual(category);
   });
 
+  it('drops a field of a type newer than the contract and keeps the rest', () => {
+    const newer = {
+      ...category.fields[0],
+      key: 'color',
+      type: 'color-swatch',
+    };
+    expect(
+      categorySchema.parse({
+        ...category,
+        fields: [newer, ...category.fields],
+      }),
+    ).toEqual(category);
+  });
+
+  it('still refuses a field of a known type that breaks the contract', () => {
+    expect(
+      categorySchema.safeParse({
+        ...category,
+        fields: [{ ...category.fields[0], rank: 'first' }],
+      }).success,
+    ).toBe(false);
+  });
+
   it('accepts a Category with an add-on service', () => {
     const serviced = {
       ...category,

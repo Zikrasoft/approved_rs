@@ -5,9 +5,9 @@ here="$(cd "$(dirname -- "$0")/.." && pwd)"
 work=$(mktemp -d)
 net=carlab-caddy-test-$$
 trap 'docker rm -f "$net-medusa" "$net-caddy" >/dev/null 2>&1; docker network rm "$net" >/dev/null 2>&1; rm -rf "$work"' EXIT
-printf 'POSTGRES_PASSWORD=x\nTYPESENSE_API_KEY=y\nMEDUSA_TAG=%s\nADMIN_BASIC_AUTH_USER=staff\nADMIN_BASIC_AUTH_HASH=%s\nGRAFANA_ADMIN_PASSWORD=g\n' \
+printf 'POSTGRES_PASSWORD=x\nTYPESENSE_API_KEY=y\nMEDUSA_TAG=%s\nADMIN_BASIC_AUTH_USER=staff\nADMIN_BASIC_AUTH_HASH=%s\nGRAFANA_ADMIN_PASSWORD=g\nMEDIA_ORIGIN=https://bucket.s3.eu-north-1.amazonaws.com\n' \
   0000000000000000000000000000000000000000 "'\$2a\$14\$hash'" >"$work/.env"
-env -u POSTGRES_PASSWORD -u TYPESENSE_API_KEY -u MEDUSA_TAG -u ADMIN_BASIC_AUTH_USER -u ADMIN_BASIC_AUTH_HASH -u GRAFANA_ADMIN_PASSWORD -u GRAFANA_PORT docker compose -f "$here/docker-compose.yml" --project-directory "$work" config --format json >"$work/config.json"
+env -u MEDIA_ORIGIN -u POSTGRES_PASSWORD -u TYPESENSE_API_KEY -u MEDUSA_TAG -u ADMIN_BASIC_AUTH_USER -u ADMIN_BASIC_AUTH_HASH -u GRAFANA_ADMIN_PASSWORD -u GRAFANA_PORT docker compose -f "$here/docker-compose.yml" --project-directory "$work" config --format json >"$work/config.json"
 
 failures=0
 expect() {
@@ -57,6 +57,8 @@ expect 'no service keeps shop files on a host volume, they live on S3' \
   '(.services.medusa.volumes == null) and ([.services.caddy.volumes[] | .target] | index("/srv/static") == null) and (.volumes | has("static") | not)'
 expect 'caddy serves the admin on its own host' \
   '.services.caddy.environment.ADMIN_HOST == "admin.carlab.rs"'
+expect 'caddy serves media on its own host from the origin set in .env' \
+  '.services.caddy.environment.MEDIA_HOST == "media.carlab.rs" and (.services.caddy.environment.MEDIA_ORIGIN | length > 0)'
 expect 'caddy gets the admin basic_auth credentials from .env, a bcrypt hash kept literal' \
   '.services.caddy.environment.ADMIN_BASIC_AUTH_USER == "staff" and (.services.caddy.environment.ADMIN_BASIC_AUTH_HASH | test("^[$]{2}2a[$]{2}14[$]{2}hash$"))'
 expect 'every service restarts on its own' '[.services[] | .restart] | all(. == "unless-stopped")'
@@ -72,6 +74,7 @@ docker run -d --name "$net-medusa" --network "$net" --network-alias medusa "$cad
   caddy respond --listen :9000 '{http.request.body}' >/dev/null
 docker run -d --name "$net-caddy" --network "$net" -p 127.0.0.1::443 \
   -e API_HOST=api.localhost -e ADMIN_HOST=admin.localhost \
+  -e MEDIA_HOST=media.localhost -e MEDIA_ORIGIN=http://medusa:9000 \
   -e ADMIN_BASIC_AUTH_USER=staff -e ADMIN_BASIC_AUTH_HASH="$hash" \
   -v "$here/caddy:/etc/caddy:ro" "$caddy_image" >/dev/null
 port=$(docker port "$net-caddy" 443/tcp | sed -n '1s/.*://p')
@@ -123,5 +126,10 @@ answers 'the session exchange passes with a bearer token alone' 200 admin /auth/
 answers 'an invite is accepted with a bearer token alone' 200 admin /admin/invites/accept -X POST -H 'Authorization: Bearer x'
 answers 'a password reset is set with a bearer token alone' 200 admin /auth/user/emailpass/update -X POST -H 'Authorization: Bearer x'
 answers 'the session exchange without a token needs basic_auth' 401 admin /auth/session -X POST
+answers 'the media host serves an image' 200 media /supplier-images/x
+answers 'the media host answers HEAD' 200 media /supplier-images/x -I
+answers 'the media host refuses writes' 405 media /supplier-images/x -X PUT
+cache=$(curl -sk -D - -o /dev/null --max-time 5 --resolve "media.localhost:$port:127.0.0.1" "https://media.localhost:$port/supplier-images/x" | tr -d '\r' | sed -n 's/^cache-control: //Ip')
+if [ "$cache" = 'public, max-age=31536000, immutable' ]; then echo 'ok - the media host caches images for a year'; else echo "not ok - media cache-control ($cache)"; failures=$((failures + 1)); fi
 
 [ "$failures" -eq 0 ]

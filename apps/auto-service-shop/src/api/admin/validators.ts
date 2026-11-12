@@ -11,7 +11,6 @@ import {
   STAGED_DATA_KINDS,
   STEERING_SIDES,
   UNIVERSAL_FACET_KEYS,
-  vinSchema,
 } from '@podbor/catalog-contract';
 
 import { DEMAND_REPORT_DAYS } from '../../modules/demand/ranking';
@@ -36,7 +35,7 @@ const partNumber = z
   .string()
   .trim()
   .max(MAX_PART_NUMBER_LENGTH)
-  .refine((value) => normalizePartNumber(value).length > 0);
+  .refine((value) => normalizePartNumber(value) !== null);
 
 const isEan = (value: string) => {
   const digits = value.replace(/\s/g, '');
@@ -107,6 +106,10 @@ export type AdminUpdatePartIdentifierType = z.infer<
 >;
 
 export const AdminListUnresolvedVinCodes = z.object({
+  all: z
+    .literal('true')
+    .transform(() => true)
+    .optional(),
   offset: z.coerce.number().int().nonnegative().default(0),
   limit: z.coerce.number().int().positive().max(200).default(50),
 });
@@ -277,6 +280,7 @@ export type AdminBulkDetachFitmentsType = z.infer<
 
 export const AdminUpdateSupplier = z
   .strictObject({
+    name: z.string().trim().min(1).max(100).optional(),
     markup_percentage: z.number().min(0).max(500).multipleOf(0.01).optional(),
     released_kinds: z
       .array(z.enum(STAGED_DATA_KINDS))
@@ -294,7 +298,7 @@ export type AdminStartCrawlType = z.infer<typeof AdminStartCrawl>;
 
 export const AdminCreateSupplierCategory = z.strictObject({
   code: name,
-  category_id: z.string().min(1),
+  category_id: z.string().min(1).nullable(),
 });
 export type AdminCreateSupplierCategoryType = z.infer<
   typeof AdminCreateSupplierCategory
@@ -440,7 +444,8 @@ export const AdminCreateRequirement = z
 export type AdminCreateRequirementType = z.infer<typeof AdminCreateRequirement>;
 
 export const AdminConfirmWorkshopQuote = z.strictObject({
-  vin: vinSchema.nullable(),
+  vehicle_ids: z.array(z.string().min(1)).max(MAX_LIST_LENGTH),
+  generation: z.boolean().default(false),
   lines: z
     .array(
       z.strictObject({

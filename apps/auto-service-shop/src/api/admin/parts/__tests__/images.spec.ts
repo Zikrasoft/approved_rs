@@ -4,6 +4,7 @@ import type { IApiKeyModuleService } from '@medusajs/framework/types';
 import sharp from 'sharp';
 
 import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
+import { parseEnv } from '../../../../lib/env';
 import { MAX_IMAGE_BYTES } from '../../../../lib/images';
 import { PUBLISH_MODULE } from '../../../../modules/publish';
 import type PublishModuleService from '../../../../modules/publish/service';
@@ -146,6 +147,17 @@ medusaIntegrationTestRunner({
           (await sharp(Buffer.from(served.data)).metadata()).width,
         ).toBeLessThanOrEqual(160);
         expect(await identifierImages()).toEqual(response.data.images);
+        const [stored] = (await catalog.retrievePartIdentifier(mannId)).images
+          .items as StoredImage[];
+        const { FILE_URL } = parseEnv(process.env);
+        expect(stored.src).not.toMatch(/^https?:/);
+        expect(image.src).toBe(`${FILE_URL}/${stored.src}`);
+        expect(image.srcset).toEqual(
+          stored.srcset.map(({ url, width }) => ({
+            url: `${FILE_URL}/${url}`,
+            width,
+          })),
+        );
       });
 
       const uploadTwo = async (): Promise<StoredImage[]> => {
@@ -314,6 +326,17 @@ medusaIntegrationTestRunner({
           'image/jpeg',
         );
         expect(second.data.image.width).toBe(640);
+        const stored = (await catalog.retrieveCategory(categoryId))
+          .image as StoredImage;
+        expect(second.data.image.src).toBe(
+          `${parseEnv(process.env).FILE_URL}/${stored.src}`,
+        );
+        const listed = await api.get('/admin/categories', adminHeaders);
+        expect(
+          listed.data.categories.find(
+            ({ id }: { id: string }) => id === categoryId,
+          ).image,
+        ).toEqual(second.data.image);
         expect((await staticFile(first.data.image.src)).status).toBe(404);
 
         const store = await api.get('/store/categories', storeHeaders);

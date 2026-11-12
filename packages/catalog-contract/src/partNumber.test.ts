@@ -13,9 +13,24 @@ describe('normalizePartNumber', () => {
     ['11-42-857.52/11', '11428575211'],
     ['hu 816 x', 'HU816X'],
     ['  HU816X\t', 'HU816X'],
+    ['W 712/75+', 'W71275'],
+    ['A_123#4', 'A1234'],
+    ['Ｗ７１２', 'W712'],
+    ['é-123', 'E123'],
+    ['HU816Х', 'HU816X'],
+    ['нu 816 х', 'HU816X'],
+    ['АВЕКМНОРСТУХ123', 'ABEKMHOPCTYX123'],
+    ['ј-12ѕ', 'J12S'],
   ])('reads %j as %j', (raw, normalized) => {
     expect(normalizePartNumber(raw)).toBe(normalized);
   });
+
+  it.each(['', '  ', '-/.', 'шлиф', '—'])(
+    'refuses %j, which keeps no letter or digit of a key',
+    (raw) => {
+      expect(normalizePartNumber(raw)).toBeNull();
+    },
+  );
 });
 
 describe('partPageSlug', () => {
@@ -30,6 +45,7 @@ describe('partNumberQuery', () => {
     ['hu  816-x', 'HU816X'],
     ['W-712/66', 'W71266'],
     ['0 986 494 104', '0986494104'],
+    ['W 712/75+', 'W71275'],
   ])('reads %j as the number %j', (raw, number) => {
     expect(partNumberQuery(raw)).toBe(number);
   });
@@ -79,6 +95,14 @@ describe('partTitle', () => {
     [
       { ...mann, name: 'Фильтр HU816x масляный' },
       { name: 'Фильтр HU816x масляный', number: null },
+    ],
+    [
+      { brand: 'MANN', number: 'W 712/75', name: 'Фильтр' },
+      { name: 'Фильтр', number: 'MANN W 712/75' },
+    ],
+    [
+      { brand: 'MANN', number: '—', name: 'Фильтр W1' },
+      { name: 'Фильтр W1', number: 'MANN —' },
     ],
   ])('splits %j', (part, title) => {
     expect(partTitle(part)).toEqual(title);

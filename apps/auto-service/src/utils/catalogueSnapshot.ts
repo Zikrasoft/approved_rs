@@ -1,5 +1,6 @@
 import {
   enrichmentGaps,
+  generationOf,
   maintenanceKit,
   makeHasPage,
   modelCategoryHasPage,
@@ -35,6 +36,7 @@ export type PartPageEntry = PartPage & {
 export type CategoryPageEntry = Category & { pages: PartPageEntry[] };
 
 export type CarPart = Fit & {
+  generation: boolean;
   category_id: string | null;
   part: PartPage['part'];
   pages: PartPageEntry[];
@@ -179,8 +181,26 @@ export function assembleSnapshot(
       },
     );
   const fitsByVehicle = groupBy(fits, ({ vehicle_id }) => vehicle_id);
+  const engineLessByModel = groupBy(
+    allVehicles.filter(({ engine }) => engine === null),
+    ({ model }) => modelKey(model),
+  );
+  const carFits = (vehicle: Vehicle) => {
+    const own = fitsByVehicle.get(vehicle.id) ?? [];
+    const seen = new Set(own.map(({ part_id }) => part_id));
+    const borrowed = generationOf(
+      vehicle,
+      engineLessByModel.get(modelKey(vehicle.model)) ?? [],
+    )
+      .flatMap(({ id }) => fitsByVehicle.get(id) ?? [])
+      .filter(({ part_id }) => !seen.has(part_id) && seen.add(part_id));
+    return [
+      ...own.map((fit) => ({ ...fit, generation: false })),
+      ...borrowed.map((fit) => ({ ...fit, generation: true })),
+    ];
+  };
   const cars = allVehicles.map((vehicle): CarPageEntry => {
-    const candidates = (fitsByVehicle.get(vehicle.id) ?? []).flatMap((fit) => {
+    const candidates = carFits(vehicle).flatMap((fit) => {
       const partPages = pagesByPart.get(fit.part_id);
       return partPages && !retired(partPages[0].part)
         ? [
@@ -221,7 +241,7 @@ export function assembleSnapshot(
     cars.map(({ vehicle, matches }) => [vehicle.id, matches]),
   );
   const fittedParts = (vehicle: Vehicle) =>
-    (fitsByVehicle.get(vehicle.id) ?? []).flatMap(({ part_id }) => {
+    carFits(vehicle).flatMap(({ part_id }) => {
       const partPages = pagesByPart.get(part_id);
       return partPages && !retired(partPages[0].part) ? [part_id] : [];
     });

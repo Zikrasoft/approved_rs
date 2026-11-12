@@ -20,6 +20,7 @@ import {
   type Formatter,
 } from './cards.ts';
 import type { Role } from './markup.ts';
+import { noVisitorSearches, type VisitorSearches } from '../visitorSearches.ts';
 
 export interface NotifierOptions {
   client: TelegramClient;
@@ -27,6 +28,7 @@ export interface NotifierOptions {
   groupId: string;
   ownerIds: number[];
   adminIds: number[];
+  visitorSearches?: VisitorSearches;
 }
 
 export function createNotifier({
@@ -35,7 +37,12 @@ export function createNotifier({
   groupId,
   ownerIds,
   adminIds,
+  visitorSearches = noVisitorSearches,
 }: NotifierOptions) {
+  async function leadDetail(lead: StoredLead, role: Role) {
+    return formatter.buildLeadDetail(lead, role, await visitorSearches(lead));
+  }
+
   async function sendToAll(
     ids: number[],
     text: string,
@@ -59,12 +66,14 @@ export function createNotifier({
   }
 
   return {
+    leadDetail,
+
     async sendLeadNotification(
       lead: StoredLead,
     ): Promise<{ chatId: number; messageId: number }> {
       const sent = await client.api.sendMessage(
         groupId,
-        formatter.formatTeaser(lead),
+        formatter.formatTeaser(lead, await visitorSearches(lead)),
         {
           parse_mode: 'HTML',
           reply_markup: formatter.deepLinkKeyboard(lead),
@@ -151,7 +160,7 @@ export function createNotifier({
         await client.safeEditMessage(
           lead.telegramChatId,
           lead.telegramMessageId,
-          formatter.formatTeaser(lead),
+          formatter.formatTeaser(lead, await visitorSearches(lead)),
           formatter.deepLinkKeyboard(lead),
         );
       } catch (err) {
@@ -274,7 +283,7 @@ export function createNotifier({
       lead: StoredLead,
       role: Role,
     ): Promise<void> {
-      const { text, reply_markup } = formatter.buildLeadDetail(lead, role);
+      const { text, reply_markup } = await leadDetail(lead, role);
       await client.safeEditMessage(chatId, messageId, text, reply_markup);
     },
   };

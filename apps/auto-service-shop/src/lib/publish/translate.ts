@@ -1,9 +1,15 @@
 import { MedusaError } from '@medusajs/framework/utils';
 import { CARLAB } from '@podbor/brands';
 import { CATALOG_TRANSLATION_LOCALES } from '@podbor/catalog-contract';
-import { sha256Hex, translateFields } from '@podbor/i18n/translate/core';
+import {
+  fieldsPrompt,
+  SERBIAN_CAR_TRADE_GUIDANCE,
+  sha256Hex,
+  translateFields,
+} from '@podbor/i18n/translate/core';
 import { z } from 'zod';
 
+import { OPENAI_MODEL } from '../openai-model';
 import type CatalogModuleService from '../../modules/catalog/service';
 
 export type TargetLocale = (typeof CATALOG_TRANSLATION_LOCALES)[number];
@@ -13,9 +19,12 @@ const LANGUAGE_NAME: Record<TargetLocale, string> = {
   en: 'English',
 };
 
-const BUSINESS_DESCRIPTION = `${CARLAB.name}, a car service in Belgrade, Serbia, with a parts shop for BMW and Mercedes-Benz`;
+const LOCALE_GUIDANCE: Partial<Record<TargetLocale, string>> = {
+  sr: SERBIAN_CAR_TRADE_GUIDANCE,
+  en: '"Подходит, в том числе, для" is "Fits vehicles including", never "Fits, among others,".',
+};
 
-const CATALOG_TRANSLATE_MODEL = 'gpt-6.1-terra';
+const BUSINESS_DESCRIPTION = `${CARLAB.name}, a car service in Belgrade, Serbia, with a parts catalogue for all common car makes`;
 
 const ROWS_PER_REQUEST = 50;
 const ROWS_PER_PAGE = 2_000;
@@ -25,7 +34,6 @@ const localeSchema = z.enum(CATALOG_TRANSLATION_LOCALES);
 const nestedSchema = z
   .partialRecord(localeSchema, z.record(z.string(), z.string()))
   .nullable();
-const flatSchema = z.partialRecord(localeSchema, z.string()).nullable();
 const translatedFromSchema = z
   .partialRecord(localeSchema, z.string())
   .nullable();
@@ -47,15 +55,9 @@ type TranslationUpdate = {
   updated_by?: string;
 };
 
-type Codec = {
-  decode: (stored: unknown) => Translations;
-  encode: (translations: Translations) => Record<string, unknown>;
-};
-
 type TranslatableEntity = {
   subject: string;
   fields: readonly string[];
-  codec: Codec;
   list: (
     catalog: CatalogModuleService,
     filters: { id?: string | { $gt: string } },
@@ -67,29 +69,8 @@ type TranslatableEntity = {
   ) => Promise<unknown>;
 };
 
-const mapLocales = <From, To>(
-  record: Partial<Record<TargetLocale, From>>,
-  map: (value: From) => To,
-): Partial<Record<TargetLocale, To>> =>
-  Object.fromEntries(
-    Object.entries(record).map(([locale, value]) => [
-      locale,
-      map(value as From),
-    ]),
-  );
-
-const nested: Codec = {
-  decode: (stored) => nestedSchema.parse(stored ?? null) ?? {},
-  encode: (translations) => translations,
-};
-
-const flat = (field: string): Codec => ({
-  decode: (stored) =>
-    mapLocales(flatSchema.parse(stored ?? null) ?? {}, (text) => ({
-      [field]: text,
-    })),
-  encode: (translations) => mapLocales(translations, (fields) => fields[field]),
-});
+const decode = (stored: unknown): Translations =>
+  nestedSchema.parse(stored ?? null) ?? {};
 
 const TRANSLATION_COLUMNS = [
   'id',
@@ -110,7 +91,6 @@ export const TRANSLATABLE_ENTITIES = new Map<string, TranslatableEntity>([
     {
       subject: 'car part names and descriptions in a parts catalogue',
       fields: ['name', 'description'],
-      codec: nested,
       list: (catalog, filters, take) =>
         catalog.listParts(filters, {
           select: [...TRANSLATION_COLUMNS, 'name', 'description'],
@@ -124,7 +104,6 @@ export const TRANSLATABLE_ENTITIES = new Map<string, TranslatableEntity>([
     {
       subject: 'car model series names, such as "3 серия"',
       fields: ['name'],
-      codec: flat('name'),
       list: (catalog, filters, take) =>
         catalog.listSeries(filters, {
           select: [...TRANSLATION_COLUMNS, 'name'],
@@ -139,7 +118,6 @@ export const TRANSLATABLE_ENTITIES = new Map<string, TranslatableEntity>([
       subject:
         'car part category names, their descriptions and the CarLab service sold with a part',
       fields: ['name', 'text', 'service_label', 'service_note'],
-      codec: nested,
       list: (catalog, filters, take) =>
         catalog.listCategories(filters, {
           select: [
@@ -159,7 +137,6 @@ export const TRANSLATABLE_ENTITIES = new Map<string, TranslatableEntity>([
     {
       subject: 'names of car part characteristics, such as "Вязкость"',
       fields: ['label'],
-      codec: nested,
       list: (catalog, filters, take) =>
         catalog.listCategoryFields(filters, {
           select: [...TRANSLATION_COLUMNS, 'label'],
@@ -173,7 +150,6 @@ export const TRANSLATABLE_ENTITIES = new Map<string, TranslatableEntity>([
     {
       subject: 'values of car part characteristics, such as "Сменный элемент"',
       fields: ['label'],
-      codec: nested,
       list: (catalog, filters, take) =>
         catalog.listCategoryFieldOptions(filters, {
           select: [...TRANSLATION_COLUMNS, 'label'],
@@ -187,7 +163,6 @@ export const TRANSLATABLE_ENTITIES = new Map<string, TranslatableEntity>([
     {
       subject: 'notes on where a car part fits, such as "Только с M-пакетом"',
       fields: ['note'],
-      codec: nested,
       list: (catalog, filters, take) =>
         catalog.listFitments(
           { ...filters, note: { $ne: null } },
@@ -201,7 +176,7 @@ export const TRANSLATABLE_ENTITIES = new Map<string, TranslatableEntity>([
 type Item = {
   id: string;
   source: Record<string, string>;
-  hash: string;
+  hash: Record<TargetLocale, string>;
   translations: Translations;
   translatedFrom: TranslatedFrom;
 };
@@ -218,8 +193,24 @@ const itemOf = (entity: TranslatableEntity, row: StoredRow): Item => {
   return {
     id: row.id,
     source,
-    hash: sha256Hex(JSON.stringify(source)),
-    translations: entity.codec.decode(row.translations),
+    hash: Object.fromEntries(
+      CATALOG_TRANSLATION_LOCALES.map((locale) => [
+        locale,
+        sha256Hex(
+          JSON.stringify([
+            fieldsPrompt(
+              LANGUAGE_NAME[locale],
+              BUSINESS_DESCRIPTION,
+              entity.subject,
+              LOCALE_GUIDANCE[locale],
+            ),
+            OPENAI_MODEL,
+            source,
+          ]),
+        ),
+      ]),
+    ) as Record<TargetLocale, string>,
+    translations: decode(row.translations),
     translatedFrom:
       translatedFromSchema.parse(row.translated_from ?? null) ?? {},
   };
@@ -278,7 +269,7 @@ async function translateLocale(
   apiKey: string | undefined,
 ): Promise<void> {
   const stale = items.filter(
-    (item) => item.translatedFrom[locale] !== item.hash,
+    (item) => item.translatedFrom[locale] !== item.hash[locale],
   );
   for (const chunk of requestBatches(stale, locale)) {
     const fields = Object.fromEntries(
@@ -293,8 +284,9 @@ async function translateLocale(
       languageName: LANGUAGE_NAME,
       businessDescription: BUSINESS_DESCRIPTION,
       subject: entity.subject,
+      localeGuidance: LOCALE_GUIDANCE,
       apiKey: apiKey ?? '',
-      model: CATALOG_TRANSLATE_MODEL,
+      model: OPENAI_MODEL,
     });
     await entity.update(
       catalog,
@@ -309,10 +301,13 @@ async function translateLocale(
             ]),
           ),
         };
-        item.translatedFrom = { ...item.translatedFrom, [locale]: item.hash };
+        item.translatedFrom = {
+          ...item.translatedFrom,
+          [locale]: item.hash[locale],
+        };
         return {
           id: item.id,
-          translations: entity.codec.encode(item.translations),
+          translations: item.translations,
           translated_from: item.translatedFrom,
         };
       }),
@@ -413,8 +408,8 @@ export async function editTranslation(
   await entity.update(catalog, [
     {
       id,
-      translations: entity.codec.encode(translations),
-      translated_from: { ...item.translatedFrom, [locale]: item.hash },
+      translations: translations,
+      translated_from: { ...item.translatedFrom, [locale]: item.hash[locale] },
       updated_by: actorId,
     },
   ]);

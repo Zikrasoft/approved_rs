@@ -30,6 +30,7 @@ car:
   formHeading: Заявка на запчасти
   confirmVariantLead: Несколько вариантов.
   confirmVariant: Какой стоит на вашей машине, подберем по VIN.
+  generationFit: Подходит к поколению модели, уточните двигатель.
   otherParts: Другие запчасти
   notYourCar: Это не ваш автомобиль? Проверьте VIN или отправьте заявку, и мы разберемся вручную.
   vinMatched: Подобрали по VIN {vin}
@@ -48,7 +49,11 @@ car:
     petrol: бензин
     diesel: дизель
     hybrid: гибрид
+    mild-hybrid: мягкий гибрид
+    plug-in-hybrid: подключаемый гибрид
     electric: электро
+    lpg: газ (пропан)
+    cng: газ (метан)
   drive:
     rwd: задний
     fwd: передний
@@ -61,7 +66,10 @@ car:
     convertible: кабриолет
     gran-coupe: Gran Coupe
     suv: внедорожник
-    van: минивэн
+    crossover: кроссовер
+    minivan: минивэн
+    van: фургон
+    pickup: пикап
   steering:
     left: левый
     right: правый
@@ -148,6 +156,7 @@ translations:
       formHeading: Upit za delove
       confirmVariantLead: Postoji više varijanti.
       confirmVariant: Po VIN-u ćemo proveriti koja odgovara Vašem automobilu.
+      generationFit: Odgovara ovoj generaciji modela, proverite motor.
       otherParts: Ostali delovi
       notYourCar: Ovo nije Vaš automobil? Proverite VIN ili pošaljite upit, pa ćemo proveriti ručno.
       vinMatched: Pronađeno po VIN-u {vin}
@@ -166,7 +175,11 @@ translations:
         petrol: benzin
         diesel: dizel
         hybrid: hibrid
+        mild-hybrid: blagi hibrid
+        plug-in-hybrid: plug-in hibrid
         electric: električni
+        lpg: auto-gas (TNG)
+        cng: metan (KPG)
       drive:
         rwd: zadnji
         fwd: prednji
@@ -179,7 +192,10 @@ translations:
         convertible: kabriolet
         gran-coupe: Gran Coupe
         suv: terenac
-        van: miniven
+        crossover: krosover
+        minivan: monovolumen
+        van: kombi
+        pickup: pikap
       steering:
         left: levi
         right: desni
@@ -264,6 +280,7 @@ translations:
       formHeading: Parts enquiry
       confirmVariantLead: Several versions available.
       confirmVariant: We'll use the VIN to check which one is fitted to your car.
+      generationFit: Fits this model generation; please confirm the engine.
       otherParts: Other parts
       notYourCar: Not your car? Check the VIN or send an enquiry and we'll look into it manually.
       vinMatched: Matched by VIN {vin}
@@ -282,7 +299,11 @@ translations:
         petrol: petrol
         diesel: diesel
         hybrid: hybrid
+        mild-hybrid: mild hybrid
+        plug-in-hybrid: plug-in hybrid
         electric: electric
+        lpg: LPG
+        cng: CNG
       drive:
         rwd: rear-wheel drive
         fwd: front-wheel drive
@@ -295,7 +316,10 @@ translations:
         convertible: convertible
         gran-coupe: Gran Coupe
         suv: SUV
-        van: MPV
+        crossover: crossover
+        minivan: MPV
+        van: van
+        pickup: pickup
       steering:
         left: left
         right: right

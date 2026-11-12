@@ -91,6 +91,7 @@ medusaIntegrationTestRunner({
         }
         await catalog.updateParts({ id: parts[1], installation_price: 0 });
         const supplier = await suppliers.createSuppliers({
+          key: 'demo-intercars',
           name: 'Intercars',
           markup_percentage: 20,
         });
@@ -117,7 +118,7 @@ medusaIntegrationTestRunner({
         delete process.env.SHOP_OPEN;
       });
 
-      it('keeps every price out of the store API for a visitor without the preview flag', async () => {
+      it('keeps the Part prices out of the store API for a visitor without the preview flag, and shows the workshop prices', async () => {
         const search = await get(`${searchPath}&range=price:1000:1500`);
         const pages = await get('/store/part-pages');
         const categories = await get('/store/categories');
@@ -130,12 +131,12 @@ medusaIntegrationTestRunner({
         expect(prices(search.data.results)).toEqual([]);
         expect(facetKeys(search.data.facets)).not.toContain('price');
         expect(prices(pages.data.pages)).toEqual([]);
-        expect(categories.data.categories[0].service_price).toBeNull();
-        expect(categories.data.categories[0].installation_price).toBeNull();
-        expect(installations(pages.data.pages)).toEqual([null, null]);
+        expect(categories.data.categories[0].service_price).toBe(900);
+        expect(categories.data.categories[0].installation_price).toBe(700);
+        expect(installations(pages.data.pages)).toEqual([700, 0]);
         expect(batch.data.installation).toEqual({
-          [identifiers[0]]: null,
-          [identifiers[1]]: null,
+          [identifiers[0]]: 700,
+          [identifiers[1]]: 0,
         });
         expect(live.data.offers).toEqual([]);
         expect(batch.data.offers).toEqual({

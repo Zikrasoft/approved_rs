@@ -1,4 +1,6 @@
 import type CatalogModuleService from '../../../modules/catalog/service';
+import { sha256Hex } from '@podbor/i18n/translate/core';
+
 import { translateCatalogue } from '../translate';
 
 type Row = { id: string; name: string; description: string | null };
@@ -22,17 +24,19 @@ const catalogueOf = (parts: Row[]) => {
 
 const openAi = () => {
   const requests: Record<string, string>[] = [];
+  const prompts: string[] = [];
   globalThis.fetch = jest.fn(async (_input, init) => {
     const body = JSON.parse(String(init?.body)) as {
       model: string;
       messages: { content: string }[];
     };
-    expect(body.model).toBe('gpt-6.1-terra');
+    expect(body.model).toBe('gpt-6-luna');
     const fields = JSON.parse(body.messages[1].content) as Record<
       string,
       string
     >;
     requests.push(fields);
+    prompts.push(body.messages[0].content);
     const answer = Object.fromEntries(
       Object.keys(fields).map((key) => [key, `translated ${key}`]),
     );
@@ -40,7 +44,7 @@ const openAi = () => {
       choices: [{ message: { content: JSON.stringify(answer) } }],
     });
   }) as typeof fetch;
-  return requests;
+  return Object.assign(requests, { prompts });
 };
 
 const part = (index: number, description: string | null): Row => ({
@@ -111,6 +115,42 @@ describe('translateCatalogue', () => {
       },
       translated_from: expect.any(Object),
     });
+  });
+
+  it('asks again only for what a different prompt or model translated', async () => {
+    const requests = openAi();
+    const first = catalogueOf([part(1, null)]);
+    await translateCatalogue(first.catalog, 'key');
+    const { translated_from } = first.updated[
+      first.updated.length - 1
+    ] as unknown as {
+      translated_from: Record<string, string>;
+    };
+    requests.length = 0;
+
+    const current = catalogueOf([{ ...part(1, null), translated_from } as Row]);
+    await translateCatalogue(current.catalog, 'key');
+    expect(requests).toHaveLength(0);
+
+    const older = catalogueOf([
+      {
+        ...part(1, null),
+        translated_from: {
+          sr: sha256Hex(JSON.stringify({ name: 'Деталь 1' })),
+          en: translated_from.en,
+        },
+      } as Row,
+    ]);
+    await translateCatalogue(older.catalog, 'key');
+    expect([...requests]).toEqual([{ 'part_1.name': 'Деталь 1' }]);
+  });
+
+  it('describes CarLab as a parts catalogue for every common make', async () => {
+    const { prompts } = openAi();
+    await translateCatalogue(catalogueOf([part(1, null)]).catalog, 'key');
+
+    expect(prompts[0]).toContain('all common car makes');
+    expect(prompts[0]).not.toContain('BMW and Mercedes-Benz');
   });
 
   it('keeps short Parts together up to the row limit', async () => {

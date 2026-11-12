@@ -44,17 +44,6 @@ describe('parseEnv', () => {
     expect(env.TYPESENSE_PROTOCOL).toBe('http');
   });
 
-  it('asks Import questions of gpt-4o-mini unless another model is set', () => {
-    expect(parseEnv(VALID_ENV).OPENAI_IMPORT_MODEL).toBe('gpt-4o-mini');
-    expect(
-      parseEnv({ ...VALID_ENV, OPENAI_IMPORT_MODEL: '' }).OPENAI_IMPORT_MODEL,
-    ).toBe('gpt-4o-mini');
-    expect(
-      parseEnv({ ...VALID_ENV, OPENAI_IMPORT_MODEL: 'gpt-4.1-mini' })
-        .OPENAI_IMPORT_MODEL,
-    ).toBe('gpt-4.1-mini');
-  });
-
   it('asks about four Import articles at once unless another number is set', () => {
     expect(parseEnv(VALID_ENV).IMPORT_CONCURRENCY).toBe(4);
     expect(
@@ -121,6 +110,20 @@ describe('parseEnv', () => {
     expect(() =>
       parseEnv({ ...VALID_ENV, TELEGRAM_GROUP_ID: 'crm-group' }),
     ).toThrow();
+  });
+
+  it('reads the storefront origin, refusing a URL with a path', () => {
+    expect(
+      parseEnv({ ...VALID_ENV, STOREFRONT_ORIGIN: 'https://carlab.rs/' })
+        .STOREFRONT_ORIGIN,
+    ).toBe('https://carlab.rs');
+    expect(parseEnv(VALID_ENV).STOREFRONT_ORIGIN).toBeUndefined();
+    expect(() =>
+      parseEnv({
+        ...VALID_ENV,
+        STOREFRONT_ORIGIN: 'https://carlab.rs/api/leads',
+      }),
+    ).toThrow(/STOREFRONT_ORIGIN/);
   });
 
   it('coerces TYPESENSE_PORT from a string env value', () => {
@@ -228,11 +231,12 @@ describe('parseEnv', () => {
     );
   });
 
-  it('chains the BMW, Mercedes and VAG decoders by default', () => {
+  it('chains the BMW, Mercedes, VAG and WMI decoders by default', () => {
     expect(parseEnv(VALID_ENV).VIN_DECODERS).toEqual([
       'bmw-type-code',
       'mercedes-baumuster',
       'vag-model-code',
+      'wmi-make',
     ]);
   });
 
@@ -257,6 +261,19 @@ describe('parseEnv', () => {
     expect(
       parseEnv({ ...VALID_ENV, SUPPLIER_ADAPTERS: ' demo ' }).SUPPLIER_ADAPTERS,
     ).toEqual(['demo']);
+  });
+
+  it('reads the staff visitor ids as a list and refuses one that is not a visitor id', () => {
+    expect(parseEnv(VALID_ENV).STAFF_VISITOR_IDS).toEqual([]);
+    expect(
+      parseEnv({
+        ...VALID_ENV,
+        STAFF_VISITOR_IDS: ' 0b8a4f5e-6c1d-4e2f-9a3b-7c8d9e0f1a2b , ',
+      }).STAFF_VISITOR_IDS,
+    ).toEqual(['0b8a4f5e-6c1d-4e2f-9a3b-7c8d9e0f1a2b']);
+    expect(() =>
+      parseEnv({ ...VALID_ENV, STAFF_VISITOR_IDS: '_ga.123' }),
+    ).toThrow();
   });
 
   it('refuses an unknown supplier adapter', () => {

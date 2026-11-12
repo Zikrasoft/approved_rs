@@ -50,7 +50,7 @@ const deletePartStep = createStep(
   'delete-part',
   async (id: string, { container }) => {
     const catalog: CatalogModuleService = container.resolve(CATALOG_MODULE);
-    await catalog.deleteParts(id);
+    await catalog.deletePartRejectingNumbers(id);
     return new StepResponse(id);
   },
 );

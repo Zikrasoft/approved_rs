@@ -8,6 +8,7 @@ import {
   Heading,
   Input,
   Label,
+  Switch,
   Table,
   Text,
   toast,
@@ -26,6 +27,7 @@ import { ScrollArea } from '../../components/scroll-area';
 import { acknowledged, adminFetch, useWriting } from '../../lib/admin-fetch';
 import { breadcrumb } from '../../lib/breadcrumb';
 import { useConfirmed } from '../../lib/confirm';
+import { sourceLine } from '../../lib/vin-sources';
 import {
   labelledVehicleSchema,
   openDataLine,
@@ -36,9 +38,16 @@ import {
 const SHOWN_VEHICLES = 100;
 
 const unresolvedCodeSchema = z.object({
+  make_key: z.string(),
   make: z.string(),
   code: z.string(),
-  count: z.number(),
+  customers: z.number(),
+  visitors: z.array(z.string()).default([]),
+  sources: z.object({
+    storefront: z.number(),
+    'workshop-quote': z.number(),
+    admin: z.number(),
+  }),
   last_seen: z.string(),
   reference: openDataReferenceSchema.nullable(),
 });
@@ -143,7 +152,7 @@ const LinkDrawer = ({
     if (!entry) return;
     setSaving(true);
     const linked = await adminFetch(
-      `/admin/vin-lookups/unresolved/${encodeURIComponent(entry.make)}/${encodeURIComponent(entry.code)}`,
+      `/admin/vin-lookups/unresolved/${encodeURIComponent(entry.make_key)}/${encodeURIComponent(entry.code)}`,
       linkedSchema,
       {
         method: 'POST',
@@ -257,12 +266,14 @@ const VinLookupsPage = () => {
   const [count, setCount] = useState(0);
   const [pageIndex, setPageIndex] = useState(0);
   const [linking, setLinking] = useState<UnresolvedCode | null>(null);
+  const [all, setAll] = useState(false);
 
   const load = () =>
     adminFetch(
       `/admin/vin-lookups/unresolved?${new URLSearchParams({
         offset: String(pageIndex * PAGE_SIZE),
         limit: String(PAGE_SIZE),
+        ...(all && { all: 'true' }),
       })}`,
       codesSchema,
     ).then((data) => {
@@ -277,11 +288,11 @@ const VinLookupsPage = () => {
 
   useEffect(() => {
     load();
-  }, [pageIndex]);
+  }, [pageIndex, all]);
 
   const pageCount = Math.max(1, Math.ceil(count / PAGE_SIZE));
 
-  const dismiss = async ({ make, code }: UnresolvedCode) => {
+  const dismiss = async ({ make_key, code }: UnresolvedCode) => {
     if (
       await confirmed({
         title: t('vinLookups.confirmDismissTitle', { code }),
@@ -290,7 +301,7 @@ const VinLookupsPage = () => {
         done: t('vinLookups.dismissed', { code }),
         run: () =>
           adminFetch(
-            `/admin/vin-lookups/unresolved/${encodeURIComponent(make)}/${encodeURIComponent(code)}`,
+            `/admin/vin-lookups/unresolved/${encodeURIComponent(make_key)}/${encodeURIComponent(code)}`,
             acknowledged,
             { method: 'DELETE' },
           ),
@@ -304,6 +315,16 @@ const VinLookupsPage = () => {
     <Container className="flex flex-col gap-y-4">
       <Heading level="h1">{t('vinLookups.heading')}</Heading>
       <Text className="text-ui-fg-subtle">{t('vinLookups.lead')}</Text>
+      <Label className="flex items-center gap-x-2">
+        <Switch
+          checked={all}
+          onCheckedChange={(checked) => {
+            setPageIndex(0);
+            setAll(checked);
+          }}
+        />
+        {t('vinLookups.showAll')}
+      </Label>
       {codes === null ? (
         <ListLoading />
       ) : codes.length === 0 ? (
@@ -324,7 +345,13 @@ const VinLookupsPage = () => {
                     {t('vinLookups.columns.openData')}
                   </Table.HeaderCell>
                   <Table.HeaderCell>
-                    {t('vinLookups.columns.count')}
+                    {t('vinLookups.columns.customers')}
+                  </Table.HeaderCell>
+                  <Table.HeaderCell>
+                    {t('vinLookups.columns.visitors')}
+                  </Table.HeaderCell>
+                  <Table.HeaderCell>
+                    {t('vinLookups.columns.sources')}
                   </Table.HeaderCell>
                   <Table.HeaderCell>
                     {t('vinLookups.columns.lastSeen')}
@@ -334,7 +361,7 @@ const VinLookupsPage = () => {
               </Table.Header>
               <Table.Body>
                 {codes.map((entry) => (
-                  <Table.Row key={`${entry.make}-${entry.code}`}>
+                  <Table.Row key={`${entry.make_key}-${entry.code}`}>
                     <Table.Cell>
                       {t(`vinLookups.makes.${entry.make}`, {
                         defaultValue: entry.make,
@@ -353,7 +380,13 @@ const VinLookupsPage = () => {
                       )}
                     </Table.Cell>
                     <Table.Cell className="tabular-nums">
-                      {entry.count.toLocaleString(i18n.language)}
+                      {entry.customers.toLocaleString(i18n.language)}
+                    </Table.Cell>
+                    <Table.Cell className="max-w-[12rem] whitespace-normal break-words font-mono txt-compact-small">
+                      {entry.visitors.join(' ') || '—'}
+                    </Table.Cell>
+                    <Table.Cell className="whitespace-nowrap tabular-nums">
+                      {sourceLine(t, entry.sources)}
                     </Table.Cell>
                     <Table.Cell className="tabular-nums">
                       {new Date(entry.last_seen).toLocaleDateString(
@@ -362,7 +395,7 @@ const VinLookupsPage = () => {
                     </Table.Cell>
                     <Table.Cell>
                       <div className="flex items-center justify-end gap-x-2">
-                        {LINKABLE_CODE_TYPES[entry.make] && (
+                        {LINKABLE_CODE_TYPES[entry.make_key] && (
                           <Button
                             size="small"
                             variant="secondary"

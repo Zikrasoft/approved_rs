@@ -313,7 +313,7 @@ type NewLine = {
 
 export type LiveOfferRow = PricedOfferRow & {
   part_identifier_id: string;
-  supplier: { name: string };
+  supplier: { key: string };
 };
 
 export type LinePart = {
@@ -425,7 +425,7 @@ export function createCartLines(deps: CartDeps) {
     return {
       ...offer,
       part_identifier_id: row.part_identifier_id,
-      supplierName: row.supplier.name,
+      supplierKey: row.supplier.key,
     };
   }
 
@@ -458,7 +458,7 @@ export function createCartLines(deps: CartDeps) {
           offer.id,
           identifierId,
           part,
-          offer.supplierName,
+          offer.supplierKey,
         ),
       },
     ]);
@@ -599,7 +599,12 @@ const offerCartDeps = (scope: MedusaContainer): CartDeps => {
         await carts().updateLineItems(itemId, { metadata });
       }
     },
-    carFor: (vin) => carFor(scope, vin),
+    carFor: (vin) =>
+      carFor(scope, vin, {
+        source: 'storefront',
+        bot: null,
+        visitor_id: null,
+      }),
     async saveMetadata(cartId, metadata) {
       await carts().updateCarts(cartId, { metadata });
     },

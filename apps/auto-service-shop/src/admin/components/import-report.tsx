@@ -1,25 +1,40 @@
 import { Badge, Container, Select, Text } from '@medusajs/ui';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { z } from 'zod';
 
 import { adminFetch } from '../lib/admin-fetch';
+import { importedSoFar } from '../lib/import-run';
 import { knownError } from '../lib/run-errors';
 import { ListEmpty, ListHeader, ListLoading } from './list';
 
+const count = z.number().default(0);
+
 const importSummarySchema = z.object({
   supplier: z.string(),
-  imported: z.number(),
-  created: z.number(),
-  skipped: z.number(),
+  created: count,
+  updated: count,
+  unchanged: count,
+  skipped: count,
   skipped_by_reason: z.object({
-    brand: z.number(),
-    currency: z.number(),
-    unreadable: z.number(),
-    no_engine_code: z.number(),
-    not_in_scope: z.number(),
+    brand: count,
+    unmapped: count,
+    excluded: count,
+    currency: count,
+    unreadable: count,
+    no_make: count,
+    not_in_scope: count,
+    rejected: count,
+    no_number: count,
   }),
-  needs_category: z.array(z.string()),
+  without_engine_code: count,
+  unmapped_categories: z
+    .array(z.object({ code: z.string(), count: z.number() }))
+    .default([]),
+  unknown_makes: z
+    .array(z.object({ make: z.string(), count: z.number() }))
+    .default([]),
   missing_fields: z
     .array(
       z.object({
@@ -29,10 +44,13 @@ const importSummarySchema = z.object({
       }),
     )
     .default([]),
+  images_failed: count,
   unanswered: z
     .array(z.object({ number: z.string(), reason: z.string() }))
     .default([]),
-  failed: z.array(z.object({ number: z.string(), reason: z.string() })),
+  failed: z
+    .array(z.object({ number: z.string(), reason: z.string() }))
+    .default([]),
 });
 
 type ImportSummary = z.infer<typeof importSummarySchema>;
@@ -41,7 +59,7 @@ export const importRunSchema = z.object({
   id: z.string(),
   status: z.enum(['running', 'succeeded', 'failed']),
   error: z.string().nullable(),
-  report: importSummarySchema.nullable(),
+  report: importSummarySchema.nullable().catch(null),
   created_at: z.string(),
   finished_at: z.string().nullable(),
 });
@@ -56,55 +74,66 @@ const BADGE_COLOR = {
   failed: 'red',
 } as const;
 
+type ReportLine = { text: string; items?: string[] };
+
+const withReason = ({ number, reason }: { number: string; reason: string }) =>
+  `${number} (${reason})`;
+
 const useSummaryLines = () => {
   const { t } = useTranslation('carlabAdmin');
-  return (summary: ImportSummary) => {
+  return (summary: ImportSummary): ReportLine[] => {
     const { skipped_by_reason: skipped } = summary;
+    const counted = (key: string, count: number, items?: string[]) =>
+      count > 0 && { text: t(key, { count }), items };
     return [
-      t('suppliers.importSummary', {
-        ...summary,
-        supplier: t(`sources.names.${summary.supplier}`, {
-          defaultValue: summary.supplier,
+      {
+        text: t('suppliers.importSummary', {
+          ...summary,
+          supplier: t(`sources.names.${summary.supplier}`, {
+            defaultValue: summary.supplier,
+          }),
         }),
-      }),
-      skipped.brand > 0 &&
-        t('suppliers.importSkipped', { count: skipped.brand }),
-      skipped.unreadable > 0 &&
-        t('suppliers.importUnreadable', { count: skipped.unreadable }),
-      skipped.not_in_scope > 0 &&
-        t('suppliers.importNotInScope', { count: skipped.not_in_scope }),
-      skipped.currency > 0 &&
-        t('suppliers.importWithoutPrice', { count: skipped.currency }),
-      skipped.no_engine_code > 0 &&
-        t('suppliers.importWithoutEngineCode', {
-          count: skipped.no_engine_code,
-        }),
-      summary.needs_category.length > 0 &&
-        t('suppliers.importWithoutCategory', {
-          numbers: summary.needs_category.join(', '),
-        }),
-      summary.missing_fields.length > 0 &&
-        t('suppliers.importMissingFields', {
-          articles: summary.missing_fields
-            .map(
-              ({ number, category, fields }) =>
-                `${number} (${category}: ${fields.join(', ')})`,
-            )
-            .join('; '),
-        }),
-      summary.unanswered.length > 0 &&
-        t('suppliers.importUnanswered', {
-          articles: summary.unanswered
-            .map(({ number, reason }) => `${number} (${reason})`)
-            .join('; '),
-        }),
-      summary.failed.length > 0 &&
-        t('suppliers.importArticlesFailed', {
-          articles: summary.failed
-            .map(({ number, reason }) => `${number} (${reason})`)
-            .join('; '),
-        }),
-    ].filter((line): line is string => Boolean(line));
+      },
+      counted('suppliers.importSkipped', skipped.brand),
+      counted(
+        'suppliers.importUnmapped',
+        skipped.unmapped,
+        summary.unmapped_categories.map(
+          ({ code, count }) => `${code}: ${count}`,
+        ),
+      ),
+      counted('suppliers.importExcluded', skipped.excluded),
+      counted('suppliers.importUnreadable', skipped.unreadable),
+      counted('suppliers.importNotInScope', skipped.not_in_scope),
+      counted('suppliers.importWithoutPrice', skipped.currency),
+      counted('suppliers.importRejected', skipped.rejected),
+      counted('suppliers.importWithoutNumber', skipped.no_number),
+      counted('suppliers.importWithoutEngineCode', summary.without_engine_code),
+      counted(
+        'suppliers.importWithoutMake',
+        skipped.no_make,
+        summary.unknown_makes.map(({ make, count }) => `${make}: ${count}`),
+      ),
+      counted('suppliers.importImagesFailed', summary.images_failed),
+      counted(
+        'suppliers.importMissingFields',
+        summary.missing_fields.length,
+        summary.missing_fields.map(
+          ({ number, category, fields }) =>
+            `${number} (${category}: ${fields.join(', ')})`,
+        ),
+      ),
+      counted(
+        'suppliers.importUnanswered',
+        summary.unanswered.length,
+        summary.unanswered.map(withReason),
+      ),
+      counted(
+        'suppliers.importArticlesFailed',
+        summary.failed.length,
+        summary.failed.map(withReason),
+      ),
+    ].filter((line): line is ReportLine => Boolean(line));
   };
 };
 
@@ -112,34 +141,61 @@ export const ImportRunReport = ({ run }: { run: ImportRun }) => {
   const { t, i18n } = useTranslation('carlabAdmin');
   const summaryLines = useSummaryLines();
   const errorKey = knownError(run.error);
-  const lines =
+  const imported = importedSoFar(run.report);
+  const lines: ReportLine[] =
     run.status === 'running'
       ? [
-          t('suppliers.importRunning', {
-            count: run.report ? run.report.imported + run.report.created : 0,
-          }),
+          {
+            text:
+              imported === null
+                ? t('suppliers.importPending')
+                : t('suppliers.importRunning', { count: imported }),
+          },
         ]
       : [
           ...(run.report ? summaryLines(run.report) : []),
-          run.error &&
-            (errorKey
-              ? t(errorKey)
-              : t('suppliers.importFailed', { error: run.error })),
-          run.finished_at &&
-            t('suppliers.importFinishedAt', {
-              time: new Date(run.finished_at).toLocaleString(i18n.language),
-            }),
-        ].filter((line): line is string => Boolean(line));
+          ...[
+            run.error &&
+              (errorKey
+                ? t(errorKey)
+                : t('suppliers.importFailed', { error: run.error })),
+            run.finished_at &&
+              t('suppliers.importFinishedAt', {
+                time: new Date(run.finished_at).toLocaleString(i18n.language),
+              }),
+          ]
+            .filter((text): text is string => Boolean(text))
+            .map((text) => ({ text })),
+        ];
   return (
     <div className="flex max-w-md flex-col items-start gap-y-1 py-2">
       <Badge color={BADGE_COLOR[run.status]} size="small">
         {t(`publish.statuses.${run.status}`)}
       </Badge>
-      {lines.map((line) => (
-        <Text key={line} size="small" className="text-ui-fg-subtle">
-          {line}
-        </Text>
+      {lines.map(({ text, items }) => (
+        <div key={text} className="flex flex-col gap-y-0.5">
+          <Text size="small" className="text-ui-fg-subtle">
+            {text}
+          </Text>
+          {items && items.length > 0 && (
+            <ul className="txt-small text-ui-fg-subtle max-h-40 list-disc overflow-y-auto pl-5">
+              {items.map((item, index) => (
+                <li key={index} className="break-words">
+                  {item}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       ))}
+      {run.status !== 'running' && run.report?.missing_fields.length ? (
+        <Link
+          to="/parts?category=none"
+          className="txt-small text-ui-fg-interactive hover:text-ui-fg-interactive-hover"
+        >
+          {t('suppliers.importWithoutCategoryLink')}
+        </Link>
+      ) : null}
     </div>
   );
 };
@@ -152,15 +208,19 @@ export const ImportReports = ({
   const { t, i18n } = useTranslation('carlabAdmin');
   const [supplierId, setSupplierId] = useState('');
   const [runs, setRuns] = useState<ImportRun[] | null>(null);
+  const chosen = useRef('');
 
   const choose = async (id: string) => {
+    chosen.current = id;
     setSupplierId(id);
     setRuns(null);
     const data = await adminFetch(
       `/admin/suppliers/${id}/import-runs`,
       importRunsSchema,
     );
+    if (chosen.current !== id) return;
     if (data) setRuns(data.import_runs);
+    else setSupplierId('');
   };
 
   return (
@@ -171,7 +231,9 @@ export const ImportReports = ({
       >
         <div className="max-w-xs">
           <Select value={supplierId} onValueChange={choose}>
-            <Select.Trigger>
+            <Select.Trigger
+              aria-label={t('suppliers.mappings.supplierPlaceholder')}
+            >
               <Select.Value
                 placeholder={t('suppliers.mappings.supplierPlaceholder')}
               />
@@ -179,7 +241,7 @@ export const ImportReports = ({
             <Select.Content>
               {suppliers.map(({ id, name }) => (
                 <Select.Item key={id} value={id}>
-                  {t(`sources.names.${name}`, { defaultValue: name })}
+                  {name}
                 </Select.Item>
               ))}
             </Select.Content>

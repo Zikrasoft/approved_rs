@@ -247,7 +247,10 @@ _Avoid_: listing, product, variant
 or shop site whose pages are read, or Manual entry. Only a Supplier that sells
 to us brings Offers; the rest bring Parts, Brand-numbers and facts alone. Its
 import can be switched off, which stops new data but leaves its Offers on the
-site until they are taken off.
+site until they are taken off. A Supplier is known by its key (`mann-filter`,
+`manual`), never by its name: the key is what its catalogue rows name as their
+source, what its crawl and its Offers' order lines carry, and it never changes;
+the name is what staff read and may edit.
 
 **Workshop quote**: a CarLab service quote (Serbian «ponuda»): one car's VIN
 and the Brand-numbers fitted to it. Staff upload it in the shop admin, check

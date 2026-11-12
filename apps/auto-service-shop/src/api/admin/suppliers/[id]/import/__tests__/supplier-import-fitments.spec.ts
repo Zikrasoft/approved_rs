@@ -18,8 +18,8 @@ import type CatalogModuleService from '../../../../../../modules/catalog/service
 import { SUPPLIER_MODULE } from '../../../../../../modules/supplier';
 import type SupplierModuleService from '../../../../../../modules/supplier/service';
 
-const mann = createFakeSupplier('MANN-FILTER');
-const bilstein = createFakeSupplier('bilstein group');
+const mann = createFakeSupplier('mann-filter');
+const bilstein = createFakeSupplier('bilstein');
 const shopAi = createFakeShopAi();
 
 type VehicleFacts = NonNullable<SupplierArticle['vehicles']>[number];
@@ -69,10 +69,32 @@ medusaIntegrationTestRunner({
           'supersecret',
         );
         const created = await suppliers.createSuppliers([
-          { name: 'MANN-FILTER', markup_percentage: 0 },
-          { name: 'bilstein group', markup_percentage: 0 },
+          { key: 'mann-filter', name: 'MANN-FILTER', markup_percentage: 0 },
+          { key: 'bilstein', name: 'bilstein group', markup_percentage: 0 },
         ]);
         for (const { id, name } of created) supplierIds[name] = id;
+        const filters = await catalog.createCategories({
+          slug: 'filters',
+          name: 'Фильтры',
+        });
+        await suppliers.createSupplierCategories(
+          [
+            ...[
+              'Oil Filter',
+              'Air Filter',
+              'Cabin Air Filter',
+              'Fuel Filter',
+              'Ventilator',
+            ].map((code) => ({
+              supplier_id: supplierIds['MANN-FILTER'],
+              code,
+            })),
+            ...['uljni filter', 'filter kabine'].map((code) => ({
+              supplier_id: supplierIds['bilstein group'],
+              code,
+            })),
+          ].map((mapping) => ({ ...mapping, category_id: filters.id })),
+        );
         const [mannBrand, febi] = await catalog.createBrands([
           { name: 'Mann-Filter', slug: 'mann-filter' },
           { name: 'febi', slug: 'febi' },
@@ -137,10 +159,10 @@ medusaIntegrationTestRunner({
 
         const [fitment] = await fitmentsOf('HU 816 x');
         expect(fitment).toMatchObject({
-          source: 'MANN-FILTER',
+          source: 'mann-filter',
           note: null,
           vehicle: {
-            source: 'MANN-FILTER',
+            source: 'mann-filter',
             power_kw: 160,
             year_from: 2008,
             year_to: 2013,
@@ -150,19 +172,19 @@ medusaIntegrationTestRunner({
               family: 'N52',
               fuel: null,
               displacement_cc: 2996,
-              source: 'MANN-FILTER',
+              source: 'mann-filter',
             },
             model: {
               name: '125i (E82/E88)',
-              source: 'MANN-FILTER',
+              source: 'mann-filter',
               chassis: {
                 code: 'E82/E88',
                 body_style: null,
-                source: 'MANN-FILTER',
+                source: 'mann-filter',
                 series: {
                   name: '1',
-                  source: 'MANN-FILTER',
-                  make: { slug: 'bmw', name: 'BMW', source: 'MANN-FILTER' },
+                  source: 'mann-filter',
+                  make: { slug: 'bmw', name: 'BMW', source: 'mann-filter' },
                 },
               },
             },
@@ -344,7 +366,7 @@ medusaIntegrationTestRunner({
         ]);
       });
 
-      it('fits no construction, agricultural, truck or bus maker and makes no Make of it', async () => {
+      it('fits no construction or agricultural maker, makes no Make of it and reports each unknown make with its rows', async () => {
         mann.articles.push({
           article_id: 'WK9406',
           brand: 'MANN-FILTER',
@@ -354,24 +376,46 @@ medusaIntegrationTestRunner({
           vehicles: [
             golf('VOLVO CONSTRUCTION EQUIPMENT'),
             golf('MASSEY-FERGUSON TRAKTOREN (AGCO)'),
-            golf('DAF TRUCKS'),
-            golf('IVECO BUS'),
+            { ...golf('MASSEY-FERGUSON TRAKTOREN (AGCO)'), model: 'Polo' },
           ],
         });
 
-        await runImport('MANN-FILTER');
+        const summary = await runImport('MANN-FILTER');
 
+        expect(summary.skipped_by_reason.no_make).toBe(3);
+        expect(summary.unknown_makes).toEqual([
+          { make: 'MASSEY-FERGUSON TRAKTOREN (AGCO)', count: 2 },
+          { make: 'VOLVO CONSTRUCTION EQUIPMENT', count: 1 },
+        ]);
         expect(await fitmentsOf('WK 940/6')).toEqual([]);
         expect(
           await catalog.listMakes({
-            slug: [
-              'volvo-construction-equipment',
-              'massey-ferguson-traktoren',
-              'daf-trucks',
-              'iveco-bus',
-            ],
+            slug: ['volvo-construction-equipment', 'massey-ferguson-traktoren'],
           }),
         ).toEqual([]);
+      });
+
+      it('fits a truck or bus maker under its one Make', async () => {
+        mann.articles.push({
+          article_id: 'WK9407',
+          brand: 'MANN-FILTER',
+          number: 'WK 940/7',
+          name: 'Fuel Filter WK 940/7',
+          category: 'Fuel Filter',
+          vehicles: [
+            golf('DAF TRUCKS'),
+            { ...golf('IVECO BUS'), model: 'Crossway' },
+          ],
+        });
+
+        const summary = await runImport('MANN-FILTER');
+
+        expect(summary.unknown_makes).toEqual([]);
+        expect(
+          (await fitmentsOf('WK 940/7'))
+            .map(({ vehicle }) => vehicle.model.chassis.series.make.name)
+            .sort(),
+        ).toEqual(['DAF', 'Iveco']);
       });
 
       it('resolves a spelling staff added to a Make in the admin, and lists and removes it there', async () => {
@@ -775,40 +819,144 @@ medusaIntegrationTestRunner({
         ]).toEqual([expect.objectContaining({ slug: '3-e90-320-d' })]);
       });
 
-      it('fits no Vehicle for a row without an engine code and counts the row', async () => {
+      const e90Generation: VehicleFacts = {
+        ...bmw125i,
+        model: '3',
+        variant: '320d (E90)',
+        chassis_codes: ['E90'],
+        engine_codes: [],
+        power_kw: 120,
+        year_from: 2005,
+        year_to: 2012,
+      };
+
+      it('fits a row without an engine code to a Vehicle of its model without an engine, and counts the row', async () => {
         mann.articles.push({
-          article_id: 'K1477',
+          article_id: 'CU2939',
           brand: 'MANN-FILTER',
-          number: 'K 1477',
-          name: 'Cabin Air Filter K 1477',
+          number: 'CU 2939',
+          name: 'Cabin Air Filter CU 2939',
           category: 'Cabin Air Filter',
-          vehicles: [
-            {
-              ...bmw125i,
-              make: 'FORD USA',
-              model: 'F-150 Lightning',
-              variant: 'EV',
-              chassis_codes: [],
-              engine_codes: [],
-            },
-          ],
+          vehicles: [e90Generation],
         });
 
         const summary = await runImport('MANN-FILTER');
 
-        expect(await fitmentsOf('K 1477')).toEqual([]);
-        expect(summary.skipped_by_reason.no_engine_code).toBe(1);
-        expect(await catalog.listMakes({ slug: 'ford' })).toEqual([]);
+        const [fitment] = await fitmentsOf('CU 2939');
+        expect(fitment.vehicle).toMatchObject({
+          engine_id: null,
+          slug: '320d-120kw',
+          power_kw: 120,
+          model: { chassis: { code: 'E90' } },
+        });
+        expect(summary.without_engine_code).toBe(1);
+        expect(summary.skipped_by_reason.no_make).toBe(0);
       });
 
-      it('names an imported Part in Russian and renames it only when the source name changes', async () => {
+      it('fits rows without an engine code only to a Vehicle without an engine of the same model', async () => {
+        const engined = await createVehicleFixture(catalog, {
+          typeCode: '9E90',
+          modelSlug: 'e90-320d-fixture',
+          chassisCode: 'E90',
+          engineCode: 'N47 D20A',
+          engineFamily: 'N47',
+        });
+        mann.articles.push({
+          article_id: 'CU2940',
+          brand: 'MANN-FILTER',
+          number: 'CU 2940',
+          name: 'Cabin Air Filter CU 2940',
+          category: 'Cabin Air Filter',
+          vehicles: [
+            e90Generation,
+            { ...e90Generation, year_from: 2008, year_to: 2010 },
+          ],
+        });
+        bilstein.articles.push({
+          article_id: 'febi/2940',
+          brand: 'febi',
+          number: '2940',
+          name: 'filter kabine',
+          category: 'filter kabine',
+          vehicles: [{ ...e90Generation, variant: '320 d (E90)' }],
+        });
+
+        await runImport('MANN-FILTER');
+        await runImport('bilstein group');
+
+        const mannVehicles = (await fitmentsOf('CU 2940')).map(
+          ({ vehicle_id }) => vehicle_id,
+        );
+        const febiVehicles = (await fitmentsOf('2940')).map(
+          ({ vehicle_id }) => vehicle_id,
+        );
+        expect(new Set(mannVehicles).size).toBe(1);
+        expect(febiVehicles).toEqual(mannVehicles);
+        expect(mannVehicles).not.toContain(engined.vehicle.id);
+      });
+
+      it('keeps a Supplier vehicle id for each Vehicle a row with several engine codes creates', async () => {
+        const twoEngines: VehicleFacts = {
+          ...bmw125i,
+          variant: '120d (E87)',
+          chassis_codes: ['E87'],
+          engine_codes: ['N47 D20A', 'M47 D20'],
+          power_kw: 120,
+          supplier_vehicle_id: 'tecdoc-4711',
+        };
+        mann.articles.push({
+          article_id: 'WK8',
+          brand: 'MANN-FILTER',
+          number: 'WK 8',
+          name: 'Fuel Filter WK 8',
+          category: 'Fuel Filter | For diesel',
+          vehicles: [twoEngines],
+        });
+
+        await runImport('MANN-FILTER');
+        await runImport('MANN-FILTER');
+
+        const fitted = await fitmentsOf('WK 8');
+        expect(fitted).toHaveLength(2);
+        expect(
+          fitted
+            .flatMap(({ vehicle }) => vehicle.identifiers)
+            .map(({ value }) => value)
+            .sort(),
+        ).toEqual(['tecdoc-4711:M47 D20', 'tecdoc-4711:N47 D20A']);
+      });
+
+      it('skips a number staff deleted on the next import and counts it', async () => {
+        mann.articles.push({
+          article_id: 'W6062',
+          brand: 'MANN-FILTER',
+          number: 'W 606/2',
+          name: 'Oil Filter W 606/2',
+          category: 'Oil Filter',
+        });
+        await runImport('MANN-FILTER');
+        await api.delete(
+          `/admin/parts/${(await partOf('W 606/2')).id}`,
+          adminHeaders,
+        );
+
+        const summary = await runImport('MANN-FILTER');
+
+        expect(
+          await catalog.listPartIdentifiers({ normalized_value: 'W6062' }),
+        ).toEqual([]);
+        expect(summary.skipped_by_reason.rejected).toBe(1);
+        expect(summary.failed).toEqual([]);
+      });
+
+      it('names an imported Part of a category with no one type in Russian and renames it only when the source name changes', async () => {
         shopAi.name = 'Масляный фильтр MANN-FILTER W 712/95';
         mann.articles.push({
           article_id: 'W71295',
           brand: 'MANN-FILTER',
           number: 'W 712/95',
           name: 'Oil Filter W 712/95',
-          category: 'Oil Filter',
+          category: 'Ventilator',
         });
 
         await runImport('MANN-FILTER');

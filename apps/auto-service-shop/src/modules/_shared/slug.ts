@@ -1,8 +1,18 @@
+const UNDECOMPOSED: Record<string, string> = {
+  đ: 'dj',
+  ß: 'ss',
+  ł: 'l',
+  ø: 'o',
+  æ: 'ae',
+  œ: 'oe',
+};
+
 export const slugOf = (name: string) =>
   name
     .normalize('NFKD')
-    .replace(/[̀-ͯ]/g, '')
+    .replace(/[\u0300-\u036f]/gu, '')
     .toLowerCase()
+    .replace(/[đßłøæœ]/gu, (letter) => UNDECOMPOSED[letter])
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
 
@@ -47,8 +57,13 @@ export function modelSlugOf(names: {
 
 export const vehicleSlugOf = ({
   engine,
+  variant,
   power_kw,
 }: {
-  engine: string;
+  engine: string | null;
+  variant: string;
   power_kw: number | null;
-}) => slugOf(power_kw ? `${engine} ${power_kw}kw` : engine);
+}) => {
+  const name = engine ?? withoutCodeLists(variant);
+  return slugOf(power_kw ? `${name} ${power_kw}kw` : name);
+};

@@ -7,8 +7,10 @@ import { requestIdSchema } from '@podbor/catalog-contract/events';
 import { secretMatches } from '@podbor/lead-crm/verify-secret';
 import type { CatalogueRedirect, Category } from '@podbor/catalog-contract';
 import { CARLAB } from '@podbor/brands';
+import { VISITOR_ID_COOKIE } from '@podbor/site-kit';
 import { CATALOGUE_TIMEOUT_MS, createCatalogue } from './catalogue';
 import type { CataloguePages } from './paths';
+import { isBotAgent } from './botAgent';
 import { PREVIEW_COOKIE } from './shopPreview';
 import {
   carPagesFrom,
@@ -86,16 +88,15 @@ export const previewTokenMatches = (
     shopPreviewTokenSchema.safeParse(env.SHOP_PREVIEW_TOKEN).data,
   );
 
-const previewTokenFrom = (cookie: string | null): string =>
-  new URLSearchParams((cookie ?? '').replaceAll(/;\s*/g, '&')).get(
-    PREVIEW_COOKIE,
-  ) ?? '';
+const cookieOf = (request: Request, name: string): string =>
+  new URLSearchParams(
+    (request.headers.get('cookie') ?? '').replaceAll(/;\s*/g, '&'),
+  ).get(name) ?? '';
 
 export const previewRequested = (
   request: Request,
   env: CatalogueEnv = siteEnv(),
-): boolean =>
-  previewTokenMatches(previewTokenFrom(request.headers.get('cookie')), env);
+): boolean => previewTokenMatches(cookieOf(request, PREVIEW_COOKIE), env);
 
 const visitorAddressSchema = z.union([z.ipv4(), z.ipv6()]);
 
@@ -104,6 +105,9 @@ export const visitorAddress = (request: Request): string | undefined =>
     request.headers.get('x-real-ip') ??
       request.headers.get('x-forwarded-for')?.split(',')[0]?.trim(),
   ).data;
+
+const visitorIdOf = (request: Request): string | undefined =>
+  z.uuid().safeParse(cookieOf(request, VISITOR_ID_COOKIE)).data;
 
 export const requestIdOf = (request: Request): string | undefined =>
   requestIdSchema.safeParse(request.headers.get('x-vercel-id')).data;
@@ -121,6 +125,8 @@ export function catalogueFromEnv(
     shopOpen: shopOpen(env),
     preview,
     requestId: visitor && requestIdOf(visitor),
+    bot: visitor && isBotAgent(visitor.headers.get('user-agent')),
+    visitorId: visitor && visitorIdOf(visitor),
     client:
       address && clientSecret ? { address, secret: clientSecret } : undefined,
   });

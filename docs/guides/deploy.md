@@ -379,13 +379,14 @@ token. What fires and when: [analytics.md](analytics.md#the-server-lead-event-fr
 
 ### Shop Orders (ADR-0053)
 
-| Variable                    | approved.rs | carlab.rs | details.rs | Without it                                                                                                 |
-| --------------------------- | ----------- | --------- | ---------- | ---------------------------------------------------------------------------------------------------------- |
-| `SHOP_API_URL`              | ✅          | no        | no         | ✅/❌ on a `parts-order` Lead never completes or cancels its shop Order                                    |
-| `SHOP_ORDER_OUTCOME_SECRET` | ✅ secret   | no        | no         | same                                                                                                       |
-| `SHOP_LEAD_SECRET`          | no          | ✅ secret | no         | `/api/shop-orders` answers 401 to the shop, a shop cancel never marks a Lead lost, «Сделать кейс» gets 401 |
-| `SHOP_CLIENT_SECRET`        | no          | ✅ secret | no         | all shoppers share one store rate-limit bucket                                                             |
-| `SHOP_EVENTS_SECRET`        | no          | ✅ secret | no         | carlab.rs sends no Events to the shop's log; the shop's own Events still log                               |
+| Variable                       | approved.rs | carlab.rs | details.rs | Without it                                                                                                 |
+| ------------------------------ | ----------- | --------- | ---------- | ---------------------------------------------------------------------------------------------------------- |
+| `SHOP_API_URL`                 | ✅          | ✅        | no         | ✅/❌ on a `parts-order` Lead never completes or cancels its shop Order; no «🔎 Искал» lines               |
+| `SHOP_ORDER_OUTCOME_SECRET`    | ✅ secret   | no        | no         | same                                                                                                       |
+| `SHOP_LEAD_SECRET`             | no          | ✅ secret | no         | `/api/shop-orders` answers 401 to the shop, a shop cancel never marks a Lead lost, «Сделать кейс» gets 401 |
+| `SHOP_VISITOR_SEARCHES_SECRET` | ✅ secret   | ✅ secret | no         | no «🔎 Искал» lines                                                                                        |
+| `SHOP_CLIENT_SECRET`           | no          | ✅ secret | no         | all shoppers share one store rate-limit bucket                                                             |
+| `SHOP_EVENTS_SECRET`           | no          | ✅ secret | no         | carlab.rs sends no Events to the shop's log; the shop's own Events still log                               |
 
 `SHOP_API_URL` is the shop's public API origin, `https://api.carlab.rs`. When
 the bot marks a `parts-order` Lead ✅ it completes the Order, ❌ cancels it,
@@ -407,6 +408,18 @@ to someone else's Order. The same secret goes the other way for «Сделать
 and the RSD total of a completed Order. The draft Work is then committed with
 the staff member's own Keystatic GitHub login; the shop holds no repository
 token.
+The CRM bot uses `SHOP_API_URL` and `SHOP_VISITOR_SEARCHES_SECRET` to read
+`GET /hooks/visitors/:visitor_id/vin-lookups`, the last three VIN searches of a
+CarLab Lead's visitor, and lists them as «🔎 Искал» lines on the group card
+(sent by carlab.rs) and on the DM detail (built by approved.rs's webhook).
+approved.rs and details.rs Leads never query the shop. The secret is one more
+value set twice, on carlab.rs and approved.rs and in the shop's `.env`, apart
+from `SHOP_LEAD_SECRET`, so approved.rs holds a key that can only read VIN
+searches and never post an Order to carlab.rs. Either side without both
+variables shows the card without them; a shop that does not answer
+within three seconds does too. The visitor id reaches the shop because
+`bootSiteKit` mirrors it into the first-party `visitor_id` cookie, which the
+server-rendered VIN search reads and sends in the `/store/vin-lookups` body.
 `SHOP_CLIENT_SECRET` is a separate value set twice the same way, on carlab.rs
 and in the shop's `.env`: every catalogue call carlab.rs makes for a visitor
 carries it in `x-shop-client-secret`, so the shop's store rate limits count the
@@ -424,8 +437,9 @@ answers 401.
 
 **Rotating either secret without downtime.** Every side that checks a Bearer
 secret also accepts `<NAME>_PREVIOUS`, optional: the shop checks
-`SHOP_ORDER_OUTCOME_SECRET`, `SHOP_LEAD_SECRET`, `SHOP_CLIENT_SECRET` and
-`SHOP_EVENTS_SECRET`, carlab.rs checks `SHOP_LEAD_SECRET`; a side only ever
+`SHOP_ORDER_OUTCOME_SECRET`, `SHOP_LEAD_SECRET`, `SHOP_CLIENT_SECRET`,
+`SHOP_EVENTS_SECRET` and `SHOP_VISITOR_SEARCHES_SECRET`, carlab.rs checks
+`SHOP_LEAD_SECRET`; a side only ever
 sends the current value.
 
 1. Make a new value (`openssl rand -hex 32`).
@@ -436,7 +450,9 @@ sends the current value.
    there, it only sends) and
    `/srv/carlab/.env`, for
    `SHOP_ORDER_OUTCOME_SECRET` approved.rs (no `_PREVIOUS` there, it only sends)
-   and `/srv/carlab/.env`. Redeploy carlab.rs or approved.rs and restart the
+   and `/srv/carlab/.env`, for `SHOP_VISITOR_SEARCHES_SECRET` carlab.rs and
+   approved.rs (no `_PREVIOUS` on either, they only send) and
+   `/srv/carlab/.env`. Redeploy carlab.rs or approved.rs and restart the
    shop (`docker compose up -d medusa`), in any order: while the sides differ,
    each still takes the other's old or new value.
 3. Once both sides run the new value, empty `<NAME>_PREVIOUS` everywhere and
@@ -666,7 +682,7 @@ account. All of it is described in `infra/auto-service-shop/`:
 | `backup.env.example`                     | the template for `/srv/carlab/.env.backup`, the off-host backup bucket                                                                                                                           |
 | `deploy.sh`, `backup.sh`, `restore.sh`   | shipping, the nightly backup and its off-host copy (`backup.sh fetch` pulls one back), restore                                                                                                   |
 | `crawler-role.sh`                        | the crawler's Postgres role, run by `deploy.sh` and `restore.sh` after the migrations                                                                                                            |
-| `move-static-to-s3.sh`                   | once: copies the old `static` volume to the public bucket and rewrites the stored image URLs                                                                                                     |
+| `move-static-to-s3.sh`                   | once: copies the old `static` volume to the public bucket; stored image keys need no rewrite                                                                                                     |
 | `bootstrap-host.sh`, `harden-ssh.sh`     | first-time server setup (once, by hand)                                                                                                                                                          |
 | `test/*.test.sh`                         | the compose shape, the Caddy rules against a live Caddy, the crawler role against a live Postgres, the scripts' behaviour against a stubbed `docker`, run in `check`                             |
 
@@ -681,8 +697,15 @@ test run that stops after that many stored pages, picked at random across the
 whole sitemap), reads the site's sitemap, and fetches one page at a time, at
 least 2 seconds apart (more if robots.txt
 asks, and Retry-After is waited out). Postgres keeps the queue (`crawl_run`,
-`crawl_page`, with the object key in `crawl_page.body_key`); the gzipped HTML goes
-to the private S3 bucket. Requests go through Crawlee with browser-like headers and rotating
+`crawl_page`, with the object key in `crawl_page.body_key` and the page's first
+sitemap image title in `crawl_page.category_hint`); the gzipped HTML goes
+to the private S3 bucket. The import hands that title to the site's parser:
+bilstein files each article under it, the supplier's generic article name
+(`rame` for «rame sa ležištem, zglobom...»), because its article pages name no
+category; the other sites ignore it. A page the site's own parser reads as out of scope
+(a MANN+HUMMEL spare part, a febi page outside the families we sell, a VARTA
+placeholder) is marked `out_of_scope` with no copy in S3 and is fetched again
+only once its last fetch is 30 days old. Requests go through Crawlee with browser-like headers and rotating
 sessions; a site marked `fetchMode: 'browser'` (FILTRON, behind Cloudflare) loads
 its pages in Playwright's own headless Chromium, while robots.txt and sitemaps
 stay plain HTTP. A page the site keeps blocking after Crawlee's retries is marked
@@ -840,7 +863,7 @@ the file>`, with the source URL in the object's `source-url` metadata, and a
   staged nowhere, so the site never links the brand's server, and is tried again
   on the next import.
 - **Private bucket** (`S3_PRIVATE_BUCKET`): the crawler's raw pages, gzipped, under
-  `crawl/<site>/<sha256 of the URL>.html.gz`. The import reads them back from there.
+  `crawl/<supplier key>/<sha256 of the URL>.html.gz`, such as `crawl/mann-filter/…`. The import reads them back from there.
 
 Bucket setup: keep Object Ownership on "Bucket owner enforced" (ACLs off; the file
 provider runs with `acl: false`), and make the public bucket readable with a
@@ -896,10 +919,10 @@ requires it, but the worker never writes there and the policy would refuse it.
 Moving an existing server off the old `static` volume, once, after the first
 deploy with the S3 settings: `/srv/carlab/move-static-to-s3.sh` copies the volume
 into the public bucket with `aws s3 sync` (in a pinned `amazon/aws-cli` container,
-keys through a temporary env file) and rewrites `https://$API_HOST/static` to
-`FILE_URL` in `part_identifier.images` and `category.image`. File ids keep working
-because the keys stay the file names. Then a Publish, and `docker volume rm
-carlab_static` once the images show.
+keys through a temporary env file). The database needs no rewrite:
+`part_identifier.images` and `category.image` store object keys, never a host, and
+the keys stay the file names. Then `docker volume rm carlab_static` once the
+images show.
 
 ### `.env`
 
@@ -937,11 +960,14 @@ number gets its CI value in that script. The non-obvious parts:
   the shortest expiry you are willing to rotate, and revoke it at
   Settings → Developer settings at the first sign the server is compromised.
 - `OPENAI_API_KEY` also answers a Supplier Import's one question per new
-  article (Russian name, Category, attributes, description), on
-  `OPENAI_IMPORT_MODEL` (empty means `gpt-4o-mini`). Answers are cached in the
+  article (Russian name, attributes, description; the Category comes from the
+  supplier category mapping, never from AI), on
+  `gpt-6-luna`, the one model the shop asks. Answers are cached in the
   private bucket under `ai-answers/`, keyed by prompt, model and article, so a
   rerun or a rebuilt database asks nothing twice; changing the model or the
-  prompt asks again. An answer that fails validation twice is cached as a
+  prompt asks again. The prompt carries only the article's own Category, so
+  editing another Category asks nothing again. A re-import refreshes the
+  attributes of a Part it filed, unless staff edited them. An answer that fails validation twice is cached as a
   failure too and listed in the Import report, so a rerun does not pay for it
   again. Without S3 nothing is cached. `IMPORT_CONCURRENCY` (empty means 4) is
   how many articles are asked at once; vehicle fitting still runs one article
@@ -983,13 +1009,18 @@ number gets its CI value in that script. The non-obvious parts:
   build bakes the prices current at that moment into the pages' structured data.
 - `TELEGRAM_BOT_TOKEN` and `TELEGRAM_GROUP_ID` are the CRM bot's own values: when an order's Lead still has not reached the storefront after the last retry, the shop posts an alert to that group. Empty, the failure only reaches the log.
 - `ADMIN_HOST` is where staff open the admin (`admin.carlab.rs`): Caddy proxies it to the same Medusa, sends `/` to `/app`, and redirects `api.carlab.rs/app` there. `ADMIN_CORS` and `AUTH_CORS` name that origin; the admin calls the API on its own origin, so `admin.backendUrl` stays unset.
-- `LEAD_ROUTE_URL` is the storefront's `/api/leads` URL, and its origin is where a placed order goes:
-  the `order.placed` subscriber posts it to `/api/shop-orders` on that origin as
-  a `parts-order` Lead, which reaches Telegram like every other Lead. The full
-  `/api/leads` URL is only the fallback for a storefront too old to serve
-  `/api/shop-orders` (it answers 404); once that fallback is dropped (the
-  `TODO:` in `order-lead.ts`) the value becomes the bare origin. Empty, orders are placed but reach
-  nobody, and the log says so. A delivered order is stamped
+- `STOREFRONT_ORIGIN` is the storefront's bare origin (`https://carlab.rs`, no
+  path; the shop refuses to start on one with a path): the `order.placed`
+  subscriber posts a placed order to `/api/shop-orders` on it as a
+  `parts-order` Lead, which reaches Telegram like every other Lead, and the
+  admin's order screen links there. Any non-2xx answer, a 404
+  included, is a failed handoff that the retry job sends again. Empty, orders
+  are placed but reach nobody, and the log says so. **A new
+  `shopOrderEventSchema` event reaches carlab.rs before the shop sends it**:
+  the event joins `@podbor/lead-crm/shop-orders-wire`, carlab.rs deploys with
+  `/api/shop-orders` reading it, and only then does a shop release send it. A
+  storefront that cannot parse an event refuses it, and the shop retries it
+  until it gives up and alerts the group. A delivered order is stamped
   `lead_handed_off_at`; every 10 minutes `src/jobs/retry-order-leads.ts`
   re-sends each order from the last two days (older than two minutes) that
   lacks the stamp, six attempts in all, timeouts included. That also catches
@@ -1009,23 +1040,45 @@ number gets its CI value in that script. The non-obvious parts:
   - `mercedes-baumuster`: Mercedes-Benz, the Baumuster in characters 4 to 9,
     matched to crawled Model names that list it (ADR-0050).
   - `vag-model-code`: Volkswagen, Audi, Skoda, SEAT and Cupra, the model code
-    in characters 7 and 8, read through `vag-model-codes.json`. Each row names
+    in characters 7 and 8, read through `vag-model-code-rows.json`. Each row names
     the generation, its type designations, its years and the public sources
     it comes from (Wikibooks, Wikipedia, manufacturer documents, public VIN
     records). A VIN matches the crawled Vehicles of its make whose Chassis
     code starts with one of those types and whose years hold the model year
     in character 10.
+  - `wmi-make`: every other make, from the WMI alone, last in the chain. It
+    names the make so the lookup is saved and the visitor reaches the make's
+    page; it matches no Vehicle.
 
   A code a decoder reads but cannot match lands on the admin Unresolved VINs
-  screen with what the open data says about it.
+  screen with what the open data says about it, and with where each lookup
+  came from: the carlab.rs search, a Workshop quote, or another admin path.
+  By default the screen lists only codes a real customer searched: a carlab.rs
+  lookup whose visitor carlab.rs did not take for a bot by its user agent and
+  whose visitor id is not in `STAFF_VISITOR_IDS`.
+
+- `STAFF_VISITOR_IDS` is the comma-separated list of our own carlab.rs visitor
+  ids (the `visitor_id` key in the browser's localStorage, or the `visitor_id`
+  cookie, on carlab.rs, a UUID),
+  not the GA4/Metrika client ids of `analytics-exclusions.md`. Optional; an
+  entry that is not a UUID stops the server at startup. Read when the
+  Unresolved VINs screen loads, so a change reclassifies past lookups too.
+  The screen shows the first eight characters of each customer visitor id per
+  code, to find the Lead whose «ID посетителя» starts with them.
 
 - `TYPESENSE_API_KEY` has a local default only outside production; with
   `NODE_ENV=production` an empty one stops the server at startup.
-- `FILE_URL` is the public base URL of the public bucket, stored into every image
-  URL at upload time: `https://<bucket>.s3.<region>.amazonaws.com` now, a
-  CloudFront address later (only new uploads pick a change up;
-  stored URLs need the same rewrite `move-static-to-s3.sh` does). Without it
-  production stops at startup.
+- `FILE_URL` is the public base URL of shop images, `https://media.carlab.rs`.
+  The database stores object keys only and the shop puts `FILE_URL` in front of
+  them when it answers, so the host can change without rewriting a stored row.
+  Without it production stops at startup.
+- `MEDIA_ORIGIN` is where Caddy fetches `media.carlab.rs` from, the public
+  bucket's endpoint (`https://<bucket>.s3.<region>.amazonaws.com`). Caddy
+  answers GET and HEAD only and marks every image cacheable for a year: image
+  keys never change content (supplier images are named by their sha256). A CDN
+  in front later (Bunny pulling from this origin, or CloudFront once AWS verifies
+  the account) is a DNS change for `media`, not a data change. `MEDIA_HOST`
+  defaults to `media.carlab.rs`.
 - `S3_REGION`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_PUBLIC_BUCKET` and
   `S3_PRIVATE_BUCKET` are all required in production, and outside it either all
   set or none (none keeps uploads on the local disk under `/static` and leaves
@@ -1179,7 +1232,7 @@ every deploy and is idempotent. It creates the cash-at-pickup commerce defaults
 Categories carlab.rs's old `/{locale}/parts/{slug}/` pages 301 to, with their
 Russian name and text and the old picture from `apps/auto-service-shop/assets/categories`
 (the image copies that directory to `/server/assets`), and «Аккумуляторы»
-(`batteries`) with its nine fields, their options and the battery registration
+(`batteries`) with its twelve fields, their options and the battery registration
 service (label, price, note), from the same definitions the demo seed uses.
 Batteries ship without a picture: upload one in the admin. Serbian and English
 come from the admin's Publish chain like any other catalogue text. A Category,
@@ -1190,7 +1243,11 @@ It also configures the crawled catalogues, from `CRAWLED_CATALOGUES` in
 `apps/auto-service-shop/src/lib/production-seed.ts`, one entry per crawled site: the
 Supplier (with cross-references, applicability and images released), its Brands with the spelling the site prints (MANN-FILTER, FILTRON,
 VARTA, and febi, SWAG and Blue Print for bilstein group), its known category
-mapping (VARTA `battery` to «Аккумуляторы») and, for the three sites that list cars,
+mappings (VARTA `battery` to «Аккумуляторы»; the nine MANN-FILTER filter families to «ТО и расходники», `Ventilator` to «Двигатель» and `Hydraulic Transmission Filter` to «Трансмиссия и приводы»; five FILTRON families to «ТО и расходники», `Sušač` to «Тормозная система» and `Filter hidrauličnog prenosa` to «Трансмиссия и приводы»; bilstein group's generic article names seen so far:
+brake discs, pads, calipers, hoses, drums and handbrake cables to «Тормозная
+система», shock absorbers, control arms and their mounts, stabiliser mounts and
+axial joints to «Подвеска и рулевое», oil, air, fuel and cabin filters to «ТО и
+расходники», V-ribbed belts and timing belt kits to «Двигатель») and, for the three sites that list cars,
 every Make alias of the car Make table `CAR_MAKES` in
 `apps/auto-service-shop/src/lib/suppliers/makes.ts` (`SKODA` on Škoda, `VOLVO CARS` on
 Volvo, `VW (VOLKSWAGEN)` on Volkswagen, ...). The
@@ -1199,7 +1256,17 @@ its name, then its slug, then the seeded spelling that points at it, so a staff
 rename of either does not seed a duplicate. Deleting a spelling or a mapping in
 the admin is a soft delete, and the seed reads a deleted row as the staff's
 decision and leaves it deleted. Every other site category is still mapped by
-hand on the Supplier's categories screen.
+hand on the Supplier's categories screen, where «Исключить» excludes a category
+instead of mapping it (a mapping with no Category; the seed excludes MANN-FILTER's
+`Hydraulics`, `Compressed Air-Oil Separation` and `EDM Filter` and FILTRON's
+`Hidraulika`). An import skips every article of an unmapped or excluded
+category and its report counts them, unmapped ones by code; a Supplier with no
+mapping at all imports nothing. Each seeded mapping also names its part type
+(«Салонный фильтр», «Тормозные колодки», ...), and a crawled Part is named
+«type brand number» from it, so one type reads the same across suppliers; a
+battery is named from its attributes, and a mapping without a type leaves the
+name to AI. A crawled image that could not be copied is counted in the
+report and asked for again only after a week.
 
 It seeds no Parts or offers: the manual supplier is created on the first
 hand-entered offer, and the demo data lives in `seed.ts` / `seed-demo.ts`, which
@@ -1330,7 +1397,9 @@ that would otherwise grow forever or hold personal data longer than needed:
   the last lookup of that VIN. Then the job clears `vin`, `raw` and `facts` and
   keeps the WMI (the first three characters of the VIN), the make, the type code,
   the decoded Vehicle and the row itself, so the unresolved-codes counts stay
-  right. A later lookup of the same VIN is a new row. The carlab.rs privacy page
+  right. A later lookup of the same VIN is a new row. Each lookup is a
+  `vin_lookup_hit` row (source, bot flag, visitor id); its visitor id is
+  cleared 90 days after that lookup, its source and bot flag stay. The carlab.rs privacy page
   states this retention; change both together. The nightly dumps still hold a
   scrubbed VIN for up to 30 days (the off-site retention above).
 - **Catalogue runs, 90 days** (`prune-catalogue-runs`, nightly). Finished import,
@@ -1349,8 +1418,10 @@ purpose: only the crawler on the owner's Mac writes them, through raw SQL under
 its own Postgres role (`crawler-role.sh` grants it exactly these two tables), and
 a module would hand them to a service no Medusa code calls. The supplier module's
 hand-written migration creates them, and `src/lib/schema-check.ts` lists their
-columns and indexes, so the deploy-time schema check and the schema spec still
-see them.
+columns and indexes, and checks the `crawl_page_status` and `crawl_page_error`
+CHECKs against `PAGE_STATUSES` and `FAILURE_REASONS` in
+`src/lib/crawler/store.ts`, so the deploy-time schema check and the schema spec
+still see them.
 
 `fitment` keeps two indexes the planner never needs: the generator's partial
 `IDX_fitment_part_id` and `IDX_fitment_vehicle_id`, covered by the hand-written
@@ -1615,19 +1686,19 @@ Steps 1, 5 and 6 are one `terraform apply`: see `infra/auto-service-shop/terrafo
    at `https://admin.carlab.rs`, and in Settings → Publishable API Keys create the
    key carlab.rs uses, with the `CarLab parts shop` sales channel added to it (the
    production seed created the channel).
-   Then open «Аккумуляторы»: the production seed created it with its nine
+   Then open «Аккумуляторы»: the production seed created it with its twelve
    fields, their options and the battery registration service (label, price,
    note). Check the price is still right and upload the Category's picture,
    which the seed does not ship.
-   The crawled Suppliers, their Brands and spellings, the VARTA battery mapping
+   The crawled Suppliers, their Brands and spellings, the VARTA, MANN-FILTER, FILTRON and bilstein group category mappings
    and the Volkswagen aliases are seeded too: nothing to set up before the first
    crawl and Import.
    Done: signing in works, the eight seeded Categories are in the admin,
    «Аккумуляторы» shows its fields, the registration service and a picture, and
    the Suppliers screen lists the four crawled sites.
 10. **The shop's `.env` values for carlab.rs.** In `/srv/carlab/.env`:
-    `LEAD_ROUTE_URL=https://carlab.rs/api/leads` (orders go to `/api/shop-orders`
-    on its origin, see [`.env`](#env)), `SHOP_OPEN=false` while the shop is
+    `STOREFRONT_ORIGIN=https://carlab.rs` (orders go to its `/api/shop-orders`,
+    see [`.env`](#env)), `SHOP_OPEN=false` while the shop is
     closed, `PUBLISH_DISPATCH_TOKEN` and `OPENAI_API_KEY` as described in
     [`.env`](#env); `docker compose up -d medusa` after editing.
     Done: `cut -d= -f1 /srv/carlab/.env` lists all four names.

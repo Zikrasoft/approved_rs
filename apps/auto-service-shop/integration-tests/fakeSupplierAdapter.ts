@@ -4,19 +4,20 @@ import type {
   SupplierQuote,
   UnreadablePage,
 } from '../src/lib/suppliers/adapter';
+import type { AdapterSupplierKey } from '../src/modules/supplier/keys';
 
 export type FakeSupplier = {
   adapter: SupplierAdapter;
   articles: SupplierArticle[];
   unreadable: UnreadablePage[];
   notInScope: number;
-  quotes: Map<string, SupplierQuote>;
+  quotes: Map<string, Omit<SupplierQuote, 'currency'> & { currency: string }>;
   laterPages: Promise<void> | null;
   pageSize: number;
 };
 
 export const createFakeSupplier = (
-  name: string,
+  key: AdapterSupplierKey,
   pageSize = 2,
 ): FakeSupplier => {
   const fake: FakeSupplier = {
@@ -27,7 +28,7 @@ export const createFakeSupplier = (
     laterPages: null,
     pageSize,
     adapter: {
-      name,
+      key,
       listCatalogue: async (cursor) => {
         if (cursor) await fake.laterPages;
         const start = Number(cursor ?? 0);

@@ -45,7 +45,7 @@ export async function POST(
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
   await suppliers.retrieveSupplier(id);
-  await catalog.retrieveCategory(category_id);
+  if (category_id) await catalog.retrieveCategory(category_id);
   const { id: mappingId } = await suppliers.createSupplierCategories({
     supplier_id: id,
     code,

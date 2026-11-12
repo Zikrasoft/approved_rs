@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 
 import { z } from 'zod';
 
+import type { DEMO_SUPPLIER_KEYS } from '../../modules/supplier/keys';
 import type {
   SupplierAdapter,
   SupplierArticle,
@@ -11,11 +12,14 @@ import type {
 const DEMO_PAGE_SIZE = 3;
 const DEMO_LOCATION = 'Beograd';
 
+type DemoQuote = Omit<SupplierQuote, 'currency'> & { currency: string };
+
 type DemoArticle = SupplierArticle & {
-  offer: Omit<SupplierQuote, 'article_id'>;
+  offer: Omit<DemoQuote, 'article_id'>;
 };
 
 export type DemoSupplier = {
+  key: (typeof DEMO_SUPPLIER_KEYS)[number];
   name: string;
   markup_percentage: number;
   categories: Record<string, string>;
@@ -37,6 +41,7 @@ const offer = (
 
 export const DEMO_SUPPLIERS: DemoSupplier[] = [
   {
+    key: 'demo-intercars',
     name: 'Demo Intercars',
     markup_percentage: 20,
     categories: {
@@ -260,6 +265,7 @@ export const DEMO_SUPPLIERS: DemoSupplier[] = [
     ],
   },
   {
+    key: 'demo-autodelovi',
     name: 'Demo Autodelovi',
     markup_percentage: 10,
     categories: {
@@ -403,7 +409,7 @@ export const readDemoOverrides = (path: string | undefined): DemoOverrides => {
 const quoteOf = (
   { article_id, offer: base }: DemoArticle,
   overrides: DemoOverrides,
-): SupplierQuote => {
+): DemoQuote => {
   const override = overrides[article_id] ?? {};
   return {
     article_id,
@@ -417,11 +423,11 @@ const quoteOf = (
 };
 
 export const createDemoAdapter = (
-  { name, articles }: DemoSupplier,
+  { key, articles }: DemoSupplier,
   overrides: () => DemoOverrides,
   fileUrl: string,
 ): SupplierAdapter => ({
-  name,
+  key,
   listCatalogue: async (cursor) => {
     const start = Number(cursor ?? 0);
     const end = start + DEMO_PAGE_SIZE;

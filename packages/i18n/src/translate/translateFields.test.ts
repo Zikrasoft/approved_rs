@@ -67,6 +67,29 @@ describe('translateFields', () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
+  it('adds the guidance of one locale to that locale only', async () => {
+    stubTranslate((text) => text);
+    await translateFields({
+      ...OPTIONS,
+      localeGuidance: { sr: 'Write trap for the suspension.' },
+    });
+    const prompts = systemPrompts();
+    expect(prompts).toContain(
+      fieldsPrompt(
+        'Serbian (Latin script)',
+        OPTIONS.businessDescription,
+        OPTIONS.subject,
+        'Write trap for the suspension.',
+      ),
+    );
+    expect(prompts).toContain(
+      fieldsPrompt('English', OPTIONS.businessDescription, OPTIONS.subject),
+    );
+    expect(prompts.find((prompt) => prompt.includes('Serbian'))).toMatch(
+      / Write trap for the suspension\.$/,
+    );
+  });
+
   it('passes a chosen model through', async () => {
     stubTranslate((text) => text);
     await translateFields({

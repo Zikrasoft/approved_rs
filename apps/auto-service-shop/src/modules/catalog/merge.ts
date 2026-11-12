@@ -2,7 +2,7 @@ import type { Context } from '@medusajs/framework/types';
 import { MedusaError } from '@medusajs/framework/utils';
 
 import { adminError } from '../_shared/admin-error';
-import { spellingKey } from '../_shared/spelling';
+import { nameKey } from '../_shared/keys';
 import type { SlugKind } from './models/slug-redirect';
 import type CatalogModuleService from './service';
 import type { Provenance } from './service';
@@ -20,7 +20,7 @@ export type MergeSteps = {
     vehicle: {
       id: string;
       slug: string;
-      engine_id: string;
+      engine_id: string | null;
       power_kw: number | null;
     },
     modelId: string,
@@ -31,7 +31,7 @@ export type MergeSteps = {
   purgeModel: (id: string, context: Context) => Promise<void>;
 };
 
-const sameName = (a: string, b: string) => spellingKey(a) === spellingKey(b);
+const sameName = (a: string, b: string) => nameKey(a) === nameKey(b);
 
 async function mergeModels(
   steps: MergeSteps,

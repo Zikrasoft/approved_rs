@@ -4,12 +4,14 @@ import type {
   VinLookupResponse,
 } from '@podbor/catalog-contract';
 
+import { nameKey } from '../../modules/_shared/keys';
 import type CatalogModuleService from '../../modules/catalog/service';
 import type VinLookupModuleService from '../../modules/vin-lookup/service';
 import { listVehicleResponses } from '../store-response';
 import { vehiclesDescribedByTypeKey } from './bmw-type-key';
 import { modelsListingBaumuster } from './crawled-baumuster';
 import type { VinDecode, VinDecoder } from './decoder';
+import type { LookupOrigin } from './sources';
 import { vehiclesOfVagModelCode } from './vag-model-match';
 
 type Answer = { decoder: VinDecoder; decode: VinDecode };
@@ -107,6 +109,7 @@ export const resolveVin = async (
   vin: string,
   decoders: VinDecoder[],
   { catalog, vinLookups }: Services,
+  origin: LookupOrigin,
 ): Promise<
   | Omit<Extract<VinLookupResponse, { resolved: true }>, 'place'>
   | Omit<Extract<VinLookupResponse, { resolved: false }>, 'place'>
@@ -114,26 +117,27 @@ export const resolveVin = async (
   const { answer, vehicles } = await decodeThroughChain(vin, decoders, catalog);
   const vehicle = vehicles.length === 1 ? vehicles[0] : null;
   const [identifier] = answer?.decode.identifiers ?? [];
+  const make = answer?.decode.make ?? null;
   const record = {
     vin,
     decoder: answer?.decoder.name ?? null,
     decoder_version: answer?.decoder.version ?? null,
     raw: answer?.decode.raw ?? null,
     facts: answer?.decode.facts ?? {},
-    make: answer?.decode.make ?? null,
+    make_key: make && nameKey(make),
     code: answer?.decode.code ?? identifier?.value ?? null,
     code_type: answer?.decode.code ? null : (identifier?.type ?? null),
     vehicle_id: vehicle?.id ?? null,
   };
-  if (record.make) {
-    await vinLookups.saveLookup(record);
+  if (record.make_key) {
+    await vinLookups.saveLookup(record, origin);
   }
 
   return vehicle
     ? { resolved: true, vehicle, facts: record.facts }
     : {
         resolved: false,
-        make: record.make,
+        make,
         code: record.code,
         model_slug: commonModelSlug(vehicles),
         vehicle_ids: vehicles.map(({ id }) => id),

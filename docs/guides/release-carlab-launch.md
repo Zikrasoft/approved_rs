@@ -126,25 +126,25 @@ one `terraform apply`: `infra/auto-service-shop/terraform/README.md`.
 - [ ] `/srv/carlab/.env` from `infra/auto-service-shop/production.env.example`,
       mode 600 (§ The first ship, step 4). Every name in the template:
 
-  | Name                                                                                                               | Value                                                                  | Source                    |
-  | ------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- | ------------------------- |
-  | `API_HOST`, `ADMIN_HOST`, `STORE_CORS`, `ADMIN_CORS`, `AUTH_CORS`, `NODE_ENV`, `PORT`, `DATABASE_SSL`              | keep the template's                                                    | `production.env.example`  |
-  | `MEDUSA_TAG`                                                                                                       | leave empty; `deploy.sh` writes it                                     | deploy.md § `.env`        |
-  | `POSTGRES_PASSWORD`, `TYPESENSE_API_KEY`, `JWT_SECRET`, `COOKIE_SECRET`, `CRAWLER_DB_PASSWORD`                     | `openssl rand -hex 32` each                                            | deploy.md § `.env`        |
-  | `ADMIN_BASIC_AUTH_USER`, `ADMIN_BASIC_AUTH_HASH`                                                                   | `caddy hash-password`; the hash in single quotes                       | deploy.md § `.env`        |
-  | `OPENAI_API_KEY`, `OPENAI_IMPORT_MODEL`, `IMPORT_CONCURRENCY`                                                      | the shop's own OpenAI key; keep the template's model and concurrency   | deploy.md § `.env`        |
-  | `PUBLISH_DISPATCH_TOKEN`                                                                                           | fine-grained token, `actions: write` on this repository, short expiry  | deploy.md § `.env`        |
-  | `LEAD_ROUTE_URL`                                                                                                   | `https://carlab.rs/api/leads`                                          | § The first ship, step 10 |
-  | `SHOP_LEAD_SECRET`, `SHOP_CLIENT_SECRET`, `SHOP_ORDER_OUTCOME_SECRET`, `SHOP_EVENTS_SECRET`                        | `openssl rand -hex 32` each; the same value goes to Vercel (section 5) | deploy.md § Shop Orders   |
-  | `*_PREVIOUS` of those four                                                                                         | empty (rotation only)                                                  | deploy.md § Shop Orders   |
-  | `SHOP_OPEN`                                                                                                        | `false`                                                                | deploy.md § Closed beta   |
-  | `SHOP_PREVIEW_TOKEN`                                                                                               | `openssl rand -hex 32`; same value on carlab.rs                        | deploy.md § Closed beta   |
-  | `STORE_WRITES_PER_MINUTE`, `STORE_SEARCHES_PER_MINUTE`, `STOREFRONT_EVENTS_PER_MINUTE`, `LIVE_QUOTE_CACHE_SECONDS` | keep the template's (120, 600, 1200, 60)                               | deploy.md § `.env`        |
-  | `VIN_DECODERS`, `SUPPLIER_ADAPTERS`                                                                                | keep the template's                                                    | deploy.md § `.env`        |
-  | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_GROUP_ID`                                                                          | the CRM bot's values, as on Vercel                                     | deploy.md § `.env`        |
-  | `FILE_URL`, `S3_REGION`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_PUBLIC_BUCKET`, `S3_PRIVATE_BUCKET`       | from the S3 step; `S3_ENDPOINT` empty for AWS                          | deploy.md § `.env`        |
-  | `SENTRY_DSN`                                                                                                       | optional                                                               | deploy.md § Monitoring    |
-  | `GRAFANA_ADMIN_PASSWORD`                                                                                           | `openssl rand -hex 32`; required, compose refuses to start without it  | deploy.md § `.env`        |
+  | Name                                                                                                                        | Value                                                                  | Source                    |
+  | --------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | ------------------------- |
+  | `API_HOST`, `ADMIN_HOST`, `STORE_CORS`, `ADMIN_CORS`, `AUTH_CORS`, `NODE_ENV`, `PORT`, `DATABASE_SSL`                       | keep the template's                                                    | `production.env.example`  |
+  | `MEDUSA_TAG`                                                                                                                | leave empty; `deploy.sh` writes it                                     | deploy.md § `.env`        |
+  | `POSTGRES_PASSWORD`, `TYPESENSE_API_KEY`, `JWT_SECRET`, `COOKIE_SECRET`, `CRAWLER_DB_PASSWORD`                              | `openssl rand -hex 32` each                                            | deploy.md § `.env`        |
+  | `ADMIN_BASIC_AUTH_USER`, `ADMIN_BASIC_AUTH_HASH`                                                                            | `caddy hash-password`; the hash in single quotes                       | deploy.md § `.env`        |
+  | `OPENAI_API_KEY`, `IMPORT_CONCURRENCY`                                                                                      | the shop's own OpenAI key; keep the template's concurrency             | deploy.md § `.env`        |
+  | `PUBLISH_DISPATCH_TOKEN`                                                                                                    | fine-grained token, `actions: write` on this repository, short expiry  | deploy.md § `.env`        |
+  | `STOREFRONT_ORIGIN`                                                                                                         | `https://carlab.rs`                                                    | § The first ship, step 10 |
+  | `SHOP_LEAD_SECRET`, `SHOP_CLIENT_SECRET`, `SHOP_ORDER_OUTCOME_SECRET`, `SHOP_EVENTS_SECRET`, `SHOP_VISITOR_SEARCHES_SECRET` | `openssl rand -hex 32` each; the same value goes to Vercel (section 5) | deploy.md § Shop Orders   |
+  | `*_PREVIOUS` of those five                                                                                                  | empty (rotation only)                                                  | deploy.md § Shop Orders   |
+  | `SHOP_OPEN`                                                                                                                 | `false`                                                                | deploy.md § Closed beta   |
+  | `SHOP_PREVIEW_TOKEN`                                                                                                        | `openssl rand -hex 32`; same value on carlab.rs                        | deploy.md § Closed beta   |
+  | `STORE_WRITES_PER_MINUTE`, `STORE_SEARCHES_PER_MINUTE`, `STOREFRONT_EVENTS_PER_MINUTE`, `LIVE_QUOTE_CACHE_SECONDS`          | keep the template's (120, 600, 1200, 60)                               | deploy.md § `.env`        |
+  | `VIN_DECODERS`, `SUPPLIER_ADAPTERS`                                                                                         | keep the template's                                                    | deploy.md § `.env`        |
+  | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_GROUP_ID`                                                                                   | the CRM bot's values, as on Vercel                                     | deploy.md § `.env`        |
+  | `FILE_URL`, `S3_REGION`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_PUBLIC_BUCKET`, `S3_PRIVATE_BUCKET`                | from the S3 step; `S3_ENDPOINT` empty for AWS                          | deploy.md § `.env`        |
+  | `SENTRY_DSN`                                                                                                                | optional                                                               | deploy.md § Monitoring    |
+  | `GRAFANA_ADMIN_PASSWORD`                                                                                                    | `openssl rand -hex 32`; required, compose refuses to start without it  | deploy.md § `.env`        |
 
 - [ ] No value wrapped in `"…"` (deploy.md § Easy to miss, "`.env` is read literally").
 - [ ] `stat -c %a /srv/carlab/.env` and `.env.backup` print `600`.
@@ -176,8 +176,9 @@ Production environment only; a change applies at the next deploy (deploy.md
 
 carlab.rs:
 
-- [ ] `SHOP_LEAD_SECRET`, `SHOP_CLIENT_SECRET`, `SHOP_EVENTS_SECRET`: the
-      shop's values, server-only (deploy.md § Shop Orders).
+- [ ] `SHOP_LEAD_SECRET`, `SHOP_CLIENT_SECRET`, `SHOP_EVENTS_SECRET`,
+      `SHOP_VISITOR_SEARCHES_SECRET`: the shop's values, server-only
+      (deploy.md § Shop Orders).
 - [ ] `SHOP_PREVIEW_TOKEN`: the shop's value, server-only, never `PUBLIC_`
       (deploy.md § Closed beta).
 - [ ] `SHOP_OPEN`: `false` or unset. Only the exact `true` opens the storefront
@@ -195,9 +196,9 @@ carlab.rs:
 
 approved.rs:
 
-- [ ] `SHOP_API_URL` = `https://api.carlab.rs`, `SHOP_ORDER_OUTCOME_SECRET` =
-      the shop's value (deploy.md § Shop Orders; issue #442 "Env before the
-      shop's first deploy").
+- [ ] `SHOP_API_URL` = `https://api.carlab.rs`, `SHOP_ORDER_OUTCOME_SECRET` and
+      `SHOP_VISITOR_SEARCHES_SECRET` = the shop's values (deploy.md § Shop
+      Orders; issue #442 "Env before the shop's first deploy").
 - [ ] Optional `TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB` and
       `TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS` for owner replies in Topics
       (deploy.md § Telegram).

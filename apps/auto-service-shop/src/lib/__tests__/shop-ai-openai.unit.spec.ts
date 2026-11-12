@@ -41,14 +41,21 @@ const sentMessages = (fetch: unknown, call = 0) => {
   };
 };
 
+const BRANDS = ['MANN-FILTER', 'Febi'];
+
 const line = {
   name: 'Filter ulja',
+  name_ru: 'Масляный фильтр',
   number: 'HU 816 x',
   quantity: 1,
   brand: 'MANN-FILTER',
   brand_confidence: 0.9,
   category_id: 'cat_oil',
+  catalogue_part: true,
 };
+
+const readQuote = () =>
+  openAiShopAi('test-key').readQuote(PDF, CATEGORIES, BRANDS);
 
 describe('OpenAI shop AI', () => {
   const networkFetch = globalThis.fetch;
@@ -65,10 +72,7 @@ describe('OpenAI shop AI', () => {
       lines: [{ ...line, price: 1500, unit_price: 1500 }],
     });
 
-    const reading = await openAiShopAi('test-key', 'gpt-4o-mini').readQuote(
-      PDF,
-      CATEGORIES,
-    );
+    const reading = await readQuote();
 
     expect(reading).toEqual({
       vin: 'WBA35BG070N074158',
@@ -77,28 +81,93 @@ describe('OpenAI shop AI', () => {
     });
   });
 
-  it.each([
-    ['a confidence above one', { ...line, brand_confidence: 1.5 }],
-    ['a fractional quantity', { ...line, quantity: 0.5 }],
-    ['a missing number', { ...line, number: undefined }],
-  ])('refuses an answer with %s', async (_, badLine) => {
+  it('gives the model the catalogue brands as a closed list', async () => {
+    globalThis.fetch = answering({ vin: null, vehicle: null, lines: [] });
+
+    await readQuote();
+
+    const { system } = sentMessages(globalThis.fetch);
+    expect(system).toContain('Brands:\nMANN-FILTER\nFebi\n');
+    expect(system).toContain('Copy it exactly as written in the brand list');
+  });
+
+  it('keeps a Russian name in house style and a decimal quantity', async () => {
     globalThis.fetch = answering({
       vin: null,
       vehicle: null,
-      lines: [badLine],
+      lines: [
+        {
+          ...line,
+          name: 'Ulje MULTI DCTF',
+          name_ru: 'трансмиссионное масло — для ДСГ, ёмкость 1 л',
+          quantity: 4.5,
+          catalogue_part: false,
+        },
+      ],
     });
 
-    await expect(
-      openAiShopAi('test-key', 'gpt-4o-mini').readQuote(PDF, CATEGORIES),
-    ).rejects.toMatchObject({ code: 'QUOTE_UNREADABLE' });
+    const [read] = (await readQuote()).lines;
+
+    expect(read).toMatchObject({
+      name: 'Ulje MULTI DCTF',
+      name_ru: 'Трансмиссионное масло - для ДСГ, емкость 1 л',
+      quantity: 4.5,
+      catalogue_part: false,
+    });
   });
 
-  it('refuses an answer that is not JSON', async () => {
+  it.each([
+    ['a confidence above one', { ...line, brand_confidence: 1.5 }],
+    ['a missing number', { ...line, number: undefined }],
+    ['a zero quantity', { ...line, quantity: 0 }],
+    ['a name mixing scripts', { ...line, name_ru: 'Фильтр oilа' }],
+  ])('flags a line with %s and keeps the rest', async (_, badLine) => {
+    globalThis.fetch = answering({
+      vin: null,
+      vehicle: null,
+      lines: [badLine, line],
+    });
+
+    const reading = await readQuote();
+
+    expect(reading.lines).toEqual([
+      {
+        unreadable: true,
+        name: 'Filter ulja',
+        number: badLine.number ?? '',
+      },
+      line,
+    ]);
+  });
+
+  it('flags a line that is not an object', async () => {
+    globalThis.fetch = answering({ vin: null, vehicle: null, lines: [7] });
+
+    expect((await readQuote()).lines).toEqual([
+      { unreadable: true, name: '', number: '' },
+    ]);
+  });
+
+  it('asks once more when the answer is not JSON', async () => {
+    const fetch = jest
+      .fn()
+      .mockImplementationOnce(replying('ponuda'))
+      .mockImplementationOnce(
+        answering({ vin: null, vehicle: null, lines: [line] }),
+      );
+    globalThis.fetch = fetch;
+
+    expect((await readQuote()).lines).toEqual([line]);
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
+
+  it('refuses an answer that is not JSON twice', async () => {
     globalThis.fetch = replying('ponuda');
 
-    await expect(
-      openAiShopAi('test-key', 'gpt-4o-mini').readQuote(PDF, CATEGORIES),
-    ).rejects.toMatchObject({ code: 'QUOTE_UNREADABLE' });
+    await expect(readQuote()).rejects.toMatchObject({
+      code: 'QUOTE_UNREADABLE',
+    });
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2);
   });
 
   const article = {
@@ -108,58 +177,48 @@ describe('OpenAI shop AI', () => {
     description: 'Potpuno sintetičko ulje.',
     specs: { Viskozitet: '0W-20' },
     fits: ['BMW 3 (G20)'],
-    category_id: null,
   };
+
+  const OIL = { id: 'cat_oil', name: 'Масляные фильтры' };
 
   const answer = {
     name: 'Моторное масло MANN-FILTER OIL 0W20',
-    category_id: 'cat_oil',
     attributes: { viscosity: '0W-20' },
     description: 'Синтетическое масло.',
   };
 
   const reply = {
     name: answer.name,
-    category: 1,
     attributes: answer.attributes,
     description: answer.description,
   };
 
-  const shopAi = () => openAiShopAi('test-key', 'gpt-4o-mini');
+  const shopAi = () => openAiShopAi('test-key');
 
-  const answerOf = (ai = shopAi(), categories = CATEGORIES) =>
-    ai.answerArticle(ai.articleQuestion(article, categories));
+  const answerOf = (ai = shopAi()) =>
+    ai.answerArticle(ai.articleQuestion(article, OIL));
 
   const sentBody = (fetch: unknown, call = 0) =>
     JSON.parse(
       ((fetch as jest.Mock).mock.calls[call] as [unknown, { body: string }])[1]
         .body,
-    ) as { model: string; temperature: number };
+    ) as { model: string; temperature?: number };
 
-  it('answers an article in one call on the configured model, with the most likely answer', async () => {
+  it('answers an article in one call on the one model, with the most likely answer', async () => {
     globalThis.fetch = answering(reply);
 
     await expect(answerOf()).resolves.toEqual(answer);
-    await answerOf(openAiShopAi('test-key', 'gpt-4.1-mini'));
 
-    expect(globalThis.fetch).toHaveBeenCalledTimes(2);
-    expect(sentBody(globalThis.fetch)).toMatchObject({
-      model: 'gpt-4o-mini',
-      temperature: 0,
-    });
-    expect(sentBody(globalThis.fetch, 1).model).toBe('gpt-4.1-mini');
-    expect(shopAi().articleQuestion(article, CATEGORIES).model).toBe(
-      'gpt-4o-mini',
-    );
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+    expect(sentBody(globalThis.fetch)).toMatchObject({ model: 'gpt-6-luna' });
+    expect(sentBody(globalThis.fetch).temperature).toBeUndefined();
+    expect(shopAi().articleQuestion(article, OIL).model).toBe('gpt-6-luna');
   });
 
-  it('sends the article as JSON with the Category it is already filed under', async () => {
+  it('sends the article as JSON and only the Category it is filed under in the prompt', async () => {
     globalThis.fetch = answering(reply);
-    const ai = shopAi();
 
-    await ai.answerArticle(
-      ai.articleQuestion({ ...article, category_id: 'cat_oil' }, CATEGORIES),
-    );
+    await answerOf();
 
     expect(JSON.parse(sentMessages(globalThis.fetch).user)).toEqual({
       name: article.name,
@@ -169,17 +228,23 @@ describe('OpenAI shop AI', () => {
       specs: article.specs,
       fits: article.fits,
       glossary: [],
-      category: 1,
     });
     expect(sentMessages(globalThis.fetch).system).toMatch(
-      /^1: Масляные фильтры$/mu,
+      /^Category: Масляные фильтры$/mu,
     );
   });
 
-  it('files under no Category for a number that is not listed', async () => {
-    globalThis.fetch = answering({ ...reply, category: 7 });
+  it('asks for no attributes for a part filed under no Category', () => {
+    const { system } = shopAi().articleQuestion(article, null);
 
-    await expect(answerOf()).resolves.toMatchObject({ category_id: null });
+    expect(system).toMatch(/^Category: none$/mu);
+  });
+
+  it('never asks the model to choose a Category', () => {
+    const { system } = shopAi().articleQuestion(article, OIL);
+
+    expect(system).not.toMatch(/"category"/u);
+    expect(system).not.toMatch(/oil, air, cabin, fuel/u);
   });
 
   it('starts the name with a capital letter', async () => {
@@ -208,7 +273,6 @@ describe('OpenAI shop AI', () => {
   it.each([
     ['a blank name', { name: ' ' }],
     ['a blank description', { description: ' ' }],
-    ['no Category field', { category: undefined }],
   ])('refuses an answer with %s', async (_, bad) => {
     globalThis.fetch = answering({ ...reply, ...bad });
 
@@ -305,35 +369,25 @@ describe('OpenAI shop AI', () => {
     expect(globalThis.fetch).toHaveBeenCalledTimes(1);
   });
 
-  it('offers each Category with its description and fields and files control arms and bump stops under suspension', () => {
-    const { system } = shopAi().articleQuestion(article, [
-      {
-        id: 'cat_arm',
-        name: 'Подвеска',
-        text: 'Рычаги, шаровые опоры, сайлентблоки',
-      },
-      {
-        id: 'cat_battery',
-        name: 'Аккумуляторы',
-        text: '',
-        fields: [
-          {
-            key: 'technology',
-            label: 'Технология',
-            type: 'single-select',
-            unit: null,
-            required: false,
-            options: [{ key: 'standard', label: 'Стандартная' }],
-          },
-        ],
-      },
-    ]);
+  it('offers the Category with its description and fields', () => {
+    const { system } = shopAi().articleQuestion(article, {
+      id: 'cat_battery',
+      name: 'Аккумуляторы',
+      text: 'Стартерные батареи',
+      fields: [
+        {
+          key: 'technology',
+          label: 'Технология',
+          type: 'single-select',
+          unit: null,
+          required: false,
+          options: [{ key: 'standard', label: 'Стандартная' }],
+        },
+      ],
+    });
 
-    expect(system).toMatch(
-      /^1: Подвеска \(Рычаги, шаровые опоры, сайлентблоки\)$/mu,
-    );
-    expect(system).toMatch(/^2: Аккумуляторы$/mu);
-    expect(system).toMatch(/^ {2}fields: \[\{"key":"technology"/mu);
+    expect(system).toMatch(/^Category: Аккумуляторы \(Стартерные батареи\)$/mu);
+    expect(system).toMatch(/^Fields: \[\{"key":"technology"/mu);
     expect(system).toMatch(/rame/u);
     expect(system).toMatch(/odbojna guma/u);
     expect(system).toMatch(/SLI/u);
@@ -342,7 +396,7 @@ describe('OpenAI shop AI', () => {
   it('sends the glossary lines for the Serbian words in the part name, whatever their case', () => {
     const { user } = shopAi().articleQuestion(
       { ...article, name: 'kraj spone sa krunastom navrtkom i rascepkom' },
-      CATEGORIES,
+      OIL,
     );
 
     expect(JSON.parse(user).glossary).toEqual([
@@ -354,23 +408,15 @@ describe('OpenAI shop AI', () => {
   });
 
   it('steers Serbian part names through the parts glossary', () => {
-    const { system } = shopAi().articleQuestion(article, CATEGORIES);
+    const { system } = shopAi().articleQuestion(article, OIL);
 
     expect(system).toMatch(/nosač stabilizatora.*втулка стабилизатора/u);
     expect(system).toMatch(/španer.*натяжитель ремня/u);
     expect(system).toMatch(/svećica.*свеча зажигания/u);
   });
 
-  it('files every filter and battery and leaves a Category empty only when none covers the part', () => {
-    const { system } = shopAi().articleQuestion(article, CATEGORIES);
-
-    expect(system).toMatch(/oil, air, cabin, fuel/u);
-    expect(system).toMatch(/batter/u);
-    expect(system).not.toMatch(/Prefer null/u);
-  });
-
   it('asks for a description of its own for each part, without the supplier claims', () => {
-    const { system } = shopAi().articleQuestion(article, CATEGORIES);
+    const { system } = shopAi().articleQuestion(article, OIL);
 
     expect(system).toMatch(/Strogi standardi kvaliteta/u);
   });
@@ -378,9 +424,9 @@ describe('OpenAI shop AI', () => {
   it('asks nothing without a key', async () => {
     globalThis.fetch = answering(reply);
 
-    await expect(
-      answerOf(openAiShopAi(undefined, 'gpt-4o-mini')),
-    ).rejects.toMatchObject({ code: 'AI_NOT_CONFIGURED' });
+    await expect(answerOf(openAiShopAi(undefined))).rejects.toMatchObject({
+      code: 'AI_NOT_CONFIGURED',
+    });
     expect(globalThis.fetch).not.toHaveBeenCalled();
   });
 
@@ -388,7 +434,7 @@ describe('OpenAI shop AI', () => {
     globalThis.fetch = answering({ vin: null, vehicle: null, lines: [] });
 
     await expect(
-      openAiShopAi(undefined, 'gpt-4o-mini').readQuote(PDF, CATEGORIES),
+      openAiShopAi(undefined).readQuote(PDF, CATEGORIES, BRANDS),
     ).rejects.toMatchObject({ code: 'AI_NOT_CONFIGURED' });
     expect(globalThis.fetch).not.toHaveBeenCalled();
   });

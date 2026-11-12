@@ -6,6 +6,7 @@ import demandSnapshot from '../modules/demand/migrations/.snapshot-demand.json';
 import publishSnapshot from '../modules/publish/migrations/.snapshot-publish.json';
 import supplierSnapshot from '../modules/supplier/migrations/.snapshot-supplier.json';
 import vinLookupSnapshot from '../modules/vin-lookup/migrations/.snapshot-vin-lookup.json';
+import { FAILURE_REASONS, PAGE_STATUSES } from './crawler/store';
 
 const tableSchema = z.object({
   name: z.string(),
@@ -69,6 +70,7 @@ const CRAWL_TABLES: SchemaTable[] = [
     [
       column('site', 'text'),
       column('url', 'text'),
+      column('category_hint', 'text', true),
       column('status', 'text'),
       column('attempts', 'integer'),
       column('next_attempt_at', 'timestamptz'),
@@ -102,8 +104,16 @@ export const HAND_WRITTEN_TYPES: Record<string, string> = {
 
 const UNIQUE_ACROSS_NULLS =
   /^CREATE UNIQUE INDEX .* NULLS NOT DISTINCT WHERE \(deleted_at IS NULL\)$/;
-const ON_NAME_KEY =
-  /^CREATE UNIQUE INDEX .*upper\(regexp_replace\(btrim\(NORMALIZE\(name, NFKC\)\)/;
+const containing = (text: string) =>
+  new RegExp(text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+const withoutMarks = (column: string) =>
+  `regexp_replace(NORMALIZE(${column}, NFKD), '[\\u0300-\\u036f]'::text, ''::text, 'g'::text)`;
+const ON_NAME_KEY = containing(
+  `upper(btrim(regexp_replace(${withoutMarks('name')}, '[\\s._-]+'::text, ' '::text, 'g'::text)))`,
+);
+const ON_CODE_KEY = containing(
+  `upper(regexp_replace(${withoutMarks('code')}, '[\\s.-]+'::text, ''::text, 'g'::text))) WHERE (deleted_at IS NULL)`,
+);
 const OVER_TOMBSTONES_TOO = /^CREATE INDEX .* USING btree \([^)]*\)$/;
 const TRIGRAM = /USING gin .*gin_trgm_ops/;
 
@@ -114,6 +124,10 @@ export const HAND_WRITTEN_INDEXES: Record<string, RegExp> = {
   IDX_make_name_key_unique: ON_NAME_KEY,
   IDX_category_name_key_unique: ON_NAME_KEY,
   IDX_series_make_id_name_key_unique: ON_NAME_KEY,
+  IDX_engine_code_key_unique: ON_CODE_KEY,
+  IDX_chassis_series_id_code_key_unique: ON_CODE_KEY,
+  IDX_slug_redirect_kind_scope_id_from_slug_unique:
+    /\(kind, scope_id, from_slug\) NULLS NOT DISTINCT WHERE \(\(kind <> 'part'::text\) AND \(deleted_at IS NULL\)\)$/,
   IDX_fitment_part_vehicle_all: OVER_TOMBSTONES_TOO,
   IDX_fitment_vehicle_all: OVER_TOMBSTONES_TOO,
   IDX_vehicle_model_name_trigram: TRIGRAM,
@@ -122,14 +136,27 @@ export const HAND_WRITTEN_INDEXES: Record<string, RegExp> = {
   IDX_part_description_hash: /USING hash \(description\)$/,
   IDX_order_created_at: /\(created_at\) WHERE \(deleted_at IS NULL\)$/,
   IDX_order_updated_at: /\(updated_at\) WHERE \(deleted_at IS NULL\)$/,
+  IDX_vin_lookup_scrub_due: /\(updated_at\) WHERE \(vin IS NOT NULL\)$/,
+  IDX_vin_lookup_hit_visitor_scrub_due:
+    /\(created_at\) WHERE \(visitor_id IS NOT NULL\)$/,
   IDX_crawl_page_due:
     /\(site, next_attempt_at\) WHERE \(status = 'queued'::text\)$/,
 };
 
+const oneOf = (column: string, values: readonly string[]) =>
+  new RegExp(
+    `^CHECK \\(\\(${column} = ANY \\(ARRAY\\[${values.map((value) => `'${value}'::text`).join(', ')}\\]\\)\\)\\)$`,
+  );
+
 export const HAND_WRITTEN_CONSTRAINTS: Record<string, RegExp> = {
+  crawl_page_status: oneOf('status', PAGE_STATUSES),
+  crawl_page_error: oneOf('error', FAILURE_REASONS),
   supplier_markup_percentage:
     /^CHECK \(\(markup_percentage >= \(0\)::numeric\)\)$/,
   part_category_id_foreign: / ON DELETE RESTRICT$/,
+  vehicle_engine_id_foreign: / ON DELETE RESTRICT$/,
+  rejected_number_brand_id_foreign:
+    /^FOREIGN KEY \(brand_id\) REFERENCES brand\(id\) ON UPDATE CASCADE ON DELETE RESTRICT$/,
 };
 
 const signature = (type: string, nullable: boolean) =>

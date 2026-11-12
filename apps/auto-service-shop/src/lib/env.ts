@@ -4,19 +4,15 @@ import {
 } from '@podbor/catalog-contract/preview';
 import { z } from 'zod';
 
+import { SUPPLIER_ADAPTER_NAMES } from '../modules/supplier/keys';
 import { VIN_DECODER_NAMES } from './vin/decoders';
 
 const LOCAL_TYPESENSE_API_KEY = 'xyz';
 
-export const SUPPLIER_ADAPTER_NAMES = [
-  'demo',
-  'mann-filter',
-  'varta',
-  'bilstein',
-  'filtron',
-] as const;
-
-export type SupplierAdapterName = (typeof SUPPLIER_ADAPTER_NAMES)[number];
+export {
+  SUPPLIER_ADAPTER_NAMES,
+  type SupplierAdapterName,
+} from '../modules/supplier/keys';
 
 const nameList = (value: string) =>
   value
@@ -74,9 +70,6 @@ const envFields = z.object({
   TYPESENSE_PROTOCOL: z.enum(['http', 'https']).default('http'),
   TYPESENSE_API_KEY: optionalSecret,
   OPENAI_API_KEY: optionalSecret,
-  OPENAI_IMPORT_MODEL: optionalValue.transform(
-    (model) => model ?? 'gpt-4o-mini',
-  ),
   IMPORT_CONCURRENCY: optionalValue
     .transform((articles) => Number(articles ?? 4))
     .pipe(z.number().int().positive()),
@@ -93,7 +86,13 @@ const envFields = z.object({
     .transform((seconds) => Number(seconds ?? 60))
     .pipe(z.number().int().nonnegative()),
   PUBLISH_DISPATCH_TOKEN: optionalSecret,
-  LEAD_ROUTE_URL: optionalValue.pipe(z.url().optional()),
+  STOREFRONT_ORIGIN: optionalValue.pipe(
+    z
+      .url()
+      .refine((url) => new URL(url).pathname === '/', 'An origin, no path')
+      .transform((url) => new URL(url).origin)
+      .optional(),
+  ),
   SHOP_LEAD_SECRET: optionalSecret,
   SHOP_LEAD_SECRET_PREVIOUS: optionalSecret,
   SHOP_CLIENT_SECRET: optionalSecret,
@@ -102,11 +101,18 @@ const envFields = z.object({
   SHOP_ORDER_OUTCOME_SECRET_PREVIOUS: optionalSecret,
   SHOP_EVENTS_SECRET: optionalSecret,
   SHOP_EVENTS_SECRET_PREVIOUS: optionalSecret,
+  SHOP_VISITOR_SEARCHES_SECRET: optionalSecret,
+  SHOP_VISITOR_SEARCHES_SECRET_PREVIOUS: optionalSecret,
   VIN_DECODERS: z
     .string()
     .default(VIN_DECODER_NAMES.join(','))
     .transform(nameList)
     .pipe(z.array(z.enum(VIN_DECODER_NAMES)).min(1)),
+  STAFF_VISITOR_IDS: z
+    .string()
+    .default('')
+    .transform(nameList)
+    .pipe(z.array(z.uuid())),
   SUPPLIER_ADAPTERS: z
     .string()
     .default('')

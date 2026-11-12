@@ -6,4 +6,5 @@ export {
 export { assertSafeTranslation } from './assertSafeTranslation.ts';
 export { sha256Hex } from './sha256Hex.ts';
 export { fieldsPrompt, translateFields } from './translateFields.ts';
+export { SERBIAN_CAR_TRADE_GUIDANCE } from './promptRules.ts';
 export type { TranslateFieldsOptions } from './translateFields.ts';

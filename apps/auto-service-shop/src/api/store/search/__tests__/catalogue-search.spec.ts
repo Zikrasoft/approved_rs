@@ -171,7 +171,7 @@ medusaIntegrationTestRunner({
         await part('Щетка', '41 001', [audi.vehicle.id]);
         otherFilterId = await part('Масляный фильтр', 'HU 816 x', [], mann.id);
         const [supplier] = await suppliers.createSuppliers([
-          { name: 'Intercars', markup_percentage: 20 },
+          { key: 'demo-intercars', name: 'Intercars', markup_percentage: 20 },
         ]);
         const [otherNumber] = await catalog.listPartIdentifiers({
           part_id: otherFilterId,

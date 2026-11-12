@@ -1,0 +1,99 @@
+import { importTally } from '../import-summary';
+
+describe('importTally', () => {
+  it('counts skipped articles by reason and only articles in the skipped total, apart from rows without an engine code', () => {
+    const tally = importTally('MANN-FILTER');
+
+    tally.skip('brand', 2);
+    tally.skip('excluded');
+    tally.skip('not_in_scope', 3);
+    tally.skip('currency');
+    tally.skip('rejected', 4);
+    tally.skip('no_number', 6);
+    tally.withoutEngineCode(7);
+    tally.skip('no_make', 5);
+
+    expect(tally.summary).toMatchObject({
+      skipped: 16,
+      skipped_by_reason: {
+        brand: 2,
+        excluded: 1,
+        not_in_scope: 3,
+        currency: 1,
+        rejected: 4,
+        no_number: 6,
+        no_make: 5,
+        unmapped: 0,
+        unreadable: 0,
+      },
+      without_engine_code: 7,
+    });
+  });
+
+  it('lists unmapped codes once under their first spelling, most articles first', () => {
+    const tally = importTally('MANN-FILTER');
+
+    for (const code of [
+      'EDM Filter',
+      'Hydraulics',
+      'hydraulics',
+      'EDM Filter',
+      'HYDRAULICS',
+    ]) {
+      tally.unmapped(code);
+    }
+
+    expect(tally.summary).toMatchObject({
+      skipped: 5,
+      skipped_by_reason: { unmapped: 5 },
+      unmapped_categories: [
+        { code: 'Hydraulics', count: 3 },
+        { code: 'EDM Filter', count: 2 },
+      ],
+    });
+  });
+
+  it('lists unknown vehicle makes once under their first spelling, most rows first, and counts them as rows without a make', () => {
+    const tally = importTally('MANN-FILTER');
+
+    for (const make of [
+      'LIEBHERR',
+      'New Holland',
+      'NEW HOLLAND',
+      'LIEBHERR',
+      'NEW  HOLLAND',
+    ]) {
+      tally.unknownMake(make);
+    }
+
+    expect(tally.summary).toMatchObject({
+      skipped: 0,
+      skipped_by_reason: { no_make: 5 },
+      unknown_makes: [
+        { make: 'New Holland', count: 3 },
+        { make: 'LIEBHERR', count: 2 },
+      ],
+    });
+  });
+
+  it('counts each imported article as created, updated or unchanged', () => {
+    const tally = importTally('MANN-FILTER');
+
+    for (const outcome of [
+      'created',
+      'updated',
+      'unchanged',
+      'unchanged',
+    ] as const) {
+      tally.imported(outcome);
+    }
+
+    expect(tally.summary).toMatchObject({
+      supplier: 'MANN-FILTER',
+      created: 1,
+      updated: 1,
+      unchanged: 2,
+      skipped: 0,
+    });
+  });
+});

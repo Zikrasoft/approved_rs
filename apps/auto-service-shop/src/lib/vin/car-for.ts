@@ -12,6 +12,56 @@ import type VinLookupModuleService from '../../modules/vin-lookup/service';
 import { listVehicleResponses } from '../store-response';
 import { vinDecoders } from './chain';
 import { resolveVin } from './resolve';
+import type { LookupOrigin } from './sources';
+import { vagReference } from './vag-model-codes';
+
+type Unresolved = Extract<
+  Awaited<ReturnType<typeof resolveVin>>,
+  { resolved: false }
+>;
+
+export type VinGeneration = {
+  make: string;
+  model_slug: string | null;
+  code: string | null;
+  chassis: string | null;
+  model: string | null;
+};
+
+export function generationOf({
+  make,
+  code,
+  model_slug,
+}: Unresolved): VinGeneration | null {
+  if (!make || !(model_slug || code)) return null;
+  const reference = code ? vagReference(make, code) : null;
+  return {
+    make,
+    model_slug,
+    code,
+    chassis: reference?.chassis ?? null,
+    model: reference?.model ?? null,
+  };
+}
+
+export async function generationForVin(
+  scope: MedusaContainer,
+  typed: string | undefined,
+  origin: LookupOrigin,
+): Promise<VinGeneration | null> {
+  const vin = vinSchema.safeParse(typed);
+  if (!vin.success) return null;
+  const result = await resolveVin(
+    vin.data,
+    vinDecoders(scope),
+    {
+      catalog: scope.resolve(CATALOG_MODULE),
+      vinLookups: scope.resolve(VIN_LOOKUP_MODULE),
+    },
+    origin,
+  );
+  return result.resolved ? null : generationOf(result);
+}
 
 export async function vehicleForVin(
   scope: MedusaContainer,
@@ -31,13 +81,19 @@ export async function vehicleForVin(
 export async function carFor(
   scope: MedusaContainer,
   typed: string | undefined,
+  origin: LookupOrigin,
 ): Promise<string | null> {
   const vin = vinSchema.safeParse(typed);
   if (!vin.success) return null;
-  await resolveVin(vin.data, vinDecoders(scope), {
-    catalog: scope.resolve(CATALOG_MODULE),
-    vinLookups: scope.resolve(VIN_LOOKUP_MODULE),
-  });
+  await resolveVin(
+    vin.data,
+    vinDecoders(scope),
+    {
+      catalog: scope.resolve(CATALOG_MODULE),
+      vinLookups: scope.resolve(VIN_LOOKUP_MODULE),
+    },
+    origin,
+  );
   const vehicle = await vehicleForVin(scope, vin.data);
   return vehicle ? vehicleLabel(vehicle) : null;
 }

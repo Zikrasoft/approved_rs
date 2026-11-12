@@ -10,6 +10,16 @@ export const CATEGORY_FIELD_TYPES = [
 
 export type CategoryFieldType = (typeof CATEGORY_FIELD_TYPES)[number];
 
+const knownFieldType = z.object({ type: z.enum(CATEGORY_FIELD_TYPES) });
+
+export const ofKnownFieldTypes = <T extends z.ZodType>(item: T) =>
+  z
+    .array(z.unknown())
+    .transform((items) =>
+      items.filter((entry) => knownFieldType.safeParse(entry).success),
+    )
+    .pipe(z.array(item));
+
 export type CategoryFieldDefinition = {
   key: string;
   type: CategoryFieldType;

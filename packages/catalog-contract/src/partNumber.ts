@@ -1,5 +1,15 @@
-export const normalizePartNumber = (raw: string): string =>
-  raw.replace(/[\s./-]/g, '').toUpperCase();
+const CYRILLIC_LOOKALIKES = 'АВЕКМНОРСТУХЈЅ';
+const LATIN_TWINS = 'ABEKMHOPCTYXJS';
+
+export const normalizePartNumber = (raw: string): string | null =>
+  raw
+    .normalize('NFKD')
+    .toUpperCase()
+    .replace(
+      new RegExp(`[${CYRILLIC_LOOKALIKES}]`, 'g'),
+      (letter) => LATIN_TWINS[CYRILLIC_LOOKALIKES.indexOf(letter)],
+    )
+    .replace(/[^A-Z0-9]/g, '') || null;
 
 export const partPageSlug = (
   brandSlug: string,
@@ -10,7 +20,8 @@ const WORD = /^\p{L}{3,}$/u;
 
 export const partNumberQuery = (raw: string): string | null => {
   const number = normalizePartNumber(raw);
-  return number.length >= 6 &&
+  return number !== null &&
+    number.length >= 6 &&
     /\d{3}/.test(number) &&
     !raw.split(/\s+/).some((token) => WORD.test(token))
     ? number
@@ -47,11 +58,13 @@ export const partTitle = ({
       break;
     }
   }
+  const key = normalizePartNumber(number);
   return {
     name: rest,
-    number: normalizePartNumber(rest).includes(normalizePartNumber(number))
-      ? null
-      : `${brand} ${number}`,
+    number:
+      key && normalizePartNumber(rest)?.includes(key)
+        ? null
+        : `${brand} ${number}`,
   };
 };
 

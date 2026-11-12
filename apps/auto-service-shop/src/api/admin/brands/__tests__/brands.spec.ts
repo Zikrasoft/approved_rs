@@ -24,6 +24,7 @@ medusaIntegrationTestRunner({
         const suppliers: SupplierModuleService =
           getContainer().resolve(SUPPLIER_MODULE);
         intercars = await suppliers.createSuppliers({
+          key: 'demo-intercars',
           name: 'Intercars',
           markup_percentage: 20,
         });
@@ -294,6 +295,26 @@ medusaIntegrationTestRunner({
         expect(response.data).toMatchObject({
           code: 'IN_USE',
           holders: [{ entity: 'part_identifier', count: 1 }],
+        });
+        expect(await catalog.listBrands({ id: brand.id })).toHaveLength(1);
+      });
+
+      it('refuses to delete a Brand its RejectedNumbers use', async () => {
+        const brand = await catalog.createBrands({
+          name: 'Rejecting',
+          slug: 'rejecting',
+        });
+        await catalog.createRejectedNumbers({
+          brand_id: brand.id,
+          normalized_value: 'REJECTED1',
+        });
+
+        const response = await remove(`/admin/brands/${brand.id}`);
+
+        expect(response.status).toBe(409);
+        expect(response.data).toMatchObject({
+          code: 'IN_USE',
+          holders: [{ entity: 'rejected_number', count: 1 }],
         });
         expect(await catalog.listBrands({ id: brand.id })).toHaveLength(1);
       });

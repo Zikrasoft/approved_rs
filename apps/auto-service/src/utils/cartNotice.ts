@@ -16,7 +16,7 @@ export type CartNotice =
 
 type RefusalNotice = Extract<
   CartNotice,
-  'price-changed' | 'cart-changed' | 'unavailable'
+  'price-changed' | 'cart-changed' | 'unavailable' | 'unreachable'
 >;
 
 const REFUSAL_NOTICES: Record<CheckoutRefusal, RefusalNotice> = {
@@ -25,6 +25,7 @@ const REFUSAL_NOTICES: Record<CheckoutRefusal, RefusalNotice> = {
   OFFER_OUT_OF_STOCK: 'unavailable',
   OFFER_MISSING: 'unavailable',
   CONTACT_MISSING: 'unavailable',
+  CHECKOUT_REFUSED: 'unreachable',
 };
 
 export const refusalNotice = (code: CheckoutRefusal): RefusalNotice =>

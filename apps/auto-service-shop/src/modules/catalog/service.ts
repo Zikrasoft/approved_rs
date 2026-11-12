@@ -1,3 +1,5 @@
+import { isDeepStrictEqual } from 'node:util';
+
 import type { SqlEntityManager } from '@medusajs/framework/mikro-orm/postgresql';
 import type { Context } from '@medusajs/framework/types';
 import {
@@ -16,7 +18,6 @@ import {
   guardDefinitionChange,
   type SteeringSide,
   type VEHICLE_DRIVES,
-  normalizePartNumber,
   requirementErrors,
   validateAttributes,
 } from '@podbor/catalog-contract';
@@ -32,6 +33,7 @@ import Fitment from './models/fitment';
 import Make from './models/make';
 import MakeSpelling from './models/make-spelling';
 import Part from './models/part';
+import RejectedNumber from './models/rejected-number';
 import Requirement from './models/requirement';
 import PartIdentifier, {
   type PART_IDENTIFIER_TYPES,
@@ -46,7 +48,8 @@ import { runBoundSql } from '../_shared/bound-sql';
 import { chunksOf } from '../_shared/chunks';
 import { keysetPages } from '../_shared/keyset-pages';
 import { modelSlugOf, slugOf, vehicleSlugOf } from '../_shared/slug';
-import { spellingKey } from '../_shared/spelling';
+import { nameKey } from '../_shared/keys';
+import { partNumberKey } from '../_shared/part-number-key';
 import {
   countRowsBySource,
   lockSourcedRows,
@@ -113,12 +116,14 @@ export type SourceChange = {
   classification?: PartClassification;
 };
 
-export type AppliedSourceChange = {
-  changed: boolean;
-  categorized?: boolean;
-};
+export type AppliedSourceChange = { changed: boolean };
 
-const STAFF_OWNED_FIELDS = ['name', 'description', 'category_id'] as const;
+const STAFF_OWNED_FIELDS = [
+  'name',
+  'description',
+  'category_id',
+  'attributes',
+] as const;
 
 const definedOf = <Row extends object>(row: Row): Partial<Row> =>
   Object.fromEntries(
@@ -212,10 +217,10 @@ export type VehicleFilter = {
 
 type FilteredVehicle = {
   model_id: string;
-  engine_id: string;
+  engine_id: string | null;
   year_from: number | null;
   year_to: number | null;
-  engine: { family: string };
+  engine: { family: string } | null;
   model: {
     chassis_id: string;
     chassis: { series_id: string; series: { make_id: string } };
@@ -231,7 +236,7 @@ export const matchesFilter =
       [filter.chassis_id, model.chassis_id],
       [filter.model_id, vehicle.model_id],
       [filter.engine_id, vehicle.engine_id],
-      [filter.engine_family, engine.family],
+      [filter.engine_family, engine?.family],
     ].every(([wanted, actual]) => wanted === undefined || wanted === actual) &&
     (filter.year_from === undefined ||
       vehicle.year_to === null ||
@@ -266,7 +271,7 @@ const VEHICLE_IDENTITY = [
 
 export type NewVehicle = Provenance & {
   model_id: string;
-  engine_id: string;
+  engine_id: string | null;
   power_kw?: number | null;
   drive?: (typeof VEHICLE_DRIVES)[number] | null;
   market?: string | null;
@@ -311,7 +316,7 @@ const FLAG_UNLISTED_PARTS = `
       not exists (
         select 1 from part_identifier pi
         where pi.part_id = p.id and pi.deleted_at is null
-          and pi.normalized_value = any(?::text[])
+          and pi.brand_id || ' ' || pi.normalized_value = any(?::text[])
       ) as missing
     from part p where p.source = ? and p.deleted_at is null
   )
@@ -363,6 +368,7 @@ const CatalogModuleBase = MedusaService({
   VehicleIdentifier,
   Fitment,
   Requirement,
+  RejectedNumber,
   SlugRedirect,
 });
 
@@ -372,7 +378,7 @@ type SpellingInput = { value: string } & Record<string, unknown>;
 
 const withValueKey = (row: SpellingInput) => ({
   ...row,
-  value_key: spellingKey(row.value),
+  value_key: nameKey(row.value),
 });
 
 class CatalogModuleService extends CatalogModuleBase {
@@ -470,13 +476,24 @@ class CatalogModuleService extends CatalogModuleBase {
       });
     }
     if (kind === 'vehicle') {
-      const engine = await this.retrieveEngine(
-        String(row.engine_id),
-        { select: ['code'] },
-        context,
-      );
+      const engine =
+        typeof row.engine_id === 'string'
+          ? await this.retrieveEngine(
+              row.engine_id,
+              { select: ['code'] },
+              context,
+            )
+          : null;
+      const model = engine
+        ? null
+        : await this.retrieveVehicleModel(
+            String(row.model_id),
+            { select: ['name'] },
+            context,
+          );
       return vehicleSlugOf({
-        engine: engine.code,
+        engine: engine?.code ?? null,
+        variant: model?.name ?? '',
         power_kw: typeof row.power_kw === 'number' ? row.power_kw : null,
       });
     }
@@ -915,6 +932,7 @@ class CatalogModuleService extends CatalogModuleBase {
     await this.refuseUnknownBrands(identifiers, sharedContext);
     await this.lockNumbers(identifiers, sharedContext);
     await this.refuseTakenNumbers(identifiers, sharedContext);
+    await this.takeBackRejectedNumbers(identifiers, sharedContext);
     const created = await this.createParts(
       {
         name,
@@ -934,7 +952,7 @@ class CatalogModuleService extends CatalogModuleBase {
     await this.createPartIdentifiers(
       identifiers.map((identifier) => ({
         ...identifier,
-        normalized_value: normalizePartNumber(identifier.value),
+        normalized_value: partNumberKey(identifier.value),
         part_id: created.id,
         ...provenance,
       })),
@@ -949,7 +967,7 @@ class CatalogModuleService extends CatalogModuleBase {
     @MedusaContext() sharedContext: Context = {},
   ): Promise<FoundPart> {
     await this.lockNumbers([identifier], sharedContext);
-    const normalized = normalizePartNumber(identifier.value);
+    const normalized = partNumberKey(identifier.value);
     const [existing] = await this.listPartIdentifiers(
       { brand_id: identifier.brand_id, normalized_value: normalized },
       { select: ['id', 'part_id'], take: 1 },
@@ -962,6 +980,19 @@ class CatalogModuleService extends CatalogModuleBase {
         created: false,
       };
     }
+    if (
+      await this.isRejectedNumber(
+        identifier.brand_id,
+        identifier.value,
+        sharedContext,
+      )
+    ) {
+      throw adminError(
+        MedusaError.Types.NOT_ALLOWED,
+        'REJECTED_NUMBER',
+        `${identifier.value} was deleted from the catalogue by staff`,
+      );
+    }
     const partId = await this.createPartWithIdentifiers(
       { ...part, identifiers: [identifier] },
       sharedContext,
@@ -972,6 +1003,114 @@ class CatalogModuleService extends CatalogModuleBase {
       sharedContext,
     );
     return { part_id: partId, part_identifier_id: created.id, created: true };
+  }
+
+  @InjectManager()
+  async isRejectedNumber(
+    brandId: string,
+    value: string,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<boolean> {
+    const [, count] = await this.listAndCountRejectedNumbers(
+      { brand_id: brandId, normalized_value: partNumberKey(value) },
+      { select: ['id'], take: 1 },
+      sharedContext,
+    );
+    return count > 0;
+  }
+
+  @InjectTransactionManager()
+  async deletePartRejectingNumbers(
+    id: string,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<void> {
+    const identifiers = await this.listPartIdentifiers(
+      { part_id: id },
+      { select: ['brand_id', 'normalized_value'], take: null },
+      sharedContext,
+    );
+    const rejected = identifiers.length
+      ? await this.listRejectedNumbers(
+          {
+            $or: identifiers.map(({ brand_id, normalized_value }) => ({
+              brand_id,
+              normalized_value,
+            })),
+          },
+          { select: ['brand_id', 'normalized_value'], take: null },
+          sharedContext,
+        )
+      : [];
+    const known = new Set(
+      rejected.map((row) => `${row.brand_id} ${row.normalized_value}`),
+    );
+    const fresh = identifiers.filter(
+      (row) => !known.has(`${row.brand_id} ${row.normalized_value}`),
+    );
+    if (fresh.length) {
+      await this.createRejectedNumbers(
+        fresh.map(({ brand_id, normalized_value }) => ({
+          brand_id,
+          normalized_value,
+        })),
+        sharedContext,
+      );
+    }
+    await this.deleteParts(id, sharedContext);
+  }
+
+  private async takeBackRejectedNumbers(
+    identifiers: NewPartIdentifier[],
+    context: Context,
+  ): Promise<void> {
+    const rejected = await this.listRejectedNumbers(
+      {
+        $or: identifiers.map(({ brand_id, value }) => ({
+          brand_id,
+          normalized_value: partNumberKey(value),
+        })),
+      },
+      { select: ['id'], take: null },
+      context,
+    );
+    if (rejected.length) {
+      await this.softDeleteRejectedNumbers(
+        rejected.map(({ id }) => id),
+        {},
+        context,
+      );
+    }
+  }
+
+  @InjectManager()
+  async brandByAnyName(
+    name: string,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<{ id: string; name: string; slug: string } | null> {
+    const key = nameKey(name);
+    const spellings = await this.listBrandSpellings(
+      { value_key: key },
+      { relations: ['brand'], take: null },
+      sharedContext,
+    );
+    const brandOf = (spelling?: (typeof spellings)[number]) =>
+      spelling && {
+        id: spelling.brand.id,
+        name: spelling.brand.name,
+        slug: spelling.brand.slug,
+      };
+    const aliased = brandOf(
+      spellings.find(({ supplier_id }) => supplier_id === null),
+    );
+    if (aliased) return aliased;
+    const named = (
+      await this.listBrands(
+        {},
+        { select: ['id', 'name', 'slug'], take: null },
+        sharedContext,
+      )
+    ).find((brand) => nameKey(brand.name) === key);
+    return named ?? brandOf(spellings[0]) ?? null;
   }
 
   @InjectTransactionManager()
@@ -1032,10 +1171,11 @@ class CatalogModuleService extends CatalogModuleBase {
     await this.refuseUnknownBrands([identifier], sharedContext);
     await this.lockNumbers([identifier], sharedContext);
     await this.refuseTakenNumbers([identifier], sharedContext);
+    await this.takeBackRejectedNumbers([identifier], sharedContext);
     await this.createPartIdentifiers(
       {
         ...identifier,
-        normalized_value: normalizePartNumber(identifier.value),
+        normalized_value: partNumberKey(identifier.value),
         part_id: partId,
         ...provenance,
       },
@@ -1092,7 +1232,7 @@ class CatalogModuleService extends CatalogModuleBase {
     const keys = [
       ...new Set(
         identifiers.map(
-          ({ brand_id, value }) => `${brand_id}:${normalizePartNumber(value)}`,
+          ({ brand_id, value }) => `${brand_id}:${partNumberKey(value)}`,
         ),
       ),
     ].sort();
@@ -1112,7 +1252,7 @@ class CatalogModuleService extends CatalogModuleBase {
       {
         $or: identifiers.map(({ brand_id, value }) => ({
           brand_id,
-          normalized_value: normalizePartNumber(value),
+          normalized_value: partNumberKey(value),
         })),
       },
       { relations: ['part'], take: 1 },
@@ -1276,12 +1416,12 @@ class CatalogModuleService extends CatalogModuleBase {
   @InjectTransactionManager()
   async flagUnlistedParts(
     source: string,
-    listedNumbers: string[],
+    listedBrandNumbers: string[],
     unreadableUrls: string[],
     @MedusaContext() sharedContext: Context = {},
   ): Promise<void> {
     await runBoundSql(sharedContext, FLAG_UNLISTED_PARTS, [
-      listedNumbers,
+      listedBrandNumbers,
       source,
       unreadableUrls.length === 0,
       unreadableUrls,
@@ -1384,7 +1524,7 @@ class CatalogModuleService extends CatalogModuleBase {
       { select: ['category_id', 'attributes', 'edited_fields'] },
       sharedContext,
     );
-    const edit = { ...columns, category_id };
+    const edit = { ...columns, category_id, attributes };
     await this.updateParts(
       {
         id,
@@ -1428,7 +1568,7 @@ class CatalogModuleService extends CatalogModuleBase {
     await this.lockRow('part', id, sharedContext);
     const part = await this.retrievePart(
       id,
-      { select: ['category_id', 'description', 'edited_fields'] },
+      { select: ['category_id', 'attributes', 'description', 'edited_fields'] },
       sharedContext,
     );
     const owned = new Set(part.edited_fields);
@@ -1442,35 +1582,52 @@ class CatalogModuleService extends CatalogModuleBase {
         !owned.has('description') &&
         !part.description && { description: change.description }),
     };
-    const categorized =
-      classification && !part.category_id && !owned.has('category_id')
-        ? await this.fileFromSource(id, classification, sharedContext)
-        : undefined;
+    const fileable = !part.category_id && !owned.has('category_id');
+    const refreshable =
+      Boolean(part.category_id) &&
+      classification?.category_id === part.category_id &&
+      !owned.has('attributes');
+    const classified =
+      classification && (fileable || refreshable)
+        ? await this.classifyFromSource(id, classification, part, sharedContext)
+        : false;
     const renamed = Object.keys(columns).length > 0;
     if (renamed) {
       await this.updateParts({ id, ...columns }, sharedContext);
     }
-    return { changed: renamed || categorized === true, categorized };
+    return { changed: renamed || classified };
   }
 
-  private async fileFromSource(
+  private async classifyFromSource(
     id: string,
     classification: PartClassification,
+    current: PartClassification,
     sharedContext: Context,
   ): Promise<boolean> {
     if (!classification.category_id) return false;
-    return this.classifyPart(id, classification, sharedContext).then(
-      () => true,
-      (error: unknown) => {
-        if (
-          MedusaError.isMedusaError(error) &&
-          error.code === 'INVALID_ATTRIBUTES'
-        ) {
-          return false;
-        }
-        throw error;
-      },
-    );
+    try {
+      const values = await this.classifiedAttributes(
+        classification.category_id,
+        classification.attributes,
+        sharedContext,
+      );
+      if (
+        classification.category_id === current.category_id &&
+        isDeepStrictEqual(values, current.attributes)
+      ) {
+        return false;
+      }
+      await this.classifyPart(id, classification, sharedContext);
+      return true;
+    } catch (error) {
+      if (
+        MedusaError.isMedusaError(error) &&
+        error.code === 'INVALID_ATTRIBUTES'
+      ) {
+        return false;
+      }
+      throw error;
+    }
   }
 
   @InjectTransactionManager()

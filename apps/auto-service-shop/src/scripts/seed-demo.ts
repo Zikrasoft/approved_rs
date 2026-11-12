@@ -12,7 +12,6 @@ import type {
   MedusaContainer,
 } from '@medusajs/framework/types';
 import { Modules } from '@medusajs/framework/utils';
-import { normalizePartNumber } from '@podbor/catalog-contract';
 import {
   createApiKeysWorkflow,
   linkSalesChannelsToApiKeyWorkflow,
@@ -31,6 +30,7 @@ import {
   seedProductionCatalogue,
 } from '../lib/production-seed';
 import { DEMO_SUPPLIERS } from '../lib/suppliers/demo-adapter';
+import { partNumberKey } from '../modules/_shared/part-number-key';
 import { CATALOG_MODULE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
 import type { NewPart } from '../modules/catalog/service';
@@ -186,7 +186,7 @@ async function seedPart(
   for (const identifier of part.identifiers) {
     const [found] = await catalog.listPartIdentifiers({
       brand_id: identifier.brand_id,
-      normalized_value: normalizePartNumber(identifier.value),
+      normalized_value: partNumberKey(identifier.value),
     });
     if (found) taken ??= found.part_id;
     else free.push(identifier);
@@ -217,17 +217,17 @@ async function seedVehicles(catalog: CatalogModuleService) {
       {
         make_id: bmw.id,
         name: '3 серия',
-        translations: { sr: 'Serija 3', en: '3 Series' },
+        translations: { sr: { name: 'Serija 3' }, en: { name: '3 Series' } },
       },
       {
         make_id: bmw.id,
         name: '5 серия',
-        translations: { sr: 'Serija 5', en: '5 Series' },
+        translations: { sr: { name: 'Serija 5' }, en: { name: '5 Series' } },
       },
       {
         make_id: mercedes.id,
         name: 'E-класс',
-        translations: { sr: 'E-klasa', en: 'E-Class' },
+        translations: { sr: { name: 'E-klasa' }, en: { name: 'E-Class' } },
       },
     ],
     ['make_id', 'name'],
@@ -812,7 +812,7 @@ async function applyDemoAttributes(catalog: CatalogModuleService) {
   );
   for (const [slug, number, attributes, name] of DEMO_ATTRIBUTES) {
     const [identifier] = await catalog.listPartIdentifiers(
-      { brand_id: brand[slug], normalized_value: normalizePartNumber(number) },
+      { brand_id: brand[slug], normalized_value: partNumberKey(number) },
       { relations: ['part'] },
     );
     const part = identifier?.part;
@@ -1012,7 +1012,7 @@ async function seedFilterVariety(
   );
   const existing = async (slug: string, number: string) => {
     const [identifier] = await catalog.listPartIdentifiers(
-      { brand_id: brand[slug], normalized_value: normalizePartNumber(number) },
+      { brand_id: brand[slug], normalized_value: partNumberKey(number) },
       { relations: ['part'] },
     );
     return identifier;
@@ -1060,14 +1060,15 @@ async function syncDemoSuppliers(
     (await catalog.listBrands({}, { take: null })).map((b) => [b.slug, b.id]),
   );
   for (const {
+    key,
     name,
     markup_percentage,
     categories,
     spellings,
   } of DEMO_SUPPLIERS) {
-    const [found] = await suppliers.listSuppliers({ name });
     const supplier =
-      found ?? (await suppliers.createSuppliers({ name, markup_percentage }));
+      (await suppliers.supplierByKey(key)) ??
+      (await suppliers.createSuppliers({ key, name, markup_percentage }));
     const mapped = new Set(
       (
         await suppliers.listSupplierCategories(
@@ -1114,9 +1115,7 @@ export default async function seedDemo({ container }: ExecArgs) {
   const catalog: CatalogModuleService = container.resolve(CATALOG_MODULE);
   const suppliers: SupplierModuleService = container.resolve(SUPPLIER_MODULE);
   const oilField = await seedCategories(catalog);
-  if (
-    (await suppliers.listSuppliers({ name: DEMO_SUPPLIERS[0].name })).length
-  ) {
+  if (await suppliers.supplierByKey(DEMO_SUPPLIERS[0].key)) {
     logger.info('Demo catalogue already seeded, skipping.');
   } else {
     await seedCatalogue(catalog, oilField, logger);

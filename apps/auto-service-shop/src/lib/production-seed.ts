@@ -12,15 +12,17 @@ import {
   STAGED_DATA_KINDS,
 } from '@podbor/catalog-contract';
 
-import type { SupplierAdapterName } from './env';
+import type { CrawledSupplierKey } from '../modules/supplier/keys';
 import { slugOf } from '../modules/_shared/slug';
+import { scopedCodeOf } from './suppliers/category-scope';
 import { MAKE_ALIASES } from './suppliers/makes';
-import { spellingKey } from '../modules/_shared/spelling';
+import { nameKey } from '../modules/_shared/keys';
 import { CATALOG_MODULE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../modules/supplier';
 import type SupplierModuleService from '../modules/supplier/service';
 import { seedCashAtPickupCommerceDefaults } from './commerce-defaults';
+import type { CrawledSite } from './crawler/site';
 import { CRAWLED_SITES } from './crawler/sites';
 import { errorMessage } from './errors';
 import { storeImage } from './images';
@@ -361,50 +363,149 @@ export async function seedCategoryFields(
   return ids;
 }
 
+type PartType = [slug: string, type: string | null];
+
 type CrawledCatalogue = {
   brands: Record<string, string[]>;
-  categories: Record<string, string>;
+  categories: Record<string, PartType>;
+  excluded: string[];
   makes: Record<string, string>;
 };
 
-const CRAWLED_CATALOGUES: Record<
-  Exclude<SupplierAdapterName, 'demo'>,
-  CrawledCatalogue
-> = {
+const MAINTENANCE_SLUG = 'maintenance-consumables';
+
+const OIL_FILTER: PartType = [MAINTENANCE_SLUG, 'Масляный фильтр'];
+const AIR_FILTER: PartType = [MAINTENANCE_SLUG, 'Воздушный фильтр'];
+const FUEL_FILTER: PartType = [MAINTENANCE_SLUG, 'Топливный фильтр'];
+const CABIN_FILTER: PartType = [MAINTENANCE_SLUG, 'Салонный фильтр'];
+const SECONDARY_ELEMENT: PartType = [MAINTENANCE_SLUG, null];
+const TRANSMISSION_FILTER: PartType = ['transmission', 'Фильтр АКПП'];
+
+const CRAWLED_CATALOGUES: Record<CrawledSupplierKey, CrawledCatalogue> = {
   'mann-filter': {
     brands: { 'MANN-FILTER': ['MANN-FILTER'] },
-    categories: {},
+    categories: {
+      'Oil Filter': OIL_FILTER,
+      'Air Filter': AIR_FILTER,
+      'Fuel Filter | For diesel': FUEL_FILTER,
+      'Fuel Filter | For gasoline': FUEL_FILTER,
+      'Fuel Filter | Water Separator': FUEL_FILTER,
+      'Cabin Air Filter | Particulate': CABIN_FILTER,
+      'Cabin Air Filter | Activated carbon': CABIN_FILTER,
+      'Cabin Air Filter | Biofunctional': CABIN_FILTER,
+      'Secondary Element': SECONDARY_ELEMENT,
+      Ventilator: ['engine-parts', null],
+      'Hydraulic Transmission Filter': TRANSMISSION_FILTER,
+      'Cooling Liquid Filter': [
+        MAINTENANCE_SLUG,
+        'Фильтр охлаждающей жидкости',
+      ],
+    },
+    excluded: ['Hydraulics', 'Compressed Air-Oil Separation', 'EDM Filter'],
     makes: MAKE_ALIASES,
   },
   filtron: {
     brands: { FILTRON: ['FILTRON'] },
-    categories: {},
+    categories: {
+      'Filter vazduha': AIR_FILTER,
+      'Filter goriva': FUEL_FILTER,
+      'Filter kabine': CABIN_FILTER,
+      'Filter ulja': OIL_FILTER,
+      'Sekundarni element': SECONDARY_ELEMENT,
+      Sušač: ['brakes', null],
+      'Filter hidrauličnog prenosa': TRANSMISSION_FILTER,
+    },
+    excluded: ['Hidraulika'],
     makes: MAKE_ALIASES,
   },
   varta: {
     brands: { VARTA: ['VARTA'] },
-    categories: { battery: BATTERY_CATEGORY.slug },
+    categories: { battery: [BATTERY_CATEGORY.slug, 'Аккумулятор'] },
+    excluded: [],
     makes: {},
   },
   bilstein: {
     brands: { Febi: ['febi'], SWAG: ['SWAG'], 'Blue Print': ['Blue Print'] },
-    categories: {},
+    categories: {
+      'kočioni disk': ['brakes', 'Тормозной диск'],
+      'Set kočione obloge': ['brakes', 'Тормозные колодки'],
+      'kočiona čeljust': ['brakes', 'Тормозной суппорт'],
+      'kočiono crevo': ['brakes', 'Тормозной шланг'],
+      'doboš kočnice': ['brakes', 'Тормозной барабан'],
+      'sajla ručne kočnice': ['brakes', 'Трос стояночного тормоза'],
+      amortizer: ['suspension', 'Амортизатор'],
+      rame: ['suspension', 'Рычаг подвески'],
+      'nosač ramena': ['suspension', 'Сайлентблок рычага'],
+      'nosač stabilizatora': ['suspension', 'Втулка стабилизатора'],
+      'aksijalni zglob': ['suspension', 'Рулевая тяга'],
+      'uljni filter': OIL_FILTER,
+      'vazdušni filter': AIR_FILTER,
+      'filter goriva': FUEL_FILTER,
+      'filter kabine': CABIN_FILTER,
+      'kanalni kaiš': ['engine-parts', 'Поликлиновой ремень'],
+      'garnitura zupčastih kaiševa': ['engine-parts', 'Комплект ремня ГРМ'],
+      'zupčasti kaiš': ['engine-parts', 'Зубчатый ремень'],
+      'kočioni cilindar točka': ['brakes', 'Колесный тормозной цилиндр'],
+      'kontakt istrošenosti': ['brakes', 'Датчик износа тормозных колодок'],
+    },
+    excluded: [],
     makes: MAKE_ALIASES,
   },
+};
+
+export const crawledPartType = (supplierKey: string, code: string) => {
+  const categories =
+    Object.entries(CRAWLED_CATALOGUES).find(([key]) => key === supplierKey)?.[1]
+      .categories ?? {};
+  const mapped = scopedCodeOf(Object.keys(categories))(code);
+  return mapped === null ? null : categories[mapped][1];
+};
+
+export const GLOBAL_BRAND_ALIASES: Record<string, string[]> = {
+  Bosch: ['Robert Bosch'],
+  Elring: ['ElringKlinger', 'Elring Klinger'],
+  FILTRON: [],
+  Febi: ['febi bilstein'],
+  SWAG: [],
+  'Blue Print': ['Blueprint'],
+  'MANN-FILTER': ['MANN'],
+  MAHLE: ['Knecht', 'MAHLE Knecht', 'MAHLE Original'],
+  Hengst: [],
+  Meyle: [],
+  TRW: ['TRW Automotive', 'ZF TRW'],
+  KYB: ['Kayaba'],
+  Continental: ['ContiTech'],
+  INA: [],
+  HEPU: [],
+  Lemförder: ['Lemfoerder'],
+  Corteco: [],
+  Bosal: [],
+  'Victor Reinz': ['Reinz'],
+  Delphi: ['Delphi Technologies'],
+  Dayco: [],
+  Gates: [],
+  SKF: [],
+  Valeo: [],
+  Sachs: ['ZF Sachs'],
+  LUK: [],
+  NGK: [],
+  Denso: [],
+  VARTA: [],
 };
 
 const CRAWLED_SUPPLIER = { released_kinds: [...STAGED_DATA_KINDS] };
 
 async function seedCrawledSupplier(
   suppliers: SupplierModuleService,
-  name: string,
+  { key, name }: CrawledSite,
 ) {
-  const [row] = await suppliers.listSuppliers({ name });
+  const row = (await suppliers.supplierByKey(key)) ?? undefined;
   return upsert(
     row,
     CRAWLED_SUPPLIER,
     () =>
       suppliers.createSuppliers({
+        key,
         name,
         markup_percentage: 0,
         ...CRAWLED_SUPPLIER,
@@ -429,9 +530,7 @@ async function seedNamed<Row extends Seeded & { name: string; slug: string }>(
 ) {
   const rows = await list();
   const row =
-    rows.find(
-      (candidate) => spellingKey(candidate.name) === spellingKey(name),
-    ) ??
+    rows.find((candidate) => nameKey(candidate.name) === nameKey(name)) ??
     rows.find(({ slug }) => slug === slugOf(name)) ??
     rows.find(({ id }) => id === spelledId);
   return upsert(row, { name }, () => create({ name }), update);
@@ -444,7 +543,7 @@ const spelledOwner = <Row extends Seeded & { value_key: string }>(
 ) => {
   const row = existing.find(
     (candidate) =>
-      candidate.value_key === spellingKey(value) && !candidate.deleted_at,
+      candidate.value_key === nameKey(value) && !candidate.deleted_at,
   );
   return row && owner(row);
 };
@@ -460,7 +559,7 @@ async function seedSpellings<
 ) {
   for (const [value, owner] of wanted) {
     await upsert(
-      liveFirst(existing, ({ value_key }) => value_key === spellingKey(value)),
+      liveFirst(existing, ({ value_key }) => value_key === nameKey(value)),
       owner,
       () => create(value, owner),
       update,
@@ -468,13 +567,26 @@ async function seedSpellings<
   }
 }
 
+async function seededCategoryBySlug(catalog: CatalogModuleService) {
+  const live = await catalog.listCategories({}, { take: null });
+  const retired = await catalog.listSlugRedirects(
+    { kind: 'category' },
+    { select: ['from_id', 'from_slug'], take: null },
+  );
+  return (slug: string) =>
+    live.find((row) => row.slug === slug) ??
+    live.find(({ id }) =>
+      retired.some((row) => row.from_slug === slug && row.from_id === id),
+    );
+}
+
 async function seedCrawledCatalogues(container: MedusaContainer) {
   const catalog: CatalogModuleService = container.resolve(CATALOG_MODULE);
   const suppliers: SupplierModuleService = container.resolve(SUPPLIER_MODULE);
   for (const site of CRAWLED_SITES) {
-    if (site.key === 'demo') continue;
-    const { brands, categories, makes } = CRAWLED_CATALOGUES[site.key];
-    const { id: supplier_id } = await seedCrawledSupplier(suppliers, site.name);
+    const { brands, categories, excluded, makes } =
+      CRAWLED_CATALOGUES[site.key];
+    const { id: supplier_id } = await seedCrawledSupplier(suppliers, site);
 
     const seededBrandSpellings = await catalog.listBrandSpellings(
       { supplier_id },
@@ -531,21 +643,58 @@ async function seedCrawledCatalogues(container: MedusaContainer) {
       { supplier_id },
       WITH_DELETED,
     );
-    for (const [code, slug] of Object.entries(categories)) {
-      const [category] = await catalog.listCategories({ slug });
+    const categoryOf = await seededCategoryBySlug(catalog);
+    const wanted: [string, string | null][] = [
+      ...Object.entries(categories).map(
+        ([code, [slug]]): [string, string | null] => [
+          code,
+          categoryOf(slug)?.id ?? null,
+        ],
+      ),
+      ...excluded.map((code): [string, null] => [code, null]),
+    ];
+    for (const [code, category_id] of wanted) {
       await upsert(
-        liveFirst(mapped, ({ code_key }) => code_key === spellingKey(code)),
-        { category_id: category.id },
+        liveFirst(mapped, ({ code_key }) => code_key === nameKey(code)),
+        { category_id },
         () =>
           suppliers.createSupplierCategories({
             supplier_id,
             code,
-            category_id: category.id,
+            category_id,
           }),
         (update) => suppliers.updateSupplierCategories(update),
       );
     }
   }
+}
+
+async function seedGlobalBrandAliases(container: MedusaContainer) {
+  const catalog: CatalogModuleService = container.resolve(CATALOG_MODULE);
+  const seeded = await catalog.listBrandSpellings(
+    { supplier_id: null },
+    WITH_DELETED,
+  );
+  const aliases: [string, { brand_id: string }][] = [];
+  for (const [name, values] of Object.entries(GLOBAL_BRAND_ALIASES)) {
+    const brand = await seedNamed(
+      name,
+      values
+        .map((value) => spelledOwner(seeded, value, (row) => row.brand_id))
+        .find(Boolean),
+      () => catalog.listBrands({}, { take: null }),
+      (data) => catalog.createBrands(data),
+      (update) => catalog.updateBrands(update),
+    );
+    for (const value of values) aliases.push([value, { brand_id: brand.id }]);
+  }
+  await seedSpellings(
+    seeded,
+    aliases,
+    (value, owner) =>
+      catalog.createBrandSpellings({ supplier_id: null, value, ...owner }),
+    (update) => catalog.updateBrandSpellings(update),
+  );
 }
 
 export async function seedProductionCatalogue(
@@ -556,15 +705,11 @@ export async function seedProductionCatalogue(
   const catalog: CatalogModuleService = container.resolve(CATALOG_MODULE);
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
   const categories = [...CATEGORIES, BATTERY_CATEGORY];
-  const existing = await catalog.listCategories(
-    { slug: categories.map(({ slug }) => slug) },
-    { take: null },
-  );
+  const existing = await seededCategoryBySlug(catalog);
   const photos = readdirSync(IMAGES);
   for (const category of categories) {
     const row =
-      existing.find(({ slug }) => slug === category.slug) ??
-      (await catalog.createCategories(category));
+      existing(category.slug) ?? (await catalog.createCategories(category));
     const fields = CATEGORY_FIELDS[category.slug];
     if (fields) await seedCategoryFields(catalog, row.id, fields, logger);
     if (row.updated_by) continue;
@@ -583,4 +728,5 @@ export async function seedProductionCatalogue(
     await catalog.updateCategories({ id: row.id, ...category, image });
   }
   await seedCrawledCatalogues(container);
+  await seedGlobalBrandAliases(container);
 }

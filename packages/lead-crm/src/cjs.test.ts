@@ -3,7 +3,7 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 
-describe('CommonJS build', () => {
+describe('CommonJS build', { timeout: 30_000 }, () => {
   it('serves the contact channels, limits and contact check to require()', () => {
     expect(require.resolve('@podbor/lead-crm/phone')).toMatch(
       /dist\/cjs\/phone\.js$/,
@@ -36,5 +36,10 @@ describe('CommonJS build', () => {
     expect(
       wire.shopOrderEventSchema.parse({ event: 'canceled', order_id: 'o_1' }),
     ).toEqual({ event: 'canceled', order_id: 'o_1' });
+    expect(
+      require('@podbor/lead-crm/visitor-searches-wire').visitorVinLookupsPath(
+        'v',
+      ),
+    ).toBe('/hooks/visitors/v/vin-lookups');
   });
 });

@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  carHitSchema,
+  generationOf,
   vehiclesResponseSchema,
   vinLookupResponseSchema,
   vehicleLabel,
@@ -24,6 +26,21 @@ describe('vehicleLabel', () => {
         engine: { code: 'N47D20' },
       }),
     ).toBe('BMW 3 серия F30 320d, N47D20');
+  });
+
+  it('names a car without an engine by its model alone', () => {
+    expect(
+      vehicleLabel({
+        model: {
+          name: '320d',
+          chassis: {
+            code: 'F30',
+            series: { name: '3 серия', make: { name: 'BMW' } },
+          },
+        },
+        engine: null,
+      }),
+    ).toBe('BMW 3 серия F30 320d');
   });
 });
 
@@ -110,7 +127,7 @@ const vehicle: Vehicle = {
       body_style: 'sedan',
       series: {
         name: '3 серия',
-        translations: { sr: 'Serija 3', en: '3 Series' },
+        translations: { sr: { name: 'Serija 3' }, en: { name: '3 Series' } },
         make: { slug: 'bmw', name: 'BMW' },
       },
     },
@@ -181,6 +198,31 @@ describe('vehiclesResponseSchema', () => {
     });
   });
 
+  it.each([
+    ['pickup', 'lpg'],
+    ['minivan', 'cng'],
+    ['crossover', 'plug-in-hybrid'],
+    ['van', 'mild-hybrid'],
+  ])('reads a %s body and %s fuel', (body_style, fuel) => {
+    const parsed = vehiclesResponseSchema.parse({
+      vehicles: [
+        {
+          ...vehicle,
+          model: {
+            ...vehicle.model,
+            chassis: { ...vehicle.model.chassis, body_style },
+          },
+          engine: { ...vehicle.engine, fuel },
+        },
+      ],
+    });
+
+    expect(parsed.vehicles[0]).toMatchObject({
+      model: { chassis: { body_style } },
+      engine: { fuel },
+    });
+  });
+
   it('reads a vocabulary value newer than the contract as null', () => {
     const parsed = vehiclesResponseSchema.parse({
       vehicles: [
@@ -209,7 +251,7 @@ describe('vehiclesResponseSchema', () => {
 
   it('reads a vehicle from a shop that has not shipped its slug, fuel and body style', () => {
     const { slug: _slug, ...unslugged } = vehicle;
-    const { fuel: _fuel, ...engine } = vehicle.engine;
+    const { fuel: _fuel, ...engine } = vehicle.engine!;
     const { body_style: _body, ...chassis } = vehicle.model.chassis;
 
     const parsed = vehiclesResponseSchema.parse({
@@ -223,6 +265,125 @@ describe('vehiclesResponseSchema', () => {
       engine: { fuel: null },
       model: { chassis: { body_style: null } },
     });
+  });
+});
+
+describe('a Vehicle without an engine', () => {
+  it('reads a Vehicle the shop knows only down to its model', () => {
+    expect(
+      vehiclesResponseSchema.parse({ vehicles: [{ ...vehicle, engine: null }] })
+        .vehicles[0].engine,
+    ).toBeNull();
+  });
+
+  it('reads a car search hit without an engine', () => {
+    expect(
+      carHitSchema.parse({
+        kind: 'vehicle',
+        make: { slug: 'bmw', name: 'BMW' },
+        model: vehicle.model,
+        vehicle: {
+          id: 'veh_1',
+          slug: '320d-140kw',
+          power_kw: 140,
+          year_from: 2015,
+          year_to: 2019,
+          engine: null,
+        },
+      }).vehicle?.engine,
+    ).toBeNull();
+  });
+});
+
+describe('series translations', () => {
+  const series = (translations: unknown) =>
+    vehiclesResponseSchema.parse({
+      vehicles: [
+        {
+          ...vehicle,
+          model: {
+            ...vehicle.model,
+            chassis: {
+              ...vehicle.model.chassis,
+              series: { ...vehicle.model.chassis.series, translations },
+            },
+          },
+        },
+      ],
+    }).vehicles[0].model.chassis.series.translations;
+
+  it('reads the per-column translations every other entity carries', () => {
+    expect(series({ sr: { name: 'Serija 3' } })).toEqual({
+      sr: { name: 'Serija 3' },
+    });
+  });
+
+  it('reads the flat translations an older shop sends as the name column', () => {
+    expect(series({ sr: 'Serija 3', en: '3 Series' })).toEqual({
+      sr: { name: 'Serija 3' },
+      en: { name: '3 Series' },
+    });
+  });
+
+  it('reads translations it cannot read as none', () => {
+    expect(series({ sr: 7 })).toBeNull();
+  });
+});
+
+describe('generationOf', () => {
+  const engineLess = (id: string, fields: Partial<Vehicle> = {}): Vehicle => ({
+    ...vehicle,
+    id,
+    engine: null,
+    ...fields,
+  });
+  const otherModel = {
+    ...vehicle.model,
+    slug: 'f31-320d',
+  };
+
+  it('finds the Vehicles without an engine of the same model that a car shares its years and power with', () => {
+    const fits = engineLess('veh_gen');
+    expect(
+      generationOf(vehicle, [
+        vehicle,
+        fits,
+        engineLess('veh_open', {
+          power_kw: null,
+          year_from: null,
+          year_to: null,
+        }),
+        engineLess('veh_weaker', { power_kw: 100 }),
+        engineLess('veh_older', { year_from: 2005, year_to: 2011 }),
+        engineLess('veh_touring', { model: otherModel }),
+        engineLess('veh_other_make', {
+          model: {
+            ...vehicle.model,
+            chassis: {
+              ...vehicle.model.chassis,
+              series: {
+                ...vehicle.model.chassis.series,
+                make: { slug: 'mini', name: 'MINI' },
+              },
+            },
+          },
+        }),
+      ]).map(({ id }) => id),
+    ).toEqual(['veh_gen', 'veh_open']);
+  });
+
+  it('gives a Vehicle without an engine no generation of its own', () => {
+    expect(
+      generationOf(engineLess('veh_gen'), [engineLess('veh_other')]),
+    ).toEqual([]);
+  });
+
+  it('reads an open year range as overlapping', () => {
+    expect(
+      generationOf({ ...vehicle, year_from: null, year_to: null }, [
+        engineLess('veh_gen'),
+      ]),
+    ).toHaveLength(1);
   });
 });
 

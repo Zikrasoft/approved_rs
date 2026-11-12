@@ -15,6 +15,7 @@ import {
   IN_STOCK_FACET,
   type PartOffer,
   type SearchSort,
+  type SupplierData,
 } from '@podbor/catalog-contract';
 import { isBuyable } from '@podbor/catalog-contract/availability';
 
@@ -22,9 +23,16 @@ import { serbianScripts } from '../lib/serbian';
 import { type CarAddress, fittedCarKeys } from '../lib/car-pages';
 import { loadPartDemand } from '../lib/part-demand';
 import { requirementFits } from '../lib/requirement-fit';
+import { partNumberKey } from '../modules/_shared/part-number-key';
 import { CATALOG_MODULE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
-import { offersByIdentifier, type PricedOfferRow } from '../modules/supplier';
+import {
+  offersByIdentifier,
+  type PricedOfferRow,
+  SUPPLIER_MODULE,
+} from '../modules/supplier';
+import { releasedSupplierData } from '../modules/supplier/released';
+import type SupplierModuleService from '../modules/supplier/service';
 import {
   PART_CHANGED_EVENT,
   PART_IDENTIFIER_INDEX,
@@ -131,6 +139,7 @@ const toDocument = (
   own: PartOffer[],
   fitted: CarAddress[],
   demand: number,
+  supplierData: SupplierData,
 ) => {
   const [best] = own;
   return {
@@ -148,6 +157,9 @@ const toDocument = (
     equivalent_numbers: catalogue.siblings
       .filter(({ id, part_id }) => part_id === row.part.id && id !== row.id)
       .flatMap(({ value, normalized_value }) => [value, normalized_value]),
+    cross_reference_numbers: supplierData.cross_references.flatMap(
+      ({ number }) => [number, partNumberKey(number)],
+    ),
     ...names('name', row.part),
     ...(row.part.category
       ? {
@@ -204,6 +216,7 @@ const source = {
       { data: published },
       required,
       demand,
+      supplierData,
     ] = await Promise.all([
       container.query.graph({
         entity: 'part_identifier',
@@ -221,7 +234,6 @@ const source = {
           'id',
           'part_identifier_id',
           'cost_price',
-          'currency',
           'stock_quantity',
           'lead_time_days',
           'supplier.markup_percentage',
@@ -249,6 +261,10 @@ const source = {
         parts,
       ),
       loadPartDemand(appContainer),
+      releasedSupplierData(
+        appContainer.resolve<SupplierModuleService>(SUPPLIER_MODULE),
+        rows.map(({ id }) => id),
+      ),
     ]);
     const fitted = [...(fitments as FitmentRow[]), ...required];
     const offersOf = offersByIdentifier(offers as OfferRow[]);
@@ -271,6 +287,7 @@ const source = {
           .filter(({ part_id }) => part_id === row.part.id)
           .map(({ vehicle }) => vehicle),
         demand.get(row.id)?.score ?? 0,
+        supplierData(row.id),
       ),
     );
   },
@@ -309,6 +326,7 @@ export const searchRanking = (
       ]),
     ),
     ['equivalent_numbers', 5, 0],
+    ['cross_reference_numbers', 5, 0],
     ...NAME_FIELDS.flatMap((prefix) =>
       SCRIPTS.filter((suffix) => !own.includes(suffix)).map(
         (suffix): [string, number, number] => [`${prefix}_${suffix}`, 2, 2],
@@ -346,6 +364,7 @@ export default defineSearchIndex({
     brand: text(),
     number: numbers(),
     equivalent_numbers: numbers(),
+    cross_reference_numbers: numbers(),
     name_ru: text(),
     name_sr_latn: text(),
     name_sr_cyrl: text(),

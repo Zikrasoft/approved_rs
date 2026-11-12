@@ -25,6 +25,12 @@ const PartIdentifier = model
       unique: true,
     },
     { on: ['source'] },
+  ])
+  .checks([
+    {
+      name: 'part_identifier_normalized_value_key',
+      expression: "normalized_value SIMILAR TO '[A-Z0-9]+'",
+    },
   ]);
 
 export default PartIdentifier;

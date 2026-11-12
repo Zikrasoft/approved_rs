@@ -31,6 +31,7 @@ export const PARTS_ORDER_COPY = {
     OFFER_MISSING: 'позицию больше не продают',
     CONTACT_MISSING: 'магазин не принял контакт',
     CART_CHANGED: 'корзина изменилась в другой вкладке',
+    CHECKOUT_REFUSED: 'магазин отказал в оформлении',
     expired: 'корзина устарела',
     unreachable: 'магазин не ответил',
   },

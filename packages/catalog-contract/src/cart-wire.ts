@@ -13,6 +13,7 @@ export const CHECKOUT_REFUSALS = [
   'OFFER_MISSING',
   'CONTACT_MISSING',
   'CART_CHANGED',
+  'CHECKOUT_REFUSED',
 ] as const;
 export type CheckoutRefusal = (typeof CHECKOUT_REFUSALS)[number];
 

@@ -94,7 +94,7 @@ describe('orderLeadPayload', () => {
     ]);
   });
 
-  it('names the supplier, so two lines of one part from two suppliers differ', () => {
+  it('names the supplier by its display name, so two lines of one part from two suppliers differ', () => {
     const line = (supplier: string) => ({
       title: 'Pads',
       unit_price: 100,
@@ -103,14 +103,25 @@ describe('orderLeadPayload', () => {
     });
     const comment = summaryOf(
       order({
-        items: [line('Intercars'), line('Autodelovi'), line('manual')],
+        items: [
+          line('demo-intercars'),
+          line('bilstein'),
+          line('manual'),
+          line('gone'),
+        ],
+        supplier_names: {
+          'demo-intercars': 'Intercars',
+          bilstein: 'bilstein group',
+          manual: 'manual',
+        },
       }),
     );
 
-    expect(comment.split('\n').slice(3, 6)).toEqual([
+    expect(comment.split('\n').slice(3, 7)).toEqual([
       'Pads × 1: 100 RSD, в наличии, Intercars',
-      'Pads × 1: 100 RSD, в наличии, Autodelovi',
+      'Pads × 1: 100 RSD, в наличии, bilstein group',
       'Pads × 1: 100 RSD, в наличии, ручное предложение',
+      'Pads × 1: 100 RSD, в наличии, gone',
     ]);
   });
 
@@ -264,7 +275,7 @@ describe('sendShopOrderEvent', () => {
     await new Promise<void>((resolve) => server.listen(0, resolve));
     const { port } = server.address() as AddressInfo;
     try {
-      await run(`http://localhost:${port}/api/leads`);
+      await run(`http://localhost:${port}`);
     } finally {
       server.close();
     }
@@ -300,36 +311,8 @@ describe('sendShopOrderEvent', () => {
     },
   );
 
-  it('falls back to the lead form route of a storefront without the shop orders route', async () => {
+  it('takes a 404 for a refusal rather than posting anywhere else', async () => {
     const seen = await serve(
-      (path) => (path === '/api/shop-orders' ? 404 : 302),
-      (url) => sendShopOrderEvent(url, placed, 's3cret'),
-    );
-
-    expect(seen.map(({ path }) => path)).toEqual([
-      '/api/shop-orders',
-      '/api/leads',
-    ]);
-    expect(Object.fromEntries(new URLSearchParams(seen[1]!.body))).toEqual({
-      contact: '+381601234567',
-      contact_channel: 'whatsapp',
-      name: '',
-      vin: 'WBA35BG070N074158',
-      locale: 'sr',
-      comment: placed.summary,
-      service: 'parts-order',
-      consent: '1',
-      source_url: '',
-      visitor_id: '',
-      ad_source: '',
-      meta_ids: '',
-      order_id: 'order_1',
-    });
-  });
-
-  it('sends a cancel to the old route as the old form, and its refusal back', async () => {
-    let body = '';
-    await serve(
       () => 404,
       (url) =>
         expect(
@@ -339,12 +322,9 @@ describe('sendShopOrderEvent', () => {
             's3cret',
           ),
         ).rejects.toThrow('The lead route answered 404'),
-    ).then((seen) => (body = seen[1]!.body));
+    );
 
-    expect(Object.fromEntries(new URLSearchParams(body))).toEqual({
-      order_id: 'order_1',
-      order_outcome: 'canceled',
-    });
+    expect(seen.map(({ path }) => path)).toEqual(['/api/shop-orders']);
   });
 });
 

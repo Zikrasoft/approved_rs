@@ -17,7 +17,11 @@ import {
   type CacheFile,
 } from './leafCache.ts';
 import { hashSource, type SectionData } from './hashSource.ts';
-import { NO_CYRILLIC_RULE, NO_EM_DASH_RULE } from './promptRules.ts';
+import {
+  NO_CYRILLIC_RULE,
+  NO_EM_DASH_RULE,
+  STRAIGHT_QUOTES_RULE,
+} from './promptRules.ts';
 import { translateLeaves } from './translateLeaves.ts';
 import { errorMessage } from './errorMessage.ts';
 
@@ -77,7 +81,7 @@ export function buildSectionPrompt(
     'a car battery is akumulator in Serbian, Autobatterie in German, batería de coche in ' +
     'Spanish, never baterija, Batterie or pila on their own. The same holds for the rest ' +
     'of the workshop vocabulary: servicing, timing belt, suspension, customs clearance. ' +
-    `${NO_EM_DASH_RULE} ${NO_CYRILLIC_RULE} ` +
+    `${NO_EM_DASH_RULE} ${NO_CYRILLIC_RULE} ${STRAIGHT_QUOTES_RULE} ` +
     'The input is a flat JSON object whose keys are field paths and whose values are the strings to ' +
     'translate. Respond with a JSON object having EXACTLY the same keys, with each value translated. ' +
     'A key like meta.metaTitle or steps[2].title tells you what the string is for, never translate ' +

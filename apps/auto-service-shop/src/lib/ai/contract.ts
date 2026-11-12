@@ -6,23 +6,6 @@ import { z } from 'zod';
 
 export const SHOP_AI_REGISTRATION = 'shopAi';
 
-export const quoteReadingSchema = z.object({
-  vin: z.string().trim().min(1).nullable(),
-  vehicle: z.string().trim().min(1).nullable(),
-  lines: z.array(
-    z.object({
-      name: z.string().trim().min(1),
-      number: z.string().trim().min(1),
-      quantity: z.number().int().positive(),
-      brand: z.string().trim().min(1).nullable(),
-      brand_confidence: z.number().min(0).max(1),
-      category_id: z.string().nullable(),
-    }),
-  ),
-});
-
-export type QuoteReading = z.infer<typeof quoteReadingSchema>;
-
 const mixesScripts = (word: string) =>
   /\p{Script=Latin}/u.test(word) && /\p{Script=Cyrillic}/u.test(word);
 
@@ -57,6 +40,45 @@ const russianText = z
       `a word mixes Latin and Cyrillic letters: ${wordsOf(String(input)).filter(mixesScripts).join(', ')}`,
   });
 
+const quoteLineSchema = z.object({
+  name: z.string().trim().min(1),
+  name_ru: russianText,
+  number: z.string().trim().min(1),
+  quantity: z.number().positive(),
+  brand: z.string().trim().min(1).nullable(),
+  brand_confidence: z.number().min(0).max(1),
+  category_id: z.string().nullable(),
+  catalogue_part: z.boolean(),
+});
+
+const unreadableLineSchema = z
+  .object({ name: z.string().catch(''), number: z.string().catch('') })
+  .catch({ name: '', number: '' });
+
+export type UnreadableQuoteLine = {
+  unreadable: true;
+  name: string;
+  number: string;
+};
+
+export type QuoteReadingLine =
+  z.infer<typeof quoteLineSchema> | UnreadableQuoteLine;
+
+export const quoteReadingSchema = z.object({
+  vin: z.string().trim().min(1).nullable(),
+  vehicle: z.string().trim().min(1).nullable(),
+  lines: z.array(
+    z.unknown().transform((raw): QuoteReadingLine => {
+      const line = quoteLineSchema.safeParse(raw);
+      return line.success
+        ? line.data
+        : { unreadable: true, ...unreadableLineSchema.parse(raw) };
+    }),
+  ),
+});
+
+export type QuoteReading = z.infer<typeof quoteReadingSchema>;
+
 const valuesThatFit = z
   .record(z.string(), z.unknown())
   .transform((values) =>
@@ -72,7 +94,6 @@ const valuesThatFit = z
 
 export const articleAnswerSchema = z.object({
   name: russianText,
-  category_id: z.string().nullable(),
   attributes: valuesThatFit,
   description: russianText.nullable(),
 });
@@ -104,23 +125,21 @@ export type ArticleFacts = {
   fits: string[];
 };
 
-export type ArticleInput = ArticleFacts & { category_id: string | null };
-
 export type ArticleQuestion = {
   model: string;
   system: string;
   user: string;
-  categoryIds: string[];
 };
 
 export type ShopAi = {
   readQuote: (
     pdf: Buffer,
     categories: CategoryChoice[],
+    brands: string[],
   ) => Promise<QuoteReading>;
   articleQuestion: (
-    article: ArticleInput,
-    categories: CategoryChoice[],
+    article: ArticleFacts,
+    category: CategoryChoice | null,
   ) => ArticleQuestion;
   answerArticle: (question: ArticleQuestion) => Promise<ArticleAnswer>;
 };

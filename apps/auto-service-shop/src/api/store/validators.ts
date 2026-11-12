@@ -76,7 +76,11 @@ export const StoreSearchParts = z
   );
 export type StoreSearchPartsType = z.infer<typeof StoreSearchParts>;
 
-export const StoreCreateVinLookup = z.object({ vin: vinSchema });
+export const StoreCreateVinLookup = z.object({
+  vin: vinSchema,
+  bot: z.boolean().nullable().default(null),
+  visitor_id: z.uuid().nullable().default(null).catch(null),
+});
 export type StoreCreateVinLookupType = z.infer<typeof StoreCreateVinLookup>;
 
 const MAX_EMAIL_LOCAL_PART = 64;

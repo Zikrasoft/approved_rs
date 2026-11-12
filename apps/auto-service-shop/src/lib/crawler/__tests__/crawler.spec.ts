@@ -19,6 +19,7 @@ type Responder = () => Fetched;
 
 const START = Date.parse('2026-10-25T00:00:00Z');
 const HOUR = 60 * 60 * 1000;
+const DAY = 24 * HOUR;
 const BLOCKED_ATTEMPTS = 4;
 
 const ok =
@@ -91,14 +92,20 @@ const testSite = (
   floorMs = 2000,
   fetchMode?: FetchMode,
 ): CrawledSite => ({
-  key: 'mann-filter',
+  key: name as CrawledSite['key'],
   name,
   origin: `https://${name}.test`,
   sitemaps: [`https://${name}.test/sitemap.xml`],
   floorMs,
   ...(fetchMode && { fetchMode }),
   isPage: (url) => url.includes('/p/'),
-  parse: () => null,
+  parse: (html) => ({
+    article_id: html,
+    brand: 'Brand',
+    number: '1',
+    name: html,
+    category: 'Category',
+  }),
 });
 
 const NO_FAILURES = {
@@ -131,8 +138,8 @@ medusaIntegrationTestRunner({
       limit: number | null = null,
       random = () => 0,
     ) => {
-      await store.start(site.name, new Date(web.clock.now()), limit);
-      await store.next([site.name], new Date(web.clock.now()));
+      await store.start(site.key, new Date(web.clock.now()), limit);
+      await store.next([site.key], new Date(web.clock.now()));
       await crawlSite(site, {
         store,
         openFetcher: web.openFetcher,
@@ -140,7 +147,7 @@ medusaIntegrationTestRunner({
         from: 'crawler@carlab.test',
         random,
       });
-      const [progress] = await store.progress([site.name]);
+      const [progress] = await store.progress([site.key]);
       return progress;
     };
 
@@ -178,20 +185,20 @@ medusaIntegrationTestRunner({
             },
             crashes,
           );
-        await broken.start(site.name, new Date(web.clock.now()));
-        await broken.next([site.name], new Date(web.clock.now()));
+        await broken.start(site.key, new Date(web.clock.now()));
+        await broken.next([site.key], new Date(web.clock.now()));
 
         for (let crash = 1; crash < 5; crash++) {
           await expect(attempt()).rejects.toThrow('S3 is down');
-          expect((await broken.run(site.name))?.status).toBe('running');
+          expect((await broken.run(site.key))?.status).toBe('running');
         }
         await expect(attempt()).rejects.toThrow('S3 is down');
 
-        expect(await broken.run(site.name)).toMatchObject({
+        expect(await broken.run(site.key)).toMatchObject({
           status: 'paused',
           paused_reason: 'worker_error',
         });
-        expect(crashes.has(site.name)).toBe(false);
+        expect(crashes.has(site.key)).toBe(false);
       });
 
       it('forgets earlier crashes once a crawl finishes', async () => {
@@ -203,9 +210,9 @@ medusaIntegrationTestRunner({
           ),
           'https://recovering.test/p/1': ok('one'),
         });
-        const crashes = new Map([[site.name, 4]]);
-        await store.start(site.name, new Date(web.clock.now()));
-        await store.next([site.name], new Date(web.clock.now()));
+        const crashes = new Map([[site.key, 4]]);
+        await store.start(site.key, new Date(web.clock.now()));
+        await store.next([site.key], new Date(web.clock.now()));
 
         await crawlOrPause(
           site,
@@ -218,8 +225,8 @@ medusaIntegrationTestRunner({
           crashes,
         );
 
-        expect(crashes.has(site.name)).toBe(false);
-        expect((await store.run(site.name))?.status).toBe('done');
+        expect(crashes.has(site.key)).toBe(false);
+        expect((await store.run(site.key))?.status).toBe('done');
       });
     });
 
@@ -257,11 +264,12 @@ medusaIntegrationTestRunner({
         expect(progress.pages).toEqual({
           queued: 0,
           done: 2,
+          out_of_scope: 0,
           failed: 0,
           gone: 0,
         });
         expect(progress.failures).toEqual(NO_FAILURES);
-        const [snapshot] = await store.snapshots(site.name, null, 1);
+        const [snapshot] = await store.snapshots(site.key, null, 1);
         expect(gunzipSync(snapshot.body!).toString('utf8')).toBe(
           '<html>one</html>',
         );
@@ -282,13 +290,16 @@ medusaIntegrationTestRunner({
 
         const row = await getContainer()
           .resolve(ContainerRegistrationKeys.PG_CONNECTION)('crawl_page')
-          .where({ site: site.name, url: 'https://bucketed.test/p/1' })
+          .where({ site: site.key, url: 'https://bucketed.test/p/1' })
           .first('body_key');
+        expect(row.body_key).toMatch(
+          /^crawl\/bucketed\/[0-9a-f]{64}\.html\.gz$/,
+        );
         const stored = pageBucket.objects.get(row.body_key);
         expect(gunzipSync(stored!.body).toString('utf8')).toBe(
           '<html>kept</html>',
         );
-        const [snapshot] = await store.snapshots(site.name, null, 1);
+        const [snapshot] = await store.snapshots(site.key, null, 1);
         expect(gunzipSync(snapshot.body!).toString('utf8')).toBe(
           '<html>kept</html>',
         );
@@ -615,6 +626,40 @@ medusaIntegrationTestRunner({
         ]);
       });
 
+      it("hands the parser each page's first sitemap image title as its category hint, and nothing for a page without one", async () => {
+        const site: CrawledSite = {
+          ...testSite('hinted'),
+          parse: (html, categoryHint) => ({
+            article_id: html,
+            brand: 'Brand',
+            number: html,
+            name: html,
+            category: categoryHint ?? 'no hint',
+          }),
+        };
+        const web = fakeWeb({
+          'https://hinted.test/robots.txt': ok(''),
+          'https://hinted.test/sitemap.xml': ok(
+            `<?xml version="1.0"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"><url><loc>https://hinted.test/p/1</loc><image:image><image:title>rame</image:title></image:image><image:image><image:title>rame sa zglobom</image:title></image:image></url><url><loc>https://hinted.test/p/2</loc></url></urlset>`,
+          ),
+          'https://hinted.test/p/1': ok('one'),
+          'https://hinted.test/p/2': ok('two'),
+        });
+
+        await crawl(site, web);
+        const { articles } = await crawledSupplierAdapter(
+          site,
+          store,
+        ).listCatalogue(null);
+
+        expect(
+          articles.map(({ number, category }) => [number, category]),
+        ).toEqual([
+          ['one', 'rame'],
+          ['two', 'no hint'],
+        ]);
+      });
+
       it('ends a test run once it has stored the pages it was asked for', async () => {
         const site = testSite('sample');
         const pages = [1, 2, 3, 4].map((n) => `https://sample.test/p/${n}`);
@@ -662,6 +707,43 @@ medusaIntegrationTestRunner({
         expect(Math.max(...sample)).toBeGreaterThanOrEqual(10);
         expect(another).toHaveLength(4);
         expect(another).not.toEqual(sample);
+      });
+
+      it('keeps no body of a page that will never import and fetches it again only once a month', async () => {
+        const site: CrawledSite = {
+          ...testSite('scoped'),
+          parse: (html) =>
+            html === 'spare part' ? null : testSite('scoped').parse(html),
+        };
+        const part = 'https://scoped.test/p/part';
+        const spare = 'https://scoped.test/p/spare';
+        const web = fakeWeb({
+          'https://scoped.test/robots.txt': ok(''),
+          'https://scoped.test/sitemap.xml': ok(urlset(part, spare)),
+          [part]: ok('part'),
+          [spare]: ok('spare part', { etag: '"spare"' }),
+        });
+
+        const first = await crawl(site, web);
+
+        expect(first.pages).toMatchObject({ done: 1, out_of_scope: 1 });
+        const row = await getContainer()
+          .resolve(ContainerRegistrationKeys.PG_CONNECTION)('crawl_page')
+          .where({ site: site.key, url: spare })
+          .first('body_key', 'etag');
+        expect(row).toEqual({ body_key: null, etag: null });
+        expect(
+          (await store.snapshots(site.key, null, 10)).map(({ url }) => url),
+        ).toEqual([part]);
+
+        await crawl(site, web);
+        expect(web.fetched(part)).toHaveLength(2);
+        expect(web.fetched(spare)).toHaveLength(1);
+
+        web.clock.time += 31 * DAY;
+        const later = await crawl(site, web);
+        expect(web.fetched(spare)).toHaveLength(2);
+        expect(later.pages).toMatchObject({ done: 1, out_of_scope: 1 });
       });
 
       it('re-reads robots.txt once a day during a long run', async () => {
@@ -752,10 +834,10 @@ medusaIntegrationTestRunner({
           'https://www.mann-filter.com/en/catalog/search-results/product.html/hu816x_mann-filter.html':
             fixture('hu816x.html.gz'),
         };
-        await store.start(mannFilter.name, new Date(START));
-        await store.seed(mannFilter.name, Object.keys(pages), new Date(START));
+        await store.start(mannFilter.key, new Date(START));
+        await store.seed(mannFilter.key, Object.keys(pages), new Date(START));
         for (const [url, body] of Object.entries(pages)) {
-          await store.update(mannFilter.name, url, { status: 'done', body });
+          await store.update(mannFilter.key, url, { status: 'done', body });
         }
         const adapter = crawledSupplierAdapter(mannFilter, store, 1);
 
@@ -763,7 +845,7 @@ medusaIntegrationTestRunner({
         const second = await adapter.listCatalogue(first.next);
         const last = await adapter.listCatalogue(second.next);
 
-        expect(adapter.name).toBe('MANN-FILTER');
+        expect(adapter.key).toBe('mann-filter');
         expect(
           [...first.articles, ...second.articles].map(({ number }) => number),
         ).toEqual(['C 30 005', 'HU 816 x']);
@@ -798,10 +880,10 @@ medusaIntegrationTestRunner({
           'https://brittle.test/p/4': 'four',
           'https://brittle.test/p/5': 'spare',
         };
-        await store.start(site.name, new Date(START));
-        await store.seed(site.name, Object.keys(pages), new Date(START));
+        await store.start(site.key, new Date(START));
+        await store.seed(site.key, Object.keys(pages), new Date(START));
         for (const [url, body] of Object.entries(pages)) {
-          await store.update(site.name, url, {
+          await store.update(site.key, url, {
             status: 'done',
             body: gzipSync(body),
           });
@@ -854,7 +936,7 @@ medusaIntegrationTestRunner({
             paused_reason: null,
             started_at: null,
             finished_at: null,
-            pages: { queued: 0, done: 0, failed: 0, gone: 0 },
+            pages: { queued: 0, done: 0, out_of_scope: 0, failed: 0, gone: 0 },
             failures: NO_FAILURES,
           },
         ]);
@@ -873,11 +955,11 @@ medusaIntegrationTestRunner({
         const unseen = await api.get('/admin/crawls', adminHeaders);
         expect(unseen.data.worker_missing).toBe(true);
 
-        await store.beat(['MANN-FILTER'], new Date(Date.now() - 2 * 60_000));
+        await store.beat(['mann-filter'], new Date(Date.now() - 2 * 60_000));
         const stale = await api.get('/admin/crawls', adminHeaders);
         expect(stale.data.worker_missing).toBe(true);
 
-        await store.beat(['MANN-FILTER'], new Date());
+        await store.beat(['mann-filter'], new Date());
         const seen = await api.get('/admin/crawls', adminHeaders);
         expect(seen.data.worker_missing).toBe(false);
       });
@@ -910,7 +992,7 @@ medusaIntegrationTestRunner({
           adminHeaders,
         );
         expect(started.data).toEqual({ started: 'mann-filter' });
-        expect((await store.run('MANN-FILTER'))?.pages_left).toBe(10);
+        expect((await store.run('mann-filter'))?.pages_left).toBe(10);
 
         for (const limit of [0, 2.5, '10']) {
           const refused = await api

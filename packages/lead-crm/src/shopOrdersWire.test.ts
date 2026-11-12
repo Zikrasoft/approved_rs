@@ -22,7 +22,7 @@ describe('the final refusals on the shop orders wire', () => {
   );
 
   it.each([
-    [404, true],
+    [404, false],
     [409, true],
     [410, true],
     [503, false],

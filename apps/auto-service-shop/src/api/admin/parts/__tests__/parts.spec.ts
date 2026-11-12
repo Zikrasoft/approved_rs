@@ -243,6 +243,15 @@ medusaIntegrationTestRunner({
               identifiers: [{ type: 'oem', brand_id: 'brand_x', value: ' - ' }],
             },
           ],
+          [
+            'a number with no Latin letter or digit',
+            {
+              name: 'Part',
+              identifiers: [
+                { type: 'oem', brand_id: 'brand_x', value: 'фильтр+' },
+              ],
+            },
+          ],
         ])('returns a 400 for %s', async (_, body) => {
           const response = await api
             .post('/admin/parts', body, adminHeaders)
@@ -519,6 +528,11 @@ medusaIntegrationTestRunner({
             'INVALID_FIELD',
           ],
           [
+            'a number of symbols',
+            { type: 'oem', brand_id: 'brand', value: '+#/' },
+            'INVALID_FIELD',
+          ],
+          [
             'an unknown key',
             { type: 'oem', brand_id: 'brand', value: 'X1', x: 1 },
             'INVALID_FIELD',
@@ -558,10 +572,13 @@ medusaIntegrationTestRunner({
             relations: ['identifiers'],
           });
           const [identifier] = part.identifiers;
-          const supplier = await supplierService.createSuppliers({
-            name: `Supplier ${value}`,
-            markup_percentage: 10,
-          });
+          const supplier =
+            (await supplierService.supplierByKey('varta')) ??
+            (await supplierService.createSuppliers({
+              key: 'varta',
+              name: 'Varta',
+              markup_percentage: 10,
+            }));
           const offer = await supplierService.createSupplierOffers({
             part_identifier_id: identifier.id,
             supplier_id: supplier.id,

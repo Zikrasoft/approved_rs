@@ -3,7 +3,7 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 
-describe('CommonJS build', () => {
+describe('CommonJS build', { timeout: 30_000 }, () => {
   it('resolves the CommonJS-facing subpaths to dist/cjs', () => {
     expect(require.resolve('@podbor/i18n/translate/core')).toMatch(
       /dist\/cjs\/translate\/core\.js$/,

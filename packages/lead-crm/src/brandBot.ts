@@ -12,6 +12,7 @@ import { createTelegramClient } from './telegram/client.ts';
 import { createFormatter } from './telegram/cards.ts';
 import { createNotifier } from './telegram/notify.ts';
 import { createShopOrders } from './shopOrders.ts';
+import { createVisitorSearches } from './visitorSearches.ts';
 
 const required = (name: string) =>
   z.string({ error: `[telegram] ${name} is not set` }).min(1, {
@@ -43,6 +44,7 @@ const BotEnvSchema = z.object({
   TELEGRAM_ADMIN_ID: ids('TELEGRAM_ADMIN_ID'),
   SHOP_API_URL: optional.pipe(z.url().optional()),
   SHOP_ORDER_OUTCOME_SECRET: optional,
+  SHOP_VISITOR_SEARCHES_SECRET: optional,
 });
 
 function readBotEnv() {
@@ -78,6 +80,10 @@ export function createBrandBot({ store, serviceLabel }: BrandBotOptions) {
     groupId: env.TELEGRAM_GROUP_ID,
     ownerIds,
     adminIds,
+    visitorSearches: createVisitorSearches({
+      shopUrl: env.SHOP_API_URL,
+      secret: env.SHOP_VISITOR_SEARCHES_SECRET,
+    }),
   });
   const ensureLeadCard = createEnsureLeadCard({ store, notifier });
   const ensureLeadTopic = createEnsureLeadTopic({ store, notifier });

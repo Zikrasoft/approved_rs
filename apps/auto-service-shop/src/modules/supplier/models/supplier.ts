@@ -1,6 +1,7 @@
 import { model } from '@medusajs/framework/utils';
 import { STAGED_DATA_KINDS } from '@podbor/catalog-contract';
 
+import { SUPPLIER_KEYS } from '../keys';
 import StagedRecord from './staged-record';
 import SupplierCategory from './supplier-category';
 import SupplierOffer from './supplier-offer';
@@ -8,7 +9,8 @@ import SupplierOffer from './supplier-offer';
 const Supplier = model
   .define('supplier', {
     id: model.id().primaryKey(),
-    name: model.text().unique(),
+    key: model.enum([...SUPPLIER_KEYS]).unique(),
+    name: model.text(),
     markup_percentage: model.float(),
     released_kinds: model.array().default([]),
     import_enabled: model.boolean().default(true),

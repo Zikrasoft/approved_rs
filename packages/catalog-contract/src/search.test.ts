@@ -85,6 +85,18 @@ describe('searchResponseSchema', () => {
     expect(searchResponseSchema.parse(response)).toEqual(response);
   });
 
+  it('drops a facet of a field type newer than the contract', () => {
+    expect(
+      searchResponseSchema.parse({
+        ...response,
+        facets: [
+          { ...response.facets[0], key: 'color', type: 'color-swatch' },
+          ...response.facets,
+        ],
+      }),
+    ).toEqual(response);
+  });
+
   it('reads the Demand of a result, null from a shop that predates it', () => {
     const [result] = response.results;
     const demand = { score: 5, popular: false, top: false };
@@ -116,7 +128,7 @@ describe('searchResponseSchema', () => {
           body_style: 'sedan',
           series: {
             name: '3 серия',
-            translations: { en: '3 Series' },
+            translations: { en: { name: '3 Series' } },
             make: { slug: 'bmw', name: 'BMW' },
           },
         },

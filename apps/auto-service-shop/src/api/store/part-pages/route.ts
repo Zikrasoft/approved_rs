@@ -2,9 +2,10 @@ import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 import {
   partPagesResponseSchema,
   type PartOffer,
+  type SupplierData,
 } from '@podbor/catalog-contract';
 
-import { imagesSchema } from '../../../lib/images';
+import { imagesSchema, publicFileUrl, publicImage } from '../../../lib/images';
 import { installationPrice } from '../../../lib/installation';
 import { loadPartDemand } from '../../../lib/part-demand';
 import { pricesShown } from '../../../lib/shop-gate';
@@ -53,7 +54,12 @@ const brandNumber = ({
 
 const picturedBrandNumber = (row: BrandNumberRow) => ({
   ...brandNumber(row),
-  images: imagesSchema.parse(row.images).items,
+  images: imagesSchema.parse(row.images).items.map(publicImage),
+});
+
+const publicSupplierData = (data: SupplierData): SupplierData => ({
+  ...data,
+  images: data.images.map(publicFileUrl),
 });
 
 const replacement = ({
@@ -132,7 +138,7 @@ export async function GET(
       replaced_by: replacedBy(identifier.part.replaced_by_id),
       category_id: identifier.part.category_id,
       attributes: identifier.part.attributes,
-      installation_price: shown ? installationPrice(identifier.part) : null,
+      installation_price: installationPrice(identifier.part),
     },
     equivalents: siblings
       .filter(
@@ -141,7 +147,7 @@ export async function GET(
       )
       .map(picturedBrandNumber),
     offers: offers.get(identifier.id) ?? [],
-    supplier_data: supplierData(identifier.id),
+    supplier_data: publicSupplierData(supplierData(identifier.id)),
     demand: demand.get(identifier.id) ?? null,
   }));
 

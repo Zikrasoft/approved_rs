@@ -69,13 +69,11 @@ The sections below are what the command does, for reference.
 | `PORT`                    | `9009` (Medusa reads it itself; unset it is 9000)     |
 | `SUPPLIER_ADAPTERS`       | `demo`                                                |
 | `DEMO_SUPPLIER_OVERRIDES` | an absolute path to a JSON file, see step 7           |
-| `LEAD_ROUTE_URL`          | `http://127.0.0.1:4321/api/leads`                     |
+| `STOREFRONT_ORIGIN`       | `http://127.0.0.1:4321`                               |
 
-Orders go to `/api/shop-orders` on that origin; the `/api/leads` path is only
-the fallback for an older storefront (deploy.md, `LEAD_ROUTE_URL`).
-`LEAD_ROUTE_URL` names `127.0.0.1`, not `localhost`: Node resolves `localhost`
-to `[::1]` first, and anything else listening on IPv6 port 4321 gets the
-order. `shop:prepare` rewrites a `localhost` value left in an existing `.env`.
+Orders go to `/api/shop-orders` on that origin (deploy.md, `STOREFRONT_ORIGIN`).
+It names `127.0.0.1`, not `localhost`: Node resolves `localhost` to `[::1]`
+first, and anything else listening on IPv6 port 4321 gets the order.
 
 Leave `OPENAI_API_KEY` and `PUBLISH_DISPATCH_TOKEN` unset. Leave `SHOP_OPEN`
 unset too: outside `NODE_ENV=production` the backend sells to everyone. Set

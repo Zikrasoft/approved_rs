@@ -240,6 +240,7 @@ describe('POST /api/order', () => {
       [400, { code: 'OFFER_PRICE_CHANGED' }, 'цена изменилась'],
       [400, { code: 'OFFER_OUT_OF_STOCK' }, 'позиции нет в нужном количестве'],
       [400, { code: 'OFFER_MISSING' }, 'позицию больше не продают'],
+      [400, { code: 'SHOP_SAYS_NO' }, 'магазин отказал в оформлении'],
       [404, { type: 'not_found' }, 'корзина устарела'],
     ])(
       'keeps the contact when the shop answers %i %o',
