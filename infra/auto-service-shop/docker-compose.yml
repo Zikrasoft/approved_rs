@@ -93,6 +93,8 @@ services:
     environment:
       API_HOST: ${API_HOST:-api.carlab.rs}
       ADMIN_HOST: ${ADMIN_HOST:-admin.carlab.rs}
+      MEDIA_HOST: ${MEDIA_HOST:-media.carlab.rs}
+      MEDIA_ORIGIN: ${MEDIA_ORIGIN:?}
       ADMIN_BASIC_AUTH_USER: ${ADMIN_BASIC_AUTH_USER:?}
       ADMIN_BASIC_AUTH_HASH: ${ADMIN_BASIC_AUTH_HASH:?}
     ports:

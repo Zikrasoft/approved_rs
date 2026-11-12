@@ -1027,11 +1027,16 @@ number gets its CI value in that script. The non-obvious parts:
 
 - `TYPESENSE_API_KEY` has a local default only outside production; with
   `NODE_ENV=production` an empty one stops the server at startup.
-- `FILE_URL` is the public base URL of the public bucket, stored into every image
-  URL at upload time: `https://<bucket>.s3.<region>.amazonaws.com` now, a
-  CloudFront address later (only new uploads pick a change up;
-  stored URLs need the same rewrite `move-static-to-s3.sh` does). Without it
-  production stops at startup.
+- `FILE_URL` is the public base URL of shop images, stored into every image URL
+  at upload time: `https://media.carlab.rs`, so what serves the domain can change
+  without rewriting a stored URL. Without it production stops at startup.
+- `MEDIA_ORIGIN` is where Caddy fetches `media.carlab.rs` from, the public
+  bucket's endpoint (`https://<bucket>.s3.<region>.amazonaws.com`). Caddy
+  answers GET and HEAD only and marks every image cacheable for a year: image
+  keys never change content (supplier images are named by their sha256). A CDN
+  in front later (Bunny pulling from this origin, or CloudFront once AWS verifies
+  the account) is a DNS change for `media`, not a data change. `MEDIA_HOST`
+  defaults to `media.carlab.rs`.
 - `S3_REGION`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_PUBLIC_BUCKET` and
   `S3_PRIVATE_BUCKET` are all required in production, and outside it either all
   set or none (none keeps uploads on the local disk under `/static` and leaves
