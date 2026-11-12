@@ -14,10 +14,6 @@ const MakeSpelling = model
   })
   .indexes([
     {
-      on: ['supplier_id', 'value'],
-      unique: true,
-    },
-    {
       on: ['supplier_id', 'value_key'],
       unique: true,
     },

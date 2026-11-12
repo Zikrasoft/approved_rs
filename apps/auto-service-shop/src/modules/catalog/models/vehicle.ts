@@ -13,7 +13,7 @@ const Vehicle = model
     id: model.id().primaryKey(),
     slug: model.text(),
     model: model.belongsTo(() => VehicleModel, { mappedBy: 'vehicles' }),
-    engine: model.belongsTo(() => Engine, { mappedBy: 'vehicles' }),
+    engine: model.belongsTo(() => Engine, { mappedBy: 'vehicles' }).nullable(),
     power_kw: model.number().nullable(),
     drive: model.enum([...VEHICLE_DRIVES]).nullable(),
     market: model.text().nullable(),

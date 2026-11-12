@@ -365,7 +365,7 @@ medusaIntegrationTestRunner({
         const series = await catalog.createSeries({
           make_id: make.id,
           name: '3 серия',
-          translations: { sr: 'Serija 3' },
+          translations: { sr: { name: 'Serija 3' } },
         });
 
         await publish();
@@ -375,7 +375,10 @@ medusaIntegrationTestRunner({
             .translations,
         ).toEqual({ sr: { name: 'Serija 3' }, en: { name: '3 Series' } });
         const [stored] = await catalog.listSeries({ id: series.id });
-        expect(stored.translations).toEqual({ sr: 'Serija 3', en: '3 Series' });
+        expect(stored.translations).toEqual({
+          sr: { name: 'Serija 3' },
+          en: { name: '3 Series' },
+        });
       });
 
       it('translates a Category with its field and option labels', async () => {

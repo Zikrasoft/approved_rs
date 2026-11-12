@@ -18,7 +18,6 @@ const Chassis = model
     requirements: model.hasMany(() => Requirement, { mappedBy: 'chassis' }),
     ...provenance(),
   })
-  .indexes([{ on: ['series_id', 'code'], unique: true }])
   .checks([
     { name: 'chassis_years_ordered', expression: 'year_from <= year_to' },
   ])

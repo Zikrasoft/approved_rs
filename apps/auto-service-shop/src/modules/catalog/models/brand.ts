@@ -7,7 +7,7 @@ import { provenance } from './provenance';
 const Brand = model
   .define('brand', {
     id: model.id().primaryKey(),
-    name: model.text().unique(),
+    name: model.text(),
     slug: model.text().unique(),
     spellings: model.hasMany(() => BrandSpelling, { mappedBy: 'brand' }),
     identifiers: model.hasMany(() => PartIdentifier, { mappedBy: 'brand' }),

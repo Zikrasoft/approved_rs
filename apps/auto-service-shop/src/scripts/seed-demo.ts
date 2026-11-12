@@ -217,17 +217,17 @@ async function seedVehicles(catalog: CatalogModuleService) {
       {
         make_id: bmw.id,
         name: '3 серия',
-        translations: { sr: 'Serija 3', en: '3 Series' },
+        translations: { sr: { name: 'Serija 3' }, en: { name: '3 Series' } },
       },
       {
         make_id: bmw.id,
         name: '5 серия',
-        translations: { sr: 'Serija 5', en: '5 Series' },
+        translations: { sr: { name: 'Serija 5' }, en: { name: '5 Series' } },
       },
       {
         make_id: mercedes.id,
         name: 'E-класс',
-        translations: { sr: 'E-klasa', en: 'E-Class' },
+        translations: { sr: { name: 'E-klasa' }, en: { name: 'E-Class' } },
       },
     ],
     ['make_id', 'name'],

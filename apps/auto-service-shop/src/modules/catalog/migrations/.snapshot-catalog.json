@@ -153,15 +153,6 @@
       "schema": "public",
       "indexes": [
         {
-          "keyName": "IDX_brand_name_unique",
-          "columnNames": [],
-          "composite": false,
-          "constraint": false,
-          "primary": false,
-          "unique": false,
-          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_brand_name_unique\" ON \"brand\" (\"name\") WHERE deleted_at IS NULL"
-        },
-        {
           "keyName": "IDX_brand_slug_unique",
           "columnNames": [],
           "composite": false,
@@ -216,7 +207,7 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
+          "nullable": true,
           "unique": false,
           "length": null,
           "precision": null,
@@ -393,22 +384,22 @@
           "expression": "CREATE INDEX IF NOT EXISTS \"IDX_brand_spelling_deleted_at\" ON \"brand_spelling\" (\"deleted_at\") WHERE deleted_at IS NULL"
         },
         {
-          "keyName": "IDX_brand_spelling_supplier_id_value_unique",
-          "columnNames": [],
-          "composite": false,
-          "constraint": false,
-          "primary": false,
-          "unique": false,
-          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_brand_spelling_supplier_id_value_unique\" ON \"brand_spelling\" (\"supplier_id\", \"value\") WHERE deleted_at IS NULL"
-        },
-        {
           "keyName": "IDX_brand_spelling_supplier_id_value_key_unique",
           "columnNames": [],
           "composite": false,
           "constraint": false,
           "primary": false,
           "unique": false,
-          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_brand_spelling_supplier_id_value_key_unique\" ON \"brand_spelling\" (\"supplier_id\", \"value_key\") WHERE deleted_at IS NULL"
+          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_brand_spelling_supplier_id_value_key_unique\" ON \"brand_spelling\" (\"supplier_id\", \"value_key\") WHERE supplier_id IS NOT NULL AND deleted_at IS NULL"
+        },
+        {
+          "keyName": "IDX_brand_spelling_value_key_unique",
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "primary": false,
+          "unique": false,
+          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_brand_spelling_value_key_unique\" ON \"brand_spelling\" (\"value_key\") WHERE supplier_id IS NULL AND deleted_at IS NULL"
         },
         {
           "keyName": "brand_spelling_pkey",
@@ -1566,15 +1557,6 @@
       "schema": "public",
       "indexes": [
         {
-          "keyName": "IDX_engine_code_unique",
-          "columnNames": [],
-          "composite": false,
-          "constraint": false,
-          "primary": false,
-          "unique": false,
-          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_engine_code_unique\" ON \"engine\" (\"code\") WHERE deleted_at IS NULL"
-        },
-        {
           "keyName": "IDX_engine_deleted_at",
           "columnNames": [],
           "composite": false,
@@ -1976,15 +1958,6 @@
           "primary": false,
           "unique": false,
           "expression": "CREATE INDEX IF NOT EXISTS \"IDX_make_spelling_deleted_at\" ON \"make_spelling\" (\"deleted_at\") WHERE deleted_at IS NULL"
-        },
-        {
-          "keyName": "IDX_make_spelling_supplier_id_value_unique",
-          "columnNames": [],
-          "composite": false,
-          "constraint": false,
-          "primary": false,
-          "unique": false,
-          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_make_spelling_supplier_id_value_unique\" ON \"make_spelling\" (\"supplier_id\", \"value\") WHERE deleted_at IS NULL"
         },
         {
           "keyName": "IDX_make_spelling_supplier_id_value_key_unique",
@@ -2394,6 +2367,11 @@
           "name": "part_installation_price",
           "expression": "installation_price >= 0",
           "definition": "check ((installation_price >= 0))"
+        },
+        {
+          "name": "part_not_replaced_by_itself",
+          "expression": "replaced_by_id <> id",
+          "definition": "check ((replaced_by_id <> id))"
         }
       ],
       "foreignKeys": {
@@ -2722,6 +2700,187 @@
           "updateRule": "cascade"
         }
       },
+      "nativeEnums": {}
+    },
+    {
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": true,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "brand_id": {
+          "name": "brand_id",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "normalized_value": {
+          "name": "normalized_value",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "source": {
+          "name": "source",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "'manual'",
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "created_by": {
+          "name": "created_by",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "updated_by": {
+          "name": "updated_by",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": "now()",
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": "now()",
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        }
+      },
+      "name": "rejected_number",
+      "schema": "public",
+      "indexes": [
+        {
+          "keyName": "IDX_rejected_number_deleted_at",
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "primary": false,
+          "unique": false,
+          "expression": "CREATE INDEX IF NOT EXISTS \"IDX_rejected_number_deleted_at\" ON \"rejected_number\" (\"deleted_at\") WHERE deleted_at IS NULL"
+        },
+        {
+          "keyName": "IDX_rejected_number_brand_id_normalized_value_unique",
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "primary": false,
+          "unique": false,
+          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_rejected_number_brand_id_normalized_value_unique\" ON \"rejected_number\" (\"brand_id\", \"normalized_value\") WHERE deleted_at IS NULL"
+        },
+        {
+          "keyName": "rejected_number_pkey",
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "foreignKeys": {},
       "nativeEnums": {}
     },
     {
@@ -3170,15 +3329,6 @@
           "primary": false,
           "unique": false,
           "expression": "CREATE INDEX IF NOT EXISTS \"IDX_chassis_deleted_at\" ON \"chassis\" (\"deleted_at\") WHERE deleted_at IS NULL"
-        },
-        {
-          "keyName": "IDX_chassis_series_id_code_unique",
-          "columnNames": [],
-          "composite": false,
-          "constraint": false,
-          "primary": false,
-          "unique": false,
-          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_chassis_series_id_code_unique\" ON \"chassis\" (\"series_id\", \"code\") WHERE deleted_at IS NULL"
         },
         {
           "keyName": "chassis_pkey",
@@ -3789,7 +3939,7 @@
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": false,
+          "nullable": true,
           "unique": false,
           "length": null,
           "precision": null,
@@ -4071,6 +4221,7 @@
           "localTableName": "public.vehicle",
           "referencedColumnNames": ["id"],
           "referencedTableName": "public.engine",
+          "deleteRule": "set null",
           "updateRule": "cascade"
         }
       },

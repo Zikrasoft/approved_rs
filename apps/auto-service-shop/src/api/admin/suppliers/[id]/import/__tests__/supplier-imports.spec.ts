@@ -456,9 +456,10 @@ medusaIntegrationTestRunner({
               brand: 1,
               currency: 0,
               unreadable: 0,
-              no_engine_code: 0,
               not_in_scope: 0,
+              rejected: 0,
             },
+            without_engine_code: 0,
             needs_category: ['C 30 005'],
             missing_fields: [],
             unanswered: [],
@@ -473,9 +474,10 @@ medusaIntegrationTestRunner({
               brand: 0,
               currency: 0,
               unreadable: 0,
-              no_engine_code: 0,
               not_in_scope: 0,
+              rejected: 0,
             },
+            without_engine_code: 0,
             needs_category: [],
             missing_fields: [],
             unanswered: [],
@@ -511,9 +513,10 @@ medusaIntegrationTestRunner({
             brand: 0,
             currency: 0,
             unreadable: 1,
-            no_engine_code: 0,
             not_in_scope: 2,
+            rejected: 0,
           },
+          without_engine_code: 0,
           needs_category: [],
           missing_fields: [],
           unanswered: [],
@@ -635,7 +638,7 @@ medusaIntegrationTestRunner({
         await runImport();
         const made = (await page('W1000'))!.part;
         await runImport();
-        await api.delete(`/admin/parts/${made.id}`, adminHeaders);
+        await catalog.deleteParts(made.id);
         shopAi.name = 'Другое имя';
 
         await runImport();

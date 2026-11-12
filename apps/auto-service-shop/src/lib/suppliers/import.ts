@@ -43,7 +43,7 @@ import { emitIndexChanges } from '../index-changes';
 import { shopStorage, type ShopStorage } from '../storage';
 import { mirroredImage } from './mirrored-images';
 import { quotedFields } from './live-quote';
-import { spellingKey } from '../../modules/_shared/spelling';
+import { nameKey } from '../../modules/_shared/keys';
 import { fitVehicles, type VehicleMatcher, vehicleMatcher } from './vehicles';
 
 type Article = z.output<typeof cataloguePageSchema>['articles'][number];
@@ -58,9 +58,10 @@ export type ImportSummary = {
     brand: number;
     currency: number;
     unreadable: number;
-    no_engine_code: number;
     not_in_scope: number;
+    rejected: number;
   };
+  without_engine_code: number;
   needs_category: string[];
   missing_fields: { number: string; category: string; fields: string[] }[];
   unanswered: { number: string; reason: string }[];
@@ -355,7 +356,7 @@ async function matchArticle(
   created: boolean;
   changedPartId?: string;
   categorized?: boolean;
-}> {
+} | null> {
   const { adapter, catalog } = context;
   const [hit] = await catalog.listPartIdentifiers(
     {
@@ -365,6 +366,7 @@ async function matchArticle(
     { relations: ['part'], take: 1 },
   );
   if (!hit) {
+    if (await catalog.isRejectedNumber(brandId, article.number)) return null;
     const found = await createPart(context, article, brandId, categoryId);
     return {
       identifierId: found.part_identifier_id,
@@ -502,8 +504,13 @@ async function importArticle(
   categoryId: string | undefined,
   quote: Quote | undefined,
 ): Promise<void> {
-  const { identifierId, partId, created, changedPartId, categorized } =
-    await matchArticle(context, article, brandId, categoryId);
+  const match = await matchArticle(context, article, brandId, categoryId);
+  if (!match) {
+    summary.skipped += 1;
+    summary.skipped_by_reason.rejected += 1;
+    return;
+  }
+  const { identifierId, partId, created, changedPartId, categorized } = match;
   context.matched.add(identifierId);
   if (changedPartId) {
     changedPartIds.add(changedPartId);
@@ -520,7 +527,7 @@ async function importArticle(
     await context.oneAtATime(() =>
       fitVehicles(context.vehicles, partId, vehicles),
     );
-    summary.skipped_by_reason.no_engine_code += article.vehicles.filter(
+    summary.without_engine_code += article.vehicles.filter(
       ({ engine_codes }) => !engine_codes.length,
     ).length;
   }
@@ -589,9 +596,10 @@ export async function importSupplier(
       brand: 0,
       currency: 0,
       unreadable: 0,
-      no_engine_code: 0,
       not_in_scope: 0,
+      rejected: 0,
     },
+    without_engine_code: 0,
     needs_category: [],
     missing_fields: [],
     unanswered: [],
@@ -635,9 +643,9 @@ export async function importSupplier(
     ).map(({ value_key, brand_id }) => [value_key, brand_id]),
   );
   const brandOfArticle = (article: Article) =>
-    brandOf.get(spellingKey(article.brand));
+    brandOf.get(nameKey(article.brand));
   const categoryOfArticle = (article: Article) =>
-    categoryOf.get(spellingKey(article.category));
+    categoryOf.get(nameKey(article.category));
   const state: ImportState = {
     summary,
     listed: new Set(),

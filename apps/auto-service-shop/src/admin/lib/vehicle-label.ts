@@ -28,7 +28,7 @@ export const labelledVehicleSchema = z.object({
       })
       .optional(),
   }),
-  engine: z.object({ code: z.string() }),
+  engine: z.object({ code: z.string() }).nullable(),
 });
 
 export type LabelledVehicle = z.infer<typeof labelledVehicleSchema>;
@@ -50,7 +50,7 @@ export const vehicleSpecLabel = (t: TFunction, vehicle: LabelledVehicle) => {
   const { model, engine, power_kw, steering } = vehicle;
   return [
     vehicleName(model).full,
-    engine.code,
+    engine?.code,
     power_kw && t('vehicleLabel.kw', { kw: power_kw }),
     years(t, vehicle),
     steering && t(`vehicleLabel.steering.${steering}`),

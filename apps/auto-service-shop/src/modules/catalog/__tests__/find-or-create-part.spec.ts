@@ -71,6 +71,88 @@ medusaIntegrationTestRunner({
           await catalog.listPartIdentifiers({ normalized_value: 'C30005' }),
         ).toHaveLength(1);
       });
+
+      it('refuses a number staff deleted with its Part, however it is spelled', async () => {
+        const { part_id } = await catalog.findOrCreatePart(part('W 719/30'));
+
+        await catalog.deletePartRejectingNumbers(part_id);
+
+        expect(await catalog.isRejectedNumber(brandId, 'w719-30')).toBe(true);
+        await expect(
+          catalog.findOrCreatePart(part('W71930')),
+        ).rejects.toMatchObject({ code: 'REJECTED_NUMBER' });
+        expect(
+          await catalog.listPartIdentifiers({ normalized_value: 'W71930' }),
+        ).toHaveLength(0);
+      });
+
+      it('takes a rejected number back when staff create its Part by hand', async () => {
+        const { part_id } = await catalog.findOrCreatePart(part('W 811/80'));
+        await catalog.deletePartRejectingNumbers(part_id);
+
+        await catalog.createPartWithIdentifiers({
+          name: 'Oil filter',
+          identifiers: [
+            {
+              type: 'manufacturer-number',
+              brand_id: brandId,
+              value: 'W 811/80',
+            },
+          ],
+        });
+
+        expect(await catalog.isRejectedNumber(brandId, 'W 811/80')).toBe(false);
+      });
+
+      it('rejects nothing for another Brand', async () => {
+        const { part_id } = await catalog.findOrCreatePart(part('W 920/21'));
+        await catalog.deletePartRejectingNumbers(part_id);
+        const other = await catalog.createBrands({
+          name: 'Bosch',
+          slug: 'bosch',
+        });
+
+        expect(await catalog.isRejectedNumber(other.id, 'W 920/21')).toBe(
+          false,
+        );
+      });
+    });
+
+    describe('Finding a Brand by any name', () => {
+      let catalog: CatalogModuleService;
+
+      beforeAll(async () => {
+        catalog = getContainer().resolve(CATALOG_MODULE);
+      });
+
+      it('finds a Brand by its name however it is spelled, then by a global alias, then by a Supplier spelling', async () => {
+        const febi = await catalog.createBrands({ name: 'Febi', slug: 'febi' });
+        const lemforder = await catalog.createBrands({
+          name: 'Lemförder',
+          slug: 'lemforder',
+        });
+        const reinz = await catalog.createBrands({
+          name: 'Victor Reinz',
+          slug: 'victor-reinz',
+        });
+        await catalog.createBrandSpellings([
+          { supplier_id: null, value: 'febi bilstein', brand_id: febi.id },
+          { supplier_id: null, value: 'Reinz', brand_id: reinz.id },
+          { supplier_id: 'sup_1', value: 'LMI', brand_id: lemforder.id },
+        ]);
+
+        const found = async (name: string) =>
+          (await catalog.brandByAnyName(name))?.id ?? null;
+
+        expect(await found('FEBI')).toBe(febi.id);
+        expect(await found('Febi Bilstein')).toBe(febi.id);
+        expect(await found('FEBI-BILSTEIN')).toBe(febi.id);
+        expect(await found('LEMFORDER')).toBe(lemforder.id);
+        expect(await found('victor reinz')).toBe(reinz.id);
+        expect(await found('REINZ')).toBe(reinz.id);
+        expect(await found('lmi')).toBe(lemforder.id);
+        expect(await found('Bilstein')).toBeNull();
+      });
     });
   },
 });

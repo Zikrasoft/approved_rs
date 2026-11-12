@@ -33,7 +33,6 @@ const localeSchema = z.enum(CATALOG_TRANSLATION_LOCALES);
 const nestedSchema = z
   .partialRecord(localeSchema, z.record(z.string(), z.string()))
   .nullable();
-const flatSchema = z.partialRecord(localeSchema, z.string()).nullable();
 const translatedFromSchema = z
   .partialRecord(localeSchema, z.string())
   .nullable();
@@ -55,15 +54,9 @@ type TranslationUpdate = {
   updated_by?: string;
 };
 
-type Codec = {
-  decode: (stored: unknown) => Translations;
-  encode: (translations: Translations) => Record<string, unknown>;
-};
-
 type TranslatableEntity = {
   subject: string;
   fields: readonly string[];
-  codec: Codec;
   list: (
     catalog: CatalogModuleService,
     filters: { id?: string | { $gt: string } },
@@ -75,29 +68,8 @@ type TranslatableEntity = {
   ) => Promise<unknown>;
 };
 
-const mapLocales = <From, To>(
-  record: Partial<Record<TargetLocale, From>>,
-  map: (value: From) => To,
-): Partial<Record<TargetLocale, To>> =>
-  Object.fromEntries(
-    Object.entries(record).map(([locale, value]) => [
-      locale,
-      map(value as From),
-    ]),
-  );
-
-const nested: Codec = {
-  decode: (stored) => nestedSchema.parse(stored ?? null) ?? {},
-  encode: (translations) => translations,
-};
-
-const flat = (field: string): Codec => ({
-  decode: (stored) =>
-    mapLocales(flatSchema.parse(stored ?? null) ?? {}, (text) => ({
-      [field]: text,
-    })),
-  encode: (translations) => mapLocales(translations, (fields) => fields[field]),
-});
+const decode = (stored: unknown): Translations =>
+  nestedSchema.parse(stored ?? null) ?? {};
 
 const TRANSLATION_COLUMNS = [
   'id',
@@ -118,7 +90,6 @@ export const TRANSLATABLE_ENTITIES = new Map<string, TranslatableEntity>([
     {
       subject: 'car part names and descriptions in a parts catalogue',
       fields: ['name', 'description'],
-      codec: nested,
       list: (catalog, filters, take) =>
         catalog.listParts(filters, {
           select: [...TRANSLATION_COLUMNS, 'name', 'description'],
@@ -132,7 +103,6 @@ export const TRANSLATABLE_ENTITIES = new Map<string, TranslatableEntity>([
     {
       subject: 'car model series names, such as "3 серия"',
       fields: ['name'],
-      codec: flat('name'),
       list: (catalog, filters, take) =>
         catalog.listSeries(filters, {
           select: [...TRANSLATION_COLUMNS, 'name'],
@@ -147,7 +117,6 @@ export const TRANSLATABLE_ENTITIES = new Map<string, TranslatableEntity>([
       subject:
         'car part category names, their descriptions and the CarLab service sold with a part',
       fields: ['name', 'text', 'service_label', 'service_note'],
-      codec: nested,
       list: (catalog, filters, take) =>
         catalog.listCategories(filters, {
           select: [
@@ -167,7 +136,6 @@ export const TRANSLATABLE_ENTITIES = new Map<string, TranslatableEntity>([
     {
       subject: 'names of car part characteristics, such as "Вязкость"',
       fields: ['label'],
-      codec: nested,
       list: (catalog, filters, take) =>
         catalog.listCategoryFields(filters, {
           select: [...TRANSLATION_COLUMNS, 'label'],
@@ -181,7 +149,6 @@ export const TRANSLATABLE_ENTITIES = new Map<string, TranslatableEntity>([
     {
       subject: 'values of car part characteristics, such as "Сменный элемент"',
       fields: ['label'],
-      codec: nested,
       list: (catalog, filters, take) =>
         catalog.listCategoryFieldOptions(filters, {
           select: [...TRANSLATION_COLUMNS, 'label'],
@@ -195,7 +162,6 @@ export const TRANSLATABLE_ENTITIES = new Map<string, TranslatableEntity>([
     {
       subject: 'notes on where a car part fits, such as "Только с M-пакетом"',
       fields: ['note'],
-      codec: nested,
       list: (catalog, filters, take) =>
         catalog.listFitments(
           { ...filters, note: { $ne: null } },
@@ -227,7 +193,7 @@ const itemOf = (entity: TranslatableEntity, row: StoredRow): Item => {
     id: row.id,
     source,
     hash: sha256Hex(JSON.stringify(source)),
-    translations: entity.codec.decode(row.translations),
+    translations: decode(row.translations),
     translatedFrom:
       translatedFromSchema.parse(row.translated_from ?? null) ?? {},
   };
@@ -321,7 +287,7 @@ async function translateLocale(
         item.translatedFrom = { ...item.translatedFrom, [locale]: item.hash };
         return {
           id: item.id,
-          translations: entity.codec.encode(item.translations),
+          translations: item.translations,
           translated_from: item.translatedFrom,
         };
       }),
@@ -422,7 +388,7 @@ export async function editTranslation(
   await entity.update(catalog, [
     {
       id,
-      translations: entity.codec.encode(translations),
+      translations: translations,
       translated_from: { ...item.translatedFrom, [locale]: item.hash },
       updated_by: actorId,
     },

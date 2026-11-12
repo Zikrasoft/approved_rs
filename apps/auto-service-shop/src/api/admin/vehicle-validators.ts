@@ -64,7 +64,10 @@ const AdminSeries = z.strictObject({
   translations: z
     .strictObject(
       Object.fromEntries(
-        CATALOG_TRANSLATION_LOCALES.map((locale) => [locale, text.optional()]),
+        CATALOG_TRANSLATION_LOCALES.map((locale) => [
+          locale,
+          z.strictObject({ name: text }).optional(),
+        ]),
       ),
     )
     .nullable()

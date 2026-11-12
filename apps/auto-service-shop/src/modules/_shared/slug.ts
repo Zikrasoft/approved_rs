@@ -47,8 +47,13 @@ export function modelSlugOf(names: {
 
 export const vehicleSlugOf = ({
   engine,
+  variant,
   power_kw,
 }: {
-  engine: string;
+  engine: string | null;
+  variant: string;
   power_kw: number | null;
-}) => slugOf(power_kw ? `${engine} ${power_kw}kw` : engine);
+}) => {
+  const name = engine ?? withoutCodeLists(variant);
+  return slugOf(power_kw ? `${name} ${power_kw}kw` : name);
+};

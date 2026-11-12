@@ -3,6 +3,7 @@ import type { IRegionModuleService } from '@medusajs/framework/types';
 import { Modules } from '@medusajs/framework/utils';
 
 import { createAdminAuth } from '../../../integration-tests/adminAuth';
+import { GLOBAL_BRAND_ALIASES } from '../../lib/production-seed';
 import { CATALOG_MODULE } from '../../modules/catalog';
 import type CatalogModuleService from '../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../modules/supplier';
@@ -273,9 +274,10 @@ medusaIntegrationTestRunner({
         );
         expect(
           spellings
+            .filter(({ supplier_id }) => supplier_id !== null)
             .map(
               ({ supplier_id, value, brand }) =>
-                `${supplierNames.get(supplier_id)}: ${value} -> ${brand.name}`,
+                `${supplierNames.get(supplier_id!)}: ${value} -> ${brand.name}`,
             )
             .sort(),
         ).toEqual([
@@ -286,18 +288,33 @@ medusaIntegrationTestRunner({
           'bilstein group: SWAG -> SWAG',
           'bilstein group: febi -> Febi',
         ]);
-        expect(
-          (await catalog.listBrands({}, { take: null }))
-            .map(({ slug }) => slug)
-            .sort(),
-        ).toEqual([
-          'blue-print',
-          'febi',
-          'filtron',
-          'mann-filter',
-          'swag',
-          'varta',
-        ]);
+        const brands = await catalog.listBrands({}, { take: null });
+        expect(brands.map(({ slug }) => slug)).toEqual(
+          expect.arrayContaining([
+            'blue-print',
+            'febi',
+            'filtron',
+            'mann-filter',
+            'swag',
+            'varta',
+          ]),
+        );
+        expect(brands).toHaveLength(Object.keys(GLOBAL_BRAND_ALIASES).length);
+      });
+
+      it('resolves every global alias and common spelling of a seeded Brand to it', async () => {
+        const named = async (name: string) =>
+          (await catalog.brandByAnyName(name))?.name;
+
+        for (const [brand, aliases] of Object.entries(GLOBAL_BRAND_ALIASES)) {
+          for (const alias of [brand, ...aliases]) {
+            expect(await named(alias)).toBe(brand);
+          }
+        }
+        expect(await named('FEBI BILSTEIN')).toBe('Febi');
+        expect(await named('LEMFORDER')).toBe('Lemförder');
+        expect(await named('Mann Filter')).toBe('MANN-FILTER');
+        expect(await named('knecht')).toBe('MAHLE');
       });
 
       it('maps the VARTA battery category to «Аккумуляторы» and the MANN-FILTER families to their Categories', async () => {
