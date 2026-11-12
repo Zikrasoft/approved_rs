@@ -131,7 +131,7 @@ medusaIntegrationTestRunner({
         catalog = getContainer().resolve(CATALOG_MODULE);
       });
 
-      it('finds a Brand by its name however it is spelled, then by a global alias, then by a Supplier spelling', async () => {
+      it('finds a Brand by a global alias, then by its name however it is spelled, then by a Supplier spelling', async () => {
         const febi = await catalog.createBrands({ name: 'Febi', slug: 'febi' });
         const lemforder = await catalog.createBrands({
           name: 'Lemförder',
@@ -158,6 +158,24 @@ medusaIntegrationTestRunner({
         expect(await found('REINZ')).toBe(reinz.id);
         expect(await found('lmi')).toBe(lemforder.id);
         expect(await found('Bilstein')).toBeNull();
+      });
+
+      it('finds the Brand a global alias names before another Brand spelled like the alias', async () => {
+        const mahle = await catalog.createBrands({
+          name: 'MAHLE',
+          slug: 'mahle',
+        });
+        await catalog.createBrands({ name: 'Knecht', slug: 'knecht' });
+        await catalog.createBrandSpellings({
+          supplier_id: null,
+          value: 'Knecht',
+          brand_id: mahle.id,
+        });
+
+        expect(await catalog.brandByAnyName('KNECHT')).toMatchObject({
+          id: mahle.id,
+          name: 'MAHLE',
+        });
       });
     });
   },

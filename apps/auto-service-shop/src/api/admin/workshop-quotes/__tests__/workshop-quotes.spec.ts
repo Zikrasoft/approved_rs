@@ -201,11 +201,15 @@ medusaIntegrationTestRunner({
       it('settles the brand through the catalogue and its spellings', async () => {
         const febi = await catalog.createBrands({ name: 'Febi', slug: 'febi' });
         await catalog.createBrands({ name: 'FILTRON', slug: 'filtron' });
-        await catalog.createBrandSpellings({
-          supplier_id: null,
-          value: 'febi bilstein',
-          brand_id: febi.id,
+        const mahle = await catalog.createBrands({
+          name: 'MAHLE',
+          slug: 'mahle',
         });
+        await catalog.createBrands({ name: 'Knecht', slug: 'knecht' });
+        await catalog.createBrandSpellings([
+          { supplier_id: null, value: 'febi bilstein', brand_id: febi.id },
+          { supplier_id: null, value: 'Knecht', brand_id: mahle.id },
+        ]);
         ai.reading = {
           vin: null,
           vehicle: null,
@@ -213,6 +217,7 @@ medusaIntegrationTestRunner({
             quoteLine({ number: '12281', brand: 'FEBI BILSTEIN' }),
             quoteLine({ number: 'AP 139/5', brand: 'Filtron' }),
             quoteLine({ number: '0 451 103 336', brand: 'Bosch' }),
+            quoteLine({ number: 'OC 90', brand: 'Knecht' }),
           ],
         };
 
@@ -229,6 +234,7 @@ medusaIntegrationTestRunner({
           { brand: 'Febi', brand_uncertain: false },
           { brand: 'FILTRON', brand_uncertain: false },
           { brand: 'Bosch', brand_uncertain: true },
+          { brand: 'MAHLE', brand_uncertain: false },
         ]);
       });
 

@@ -1088,6 +1088,21 @@ class CatalogModuleService extends CatalogModuleBase {
     @MedusaContext() sharedContext: Context = {},
   ): Promise<{ id: string; name: string; slug: string } | null> {
     const key = nameKey(name);
+    const spellings = await this.listBrandSpellings(
+      { value_key: key },
+      { relations: ['brand'], take: null },
+      sharedContext,
+    );
+    const brandOf = (spelling?: (typeof spellings)[number]) =>
+      spelling && {
+        id: spelling.brand.id,
+        name: spelling.brand.name,
+        slug: spelling.brand.slug,
+      };
+    const aliased = brandOf(
+      spellings.find(({ supplier_id }) => supplier_id === null),
+    );
+    if (aliased) return aliased;
     const named = (
       await this.listBrands(
         {},
@@ -1095,21 +1110,7 @@ class CatalogModuleService extends CatalogModuleBase {
         sharedContext,
       )
     ).find((brand) => nameKey(brand.name) === key);
-    if (named) return named;
-    const spellings = await this.listBrandSpellings(
-      { value_key: key },
-      { relations: ['brand'], take: null },
-      sharedContext,
-    );
-    const spelled =
-      spellings.find(({ supplier_id }) => supplier_id === null) ?? spellings[0];
-    return spelled
-      ? {
-          id: spelled.brand.id,
-          name: spelled.brand.name,
-          slug: spelled.brand.slug,
-        }
-      : null;
+    return named ?? brandOf(spellings[0]) ?? null;
   }
 
   @InjectTransactionManager()

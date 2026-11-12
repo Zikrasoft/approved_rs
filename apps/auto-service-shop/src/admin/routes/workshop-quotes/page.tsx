@@ -631,7 +631,7 @@ const WorkshopQuotesPage = () => {
                               }
                             />
                           </Table.Cell>
-                          <Table.Cell className="min-w-56 py-2">
+                          <Table.Cell className="w-full min-w-80 py-2">
                             <div className="flex flex-col items-start gap-y-1.5">
                               <Input
                                 size="small"
@@ -666,7 +666,7 @@ const WorkshopQuotesPage = () => {
                               </div>
                             </div>
                           </Table.Cell>
-                          <Table.Cell className="min-w-36 py-2">
+                          <Table.Cell className="w-40 min-w-36 py-2">
                             <div className="flex flex-col items-start gap-y-1.5">
                               <Input
                                 size="small"
