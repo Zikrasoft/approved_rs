@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 
 import { adminFetch } from '../lib/admin-fetch';
+import { importedSoFar } from '../lib/import-run';
 import { knownError } from '../lib/run-errors';
 import { ListEmpty, ListHeader, ListLoading } from './list';
 
@@ -114,11 +115,7 @@ export const ImportRunReport = ({ run }: { run: ImportRun }) => {
   const errorKey = knownError(run.error);
   const lines =
     run.status === 'running'
-      ? [
-          t('suppliers.importRunning', {
-            count: run.report ? run.report.imported + run.report.created : 0,
-          }),
-        ]
+      ? [t('suppliers.importRunning', { count: importedSoFar(run.report) })]
       : [
           ...(run.report ? summaryLines(run.report) : []),
           run.error &&

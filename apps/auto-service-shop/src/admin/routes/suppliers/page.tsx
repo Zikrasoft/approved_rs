@@ -46,6 +46,7 @@ import {
 import { breadcrumb } from '../../lib/breadcrumb';
 import { useConfirmed } from '../../lib/confirm';
 import { type Category, categoriesSchema } from '../../lib/categories';
+import { importRunning } from '../../lib/import-run';
 
 const supplierSchema = editedBySchema.extend({
   id: z.string(),
@@ -135,18 +136,16 @@ const SuppliersPage = () => {
     }
   };
 
-  const importRunning = suppliers.some(
-    ({ latest_import }) => latest_import?.status === 'running',
-  );
+  const polling = importRunning(suppliers);
 
   useEffect(() => {
-    if (!importRunning) return;
-    const timer = setTimeout(() => {
+    if (!polling) return;
+    const timer = setInterval(() => {
       load();
       loadSources();
     }, POLL_MS);
-    return () => clearTimeout(timer);
-  }, [suppliers]);
+    return () => clearInterval(timer);
+  }, [polling]);
 
   useEffect(() => {
     load();

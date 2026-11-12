@@ -196,6 +196,7 @@ const request = async <T>(
   try {
     const response = await fetch(path, {
       credentials: 'include',
+      cache: 'no-store',
       headers: { 'Content-Type': 'application/json' },
       ...init,
     });
