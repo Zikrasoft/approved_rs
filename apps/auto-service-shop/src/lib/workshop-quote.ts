@@ -1,7 +1,12 @@
 import type { MedusaRequest } from '@medusajs/framework/http';
 import type { Context, MedusaContainer } from '@medusajs/framework/types';
 import { MedusaError } from '@medusajs/framework/utils';
-import { vehicleName, vinSchema, type Vehicle } from '@podbor/catalog-contract';
+import {
+  normalizePartNumber,
+  vehicleName,
+  vinSchema,
+  type Vehicle,
+} from '@podbor/catalog-contract';
 
 import { CATALOG_MODULE, WORKSHOP_QUOTE_SOURCE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
@@ -209,6 +214,11 @@ async function generationVehicles(
   return ids;
 }
 
+const quotePartName = (line: WorkshopQuoteLine, brand: string) =>
+  normalizePartNumber(line.name).includes(normalizePartNumber(line.number))
+    ? line.name
+    : [line.name, brand, line.number].join(' ');
+
 const createFromWorkshopQuote = (
   catalog: CatalogModuleService,
   lines: WorkshopQuoteLine[],
@@ -236,7 +246,10 @@ const createFromWorkshopQuote = (
       const { part_id: partId, created: newPart } =
         await catalog.findOrCreatePart(
           {
-            name: line.name,
+            name: quotePartName(
+              line,
+              brands.find(({ id }) => id === brandId)?.name ?? line.brand,
+            ),
             identifier: {
               type: 'manufacturer-number',
               brand_id: brandId,

@@ -485,7 +485,7 @@ medusaIntegrationTestRunner({
             brand_id: bmw.id,
             value: '34116860016',
             part: {
-              name: 'Pločice',
+              name: 'Pločice BMW 34116860016',
               category_id: null,
               source: 'workshop-quote',
             },
@@ -497,7 +497,7 @@ medusaIntegrationTestRunner({
             brand_id: mann[0].id,
             value: 'HU 816 x',
             part: {
-              name: 'Filter ulja',
+              name: 'Filter ulja MANN-FILTER HU 816 x',
               category_id: oilFilters.id,
               source: 'workshop-quote',
             },
@@ -669,6 +669,18 @@ medusaIntegrationTestRunner({
         expect(await catalog.listParts()).toHaveLength(1);
         expect(await catalog.listPartIdentifiers()).toHaveLength(1);
         expect(await catalog.listFitments()).toEqual([]);
+      });
+
+      it('keeps a name that already carries the number', async () => {
+        const response = await confirm({
+          vehicle_ids: [],
+          lines: [line({ name: 'Масляный фильтр MANN HU816X' })],
+        });
+
+        expect(response.status).toBe(200);
+        expect(await catalog.listParts()).toMatchObject([
+          { name: 'Масляный фильтр MANN HU816X' },
+        ]);
       });
 
       it('refuses an unknown Vehicle and creates nothing', async () => {
