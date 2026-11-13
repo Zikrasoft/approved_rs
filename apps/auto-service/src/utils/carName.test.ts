@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { byModelName, carName, modelName, vehicleVariant } from './carName';
+import { byModelName, carName, vehicleVariant } from './carName';
 
 describe('byModelName', () => {
   it('orders models by their own name in natural order, then by chassis', () => {
@@ -93,7 +93,7 @@ describe('carName', () => {
   });
 });
 
-describe('modelName', () => {
+describe('carName of a crawled model', () => {
   const crawled = {
     name: '2.0 d (E83)',
     chassis: {
@@ -102,14 +102,7 @@ describe('modelName', () => {
     },
   };
 
-  it('names the series a crawled model belongs to, without repeating its chassis', () => {
-    expect(modelName(crawled, 'ru')).toBe('X3 2.0 d (E83)');
+  it('names the series it belongs to, without repeating its chassis', () => {
     expect(carName(crawled, 'ru')).toBe('BMW X3 2.0 d (E83)');
-  });
-
-  it('names the model without its make', () => {
-    expect(modelName(model({ en: { name: '3 Series' } }), 'en')).toBe(
-      '3 Series F30 320d',
-    );
   });
 });

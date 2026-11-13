@@ -17,9 +17,6 @@ type NamedModel = {
 const seriesIn = ({ chassis: { series } }: NamedModel, locale: Locale) =>
   translated(series, 'name', locale);
 
-export const modelName = (model: NamedModel, locale: Locale): string =>
-  vehicleName(model, seriesIn(model, locale)).model;
-
 export const carName = (model: NamedModel, locale: Locale): string =>
   vehicleName(model, seriesIn(model, locale)).full;
 

@@ -105,7 +105,7 @@ describe('the Series page', () => {
     );
 
     expect(headings(root)).toContain(hubCopy.carsHeading);
-    expect(link?.textContent).toContain('3 Series F30 320d');
+    expect(link?.textContent).toContain('BMW 3 Series F30 320d');
     expect(link?.textContent).toContain('B47D20');
   });
 
