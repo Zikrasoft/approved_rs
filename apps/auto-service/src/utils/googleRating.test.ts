@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { fetchGoogleRating, googleRatingLabel } from './googleRating';
 
 const env = { GOOGLE_PLACES_API_KEY: 'key', GOOGLE_PLACE_ID: 'place/1' };
-const fallback = { rating: '5.0', reviews: 18 };
+const fallback = { rating: '5.0', reviews: 21 };
 const answer = (body: unknown, status = 200) =>
   vi
     .fn<typeof fetch>()
@@ -10,7 +10,7 @@ const answer = (body: unknown, status = 200) =>
 
 describe('googleRatingLabel', () => {
   it('states the rating and review count, from constants without Places keys', () => {
-    expect(googleRatingLabel('ru')).toBe('5.0 в Google · 18 отзывов');
+    expect(googleRatingLabel('ru')).toBe('5.0 в Google · 21 отзыв');
   });
 
   it('agrees the review word with the count', () => {

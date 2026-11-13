@@ -110,7 +110,7 @@ describe('VisitPanel', () => {
   });
 
   it('shows the Google rating under the address', async () => {
-    expect((await panel()).textContent).toContain('5.0 в Google · 18 отзывов');
+    expect((await panel()).textContent).toContain('5.0 в Google · 21 отзыв');
   });
 
   it('renders the channels slot inside the panel', async () => {

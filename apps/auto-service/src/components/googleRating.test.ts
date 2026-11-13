@@ -10,7 +10,7 @@ const rating = async (tone: 'panel' | 'card') =>
 describe('GoogleRating', () => {
   it('states the Google rating and review count', async () => {
     expect((await rating('card')).textContent?.trim()).toBe(
-      '5.0 в Google · 18 отзывов',
+      '5.0 в Google · 21 отзыв',
     );
   });
 
