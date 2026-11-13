@@ -600,7 +600,7 @@ export async function importSupplier(
     listedBrandNumbers: new Set(),
     changedPartIds: new Set(),
   };
-  const categoryOfArticle = new Map<Article, string>();
+  const categoryOfArticle = new WeakMap<Article, string>();
   const inScope = (article: Article) => {
     const decision = scopeOf(article.category);
     if ('categoryId' in decision) {
