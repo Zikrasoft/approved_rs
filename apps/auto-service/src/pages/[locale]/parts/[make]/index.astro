@@ -1,6 +1,7 @@
 ---
 import LinkRow from '@/components/LinkRow.astro';
 import { translated } from '@podbor/catalog-contract';
+import { seriesName } from '@/utils/carName';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import { localeFrom } from '@/i18n/config';
@@ -29,7 +30,7 @@ const { make } = hub;
 const series = hub.series
   .map((entry) => ({
     ...entry,
-    label: translated(entry.series, 'name', locale),
+    label: seriesName(entry.series, make, locale),
   }))
   .toSorted((a, b) => a.label.localeCompare(b.label, 'en', { numeric: true }));
 ---
