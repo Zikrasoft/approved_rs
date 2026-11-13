@@ -8,10 +8,19 @@ const { class: className = '', onPanel = false } = Astro.props;
 
 <span
   class:list={[
-    'text-xl font-extrabold tracking-[-0.04em]',
+    'inline-flex items-center gap-2.5 text-xl font-extrabold tracking-[-0.04em]',
     onPanel ? 'text-panel-fg' : 'text-ink',
     className,
   ]}
 >
-  Car<span class="text-signal">Lab</span>
+  <img
+    src="/badge.webp"
+    alt=""
+    aria-hidden="true"
+    width="40"
+    height="40"
+    decoding="async"
+    class="size-10 shrink-0 sm:size-11"
+  />
+  <span>Car<span class="text-signal">Lab</span></span>
 </span>

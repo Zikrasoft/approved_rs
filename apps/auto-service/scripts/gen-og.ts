@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
@@ -67,16 +67,3 @@ await renderOgImages(
     out: app(`public/og${localeConfig.ogSuffix[locale]}.png`),
   })),
 );
-
-const favicon = readFileSync(app('public/favicon.svg'));
-for (const [name, size] of [
-  ['apple-touch-icon.png', 180],
-  ['icon-192.png', 192],
-  ['icon-512.png', 512],
-] as const) {
-  writeFileSync(
-    app(`public/${name}`),
-    await sharp(favicon, { density: 512 }).resize(size, size).png().toBuffer(),
-  );
-  console.log(`wrote public/${name}`);
-}

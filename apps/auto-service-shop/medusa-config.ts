@@ -1,5 +1,6 @@
 import { defineConfig, loadEnv } from '@medusajs/framework/utils';
 
+import { adminFavicon } from './src/lib/admin-favicon';
 import { adminLanguage } from './src/lib/admin-language';
 import { readCalendarDatesAsText } from './src/lib/calendar-dates';
 import { parseEnv } from './src/lib/env';
@@ -47,7 +48,7 @@ export default defineConfig({
     },
   },
   admin: {
-    vite: () => ({ plugins: [adminLanguage()] }),
+    vite: () => ({ plugins: [adminLanguage(), adminFavicon()] }),
   },
   // TODO: no Locking provider is set, so the cart and order-lead locks are in-memory and exclusive only inside one process; configure the Postgres or Redis Locking provider before splitting server and worker (MEDUSA_WORKER_MODE).
   modules: [
