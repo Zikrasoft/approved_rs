@@ -65,23 +65,6 @@ describe('vehicleName', () => {
     expect(vehicleName(f30, '3 Series').full).toBe('BMW 3 Series F30 320d');
   });
 
-  it('drops a series the model name already starts with', () => {
-    const named = (series: string, name: string, code = 'F20') =>
-      vehicleName(
-        {
-          name,
-          chassis: { code, series: { name: series, make: { name: 'BMW' } } },
-        },
-        `${series} Series`,
-      ).full;
-
-    expect(named('1', '114 d (F20/F21)')).toBe('BMW 114 d (F20/F21)');
-    expect(named('XJ', 'XJ6 4.0 (XJ40, 81)', 'XJ40')).toBe(
-      'BMW XJ6 4.0 (XJ40, 81)',
-    );
-    expect(named('2', '2.0 d', 'F22')).toBe('BMW 2 Series F22 2.0 d');
-  });
-
   it('says a chassis code once when the model name carries it', () => {
     expect(
       vehicleName({

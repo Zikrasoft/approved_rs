@@ -189,16 +189,7 @@ export function vehicleName(
   const make = chassis?.series?.make?.name;
   const repeated =
     !code || code === chassis?.series?.name || name.includes(code);
-  const series = chassis?.series?.name;
-  const carriesSeries =
-    !!series &&
-    name.startsWith(series) &&
-    /^\d/.test(name.slice(series.length));
-  const model = joined([
-    carriesSeries ? '' : seriesName,
-    repeated ? '' : code,
-    name,
-  ]);
+  const model = joined([seriesName, repeated ? '' : code, name]);
   return { make: make ?? '', model, full: joined([make, model]) };
 }
 
