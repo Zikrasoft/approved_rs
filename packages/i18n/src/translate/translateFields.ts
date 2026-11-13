@@ -7,7 +7,16 @@ import {
 } from './promptRules.ts';
 
 const CYRILLIC = /\p{Script=Cyrillic}/u;
-const MISSING_FIELD_RETRIES = 2;
+const REJECTED_FIELD_RETRIES = 2;
+
+const isSafe = (source: string, translated: unknown) => {
+  try {
+    assertSafeTranslation(source, translated, '');
+    return true;
+  } catch {
+    return false;
+  }
+};
 
 export interface TranslateFieldsOptions<L extends string> {
   fields: Record<string, string>;
@@ -76,14 +85,14 @@ export async function translateFields<L extends string>(
           chunk,
         });
       let answer = await ask(russian);
-      for (let retry = 0; retry < MISSING_FIELD_RETRIES; retry += 1) {
-        const missing = Object.fromEntries(
+      for (let retry = 0; retry < REJECTED_FIELD_RETRIES; retry += 1) {
+        const rejected = Object.fromEntries(
           Object.entries(russian).filter(
-            ([key]) => typeof answer[key] !== 'string',
+            ([key, text]) => !isSafe(text, answer[key]),
           ),
         );
-        if (Object.keys(missing).length === 0) break;
-        answer = { ...answer, ...(await ask(missing)) };
+        if (Object.keys(rejected).length === 0) break;
+        answer = { ...answer, ...(await ask(rejected)) };
       }
       assertSafeTranslation(russian, answer, chunk);
       return [

@@ -65,6 +65,26 @@ describe('translateFields', () => {
     });
   });
 
+  it('asks again for a field whose translation kept Cyrillic', async () => {
+    const sent: string[] = [];
+    stubOpenAiFetch((content) => {
+      sent.push(content);
+      return sent.length === 1
+        ? { title: 'Akumulator Varta', description: 'Za **japanske** машине' }
+        : { description: 'Za **japanske** automobile' };
+    });
+    const result = await translateFields({ ...OPTIONS, targetLocales: ['sr'] });
+    expect(result).toEqual({
+      sr: {
+        title: 'Akumulator Varta',
+        description: 'Za **japanske** automobile',
+      },
+    });
+    expect(JSON.parse(sent[1])).toEqual({
+      description: 'Для **японских** машин',
+    });
+  });
+
   it('still fails when the model keeps leaving a field out', async () => {
     stubOpenAiResponse({ title: 'Akumulator Varta' });
     await expect(
