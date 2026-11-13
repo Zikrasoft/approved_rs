@@ -6,12 +6,7 @@ import type {
   CatalogueRedirect,
 } from '@podbor/catalog-contract';
 import { SUPPORTED_LOCALES, type Locale } from '../i18n/config.ts';
-import {
-  PathBuilder,
-  placeKey,
-  type CataloguePages,
-  type VehicleAddress,
-} from './paths.ts';
+import { PathBuilder, placeKey, type CataloguePages } from './paths.ts';
 
 export type RedirectRoute = {
   src: string;
@@ -142,27 +137,6 @@ export const catalogueRoutes = (
       localeRoutes(locale, redirect, pages),
     ),
   );
-
-export const carRoutes = (
-  vehicles: VehicleAddress[],
-  pages: CataloguePages,
-): RedirectRoute[] =>
-  vehicles.flatMap((vehicle) => {
-    const place = withPage(pages, {
-      brand: null,
-      make: vehicle.model.chassis.series.make.slug,
-      model: vehicle.model.slug,
-      vehicle: vehicle.slug ?? vehicle.id,
-      category: null,
-      part: null,
-    });
-    return SUPPORTED_LOCALES.map((locale) =>
-      route(
-        exactly(PathBuilder.partsCar(locale, vehicle.id)),
-        pathOf(locale, place),
-      ),
-    );
-  });
 
 export function withCatalogueRoutes<Config extends VercelConfig>(
   config: Config,

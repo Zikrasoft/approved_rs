@@ -11,10 +11,8 @@ import {
   cataloguePagesForBuild,
   partPagesForBuild,
   redirectsForBuild,
-  vehiclesForBuild,
 } from './src/utils/catalogueEnv.ts';
 import {
-  carRoutes,
   catalogueRedirectsIntegration,
   catalogueRoutes,
 } from './src/utils/catalogueRedirects.ts';
@@ -22,10 +20,7 @@ import {
 const site = CARLAB.url;
 const partPages = await partPagesForBuild(process.env);
 const pages = await cataloguePagesForBuild(process.env);
-const redirects = [
-  ...catalogueRoutes(await redirectsForBuild(process.env), pages),
-  ...carRoutes(await vehiclesForBuild(process.env), pages),
-];
+const redirects = catalogueRoutes(await redirectsForBuild(process.env), pages);
 
 export default defineConfig({
   site,

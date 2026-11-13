@@ -5,7 +5,6 @@ import {
 } from '@podbor/catalog-contract';
 import {
   catalogueRoutes,
-  carRoutes,
   type RedirectRoute,
   withCatalogueRoutes,
 } from './catalogueRedirects';
@@ -247,58 +246,5 @@ describe('withCatalogueRoutes', () => {
       version: 3,
       routes: [route],
     });
-  });
-});
-
-describe('carRoutes', () => {
-  const vehicle = (
-    id: string,
-    slug: string,
-    model = 'f30-320d',
-    make = 'bmw',
-  ) => ({
-    id,
-    slug,
-    model: { slug: model, chassis: { series: { make: { slug: make } } } },
-  });
-
-  it('301s an old car page to its Vehicle page, in every locale', () => {
-    const routes = carRoutes(
-      [vehicle('veh_01', 'b47d20o0-140kw')],
-      pagesOf({
-        makes: ['bmw'],
-        models: ['bmw/f30-320d'],
-        vehicles: ['bmw/f30-320d/b47d20o0-140kw'],
-      }),
-    );
-
-    expect(follow(routes, '/sr/parts/car/veh_01/')).toEqual(
-      moved('/sr/parts/bmw/f30-320d/m/b47d20o0-140kw/'),
-    );
-    expect(follow(routes, '/en/parts/car/veh_01')).toEqual(
-      moved('/en/parts/bmw/f30-320d/m/b47d20o0-140kw/'),
-    );
-    expect(follow(routes, '/ru/parts/car/veh_012/')).toBeNull();
-  });
-
-  it('301s an old car page without a Vehicle page to its Model, its Make, or the parts index', () => {
-    const routes = carRoutes(
-      [
-        vehicle('veh_f30', 'b47d20o0-140kw'),
-        vehicle('veh_e90', 'n47d20c-130kw', 'e90-320d'),
-        vehicle('veh_zz', 'x-1kw', 'x', 'zz'),
-      ],
-      pagesOf({ makes: ['bmw'], models: ['bmw/f30-320d'] }),
-    );
-
-    expect(follow(routes, '/sr/parts/car/veh_f30/')).toEqual(
-      moved('/sr/parts/bmw/f30-320d/'),
-    );
-    expect(follow(routes, '/sr/parts/car/veh_e90/')).toEqual(
-      moved('/sr/parts/bmw/'),
-    );
-    expect(follow(routes, '/sr/parts/car/veh_zz/')).toEqual(
-      moved('/sr/parts/'),
-    );
   });
 });

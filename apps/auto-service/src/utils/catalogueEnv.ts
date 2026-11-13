@@ -255,10 +255,6 @@ export async function carPagesForBuild(
   return snapshot ? carPagesFrom(snapshot) : [];
 }
 
-export async function vehiclesForBuild(env = siteEnv()) {
-  return (await snapshotForBuild(env))?.vehicles ?? [];
-}
-
 export async function cataloguePagesForBuild(
   env = siteEnv(),
 ): Promise<CataloguePages> {

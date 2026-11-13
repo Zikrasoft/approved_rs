@@ -136,7 +136,7 @@ describe('reserved parts segments', () => {
       .filter((path) => path.startsWith('/sr/parts/'))
       .map((path) => path.split('/')[3])
       .filter((segment) => segment && !/^[$#?]/.test(segment));
-    expect(segments).toContain('car');
+    expect(segments).toContain('makes');
     expect(segments.filter((segment) => !reserved.includes(segment))).toEqual(
       [],
     );
