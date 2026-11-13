@@ -1001,6 +1001,7 @@
     "vehicleText": "Car in the quote",
     "noVehicleText": "Not given",
     "vehicle": "Fitment",
+    "noVinHint": "The quote has no VIN. The parts can be created without fitment and matched to cars under Fitments.",
     "noVehicleHint": "No catalogue car matches this VIN. The parts can be created without fitment; to get fitments, add the car under Vehicles.",
     "noLines": "No part lines were found in the quote.",
     "uncertainSummary_one": "{{count}} line has an uncertain brand: check it before creating.",

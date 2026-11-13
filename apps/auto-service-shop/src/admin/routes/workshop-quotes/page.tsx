@@ -582,7 +582,9 @@ const WorkshopQuotesPage = () => {
                         generation: draft.generation ?? '',
                         count: draft.candidates.length,
                       })
-                    : t('workshopQuotes.noVehicleHint')}
+                    : draft.vin
+                      ? t('workshopQuotes.noVehicleHint')
+                      : t('workshopQuotes.noVinHint')}
                 </Text>
               )}
             </dd>
