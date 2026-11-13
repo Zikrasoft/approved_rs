@@ -246,6 +246,7 @@ const source = {
           'part_id',
           'vehicle.id',
           'vehicle.model.slug',
+          'vehicle.model.chassis.series.name',
           'vehicle.model.chassis.series.make.slug',
         ],
         filters: { part_id: partIds },

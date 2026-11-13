@@ -62,7 +62,10 @@ export const searchResponseSchema = z.object({
   model: vehicleSchema.shape.model.nullable().default(null),
   cars: readableCars,
   scope_pages: z
-    .object({ model: z.boolean(), make: z.boolean() })
+    .object({
+      make: z.boolean(),
+      series: z.boolean().nullable().default(null),
+    })
     .nullable()
     .default(null)
     .catch(null),

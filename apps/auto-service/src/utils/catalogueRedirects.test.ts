@@ -12,14 +12,12 @@ import type { CataloguePages } from './paths';
 
 const pagesOf = ({
   makes = [],
-  models = [],
+  series = [],
   categories = [],
-  vehicles = [],
 }: Partial<Record<keyof CataloguePages, string[]>>): CataloguePages => ({
   makes: new Set(makes),
-  models: new Set(models),
+  series: new Set(series),
   categories: new Set(categories),
-  vehicles: new Set(vehicles),
 });
 
 const redirect = (
@@ -49,31 +47,22 @@ const follow = (routes: RedirectRoute[], path: string) => {
 const moved = (location: string) => ({ status: 301, location });
 
 describe('catalogueRoutes', () => {
-  it('sends a car renamed by a Model merge to itself, not to the car that kept its slug', () => {
-    const routes = catalogueRoutes(
-      [
-        redirect(
-          { make: 'volkswagen', model: 'vw-golf' },
-          { make: 'volkswagen', model: 'golf' },
-        ),
-        redirect(
-          { make: 'volkswagen', model: 'vw-golf', vehicle: 'caxa-90kw' },
-          { make: 'volkswagen', model: 'golf', vehicle: 'caxa-90kw-2' },
-        ),
-      ],
-      pagesOf({
-        makes: ['volkswagen'],
-        models: ['volkswagen/golf'],
-        vehicles: ['volkswagen/golf/caxa-90kw-2'],
-      }),
-    );
-
-    expect(follow(routes, '/sr/parts/volkswagen/vw-golf/m/caxa-90kw/')).toEqual(
-      moved('/sr/parts/volkswagen/golf/m/caxa-90kw-2/'),
-    );
+  it('routes nothing for a renamed Model or Vehicle, neither of which has a page', () => {
     expect(
-      follow(routes, '/sr/parts/volkswagen/vw-golf/m/caxa-110kw/'),
-    ).toEqual(moved('/sr/parts/volkswagen/golf/m/caxa-110kw/'));
+      catalogueRoutes(
+        [
+          redirect(
+            { make: 'volkswagen', model: 'vw-golf' },
+            { make: 'volkswagen', model: 'golf' },
+          ),
+          redirect(
+            { make: 'volkswagen', model: 'vw-golf', vehicle: 'caxa-90kw' },
+            { make: 'volkswagen', model: 'golf' },
+          ),
+        ],
+        pagesOf({ makes: ['volkswagen'], series: ['volkswagen/golf'] }),
+      ),
+    ).toEqual([]);
   });
 
   it('301s every page under a renamed Make, in every locale', () => {
@@ -88,38 +77,19 @@ describe('catalogueRoutes', () => {
     expect(follow(routes, '/ru/parts/bmw-old')).toEqual(
       moved('/ru/parts/bmw/'),
     );
-    expect(follow(routes, '/en/parts/bmw-old/f30-320d/oil-filters/')).toEqual(
-      moved('/en/parts/bmw/f30-320d/oil-filters/'),
+    expect(follow(routes, '/en/parts/bmw-old/3-series/oil-filters/')).toEqual(
+      moved('/en/parts/bmw/3-series/oil-filters/'),
     );
     expect(follow(routes, '/sr/parts/bmw-oldtimer/')).toBeNull();
   });
 
-  it('follows a Model renamed after its Make in two hops', () => {
-    const routes = catalogueRoutes(
-      [
-        redirect({ make: 'bmw-old' }, { make: 'bmw' }),
-        redirect(
-          { make: 'bmw', model: 'f30-old' },
-          { make: 'bmw', model: '3-series-f30-320d' },
-        ),
-      ],
-      pagesOf({ makes: ['bmw'], models: ['bmw/3-series-f30-320d'] }),
-    );
-
-    const first = follow(routes, '/sr/parts/bmw-old/f30-old/oil-filters/');
-    expect(first).toEqual(moved('/sr/parts/bmw/f30-old/oil-filters/'));
-    expect(follow(routes, first!.location)).toEqual(
-      moved('/sr/parts/bmw/3-series-f30-320d/oil-filters/'),
-    );
-  });
-
-  it('301s a renamed Category, its listing pages and its pages under every Model', () => {
+  it('301s a renamed Category, its listing pages and its pages under every Series', () => {
     const routes = catalogueRoutes(
       [redirect({ category: 'oil' }, { category: 'oil-filters' })],
       pagesOf({
         makes: ['bmw'],
-        models: ['bmw/f30-320d'],
-        categories: ['bmw/f30-320d/oil-filters'],
+        series: ['bmw/3-series'],
+        categories: ['bmw/3-series/oil-filters'],
       }),
     );
 
@@ -129,10 +99,10 @@ describe('catalogueRoutes', () => {
     expect(follow(routes, '/sr/parts/c/oil/3/')).toEqual(
       moved('/sr/parts/c/oil-filters/3/'),
     );
-    expect(follow(routes, '/sr/parts/bmw/f30-320d/oil/')).toEqual(
-      moved('/sr/parts/bmw/f30-320d/oil-filters/'),
+    expect(follow(routes, '/sr/parts/bmw/3-series/oil/')).toEqual(
+      moved('/sr/parts/bmw/3-series/oil-filters/'),
     );
-    expect(follow(routes, '/sr/parts/bmw/f30-320d/oil-filters/')).toBeNull();
+    expect(follow(routes, '/sr/parts/bmw/3-series/oil-filters/')).toBeNull();
   });
 
   it('301s each part page of a renamed Brand without touching a Brand that shares its start', () => {
@@ -147,73 +117,50 @@ describe('catalogueRoutes', () => {
     expect(follow(routes, '/sr/parts/p/mann-filter-hu816x/')).toBeNull();
   });
 
-  it('falls back from a target without a page to its Model, its Make, then the parts index', () => {
+  it('falls back from a Make without a page to the parts index', () => {
     const routes = catalogueRoutes(
-      [
-        redirect(
-          { make: 'bmw', model: 'f30-320d', vehicle: 'old-140kw' },
-          { make: 'bmw', model: 'f30-320d', vehicle: 'b47d20o0-140kw' },
-        ),
-        redirect(
-          { make: 'bmw', model: 'e90-old' },
-          { make: 'bmw', model: 'e90' },
-        ),
-        redirect({ make: 'vw' }, { make: 'volkswagen' }),
-      ],
-      pagesOf({ makes: ['bmw'], models: ['bmw/f30-320d'] }),
+      [redirect({ make: 'vw' }, { make: 'volkswagen' })],
+      pagesOf({ makes: ['bmw'] }),
     );
 
-    expect(follow(routes, '/sr/parts/bmw/f30-320d/m/old-140kw/')).toEqual(
-      moved('/sr/parts/bmw/f30-320d/'),
-    );
-    expect(follow(routes, '/sr/parts/bmw/e90-old/oil-filters/')).toEqual(
-      moved('/sr/parts/bmw/'),
-    );
     expect(follow(routes, '/sr/parts/vw/golf/')).toEqual(moved('/sr/parts/'));
   });
 
-  it('sends a renamed Category under a Model only from a Model page, to the Model page when it lacks the Category', () => {
+  it('sends a renamed Category under a Series only from a Series page, to the Series page when it lacks the Category', () => {
     const routes = catalogueRoutes(
       [redirect({ category: 'oil' }, { category: 'oil-filters' })],
       pagesOf({
         makes: ['bmw'],
-        models: ['bmw/f30-320d', 'bmw/g20-320d'],
-        categories: ['bmw/f30-320d/oil-filters'],
+        series: ['bmw/3-series', 'bmw/5-series'],
+        categories: ['bmw/3-series/oil-filters'],
       }),
     );
 
-    expect(follow(routes, '/sr/parts/bmw/f30-320d/oil/')).toEqual(
-      moved('/sr/parts/bmw/f30-320d/oil-filters/'),
+    expect(follow(routes, '/sr/parts/bmw/3-series/oil/')).toEqual(
+      moved('/sr/parts/bmw/3-series/oil-filters/'),
     );
-    expect(follow(routes, '/sr/parts/bmw/g20-320d/oil/')).toEqual(
-      moved('/sr/parts/bmw/g20-320d/'),
+    expect(follow(routes, '/sr/parts/bmw/5-series/oil/')).toEqual(
+      moved('/sr/parts/bmw/5-series/'),
     );
-    expect(follow(routes, '/sr/parts/bmw/e90-320d/oil/')).toBeNull();
+    expect(follow(routes, '/sr/parts/bmw/x5/oil/')).toBeNull();
   });
 
-  it('sends a deleted part to its Category, a deleted Vehicle to its Model and a deleted Make to the parts index', () => {
+  it('sends a deleted part to its Category and a deleted Make or Category to the nearest page', () => {
     const routes = catalogueRoutes(
       [
         redirect({ part: 'mann-filter-w712' }, { category: 'oil-filters' }),
-        redirect(
-          { make: 'bmw', model: 'f30-320d', vehicle: 'b47d20o0-140kw' },
-          { make: 'bmw', model: 'f30-320d' },
-        ),
         redirect({ make: 'zz' }, {}),
         redirect({ category: 'gone' }, {}),
       ],
-      pagesOf({ makes: ['bmw'], models: ['bmw/f30-320d'] }),
+      pagesOf({ makes: ['bmw'], series: ['bmw/3-series'] }),
     );
 
     expect(follow(routes, '/sr/parts/p/mann-filter-w712/')).toEqual(
       moved('/sr/parts/c/oil-filters/'),
     );
-    expect(follow(routes, '/en/parts/bmw/f30-320d/m/b47d20o0-140kw/')).toEqual(
-      moved('/en/parts/bmw/f30-320d/'),
-    );
     expect(follow(routes, '/ru/parts/zz/x5/')).toEqual(moved('/ru/parts/'));
-    expect(follow(routes, '/sr/parts/bmw/f30-320d/gone/')).toEqual(
-      moved('/sr/parts/bmw/f30-320d/'),
+    expect(follow(routes, '/sr/parts/bmw/3-series/gone/')).toEqual(
+      moved('/sr/parts/bmw/3-series/'),
     );
   });
 });

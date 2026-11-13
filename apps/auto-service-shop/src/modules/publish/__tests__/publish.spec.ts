@@ -23,11 +23,11 @@ medusaIntegrationTestRunner({
         });
 
       const listedOn = async (
-        vehicleId: string,
+        seriesId: string,
         requirementFits: PartFit[] = [],
       ) =>
         (await publish.listedPartCounts(requirementFits)).find(
-          (row) => row.vehicle_id === vehicleId,
+          (row) => row.series_id === seriesId,
         )?.parts ?? 0;
 
       const listedById = async (ids: string[]) =>
@@ -67,18 +67,18 @@ medusaIntegrationTestRunner({
       });
 
       it('lists a replaced Part only while its replacement is unpublished', async () => {
-        const oldCar = (
+        const { vehicle: oldCar, series: oldSeries } =
           await createVehicleFixture(catalog, {
             typeCode: 'PB01',
+            seriesName: 'PB old',
             modelSlug: 'pb-old',
-          })
-        ).vehicle;
-        const newCar = (
+          });
+        const { vehicle: newCar, series: newSeries } =
           await createVehicleFixture(catalog, {
             typeCode: 'PB02',
+            seriesName: 'PB new',
             modelSlug: 'pb-new',
-          })
-        ).vehicle;
+          });
         const old = await numberedPart('OLD 1');
         const replacement = await numberedPart('NEW 1');
         await catalog.updateParts({
@@ -92,13 +92,13 @@ medusaIntegrationTestRunner({
 
         await publish.publishAll();
         const bothPublished = [
-          await listedOn(oldCar.id),
-          await listedOn(newCar.id),
+          await listedOn(oldSeries.id),
+          await listedOn(newSeries.id),
         ];
         await publish.unpublish([replacement.part_identifier_id]);
         const replacementHidden = [
-          await listedOn(oldCar.id),
-          await listedOn(newCar.id),
+          await listedOn(oldSeries.id),
+          await listedOn(newSeries.id),
         ];
 
         expect(bothPublished).toEqual([0, 1]);
@@ -152,18 +152,17 @@ medusaIntegrationTestRunner({
       });
 
       it('counts Requirement matches only from two listed ones in a Category, a fitted Part once', async () => {
-        const car = (
-          await createVehicleFixture(catalog, {
-            typeCode: 'PB03',
-            modelSlug: 'pb-required',
-          })
-        ).vehicle;
-        const lone = (
+        const { vehicle: car, series } = await createVehicleFixture(catalog, {
+          typeCode: 'PB03',
+          seriesName: 'PB required',
+          modelSlug: 'pb-required',
+        });
+        const { vehicle: lone, series: loneSeries } =
           await createVehicleFixture(catalog, {
             typeCode: 'PB04',
+            seriesName: 'PB lone',
             modelSlug: 'pb-lone',
-          })
-        ).vehicle;
+          });
         const fitted = await numberedPart('RQ 1');
         const required = await numberedPart('RQ 2');
         const retired = await numberedPart('RQ 3');
@@ -191,25 +190,12 @@ medusaIntegrationTestRunner({
           fit(car.id, oil, 'oils'),
           fit(lone.id, oil, 'oils'),
         ]);
-        const placeOf = (model_id: string, vehicle_id: string | null) =>
-          counts.find(
-            (row) => row.model_id === model_id && row.vehicle_id === vehicle_id,
-          );
+        const placeOf = (seriesId: string) =>
+          counts.find((row) => row.series_id === seriesId);
 
-        expect(await listedOn(car.id)).toBe(1);
-        expect(placeOf(car.model_id, car.id)).toMatchObject({
-          parts: 2,
-          required: 2,
-        });
-        expect(placeOf(car.model_id, null)).toMatchObject({
-          parts: 2,
-          required: 2,
-        });
-        expect(placeOf(lone.model_id, lone.id)).toMatchObject({
-          parts: 0,
-          required: 1,
-        });
-        expect(placeOf(lone.model_id, null)).toMatchObject({
+        expect(await listedOn(series.id)).toBe(1);
+        expect(placeOf(series.id)).toMatchObject({ parts: 2, required: 2 });
+        expect(placeOf(loneSeries.id)).toMatchObject({
           parts: 0,
           required: 1,
         });

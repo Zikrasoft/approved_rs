@@ -8,17 +8,15 @@ import {
   type CarHit,
   type CarKind,
   makeHasPage,
-  modelHasPage,
   type PlaceParts,
-  vehicleHasPage,
+  seriesHasPage,
 } from '@podbor/catalog-contract';
 
 import {
   CATALOGUE_CAR_INDEX,
   makeKey,
-  modelKey,
   readCarHit,
-  vehicleKey,
+  seriesKey,
 } from '../lib/car-pages';
 import { everyRequirementFit } from '../lib/requirement-fit';
 import { serbianScripts } from '../lib/serbian';
@@ -31,39 +29,33 @@ import type { ListedPartCount } from '../modules/publish/service';
 const MAX_QUERY_TOKENS = 8;
 const HITS_PER_TOKEN = 100;
 const CARS_SHOWN = 8;
-const BREADTH: Record<CarKind, number> = { make: 2, model: 1, vehicle: 0 };
+const BREADTH: Record<CarKind, number> = {
+  make: 3,
+  series: 2,
+  model: 1,
+  vehicle: 0,
+};
 
 type MakeRow = { slug: string; name: string; spellings: { value: string }[] };
 
-type ModelRow = {
+type VehicleRow = {
   id: string;
-  slug: string;
-  name: string;
-  chassis: {
-    code: string;
-    body_style: string | null;
-    series: {
-      name: string;
-      translations: Record<string, Record<string, string>> | null;
-      make: MakeRow;
+  engine: { code: string; family: string } | null;
+  model: {
+    name: string;
+    chassis: {
+      code: string;
+      series: {
+        id: string;
+        name: string;
+        translations: Record<string, Record<string, string>> | null;
+        make: MakeRow;
+      };
     };
   };
 };
 
-type VehicleRow = {
-  id: string;
-  slug: string | null;
-  power_kw: number | null;
-  year_from: number | null;
-  year_to: number | null;
-  engine: { code: string; family: string } | null;
-  model: ModelRow;
-};
-
-export type PartCounts = {
-  vehicles: Map<string, PlaceParts>;
-  models: Map<string, PlaceParts>;
-};
+export type PartCounts = Map<string, PlaceParts>;
 
 const NO_PARTS: PlaceParts = { parts: 0, required: 0 };
 
@@ -117,7 +109,7 @@ const termsOf = (...texts: (string | null | undefined)[]): string[] =>
   });
 
 const makeOf = ({ model }: VehicleRow) => model.chassis.series.make.slug;
-const modelOf = ({ model }: VehicleRow) => model.id;
+const seriesOf = ({ model }: VehicleRow) => model.chassis.series.id;
 
 const groupBy = (
   vehicles: VehicleRow[],
@@ -131,42 +123,18 @@ const groupBy = (
 };
 
 export function carsWithPages(vehicles: VehicleRow[], counts: PartCounts) {
-  const modelParts = ([row]: VehicleRow[]) =>
-    counts.models.get(modelOf(row)) ?? NO_PARTS;
-  const models = groupBy(vehicles, modelOf).filter((rows) =>
-    modelHasPage(modelParts(rows)),
+  const series = groupBy(vehicles, seriesOf).filter(([row]) =>
+    seriesHasPage(counts.get(seriesOf(row)) ?? NO_PARTS),
   );
   return {
-    makes: groupBy(models.flat(), makeOf)
-      .filter((rows) => makeHasPage(groupBy(rows, modelOf).length))
+    makes: groupBy(series.flat(), makeOf)
+      .filter((rows) => makeHasPage(groupBy(rows, seriesOf).length))
       .map(([row]) => row),
-    models: models.map(([row]) => row),
-    vehicles: models.flatMap((rows) =>
-      rows.filter((row) =>
-        vehicleHasPage({
-          vehicle: counts.vehicles.get(row.id) ?? NO_PARTS,
-          model: modelParts(rows),
-        }),
-      ),
-    ),
+    series,
   };
 }
 
 const makeCard = ({ slug, name }: MakeRow) => ({ slug, name });
-
-const modelCard = ({ slug, name, chassis }: ModelRow) => ({
-  slug,
-  name,
-  chassis: {
-    code: chassis.code,
-    body_style: chassis.body_style,
-    series: {
-      name: chassis.series.name,
-      translations: chassis.series.translations,
-      make: makeCard(chassis.series.make),
-    },
-  },
-});
 
 const document = (
   id: string,
@@ -186,75 +154,51 @@ export function carDocuments(vehicles: VehicleRow[], counts: PartCounts) {
     const { make } = model.chassis.series;
     return termsOf(make.name, ...make.spellings.map(({ value }) => value));
   };
-  const modelTerms = (row: VehicleRow) => {
-    const { series, code } = row.model.chassis;
-    return [
-      ...makeTerms(row),
-      ...termsOf(
-        series.name,
-        series.translations?.sr?.name,
-        series.translations?.en?.name,
-        code,
-        row.model.name,
-      ),
-    ];
-  };
+  const carTerms = ({ model, engine }: VehicleRow) =>
+    termsOf(model.chassis.code, model.name, engine?.code, engine?.family);
   const make = (row: VehicleRow) => makeCard(row.model.chassis.series.make);
   return [
     ...paged.makes.map((row) =>
       document(makeKey(makeOf(row)), 'make', makeTerms(row), {
         make: make(row),
+        series: null,
         model: null,
         vehicle: null,
       }),
     ),
-    ...paged.models.map((row) =>
-      document(
-        modelKey(makeOf(row), row.model.slug),
-        'model',
-        modelTerms(row),
+    ...paged.series.map((rows) => {
+      const [row] = rows;
+      const { series } = row.model.chassis;
+      return document(
+        seriesKey(series),
+        'series',
+        [
+          ...makeTerms(row),
+          ...termsOf(
+            series.name,
+            series.translations?.sr?.name,
+            series.translations?.en?.name,
+          ),
+          ...rows.flatMap(carTerms),
+        ],
         {
           make: make(row),
-          model: modelCard(row.model),
+          series: { name: series.name, translations: series.translations },
+          model: null,
           vehicle: null,
         },
-      ),
-    ),
-    ...paged.vehicles.map((row) =>
-      document(
-        vehicleKey(row.id),
-        'vehicle',
-        [...modelTerms(row), ...termsOf(row.engine?.code, row.engine?.family)],
-        {
-          make: make(row),
-          model: modelCard(row.model),
-          vehicle: {
-            id: row.id,
-            slug: row.slug,
-            engine: row.engine && { code: row.engine.code },
-            power_kw: row.power_kw,
-            year_from: row.year_from,
-            year_to: row.year_to,
-          },
-        },
-      ),
-    ),
+      );
+    }),
   ];
 }
 
 const VEHICLE_FIELDS = [
   'id',
-  'slug',
-  'power_kw',
-  'year_from',
-  'year_to',
   'engine.code',
   'engine.family',
-  'model.id',
-  'model.slug',
   'model.name',
   'model.chassis.code',
-  'model.chassis.body_style',
+  'model.chassis.series.id',
   'model.chassis.series.name',
   'model.chassis.series.translations',
   'model.chassis.series.make.slug',
@@ -262,14 +206,13 @@ const VEHICLE_FIELDS = [
   'model.chassis.series.make.spellings.value',
 ];
 
-function partCountsOf(rows: ListedPartCount[]): PartCounts {
-  const counts: PartCounts = { vehicles: new Map(), models: new Map() };
-  for (const { model_id, vehicle_id, parts, required } of rows) {
-    if (vehicle_id) counts.vehicles.set(vehicle_id, { parts, required });
-    else counts.models.set(model_id, { parts, required });
-  }
-  return counts;
-}
+const partCountsOf = (rows: ListedPartCount[]): PartCounts =>
+  new Map(
+    rows.map(({ series_id, parts, required }) => [
+      series_id,
+      { parts, required },
+    ]),
+  );
 
 async function* seed({
   container: { query },

@@ -13,8 +13,7 @@ import type SupplierModuleService from '../../../../modules/supplier/service';
 type Car = {
   kind: string;
   make: { slug: string };
-  model: { slug: string } | null;
-  vehicle: { id: string; engine: { code: string } } | null;
+  series: { name: string } | null;
 };
 
 type Answer = {
@@ -22,12 +21,8 @@ type Answer = {
   results: { value: string; part: { id: string } }[];
 };
 
-const carKey = ({ kind, make, model, vehicle }: Car) =>
-  kind === 'make'
-    ? `make:${make.slug}`
-    : kind === 'model'
-      ? `model:${model?.slug}`
-      : `vehicle:${vehicle?.engine.code}`;
+const carKey = ({ kind, make, series }: Car) =>
+  kind === 'make' ? `make:${make.slug}` : `${kind}:${series?.name}`;
 
 medusaIntegrationTestRunner({
   moduleName: 'catalog',
@@ -70,6 +65,7 @@ medusaIntegrationTestRunner({
 
         const x3N47 = await createVehicleFixture(catalog, {
           typeCode: 'PC31',
+          seriesName: 'X3',
           modelSlug: 'e83-x3-20d',
           chassisCode: 'E83',
           engineCode: 'N47D20A',
@@ -81,6 +77,7 @@ medusaIntegrationTestRunner({
         });
         const x3M47 = await createVehicleFixture(catalog, {
           typeCode: 'PA91',
+          seriesName: 'X3',
           modelSlug: 'e83-x3-20d',
           chassisCode: 'E83',
           engineCode: 'M47D20',
@@ -88,12 +85,14 @@ medusaIntegrationTestRunner({
         });
         const e90 = await createVehicleFixture(catalog, {
           typeCode: 'PG71',
+          seriesName: 'E90 Series',
           modelSlug: 'e90-320d',
           chassisCode: 'E90',
           engineCode: 'M47D20',
         });
         const f30 = await createVehicleFixture(catalog, {
           typeCode: 'T001',
+          seriesName: 'F30 Series',
           modelSlug: 'f30-320d',
           chassisCode: 'F30',
         });
@@ -136,12 +135,14 @@ medusaIntegrationTestRunner({
         }
         const g20Rich = await createVehicleFixture(catalog, {
           typeCode: 'G201',
+          seriesName: 'G20 Series',
           modelSlug: 'g20-320d',
           chassisCode: 'G20',
           engineCode: 'B47D20B',
         });
         const g20Poor = await createVehicleFixture(catalog, {
           typeCode: 'G202',
+          seriesName: 'G20 Series',
           modelSlug: 'g20-320d',
           chassisCode: 'G20',
           engineCode: 'B48B20',
@@ -152,6 +153,7 @@ medusaIntegrationTestRunner({
         await part('Фильтр салона', '51 004', [g20Poor.vehicle.id]);
         const e46 = await createVehicleFixture(catalog, {
           typeCode: 'E461',
+          seriesName: 'E46 Series',
           modelSlug: 'e46-320d',
           chassisCode: 'E46',
           engineCode: 'M47D20',
@@ -194,27 +196,25 @@ medusaIntegrationTestRunner({
         await container.resolve(Modules.SEARCH).reindex();
       });
 
-      it('finds a Make by its name, ahead of its Models', async () => {
+      it('finds a Make by its name, ahead of its Series', async () => {
         expect((await cars('bmw'))[0]).toBe('make:bmw');
       });
 
-      it('finds a Model by make and model, ahead of its Vehicles', async () => {
+      it('finds a Series by make and model', async () => {
         const found = await cars('bmw x3');
-        expect(found[0]).toBe('model:e83-x3-20d');
-        expect(found).toContain('vehicle:N47D20A');
-        expect(found).not.toContain('make:bmw');
+        expect(found).toEqual(['series:X3']);
       });
 
-      it('finds a Model by its chassis code', async () => {
-        expect((await cars('E90'))[0]).toBe('model:e90-320d');
+      it('finds a Series by a chassis code of its cars', async () => {
+        expect(await cars('E90')).toEqual(['series:E90 Series']);
       });
 
       it('reads a code typed in Cyrillic', async () => {
-        expect((await cars('Е90'))[0]).toBe('model:e90-320d');
+        expect(await cars('Е90')).toEqual(['series:E90 Series']);
       });
 
       it('reads a make and a model typed in Russian Cyrillic', async () => {
-        expect((await cars('бмв х3'))[0]).toBe('model:e83-x3-20d');
+        expect(await cars('бмв х3')).toEqual(['series:X3']);
       });
 
       it('finds no car in a spaced part number whose digits name a series', async () => {
@@ -230,12 +230,8 @@ medusaIntegrationTestRunner({
         });
       });
 
-      it('finds a Vehicle by its engine code', async () => {
-        expect(await cars('N47')).toEqual(['vehicle:N47D20A']);
-      });
-
-      it('offers a page for a solitary Vehicle with enough Parts', async () => {
-        expect(await cars('e90')).toContain('vehicle:M47D20');
+      it('finds a Series by an engine code of its cars', async () => {
+        expect(await cars('N47')).toEqual(['series:X3']);
       });
 
       it('offers no page for fewer than three published Parts', async () => {
@@ -243,14 +239,11 @@ medusaIntegrationTestRunner({
         expect(await cars('audi')).toEqual([]);
       });
 
-      it('offers a Vehicle page only to a Vehicle with enough Parts of its own', async () => {
-        expect(await cars('g20')).toEqual([
-          'model:g20-320d',
-          'vehicle:B47D20B',
-        ]);
+      it('counts the Parts of every car in a Series', async () => {
+        expect(await cars('g20')).toEqual(['series:G20 Series']);
       });
 
-      it('says whether the Model a listing is scoped to, and its Make, have a page', async () => {
+      it('says whether the Series of the Model a listing is scoped to, and its Make, have a page', async () => {
         const scoped = async (model: string, make = 'bmw') =>
           (
             await api.get(
@@ -259,12 +252,29 @@ medusaIntegrationTestRunner({
             )
           ).data.scope_pages;
 
-        expect(await scoped('g20-320d')).toEqual({ model: true, make: true });
-        expect(await scoped('f30-320d')).toEqual({ model: false, make: true });
-        expect(await scoped('b8-a4-20tdi', 'audi')).toEqual({
-          model: false,
-          make: false,
+        expect(await scoped('g20-320d')).toEqual({ make: true, series: true });
+        expect(await scoped('f30-320d')).toEqual({
+          make: true,
+          series: false,
         });
+        expect(await scoped('b8-a4-20tdi', 'audi')).toEqual({
+          make: false,
+          series: false,
+        });
+      });
+
+      it('lists every Part fitting a Model scoped without a query', async () => {
+        const { results } = (
+          await api.get(
+            `/store/search?${new URLSearchParams({ locale: 'ru', make: 'bmw', model: 'e90-320d' })}`,
+            storeHeaders,
+          )
+        ).data as Answer;
+        expect(results.map(({ value }) => value).sort()).toEqual([
+          '21 001',
+          '21 002',
+          '21 003',
+        ]);
       });
 
       it('counts no Part replaced by a published successor', async () => {
@@ -279,7 +289,7 @@ medusaIntegrationTestRunner({
 
       it('ranks the Parts that fit the named car first', async () => {
         const { cars: found, results } = await search('масляный фильтр bmw x3');
-        expect(found.map(carKey)[0]).toBe('model:e83-x3-20d');
+        expect(found.map(carKey)[0]).toBe('series:X3');
         expect(results.map(({ part }) => part.id)).toEqual([
           fittingFilterId,
           otherFilterId,

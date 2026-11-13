@@ -53,6 +53,7 @@ import {
   makeKey,
   modelKey,
   pagedCars,
+  seriesKey,
   vehicleKey,
 } from '../../../lib/car-pages';
 import { modelBySlug } from '../../../lib/store-response';
@@ -290,18 +291,19 @@ export async function GET(
   const scopeMake = scopedTo?.chassis.series.make.slug;
   const scopeModelKey =
     scopedTo && scopeMake ? modelKey(scopeMake, scopedTo.slug) : null;
+  const scopeSeriesKey = scopedTo ? seriesKey(scopedTo.chassis.series) : null;
   const scopePaged =
-    scopeModelKey && scopeMake
+    scopeSeriesKey && scopeMake
       ? await pagedCars(req.scope.resolve(Modules.SEARCH), [
-          scopeModelKey,
+          scopeSeriesKey,
           makeKey(scopeMake),
         ])
       : null;
   const scopePages =
-    scopeModelKey && scopeMake && scopePaged
+    scopeSeriesKey && scopeMake && scopePaged
       ? {
-          model: scopePaged.has(scopeModelKey),
           make: scopePaged.has(makeKey(scopeMake)),
+          series: scopePaged.has(scopeSeriesKey),
         }
       : null;
 
@@ -388,7 +390,7 @@ export async function GET(
     );
   };
 
-  if (!filters.q && !found && !cars.keys.length) {
+  if (!filters.q && !found && !cars.keys.length && !scopeModelKey) {
     nothing();
     return;
   }

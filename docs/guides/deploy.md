@@ -1145,7 +1145,7 @@ wrong token gets 403 and no cookie, and `/api/shop-preview` with no token
 forgets both. A tester whose cookie predates the flag opens the link once more. The token travels in
 that one API request only, never in a page address, so analytics never record
 it. With the cookie the visitor sees the shop as it will look open: the header
-and the parts index show the cart; listings, car and model pages, kits (with
+and the parts index show the cart; listings, series pages, kits (with
 their «в корзину» button), add-on prices and the price filter on static pages
 are filled after load by one `POST /{locale}/parts/prices/` per page, which
 renders the same components with prices; a part page fetches its offers live

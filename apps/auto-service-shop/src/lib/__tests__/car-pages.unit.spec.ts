@@ -1,70 +1,60 @@
 import type { CarHit } from '@podbor/catalog-contract';
 
-import { nearestPlace } from '../car-pages';
+import { fittedCarKeys, nearestPlace } from '../car-pages';
 
 const make = { slug: 'bmw', name: 'BMW' };
-const model = (slug: string) => ({
-  slug,
-  name: '320d',
-  chassis: {
-    code: 'F30',
-    body_style: null,
-    series: { name: '3', translations: null, make },
-  },
-});
-const address = (id: string, modelSlug: string) => ({
+const address = (id: string, series: string) => ({
   id,
-  model: { slug: modelSlug, chassis: { series: { make: { slug: 'bmw' } } } },
-});
-const vehicleCard = (id: string, modelSlug: string): CarHit => ({
-  kind: 'vehicle',
-  make,
-  model: model(modelSlug),
-  vehicle: {
-    id,
-    slug: id,
-    engine: { code: 'B47' },
-    power_kw: null,
-    year_from: null,
-    year_to: null,
+  model: {
+    slug: `${id}-model`,
+    chassis: { series: { name: series, make: { slug: 'bmw' } } },
   },
 });
-const modelCard = (slug: string): CarHit => ({
-  kind: 'model',
+const seriesCard = (name: string): CarHit => ({
+  kind: 'series',
   make,
-  model: model(slug),
+  series: { name, translations: null },
+  model: null,
   vehicle: null,
 });
-const makeCard: CarHit = { kind: 'make', make, model: null, vehicle: null };
+const makeCard: CarHit = {
+  kind: 'make',
+  make,
+  series: null,
+  model: null,
+  vehicle: null,
+};
 
 const paged = (...cards: CarHit[]) =>
   new Map(
     cards.map((card) => [
       card.kind === 'make'
         ? `make:${card.make.slug}`
-        : card.kind === 'model'
-          ? `model:bmw/${card.model?.slug}`
-          : `vehicle:${card.vehicle?.id}`,
+        : `series:bmw/${card.series?.name.toLowerCase().replace(' ', '-')}`,
       card,
     ]),
   );
 
+describe('fittedCarKeys', () => {
+  it('names the Make, the Series, the Model and the Vehicle a Part fits', () => {
+    expect(fittedCarKeys(address('veh_1', '3 Series'))).toEqual([
+      'make:bmw',
+      'series:bmw/3-series',
+      'model:bmw/veh_1-model',
+      'vehicle:veh_1',
+    ]);
+  });
+});
+
 describe('nearestPlace', () => {
-  const one = [address('veh_1', 'f30-320d')];
+  const one = [address('veh_1', '3 Series')];
 
-  it('is the Vehicle when it has a page', () => {
-    const vehicle = vehicleCard('veh_1', 'f30-320d');
-    expect(
-      nearestPlace(one, null, paged(vehicle, modelCard('f30-320d'), makeCard)),
-    ).toBe(vehicle);
+  it('is the Series of the car when it has a page', () => {
+    const series = seriesCard('3 Series');
+    expect(nearestPlace(one, null, paged(series, makeCard))).toBe(series);
   });
 
-  it('is the Model when the Vehicle has no page', () => {
-    const f30 = modelCard('f30-320d');
-    expect(nearestPlace(one, null, paged(f30, makeCard))).toBe(f30);
-  });
-
-  it('is the Make when neither the Vehicle nor the Model has a page', () => {
+  it('is the Make when the Series has no page', () => {
     expect(nearestPlace(one, null, paged(makeCard))).toBe(makeCard);
   });
 
@@ -72,42 +62,45 @@ describe('nearestPlace', () => {
     expect(nearestPlace(one, null, paged())).toBeNull();
   });
 
-  it('is the Model several candidates share, never one of them', () => {
-    const f30 = modelCard('f30-320d');
+  it('is the Series several candidates share', () => {
+    const series = seriesCard('3 Series');
     const candidates = [
-      address('veh_1', 'f30-320d'),
-      address('veh_2', 'f30-320d'),
+      address('veh_1', '3 Series'),
+      address('veh_2', '3 Series'),
     ];
-    expect(
-      nearestPlace(
-        candidates,
-        null,
-        paged(vehicleCard('veh_1', 'f30-320d'), f30, makeCard),
-      ),
-    ).toBe(f30);
+    expect(nearestPlace(candidates, null, paged(series, makeCard))).toBe(
+      series,
+    );
   });
 
-  it('is the shared Make when the candidates sit in different Models', () => {
+  it('is the shared Make when the candidates sit in different Series', () => {
     const candidates = [
-      address('veh_1', 'f30-320d'),
-      address('veh_2', 'g20-320d'),
+      address('veh_1', '3 Series'),
+      address('veh_2', '5 Series'),
     ];
     expect(
       nearestPlace(
         candidates,
         null,
-        paged(modelCard('f30-320d'), modelCard('g20-320d'), makeCard),
+        paged(seriesCard('3 Series'), seriesCard('5 Series'), makeCard),
       ),
     ).toBe(makeCard);
   });
 
-  it('is the decoded Make when neither a Vehicle nor a Model is known', () => {
+  it('is the decoded Make when neither a Vehicle nor a Series is known', () => {
     expect(nearestPlace([], null, paged(makeCard), 'bmw')).toBe(makeCard);
     expect(nearestPlace([], null, paged(), 'bmw')).toBeNull();
   });
 
-  it('is the named Model when no candidate Vehicle is known', () => {
-    const f30 = modelCard('f30-320d');
-    expect(nearestPlace([], 'f30-320d', paged(f30), 'bmw')).toBe(f30);
+  it('is the named Series when no candidate Vehicle is known', () => {
+    const series = seriesCard('3 Series');
+    expect(
+      nearestPlace(
+        [],
+        { name: '3 Series', make: { slug: 'bmw' } },
+        paged(series),
+        'bmw',
+      ),
+    ).toBe(series);
   });
 });

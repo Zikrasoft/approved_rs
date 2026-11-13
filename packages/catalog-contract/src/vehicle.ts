@@ -120,13 +120,17 @@ export const vinFactsSchema = z.object({
 
 export type VinFacts = z.infer<typeof vinFactsSchema>;
 
-export const CAR_KINDS = ['make', 'model', 'vehicle'] as const;
+export const CAR_KINDS = ['make', 'series', 'model', 'vehicle'] as const;
 
 export type CarKind = (typeof CAR_KINDS)[number];
 
 export const carHitSchema = z.object({
   kind: z.enum(CAR_KINDS),
   make: vehicleSchema.shape.model.shape.chassis.shape.series.shape.make,
+  series: vehicleSchema.shape.model.shape.chassis.shape.series
+    .pick({ name: true, translations: true })
+    .nullable()
+    .default(null),
   model: vehicleSchema.shape.model.nullable(),
   vehicle: vehicleSchema
     .pick({

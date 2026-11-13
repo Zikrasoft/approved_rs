@@ -67,7 +67,10 @@ export const StoreSearchParts = z
     limit: z.coerce.number().int().positive().max(100).default(20),
     sort: z.enum(SEARCH_SORTS).optional(),
   })
-  .refine(({ q, category }) => q || category, 'q or category is required')
+  .refine(
+    ({ q, category, model }) => q || category || model,
+    'q, category or model is required',
+  )
   .refine(modelHasMake, MODEL_NEEDS_MAKE)
   .refine(
     ({ facets, range }) =>

@@ -4,36 +4,29 @@ import { RESERVED_PARTS_SEGMENTS } from '@podbor/catalog-contract';
 import {
   catalogueLinks,
   PathBuilder,
+  seriesPath,
   swapLocale,
-  vehiclePath,
   withLocales,
 } from './paths';
 import { SERVICE_SLUGS } from './services';
 import { SUPPORTED_LOCALES } from '@/i18n/config';
 
-describe('vehiclePath', () => {
-  const vehicle = {
-    id: 'veh_1',
-    slug: 'b47d20o0-140kw',
-    model: {
-      slug: '3-series-f30-320d',
-      chassis: { series: { make: { slug: 'bmw' } } },
-    },
-  };
-
+describe('seriesPath', () => {
   it.each(SUPPORTED_LOCALES)(
-    'puts a %s Vehicle page under its Model',
+    'puts a %s Series page under its Make',
     (locale) => {
-      expect(vehiclePath(locale, vehicle)).toBe(
-        `/${locale}/parts/bmw/3-series-f30-320d/m/b47d20o0-140kw/`,
-      );
+      expect(
+        seriesPath(locale, { name: 'Polo V', make: { slug: 'volkswagen' } }),
+      ).toBe(`/${locale}/parts/volkswagen/polo-v/`);
     },
   );
+});
 
-  it('falls back to the id for a shop that has not shipped Vehicle slugs', () => {
-    expect(vehiclePath('sr', { ...vehicle, slug: null })).toBe(
-      '/sr/parts/bmw/3-series-f30-320d/m/veh_1/',
-    );
+describe('PathBuilder.partsModelSearch', () => {
+  it('scopes the search page to one Model', () => {
+    expect(
+      PathBuilder.partsModelSearch('sr', 'volkswagen', 'polo-v-6c-10'),
+    ).toBe('/sr/parts/search/?make=volkswagen&model=polo-v-6c-10');
   });
 });
 
@@ -143,25 +136,26 @@ describe('reserved parts segments', () => {
   });
 });
 
-describe('catalogueLinks.modelCategory', () => {
-  const model = {
-    slug: 'f30-320d',
-    chassis: { series: { make: { slug: 'bmw' } } },
-  };
+describe('catalogueLinks', () => {
+  const series = { name: '3 Series', make: { slug: 'bmw' } };
   const links = catalogueLinks('ru', {
-    makes: new Set(),
-    models: new Set(),
-    categories: new Set(['bmw/f30-320d/brake-pads']),
-    vehicles: new Set(),
+    makes: new Set(['bmw']),
+    series: new Set(['bmw/3-series']),
+    categories: new Set(['bmw/3-series/brake-pads']),
   });
 
-  it('links a category the Model has a page for', () => {
-    expect(links.modelCategory(model, 'brake-pads')).toBe(
-      '/ru/parts/bmw/f30-320d/brake-pads/',
+  it('links a Series that has a page', () => {
+    expect(links.series(series)).toBe('/ru/parts/bmw/3-series/');
+    expect(links.series({ ...series, name: '5 Series' })).toBeNull();
+  });
+
+  it('links a category the Series has a page for', () => {
+    expect(links.seriesCategory(series, 'brake-pads')).toBe(
+      '/ru/parts/bmw/3-series/brake-pads/',
     );
   });
 
-  it('gives nothing for a category without a Model page', () => {
-    expect(links.modelCategory(model, 'oil-filters')).toBeNull();
+  it('gives nothing for a category without a Series page', () => {
+    expect(links.seriesCategory(series, 'oil-filters')).toBeNull();
   });
 });

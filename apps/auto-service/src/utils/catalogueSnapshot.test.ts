@@ -65,7 +65,7 @@ function syntheticCatalogue(
           code: `C${modelIndex}`,
           body_style: 'sedan',
           series: {
-            name: `Series ${modelIndex}`,
+            name: `Series ${Math.floor(modelIndex / 3)}`,
             translations: null,
             make: { slug: make, name: make.toUpperCase() },
           },
@@ -152,12 +152,17 @@ function syntheticCatalogue(
 }
 
 const outline = (hubs: MakeHubEntry[]) =>
-  hubs.map(({ make, parts, models }) => [
+  hubs.map(({ make, parts, series }) => [
     make.slug,
     parts,
-    models.map(({ model, vehicles, categories }) => [
-      model.slug,
-      vehicles.map(({ id }) => id).join(' '),
+    series.map(({ series: named, models, categories }) => [
+      named.slug,
+      models
+        .map(
+          ({ model, vehicles }) =>
+            `${model.slug}:${vehicles.map(({ id }) => id).join('+')}`,
+        )
+        .join(' '),
       categories.map(({ category, parts: modelParts }) => [
         category.slug,
         modelParts
@@ -173,14 +178,14 @@ const outline = (hubs: MakeHubEntry[]) =>
   ]);
 
 describe('makeHubsFrom', () => {
-  it('groups Parts by Model and Category, fitted before required, in a mixed catalogue', () => {
+  it('groups Parts by Series and Category, fitted before required, in a mixed catalogue', () => {
     expect(outline(makeHubsFrom(syntheticCatalogue(120)))).toMatchSnapshot();
   });
 
-  it('lists no replaced Part on a Model category page, matched by a requirement or fitted', () => {
+  it('lists no replaced Part on a Series category page, matched by a requirement or fitted', () => {
     const snapshot = syntheticCatalogue(120);
-    const listed = makeHubsFrom(snapshot).flatMap(({ models }) =>
-      models.flatMap(({ categories }) =>
+    const listed = makeHubsFrom(snapshot).flatMap(({ series }) =>
+      series.flatMap(({ categories }) =>
         categories.flatMap(({ parts }) => parts.map(({ part }) => part)),
       ),
     );

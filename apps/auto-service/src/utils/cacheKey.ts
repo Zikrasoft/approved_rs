@@ -1,12 +1,7 @@
 import { createHash } from 'node:crypto';
 import { partPageSlug } from '@podbor/catalog-contract';
 import type { PartPageEntry } from './catalogueSnapshot';
-import {
-  modelKey,
-  vehicleKey,
-  type CataloguePages,
-  type VehicleAddress,
-} from './paths';
+import { seriesKey, type CataloguePages } from './paths';
 import type { CollectionEntry } from 'astro:content';
 import { sourcingWorks } from './works';
 
@@ -21,12 +16,6 @@ export const cacheKey = (rendered: unknown): string =>
   createHash('sha256')
     .update(JSON.stringify([new Date().getFullYear(), rendered], plain))
     .digest('hex');
-
-export const linkedVehicles = (
-  places: CataloguePages,
-  vehicles: VehicleAddress[],
-): boolean[] =>
-  vehicles.map((vehicle) => places.vehicles.has(vehicleKey(vehicle)));
 
 export function partCacheKey(
   props: {
@@ -57,8 +46,9 @@ export function partCacheKey(
         bySlug.get(partPageSlug(brand.slug, normalized_value)) ?? null,
     ),
     current: props.replacements.map(({ slug }) => bySlug.get(slug) ?? null),
-    vehicles: linkedVehicles(places, vehicles),
-    models: vehicles.map(({ model }) => places.models.has(modelKey(model))),
+    series: vehicles.map(({ model }) =>
+      places.series.has(seriesKey(model.chassis.series)),
+    ),
     works: sourcingWorks(works, page).map(({ id, body, data }) => ({
       id,
       body,

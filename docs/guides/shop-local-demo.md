@@ -241,22 +241,20 @@ see new Parts on static pages.
 
 Useful pages:
 
-- Owner VIN: post `WBA35BG070N074158` in the VIN form, or open the car page it
-  redirects to, `/ru/parts/bmw/f30-320d/m/b47d20-140kw/?vin=…`. A Vehicle gets
-  a page from three fitted Parts, also as the only Vehicle of its Model; the
-  page shows the maintenance kit, the Requirements and the car facts, and
-  stores the VIN in My garage. `WBA8E31000A123456` (320i) and
-  `WBAJA31000A123456` (520d) resolve too, but fit fewer than three Parts, so
-  they have no page: the search names the car and opens the inquiry with the
-  VIN.
-- E-class: `WDD2130041A123456` (left-hand drive) and `WDD2130042A123456`
-  (right-hand drive; the redirect to
-  `/ru/parts/mercedes-benz/w213-e220d/m/om654-920-143kw/` carries
-  `?steering=right`).
+- Owner VIN: post `WBA35BG070N074158` in the VIN form; it redirects to the
+  parts search scoped to its Model,
+  `/ru/parts/search/?make=bmw&model=f30-320d&vin=…`, once the car's Series has a
+  page (three Parts across the Series), and stores the VIN in My garage.
+  `WBA8E31000A123456` (320i) and `WBAJA31000A123456` (520d) resolve too; a car
+  whose Series has no page stays on the search, which names the car and opens
+  the inquiry with the VIN.
+- E-class: `WDD2130041A123456` and `WDD2130042A123456` land on the E-class
+  parts search the same way.
 - Part page: `/ru/parts/p/mann-filter-hu816x/`; superseded number:
   `/ru/parts/p/bmw-11428507683/`; replaced Part: `/ru/parts/p/ate-13046072172/`.
-- Search: `/ru/parts/search/?q=hu816x`; model page: `/ru/parts/bmw/f30-320d/`.
-  «Оставьте заявку» on a model, car or Category page opens the parts inquiry
+- Search: `/ru/parts/search/?q=hu816x`; Series page: `/ru/parts/bmw/3-y1ho96/`
+  (the demo seeds Russian Series names, which slug with a hash; see ADR-0062).
+  «Оставьте заявку» on a Series or Category page opens the parts inquiry
   in place, its comment starting with the car and Category.
 - Filters: `/ru/parts/c/oil-filters/` and `/ru/parts/c/brake-pads/` offer
   brand, «Только в наличии» and price beside the Category's own fields; a

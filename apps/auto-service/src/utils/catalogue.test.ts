@@ -8,7 +8,6 @@ import {
   catalogueFromEnv,
   categoriesForBuild,
   categoryPagesForBuild,
-  carPagesForBuild,
   makeHubsForBuild,
   partPagesForBuild,
 } from './catalogueEnv';
@@ -20,6 +19,7 @@ import {
 } from './catalogueSnapshot';
 import { fitGroups } from './fitGroups';
 import { catalogueLinks, PathBuilder } from './paths';
+import { seriesSlugOf } from '@podbor/catalog-contract/slug';
 import { sitemapFilter } from './sitemap';
 import { GET as recordBuild } from '../pages/catalogue-build.json.ts';
 
@@ -908,15 +908,19 @@ describe('which catalogue places get a page', () => {
         category_id: oilFilters.id,
       }),
     );
-  const modelOf = (slug: string, make = VEHICLE.model.chassis.series.make) => ({
+  const modelIn = (
+    series: string,
+    slug: string,
+    make = VEHICLE.model.chassis.series.make,
+  ) => ({
     ...VEHICLE.model,
     slug,
     chassis: {
       ...VEHICLE.model.chassis,
-      series: { ...VEHICLE.model.chassis.series, make },
+      series: { ...VEHICLE.model.chassis.series, name: series, make },
     },
   });
-  const car = (id: string, model = VEHICLE.model) => ({
+  const car = (id: string, model = modelIn('3 Series', 'f30-320d')) => ({
     ...VEHICLE,
     id,
     slug: `${id}-kw`,
@@ -935,86 +939,77 @@ describe('which catalogue places get a page', () => {
     catalogueWith(
       backend({ pages, categories: [oilFilters], fitments, vehicles }),
     );
+  const bmwSeries = (name: string) => ({ name, make: { slug: 'bmw' } });
 
-  it('gives a Model a page from three distinct fitted Parts, counted across its Vehicles', async () => {
+  it('gives a Series a page from three distinct fitted Parts, counted across its Models', async () => {
     const three = filters('A', 3);
     const two = filters('B', 2);
-    const f30a = car('veh_f30a');
-    const f30b = car('veh_f30b');
-    const g20 = car('veh_g20', modelOf('g20-320d'));
+    const f30 = car('veh_f30');
+    const g20 = car('veh_g20', modelIn('3 Series', 'g20-320d'));
+    const x5 = car('veh_x5', modelIn('X5', 'e70-x5'));
     const hubs = await shopOf(
       [...three, ...two],
-      [f30a, f30b, g20],
+      [f30, g20, x5],
       [
-        ...fitting(f30a, three.slice(0, 2)),
-        ...fitting(f30b, three.slice(1)),
-        ...fitting(g20, two),
+        ...fitting(f30, three.slice(0, 2)),
+        ...fitting(g20, three.slice(2)),
+        ...fitting(x5, two),
       ],
     ).makeHubs();
 
     expect(
-      hubs.map(({ make, models }) => [
+      hubs.map(({ make, series }) => [
         make.slug,
-        models.map(({ model }) => model.slug),
+        series.map((hub) => [
+          hub.series.slug,
+          hub.models.map(({ model }) => model.slug),
+        ]),
       ]),
-    ).toEqual([['bmw', ['f30-320d']]]);
+    ).toEqual([['bmw', [['3-series', ['f30-320d', 'g20-320d']]]]]);
   });
 
-  it('gives a Vehicle a page from three Parts, alone in its Model too', async () => {
+  it('lists only the Models with a Part as modifications, each with its cars', async () => {
     const parts = filters('C', 3);
     const f30a = car('veh_f30a');
     const f30b = car('veh_f30b');
-    const f30thin = car('veh_f30thin');
-    const g20 = car('veh_g20', modelOf('g20-320d'));
-    const shop = shopOf(
+    const e90 = car('veh_e90', modelIn('3 Series', 'e90-320d'));
+    const [hub] = await shopOf(
       parts,
-      [f30a, f30b, f30thin, g20],
-      [
-        ...fitting(f30a, parts),
-        ...fitting(f30b, parts),
-        ...fitting(f30thin, parts.slice(0, 2)),
-        ...fitting(g20, parts),
-      ],
-    );
+      [f30a, f30b, e90],
+      [...fitting(f30a, parts), ...fitting(f30b, parts.slice(0, 1))],
+    ).makeHubs();
 
-    expect((await shop.carPages()).map(({ vehicle }) => vehicle.id)).toEqual([
-      'veh_f30a',
-      'veh_f30b',
-      'veh_g20',
-    ]);
     expect(
-      (await shop.makeHubs())[0].models.map(({ model }) => model.slug),
-    ).toEqual(['f30-320d', 'g20-320d']);
+      hub.series[0].models.map(({ model, vehicles }) => [
+        model.slug,
+        vehicles.map(({ id }) => id),
+      ]),
+    ).toEqual([['f30-320d', ['veh_f30a', 'veh_f30b']]]);
   });
 
-  it('links a Model or a Vehicle only where its page exists', async () => {
+  it('links a Series and its categories only where their pages exist', async () => {
     const parts = filters('E', 3);
-    const f30a = car('veh_f30a');
-    const f30b = car('veh_f30b');
-    const f30thin = car('veh_f30thin');
-    const g20 = car('veh_g20', modelOf('g20-320d'));
-    const e90 = car('veh_e90', modelOf('e90-320d'));
+    const f30 = car('veh_f30');
+    const x5 = car('veh_x5', modelIn('X5', 'e70-x5'));
     const links = catalogueLinks(
       'sr',
       cataloguePagesFrom(
         await shopOf(
           parts,
-          [f30a, f30b, f30thin, g20, e90],
-          [
-            ...fitting(f30a, parts),
-            ...fitting(f30b, parts),
-            ...fitting(f30thin, parts.slice(0, 1)),
-            ...fitting(g20, parts),
-          ],
+          [f30, x5],
+          [...fitting(f30, parts), ...fitting(x5, parts.slice(0, 1))],
         ).snapshot(),
       ),
     );
 
-    expect(links.model(f30a.model)).toBe('/sr/parts/bmw/f30-320d/');
-    expect(links.model(e90.model)).toBeNull();
-    expect(links.vehicle(f30a)).toBe('/sr/parts/bmw/f30-320d/m/veh_f30a-kw/');
-    expect(links.vehicle(f30thin)).toBeNull();
-    expect(links.vehicle(g20)).toBe('/sr/parts/bmw/g20-320d/m/veh_g20-kw/');
+    expect(links.series(bmwSeries('3 Series'))).toBe('/sr/parts/bmw/3-series/');
+    expect(links.series(bmwSeries('X5'))).toBeNull();
+    expect(links.seriesCategory(bmwSeries('3 Series'), 'oil-filters')).toBe(
+      '/sr/parts/bmw/3-series/oil-filters/',
+    );
+    expect(
+      links.seriesCategory(bmwSeries('3 Series'), 'brake-pads'),
+    ).toBeNull();
   });
 
   const batteries = category('batteries', 'Аккумуляторы');
@@ -1040,9 +1035,9 @@ describe('which catalogue places get a page', () => {
     ],
   });
 
-  it('gives a car its pages from two Requirement matches in a Category, and no page or link from one', async () => {
-    const one = needing('veh_one', modelOf('g22-car'), 90);
-    const two = needing('veh_two', modelOf('g23-car'), 80);
+  it('gives a Series its page from two Requirement matches in a Category, and its category page only from three', async () => {
+    const one = needing('veh_one', modelIn('G22', 'g22-car'), 90);
+    const two = needing('veh_two', modelIn('G23', 'g23-car'), 80);
     const snapshot = await catalogueWith(
       backend({
         pages: [battery('A70', 70), battery('A80', 80), battery('A95', 95)],
@@ -1053,30 +1048,22 @@ describe('which catalogue places get a page', () => {
     const links = catalogueLinks('sr', cataloguePagesFrom(snapshot));
     const hubs = makeHubsFrom(snapshot);
 
-    expect(links.model(one.model)).toBeNull();
-    expect(links.vehicle(one)).toBeNull();
-    expect(links.model(two.model)).toBe('/sr/parts/bmw/g23-car/');
-    expect(links.vehicle(two)).toBe('/sr/parts/bmw/g23-car/m/veh_two-kw/');
+    expect(links.series(bmwSeries('G22'))).toBeNull();
+    expect(links.series(bmwSeries('G23'))).toBe('/sr/parts/bmw/g23/');
     expect(
-      hubs.flatMap(({ models }) =>
-        models.map(({ model, categories }) => [
-          model.slug,
-          categories.map(({ category, parts }) => [
-            category.slug,
-            parts.map(({ part }) => part.id),
-          ]),
-        ]),
+      hubs.flatMap(({ series }) =>
+        series.map((hub) => [hub.series.slug, hub.categories.length]),
       ),
-    ).toEqual([['g23-car', [['batteries', ['part_A80', 'part_A95']]]]]);
+    ).toEqual([['g23', 0]]);
     expect(hubs[0].parts).toBe(2);
   });
 
-  it('lists a Model category from one fitted Part, but from Requirement matches only when two match', async () => {
+  it('lists a Series category from three Parts, fitted or matched', async () => {
     const parts = filters('R', 3);
-    const fitted = needing('veh_fitted', modelOf('f31-car'), 90);
+    const fitted = needing('veh_fitted', modelIn('F31', 'f31-car'), 70);
     const hubs = await catalogueWith(
       backend({
-        pages: [...parts, battery('B95', 95)],
+        pages: [...parts, battery('B95', 95), battery('B80', 80)],
         categories: [oilFilters, batteries],
         fitments: fitting(fitted, parts),
         vehicles: [fitted],
@@ -1084,18 +1071,18 @@ describe('which catalogue places get a page', () => {
     ).makeHubs();
 
     expect(
-      hubs[0].models[0].categories.map(({ category }) => category.slug),
+      hubs[0].series[0].categories.map(({ category }) => category.slug),
     ).toEqual(['oil-filters']);
-    expect(hubs[0].parts).toBe(3);
+    expect(hubs[0].parts).toBe(5);
   });
 
-  it('keeps a Make without a Model page off, and names the rest in display-name order', async () => {
+  it('keeps a Make without a Series page off, and names the rest in display-name order', async () => {
     const parts = filters('D', 3);
     const audi = { slug: 'audi', name: 'Audi' };
     const mini = { slug: 'mini', name: 'MINI' };
     const bmwCar = car('veh_bmw');
-    const audiCar = car('veh_audi', modelOf('b9-a4', audi));
-    const miniCar = car('veh_mini', modelOf('f56-cooper', mini));
+    const audiCar = car('veh_audi', modelIn('A4', 'b9-a4', audi));
+    const miniCar = car('veh_mini', modelIn('Cooper', 'f56-cooper', mini));
     const hubs = await shopOf(
       parts,
       [bmwCar, miniCar, audiCar],
@@ -1130,7 +1117,7 @@ describe('catalogue.makeHubs', () => {
       }),
     );
 
-  it('builds a Model x Category page only for a Category with a match', async () => {
+  it('builds a Series x Category page only for a Category with three Parts', async () => {
     const hubs = await catalogueWith(
       backend({
         pages: filters,
@@ -1141,11 +1128,11 @@ describe('catalogue.makeHubs', () => {
     ).makeHubs();
 
     expect(
-      hubs.map(({ make, models }) => [
+      hubs.map(({ make, series }) => [
         make.slug,
-        models.map(({ model, categories }) => [
-          model.slug,
-          categories.map(({ category, parts }) => [
+        series.map((hub) => [
+          hub.series.slug,
+          hub.categories.map(({ category, parts }) => [
             category.slug,
             parts.map(({ pages }) => pages.map(({ slug }) => slug)),
           ]),
@@ -1156,7 +1143,7 @@ describe('catalogue.makeHubs', () => {
         'bmw',
         [
           [
-            'f30-320d',
+            seriesSlugOf('3 серия'),
             [
               [
                 'oil-filters',
@@ -1173,7 +1160,7 @@ describe('catalogue.makeHubs', () => {
     ]);
   });
 
-  it('keeps only the Model own cars among the fits on its pages', async () => {
+  it('keeps the fits of every Model of the Series on its pages', async () => {
     const hubs = await catalogueWith(
       backend({
         pages: filters,
@@ -1183,11 +1170,9 @@ describe('catalogue.makeHubs', () => {
       }),
     ).makeHubs();
 
-    const [f30, g20] = hubs[0].models;
-    expect(f30.categories[0].parts[0].fits.map(({ id }) => id)).toEqual([
+    const [series] = hubs[0].series;
+    expect(series.categories[0].parts[0].fits.map(({ id }) => id)).toEqual([
       'fit_veh_1_part_HU816X',
-    ]);
-    expect(g20.categories[0].parts[0].fits.map(({ id }) => id)).toEqual([
       'fit_veh_2_part_HU816X',
     ]);
   });
@@ -1207,7 +1192,6 @@ describe('catalogue.makeHubs', () => {
 
   it('builds no hubs when no backend is configured', async () => {
     expect(await makeHubsForBuild({})).toEqual([]);
-    expect(await carPagesForBuild({})).toEqual([]);
   });
 });
 
@@ -1313,7 +1297,6 @@ describe('the deploy build', () => {
     await partPagesForBuild(env);
     await categoriesForBuild(env);
     await categoryPagesForBuild(env);
-    await carPagesForBuild(env);
     await makeHubsForBuild(env);
 
     const reads = (path: string) =>
@@ -1334,7 +1317,7 @@ describe('the deploy build', () => {
           .length;
 
       await Promise.all([partPagesForBuild(env), makeHubsForBuild(env)]);
-      await carPagesForBuild(env);
+      await categoryPagesForBuild(env);
       expect(reads()).toBe(1);
 
       vi.advanceTimersByTime(DEV_SNAPSHOT_FRESH_MS);
@@ -1658,9 +1641,10 @@ describe('catalogueFromEnv', () => {
 describe('catalogue.resolveVin', () => {
   it('names the car a VIN resolved to and its nearest place with a page', async () => {
     const place = {
-      kind: 'model',
+      kind: 'series',
       make: { slug: 'bmw', name: 'BMW' },
-      model: VEHICLE.model,
+      series: { name: '3 серия', translations: null },
+      model: null,
       vehicle: null,
     };
     const fetch = answer({
@@ -1911,6 +1895,7 @@ describe('catalogue.search', () => {
     const car = {
       kind: 'make',
       make: { slug: 'bmw', name: 'BMW' },
+      series: null,
       model: null,
       vehicle: null,
     };
@@ -2193,10 +2178,16 @@ describe('Requirements and the maintenance kit', () => {
     expect(cars('mann-filter-hu816x')).toEqual([[], ['veh_1']]);
   });
 
-  it('builds a Model x Category page from Requirement matches alone, once two match', async () => {
+  it('builds a Series x Category page from Requirement matches alone, once three match', async () => {
     const secondOil = brandNumber('motul', '8100', {
       id: 'part_motul',
       name: 'Масло 5W-30 Motul',
+      category_id: engineOil.id,
+      attributes: { approvals: ['bmw-ll-04'] },
+    });
+    const thirdOil = brandNumber('castrol', 'EDGE', {
+      id: 'part_castrol',
+      name: 'Масло 5W-30 Castrol',
       category_id: engineOil.id,
       attributes: { approvals: ['bmw-ll-04'] },
     });
@@ -2212,7 +2203,7 @@ describe('Requirements and the maintenance kit', () => {
     ];
     const [hub] = await catalogueWith(
       backend({
-        pages: [approvedOil, otherOil, secondOil, ...fitted],
+        pages: [approvedOil, otherOil, secondOil, thirdOil, ...fitted],
         categories: [filters, engineOil],
         fitments: fitted.map(({ part }) => fitment(`fit_${part.id}`, part.id)),
         vehicles: [b47],
@@ -2220,7 +2211,7 @@ describe('Requirements and the maintenance kit', () => {
     ).makeHubs();
 
     expect(
-      hub.models[0].categories.map(({ category, parts }) => [
+      hub.series[0].categories.map(({ category, parts }) => [
         category.slug,
         parts.map(({ pages, fits }) => [pages[0].slug, fits.length]),
       ]),
@@ -2238,6 +2229,7 @@ describe('Requirements and the maintenance kit', () => {
         [
           ['liqui-moly-20646', 0],
           ['motul-8100', 0],
+          ['castrol-edge', 0],
         ],
       ],
     ]);

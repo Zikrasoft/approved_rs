@@ -2,14 +2,14 @@ import {
   normalizePartNumber,
   partNumberQuery,
   type CarHit,
-  type VinFacts,
+  type Vehicle,
 } from '@podbor/catalog-contract';
 import { vinOf, vinText } from '@podbor/lead-crm/vin';
 import type { Locale } from '@/i18n/config';
-import { carName, vehicleVariant } from './carName';
+import { carName, seriesName, vehicleVariant } from './carName';
 import type { SearchOutcome } from './catalogue';
-import { carFactsQuery } from './carFacts';
-import { PathBuilder, vehiclePath } from './paths';
+import { VIN_PARAM } from './carFacts';
+import { PathBuilder, seriesPath } from './paths';
 
 export type SearchIntent = { kind: 'vin'; vin: string } | { kind: 'query' };
 
@@ -28,7 +28,11 @@ export const nearVin = (q: string): boolean => {
 };
 
 type ResolvedVin =
-  | { kind: 'vehicle'; facts: VinFacts; place: CarHit | null }
+  | {
+      kind: 'vehicle';
+      vehicle: Pick<Vehicle, 'model'>;
+      place: CarHit | null;
+    }
   | { kind: 'inquiry'; place: CarHit | null };
 
 export const vinDestination = (
@@ -40,10 +44,15 @@ export const vinDestination = (
   if (!place || place.kind === 'make') {
     return null;
   }
-  const { href } = carLink(place, locale);
-  return place.kind === 'vehicle' && outcome.kind === 'vehicle'
-    ? `${href}${carFactsQuery(outcome.facts, vin)}`
-    : href;
+  if (outcome.kind === 'inquiry') {
+    return carLink(place, locale).href;
+  }
+  const { model } = outcome.vehicle;
+  return `${PathBuilder.partsModelSearch(
+    locale,
+    model.chassis.series.make.slug,
+    model.slug,
+  )}&${new URLSearchParams({ [VIN_PARAM]: vin })}`;
 };
 
 type PartResult = SearchOutcome['results'][number];
@@ -74,23 +83,22 @@ export const missingNumber = (q: string, results: PartResult[]): boolean => {
 export type SearchLink = { href: string; label: string; detail?: string };
 
 export const carLink = (
-  { kind, make, model, vehicle }: CarHit,
+  { make, series, model, vehicle }: CarHit,
   locale: Locale,
 ): SearchLink => {
+  if (series) {
+    return {
+      href: seriesPath(locale, { name: series.name, make }),
+      label: seriesName(series, make, locale),
+    };
+  }
   if (!model) {
     return { href: PathBuilder.partsMake(locale, make.slug), label: make.name };
   }
-  const label = carName(model, locale);
-  if (kind === 'model' || !vehicle) {
-    return {
-      href: PathBuilder.partsModel(locale, make.slug, model.slug),
-      label,
-    };
-  }
   return {
-    href: vehiclePath(locale, { ...vehicle, model }),
-    label,
-    detail: vehicleVariant(vehicle, locale),
+    href: PathBuilder.partsModelSearch(locale, make.slug, model.slug),
+    label: carName(model, locale),
+    ...(vehicle && { detail: vehicleVariant(vehicle, locale) }),
   };
 };
 
@@ -102,31 +110,11 @@ export type PartLink = SearchLink & {
 
 export type Suggestions = { cars: SearchLink[]; parts: PartLink[] };
 
-export const carLinks = (
-  cars: CarHit[],
-  locale: Locale,
-  allModifications: string,
-): SearchLink[] => {
-  const listedVehicles = (car: CarHit) =>
-    cars.filter(
-      (other) =>
-        other.kind === 'vehicle' && other.model?.slug === car.model?.slug,
-    ).length;
-  return cars.flatMap((car) => {
-    const link = carLink(car, locale);
-    if (car.kind !== 'model') return [link];
-    const listed = listedVehicles(car);
-    if (listed === 1) return [];
-    return [listed > 1 ? { ...link, detail: allModifications } : link];
-  });
-};
-
 export const suggestionsFrom = (
   { cars, results }: Pick<SearchOutcome, 'cars' | 'results'>,
   locale: Locale,
-  allModifications: string,
 ): Suggestions => ({
-  cars: carLinks(cars, locale, allModifications),
+  cars: cars.map((car) => carLink(car, locale)),
   parts: results.map((result) => ({
     href: PathBuilder.partNumber(locale, result.slug),
     label: `${result.brand.name} ${result.value}`,
@@ -139,7 +127,6 @@ export const suggestionsFrom = (
 type ListingScope = {
   locale: Locale;
   model: SearchOutcome['model'];
-  modelName: string | null;
   category: SearchOutcome['category'];
   pages: SearchOutcome['scope_pages'];
   searchLabel: string;
@@ -148,39 +135,31 @@ type ListingScope = {
 export const listingCrumbs = ({
   locale,
   model,
-  modelName,
   category,
   pages,
   searchLabel,
 }: ListingScope): SearchLink[] => {
-  const make = model?.chassis.series.make;
-  const paged = model && pages?.model ? model : null;
+  const series = model?.chassis.series;
   return [
-    ...(make && pages?.make
-      ? [{ href: PathBuilder.partsMake(locale, make.slug), label: make.name }]
-      : []),
-    ...(paged && modelName
+    ...(series && pages?.make
       ? [
           {
-            href: PathBuilder.partsModel(
-              locale,
-              paged.chassis.series.make.slug,
-              paged.slug,
-            ),
-            label: modelName,
+            href: PathBuilder.partsMake(locale, series.make.slug),
+            label: series.make.name,
+          },
+        ]
+      : []),
+    ...(series && pages?.series
+      ? [
+          {
+            href: seriesPath(locale, series),
+            label: seriesName(series, series.make, locale),
           },
         ]
       : []),
     category
       ? {
-          href: paged
-            ? PathBuilder.partsModelCategory(
-                locale,
-                paged.chassis.series.make.slug,
-                paged.slug,
-                category.slug,
-              )
-            : PathBuilder.partsCategory(locale, category.slug),
+          href: PathBuilder.partsCategory(locale, category.slug),
           label: category.name,
         }
       : { href: PathBuilder.partsSearch(locale), label: searchLabel },

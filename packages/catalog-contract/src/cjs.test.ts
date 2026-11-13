@@ -33,7 +33,10 @@ describe('CommonJS build', { timeout: 30_000 }, () => {
   it('serves the place page rules to require()', () => {
     const contract = require('@podbor/catalog-contract');
     expect(contract.MIN_PARTS_FOR_PAGE).toBe(3);
-    expect(contract.modelHasPage({ parts: 3, required: 0 })).toBe(true);
+    expect(contract.seriesHasPage({ parts: 3, required: 0 })).toBe(true);
+    expect(
+      require('@podbor/catalog-contract/slug').seriesSlugOf('Polo V'),
+    ).toBe('polo-v');
   });
 
   it('serves the attributes module to require()', () => {

@@ -1,32 +1,21 @@
 import { describe, expect, it } from 'vitest';
-import type { MakeHubEntry, ModelHubEntry } from './catalogueSnapshot';
+import type { MakeHubEntry, SeriesHubEntry } from './catalogueSnapshot';
 import { categoryCars } from './categoryCars';
 
-const model = (make: string, slug: string, name: string, code: string) =>
-  ({
-    slug,
-    name,
-    chassis: {
-      code,
-      series: {
-        name: make === 'bmw' ? '3 серия' : 'E-Класс',
-        translations: null,
-        make: { slug: make, name: make === 'bmw' ? 'BMW' : 'Mercedes-Benz' },
-      },
-    },
-  }) as unknown as ModelHubEntry['model'];
+const series = (name: string, slug: string) =>
+  ({ name, slug, translations: null }) as SeriesHubEntry['series'];
 
 const hub = (
   make: string,
-  models: [ModelHubEntry['model'], string[]][],
+  entries: [SeriesHubEntry['series'], string[]][],
 ): MakeHubEntry =>
   ({
     make: { slug: make, name: make === 'bmw' ? 'BMW' : 'Mercedes-Benz' },
     parts: 1,
-    models: models.map(([entry, categories]) => ({
+    series: entries.map(([entry, categories]) => ({
       make: { slug: make },
-      model: entry,
-      vehicles: [],
+      series: entry,
+      models: [],
       categories: categories.map((slug) => ({
         category: { slug },
         parts: [],
@@ -34,36 +23,36 @@ const hub = (
     })),
   }) as unknown as MakeHubEntry;
 
-const f30i = model('bmw', 'f30-320i', '320i', 'F30');
-const f30d = model('bmw', 'f30-320d', '320d', 'F30');
-const w213 = model('mercedes-benz', 'w213-e220d', 'E 220 d', 'W213');
+const three = series('3 Series', '3-series');
+const five = series('5 Series', '5-series');
+const eClass = series('E-Class', 'e-class');
 
 describe('categoryCars', () => {
   const hubs = [
     hub('bmw', [
-      [f30i, ['batteries']],
-      [f30d, ['batteries', 'oil-filters']],
+      [three, ['batteries']],
+      [five, ['batteries', 'oil-filters']],
     ]),
-    hub('mercedes-benz', [[w213, ['oil-filters']]]),
+    hub('mercedes-benz', [[eClass, ['oil-filters']]]),
   ];
 
-  it('lists each make with the models whose model-category page the category has', () => {
+  it('lists each make with the series whose series-category page the category has', () => {
     expect(categoryCars(hubs, 'oil-filters')).toEqual([
-      { make: { slug: 'bmw', name: 'BMW' }, models: [f30d] },
+      { make: { slug: 'bmw', name: 'BMW' }, series: [five] },
       {
         make: { slug: 'mercedes-benz', name: 'Mercedes-Benz' },
-        models: [w213],
+        series: [eClass],
       },
     ]);
   });
 
-  it('sorts the models of a make by name and leaves out a make with none', () => {
+  it('keeps the series in the order of the make page and leaves out a make with none', () => {
     expect(categoryCars(hubs, 'batteries')).toEqual([
-      { make: { slug: 'bmw', name: 'BMW' }, models: [f30d, f30i] },
+      { make: { slug: 'bmw', name: 'BMW' }, series: [three, five] },
     ]);
   });
 
-  it('offers no car for a category no model has a page in', () => {
+  it('offers no car for a category no series has a page in', () => {
     expect(categoryCars(hubs, 'body-parts')).toEqual([]);
   });
 });

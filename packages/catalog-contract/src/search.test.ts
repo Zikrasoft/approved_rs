@@ -142,23 +142,33 @@ describe('searchResponseSchema', () => {
     expect(searchResponseSchema.parse(older).model).toBeNull();
   });
 
-  it('names the Makes, Models and Vehicles the query matched', () => {
+  it('names the Makes, Series, Models and Vehicles the query matched', () => {
     const cars = [
       {
         kind: 'make',
         make: { slug: 'bmw', name: 'BMW' },
+        series: null,
+        model: null,
+        vehicle: null,
+      },
+      {
+        kind: 'series',
+        make: { slug: 'bmw', name: 'BMW' },
+        series: { name: 'X3', translations: null },
         model: null,
         vehicle: null,
       },
       {
         kind: 'model',
         make: { slug: 'bmw', name: 'BMW' },
+        series: null,
         model: bmwX3,
         vehicle: null,
       },
       {
         kind: 'vehicle',
         make: { slug: 'bmw', name: 'BMW' },
+        series: null,
         model: bmwX3,
         vehicle: {
           id: 'veh_1',
@@ -186,6 +196,7 @@ describe('searchResponseSchema', () => {
       {
         kind: 'make',
         make: { slug: 'bmw', name: 'BMW' },
+        series: null,
         model: null,
         vehicle: null,
       },
@@ -195,11 +206,20 @@ describe('searchResponseSchema', () => {
     ]);
   });
 
-  it('says whether the scoped Model and its Make have a page', () => {
-    const scope_pages = { model: false, make: true };
+  it("says whether the scoped Model's Series and its Make have a page", () => {
+    const scope_pages = { make: true, series: false };
     expect(
       searchResponseSchema.parse({ ...response, scope_pages }).scope_pages,
     ).toEqual(scope_pages);
+  });
+
+  it('reads scope pages from a shop that predates Series pages as no Series page', () => {
+    expect(
+      searchResponseSchema.parse({
+        ...response,
+        scope_pages: { model: true, make: true },
+      }).scope_pages,
+    ).toEqual({ make: true, series: null });
   });
 
   it('reads a response from a backend that predates scope pages as not knowing', () => {

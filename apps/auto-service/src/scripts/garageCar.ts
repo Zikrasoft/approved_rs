@@ -8,6 +8,7 @@ const garageCarSchema = z.object({
   vin: z.string(),
   car: z.string(),
   make: z.optional(z.string()),
+  series: z.optional(z.string()),
   model: z.optional(z.string()),
 });
 

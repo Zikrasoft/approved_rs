@@ -1,0 +1,127 @@
+---
+import LinkRow from '@/components/LinkRow.astro';
+import { translated } from '@podbor/catalog-contract';
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import VinInquiryCard from '@/components/VinInquiryCard.astro';
+import InquiryLink from '@/components/InquiryLink.astro';
+import PopularParts from '@/components/PopularParts.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { modelName, seriesName, vehicleVariant } from '@/utils/carName';
+import { makeHubsForBuild } from '@/utils/catalogueEnv';
+import { cacheKey } from '@/utils/cacheKey';
+import type { SeriesHubEntry } from '@/utils/catalogueSnapshot';
+import { paragraphs } from '@podbor/site-kit';
+import { PathBuilder, withLocales } from '@/utils/paths';
+
+export async function getStaticPaths() {
+  const hubs = await makeHubsForBuild();
+  return withLocales(
+    hubs.flatMap((hub) =>
+      hub.series.map((series) => ({
+        params: { make: hub.make.slug, series: series.series.slug },
+        props: { hub: series },
+        cacheKey: cacheKey(series),
+      })),
+    ),
+  );
+}
+
+const { hub } = Astro.props as { hub: SeriesHubEntry };
+const locale = localeFrom(Astro.url.pathname);
+const site = content(locale).site;
+const copy = content(locale).partsCar.hubs.model;
+const { make, series } = hub;
+const name = seriesName(series, make, locale);
+const empty = hub.categories.length === 0;
+---
+
+<Shell
+  title={copy.metaTitle.replace('{model}', name)}
+  description={copy.metaDescription.replace('{model}', name)}
+>
+  <PageHero
+    actions={false}
+    eyebrow={copy.eyebrow}
+    heading={name}
+    crumbs={[
+      { href: PathBuilder.parts(locale), label: site.nav.parts },
+      { href: PathBuilder.partsMake(locale, make.slug), label: make.name },
+      {
+        href: PathBuilder.partsSeries(locale, make.slug, series.slug),
+        label: name,
+      },
+    ]}
+  />
+
+  <section
+    class:list={[
+      'wrap grid gap-6 py-band md:py-band-lg',
+      empty && 'lg:grid-cols-[1.2fr_1fr] lg:items-start',
+    ]}
+  >
+    <div class="flex flex-col gap-8">
+      <PopularParts
+        pages={hub.categories.flatMap(({ parts }) =>
+          parts.flatMap(({ pages }) => pages),
+        )}
+        car={name}
+      />
+      <div class="flex flex-col gap-3">
+        <h2 class="text-section">{copy.categoriesHeading}</h2>
+        {
+          !empty ? (
+            <ul class="card divide-y divide-line">
+              {hub.categories.map(({ category }) => {
+                const [lead] = paragraphs(translated(category, 'text', locale));
+                return (
+                  <LinkRow
+                    href={PathBuilder.partsSeriesCategory(
+                      locale,
+                      make.slug,
+                      series.slug,
+                      category.slug,
+                    )}
+                    label={translated(category, 'name', locale)}
+                    detail={lead}
+                  />
+                );
+              })}
+            </ul>
+          ) : (
+            <p class="max-w-2xl text-muted">{copy.noCategories}</p>
+          )
+        }
+        {!empty && <InquiryLink topic={name} />}
+      </div>
+
+      {
+        hub.models.length > 0 && (
+          <div class="flex flex-col gap-3">
+            <h2 class="text-section">{copy.carsHeading}</h2>
+            <p class="max-w-2xl text-sm text-ink-2">{copy.carsLead}</p>
+            <ul class="card divide-y divide-line">
+              {hub.models.map(({ model, vehicles }) => (
+                <LinkRow
+                  href={PathBuilder.partsModelSearch(
+                    locale,
+                    make.slug,
+                    model.slug,
+                  )}
+                  label={modelName(model, locale)}
+                  detail={vehicles
+                    .map((vehicle) => vehicleVariant(vehicle, locale))
+                    .filter(Boolean)
+                    .join('; ')}
+                />
+              ))}
+            </ul>
+          </div>
+        )
+      }
+    </div>
+
+    {empty && <VinInquiryCard comment={`${name}: `} />}
+  </section>
+</Shell>

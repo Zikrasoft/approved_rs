@@ -2,7 +2,7 @@
 import SelectField from './SelectField.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
-import { modelName } from '@/utils/carName';
+import { translated } from '@podbor/catalog-contract';
 import type { CategoryCar } from '@/utils/categoryCars';
 import { PathBuilder } from '@/utils/paths';
 
@@ -19,10 +19,10 @@ const copy = content(locale).pages.partsInquiry.category.car;
 
 <car-picker
   class:list={['card block p-4 sm:p-5', className]}
-  data-href={PathBuilder.partsModelCategory(
+  data-href={PathBuilder.partsSeriesCategory(
     locale,
     '{make}',
-    '{model}',
+    '{series}',
     category,
   )}
 >
@@ -43,16 +43,18 @@ const copy = content(locale).pages.partsInquiry.category.car;
       {cars.map(({ make }) => <option value={make.slug}>{make.name}</option>)}
     </SelectField>
     <SelectField
-      name="model"
+      name="series"
       label={copy.model}
       placeholder={copy.modelPlaceholder}
       required
     >
       {
-        cars.map(({ make, models }) => (
+        cars.map(({ make, series }) => (
           <optgroup label={make.name} data-make={make.slug}>
-            {models.map((model) => (
-              <option value={model.slug}>{modelName(model, locale)}</option>
+            {series.map((entry) => (
+              <option value={entry.slug}>
+                {translated(entry, 'name', locale)}
+              </option>
             ))}
           </optgroup>
         ))

@@ -39,7 +39,7 @@ export const LISTED_PART_COUNTS = `
       and pn.deleted_at is null and pn.listed
     where pi.deleted_at is null
   ), places as (
-    select v.model_id, x.vehicle_id, x.part_id, x.category_id, x.fitted
+    select c.series_id, x.part_id, x.category_id, x.fitted
     from (
       select vehicle_id, part_id, null::text as category_id, true as fitted
       from fitment where deleted_at is null
@@ -50,28 +50,19 @@ export const LISTED_PART_COUNTS = `
     ) x
     join listed l on l.part_id = x.part_id
     join vehicle v on v.id = x.vehicle_id and v.deleted_at is null
-  ), vehicle_matches as (
-    select vehicle_id, category_id, count(distinct part_id) as matches
-    from places where not fitted group by vehicle_id, category_id
-  ), model_matches as (
-    select model_id, category_id, count(distinct part_id) as matches
-    from places where not fitted group by model_id, category_id
+    join vehicle_model m on m.id = v.model_id and m.deleted_at is null
+    join chassis c on c.id = m.chassis_id and c.deleted_at is null
+  ), series_matches as (
+    select series_id, category_id, count(distinct part_id) as matches
+    from places where not fitted group by series_id, category_id
   )
-  select p.model_id, p.vehicle_id,
+  select p.series_id,
     (count(distinct p.part_id) filter (where p.fitted or m.matches >= ?))::int as parts,
     coalesce(max(m.matches), 0)::int as required
   from places p
-  left join vehicle_matches m on not p.fitted
-    and m.vehicle_id = p.vehicle_id and m.category_id = p.category_id
-  group by p.model_id, p.vehicle_id
-  union all
-  select p.model_id, null,
-    (count(distinct p.part_id) filter (where p.fitted or m.matches >= ?))::int,
-    coalesce(max(m.matches), 0)::int
-  from places p
-  left join model_matches m on not p.fitted
-    and m.model_id = p.model_id and m.category_id = p.category_id
-  group by p.model_id`;
+  left join series_matches m on not p.fitted
+    and m.series_id = p.series_id and m.category_id = p.category_id
+  group by p.series_id`;
 
 export const UNRESOLVED_VIN_CODES = `
   with hits as (

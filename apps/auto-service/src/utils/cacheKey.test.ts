@@ -2,13 +2,16 @@ import { describe, expect, it } from 'vitest';
 import type { PartPageEntry } from './catalogueSnapshot';
 import type { CataloguePages } from './paths';
 import type { Work } from './works';
-import { cacheKey, linkedVehicles, partCacheKey } from './cacheKey';
+import { cacheKey, partCacheKey } from './cacheKey';
 
 const vehicle = (slug: string) =>
   ({
     id: slug,
     slug,
-    model: { slug: 'x5', chassis: { series: { make: { slug: 'bmw' } } } },
+    model: {
+      slug: 'x5',
+      chassis: { series: { name: 'X5', make: { slug: 'bmw' } } },
+    },
   }) as unknown as PartPageEntry['fits'][number]['vehicle'];
 
 const part = (value: string, overrides: Partial<PartPageEntry> = {}) =>
@@ -40,11 +43,10 @@ const work = (id: string, number: string, title = 'Замена фильтра')
     },
   }) as unknown as Work;
 
-const places = (vehicles: string[]): CataloguePages => ({
+const places = (series: string[]): CataloguePages => ({
   makes: new Set(['bmw']),
-  models: new Set(['bmw/x5']),
+  series: new Set(series),
   categories: new Set(),
-  vehicles: new Set(vehicles),
 });
 
 const keyFor = (
@@ -52,7 +54,7 @@ const keyFor = (
   {
     others = [] as PartPageEntry[],
     works = [] as Work[],
-    vehicles = ['bmw/x5/e70'],
+    series = ['bmw/x5'],
     replacements = [] as { slug: string }[],
   } = {},
 ) =>
@@ -60,7 +62,7 @@ const keyFor = (
     { page, successor: null, replacements },
     {
       bySlug: new Map([page, ...others].map((entry) => [entry.slug, entry])),
-      places: places(vehicles),
+      places: places(series),
       works,
     },
   );
@@ -81,14 +83,6 @@ describe('cacheKey', () => {
       cacheKey(new Map([['a', 2]])),
     );
     expect(cacheKey(new Set(['a']))).not.toBe(cacheKey(new Set(['b'])));
-  });
-});
-
-describe('linkedVehicles', () => {
-  it('says which vehicles have a page', () => {
-    expect(
-      linkedVehicles(places(['bmw/x5/e70']), [vehicle('e70'), vehicle('f15')]),
-    ).toEqual([true, false]);
   });
 });
 
@@ -143,8 +137,8 @@ describe('partCacheKey', () => {
     );
   });
 
-  it('changes when a fitted vehicle gains or loses its page', () => {
-    expect(keyFor(page)).not.toBe(keyFor(page, { vehicles: [] }));
+  it('changes when the Series of a fitted vehicle gains or loses its page', () => {
+    expect(keyFor(page)).not.toBe(keyFor(page, { series: [] }));
   });
 
   it('changes when a Work that sourced the part changes, and only then', () => {

@@ -10,6 +10,7 @@ type FixtureOptions = {
   identifierType?: VehicleIdentifierType;
   steering?: SteeringSide | null;
   typeCode?: string;
+  seriesName?: string;
   modelSlug?: string;
   modelName?: string;
   chassisCode?: string;
@@ -31,6 +32,7 @@ export const createVehicleFixture = async (
     identifierType = 'bmw-type-code',
     steering = 'left',
     typeCode = '35BG',
+    seriesName = '3 серия',
     modelSlug = 'f30-320d',
     modelName = '320d',
     chassisCode = 'F30',
@@ -45,11 +47,11 @@ export const createVehicleFixture = async (
     () => catalog.createMakes(makeFields),
   );
   const series = await firstOrCreate(
-    catalog.listSeries({ make_id: make.id, name: '3 серия' }),
+    catalog.listSeries({ make_id: make.id, name: seriesName }),
     () =>
       catalog.createSeries({
         make_id: make.id,
-        name: '3 серия',
+        name: seriesName,
         translations: { sr: { name: 'Serija 3' }, en: { name: '3 Series' } },
       }),
   );

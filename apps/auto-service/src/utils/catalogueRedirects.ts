@@ -40,35 +40,18 @@ const route = (src: string, location: string): RedirectRoute => ({
 
 const pathOf = (locale: Locale, to: CataloguePlace) => {
   if (to.part) return PathBuilder.partNumber(locale, to.part);
-  if (to.make && to.model && to.vehicle) {
-    return PathBuilder.partsVehicle(locale, to.make, to.model, to.vehicle);
-  }
-  if (to.make && to.model) {
-    return PathBuilder.partsModel(locale, to.make, to.model);
-  }
   if (to.make) return PathBuilder.partsMake(locale, to.make);
   if (to.category) return PathBuilder.partsCategory(locale, to.category);
   return PathBuilder.parts(locale);
 };
 
-function withPage(
+const withPage = (
   pages: CataloguePages,
   place: CataloguePlace,
-): CataloguePlace {
-  const { part, make, model, vehicle } = place;
-  if (part || !make) return place;
-  if (model && vehicle) {
-    return pages.vehicles.has(placeKey(make, model, vehicle))
-      ? place
-      : withPage(pages, { ...place, vehicle: null });
-  }
-  if (model) {
-    return pages.models.has(placeKey(make, model))
-      ? place
-      : withPage(pages, { ...place, model: null });
-  }
-  return pages.makes.has(make) ? place : { ...place, make: null };
-}
+): CataloguePlace =>
+  place.part || !place.make || pages.makes.has(place.make)
+    ? place
+    : { ...place, make: null };
 
 function localeRoutes(
   locale: Locale,
@@ -80,22 +63,12 @@ function localeRoutes(
   if (from.part) {
     return [route(exactly(PathBuilder.partNumber(locale, from.part)), target)];
   }
-  if (from.make && from.model && from.vehicle) {
-    const old = PathBuilder.partsVehicle(
-      locale,
-      from.make,
-      from.model,
-      from.vehicle,
-    );
-    return [route(exactly(old), target)];
-  }
-  if (from.make && from.model) {
-    const old = PathBuilder.partsModel(locale, from.make, from.model);
-    return [route(under(old), to.model ? `${target}$1` : target)];
+  if (from.model || from.vehicle) {
+    return [];
   }
   if (from.make) {
     const old = PathBuilder.partsMake(locale, from.make);
-    return [route(under(old), to.make && !to.model ? `${target}$1` : target)];
+    return [route(under(old), to.make ? `${target}$1` : target)];
   }
   if (from.category) {
     const listing = PathBuilder.partsCategory(locale, from.category);
@@ -103,13 +76,15 @@ function localeRoutes(
     const next = to.category;
     return [
       route(under(listing), next ? `${target}$1` : target),
-      ...[...pages.models].map((key) => {
-        const [make, model] = key.split('/');
+      ...[...pages.series].map((key) => {
+        const [make, series] = key.split('/');
         return route(
-          exactly(PathBuilder.partsModelCategory(locale, make, model, renamed)),
+          exactly(
+            PathBuilder.partsSeriesCategory(locale, make, series, renamed),
+          ),
           next && pages.categories.has(placeKey(key, next))
-            ? PathBuilder.partsModelCategory(locale, make, model, next)
-            : PathBuilder.partsModel(locale, make, model),
+            ? PathBuilder.partsSeriesCategory(locale, make, series, next)
+            : PathBuilder.partsSeries(locale, make, series),
         );
       }),
     ];
@@ -129,10 +104,7 @@ export const catalogueRoutes = (
   redirects: CatalogueRedirect[],
   pages: CataloguePages,
 ): RedirectRoute[] =>
-  [
-    ...redirects.filter(({ from }) => from.vehicle),
-    ...redirects.filter(({ from }) => !from.vehicle),
-  ].flatMap((redirect) =>
+  redirects.flatMap((redirect) =>
     SUPPORTED_LOCALES.flatMap((locale) =>
       localeRoutes(locale, redirect, pages),
     ),

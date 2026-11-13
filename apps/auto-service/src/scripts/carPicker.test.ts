@@ -5,7 +5,7 @@ import { rememberCar } from './garageCar';
 import { defineCarPicker } from './carPicker';
 
 const markup = `
-  <car-picker data-href="/ru/parts/{make}/{model}/batteries/">
+  <car-picker data-href="/ru/parts/{make}/{series}/batteries/">
     <form method="GET" action="/ru/parts/search/">
       <input type="hidden" name="category" value="batteries" />
       <select name="make">
@@ -13,7 +13,7 @@ const markup = `
         <option value="bmw">BMW</option>
         <option value="mercedes-benz">Mercedes-Benz</option>
       </select>
-      <select name="model" required>
+      <select name="series" required>
         <option value="">Модель</option>
         <optgroup label="BMW" data-make="bmw">
           <option value="f30-320d">3 серия F30 320d</option>
@@ -28,7 +28,7 @@ const markup = `
   </car-picker>`;
 
 const make = () => document.querySelector<HTMLSelectElement>('[name=make]')!;
-const model = () => document.querySelector<HTMLSelectElement>('[name=model]')!;
+const model = () => document.querySelector<HTMLSelectElement>('[name=series]')!;
 const form = () => document.querySelector('form')!;
 const models = () => [...model().options].map(({ value }) => value);
 const choose = (select: HTMLSelectElement, value: string) => {
@@ -112,7 +112,7 @@ describe('<car-picker>', () => {
       vin: 'WBA8E9C50GK123456',
       car: 'BMW 3 серия F30 320i',
       make: 'bmw',
-      model: 'f30-320i',
+      series: 'f30-320i',
     });
     document.body.innerHTML = markup;
     expect([make().value, model().value]).toEqual(['bmw', 'f30-320i']);
@@ -125,13 +125,13 @@ describe('<car-picker>', () => {
       vin: 'WDD2130041A123456',
       car: 'Mercedes-Benz C-Класс W205',
       make: 'mercedes-benz',
-      model: 'w205-c200',
+      series: 'w205-c200',
     });
     document.body.innerHTML = markup;
     expect([make().value, model().value]).toEqual(['', '']);
   });
 
-  it('ignores a garage car remembered without its make and model', () => {
+  it('ignores a garage car remembered without its make and series', () => {
     rememberVin('WBA8E9C50GK123456');
     rememberCar({ vin: 'WBA8E9C50GK123456', car: 'BMW 3 серия F30 320i' });
     document.body.innerHTML = markup;
@@ -148,15 +148,15 @@ describe('<car-picker>', () => {
   it.each([
     [
       'its selects',
-      '<car-picker data-href="/ru/parts/{make}/{model}/batteries/"><form></form></car-picker>',
+      '<car-picker data-href="/ru/parts/{make}/{series}/batteries/"><form></form></car-picker>',
     ],
     [
       'the page it opens',
-      markup.replace(' data-href="/ru/parts/{make}/{model}/batteries/"', ''),
+      markup.replace(' data-href="/ru/parts/{make}/{series}/batteries/"', ''),
     ],
   ])('stays inert without %s', (_missing, html) => {
     document.body.innerHTML = html;
-    const select = document.querySelector<HTMLSelectElement>('[name=model]');
+    const select = document.querySelector<HTMLSelectElement>('[name=series]');
     if (select) choose(select, 'f30-320d');
     expect(submit().defaultPrevented).toBe(false);
     expect(assign).not.toHaveBeenCalled();

@@ -45,10 +45,8 @@ import {
 import { REQUEST_ID_HEADER } from '@podbor/catalog-contract/events';
 import {
   assembleSnapshot,
-  carPagesFrom,
   categoryPagesFrom,
   makeHubsFrom,
-  type CarPageEntry,
   type CategoryPageEntry,
   type MakeHubEntry,
   type PartPageEntry,
@@ -294,10 +292,6 @@ export function createCatalogue({
 
     async categoryPages(): Promise<CategoryPageEntry[]> {
       return categoryPagesFrom(await snapshot());
-    },
-
-    async carPages(): Promise<CarPageEntry[]> {
-      return carPagesFrom(await snapshot());
     },
 
     async makeHubs(): Promise<MakeHubEntry[]> {

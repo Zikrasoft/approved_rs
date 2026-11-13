@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import type { CarHit } from '@podbor/catalog-contract';
 import {
   carLink,
-  carLinks,
   exactPart,
   inquiryTopic,
   listingCrumbs,
@@ -87,24 +86,29 @@ describe('nearVin', () => {
 
 describe('vinDestination', () => {
   const VIN = 'WBA35BG070N074158';
-  const vehiclePlace: CarHit = { kind: 'vehicle', make, model, vehicle };
-  const modelPlace: CarHit = { kind: 'model', make, model, vehicle: null };
-  const makePlace: CarHit = { kind: 'make', make, model: null, vehicle: null };
+  const seriesPlace: CarHit = {
+    kind: 'series',
+    make,
+    series: { name: 'X3', translations: null },
+    model: null,
+    vehicle: null,
+  };
+  const makePlace: CarHit = {
+    kind: 'make',
+    make,
+    series: null,
+    model: null,
+    vehicle: null,
+  };
   const resolved = (place: CarHit | null) => ({
     kind: 'vehicle' as const,
-    facts: { steering: 'left' as const },
+    vehicle: { model },
     place,
   });
 
-  it('opens the Vehicle page of a resolved VIN, carrying the VIN', () => {
-    expect(vinDestination(resolved(vehiclePlace), VIN, 'ru')).toBe(
-      '/ru/parts/bmw/e83-x3-20d/m/n47-130kw/?steering=left&vin=WBA35BG070N074158',
-    );
-  });
-
-  it('opens the Model page when the Vehicle has none', () => {
-    expect(vinDestination(resolved(modelPlace), VIN, 'ru')).toBe(
-      '/ru/parts/bmw/e83-x3-20d/',
+  it('opens the parts of the resolved Model, carrying the VIN', () => {
+    expect(vinDestination(resolved(seriesPlace), VIN, 'ru')).toBe(
+      '/ru/parts/search/?make=bmw&model=e83-x3-20d&vin=WBA35BG070N074158',
     );
   });
 
@@ -116,10 +120,10 @@ describe('vinDestination', () => {
     expect(vinDestination(resolved(null), VIN, 'ru')).toBeNull();
   });
 
-  it('opens the place the candidates of an unresolved VIN share', () => {
+  it('opens the Series page the candidates of an unresolved VIN share', () => {
     expect(
-      vinDestination({ kind: 'inquiry', place: modelPlace }, VIN, 'ru'),
-    ).toBe('/ru/parts/bmw/e83-x3-20d/');
+      vinDestination({ kind: 'inquiry', place: seriesPlace }, VIN, 'ru'),
+    ).toBe('/ru/parts/bmw/x3/');
   });
 
   it('stays on the inquiry for an unresolved VIN known only by its Make', () => {
@@ -185,7 +189,8 @@ describe('carLink', () => {
   const hit = (kind: CarHit['kind']): CarHit => ({
     kind,
     make,
-    model: kind === 'make' ? null : model,
+    series: kind === 'series' ? { name: 'X3', translations: null } : null,
+    model: kind === 'model' || kind === 'vehicle' ? model : null,
     vehicle: kind === 'vehicle' ? vehicle : null,
   });
 
@@ -196,72 +201,26 @@ describe('carLink', () => {
     });
   });
 
-  it('links a Model to its page under its name', () => {
+  it('links a Series to its page under its name', () => {
+    expect(carLink(hit('series'), 'en')).toEqual({
+      href: '/en/parts/bmw/x3/',
+      label: 'BMW X3',
+    });
+  });
+
+  it('links a Model from a shop that predates Series to its parts', () => {
     expect(carLink(hit('model'), 'en')).toEqual({
-      href: '/en/parts/bmw/e83-x3-20d/',
+      href: '/en/parts/search/?make=bmw&model=e83-x3-20d',
       label: 'BMW X3 E83 X3 2.0d',
     });
   });
 
-  it('links a Vehicle to its page with its engine and years', () => {
+  it('links a Vehicle from a shop that predates Series to the parts of its Model', () => {
     expect(carLink(hit('vehicle'), 'ru')).toEqual({
-      href: '/ru/parts/bmw/e83-x3-20d/m/n47-130kw/',
+      href: '/ru/parts/search/?make=bmw&model=e83-x3-20d',
       label: 'BMW X3 E83 X3 2.0d',
       detail: 'N47D20A, 130 кВт, 2007–2010',
     });
-  });
-});
-
-describe('carLinks', () => {
-  const second = { ...vehicle, id: 'veh_2', slug: 'n47-110kw', power_kw: 110 };
-
-  it('tells a Model apart from its listed Vehicles of the same name', () => {
-    expect(
-      carLinks(
-        [
-          { kind: 'model', make, model, vehicle: null },
-          { kind: 'vehicle', make, model, vehicle },
-          { kind: 'vehicle', make, model, vehicle: second },
-        ],
-        'ru',
-        'Все модификации',
-      ).map(({ href, detail }) => [href, detail]),
-    ).toEqual([
-      ['/ru/parts/bmw/e83-x3-20d/', 'Все модификации'],
-      ['/ru/parts/bmw/e83-x3-20d/m/n47-130kw/', 'N47D20A, 130 кВт, 2007–2010'],
-      ['/ru/parts/bmw/e83-x3-20d/m/n47-110kw/', 'N47D20A, 110 кВт, 2007–2010'],
-    ]);
-  });
-
-  it('drops a Model whose one listed Vehicle already leads there', () => {
-    expect(
-      carLinks(
-        [
-          { kind: 'model', make, model, vehicle: null },
-          { kind: 'vehicle', make, model, vehicle },
-        ],
-        'ru',
-        'Все модификации',
-      ),
-    ).toEqual([
-      {
-        href: '/ru/parts/bmw/e83-x3-20d/m/n47-130kw/',
-        label: 'BMW X3 E83 X3 2.0d',
-        detail: 'N47D20A, 130 кВт, 2007–2010',
-      },
-    ]);
-  });
-
-  it('leaves a Model alone when none of its Vehicles is listed', () => {
-    expect(
-      carLinks(
-        [{ kind: 'model', make, model, vehicle: null }],
-        'ru',
-        'Все модификации',
-      ),
-    ).toEqual([
-      { href: '/ru/parts/bmw/e83-x3-20d/', label: 'BMW X3 E83 X3 2.0d' },
-    ]);
   });
 });
 
@@ -270,11 +229,12 @@ describe('suggestionsFrom', () => {
     expect(
       suggestionsFrom(
         {
-          cars: [{ kind: 'make', make, model: null, vehicle: null }],
+          cars: [
+            { kind: 'make', make, series: null, model: null, vehicle: null },
+          ],
           results: [result('HU 816 x', 'HU816X', 'mann-filter-hu816x')],
         },
         'ru',
-        'Все модификации',
       ),
     ).toEqual({
       cars: [{ href: '/ru/parts/bmw/', label: 'BMW' }],
@@ -293,29 +253,25 @@ describe('suggestionsFrom', () => {
 
 describe('listingCrumbs', () => {
   const category = { slug: 'oil-filters', name: 'Масляные фильтры' };
-  const crumbs = (pages: { model: boolean; make: boolean } | null) =>
+  const crumbs = (pages: { series: boolean | null; make: boolean } | null) =>
     listingCrumbs({
       locale: 'ru',
       model,
-      modelName: 'BMW X3',
       category,
       pages,
       searchLabel: 'Поиск запчастей',
     });
 
-  it('walks up through the Make and the Model when both have a page', () => {
-    expect(crumbs({ model: true, make: true })).toEqual([
+  it('walks up through the Make and the Series when both have a page', () => {
+    expect(crumbs({ series: true, make: true })).toEqual([
       { href: '/ru/parts/bmw/', label: 'BMW' },
-      { href: '/ru/parts/bmw/e83-x3-20d/', label: 'BMW X3' },
-      {
-        href: '/ru/parts/bmw/e83-x3-20d/oil-filters/',
-        label: 'Масляные фильтры',
-      },
+      { href: '/ru/parts/bmw/x3/', label: 'BMW X3' },
+      { href: '/ru/parts/c/oil-filters/', label: 'Масляные фильтры' },
     ]);
   });
 
-  it('links only the Make and the Category when the Model has no page', () => {
-    expect(crumbs({ model: false, make: true })).toEqual([
+  it('links only the Make and the Category when the Series has no page', () => {
+    expect(crumbs({ series: false, make: true })).toEqual([
       { href: '/ru/parts/bmw/', label: 'BMW' },
       { href: '/ru/parts/c/oil-filters/', label: 'Масляные фильтры' },
     ]);
@@ -332,7 +288,6 @@ describe('listingCrumbs', () => {
       listingCrumbs({
         locale: 'ru',
         model: null,
-        modelName: null,
         category: null,
         pages: null,
         searchLabel: 'Поиск запчастей',

@@ -293,6 +293,17 @@ describe('a Vehicle without an engine', () => {
       }).vehicle?.engine,
     ).toBeNull();
   });
+
+  it('reads a car search hit from a shop that predates Series as naming none', () => {
+    expect(
+      carHitSchema.parse({
+        kind: 'make',
+        make: { slug: 'bmw', name: 'BMW' },
+        model: null,
+        vehicle: null,
+      }).series,
+    ).toBeNull();
+  });
 });
 
 describe('series translations', () => {
@@ -404,9 +415,10 @@ describe('vinLookupResponseSchema', () => {
   });
 
   const modelPlace = {
-    kind: 'model',
+    kind: 'series',
     make: { slug: 'bmw', name: 'BMW' },
-    model: vehicle.model,
+    series: { name: '3 Series', translations: null },
+    model: null,
     vehicle: null,
   };
 

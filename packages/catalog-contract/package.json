@@ -72,6 +72,13 @@
       },
       "default": "./src/partNumber.ts"
     },
+    "./slug": {
+      "require": {
+        "types": "./dist/cjs/slug.d.ts",
+        "default": "./dist/cjs/slug.js"
+      },
+      "default": "./src/slug.ts"
+    },
     "./events": {
       "require": {
         "types": "./dist/cjs/events.d.ts",

@@ -13,11 +13,9 @@ import type { CataloguePages } from './paths';
 import { isBotAgent } from './botAgent';
 import { PREVIEW_COOKIE } from './shopPreview';
 import {
-  carPagesFrom,
   cataloguePagesFrom,
   categoryPagesFrom,
   makeHubsFrom,
-  type CarPageEntry,
   type CategoryPageEntry,
   type MakeHubEntry,
   type PartPageEntry,
@@ -257,25 +255,13 @@ export async function categoryPagesForBuild(
   return snapshot ? categoryPagesFrom(snapshot) : [];
 }
 
-export async function carPagesForBuild(
-  env = siteEnv(),
-): Promise<CarPageEntry[]> {
-  const snapshot = await snapshotForBuild(env);
-  return snapshot ? carPagesFrom(snapshot) : [];
-}
-
 export async function cataloguePagesForBuild(
   env = siteEnv(),
 ): Promise<CataloguePages> {
   const snapshot = await snapshotForBuild(env);
   return snapshot
     ? cataloguePagesFrom(snapshot)
-    : {
-        makes: new Set(),
-        models: new Set(),
-        categories: new Set(),
-        vehicles: new Set(),
-      };
+    : { makes: new Set(), series: new Set(), categories: new Set() };
 }
 
 export async function makeHubsForBuild(

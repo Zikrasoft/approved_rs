@@ -20,8 +20,7 @@ import {
 import { INTERRUPTED_BY_RESTART } from '../_shared/run-errors';
 
 export type ListedPartCount = {
-  model_id: string;
-  vehicle_id: string | null;
+  series_id: string;
   parts: number;
   required: number;
 };
@@ -100,7 +99,6 @@ class PublishModuleService extends MedusaService({
       requirementFits.map(({ vehicle_id }) => vehicle_id),
       requirementFits.map(({ part_id }) => part_id),
       requirementFits.map(({ category_id }) => category_id),
-      MIN_REQUIREMENT_MATCHES_FOR_PAGE,
       MIN_REQUIREMENT_MATCHES_FOR_PAGE,
     ]);
     return rows;

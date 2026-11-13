@@ -1,20 +1,6 @@
-const UNDECOMPOSED: Record<string, string> = {
-  đ: 'dj',
-  ß: 'ss',
-  ł: 'l',
-  ø: 'o',
-  æ: 'ae',
-  œ: 'oe',
-};
+import { slugOf } from '@podbor/catalog-contract/slug';
 
-export const slugOf = (name: string) =>
-  name
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/gu, '')
-    .toLowerCase()
-    .replace(/[đßłøæœ]/gu, (letter) => UNDECOMPOSED[letter])
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
+export { slugOf };
 
 const DATES = /\b\d{1,2}[./]\d{4}\b|\b(?:19|20)\d{2}\b/gu;
 

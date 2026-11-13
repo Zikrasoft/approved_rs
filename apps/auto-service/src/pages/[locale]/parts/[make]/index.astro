@@ -5,7 +5,6 @@ import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
-import { modelName } from '@/utils/carName';
 import { makeHubsForBuild } from '@/utils/catalogueEnv';
 import { cacheKey } from '@/utils/cacheKey';
 import type { MakeHubEntry } from '@/utils/catalogueSnapshot';
@@ -27,8 +26,11 @@ const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const copy = content(locale).partsCar.hubs.make;
 const { make } = hub;
-const models = hub.models
-  .map((entry) => ({ ...entry, label: modelName(entry.model, locale) }))
+const series = hub.series
+  .map((entry) => ({
+    ...entry,
+    label: translated(entry.series, 'name', locale),
+  }))
   .toSorted((a, b) => a.label.localeCompare(b.label, 'en', { numeric: true }));
 ---
 
@@ -51,9 +53,9 @@ const models = hub.models
     <h2 class="text-section">{copy.modelsHeading}</h2>
     <ul class="card divide-y divide-line">
       {
-        models.map(({ model, label, categories }) => (
+        series.map(({ series: entry, label, categories }) => (
           <LinkRow
-            href={PathBuilder.partsModel(locale, make.slug, model.slug)}
+            href={PathBuilder.partsSeries(locale, make.slug, entry.slug)}
             label={label}
             detail={categories
               .map(({ category }) => translated(category, 'name', locale))

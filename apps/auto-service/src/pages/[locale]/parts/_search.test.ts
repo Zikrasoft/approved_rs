@@ -251,3 +251,61 @@ describe('a category listed by demand on the search page', () => {
     expect(page.querySelector('nav[aria-label="Порядок"]')).toBeNull();
   });
 });
+
+describe('the search page scoped to one Model', () => {
+  const model = {
+    slug: 'e83-x3-20d',
+    name: 'X3 2.0d',
+    chassis: {
+      code: 'E83',
+      body_style: 'suv',
+      series: {
+        name: 'X3',
+        translations: null,
+        make: { slug: 'bmw', name: 'BMW' },
+      },
+    },
+  };
+
+  beforeEach(() => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        Response.json({
+          ...answer(0),
+          category: null,
+          model,
+          scope_pages: { make: true, series: true },
+        }),
+      ),
+    );
+  });
+
+  const modelPage = () =>
+    render(SearchPage, {
+      path: '/ru/parts/search/?make=bmw&model=e83-x3-20d',
+    });
+
+  it('lists the Parts of the Model without a query or a category', async () => {
+    await modelPage();
+
+    expect(vi.mocked(fetch).mock.calls[0][0]).toContain(
+      'make=bmw&model=e83-x3-20d',
+    );
+  });
+
+  it('walks up through the Make and the Series pages', async () => {
+    const page = await modelPage();
+
+    expect(page.querySelector('a[href="/ru/parts/bmw/"]')).not.toBeNull();
+    expect(page.querySelector('a[href="/ru/parts/bmw/x3/"]')).not.toBeNull();
+  });
+
+  it('hands the car to My garage', async () => {
+    const facts = (await modelPage()).querySelector('car-facts');
+
+    expect(facts?.getAttribute('data-make')).toBe('bmw');
+    expect(facts?.getAttribute('data-series')).toBe('x3');
+    expect(facts?.getAttribute('data-model')).toBe('e83-x3-20d');
+  });
+});

@@ -12,7 +12,6 @@ import type { Locale } from '@/i18n/config';
 import type { createCatalogue } from './catalogue';
 import {
   exactPart,
-  listingCrumbs,
   nearVin,
   searchIntent,
   vinDestination,
@@ -138,18 +137,12 @@ export async function planSearch({
     return redirectTo(destination, 303);
   }
 
-  if (
-    model &&
-    make &&
-    !category &&
-    !misspeltCategory &&
-    !searchableQuery(typed)
-  ) {
-    return redirectTo(PathBuilder.partsModel(locale, make, model), 302);
-  }
-
   const searchable =
-    !vin && (searchableQuery(typed) || Boolean(category) || misspeltCategory);
+    !vin &&
+    (searchableQuery(typed) ||
+      Boolean(category) ||
+      Boolean(model) ||
+      misspeltCategory);
   const searchScope = { category, make, model, locale };
   const { q, found } = await searchEitherLayout(typed, async (query) =>
     searchable && catalogue && !misspeltCategory
@@ -214,15 +207,8 @@ export async function planSearch({
   const chosen = emptyScope ? [] : applied.facets;
   const ranges = emptyScope ? [] : applied.ranges;
   const listing =
-    !q && found?.category
-      ? listingCrumbs({
-          locale,
-          model: found.model,
-          modelName: null,
-          category: found.category,
-          pages: found.scope_pages,
-          searchLabel: '',
-        }).at(-1)?.href
+    !q && !model && found?.category
+      ? PathBuilder.partsCategory(locale, found.category.slug)
       : undefined;
   const filtersHref = (
     facets: string[],
@@ -232,8 +218,6 @@ export async function planSearch({
     listing && !nextSort && !facets.length && !nextRanges.length
       ? listing
       : searchHref(facets, nextRanges, 0, model, nextSort);
-  const listingKeepsModel =
-    !model || Boolean(found?.model && found.scope_pages?.model);
   const page = found ? Math.min(offset, lastPageOf(found)) : offset;
   if (emptyScope) {
     return redirectTo(filtersHref([], []), 302);
@@ -248,9 +232,7 @@ export async function planSearch({
       capitalised(params))
   ) {
     return redirectTo(
-      page || !listingKeepsModel
-        ? searchHref(chosen, ranges, page)
-        : filtersHref(chosen, ranges),
+      page ? searchHref(chosen, ranges, page) : filtersHref(chosen, ranges),
       302,
     );
   }

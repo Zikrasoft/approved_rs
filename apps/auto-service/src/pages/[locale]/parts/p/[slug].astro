@@ -126,7 +126,7 @@ const shown = picture && {
   note: picture.illustration ? copy.categoryIllustration : undefined,
 };
 const carLink = (vehicle: PartPageEntry['kitCars'][number]) => ({
-  href: pageLinks.vehicle(vehicle),
+  href: pageLinks.series(vehicle.model.chassis.series),
   label: `${carName(vehicle.model, locale)}, ${vehicleVariant(vehicle, locale)}`,
 });
 const carLists = [

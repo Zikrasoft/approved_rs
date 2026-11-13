@@ -25,13 +25,13 @@ import { currentNumber } from '@/utils/partNumbers';
 import { carName, vehicleVariant } from '@/utils/carName';
 import {
   carLink,
-  carLinks,
   inquiryTopic as topicOf,
   listingCrumbs,
   missingNumber,
 } from '@/utils/catalogueSearch';
 import { planSearch } from '@/utils/searchPage';
 import { VIN_INQUIRY_SERVICE } from '@/utils/services';
+import { seriesSlugOf } from '@podbor/catalog-contract/slug';
 
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
@@ -85,7 +85,7 @@ const numberMissing =
     ? missingNumber(q, found.results)
     : false;
 const looseNumbers = numberMissing && Boolean(found?.results.length);
-const cars = found ? carLinks(found.cars, locale, copy.allModifications) : [];
+const cars = found ? found.cars.map((car) => carLink(car, locale)) : [];
 const narrowedTo = scope?.category;
 const unavailable = searchable && !found && !unknownScope;
 const scopedTo = scope?.model;
@@ -165,7 +165,6 @@ const scopeHidden = {
       ...listingCrumbs({
         locale,
         model: scopedTo ?? null,
-        modelName: modelName ?? null,
         category: narrowedTo ?? null,
         pages: scope?.scope_pages ?? null,
         searchLabel: copy.heading,
@@ -410,10 +409,22 @@ const scopeHidden = {
       )
     }
   </section>
+  {
+    scopedTo && modelName && (
+      <car-facts
+        data-car={modelName}
+        data-make={scopedTo.chassis.series.make.slug}
+        data-series={seriesSlugOf(scopedTo.chassis.series.name)}
+        data-model={scopedTo.slug}
+      />
+    )
+  }
 </Shell>
 
 <script>
   import { defineVinPrefill } from '@/scripts/vinPrefill';
+  import { defineCarFacts } from '@/scripts/carFacts';
 
   defineVinPrefill();
+  defineCarFacts();
 </script>

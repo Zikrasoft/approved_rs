@@ -1,20 +1,26 @@
 import type { ISearchModuleService } from '@medusajs/framework/types';
 import { type CarHit, carHitSchema } from '@podbor/catalog-contract';
+import { seriesSlugOf } from '@podbor/catalog-contract/slug';
 import { z } from 'zod';
 
 export const CATALOGUE_CAR_INDEX = 'catalogue_car';
 
+export type SeriesAddress = { name: string; make: { slug: string } };
+
 export type CarAddress = {
   id: string;
-  model: { slug: string; chassis: { series: { make: { slug: string } } } };
+  model: { slug: string; chassis: { series: SeriesAddress } };
 };
 
 export const makeKey = (slug: string) => `make:${slug}`;
+export const seriesKey = ({ name, make }: SeriesAddress) =>
+  `series:${make.slug}/${seriesSlugOf(name)}`;
 export const modelKey = (make: string, slug: string) => `model:${make}/${slug}`;
 export const vehicleKey = (id: string) => `vehicle:${id}`;
 
 export const fittedCarKeys = ({ id, model }: CarAddress): string[] => [
   makeKey(model.chassis.series.make.slug),
+  seriesKey(model.chassis.series),
   modelKey(model.chassis.series.make.slug, model.slug),
   vehicleKey(id),
 ];
@@ -64,25 +70,20 @@ const shared = (keys: string[], paged: PagedCars) => {
   return distinct.size === 1 ? paged.get([...distinct][0]) : undefined;
 };
 
+const seriesOf = (candidates: CarAddress[], series: SeriesAddress | null) =>
+  candidates.length
+    ? candidates.map(({ model }) => model.chassis.series)
+    : series
+      ? [series]
+      : [];
+
 export const nearestPlace = (
   candidates: CarAddress[],
-  modelSlug: string | null,
+  series: SeriesAddress | null,
   paged: PagedCars,
   makeSlug: string | null = null,
 ): CarHit | null =>
-  (candidates.length === 1
-    ? paged.get(vehicleKey(candidates[0].id))
-    : undefined) ??
-  shared(
-    candidates.length
-      ? candidates.map(({ model }) =>
-          modelKey(model.chassis.series.make.slug, model.slug),
-        )
-      : modelSlug && makeSlug
-        ? [modelKey(makeSlug, modelSlug)]
-        : [],
-    paged,
-  ) ??
+  shared(seriesOf(candidates, series).map(seriesKey), paged) ??
   shared(
     candidates.length
       ? candidates.map(({ model }) => makeKey(model.chassis.series.make.slug))
@@ -96,17 +97,17 @@ export const nearestPlace = (
 export async function nearestPagedPlace(
   searchModule: ISearchModuleService,
   candidates: CarAddress[],
-  modelSlug: string | null = null,
+  series: SeriesAddress | null = null,
   makeSlug: string | null = null,
 ): Promise<CarHit | null> {
   const keys = [
-    ...candidates.flatMap(fittedCarKeys),
-    ...(modelSlug && makeSlug ? [modelKey(makeSlug, modelSlug)] : []),
+    ...seriesOf(candidates, series).map(seriesKey),
+    ...candidates.map(({ model }) => makeKey(model.chassis.series.make.slug)),
     ...(makeSlug ? [makeKey(makeSlug)] : []),
   ];
   return nearestPlace(
     candidates,
-    modelSlug,
+    series,
     await pagedCars(searchModule, keys),
     makeSlug,
   );

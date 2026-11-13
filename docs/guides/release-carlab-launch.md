@@ -24,7 +24,7 @@ User-visible changes (commit subjects on `carlab-shop`):
   callback on a mouse; the Google rating shows on the hero, visit block,
   footer and in `llms.txt`.
 - The parts catalogue from the shop: parts hub, category pages with filters
-  and a make/model picker («Для моего авто»), make and model pages, part pages
+  and a make/series picker («Для моего авто»), make and series pages, part pages
   with an order panel, VIN and part-number search with autocomplete.
 - Lead forms on all three sites ask one contact question with a passive
   privacy line; the preferred channel comes first; CarLab offers a call first.

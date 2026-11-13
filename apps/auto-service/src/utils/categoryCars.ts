@@ -1,23 +1,21 @@
-import { byModelName } from './carName';
-import type { MakeHubEntry, ModelHubEntry } from './catalogueSnapshot';
+import type { MakeHubEntry, SeriesHubEntry } from './catalogueSnapshot';
 
 export type CategoryCar = {
   make: { slug: string; name: string };
-  models: ModelHubEntry['model'][];
+  series: SeriesHubEntry['series'][];
 };
 
 export const categoryCars = (
   hubs: MakeHubEntry[],
   categorySlug: string,
 ): CategoryCar[] =>
-  hubs.flatMap(({ make, models }) => {
-    const fitting = models
+  hubs.flatMap(({ make, series }) => {
+    const fitting = series
       .filter(({ categories }) =>
         categories.some(({ category }) => category.slug === categorySlug),
       )
-      .toSorted(byModelName)
-      .map(({ model }) => model);
+      .map((hub) => hub.series);
     return fitting.length
-      ? [{ make: { slug: make.slug, name: make.name }, models: fitting }]
+      ? [{ make: { slug: make.slug, name: make.name }, series: fitting }]
       : [];
   });

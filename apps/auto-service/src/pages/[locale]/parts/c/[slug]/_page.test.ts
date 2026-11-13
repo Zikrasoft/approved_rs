@@ -24,33 +24,21 @@ const category = {
   fields: [],
 };
 
-const series = (make: { slug: string; name: string }, name: string) => ({
-  name,
-  translations: null,
-  make,
-});
-
 const bmw = { slug: 'bmw', name: 'BMW' };
 const mercedes = { slug: 'mercedes-benz', name: 'Mercedes-Benz' };
 
 const cars = [
   {
     make: bmw,
-    models: [
-      {
-        slug: 'f30-320d',
-        name: '320d',
-        chassis: { code: 'F30', series: series(bmw, '3 серия') },
-      },
-    ],
+    series: [{ name: '3 серия', slug: '3-series', translations: null }],
   },
   {
     make: mercedes,
-    models: [
+    series: [
       {
-        slug: 'w213-e220d',
-        name: 'E 220 d',
-        chassis: { code: 'W213', series: series(mercedes, 'E-Класс') },
+        name: 'E-Класс',
+        slug: 'e-class',
+        translations: { en: { name: 'E-Class' } },
       },
     ],
   },
@@ -73,12 +61,12 @@ const text = (element: Element | null | undefined) =>
   element?.textContent?.replace(/\s+/g, ' ').trim();
 
 describe('the car picker on a category page', () => {
-  it('offers the makes and their models that have a page in the category', async () => {
+  it('offers the makes and their series that have a page in the category', async () => {
     const doc = await categoryPage([partPage()], cars);
     const picker = doc.querySelector('car-picker')!;
     expect(text(picker.querySelector('h2'))).toBe('Для моего авто');
     expect(picker.getAttribute('data-href')).toBe(
-      '/ru/parts/{make}/{model}/batteries/',
+      '/ru/parts/{make}/{series}/batteries/',
     );
     expect(
       [...picker.querySelectorAll('[name=make] option')].map((option) => [
@@ -91,7 +79,7 @@ describe('the car picker on a category page', () => {
       ['mercedes-benz', 'Mercedes-Benz'],
     ]);
     expect(
-      [...picker.querySelectorAll('[name=model] optgroup')].map((group) => [
+      [...picker.querySelectorAll('[name=series] optgroup')].map((group) => [
         group.getAttribute('data-make'),
         [...group.querySelectorAll('option')].map((option) => [
           option.getAttribute('value'),
@@ -99,12 +87,12 @@ describe('the car picker on a category page', () => {
         ]),
       ]),
     ).toEqual([
-      ['bmw', [['f30-320d', '3 серия F30 320d']]],
-      ['mercedes-benz', [['w213-e220d', 'E-Класс W213 E 220 d']]],
+      ['bmw', [['3-series', '3 серия']]],
+      ['mercedes-benz', [['e-class', 'E-Класс']]],
     ]);
   });
 
-  it('falls back to the search scoped by category, make and model without JavaScript', async () => {
+  it('falls back to the category search without JavaScript', async () => {
     const doc = await categoryPage([partPage()], cars);
     const form = doc.querySelector('car-picker form')!;
     expect(form.getAttribute('action')).toBe('/ru/parts/search/');
@@ -112,7 +100,7 @@ describe('the car picker on a category page', () => {
     expect(
       form.querySelector('input[name=category]')?.getAttribute('value'),
     ).toBe('batteries');
-    expect(form.querySelector('[name=model]')?.hasAttribute('required')).toBe(
+    expect(form.querySelector('[name=series]')?.hasAttribute('required')).toBe(
       true,
     );
   });
@@ -122,7 +110,7 @@ describe('the car picker on a category page', () => {
     expect(orangeIn(doc.querySelector('car-picker')!)).toEqual([]);
   });
 
-  it('is left out when no model has a page in the category', async () => {
+  it('is left out when no series has a page in the category', async () => {
     const doc = await categoryPage([partPage()], []);
     expect(doc.querySelector('car-picker')).toBeNull();
   });

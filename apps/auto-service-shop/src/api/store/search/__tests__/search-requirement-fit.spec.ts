@@ -22,6 +22,7 @@ medusaIntegrationTestRunner({
       let g20VehicleId: string;
       let g20ChassisId: string;
       let g21VehicleId: string;
+      let g21SeriesId: string;
       let capacityId: string;
 
       const search = (params: Record<string, string>) =>
@@ -136,18 +137,21 @@ medusaIntegrationTestRunner({
         g20ChassisId = g20Car.chassis.id;
         const g21Car = await createVehicleFixture(catalog, {
           typeCode: 'G002',
+          seriesName: '3 Touring',
           modelSlug: 'g21-318d',
           modelName: '318d Touring',
           chassisCode: 'G21',
           engineCode: 'B47D20B',
         });
         g21VehicleId = g21Car.vehicle.id;
+        g21SeriesId = g21Car.series.id;
         for (const [code, min] of [
           ['G22', 90],
           ['G23', 80],
         ] as const) {
           const car = await createVehicleFixture(catalog, {
             typeCode: `${code}X`,
+            seriesName: `${code} Series`,
             modelSlug: `${code.toLowerCase()}-car`,
             modelName: `${code} Car`,
             chassisCode: code,
@@ -309,17 +313,15 @@ medusaIntegrationTestRunner({
         });
 
         expect(
-          counts.find(({ vehicle_id }) => vehicle_id === g21VehicleId)?.parts,
+          counts.find(({ series_id }) => series_id === g21SeriesId)?.parts,
         ).toBe(4);
         expect(
           cars.data.cars.map(
-            ({ kind, model }: { kind: string; model: { slug: string } }) =>
-              `${kind}:${model?.slug}`,
+            ({ kind, series }: { kind: string; series: { name: string } }) =>
+              `${kind}:${series?.name}`,
           ),
-        ).toEqual(
-          expect.arrayContaining(['model:g21-318d', 'vehicle:g21-318d']),
-        );
-        expect(scoped.data.scope_pages).toEqual({ model: true, make: true });
+        ).toEqual(['series:3 Touring']);
+        expect(scoped.data.scope_pages).toEqual({ make: true, series: true });
       });
 
       it('takes a Requirement edit to search on the next reindex, as Publish runs it', async () => {
@@ -350,11 +352,11 @@ medusaIntegrationTestRunner({
         expect(partIds(after)).toEqual([part.bosch]);
       });
 
-      it('gives a car its pages from two Requirement matches in a Category, never from one', async () => {
+      it('gives a Series its page from two Requirement matches in a Category, never from one', async () => {
         const carKeys = async (q: string) =>
           (await search({ q })).data.cars.map(
-            ({ kind, model }: { kind: string; model: { slug: string } }) =>
-              `${kind}:${model?.slug}`,
+            ({ kind, series }: { kind: string; series: { name: string } }) =>
+              `${kind}:${series?.name}`,
           );
         const scopePages = async (model: string) =>
           (await search({ q: 'аккумулятор', make: 'bmw', model })).data
@@ -362,15 +364,13 @@ medusaIntegrationTestRunner({
 
         expect(await carKeys('g22')).toEqual([]);
         expect(await scopePages('g22-car')).toEqual({
-          model: false,
           make: true,
+          series: false,
         });
-        expect(await carKeys('g23')).toEqual(
-          expect.arrayContaining(['model:g23-car', 'vehicle:g23-car']),
-        );
+        expect(await carKeys('g23')).toEqual(['series:G23 Series']);
         expect(await scopePages('g23-car')).toEqual({
-          model: true,
           make: true,
+          series: true,
         });
       });
     });

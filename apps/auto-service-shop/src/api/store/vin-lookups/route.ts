@@ -3,6 +3,7 @@ import { Modules } from '@medusajs/framework/utils';
 
 import { nearestPagedPlace } from '../../../lib/car-pages';
 import { logEvent, vinFields } from '../../../lib/log-event';
+import { modelBySlug } from '../../../lib/store-response';
 import { vinDecoders } from '../../../lib/vin/chain';
 import { resolveVin } from '../../../lib/vin/resolve';
 import { CATALOG_MODULE } from '../../../modules/catalog';
@@ -55,12 +56,18 @@ export async function POST(
           { relations: ['model.chassis.series.make'], take: null },
         )
       : [];
+  const namedModel =
+    !lookup.resolved && !candidates.length && lookup.make && lookup.model_slug
+      ? await modelBySlug(catalog, lookup.make, lookup.model_slug, {
+          relations: ['chassis.series.make'],
+        })
+      : null;
   res.json({
     ...lookup,
     place: await nearestPagedPlace(
       req.scope.resolve(Modules.SEARCH),
       candidates,
-      lookup.resolved ? null : lookup.model_slug,
+      namedModel?.chassis.series ?? null,
       lookup.resolved ? null : lookup.make,
     ),
   });

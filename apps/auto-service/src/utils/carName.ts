@@ -23,6 +23,22 @@ export const modelName = (model: NamedModel, locale: Locale): string =>
 export const carName = (model: NamedModel, locale: Locale): string =>
   vehicleName(model, seriesIn(model, locale)).full;
 
+type NamedSeries = {
+  name: string;
+  translations: Record<string, Record<string, string>> | null;
+};
+
+const asModel = (series: NamedSeries, make: { name: string }): NamedModel => ({
+  name: '',
+  chassis: { code: '', series: { ...series, make } },
+});
+
+export const seriesName = (
+  series: NamedSeries,
+  make: { name: string },
+  locale: Locale,
+): string => carName(asModel(series, make), locale);
+
 const naturally = new Intl.Collator('en', { numeric: true }).compare;
 
 type ModelEntry = { model: { name: string; chassis: { code: string } } };

@@ -2,59 +2,40 @@
 import { translated } from '@podbor/catalog-contract';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
-import VinInquiryCard from '@/components/VinInquiryCard.astro';
 import InquiryLink from '@/components/InquiryLink.astro';
 import FitLine from '@/components/FitLine.astro';
 import InkLink from '@/components/InkLink.astro';
 import FittedPart from '@/components/FittedPart.astro';
-import FacetFilters from '@/components/FacetFilters.astro';
 import ListingBar from '@/components/ListingBar.astro';
-import ListingSort from '@/components/ListingSort.astro';
-import { popularListingHref } from '@/utils/searchPage';
-import { demandOf } from '@/utils/demand';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
-import { carName, vehicleVariant } from '@/utils/carName';
-import { cataloguePagesForBuild, makeHubsForBuild } from '@/utils/catalogueEnv';
-import { cacheKey, linkedVehicles } from '@/utils/cacheKey';
+import { carName, seriesName, vehicleVariant } from '@/utils/carName';
+import { makeHubsForBuild } from '@/utils/catalogueEnv';
+import { cacheKey } from '@/utils/cacheKey';
 import type {
-  ModelCategoryEntry,
-  ModelHubEntry,
+  SeriesCategoryEntry,
+  SeriesHubEntry,
 } from '@/utils/catalogueSnapshot';
 import { keySpecs } from '@/utils/attributeRows';
-import { categoryFacets } from '@/utils/categoryFacets';
 import { paragraphs } from '@podbor/site-kit';
-import {
-  catalogueLinks,
-  PathBuilder,
-  withLocales,
-  type CataloguePages,
-} from '@/utils/paths';
-import { withFacetCopy } from '@/utils/partsSearch';
+import { PathBuilder, withLocales } from '@/utils/paths';
 
 export async function getStaticPaths() {
   const hubs = await makeHubsForBuild();
-  const pages = await cataloguePagesForBuild();
   return withLocales(
     hubs.flatMap((hub) =>
-      hub.models.flatMap((model) =>
-        model.categories.map((entry) => ({
+      hub.series.flatMap((series) =>
+        series.categories.map((entry) => ({
           params: {
             make: hub.make.slug,
-            model: model.model.slug,
+            series: series.series.slug,
             category: entry.category.slug,
           },
-          props: { hub: model, entry, pages },
+          props: { hub: series, entry },
           cacheKey: cacheKey({
-            make: model.make,
-            model: model.model,
+            make: series.make,
+            series: series.series,
             entry,
-            vehicles: linkedVehicles(
-              pages,
-              entry.parts.flatMap(({ fits }) =>
-                fits.map(({ vehicle }) => vehicle),
-              ),
-            ),
           }),
         })),
       ),
@@ -62,30 +43,22 @@ export async function getStaticPaths() {
   );
 }
 
-const { hub, entry, pages } = Astro.props as {
-  hub: ModelHubEntry;
-  entry: ModelCategoryEntry;
-  pages: CataloguePages;
+const { hub, entry } = Astro.props as {
+  hub: SeriesHubEntry;
+  entry: SeriesCategoryEntry;
 };
 const locale = localeFrom(Astro.url.pathname);
-const links = catalogueLinks(locale, pages);
 const site = content(locale).site;
 const copy = content(locale).partsCar.hubs.modelCategory;
-const { make, model } = hub;
+const { make, series } = hub;
 const { category } = entry;
-const name = carName(model, locale);
-const empty = entry.parts.length === 0;
+const name = seriesName(series, make, locale);
 const listingAttributes = entry.parts.map(({ part }) => part.attributes);
 const categoryName = translated(category, 'name', locale);
 const [lead, ...body] = paragraphs(translated(category, 'text', locale));
 const listed = entry.parts.flatMap(({ pages }) =>
   pages.filter(({ superseded }) => !superseded),
 );
-const facets = withFacetCopy(
-  categoryFacets({ ...category, pages: listed }, locale),
-  content(locale).partsSearch,
-);
-const filtered = !empty && facets.length > 0;
 const fill = (template: string) =>
   template.replace('{category}', categoryName).replace('{model}', name);
 const SAID_BY_FIT = ['axle'];
@@ -101,14 +74,14 @@ const SAID_BY_FIT = ['axle'];
       { href: PathBuilder.parts(locale), label: site.nav.parts },
       { href: PathBuilder.partsMake(locale, make.slug), label: make.name },
       {
-        href: PathBuilder.partsModel(locale, make.slug, model.slug),
+        href: PathBuilder.partsSeries(locale, make.slug, series.slug),
         label: name,
       },
       {
-        href: PathBuilder.partsModelCategory(
+        href: PathBuilder.partsSeriesCategory(
           locale,
           make.slug,
-          model.slug,
+          series.slug,
           category.slug,
         ),
         label: categoryName,
@@ -116,62 +89,15 @@ const SAID_BY_FIT = ['axle'];
     ]}
   />
 
-  <section
-    class:list={[
-      'wrap grid gap-6 py-band md:py-band-lg lg:items-start',
-      empty
-        ? 'lg:grid-cols-[1.2fr_1fr]'
-        : filtered &&
-          'max-lg:gap-y-0 lg:grid-cols-[17rem_minmax(0,1fr)] lg:gap-10',
-    ]}
-  >
-    {
-      filtered && (
-        <FacetFilters
-          action={PathBuilder.partsSearch(locale)}
-          hidden={{
-            category: category.slug,
-            make: make.slug,
-            model: model.slug,
-          }}
-          facets={facets}
-          count={listed.length}
-        />
-      )
-    }
-
+  <section class="wrap grid gap-6 py-band md:py-band-lg lg:items-start">
     <div class="flex min-w-0 flex-col gap-8">
       <div class="flex flex-col gap-3">
         <h2 class="text-section">{copy.partsHeading}</h2>
-        {
-          !empty && (
-            <ListingBar
-              count={listed.length}
-              filters={filtered}
-              found={content(locale).partsSearch.foundNumbers}
-            />
-          )
-        }
-        {
-          demandOf(listed) > 0 && (
-            <ListingSort
-              current={null}
-              hrefs={{
-                default: PathBuilder.partsModelCategory(
-                  locale,
-                  make.slug,
-                  model.slug,
-                  category.slug,
-                ),
-                popular: popularListingHref(locale, {
-                  category: category.slug,
-                  make: make.slug,
-                  model: model.slug,
-                }),
-              }}
-            />
-          )
-        }
+        <ListingBar
+          count={listed.length}
+          filters={false}
+          found={content(locale).partsSearch.foundNumbers}
+        />
         <ul class="flex flex-col gap-4">
           {
             entry.parts.map(({ part, pages, fits }) => (
@@ -195,8 +121,8 @@ const SAID_BY_FIT = ['axle'];
                         <FitLine
                           fit={fit}
                           car={{
-                            href: links.vehicle(fit.vehicle),
-                            label: vehicleVariant(fit.vehicle, locale),
+                            href: null,
+                            label: `${carName(fit.vehicle.model, locale)}, ${vehicleVariant(fit.vehicle, locale)}`,
                           }}
                         />
                       </li>
@@ -207,7 +133,7 @@ const SAID_BY_FIT = ['axle'];
             ))
           }
         </ul>
-        {!empty && <InquiryLink topic={`${name}, ${categoryName}`} />}
+        <InquiryLink topic={`${name}, ${categoryName}`} />
       </div>
 
       {
@@ -227,7 +153,5 @@ const SAID_BY_FIT = ['axle'];
         {content(locale).shopPart.categoryLink}
       </InkLink>
     </div>
-
-    {empty && <VinInquiryCard comment={`${name}, ${categoryName}: `} />}
   </section>
 </Shell>

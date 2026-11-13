@@ -180,7 +180,7 @@ medusaIntegrationTestRunner({
         });
       });
 
-      it('names the Vehicle page of the resolved car once it has one', async () => {
+      it('names the Series page of the resolved car once it has one', async () => {
         const owner =
           (await catalog.listVehicles({}, { take: 1 }))[0] ??
           (await createVehicleFixture(catalog)).vehicle;
@@ -214,8 +214,8 @@ medusaIntegrationTestRunner({
         await getContainer().resolve(Modules.SEARCH).reindex();
 
         expect((await lookUp(OWNER_VIN)).data.place).toMatchObject({
-          kind: 'vehicle',
-          vehicle: { id: owner.id },
+          kind: 'series',
+          series: { name: '3 серия' },
         });
       });
 
@@ -250,6 +250,7 @@ medusaIntegrationTestRunner({
           place: {
             kind: 'make',
             make: { slug: 'bmw', name: 'BMW' },
+            series: null,
             model: null,
             vehicle: null,
           },

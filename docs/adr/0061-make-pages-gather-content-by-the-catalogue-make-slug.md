@@ -4,7 +4,7 @@ status: accepted
 
 # Make pages gather Works, Articles and Parts by the catalogue's Make slug
 
-Decided 2026-11-06 with the owner, who wants a page per car make that people find by searching for the service («BMW in Belgrade»), fed by the Works the partner writes, by Articles and by the parts catalogue. Refines [ADR-0049](0049-catalogue-urls-are-frozen-and-redirect.md).
+Decided 2026-11-06 with the owner, who wants a page per car make that people find by searching for the service («BMW in Belgrade»), fed by the Works the partner writes, by Articles and by the parts catalogue. Refines [ADR-0049](0049-catalogue-urls-are-frozen-and-redirect.md). The parts level under a Make is now the Series, not the Model, so a later Work or Article link goes to a Series page: [ADR-0062](0062-parts-hubs-are-series-and-modifications-are-a-scoped-search.md).
 
 **Decision:**
 

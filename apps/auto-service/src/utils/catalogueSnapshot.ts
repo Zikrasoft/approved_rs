@@ -3,12 +3,12 @@ import {
   generationOf,
   maintenanceKit,
   makeHasPage,
-  modelCategoryHasPage,
-  modelHasPage,
   partPageSlug,
   positionGroups,
   requirementMatches,
   requirementMatchesCount,
+  seriesCategoryHasPage,
+  seriesHasPage,
   type Category,
   type CatalogueRedirect,
   type Fitment,
@@ -16,10 +16,11 @@ import {
   type PlaceParts,
   type PositionGroup,
   type Vehicle,
-  vehicleHasPage,
 } from '@podbor/catalog-contract';
+import { seriesSlugOf } from '@podbor/catalog-contract/slug';
+import { byModelName } from './carName';
 import { partSuccessor } from './partSuccessor';
-import { modelKey, placeKey, vehicleKey, type CataloguePages } from './paths';
+import { placeKey, seriesKey, type CataloguePages } from './paths';
 
 export type Fit = Fitment & { vehicle: Vehicle };
 
@@ -74,22 +75,31 @@ export type CarPageEntry = {
   kit: CarKitItem[];
 };
 
-export type ModelCategoryEntry = { category: Category; parts: ModelPart[] };
+export type SeriesCategoryEntry = { category: Category; parts: ModelPart[] };
 
-export type ModelHubEntry = {
+type Series = Vehicle['model']['chassis']['series'];
+
+export type SeriesModel = { model: Vehicle['model']; vehicles: Vehicle[] };
+
+export type SeriesHubEntry = {
   make: Make;
-  model: Vehicle['model'];
-  vehicles: Vehicle[];
-  categories: ModelCategoryEntry[];
+  series: Series & { slug: string };
+  models: SeriesModel[];
+  categories: SeriesCategoryEntry[];
 };
 
 export type MakeHubEntry = {
   make: Make;
-  models: ModelHubEntry[];
+  series: SeriesHubEntry[];
   parts: number;
 };
 
 const byName = new Intl.Collator('en', { numeric: true }).compare;
+
+const modelKey = ({ slug, chassis }: Vehicle['model']) =>
+  placeKey(chassis.series.make.slug, slug);
+
+const seriesKeyOf = ({ model }: Vehicle) => seriesKey(model.chassis.series);
 
 const groupBy = <T>(items: T[], key: (item: T) => string): Map<string, T[]> => {
   const groups = new Map<string, T[]>();
@@ -324,10 +334,10 @@ const oncePerSnapshot = <T>(
   };
 };
 
-const fittedByModel = (
+const fittedBySeries = (
   parts: PartPageEntry[][],
 ): Map<string, Map<string, ModelPart[]>> => {
-  const byModel = new Map<string, Map<string, ModelPart[]>>();
+  const bySeries = new Map<string, Map<string, ModelPart[]>>();
   for (const pages of parts) {
     const { part } = pages[0];
     if (part.category_id === null) {
@@ -335,7 +345,7 @@ const fittedByModel = (
     }
     const entries = new Map<string, ModelPart>();
     for (const fit of pages[0].fits) {
-      const key = modelKey(fit.vehicle.model);
+      const key = seriesKeyOf(fit.vehicle);
       const entry = entries.get(key);
       if (entry) {
         entry.fits.push(fit);
@@ -343,14 +353,14 @@ const fittedByModel = (
       }
       const created = { part, pages, fits: [fit] };
       entries.set(key, created);
-      const byCategory = byModel.get(key) ?? new Map<string, ModelPart[]>();
-      byModel.set(key, byCategory);
+      const byCategory = bySeries.get(key) ?? new Map<string, ModelPart[]>();
+      bySeries.set(key, byCategory);
       const listed = byCategory.get(part.category_id) ?? [];
       byCategory.set(part.category_id, listed);
       listed.push(created);
     }
   }
-  return byModel;
+  return bySeries;
 };
 
 const firstOfEachPart = (parts: ModelPart[]): ModelPart[] => {
@@ -367,91 +377,80 @@ export const makeHubsFrom = oncePerSnapshot(
     retired,
     placeParts,
   }: CatalogueSnapshot): MakeHubEntry[] {
-    const fitted = fittedByModel(
+    const fitted = fittedBySeries(
       [...pagesByPart.values()].filter((pages) => !retired(pages[0].part)),
     );
-    const models = [
-      ...groupBy(cars, ({ vehicle }) => modelKey(vehicle.model)).entries(),
+    const series = [
+      ...groupBy(cars, ({ vehicle }) => seriesKeyOf(vehicle)).entries(),
     ]
-      .map(([key, modelCars]) => ({
+      .map(([key, seriesCars]) => ({
         key,
-        vehicles: modelCars.map(({ vehicle }) => vehicle),
+        vehicles: seriesCars.map(({ vehicle }) => vehicle),
         required: groupBy(
-          modelCars.flatMap(({ matches }) => matches),
+          seriesCars.flatMap(({ matches }) => matches),
           ({ category }) => category.id,
         ),
       }))
-      .filter(({ vehicles }) => modelHasPage(placeParts(vehicles)))
-      .map(({ key, vehicles, required }): ModelHubEntry => {
-        const { model } = vehicles[0];
-        const modelFitted = fitted.get(key);
+      .filter(({ vehicles }) => seriesHasPage(placeParts(vehicles)))
+      .map(({ key, vehicles, required }): SeriesHubEntry => {
+        const { series: named } = vehicles[0].model.chassis;
+        const seriesFitted = fitted.get(key);
         return {
-          make: model.chassis.series.make,
-          model,
-          vehicles,
+          make: named.make,
+          series: { ...named, slug: seriesSlugOf(named.name) },
+          models: [
+            ...groupBy(vehicles, ({ model }) => modelKey(model)).values(),
+          ]
+            .filter((modelVehicles) => placeParts(modelVehicles).parts > 0)
+            .map((modelVehicles) => ({
+              model: modelVehicles[0].model,
+              vehicles: modelVehicles,
+            }))
+            .toSorted(byModelName),
           categories: all.flatMap((category) => {
-            const categoryFitted = modelFitted?.get(category.id) ?? [];
-            const categoryRequired = firstOfEachPart(
-              (required.get(category.id) ?? []).flatMap(({ parts }) => parts),
-            );
-            return modelCategoryHasPage({
-              fitted: categoryFitted.length,
-              required: categoryRequired.length,
-            })
-              ? [
-                  {
-                    category,
-                    parts: firstOfEachPart([
-                      ...categoryFitted,
-                      ...categoryRequired,
-                    ]),
-                  },
-                ]
+            const parts = firstOfEachPart([
+              ...(seriesFitted?.get(category.id) ?? []),
+              ...(required.get(category.id) ?? []).flatMap(
+                (match) => match.parts,
+              ),
+            ]);
+            return seriesCategoryHasPage(parts.length)
+              ? [{ category, parts }]
               : [];
           }),
         };
       });
-    return [...groupBy(models, ({ make }) => make.slug).values()]
-      .map((makeModels) => ({
-        make: makeModels[0].make,
-        models: makeModels,
-        parts: placeParts(makeModels.flatMap(({ vehicles }) => vehicles)).parts,
+    return [...groupBy(series, ({ make }) => make.slug).values()]
+      .map((makeSeries) => ({
+        make: makeSeries[0].make,
+        series: makeSeries.toSorted((a, b) =>
+          byName(a.series.name, b.series.name),
+        ),
+        parts: placeParts(
+          makeSeries.flatMap(({ models }) =>
+            models.flatMap(({ vehicles }) => vehicles),
+          ),
+        ).parts,
       }))
-      .filter(({ models: makeModels }) => makeHasPage(makeModels.length))
+      .filter(({ series: makeSeries }) => makeHasPage(makeSeries.length))
       .sort((a, b) => byName(a.make.name, b.make.name));
   },
 );
-
-export function carPagesFrom({
-  cars,
-  placeParts,
-}: CatalogueSnapshot): CarPageEntry[] {
-  const byModel = groupBy(cars, ({ vehicle }) => modelKey(vehicle.model));
-  return [...byModel.values()].flatMap((modelCars) => {
-    const model = placeParts(modelCars.map(({ vehicle }) => vehicle));
-    return modelCars.filter(({ vehicle }) =>
-      vehicleHasPage({ vehicle: placeParts([vehicle]), model }),
-    );
-  });
-}
 
 export const cataloguePagesFrom = oncePerSnapshot(
   'cataloguePages',
   function cataloguePages(snapshot: CatalogueSnapshot): CataloguePages {
     const hubs = makeHubsFrom(snapshot);
-    const models = hubs.flatMap(({ models: makeModels }) => makeModels);
+    const series = hubs.flatMap(({ series: makeSeries }) => makeSeries);
     return {
       makes: new Set(hubs.map(({ make }) => make.slug)),
-      models: new Set(models.map(({ model }) => modelKey(model))),
+      series: new Set(series.map((hub) => seriesKey(hub.series))),
       categories: new Set(
-        models.flatMap(({ model, categories }) =>
-          categories.map(({ category }) =>
-            placeKey(modelKey(model), category.slug),
+        series.flatMap((hub) =>
+          hub.categories.map(({ category }) =>
+            placeKey(seriesKey(hub.series), category.slug),
           ),
         ),
-      ),
-      vehicles: new Set(
-        carPagesFrom(snapshot).map(({ vehicle }) => vehicleKey(vehicle)),
       ),
     };
   },

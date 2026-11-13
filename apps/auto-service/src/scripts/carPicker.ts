@@ -10,46 +10,50 @@ export function defineCarPicker(tagName = 'car-picker'): void {
     class extends HTMLElement {
       connectedCallback(): void {
         const make = this.querySelector<HTMLSelectElement>('[name=make]');
-        const model = this.querySelector<HTMLSelectElement>('[name=model]');
+        const series = this.querySelector<HTMLSelectElement>('[name=series]');
         const { href } = this.dataset;
-        if (!make || !model || !href) return;
-        const [placeholder, ...groups] = [...model.children] as HTMLElement[];
+        if (!make || !series || !href) return;
+        const [placeholder, ...groups] = [...series.children] as HTMLElement[];
 
-        const showModels = () => {
-          const chosen = model.value;
-          model.replaceChildren(
+        const showSeries = () => {
+          const chosen = series.value;
+          series.replaceChildren(
             placeholder,
             ...groups.filter(
               ({ dataset }) => !make.value || dataset.make === make.value,
             ),
           );
-          model.value = [...model.options].some(({ value }) => value === chosen)
+          series.value = [...series.options].some(
+            ({ value }) => value === chosen,
+          )
             ? chosen
             : '';
         };
-        const choose = (makeSlug: string, modelSlug: string) => {
+        const choose = (makeSlug: string, seriesSlug: string) => {
           make.value = makeSlug;
-          showModels();
-          model.value = modelSlug;
+          showSeries();
+          series.value = seriesSlug;
         };
 
-        make.addEventListener('change', showModels);
-        model.addEventListener('change', () => {
-          const owner = groupOf(model.selectedOptions[0]);
-          if (owner && owner !== make.value) choose(owner, model.value);
+        make.addEventListener('change', showSeries);
+        series.addEventListener('change', () => {
+          const owner = groupOf(series.selectedOptions[0]);
+          if (owner && owner !== make.value) choose(owner, series.value);
         });
         this.querySelector('form')?.addEventListener('submit', (event) => {
-          if (!model.value) return;
+          if (!series.value) return;
           event.preventDefault();
           location.assign(
-            href.replace('{make}', make.value).replace('{model}', model.value),
+            href
+              .replace('{make}', make.value)
+              .replace('{series}', series.value),
           );
         });
 
         const garage = rememberedCar();
-        const listed = [...model.options].find(
+        const listed = [...series.options].find(
           (option) =>
-            option.value === garage?.model && groupOf(option) === garage.make,
+            option.value === garage?.series && groupOf(option) === garage.make,
         );
         if (garage?.make && listed) choose(garage.make, listed.value);
       }

@@ -13,8 +13,20 @@ const model = {
     series: { name: 'X3', translations: null, make },
   },
 };
-const modelPlace: CarHit = { kind: 'model', make, model, vehicle: null };
-const makePlace: CarHit = { kind: 'make', make, model: null, vehicle: null };
+const seriesPlace: CarHit = {
+  kind: 'series',
+  make,
+  series: { name: 'X3', translations: null },
+  model: null,
+  vehicle: null,
+};
+const makePlace: CarHit = {
+  kind: 'make',
+  make,
+  series: null,
+  model: null,
+  vehicle: null,
+};
 
 const result = (normalized: string, slug: string) => ({
   normalized_value: normalized,
@@ -54,11 +66,11 @@ describe('planSearch', () => {
       resolveVin: async () => ({
         kind: 'inquiry',
         vin: VIN,
-        place: modelPlace,
+        place: seriesPlace,
       }),
     });
     expect(await plan(`q=${VIN}`, catalogue)).toEqual({
-      redirect: '/ru/parts/bmw/e83-x3-20d/',
+      redirect: '/ru/parts/bmw/x3/',
       status: 303,
     });
     expect(catalogue.search).not.toHaveBeenCalled();
@@ -372,13 +384,16 @@ describe('planSearch', () => {
     });
   });
 
-  it('sends a Model without a category or query to its hub', async () => {
+  it('lists every Part of a Model scoped without a category or query', async () => {
     const catalogue = batteries();
 
-    expect(
-      await plan('make=bmw&model=f30-320d&facets=brand%3Abosch', catalogue),
-    ).toEqual({ redirect: '/ru/parts/bmw/f30-320d/', status: 302 });
-    expect(catalogue.search).not.toHaveBeenCalled();
+    const outcome = await plan('make=bmw&model=f30-320d', catalogue);
+    if (!('view' in outcome)) throw new Error('expected a view');
+
+    expect(outcome.view.searchable).toBe(true);
+    expect(catalogue.search).toHaveBeenCalledWith(
+      expect.objectContaining({ make: 'bmw', model: 'f30-320d', q: '' }),
+    );
   });
 
   it('resets the filters of a category listing back to its page', async () => {
@@ -394,13 +409,13 @@ describe('planSearch', () => {
     );
   });
 
-  it('resets the filters of a Model category listing back to its page when the Model has one', async () => {
+  it('resets the filters of a Model category listing on the search, which is the only page it has', async () => {
     const search = vi.fn(async () => ({
       ...found(2),
       facets: [facetOf('brand', 'bosch', 'varta')],
       category: { slug: 'batteries', name: 'Аккумуляторы' },
       model,
-      scope_pages: { make: true, model: true },
+      scope_pages: { make: true, series: true },
     }));
     const outcome = await plan(
       'category=batteries&make=bmw&model=e83-x3-20d&facets=brand%3Abosch',
@@ -409,7 +424,7 @@ describe('planSearch', () => {
     if (!('view' in outcome)) throw new Error('expected a view');
 
     expect(outcome.view.filtersHref([], [])).toBe(
-      '/ru/parts/bmw/e83-x3-20d/batteries/',
+      '/ru/parts/search/?category=batteries&make=bmw&model=e83-x3-20d',
     );
   });
 
@@ -682,30 +697,13 @@ describe('planSearch', () => {
     ).toEqual({ redirect: '/ru/parts/c/batteries/', status: 302 });
   });
 
-  it('sends a Model category range that filters nothing back to its page when the Model has one', async () => {
+  it('keeps the Model on the search when a range filters nothing', async () => {
     const search = vi.fn(async () => ({
       ...found(2),
       facets: [numberFacet('capacity', '60')],
       category: { slug: 'batteries', name: 'Аккумуляторы' },
       model,
-      scope_pages: { make: true, model: true },
-    }));
-
-    expect(
-      await plan(
-        'category=batteries&make=bmw&model=e83-x3-20d&min.capacity=0',
-        fakeCatalogue({ search }),
-      ),
-    ).toEqual({ redirect: '/ru/parts/bmw/e83-x3-20d/batteries/', status: 302 });
-  });
-
-  it('keeps the Model on the search when a range that filters nothing has no Model page to return to', async () => {
-    const search = vi.fn(async () => ({
-      ...found(2),
-      facets: [numberFacet('capacity', '60')],
-      category: { slug: 'batteries', name: 'Аккумуляторы' },
-      model,
-      scope_pages: { make: true, model: false },
+      scope_pages: { make: true, series: true },
     }));
 
     expect(
