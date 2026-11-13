@@ -7,6 +7,7 @@ import {
 } from './promptRules.ts';
 
 const CYRILLIC = /\p{Script=Cyrillic}/u;
+const MISSING_FIELD_RETRIES = 2;
 
 export interface TranslateFieldsOptions<L extends string> {
   fields: Record<string, string>;
@@ -61,18 +62,29 @@ export async function translateFields<L extends string>(
       if (Object.keys(russian).length === 0)
         return [locale, { ...fields }] as const;
       const chunk = `${subject}.${locale}`;
-      const answer = await callOpenAiJson({
-        apiKey,
-        model,
-        systemPrompt: fieldsPrompt(
-          languageName[locale],
-          businessDescription,
-          subject,
-          localeGuidance?.[locale],
-        ),
-        userContent: JSON.stringify(russian),
-        chunk,
-      });
+      const ask = (pending: Record<string, string>) =>
+        callOpenAiJson({
+          apiKey,
+          model,
+          systemPrompt: fieldsPrompt(
+            languageName[locale],
+            businessDescription,
+            subject,
+            localeGuidance?.[locale],
+          ),
+          userContent: JSON.stringify(pending),
+          chunk,
+        });
+      let answer = await ask(russian);
+      for (let retry = 0; retry < MISSING_FIELD_RETRIES; retry += 1) {
+        const missing = Object.fromEntries(
+          Object.entries(russian).filter(
+            ([key]) => typeof answer[key] !== 'string',
+          ),
+        );
+        if (Object.keys(missing).length === 0) break;
+        answer = { ...answer, ...(await ask(missing)) };
+      }
       assertSafeTranslation(russian, answer, chunk);
       return [
         locale,

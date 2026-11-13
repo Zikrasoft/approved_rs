@@ -2,6 +2,7 @@ import { afterEach, describe, it, expect, vi } from 'vitest';
 import { fieldsPrompt, translateFields } from './translateFields.ts';
 import { NO_CYRILLIC_RULE } from './promptRules.ts';
 import {
+  stubOpenAiFetch,
   stubOpenAiResponse,
   stubTranslate,
   systemPrompts,
@@ -44,6 +45,31 @@ describe('translateFields', () => {
         fieldsPrompt('English', OPTIONS.businessDescription, OPTIONS.subject),
       ].sort(),
     );
+  });
+
+  it('asks again only for the fields the model left out', async () => {
+    const sent: string[] = [];
+    stubOpenAiFetch((content) => {
+      sent.push(content);
+      const asked = JSON.parse(content) as Record<string, string>;
+      return sent.length === 1
+        ? { title: 'Akumulator Varta' }
+        : Object.fromEntries(Object.keys(asked).map((key) => [key, 'Opis']));
+    });
+    const result = await translateFields({ ...OPTIONS, targetLocales: ['sr'] });
+    expect(result).toEqual({
+      sr: { title: 'Akumulator Varta', description: 'Opis' },
+    });
+    expect(JSON.parse(sent[1])).toEqual({
+      description: 'Для **японских** машин',
+    });
+  });
+
+  it('still fails when the model keeps leaving a field out', async () => {
+    stubOpenAiResponse({ title: 'Akumulator Varta' });
+    await expect(
+      translateFields({ ...OPTIONS, targetLocales: ['sr'] }),
+    ).rejects.toThrow('"a shop product.sr.description" is missing');
   });
 
   it('copies a field without Cyrillic and never sends it', async () => {
