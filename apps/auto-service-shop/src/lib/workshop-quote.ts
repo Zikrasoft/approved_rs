@@ -214,10 +214,12 @@ async function generationVehicles(
   return ids;
 }
 
-const quotePartName = (line: WorkshopQuoteLine, brand: string) =>
-  normalizePartNumber(line.name).includes(normalizePartNumber(line.number))
+const quotePartName = (line: WorkshopQuoteLine, brand: string) => {
+  const number = normalizePartNumber(line.number);
+  return number && normalizePartNumber(line.name)?.includes(number)
     ? line.name
     : [line.name, brand, line.number].join(' ');
+};
 
 const createFromWorkshopQuote = (
   catalog: CatalogModuleService,
