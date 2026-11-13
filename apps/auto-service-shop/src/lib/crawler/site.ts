@@ -14,6 +14,7 @@ export type CrawledSite = {
   fetchMode?: FetchMode;
   locale?: string;
   waitFor?: string;
+  goneWhen?: string;
   interact?: (page: Page) => Promise<void>;
   isPage: (url: string) => boolean;
   sitemapPage?: (entry: SitemapEntry) => boolean;

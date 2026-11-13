@@ -306,12 +306,39 @@ describe('crawleeFetcher', () => {
       const fetched = await fetcher.fetch({
         url: web.url('/p/1'),
         waitFor: '#late',
+        goneWhen: '#gone',
         beforeAttempt: async () => {},
       });
 
       expect(
         fetched.kind === 'response' && fetched.body.toString('utf8'),
       ).toContain('<table id="late">');
+    },
+  );
+
+  withBrowser(
+    'reports a page the site renders as missing as a 404 without acting on it',
+    async () => {
+      web = await site({
+        '/p/1': html(
+          '<html><body><script>setTimeout(() => { const gone = document.createElement("div"); gone.id = "gone"; document.body.append(gone) }, 300)</script></body></html>',
+        ),
+      });
+      open('browser');
+      let acted = false;
+
+      const fetched = await fetcher.fetch({
+        url: web.url('/p/1'),
+        waitFor: '#late',
+        goneWhen: '#gone',
+        interact: async () => {
+          acted = true;
+        },
+        beforeAttempt: async () => {},
+      });
+
+      expect(fetched).toMatchObject({ kind: 'response', status: 404 });
+      expect(acted).toBe(false);
     },
   );
 

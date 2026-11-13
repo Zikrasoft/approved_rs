@@ -49,6 +49,7 @@ describe('bilstein group partsfinder', () => {
   it('renders article pages in the browser and opens their vehicle list first', () => {
     expect(bilstein.fetchMode).toBe('browser');
     expect(bilstein.waitFor).toBe('#detail-page-applications');
+    expect(bilstein.goneWhen).toBe('#nr-container');
     expect(bilstein.interact).toBeDefined();
     expect(bilstein.locale).toBe('sr-RS');
   });

@@ -356,6 +356,7 @@ export const bilstein: CrawledSite = {
   fetchMode: 'browser',
   locale: 'sr-RS',
   waitFor: APPLICATIONS,
+  goneWhen: '#nr-container',
   interact: collectApplications,
   isPage: (url) => ARTICLE_PAGE.test(url),
   sitemapPage,

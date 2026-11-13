@@ -31,6 +31,7 @@ export type FetchRequest = {
   url: string;
   headers?: Record<string, string>;
   waitFor?: string;
+  goneWhen?: string;
   interact?: (page: Page) => Promise<void>;
   beforeAttempt: () => Promise<void>;
 };
@@ -226,13 +227,17 @@ export const crawleeFetcher = (mode: FetchMode, locale?: string): Fetcher => {
             postNavigationHooks: [afterAttempt],
             requestHandler: async ({ request, response, page }) => {
               await refusePrivateBrowserRedirects(response?.request() ?? null);
-              const { waitFor, interact } =
+              const { waitFor, goneWhen, interact } =
                 pending.get(request.uniqueKey)?.request ?? {};
               if (waitFor) {
-                await page.waitForSelector(waitFor, {
-                  state: 'attached',
-                  timeout: WAIT_FOR_MS,
-                });
+                await page.waitForSelector(
+                  goneWhen ? `${waitFor}, ${goneWhen}` : waitFor,
+                  { state: 'attached', timeout: WAIT_FOR_MS },
+                );
+              }
+              if (goneWhen && (await page.locator(goneWhen).count())) {
+                answer(request.uniqueKey, 404, {}, Buffer.alloc(0));
+                return;
               }
               await interact?.(page);
               answer(

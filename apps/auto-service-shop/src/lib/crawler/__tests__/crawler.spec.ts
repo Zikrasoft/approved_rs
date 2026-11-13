@@ -41,6 +41,7 @@ const fakeWeb = (routes: Record<string, Responder | Responder[]>) => {
     headers: Record<string, string>;
     mode: FetchMode;
     waitFor?: string;
+    goneWhen?: string;
   }[] = [];
   const closed: FetchMode[] = [];
   const locales: [FetchMode, string | undefined][] = [];
@@ -63,12 +64,25 @@ const fakeWeb = (routes: Record<string, Responder | Responder[]>) => {
   const openFetcher = (mode: FetchMode, locale?: string): Fetcher => {
     locales.push([mode, locale]);
     return {
-      fetch: async ({ url, headers = {}, waitFor, beforeAttempt }) => {
+      fetch: async ({
+        url,
+        headers = {},
+        waitFor,
+        goneWhen,
+        beforeAttempt,
+      }) => {
         const answer = responder(url);
         const attempts = answer().kind === 'blocked' ? BLOCKED_ATTEMPTS : 1;
         for (let attempt = 0; attempt < attempts; attempt++) {
           await beforeAttempt();
-          requests.push({ url, at: clock.time, headers, mode, waitFor });
+          requests.push({
+            url,
+            at: clock.time,
+            headers,
+            mode,
+            waitFor,
+            goneWhen,
+          });
         }
         return answer();
       },
@@ -412,6 +426,7 @@ medusaIntegrationTestRunner({
         const site = {
           ...testSite('cloudy', 2000, 'browser'),
           waitFor: '#criteria',
+          goneWhen: '#missing',
           locale: 'sr-RS',
         };
         const web = fakeWeb({
@@ -425,11 +440,15 @@ medusaIntegrationTestRunner({
         const progress = await crawl(site, web);
 
         expect(
-          web.requests.map(({ mode, waitFor }) => [mode, waitFor]),
+          web.requests.map(({ mode, waitFor, goneWhen }) => [
+            mode,
+            waitFor,
+            goneWhen,
+          ]),
         ).toEqual([
-          ['http', undefined],
-          ['http', undefined],
-          ['browser', '#criteria'],
+          ['http', undefined, undefined],
+          ['http', undefined, undefined],
+          ['browser', '#criteria', '#missing'],
         ]);
         expect(progress.pages).toMatchObject({ done: 1 });
         expect([...web.closed].sort()).toEqual(['browser', 'http']);
