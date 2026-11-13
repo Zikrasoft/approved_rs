@@ -114,7 +114,11 @@ export const requestIdOf = (request: Request): string | undefined =>
 
 export function catalogueFromEnv(
   env: CatalogueEnv,
-  { preview = false, visitor }: { preview?: boolean; visitor?: Request } = {},
+  {
+    preview = false,
+    visitor,
+    timeoutMs,
+  }: { preview?: boolean; visitor?: Request; timeoutMs?: number } = {},
 ) {
   const config = catalogueEnvSchema.parse(env);
   if (!config) return null;
@@ -124,6 +128,7 @@ export function catalogueFromEnv(
     ...shop,
     shopOpen: shopOpen(env),
     preview,
+    timeoutMs,
     requestId: visitor && requestIdOf(visitor),
     bot: visitor && isBotAgent(visitor.headers.get('user-agent')),
     visitorId: visitor && visitorIdOf(visitor),
@@ -158,6 +163,8 @@ export const PREVIOUS_BUILD_URL = `${CARLAB.url}/catalogue-build.json`;
 
 const SHRINK_FLOOR = 0.5;
 
+export const BUILD_CATALOGUE_TIMEOUT_MS = 60_000;
+
 const previousBuildSchema = z.object({
   partPages: z.number().int().nonnegative(),
 });
@@ -177,7 +184,9 @@ async function livePartPages(): Promise<number> {
 
 async function loadSnapshot(env: CatalogueEnv) {
   const live = env.VERCEL === '1' ? await livePartPages() : 0;
-  const catalogue = catalogueFromEnv(env);
+  const catalogue = catalogueFromEnv(env, {
+    timeoutMs: BUILD_CATALOGUE_TIMEOUT_MS,
+  });
   if (!catalogue) {
     if (live > 0) {
       throw new Error(

@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createCatalogue } from './catalogue';
+import { CATALOGUE_TIMEOUT_MS, createCatalogue } from './catalogue';
 import {
   DEV_SNAPSHOT_FRESH_MS,
+  BUILD_CATALOGUE_TIMEOUT_MS,
   PREVIOUS_BUILD_URL,
   type CatalogueEnv,
   catalogueFromEnv,
@@ -1292,6 +1293,17 @@ describe('the deploy build', () => {
           : shop(url),
       ),
     );
+
+  it('gives the shop the build timeout, not the visitor one', async () => {
+    deployed(null, backend({ pages: partPages(1) }));
+    const timeout = vi.spyOn(AbortSignal, 'timeout');
+
+    await partPagesForBuild(shopEnv());
+
+    expect(timeout).toHaveBeenCalledWith(BUILD_CATALOGUE_TIMEOUT_MS);
+    expect(timeout).not.toHaveBeenCalledWith(CATALOGUE_TIMEOUT_MS);
+    timeout.mockRestore();
+  });
 
   it('reads the catalogue once for every page, the sitemap and llms.txt', async () => {
     const shop = backend({ pages: partPages(2) });
