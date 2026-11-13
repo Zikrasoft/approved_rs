@@ -311,11 +311,11 @@ const answer = async (page: Page, path: string, act: () => Promise<void>) => {
 
 const openApplications = async (page: Page) => {
   await page.waitForLoadState('networkidle');
-  return answer(page, '/api/makes', () =>
-    page
-      .locator(`section:has(${APPLICATIONS}) > header`)
-      .dispatchEvent('click'),
-  );
+  const header = page.locator(`section:has(${APPLICATIONS}) > header`);
+  if (await page.locator(APPLICATIONS).isVisible()) {
+    await header.dispatchEvent('click');
+  }
+  return answer(page, '/api/makes', () => header.dispatchEvent('click'));
 };
 
 export const collectApplications = async (page: Page) => {
