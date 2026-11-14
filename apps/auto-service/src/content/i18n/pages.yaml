@@ -173,6 +173,8 @@ make:
   servicesHeadingTemplate: Что мы делаем на {make}
   worksHeadingTemplate: Наши работы на {make}
   worksAllTemplate: Все работы на {make}
+  faqHeadingTemplate: Частые вопросы о ремонте {make}
+  articlesHeadingTemplate: Статьи про {make}
   ctaHeadingTemplate: Запишите {make} в сервис
   ctaBody: 'Модель, год и что беспокоит: скажем предварительно, с чего начинать и сколько будет стоить диагностика.'
   ctaCommentPlaceholder: Модель, год и что беспокоит

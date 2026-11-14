@@ -39,7 +39,8 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
   const site = content(locale).site;
   const workEntries = await getCollection('works');
   const works = publishedWorks(workEntries);
-  const articles = blogArticles(await getCollection('articles'));
+  const articleEntries = await getCollection('articles');
+  const articles = blogArticles(articleEntries);
   const blog = content(locale).blog;
   const categories = await categoriesForBuild();
   const makes = await makeHubsForBuild();
@@ -146,10 +147,14 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
     ],
     other: [
       { label: site.common.homeLabel, href: url(PathBuilder.home(locale)) },
-      ...workshopMakePages(workEntries).map(({ make }) => ({
-        label: withPlaceholder(pages.make.headingTemplate, 'make', make.name),
-        href: url(PathBuilder.carsMake(locale, make.slug)),
-      })),
+      ...workshopMakePages(workEntries, articleEntries).map(
+        ({ make, overview }) => ({
+          label: overview
+            ? localizedArticle(overview, locale).title
+            : withPlaceholder(pages.make.headingTemplate, 'make', make.name),
+          href: url(PathBuilder.carsMake(locale, make.slug)),
+        }),
+      ),
       { label: pages.bmw.heading, href: url(PathBuilder.bmw(locale)) },
       { label: site.nav.contact, href: url(PathBuilder.contact(locale)) },
       {

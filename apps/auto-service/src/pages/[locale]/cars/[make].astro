@@ -1,11 +1,15 @@
 ---
 import { getCollection } from 'astro:content';
 import { withPlaceholder } from '@podbor/i18n';
+import { localizedArticle } from '@podbor/blog/article';
+import { faqPageSchema, safeMarkdown } from '@podbor/site-kit';
 import Shell from '@/layouts/Shell.astro';
 import Icon from '@/components/Icon.astro';
 import PageHero from '@/components/PageHero.astro';
 import ServiceList from '@/components/ServiceList.astro';
 import WorkGrid from '@/components/WorkGrid.astro';
+import Faq from '@/components/Faq.astro';
+import ArticleCard from '@/components/ArticleCard.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
@@ -14,7 +18,10 @@ import { workshopMakePages, type WorkshopMakePage } from '@/utils/works';
 
 export async function getStaticPaths() {
   return withLocales(
-    workshopMakePages(await getCollection('works')).map((page) => ({
+    workshopMakePages(
+      await getCollection('works'),
+      await getCollection('articles'),
+    ).map((page) => ({
       params: { make: page.make.slug },
       props: { page },
     })),
@@ -27,26 +34,37 @@ interface Props {
 
 const MAX_WORKS = 6;
 
-const { make, works } = Astro.props.page;
+const { make, works, overview, articles } = Astro.props.page;
 const locale = localeFrom(Astro.url.pathname);
 const { pages, home } = content(locale);
 const copy = pages.make;
 const named = (template: string) =>
   withPlaceholder(template, 'make', make.name);
+const about = overview && localizedArticle(overview, locale);
+const faq = about?.faq ?? [];
 ---
 
 <Shell
   title={named(copy.metaTitleTemplate)}
   description={named(copy.metaDescriptionTemplate)}
+  jsonLd={faq.length > 0 ? [faqPageSchema(faq)] : []}
 >
   <PageHero
     eyebrow={make.name}
-    heading={named(copy.headingTemplate)}
-    lead={named(copy.leadTemplate)}
+    heading={about?.title ?? named(copy.headingTemplate)}
+    lead={about?.lead ?? named(copy.leadTemplate)}
     crumbs={[
       { href: PathBuilder.carsMake(locale, make.slug), label: make.name },
     ]}
   />
+
+  {
+    about?.body.trim() && (
+      <section data-make-overview class="wrap pt-band md:pt-band-lg">
+        <div class="prose-shop max-w-2xl" set:html={safeMarkdown(about.body)} />
+      </section>
+    )
+  }
 
   <section class="wrap py-band md:py-band-lg">
     <h2 class="text-section">{named(copy.servicesHeadingTemplate)}</h2>
@@ -66,6 +84,30 @@ const named = (template: string) =>
       <Icon name="chevronRight" size={14} />
     </a>
   </section>
+
+  {
+    faq.length > 0 && (
+      <section data-make-faq class="wrap pb-band">
+        <h2 class="text-section">{named(copy.faqHeadingTemplate)}</h2>
+        <Faq items={faq} class="mt-5 max-w-3xl md:mt-6" />
+      </section>
+    )
+  }
+
+  {
+    articles.length > 0 && (
+      <section data-make-articles class="wrap pb-band">
+        <h2 class="text-section">{named(copy.articlesHeadingTemplate)}</h2>
+        <ul class="mt-5 grid gap-4 md:mt-6 md:grid-cols-2 lg:grid-cols-3">
+          {articles.map((article) => (
+            <li>
+              <ArticleCard article={article} />
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
 
   <FinalCta
     eyebrow={home.finalCta.eyebrow}

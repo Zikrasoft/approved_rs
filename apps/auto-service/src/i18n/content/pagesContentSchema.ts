@@ -183,6 +183,8 @@ export const pagesContentSchema = z
         servicesHeadingTemplate: z.string().includes('{make}'),
         worksHeadingTemplate: z.string().includes('{make}'),
         worksAllTemplate: z.string().includes('{make}'),
+        faqHeadingTemplate: z.string().includes('{make}'),
+        articlesHeadingTemplate: z.string().includes('{make}'),
         ctaHeadingTemplate: z.string().includes('{make}'),
         ctaBody: z.string(),
         ctaCommentPlaceholder: z.string(),
