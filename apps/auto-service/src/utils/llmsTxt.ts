@@ -1,7 +1,7 @@
 import { DEVELOPER } from '@podbor/brands';
 import { getCollection } from 'astro:content';
 import { mapPlaceUrl, mapRouteUrl } from '@podbor/site-kit';
-import { renderBrandLlmsTxt } from '@podbor/i18n';
+import { renderBrandLlmsTxt, withPlaceholder } from '@podbor/i18n';
 import {
   SITE_URL,
   SITE_NAME,
@@ -19,7 +19,11 @@ import {
 import { categoryAddon } from '@/utils/categoryAddon';
 import { formatMoney, PRICE_CURRENCY } from '@/utils/money';
 import { paragraphs } from '@podbor/site-kit';
-import { localizedWork, publishedWorks } from '@/utils/works';
+import {
+  localizedWork,
+  publishedWorks,
+  workshopMakePages,
+} from '@/utils/works';
 import { PathBuilder } from '@/utils/paths';
 import { BCP47_BY_LOCALE, SUPPORTED_LOCALES, type Locale } from '@/i18n/config';
 import { content } from '@/i18n/content';
@@ -32,7 +36,8 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
   const pages = content(locale).pages;
   const services = content(locale).services;
   const site = content(locale).site;
-  const works = publishedWorks(await getCollection('works'));
+  const workEntries = await getCollection('works');
+  const works = publishedWorks(workEntries);
   const categories = await categoriesForBuild();
   const makes = await makeHubsForBuild();
 
@@ -126,6 +131,10 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
     ],
     other: [
       { label: site.common.homeLabel, href: url(PathBuilder.home(locale)) },
+      ...workshopMakePages(workEntries).map(({ make }) => ({
+        label: withPlaceholder(pages.make.headingTemplate, 'make', make.name),
+        href: url(PathBuilder.carsMake(locale, make.slug)),
+      })),
       { label: pages.bmw.heading, href: url(PathBuilder.bmw(locale)) },
       { label: site.nav.contact, href: url(PathBuilder.contact(locale)) },
       {

@@ -8,6 +8,7 @@ vi.mock('astro:content', () => ({
       body: 'Телом на русском.',
       data: {
         title: 'BMW X5 — плёнка PPF',
+        make: 'bmw',
         published: true,
         image: { src: '/image.jpg' },
         date: new Date('2026-01-01'),
@@ -63,6 +64,20 @@ describe('generateLlmsTxt', () => {
 
   it('falls back to the Russian title when a locale has no translation', async () => {
     expect(await generateLlmsTxt('en')).toContain('[BMW X5 — плёнка PPF]');
+  });
+
+  it('links a Make page for each Make with a Work, in every locale', async () => {
+    for (const locale of SUPPORTED_LOCALES) {
+      const heading = content(locale).pages.make.headingTemplate.replace(
+        '{make}',
+        'BMW',
+      );
+      const body = await generateLlmsTxt(locale);
+      expect(body).toContain(
+        `[${heading}](https://carlab.rs/${locale}/cars/bmw/)`,
+      );
+      expect(body).not.toContain('/cars/audi/');
+    }
   });
 
   it('"other languages" links to the other locales, not the current one', async () => {
