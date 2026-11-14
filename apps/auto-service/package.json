@@ -21,6 +21,7 @@
     "@keystar/ui": "0.10.0",
     "@keystatic/astro": "6.0.0",
     "@keystatic/core": "0.6.9",
+    "@podbor/blog": "workspace:*",
     "@podbor/brands": "workspace:*",
     "@podbor/catalog-contract": "workspace:*",
     "@podbor/i18n": "workspace:*",
