@@ -1,6 +1,7 @@
 ---
 title: 'Peugeot 208 1.2 PureTech: большой сервис с заменой ГРМ'
 car: Peugeot 208
+make: peugeot
 year: 2020
 servicesApplied:
   - engine-gearbox

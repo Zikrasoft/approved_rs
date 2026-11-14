@@ -11,7 +11,7 @@ fi
 
 failed=0
 if ! $sum -c --quiet migrations.sha256 >&2; then
-  echo "A shop migration listed in migrations.sha256 changed or disappeared. A database may already have run it, so never edit it: add a new additive migration instead (AGENTS.md, Shop migrations)." >&2
+  echo "A shop migration listed in migrations.sha256 changed or disappeared. A database may already have run it, so never edit it: add a new additive migration instead (docs/guides/shop-migrations.md)." >&2
   failed=1
 fi
 

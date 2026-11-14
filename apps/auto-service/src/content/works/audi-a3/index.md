@@ -24,6 +24,7 @@ translations:
       Zatim smo se pozabavili menjačem. DQ200 je robotizovani menjač sa suvim kvačilima. Zamenili smo ulje u mehaničkom delu i radnu tečnost u mehatronici. Naša preporuka za ovaj menjač je jednostavna: ulje i mehatroniku treba servisirati najmanje jednom na **60.000 km**. Uz ovakav interval, menjač duže traje i ređe dolazi na skupu popravku.
     car: Audi A3
 car: Audi A3
+make: audi
 year: 2019
 servicesApplied:
   - servicing

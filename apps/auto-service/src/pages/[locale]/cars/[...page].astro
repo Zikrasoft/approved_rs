@@ -1,0 +1,160 @@
+---
+import type { ImageMetadata } from 'astro';
+import { getImage } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import { paginate, type Page } from '@podbor/site-kit/pagination';
+import Shell from '@/layouts/Shell.astro';
+import Icon from '@/components/Icon.astro';
+import MakeCard from '@/components/MakeCard.astro';
+import PageHero from '@/components/PageHero.astro';
+import ListingPager from '@/components/ListingPager.astro';
+import FinalCta from '@/components/FinalCta.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { makePartsForBuild } from '@/utils/catalogueEnv';
+import { listingHeading, listingTitle } from '@/utils/listing';
+import type { Make } from '@/utils/makes';
+import { PathBuilder, withLocales } from '@/utils/paths';
+import { CARS_PAGE_SIZE, makeCover, workshopMakePages } from '@/utils/works';
+
+type MakeTile = { make: Make; cover: ImageMetadata | undefined };
+
+export async function getStaticPaths() {
+  const cards: MakeTile[] = workshopMakePages(
+    await getCollection('works'),
+    await getCollection('articles'),
+    await makePartsForBuild(),
+  ).map((page) => ({ make: page.make, cover: makeCover(page) }));
+  return withLocales(
+    paginate(cards, CARS_PAGE_SIZE).map((listing) => ({
+      params: {
+        page: listing.number > 1 ? String(listing.number) : undefined,
+      },
+      props: { listing, cards },
+    })),
+  );
+}
+
+interface Props {
+  listing: Page<MakeTile>;
+  cards: MakeTile[];
+}
+
+const EAGER = 4;
+
+const { listing, cards } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const { pages, home } = content(locale);
+const copy = pages.cars;
+const pageHref = (number: number) => PathBuilder.cars(locale, number);
+const heading = listingHeading(listing.number, copy);
+const searchIndex = await Promise.all(
+  cards.map(async ({ make, cover }) => ({
+    name: make.name,
+    href: PathBuilder.carsMake(locale, make.slug),
+    picture: cover
+      ? (await getImage({ src: cover, width: 560, quality: 68 })).src
+      : null,
+  })),
+);
+---
+
+<Shell
+  title={listingTitle(listing.number, copy)}
+  description={copy.metaDescription}
+>
+  <PageHero
+    eyebrow={copy.navLabel}
+    heading={heading}
+    lead={listing.number === 1 ? copy.lead : undefined}
+    compact
+    desktopLead
+    crumbs={[{ href: PathBuilder.cars(locale), label: copy.navLabel }]}
+  />
+
+  <section class="wrap pt-6 pb-band md:py-band-lg">
+    {
+      cards.length === 0 ? (
+        <p class="card p-6 text-base text-muted">{copy.empty}</p>
+      ) : (
+        <list-search class="flex flex-col gap-6 md:gap-8">
+          <label class="relative block w-full sm:max-w-sm">
+            <span class="sr-only">{copy.searchLabel}</span>
+            <Icon
+              name="search"
+              size={16}
+              class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted"
+            />
+            <input
+              type="search"
+              data-search-input
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+              enterkeyhint="search"
+              placeholder={copy.searchPlaceholder}
+              class="field min-h-12 py-2 pl-9 [&::-webkit-search-cancel-button]:appearance-none"
+            />
+          </label>
+
+          <ul
+            data-search-idle
+            class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4"
+          >
+            {listing.items.map(({ make, cover }, index) => (
+              <li>
+                <MakeCard
+                  name={make.name}
+                  href={PathBuilder.carsMake(locale, make.slug)}
+                  cover={cover}
+                  eager={index < EAGER}
+                />
+              </li>
+            ))}
+          </ul>
+          <ul
+            data-search-results
+            hidden
+            class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4"
+          />
+          <template data-search-template>
+            <li>
+              <MakeCard template />
+            </li>
+          </template>
+          <script
+            is:inline
+            type="application/json"
+            data-search-index
+            set:html={JSON.stringify(searchIndex).replaceAll('<', '\\u003c')}
+          />
+
+          <p data-search-empty hidden class="card p-6 text-base text-muted">
+            {copy.noMatch}
+          </p>
+          <p data-search-status aria-live="polite" class="sr-only" />
+
+          <div data-search-idle class="contents">
+            <ListingPager
+              label={copy.pagination}
+              listing={listing}
+              href={pageHref}
+            />
+          </div>
+        </list-search>
+      )
+    }
+  </section>
+
+  <FinalCta
+    eyebrow={home.finalCta.eyebrow}
+    heading={copy.ctaHeading}
+    body={copy.ctaBody}
+  />
+</Shell>
+
+<script>
+  import { defineListSearch } from '@podbor/site-kit/list-search';
+
+  defineListSearch();
+</script>

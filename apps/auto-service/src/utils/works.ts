@@ -1,9 +1,17 @@
 import type { ImageMetadata } from 'astro';
 import type { CollectionEntry } from 'astro:content';
+import { makeArticles } from '@podbor/blog/article';
+import { makePages } from '@podbor/blog/make-pages';
 import { normalizePartNumber } from '@podbor/catalog-contract';
-import { localizedEntry, publishedByNewest } from '@podbor/i18n';
+import {
+  localizedEntry,
+  publishedByNewest,
+  publishedEntries,
+} from '@podbor/i18n';
 import type { Locale } from '@/i18n/config';
-import type { PartPageEntry } from './catalogueSnapshot';
+import type { Article } from './blog';
+import type { MakePartsEntry, PartPageEntry } from './catalogueSnapshot';
+import { MAKES } from './makes';
 import type { ServiceSlug } from './services';
 
 type WorkEntry = CollectionEntry<'works'>;
@@ -62,36 +70,48 @@ export const workLeadService = ({ data: { servicesApplied } }: Work) =>
     ? PARTS_SOURCING
     : servicesApplied[0];
 
-const MAKES = [
-  'Alfa Romeo',
-  'Audi',
-  'BMW',
-  'Honda',
-  'Mercedes-Benz',
-  'MINI',
-  'Peugeot',
-  'Seat',
-  'Skoda',
-  'VW',
-];
+export const makeGroup = ({ data: { make } }: Work): string | undefined => make;
 
-export const makeOf = ({ data: { car } }: Work): string | undefined =>
-  MAKES.find((make) => car.toLowerCase().startsWith(make.toLowerCase()));
-
-const groupOf = (make: string) => make.toLowerCase().replaceAll(' ', '-');
-
-export const makeGroup = (work: Work): string | undefined => {
-  const make = makeOf(work);
-  return make && groupOf(make);
-};
+const carried = (works: Work[], count: number) =>
+  MAKES.filter(
+    ({ slug }) =>
+      works.filter((work) => makeGroup(work) === slug).length >= count,
+  );
 
 export const sharedMakes = (works: Work[]) =>
-  MAKES.filter(
-    (make) => works.filter((work) => makeOf(work) === make).length > 1,
-  ).map((make) => ({ label: make, group: groupOf(make) }));
+  carried(works, 2).map(({ slug, name }) => ({ label: name, group: slug }));
 
-export const makesOf = (works: Work[]): string[] =>
-  MAKES.filter((make) => works.some((work) => makeOf(work) === make));
+export const makesOf = (works: Work[]) => carried(works, 1);
+
+export const workshopMakePages = (
+  works: WorkEntry[],
+  articles: Article[],
+  parts: MakePartsEntry[],
+) =>
+  makePages(MAKES, {
+    works: featuredWorks(works),
+    articles: publishedEntries(articles),
+    parts: parts.map((entry) => ({
+      ...entry,
+      data: { make: entry.make.slug },
+    })),
+  }).map((page) => ({ ...page, ...makeArticles(page.articles) }));
+
+export type WorkshopMakePage = ReturnType<typeof workshopMakePages>[number];
+
+export const overviewConflicts = (pages: WorkshopMakePage[]) =>
+  pages.flatMap(({ make, overview, ignoredOverviews }) =>
+    overview && ignoredOverviews.length > 0
+      ? [
+          `Make ${make.slug} has ${ignoredOverviews.length + 1} overview Articles (${[overview, ...ignoredOverviews].map(({ id }) => id).join(', ')}); using ${overview.id}`,
+        ]
+      : [],
+  );
+
+export const makeCover = ({ overview, works }: WorkshopMakePage) =>
+  overview?.data.image ?? publishedByNewest(works)[0]?.data.image;
+
+export const CARS_PAGE_SIZE = 24;
 
 const WORKSHOP = 'workshop';
 

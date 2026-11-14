@@ -1,6 +1,7 @@
 ---
 title: Замена масла в DSG DQ381 на Skoda Octavia
 car: Skoda Octavia
+make: skoda
 year: 2020
 servicesApplied:
   - engine-gearbox

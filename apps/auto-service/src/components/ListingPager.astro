@@ -1,0 +1,24 @@
+---
+import { neighbours } from '@/utils/listing';
+import Pagination from './Pagination.astro';
+
+interface Props {
+  label: string;
+  listing: { number: number; count: number };
+  href: (number: number) => string;
+}
+
+const { label, listing, href } = Astro.props;
+const { prev, next } = neighbours(listing, href);
+---
+
+{
+  listing.count > 1 && (
+    <Pagination
+      label={label}
+      prev={prev}
+      next={next}
+      numbered={{ current: listing.number, count: listing.count, href }}
+    />
+  )
+}

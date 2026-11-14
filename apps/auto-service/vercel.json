@@ -11,6 +11,46 @@
   },
   "redirects": [
     {
+      "source": "/ru/bmw",
+      "destination": "/ru/cars/bmw/",
+      "permanent": true
+    },
+    {
+      "source": "/ru/bmw/",
+      "destination": "/ru/cars/bmw/",
+      "permanent": true
+    },
+    {
+      "source": "/sr/bmw",
+      "destination": "/sr/cars/bmw/",
+      "permanent": true
+    },
+    {
+      "source": "/sr/bmw/",
+      "destination": "/sr/cars/bmw/",
+      "permanent": true
+    },
+    {
+      "source": "/en/bmw",
+      "destination": "/en/cars/bmw/",
+      "permanent": true
+    },
+    {
+      "source": "/en/bmw/",
+      "destination": "/en/cars/bmw/",
+      "permanent": true
+    },
+    {
+      "source": "/bmw",
+      "destination": "/sr/cars/bmw/",
+      "permanent": true
+    },
+    {
+      "source": "/bmw/",
+      "destination": "/sr/cars/bmw/",
+      "permanent": true
+    },
+    {
       "source": "/ru/parts/maintenance-consumables",
       "destination": "/ru/parts/c/maintenance-consumables/",
       "permanent": true
@@ -386,13 +426,13 @@
       "permanent": true
     },
     {
-      "source": "/bmw",
-      "destination": "/sr/bmw/",
+      "source": "/cars/:path*",
+      "destination": "/sr/cars/:path*",
       "permanent": true
     },
     {
-      "source": "/bmw/",
-      "destination": "/sr/bmw/",
+      "source": "/blog/:path*",
+      "destination": "/sr/blog/:path*",
       "permanent": true
     },
     {

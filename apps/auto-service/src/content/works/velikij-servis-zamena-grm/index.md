@@ -1,6 +1,7 @@
 ---
 title: 'Большой сервис Skoda Octavia 2.0 TDI: замена ГРМ'
 car: Skoda Octavia
+make: skoda
 year: 2018
 servicesApplied:
   - servicing

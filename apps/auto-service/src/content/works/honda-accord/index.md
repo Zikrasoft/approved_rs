@@ -32,6 +32,7 @@ translations:
       Pored ulja, na servisu ima smisla proveriti filtere, svećice, antifriz, kočionu tečnost i ostali potrošni materijal.
     car: Honda Accord
 car: Honda Accord
+make: honda
 servicesApplied:
   - brakes-suspension
   - servicing

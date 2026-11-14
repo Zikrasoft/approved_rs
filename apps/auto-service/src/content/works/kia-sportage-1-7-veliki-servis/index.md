@@ -1,6 +1,7 @@
 ---
 title: 'Kia Sportage 1.7: большое ТО, сцепление и тормоза'
 car: Kia Sportage
+make: kia
 year: 2019
 servicesApplied:
   - diagnostics

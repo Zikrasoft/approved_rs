@@ -12,6 +12,7 @@
     "seed:demo": "medusa exec ./src/scripts/seed-demo.ts",
     "import:local": "medusa exec ./src/scripts/import-local.ts",
     "publish:local": "medusa exec ./src/scripts/publish-local.ts",
+    "export:makes": "medusa exec ./src/scripts/export-makes.ts",
     "shop:prepare": "sh scripts/shop-prepare.sh",
     "dev:shop": "medusa develop",
     "crawler": "pnpm --workspace-root exec turbo run build --filter=@podbor/auto-service-shop^... --output-logs=errors-only && node --env-file=.env.crawler -r ts-node/register src/lib/crawler/worker.ts",

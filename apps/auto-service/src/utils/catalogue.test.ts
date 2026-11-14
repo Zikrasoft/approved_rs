@@ -9,6 +9,7 @@ import {
   categoriesForBuild,
   categoryPagesForBuild,
   makeHubsForBuild,
+  makePartsForBuild,
   partPagesForBuild,
 } from './catalogueEnv';
 import { categoryFacets } from './categoryFacets';
@@ -16,6 +17,7 @@ import {
   cataloguePagesFrom,
   categoryListings,
   makeHubsFrom,
+  makePartsFrom,
 } from './catalogueSnapshot';
 import { fitGroups } from './fitGroups';
 import { catalogueLinks, PathBuilder } from './paths';
@@ -1195,6 +1197,127 @@ describe('catalogue.makeHubs', () => {
   });
 });
 
+describe('the Parts of a Make', () => {
+  const audi = {
+    ...VEHICLE,
+    id: 'veh_audi',
+    model: {
+      ...VEHICLE.model,
+      slug: 'a4-b8',
+      chassis: {
+        ...VEHICLE.model.chassis,
+        series: {
+          ...VEHICLE.model.chassis.series,
+          make: { slug: 'audi', name: 'Audi' },
+        },
+      },
+    },
+  };
+  const part = (number: string, category_id: string | null) =>
+    brandNumber('mann-filter', number, {
+      id: `part_${number}`,
+      name: number,
+      category_id,
+    });
+  const filters = ['HU816X', 'HU7020Z', 'HU6004X'].map((number) =>
+    part(number, oilFilters.id),
+  );
+  const pads = part('P1', brakePads.id);
+  const loose = part('L1', null);
+  const fits = (vehicle_id: string, parts: { part: { id: string } }[]) =>
+    parts.map(({ part: { id } }) =>
+      fitment(`fit_${vehicle_id}_${id}`, id, { vehicle_id }),
+    );
+  const snapshotOf = (fitments: unknown[], pages: unknown[] = []) =>
+    catalogueWith(
+      backend({
+        pages: [...filters, pads, loose, ...pages],
+        categories: [brakePads, oilFilters],
+        fitments,
+        vehicles: [VEHICLE, audi],
+      }),
+    ).snapshot();
+  const outline = (snapshot: Awaited<ReturnType<typeof snapshotOf>>) =>
+    makePartsFrom(snapshot).map(({ make, parts, hub, categories }) => [
+      make.slug,
+      parts,
+      hub,
+      categories.map(({ slug }) => slug),
+    ]);
+
+  it('counts the published Parts fitting each Make and ranks its Categories by them', async () => {
+    const snapshot = await snapshotOf([
+      ...fits(VEHICLE.id, [...filters, pads, loose]),
+      ...fits(audi.id, [pads]),
+    ]);
+
+    expect(outline(snapshot)).toEqual([
+      ['audi', 1, false, ['brake-pads']],
+      ['bmw', 5, true, ['oil-filters', 'brake-pads']],
+    ]);
+  });
+
+  it('counts the goods the Requirements of a Make match', async () => {
+    const oil = category('engine-oil', 'Моторное масло');
+    const ll04 = brandNumber('liqui-moly', '20646', {
+      id: 'part_ll04',
+      name: 'LL-04',
+      category_id: oil.id,
+      attributes: { approvals: ['bmw-ll-04'] },
+    });
+    const snapshot = await catalogueWith(
+      backend({
+        pages: [ll04],
+        categories: [oil],
+        vehicles: [
+          {
+            ...VEHICLE,
+            requirements: [
+              {
+                id: 'requirement_b47',
+                category_id: oil.id,
+                field_key: 'approvals',
+                option_keys: ['bmw-ll-04'],
+                min: null,
+                max: null,
+                quantity: 5,
+              },
+            ],
+          },
+        ],
+      }),
+    ).snapshot();
+
+    expect(outline(snapshot)).toEqual([['bmw', 1, false, ['engine-oil']]]);
+  });
+
+  it('leaves out a Make whose only Part is retired or has no page', async () => {
+    const snapshot = await catalogueWith(
+      backend({
+        pages: [{ ...pads, listed: false }],
+        categories: [brakePads],
+        fitments: [
+          ...fits(audi.id, [pads]),
+          fitment('fit_ghost', 'part_ghost', { vehicle_id: audi.id }),
+        ],
+        vehicles: [audi],
+      }),
+    ).snapshot();
+
+    expect(makePartsFrom(snapshot)).toEqual([]);
+  });
+
+  it('assembles the Parts of every Make once per snapshot', async () => {
+    const snapshot = await snapshotOf([]);
+
+    expect(makePartsFrom(snapshot)).toBe(makePartsFrom(snapshot));
+  });
+
+  it('gives no Make any Parts when no backend is configured', async () => {
+    expect(await makePartsForBuild({})).toEqual([]);
+  });
+});
+
 describe('catalogue redirects', () => {
   const renamed = {
     from: { make: 'bmw-old' },
@@ -1389,6 +1512,22 @@ describe('the deploy build', () => {
     );
   });
 
+  it('names MEDUSA_BACKEND_URL and the URL it tried when the shop is down', async () => {
+    const down = new TypeError('fetch failed');
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.reject(down)),
+    );
+    const env = shopEnv();
+
+    const failure = await partPagesForBuild(env).catch((error) => error);
+
+    expect(failure.message).toContain('MEDUSA_BACKEND_URL');
+    expect(failure.message).toContain(env.MEDUSA_BACKEND_URL);
+    expect(failure.message).toContain('fetch failed');
+    expect(failure.cause).toBe(down);
+  });
+
   it('fails when the live site cannot say what it serves', async () => {
     vi.stubGlobal(
       'fetch',
@@ -1398,6 +1537,33 @@ describe('the deploy build', () => {
     await expect(partPagesForBuild(shopEnv({ VERCEL: '1' }))).rejects.toThrow(
       '503',
     );
+  });
+
+  it('warns when a catalogue Make is missing from the exported list', async () => {
+    const audi = { slug: 'audi', name: 'Audi' };
+    const unknown = { slug: 'zastava', name: 'Zastava' };
+    const vehicleOf = (make: typeof audi) => ({
+      ...VEHICLE,
+      id: make.slug,
+      model: {
+        ...VEHICLE.model,
+        chassis: {
+          ...VEHICLE.model.chassis,
+          series: { ...VEHICLE.model.chassis.series, make },
+        },
+      },
+    });
+    deployed(null, backend({ vehicles: [audi, unknown].map(vehicleOf) }));
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    await partPagesForBuild(shopEnv());
+
+    expect(warn.mock.calls).toEqual([
+      [
+        'Make zastava (Zastava) is in the catalogue but not in src/content/makes.json',
+      ],
+    ]);
+    warn.mockRestore();
   });
 });
 

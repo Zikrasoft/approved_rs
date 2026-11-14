@@ -4,7 +4,7 @@ import HeroContacts from './HeroContacts.astro';
 import type { ServiceSlug } from '@/utils/services';
 
 interface Props {
-  eyebrow: string;
+  eyebrow?: string;
   heading: string;
   lead?: string;
   crumbs?: Crumb[];
@@ -34,7 +34,7 @@ const {
     ]}
   >
     <Breadcrumbs crumbs={crumbs} />
-    {!compact && <span class="eyebrow">{eyebrow}</span>}
+    {!compact && eyebrow && <span class="eyebrow">{eyebrow}</span>}
     <h1 class="text-hero max-w-3xl break-words" data-hero-heading>
       {heading}
     </h1>

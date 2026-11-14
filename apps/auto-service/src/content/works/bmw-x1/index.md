@@ -1,6 +1,7 @@
 ---
 title: BMW X1
 car: 'BMW X1 '
+make: bmw
 year: 2019
 servicesApplied:
   - engine-gearbox

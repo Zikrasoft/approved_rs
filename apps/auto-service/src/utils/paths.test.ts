@@ -30,6 +30,18 @@ describe('PathBuilder.partsModelSearch', () => {
   });
 });
 
+describe('Make paths', () => {
+  it('puts a Make page under /cars/ by the catalogue slug', () => {
+    expect(PathBuilder.carsMake('sr', 'mercedes-benz')).toBe(
+      '/sr/cars/mercedes-benz/',
+    );
+  });
+
+  it('narrows the Works list to one Make', () => {
+    expect(PathBuilder.worksOfMake('en', 'bmw')).toBe('/en/works/?make=bmw');
+  });
+});
+
 describe('PathBuilder', () => {
   it('prefixes every path with the locale and ends with a slash', () => {
     const paths = [
@@ -42,7 +54,6 @@ describe('PathBuilder', () => {
       PathBuilder.thanks('sr'),
       PathBuilder.privacy('sr'),
       PathBuilder.about('sr'),
-      PathBuilder.bmw('sr'),
     ];
     paths.forEach((path) => {
       expect(path.startsWith('/sr/')).toBe(true);
@@ -75,6 +86,20 @@ describe('PathBuilder', () => {
       );
     },
   );
+
+  it('puts the blog, its later pages, an Article and a Make page under their sections', () => {
+    expect(PathBuilder.blog('sr')).toBe('/sr/blog/');
+    expect(PathBuilder.blog('sr', 1)).toBe('/sr/blog/');
+    expect(PathBuilder.blog('sr', 2)).toBe('/sr/blog/2/');
+    expect(PathBuilder.blogArticle('sr', 'oil')).toBe('/sr/blog/oil/');
+    expect(PathBuilder.carsMake('sr', 'bmw')).toBe('/sr/cars/bmw/');
+  });
+
+  it('puts the list of Make pages and its later pages under /cars/', () => {
+    expect(PathBuilder.cars('en')).toBe('/en/cars/');
+    expect(PathBuilder.cars('en', 1)).toBe('/en/cars/');
+    expect(PathBuilder.cars('en', 3)).toBe('/en/cars/3/');
+  });
 });
 
 describe('swapLocale', () => {

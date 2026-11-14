@@ -28,52 +28,13 @@ packages/catalog-contract/ what auto-service-shop and the carlab.rs storefront a
 
 A package's contents are an `ls` away and go stale in a document, so this lists
 jobs rather than files. What an `ls` will not tell you is which **markup
-contracts** a package owns, and an app that breaks one fails silently:
-`packages/site-kit` owns `data-contact-order` / `data-channel` /
-`data-primary-contact` / `data-primary-channel` (preferred contact channel),
-`data-lead-form` / `data-brand-link` / `data-developer-credit` /
-`data-field` / `aria-invalid` (funnel tracking), `data-depth-slug` / `data-depth-door` / `data-revealed` (browsing
-depth on case and work pages), `data-contact-channel` /
-`data-contact-placement` (contact clicks, whose placement half
-`.github/scripts/contact-placement.ts` enforces against the built HTML) and
-`data-contact-cta` (in-flow contact regions the floating CTA's `watch`
-selector hides behind — stamp it with `contactRegion`, `contactCta` and
-`CONTACT_CTA_SELECTOR` from `@podbor/site-kit/contact-control`, never as a
-literal), `data-vin-input` (the VIN field `defineMyGarage` reads/fills,
-`MY_GARAGE_VIN_ATTRIBUTE` from `@podbor/site-kit/browser`, never a literal),
-`data-copy-number` / `data-copy-digits` / `data-copy-status` (the number
-`defineCopyPhone` copies, the digits it selects when the clipboard fails, the
-live region it fills with the copied wording; `COPY_PHONE_*_ATTRIBUTE` from
-`@podbor/site-kit/browser`, never a literal, stamped only by each app's
-`PhoneNumber.astro`) and
-`METRIKA_MASK_CLASS` (on every form that takes a contact, keeping its fields out
-of Webvisor recordings as the privacy copy promises; from
-`@podbor/site-kit/browser`, never a literal) and `--cookie-consent-height`
-(`COOKIE_CONSENT_HEIGHT_VAR` from `@podbor/site-kit/browser`, the banner's
-height that `<cookie-consent>` sets on `<html>` and every bar fixed to the
-bottom of the screen rises by; Tailwind classes and scoped CSS cannot import
-it, so they spell it out and each app's `cookieConsentLift.test.ts` counts the
-spellings against the constant). `packages/lead-crm` owns the `<lead-form>` hooks `leadForm.ts`
-picks with a non-null assertion, so a missing one is a `TypeError`:
-`data-telegram`, `data-country` (with `data-display-locale`), `data-phone`,
-the hidden `contact` and `contact_channel` inputs
-(every contact input is named from `CONTACT_INPUT_FIELDS` in
-`@podbor/lead-crm/fields`, never a literal: the no-JS refusal page
-`createLeadsRoute` renders re-posts every other field as hidden and asks for
-these again, under the same privacy line the form shows),
-`data-source-url`, `data-visitor-id`, `data-ad-source` (the hidden
-`name={AD_SOURCE_FIELD}` input the Ad visit rides in — the contact-click
-beacon posts the same field), `data-meta-ids` (the hidden
-`name={META_IDS_FIELD}` input for the Meta `fbc`/`fbp`, likewise),
-`data-submit-label` inside the submit
-button, `data-error-telegram` / `data-error-phone` / `data-error-submit`, tab buttons carrying `data-tab` + `data-panel` +
-`aria-selected`, panels carrying `data-panel` alone, and the form's own
-`data-submitting-label` and `data-armed`; the busy submit button carries
-`aria-busy`, which the apps' spinner CSS keys on. A lead form asks for no
-consent: all three sites state the privacy policy in a passive line above the
-submit, and the leads route takes a Lead with no `CONSENT_FIELD`. A form that
-renders a box (`data-consent` with its `data-error-consent`, only carlab.rs's
-checkout, whose `/api/order` still requires it) gets it checked before submit.
+contracts** a package owns, and an app that breaks one fails silently.
+**Stamping or renaming a `data-*` hook, class or CSS variable a package reads**
+(contact, funnel, search, copy-number, `<lead-form>` hooks, `METRIKA_MASK_CLASS`,
+`--cookie-consent-height`): read
+[docs/guides/markup-contracts.md](docs/guides/markup-contracts.md). A bar fixed
+to the bottom of the screen rises by `--cookie-consent-height`; each app's
+`cookieConsentLift.test.ts` counts the spellings.
 
 Each of the three sites owns its own `astro.config.mjs`, `keystatic.config.ts`,
 `vercel.json`, `vitest.config.ts` and `tsconfig.json`, and its own `.env*`.
@@ -105,28 +66,6 @@ brand: the cross-brand link builder, the legacy-redirect host map in
 — and in `src/i18n/translateConfig.ts`, which the translate scripts load under
 bare node where `import.meta.env` does not exist.
 
-The brands were chosen to satisfy one rule: no shared brand root between the
-three sites, and nothing carrying Approved's trust/verification semantics.
-
-**One CRM bot, one chat, one lead store, three brands — plus a capture bot
-each.** Telegram allows a single webhook URL per bot, so the CRM bot's
-`api/telegram-webhook.ts` and `api/reminders.ts` are deployed only by
-`apps/approved-rs`; the other two apps ship `/api/leads`, `/api/contact-click`
-and their own capture bot's `/api/telegram-capture`, and carlab.rs also
-`/api/shop-orders`, where the shop hands over its placed and canceled orders. All three write to the same `data/leads.json` on the
-same Vercel Blob store and are separated by the lead's `brand` field, which the
-app's `createBrandBot({ brand })` stamps on — a visitor can never set it.
-Connect the same Blob store to all three Vercel projects.
-
-**A lead captured for a sister brand is stored as that brand's.** approved.rs's
-partner block can open its own form for CarLab or Details, and
-`src/lib/notifyLead.ts` maps the partner service slug onto that brand's name
-(`PARTNER_SERVICE` in `packages/brands`) before the store sees the lead. So
-`brand` still means "whose lead this is", and `source_url` is what says the
-visitor came from approved.rs. The visitor still cannot name a brand: they can only pick one
-of the two partner slugs the page renders, and every other value falls through
-to approved.rs itself.
-
 **A `packages/*` change deploys all three sites, and that is the point.** The
 deploy filter in `ci.yml` is `turbo --filter="...[<deployed tag>]"` — the
 leading dots pull in the dependents of a changed package, so touching
@@ -138,11 +77,6 @@ one site writes records another cannot parse, and they land in
 enforces this — no test and no schema can see a half-deployed package. Do not
 narrow that filter to the app directories, and do not move a `deployed/*` tag
 forward by hand.
-
-**Each site writes its own leads.** A brand site posts to its own
-server-side route rather than another brand's origin — three separate Vercel
-projects on three separate domains, so a cross-origin POST buys nothing but a
-CORS config to maintain.
 
 **Why packages exist:** this repo is becoming a portfolio of deliberately
 independent brand sites (see `docs/adr/0001-one-repo-three-independent-brand-sites.md`). The
@@ -201,16 +135,6 @@ Approved's trust/verification semantics.
   for every brand and lives in the package, contact-channel labels included
   (`channelLabel` in `packages/lead-crm/src/channelLabels.ts`, after three
   byte-identical copies of it sat in the apps' `crmBot.ts`).
-- **`SOURCE_LOCALE = 'ru'` in `packages/i18n` is a deliberate exception** to that
-  rule. It is the language content is authored in, not a locale a site serves,
-  and the whole auto-translate pipeline is built on every app writing Russian and
-  the `translate` job filling the rest. `createLocaleSet` throws if `'ru'` is
-  missing from the locale list. Which locale a site _presents_ by default is a
-  separate, per-app field — `primaryLocale`, required, driving `x-default` and
-  the `detectLocale` fallback. Do not conflate the two: swapping them silently
-  renders Serbian pages in Russian, and no test catches it. A future brand that
-  authors in another language turns `SOURCE_LOCALE` into config; until one
-  exists, that would be configuration for a single caller.
 - The app binds a package through a thin re-export file (`src/lib/store.ts`,
   `src/lib/telegram/index.ts`, `src/i18n/config.ts`). That keeps the ~950 lines
   of API-route call sites and ~190 `.astro` i18n call sites free of churn when
@@ -224,251 +148,32 @@ Approved's trust/verification semantics.
   (`@podbor/lead-crm/contact-channel`, `@podbor/site-kit/browser`), never the
   package root: the root barrel pulls zod, date-fns and the Telegram client
   into the browser bundle.
-- **A package built for a CommonJS consumer ships a CommonJS build behind a
-  `require` condition.** `apps/auto-service-shop` is CommonJS and consumes
-  `packages/catalog-contract`, `packages/brands`, `@podbor/i18n`'s
-  `./translate/core` and `./section`, and `@podbor/lead-crm`'s
-  `./contact-channel`, `./limits`, `./fields`, `./parts-order-copy`, `./phone`,
-  `./vin`, `./verify-secret`, `./shop-orders-wire` and `./visitor-searches-wire`; they export
-  `{ "require": dist/cjs…, "default": src/….ts }`, build with
-  `tsc -p tsconfig.cjs.json` (`module: CommonJS`, `rewriteRelativeImportExtensions`)
-  and stamp `dist/cjs/package.json` with `{"type":"commonjs"}`. Their `test` task
-  depends on their own `build` in `turbo.json`, and a `cjs.test.ts` `require()`s
-  the result — so run such a package's tests through turbo
-  (`pnpm turbo run test --filter=<package>`); a bare `pnpm --filter <package> test`
-  finds no `dist/`.
-- **A `packages/catalog-contract` response schema tolerates a shop ahead of or
-  behind the storefront.** The shop deploys on its own VPS and can roll back,
-  so the storefront build parses responses from a newer or older shop. Response
-  schemas are `z.object` (unknown keys strip, never `z.strictObject`), a display
-  vocabulary (fuel, body style, identifier type, position) is `displayEnum`, so
-  a value newer than the contract reads as `null`, and **every field added from
-  now on is `.nullable().default(null)`** (or `.catch(null)`), so a shop that
-  has not shipped it yet still parses. A field becomes required only once every
-  deployed shop sends it. The contract tests pin this with an extra key, an
-  unknown enum value and a missing new field.
-- **A helper a lazily-loaded path depends on must live in a module that imports
-  nothing heavy.** Rollup cannot code-split a module that is also statically
-  imported, so putting such a helper beside a static `libphonenumber-js` import
-  inlines the whole library into the eager chunk — measured at 3 KB → 185 KB on
-  the lead form, a 60× regression aimed squarely at slow connections. Hence
-  `@podbor/lead-crm/compose-e164` and `/phone-input`, zero-import subpaths
-  separate from `/phone`. When extracting, check the emitted chunk, not the
-  source — `/phone-input` was measured at 4 KB eager with `libphonenumber-js`
-  still behind a dynamic import.
+- **Building a package for `apps/auto-service-shop` (CommonJS), or changing a
+  `packages/catalog-contract` response schema:** read
+  [docs/guides/packages.md](docs/guides/packages.md).
+- **Putting a helper on a lazily-loaded path, or dev-only `node:fs` code in an
+  SSR route:** read [docs/guides/bundles.md](docs/guides/bundles.md).
 
 ## House style for a brand site
 
-Both new apps follow the same shape, and a third should too:
+Both new apps follow the same shape, and a third should too. Read the guide
+before touching its area:
 
-- **URL segments and slugs are English**, never transliterated Serbian:
-  `/sr/services/brakes-suspension/`, not `/sr/usluge/kocnice-i-vesanje/`. Build
-  every internal href through the app's `PathBuilder` (`src/utils/paths.ts`);
-  no page or component writes a locale-prefixed URL by hand.
-- **Locale comes from the path**, via `localeFrom(Astro.url.pathname)`. Do not
-  use `Astro.currentLocale` (it reads request headers and warns on prerendered
-  pages) and do not use `Astro.params` (it is empty on `404.astro`, which would
-  serve a Russian 404 to every visitor).
-- **`/` redirects, it does not rewrite.** Astro forbids rewriting from an
-  on-demand route to a prerendered one, and `src/pages/[locale]/index.astro` is
-  prerendered in both new apps — a rewrite returns a 500 for every hit on the
-  site root. `src/pages/index.astro` still has to exist with
-  `prerender = false` so Vercel routes `/` through middleware at all.
-- **`/llms.txt` is served, never redirected.** Each app has both
-  `src/pages/llms.txt.ts` (the default locale's copy, at the well-known root
-  URI) and `src/pages/[locale]/llms.txt.ts`. Some AI crawlers do not follow
-  redirects, and this is the one URI where that risk is not worth taking — so
-  the root path must also be listed in the app's unlocalized-path config, or
-  middleware 302s it to `/{locale}/llms.txt` in dev and the well-known URI
-  stops being one.
-- **The lead form carries its own `locale`** in a hidden input. Middleware never
-  runs for a prerendered page on Vercel's static output, so the `lang` cookie
-  may not exist — without the field, every non-Russian visitor lands on
-  `/ru/thanks/` and the lead is stored as `locale: 'ru'`.
-- **Only the contact is required**, on all three sites: `@podbor/lead-crm`'s
-  form schema accepts an empty `name`, and no form marks it `required`. A
-  shorter form converts better, and a lead is answerable without a name. The
-  same reasoning removed the service picker from the brand forms. What posts a
-  slug now is the page, through a hidden `SERVICE_FIELD` input: the service
-  pages, CarLab's VIN-inquiry parts pages (`vin-parts-inquiry`) and Details'
-  work pages (`servicesApplied[0]`). Everywhere else (the modal, the contact page, the
-  homepage forms) a lead carries no service **by design**, and the owner
-  card renders `—` for it with the visited page on the `Страница:` line. A
-  contact click renders `Клик: <канал>` instead: the click has a channel worth
-  naming, a form lead does not. The
-  bot cannot set the service afterwards, so treat it as lost rather than
-  pending; if per-service numbers ever matter more than the shorter form, the
-  fix is to thread the page's service into the modal, not to bring the picker
-  back.
-- **A messenger tap opens the messenger**, on all three sites. The tile's label
-  promises a messenger, so it is a plain `<a>` to one — no modal trigger, works
-  with JavaScript off. approved.rs routed these through the lead form until the
-  CRO audit priced the detour (issue #56,
-  `docs/adr/0015-lead-form-asks-only-for-a-contact.md`); do not re-add it. The
-  form keeps its own doors there: the header CTA, the callback control, the
-  partner block and the inline form in the same fold. The one step allowed
-  before Telegram is the bot-or-manager choice below, because both of its
-  options still open Telegram.
-- **A `tel:` control only exists where a dialer does**, on all three sites.
-  `createContactControls` in `@podbor/site-kit/contact-control` encodes the
-  contract — the phone is `coarse-only`, the plain-number twin exists on
-  `/thanks/` in the contacts block (`region: 'contacts'`, which the floating
-  widget never passes) and wherever the call site passes `showNumber`, which
-  names the control rather than the page: the header and the footer of all three
-  sites, so a mouse can always read the number, the human Telegram only on
-  `/thanks/` — and the
-  placement says only where a click is recorded. The plain-number twin is a
-  copy-number button (each app's `PhoneNumber.astro` with `copy`, the only
-  markup in an app that renders the digits) carrying the same
-  `data-contact-channel="phone"`, so a mouse click on it fires `contact_click`
-  and stores a click Lead exactly like a `tel:` tap; tracking counts only the
-  innermost tracked control, so one click is one Lead. Each app's
-  `src/components/ContactControl.astro` is the only place that turns it into
-  `pointer-fine:hidden!` / `pointer-coarse:hidden!` and reads the route for
-  `onThanks`. Read those two instead of re-deciding a pointer rule at a call
-  site; what stays per region is whether a callback button replaces the phone
-  on a mouse. The `!` is load-bearing: Tailwind utilities sit in
-  `@layer utilities` and lose to an unlayered Astro scoped `display`, so a
-  plain `pointer-fine:hidden` on a `.contact-cell` silently does nothing. The
-  compact hero may drop its phone on a mouse only while its lead-modal button
-  stays unconditional — `cases/[slug].astro` renders no form of its own, and
-  no check below sees whether a form is reachable. Verify with
-  `node --experimental-strip-types scripts/contact-controls-pass.ts <base-url> <path>...`
-  against a built site or a dev server: it drives both pointer variants
-  through a device profile (a resized window still reports a fine pointer)
-  and fails on a `tel:` link offered to a mouse or left in the tab order,
-  fine-only markup on a touchscreen, or a control outside any
-  `data-contact-placement`. Local only; CI gets the placement half from
-  `.github/scripts/contact-placement.ts` in `check`.
-- **No boolean rides down to a contact component to say which page it is on.**
-  `ContactCTA direct`, `BaseLayout directContacts` and the `openModal` threaded
-  through `ContactCTA` and `ClosingBand` are all gone (issue #92). What replaced
-  them: the `/thanks/` carve-out is read from the route —
-  `navCurrent(Astro.url.pathname, PathBuilder.thanks(locale)) === 'page'` —
-  inside each app's `ContactControl.astro`, and in approved.rs's `ContactCTA`
-  and `FloatingContactWidget` for the markup they drop there. `placement`
-  only says where a click is recorded. And there is now one
-  trigger attribute, `data-open-lead-modal`: a page that needs its own
-  `LeadFormModal` — only `ServicePageLayout`, which carries the page's service,
-  country, city and comment copy — renders it with `page`, and the modal script
-  strips `trigger` off every unmarked `approved-modal` when a `page` one is
-  present, so the page's modal is the only one that answers and the header's
-  stands down. `DATA_OPEN_PAGE_LEAD_MODAL` is gone with it. Do not reintroduce a
-  prop for either job: a call site that has to be told where it is, is a call
-  site that will be told wrong.
-- **Only approved.rs prefills the first message**, `messengerPrefill` in its
-  `services.yaml`, so the chat does not open empty. The mechanism is shared and
-  the brand sites opt in through the `prefill` option of
-  `createContactControls`, which reaches WhatsApp only, as `text`. Viber's chat link has no such parameter, so Viber tiles stay bare —
-  asymmetry by platform, not by choice.
-- **A Telegram tile carries a `?start=` payload, not a prefill.** It opens the
-  brand's capture bot through `createContactControls` in
-  `@podbor/site-kit/contact-control`, which every app binds once over its own
-  `BRAND.captureBot` as `contactControl` in `src/utils/contactLinks.ts` and
-  renders through its own `ContactControl.astro` — a tile is that component,
-  never a hand-built href or the bot name. A
-  tracked Telegram tile must carry `?start=`: a Telegram link without it is
-  treated as a human account, and a tap on it stores no Lead. `?start=`
-  and `?text=` are different parameters, so `messengerPrefill` never reaches
-  Telegram. The payload is `<service>_<locale>`, or the locale alone where the
-  page has no service (the homepage, the footer, the floating widget, the
-  contacts page); a component that sits on a service page takes the slug as a
-  prop rather than reading it off the path. A Telegram tap stores a click Lead
-  like every other channel, carrying the page and the visitor id, and
-  `defineContactClickTracking` appends that id to the payload through
-  `stampStartVisitor` in `@podbor/site-kit/contact-links` — the bot decodes it
-  with `readStartVisitor` from the same module, so the wire format has one
-  owner. The bot then goes through `insertOrMergeLead`, which lets a Lead
-  carrying a `telegramId` absorb only a placeholder click, never a form the
-  visitor already sent — that is how the owner card gets a `Страница:` line,
-  and `telegramId` is what the card reads as `🤖 через бота`. A tap that cannot
-  carry the id (analytics declined, or a payload past 64 characters) beacons
-  nothing: the bot writes its Lead alone, without a page, rather than leaving a
-  second, unmergeable card in the chat. The same holds on every channel: a
-  tap with no visitor id beacons nothing, and `/api/contact-click` stores no
-  Lead for one, so an anonymous beacon cannot flood the chat. **Every site has a `/thanks/`
-  human-account carve-out, and approved.rs a second one.** The first is
-  `/thanks/`: the visitor there has just sent the form, so its Telegram tile
-  opens the manager's own account (`PUBLIC_TG_MANAGER`, an app variable and
-  never a `packages/brands` field, because it is a staff account rather than
-  brand identity) through `telegramLink`, with no `?start=`, and falls back to
-  the capture bot when the variable is unset. The bound `contactControl`
-  carries the handle as `humanTelegram` and picks it when `ContactControl.astro`
-  reads `/thanks/` off the route — no prop says where a component is. The
-  second is the footer's «Написать менеджеру» control and its icon twin: the
-  label promises the manager, so the call site passes `manager`, which names
-  the control rather than the page, and `createContactControls` picks the same
-  `humanTelegram` on any page. **Every other tile that opens the bot asks
-  first** ([ADR-0042](docs/adr/0042-telegram-tap-offers-bot-or-manager.md)):
-  when `humanTelegram` is set, `createContactControls` stamps the manager's
-  link on it as `data-telegram-choice`, and each app's `TelegramChoice.astro`,
-  mounted once in the layout, is a `defineTelegramChoice` dialog that opens on
-  that attribute and copies the tapped tile's stamped bot href into its bot
-  option. One dialog per page, in the layout, not one per tile: a dialog inside
-  the mobile menu goes inert when the menu closes on the tap. The tile keeps
-  its own `data-contact-channel`, so the tap beacons exactly as before, and the
-  two options carry none, so a choice is never counted twice. The capture
-  bot's profile names the manager as well: `{manager}` in the `profile` copy
-  of `captureBot.yaml` becomes `@` plus `PUBLIC_TG_MANAGER`. Each capture
-  bot's «Написать менеджеру» menu button follows the same rule:
-  `humanTelegram` in the app's `telegram-capture.ts`, read from that app's `PUBLIC_TG_MANAGER`, makes it a
-  hand-off: the button stays a callback so the tap can first stamp
-  `managerHandoff` on the Lead and post it to the Topic, then the screen offers
-  the URL to the manager; unset it stays the in-bot manager screen. A
-  tap on either site carve-out fires `contact_click` and writes no Lead:
-  `defineContactClickTracking` skips the beacon for a `telegram` link whose
-  href carries no `start` parameter — a human account, which a capture-bot
-  link never is — so the rule is keyed on the link, not on the placement, and
-  the fallback bot link beacons its placeholder like everywhere else. The
-  other channels on `/thanks/` keep their click Lead,
-  which merges into the form Lead on the visitor id.
-- **The lead modal takes its service from the trigger.** `data-lead-service` on
-  a button sets the form's `service` when the modal opens; `data-default-service`
-  on the form is what it resets to when the trigger names none. The same
-  opening picks the tab the trigger's `data-open-lead-modal` names, focuses
-  the form's first field (unless the modal marks a `data-modal-focus` target)
-  and fires `lead_modal_open`; all of it is `defineLeadModal(tagName)` from
-  `@podbor/site-kit/lead-form`, which every app's lead modal is defined with,
-  and the attribute constants live there too. The second attribute is not redundant:
-  for an `<input type="hidden">` the `value` IDL attribute reflects the content
-  attribute, so assigning `.value` moves `defaultValue` with it and the slug
-  would stick between openings of the same modal.
-- **Form controls nest their label** instead of using `id`/`for`. The lead form
-  renders two or three times per page (inline, in the modal, on the contact
-  page), and duplicate ids make every label focus the first form.
-- **Keystatic content paths need the app prefix in production.** GitHub's
-  contents API resolves from the repo root, so a collection path is
-  `` `${APP_ROOT}src/content/...` `` with
-  `const APP_ROOT = import.meta.env.PROD ? 'apps/<app>/' : ''`. Local storage
-  mode resolves from the app directory, hence the empty string in dev. The same
-  applies to `src/lib/githubContents.ts` in approved-rs.
-- Empty content directories need a `.gitkeep` — git does not track them, and
-  both the glob loader and the registry test fail on a fresh clone without it.
-- **A hand-written translation survives on its own, in its own commit.** The
-  translate job compares each string in the file against what the cache says it
-  produced; a value that differs was written by a person, so it is adopted and
-  served from then on — but only while `translatedFrom` says the file's
-  translations were made from the Russian it holds now. That condition is what
-  separates a person's edit from stale machine output left behind by a
-  reordered list or a chunk that failed last run. The catch is the word _alone_, and it is wider than it
-  looks: `translatedFrom` hashes the file's **whole** Russian source, so editing
-  any Russian string in a file discards every hand-written translation in that
-  file, not only the one whose source moved. Fix translations in one commit and
-  Russian in another. The job logs `overwriting hand-written <path>` for each
-  dropped translation whose own Russian is unchanged — the one whose Russian you
-  just edited is replaced without a line in the log, because there is no cache
-  entry under its new key to compare against. An unsafe hand-edit — a dropped `{placeholder}`, any Cyrillic
-  letter, a blank — is refused with a warning; the cached translation
-  is served instead, or the string is retranslated if there is none. Adopting
-  it would fail the whole-file guard on every subsequent run and wedge the
-  pipeline. **Never hand-compute a matching `translatedFrom` yourself to quiet
-  a failing test.** A correct-looking hash with no real translate run behind
-  it tells `apps/*/src/i18n/content/content.test.ts` every section is now fully
-  translated, which un-skips its deep fallback checks (`it.skipIf(!translated)`)
-  across the _whole app_ — including sections you didn't touch — and they will
-  fail honestly on any section still RU-only. Leave the hash stale until a real
-  CI translate run produces the backing translations; a stale hash keeps those
-  checks correctly skipped.
+- **Writing a URL, reading the locale, adding a redirect or a root route (`/`,
+  `/llms.txt`), or touching `SOURCE_LOCALE` / `primaryLocale`:** [docs/guides/routing.md](docs/guides/routing.md). Build every
+  internal href through the app's `PathBuilder` (`src/utils/paths.ts`).
+  `vercel.json`'s `redirects` and `headers` are generated; `.github/scripts/redirects-drift.sh` fails `check` on a hand edit.
+- **Rendering a lead form or the lead modal:**
+  [docs/guides/lead-forms.md](docs/guides/lead-forms.md).
+- **Touching a contact control, `tel:` link, messenger or Telegram tile, or
+  `/thanks/`:** [docs/guides/contact-controls.md](docs/guides/contact-controls.md).
+  `.github/scripts/contact-placement.ts` enforces placement in `check`;
+  `scripts/contact-controls-pass.ts` checks pointer variants locally.
+- **Editing content collections, YAML copy, a Keystatic collection or a service
+  slug:** [docs/guides/content.md](docs/guides/content.md).
+- **Hand-editing a translation, touching `translatedFrom`, the translate cache
+  or a translate script:** [docs/guides/translation.md](docs/guides/translation.md).
+  Translation belongs to CI.
 
 ## Commands
 
@@ -484,6 +189,7 @@ pnpm lint:fix
 pnpm format           # prettier --write . (never --write in a review pass — it reformats what you are meant to be reading)
 pnpm exec prettier --check .
 node --experimental-strip-types scripts/layout-shift-pass.ts <base-url> <path>...   # local only: CLS per page (load + scroll down/up) on two desktops and a phone, fails over 0.01
+pnpm --filter @podbor/auto-service preview:static   # serves a built site's .vercel/output/static on 127.0.0.1:4322 (PREVIEW_PORT) for layout-shift-pass.ts / contact-controls-pass.ts; astro preview does not run with the Vercel adapter
 ```
 
 Scoped to one app — either `--filter` from the root, or run inside the app dir:
@@ -493,31 +199,6 @@ pnpm --filter @podbor/approved-rs dev
 pnpm --filter @podbor/approved-rs exec vitest run path/to/file.test.ts   # single test file
 pnpm --filter @podbor/approved-rs exec vitest run -t "name substring"    # single test by name
 ```
-
-The translate scripts resolve content paths relative to the process's working
-directory, so they must run from inside the app:
-
-```bash
-cd apps/approved-rs
-node --experimental-strip-types scripts/translate-i18n.ts   # i18n YAML (needs OPENAI_API_KEY)
-node --experimental-strip-types scripts/translate-cases.ts  # case studies
-```
-
-Neither has a dry-run mode: both call OpenAI, rewrite the YAML or the
-frontmatter, move `translatedFrom` and write `translations.cache.json`.
-Translation belongs to CI — run these locally only to debug the scripts
-themselves, and expect a diff to commit or discard afterwards.
-
-Dev-only filesystem code in an SSR route must sit inside an
-`if (import.meta.env.DEV)` block with its `node:fs`/`node:path` imports done
-dynamically inside it, never as the fall-through of an
-`if (import.meta.env.PROD) { … return }` branch. Vite only folds away a
-literal `if (false)`, so the fall-through form survives into the bundle, and
-`@vercel/nft` then resolves its `process.cwd()` + dynamic path to "every file
-under the workspace root" — which the Vercel adapter copies verbatim into the
-deployed function (`.git`, `.env*` and every other app included; it was 353 MB
-before this was fixed, 32 MB after). See `src/pages/api/admin/case-photos-*.ts`
-for the shape.
 
 `pnpm build` may finish rendering every page and only then fail at the
 `@astrojs/vercel` "astro:build:done" hook locally with a `sharp` binary `ENOENT`
@@ -545,82 +226,20 @@ a commit but cannot run the review itself.
 
 ## Shop migrations
 
-`apps/auto-service-shop` migrates its Postgres while the previous image is still
-serving, and a rollback brings that image back over the new schema (deploy
-order in `docs/guides/deploy.md`). So every shop migration is **additive**:
-add a column nullable or with a default, add a table or an index. A rename or a
-drop ships in two deploys, first the code that stops reading the old shape,
-then the migration that removes it.
-
-The one sanctioned exception is the pre-launch squash of spec #404: until the
-shop opens (`SHOP_OPEN=true`), each module's history is folded into a single
-generated initial migration plus its single hand-written one, and schema changes
-are folded into them. The production database was dropped and recreated for
-the catalog and supplier refold, which is what makes this possible while the
-shop is closed; every fold recreates it again. From the day the shop opens,
-every schema change is a new additive migration beside the initial ones; never
-edit a migration a database holding real orders has run.
-
-Generate a module's migration with `medusa db:generate <module>` and leave the
-generated file as it comes. SQL the model DSL cannot express (`NULLS NOT
-DISTINCT`, an expression index) lives in a hand-written migration of its own,
-with the index left out of the model so the generator never rewrites it, and
-`src/modules/catalog/__tests__/hand-written-indexes.spec.ts` asserts it
-against `pg_indexes` through `src/lib/schema-check.ts`. The same module
-compares the database with every `.snapshot-*.json` and with the two crawl
-tables, which belong to no module (see `docs/guides/deploy.md`, Data lifecycle);
-a column type only a hand-written migration sets is listed there in
-`HAND_WRITTEN_TYPES`, a hand-written index in `HAND_WRITTEN_INDEXES`. A new
-hand-written index, type or constraint goes into that module, not only into the
-spec. `deploy.sh` runs the same assertions against the live database right after
-`db:migrate` (`medusa exec ./src/scripts/check-schema.js`) and stops the deploy
-before the seed, with the previous image still serving, when the schema is not
-what the migrations build. An index on one of Medusa's own tables
-(the `order` time indexes) cannot sit in our modules' migrations, which may run
-before Medusa's; it is a script in `src/migration-scripts/`, which `db:migrate`
-runs once after every module migration. `check` runs
-`.github/scripts/shop-migration-drift.sh`, which fails when `medusa db:generate`
-on a fresh database writes anything.
-
-**The migration files are frozen by a manifest.** `apps/auto-service-shop/migrations.sha256`
-lists the sha256 of every file under `src/modules/*/migrations/*.ts` and
-`src/migration-scripts/*.ts`, and `.github/scripts/shop-migrations-frozen.sh`
-in `check` fails when a listed file changes or disappears, or when a migration
-file is missing from the list. A new migration is appended to it in the same
-commit: `cd apps/auto-service-shop && sha256sum <file> >>migrations.sha256`.
-The manifest is frozen from the day the shop opens: after that, a failing check
-means a migration a database has run was edited, and the fix is to restore the
-file and add a new migration, never to rewrite the hash. Until then, a
-pre-launch fold into an initial migration rewrites its line
-(`sha256sum src/modules/*/migrations/*.ts src/migration-scripts/*.ts >migrations.sha256`),
-and every long-lived database (production, the demo, a staging copy) is
-recreated from scratch after the fold, because MikroORM skips a migration by name and never
-replays an edited one.
+**Writing or changing a migration in `apps/auto-service-shop`:** read
+[docs/guides/shop-migrations.md](docs/guides/shop-migrations.md). Every shop
+migration is **additive**; `check` runs `.github/scripts/shop-migration-drift.sh`
+and `.github/scripts/shop-migrations-frozen.sh` against the
+`apps/auto-service-shop/migrations.sha256` manifest.
 
 ## Architecture
 
 **Stack:** Astro v7, `output: 'static'` (prerendered) with the Vercel adapter — most pages are static; a page opts into SSR individually via `export const prerender = false` (used by the two `/api/*` routes and the homepage, which middleware rewrites bare `/` into). There is no global SSR mode.
 
-**i18n routing (`src/middleware.ts` + `src/i18n/`):** 5 locales (`ru` default, `en`, `sr`, `es`, `de`), `routing: 'manual'` in `astro.config.mjs`. The middleware is the single place that: detects locale from cookie/Accept-Language (`detectLocale.ts`, backed by `@podbor/i18n`'s `createLocaleSet`; the five locales are declared once as `localeConfig` in `src/i18n/config.ts`), rewrites bare `/` to the detected locale without a visible redirect, and 301s legacy URLs through `createRedirectMatcher` from `@podbor/site-kit/redirects`. The rules live once, in `src/redirects.ts`, as Vercel's own `{ source, destination, permanent }` with path-to-regexp sources built from small tables (legacy paths, slug renames × all five locales, the de spoke, buyback countries, moved brand hubs). On Vercel's static output, middleware only runs for requests matching a real Astro route, so the same rules ship to the edge: `vercel.json`'s `redirects` is generated from `EDGE_REDIRECTS` (`REDIRECTS` plus the unprefixed-section catch-alls middleware answers with Accept-Language detection instead) by `node --experimental-strip-types scripts/redirects.ts`, which also writes `headers` from site-kit's `SECURITY_HEADERS`. Never hand-edit either key — `.github/scripts/redirects-drift.sh` regenerates it in `check` and fails on a diff. The two brand sites run the same generator over `unprefixedSectionRedirects(PathBuilder, PRIMARY_LOCALE)`: a section with a nested builder gets a `/:path*` catch-all, a single page its exact URL with both slash variants — so a new PathBuilder section reaches the edge by regenerating, which is why their `src/utils/paths.ts` imports `../i18n/config.ts` rather than the `@/` alias bare node cannot resolve.
-
-**Content model — two different systems by design:**
-
-- **Case studies** (`src/content/cases` on approved.rs, `src/content/works` on the two brand sites, schemas in each app's `src/content.config.ts`) are Keystatic-managed Markdown collections. Admin writes `title`/`car`/`price`/etc. and the RU `title`/`body` only; a `translations: { en, sr, es, de }` field on the same entry (not a separate collection) holds the other four locales, each optional — missing/failed falls back to RU rather than breaking the page.
-- **UI/site copy** (`src/content/i18n/*.yaml`: `dictionary`, `faq`, `home`, `pages`, `meta`, `leadForm`, `promoBanners`, `services`) is flat YAML, declared once per app in the `SECTIONS` registry (`src/i18n/sections.ts`: key, path, `*ContentSchema.ts` zod schema, translate prompt subject) and read only through `content(locale).<key>` (`src/i18n/content.ts`), which runs every section through the shared `loadI18nSection()` helper (`src/i18n/loadI18nSection.ts`, a thin binding over `@podbor/i18n`'s `createSectionLoader`) — it parses the YAML once at module load, validates RU against the schema (throws loudly on a bad file instead of failing at render time), and falls back to RU per-locale if a translation fails validation. `getI18n()` (`src/i18n/getI18n.ts`) additionally merges in `src/i18n/dictionaries/templates.ts` — the handful of interpolation functions (e.g. gallery alt-text templates) that can't be represented as static YAML strings.
-
-**Both content systems share one auto-translate mechanism:** admin/dev only ever hand-writes RU. The `translate` job in `.github/workflows/ci.yml` runs each app's `scripts/translate-i18n.ts` plus `scripts/translate-cases.ts` on approved.rs and `scripts/translate-works.ts` on the two brand sites, on every push to `main` (a branch is checked by a manual `workflow_dispatch` run, which translates it too) and commits the result back. Jobs run on `vars.RUNNER` when it is set (`self-hosted`: the Mac runners, each isolated by `COMPOSE_PROJECT_NAME` and `SHOP_TEST_*` ports in its own `.env`), else on GitHub. The `translate` job itself stays unconditional rather than path-filtered — every string is looked up in the leaf cache first, so a run with nothing new makes no OpenAI request at all, and every job downstream reads the SHA it left behind, so untranslated content cannot reach production. **Deploy filtering is a separate step** (`scope` in `verify`, against per-app `refs/tags/deployed/<app>` tags) — why: `docs/adr/0008-deploy-only-what-is-stale-in-production.md`. **The unit of work is one string, not one file.** `packages/i18n/src/translate/leafCache.ts` keys a committed cache on the triple (system prompt, model, Russian string), so a rerun asks the model only for the strings whose Russian actually moved — the rest come back from `apps/<app>/src/content/translations.cache.json`. It must stay committed: deleting it regenerates the whole corpus at OpenAI's price. The cache is keyed by file path, so renaming a case directory drops its block and the next run adopts the committed translations as if they were hand-written, which quietly exempts that file from the next prompt fix. Editing the prompt or the model changes the fingerprint and regenerates everything that prompt produced, which is the deliberate switch for a prompt fix. The prompt names the target language, so the fingerprint is per locale, and `localeGuidance` on either translator (approved.rs's `LOCALE_GUIDANCE` in `translateConfig.ts`, the Serbian search phrase) is how one locale's wording is steered and regenerated without touching the other three. `translatedFrom` still records the hash of the whole RU source, and is what tells the job whether the committed translations correspond to the Russian in the file right now — the condition a hand-written translation is adopted under. Both scripts call through `packages/i18n/src/translate/openaiChat.ts` (official `openai` SDK) and validate the AI's response with `packages/i18n/src/translate/assertSafeTranslation.ts`, which rejects a translation that introduces HTML the RU source didn't already have (a stored-XSS guard on an otherwise-unreviewed auto-commit path — case bodies are rendered as markdown via `src/lib/safeMarked.ts`, which itself sanitizes with `sanitize-html`). Needs `OPENAI_API_KEY` as a GitHub Actions secret (separate from Vercel's env vars); without it the job fails at the translate step but doesn't touch already-translated content.
-
-**Lead capture pipeline (`@podbor/lead-crm`, bound in `src/lib/crm.ts` + `src/lib/crmBot.ts`):** form submissions (`api/leads.ts`), call-button clicks (`api/contact-click.ts`) and, on carlab.rs, placed shop orders (`api/shop-orders.ts`) and Failed checkouts (`api/order.ts`, CONTEXT.md) all funnel through `notifyLead`, which stores the lead and notifies Telegram via `waitUntil()` (fire-and-forget after the response redirects). Leads live in a single JSON blob on Vercel Blob (`data/leads.json`), not a database: one array of Leads beside `digest` marks (the record that lets the daily digest claim its day once). Money is not in that file. Payouts and Settlements live in their own blob, `data/ledger.json`, behind `createLedgerStore` — the Balance has nothing to do with any Lead. While that blob does not exist the Balance reads as zero; nothing in the Lead file is ever carried into it (the one-time carry-over is gone, ADR-0032). Every mutation goes through `updateRecords()` (`updateLeads()` is its Leads-only shorthand), a compare-and-swap loop with jittered exponential backoff so two concurrent writers (e.g. a bot button edit racing a new form submission) desync instead of retry-colliding. Storage sits behind a `LeadStorage` interface, so moving to Postgres later is one adapter rather than a rewrite. `api/telegram-webhook.ts` handles the bot side (status changes, ➕ Зачислить / ➖ Списать prompts, postpone/remind flow). `✅` marks a Lead won and asks nothing; a reply to a Lead card in the group is ordinary discussion and stores nothing — notes go in only through the DM detail's 📝 Заметка, and the DM detail edits a Lead's name or gives a Lead without a real contact one (`pendingPrompt` `edit_*`, telling the other role what changed; a contact typed for a Lead that already has a real one — `hasRealContact` — is appended as a note, never written over it) or appends a 📝 note signed with author and date, which the other role is told about too. The owner and the admin both change statuses on the card and the DM detail, and `afterStatusChange`'s `author` sends the other role the notice (`sendStatusChange`, never to the author). The digest has no buttons and only links each Lead. `dropFromDigest` redraws it without a Lead from the ids its `digest` record keeps, also forgetting Leads closed or deleted since; it runs from `afterStatusChange` when an `author` is set, and directly from the webhook for 🔵 on a Lead already in progress and for a deletion. The cron's own resume of due postponed Leads has no author and leaves the digest alone. A status move into work (🗣, 🔵) never reopens a won or lost Lead — `setStatus` refuses it, and leaving `postponed` clears the reminder. The visitor's comment is read-only — staff text goes in only as a note. **Every Lead the site creates carries the Ad visit** (CONTEXT.md): `bootSiteKit` remembers a paid landing in `localStorage` for 30 days under the visitor id's consent, the form and the click beacon post it as `AD_SOURCE_FIELD` (JSON), `adSourceFieldSchema` validates it in both routes, and it lands as `adSource` on the Lead, `null` when absent or unreadable. `insertOrMergeLead` keeps the first one, so a Capture bot Lead absorbing a Telegram click inherits it; the card, the DM detail and the Topic summary show «📣 Реклама» and `#реклама`. **A Topic exists only for a Lead that came through a Capture bot in Telegram** — WhatsApp, Viber, phone and form Leads have none, so a Lead feature must work on the card and the DM detail and never assume a Topic. `api/reminders.ts` is a Vercel Cron job (needs `CRON_SECRET`) that expires Ghost leads and posts one daily digest to the group: due `postponed` leads and open leads with no action for 7 days. There is no monthly summary.
-
-The binding is split in two on purpose: `src/lib/crm.ts` builds the store and needs no Telegram credentials, while `src/lib/crmBot.ts` builds the bot and reads `TELEGRAM_*` at module load. Importing the store therefore cannot fail a build over a missing bot token. `src/lib/store.ts`, `src/lib/telegram/index.ts` and `src/lib/notifyLead.ts` are thin re-exports over those two.
-
-**Keystatic admin (`keystatic.config.ts`):** local dev reads/writes the working tree directly (`storage: { kind: 'local' }`); production (`import.meta.env.PROD`) goes through GitHub's API (`storage: { kind: 'github' }`) since Vercel's filesystem is ephemeral. Service slugs live once, in `SERVICE_SLUGS_BY_BRAND` in `packages/brands/src/serviceLabels.ts`, typed against `SERVICE_LABELS_RU` so a slug without a label is a compile error. `src/utils/labels.ts` (`src/utils/services.ts` on the brand sites), `src/content.config.ts` and the Keystatic select options all read that list — Keystatic's config cannot import Astro-coupled modules, but `@podbor/brands` is plain TypeScript. Add a service there and its label in the same edit; `serviceLabel()` still echoes an unknown slug rather than throwing, which only a slug outside the list (the `vehicle-import-<spoke>` sub-slugs, `parts-order`, the partner and legacy slugs) can reach.
-
-**Path/URL construction:** always go through `src/utils/paths.ts`'s `PathBuilder` rather than hand-building locale-prefixed URLs, so a routing change (like the legacy-slug renames above) only needs updating in one place.
+**Touching lead storage, a lead or contact-click route, the CRM bot, a capture
+bot or the reminder cron:** read [docs/guides/lead-crm.md](docs/guides/lead-crm.md).
 
 See `docs/guides/deploy.md` for the full environment-variable list and Vercel deployment/git.deploymentEnabled setup.
-
-## Project instructions
 
 ## i18n
 
@@ -690,11 +309,9 @@ Every dependency in `package.json` must be pinned to an exact version — no `^`
 This site is Astro SSG (`output: 'static'`/prerendered, no SSR) — `.astro` frontmatter and everything under `scripts/` runs only at `astro build`/Node, never ships to the client bundle. That removes the usual "every dependency costs bundle size" tradeoff for build-time code, so prefer a well-maintained, popular library over a hand-rolled implementation for anything security-sensitive or with known edge cases (HTML sanitization, URL parsing, hashing, retry/backoff against a third-party API, etc.) — a maintained library gets these edge cases right and keeps getting security fixes; a hand-rolled regex/parser has to be re-audited by hand every time. Examples already in this codebase:
 
 - `src/lib/safeMarked.ts` uses `sanitize-html` instead of a custom `marked` renderer + URL-scheme regex — adopted after the regex-based version shipped a protocol-relative-URL bypass that review caught only by hand-testing payloads.
-- `scripts/lib/openaiChat.ts` uses the official `openai` SDK instead of a hand-rolled `fetch` wrapper — gets typed errors and automatic retry-with-backoff on 429/5xx for free.
+- `packages/i18n/src/translate/openaiChat.ts` uses the official `openai` SDK instead of a hand-rolled `fetch` wrapper — gets typed errors and automatic retry-with-backoff on 429/5xx for free.
 
-Don't reach for a library reflexively, though — a hand-rolled ~10-line helper that's already correct and purpose-built to one exact call site (e.g. `src/lib/store.ts`'s jittered CAS-retry backoff) doesn't get simpler by wrapping it in a generic library's config API. The bar is: does an existing library solve a real edge case this code either gets wrong today or would have to re-solve by hand, not "is there a package for this."
-
-**grammY for every bot, no sessions** — why: `docs/adr/0031-grammy-for-every-bot.md`. Callback dispatch is the `[pattern, requiredRole, handler]` table `CALLBACKS` in `apps/approved-rs/src/pages/api/telegram-webhook.ts`, each row registered as a grammY `callbackQuery` handler; a new callback is a row there. A prompt lives on the record it answers — `pendingPrompt` on a Lead, or an operation prompt in `data/ledger.json` for ➕/➖ — matched by chat id and message id, never in a grammY session and never by the replied-to text.
+Don't reach for a library reflexively, though — a hand-rolled ~10-line helper that's already correct and purpose-built to one exact call site (e.g. `packages/lead-crm/src/storage/retry.ts`'s jittered CAS-retry backoff) doesn't get simpler by wrapping it in a generic library's config API. The bar is: does an existing library solve a real edge case this code either gets wrong today or would have to re-solve by hand, not "is there a package for this."
 
 This only applies to build-time code (`.astro` frontmatter, `src/lib/`, `scripts/`). Code that ships to the browser (client-side `<script>`, hydrated islands) still carries a real bundle-size cost — weigh a new client dependency normally there.
 

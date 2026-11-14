@@ -68,6 +68,43 @@ describe('defineChipFilter', () => {
     expect(shown(root)).toEqual(['leon']);
   });
 
+  describe('with a query parameter named', () => {
+    const CHIPS = `<button data-filter-chip aria-pressed="true">all</button>
+       <button data-filter-chip data-group="rs" aria-pressed="false">rs</button>`;
+    const at = (search: string) =>
+      window.history.replaceState(null, '', `/works/${search}`);
+
+    it('starts on the group the address names and presses its chip', () => {
+      at('?make=rs');
+      const root = mount(`${CHIPS}${ITEMS}`, 'data-param="make"');
+      expect(shown(root)).toEqual(['giulia']);
+      expect(
+        [...root.querySelectorAll('[data-filter-chip]')].map((chip) =>
+          chip.getAttribute('aria-pressed'),
+        ),
+      ).toEqual(['false', 'true']);
+    });
+
+    it('narrows to a group no chip offers, pressing none', () => {
+      at('?make=es');
+      const root = mount(`${CHIPS}${ITEMS}`, 'data-param="make"');
+      expect(shown(root)).toEqual(['leon']);
+      expect(root.querySelector('[aria-pressed="true"]')).toBeNull();
+    });
+
+    it('keeps the pressed chip when the address names no group', () => {
+      at('');
+      const root = mount(`${CHIPS}${ITEMS}`, 'data-param="make"');
+      expect(shown(root)).toEqual(['grenadier', 'giulia', 'leon']);
+    });
+
+    it('reads no address without the attribute', () => {
+      at('?make=es');
+      const root = mount(`${CHIPS}${ITEMS}`);
+      expect(shown(root)).toEqual(['grenadier', 'giulia', 'leon']);
+    });
+  });
+
   it('treats a chip without a group as "all"', () => {
     const root = mount(`<button data-filter-chip>any</button>${ITEMS}`);
     root.querySelector<HTMLButtonElement>('[data-filter-chip]')!.click();

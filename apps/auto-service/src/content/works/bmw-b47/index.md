@@ -21,6 +21,7 @@ translations:
       Usput smo očistili vrtložne klapne i usisni sistem. Kod dizel motora se vremenom u usisnom sistemu i na klapnama nakuplja čađ, što ometa rad motora.
     car: BMW
 car: BMW
+make: bmw
 year: 2020
 servicesApplied:
   - engine-gearbox
