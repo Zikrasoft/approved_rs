@@ -14,7 +14,16 @@ export default defineConfig(async (env) =>
     test: {
       environment: 'node',
       include: ['src/**/*.test.ts'],
-      coverage: { provider: 'v8', include: ['src/**/*.{ts,astro}'] },
+      coverage: {
+        provider: 'v8',
+        include: ['src/**/*.{ts,astro}'],
+        thresholds: {
+          statements: 93,
+          branches: 92,
+          functions: 95,
+          lines: 93,
+        },
+      },
       env: {
         PUBLIC_PHONE_NUMBER: '381677210533',
         PUBLIC_TG_MANAGER: 'carlabrs',

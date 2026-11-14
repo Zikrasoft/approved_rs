@@ -10,7 +10,7 @@
     "preview": "astro preview",
     "preview:static": "python3 -m http.server ${PREVIEW_PORT:-4322} --bind 127.0.0.1 --directory .vercel/output/static",
     "astro": "astro",
-    "test": "vitest run --passWithNoTests",
+    "test": "vitest run --coverage --passWithNoTests",
     "typecheck": "astro check",
     "gen:og": "node --experimental-strip-types scripts/gen-og.ts"
   },
