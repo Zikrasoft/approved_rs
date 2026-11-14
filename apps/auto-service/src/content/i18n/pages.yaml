@@ -165,6 +165,17 @@ bmw:
   ctaHeading: Опишите, что с машиной
   ctaBody: 'Модель, год, двигатель и что беспокоит: скажем предварительно, с чего начинать и сколько будет стоить диагностика.'
   ctaCommentPlaceholder: Модель, год и что беспокоит
+make:
+  metaTitleTemplate: Ремонт и обслуживание {make} в Белграде | CarLab
+  metaDescriptionTemplate: 'Диагностика, обслуживание и ремонт {make} в автосервисе CarLab в Белграде: реальные работы на {make}, запись по телефону или онлайн.'
+  headingTemplate: Ремонт и обслуживание {make} в Белграде
+  leadTemplate: 'Диагностируем, обслуживаем и ремонтируем {make}: от замены масла до двигателя и коробки. Скажем, что нужно сделать и сколько это стоит, до начала работ.'
+  servicesHeadingTemplate: Что мы делаем на {make}
+  worksHeadingTemplate: Наши работы на {make}
+  worksAllTemplate: Все работы на {make}
+  ctaHeadingTemplate: Запишите {make} в сервис
+  ctaBody: 'Модель, год и что беспокоит: скажем предварительно, с чего начинать и сколько будет стоить диагностика.'
+  ctaCommentPlaceholder: Модель, год и что беспокоит
 translations:
   sr:
     works:

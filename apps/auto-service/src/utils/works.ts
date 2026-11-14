@@ -1,5 +1,6 @@
 import type { ImageMetadata } from 'astro';
 import type { CollectionEntry } from 'astro:content';
+import { makePages } from '@podbor/blog/make-pages';
 import { normalizePartNumber } from '@podbor/catalog-contract';
 import { localizedEntry, publishedByNewest } from '@podbor/i18n';
 import type { Locale } from '@/i18n/config';
@@ -76,6 +77,11 @@ export const sharedMakes = (works: Work[]) =>
 
 export const makesOf = (works: Work[]): string[] =>
   carried(works, 1).map(({ name }) => name);
+
+export const workshopMakePages = (works: WorkEntry[]) =>
+  makePages(MAKES, { works: featuredWorks(works) });
+
+export type WorkshopMakePage = ReturnType<typeof workshopMakePages>[number];
 
 const WORKSHOP = 'workshop';
 

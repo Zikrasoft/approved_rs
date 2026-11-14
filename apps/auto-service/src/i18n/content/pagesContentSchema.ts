@@ -174,6 +174,20 @@ export const pagesContentSchema = z
         ctaCommentPlaceholder: z.string(),
       })
       .strict(),
+    make: z
+      .object({
+        metaTitleTemplate: z.string().includes('{make}'),
+        metaDescriptionTemplate: z.string().includes('{make}'),
+        headingTemplate: z.string().includes('{make}'),
+        leadTemplate: z.string().includes('{make}'),
+        servicesHeadingTemplate: z.string().includes('{make}'),
+        worksHeadingTemplate: z.string().includes('{make}'),
+        worksAllTemplate: z.string().includes('{make}'),
+        ctaHeadingTemplate: z.string().includes('{make}'),
+        ctaBody: z.string(),
+        ctaCommentPlaceholder: z.string(),
+      })
+      .strict(),
   })
   .strict();
 

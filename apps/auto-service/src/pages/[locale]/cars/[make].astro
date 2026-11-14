@@ -1,0 +1,76 @@
+---
+import { getCollection } from 'astro:content';
+import { withPlaceholder } from '@podbor/i18n';
+import Shell from '@/layouts/Shell.astro';
+import Icon from '@/components/Icon.astro';
+import PageHero from '@/components/PageHero.astro';
+import ServiceList from '@/components/ServiceList.astro';
+import WorkGrid from '@/components/WorkGrid.astro';
+import FinalCta from '@/components/FinalCta.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { PathBuilder, withLocales } from '@/utils/paths';
+import { workshopMakePages, type WorkshopMakePage } from '@/utils/works';
+
+export async function getStaticPaths() {
+  return withLocales(
+    workshopMakePages(await getCollection('works')).map((page) => ({
+      params: { make: page.make.slug },
+      props: { page },
+    })),
+  );
+}
+
+interface Props {
+  page: WorkshopMakePage;
+}
+
+const MAX_WORKS = 6;
+
+const { make, works } = Astro.props.page;
+const locale = localeFrom(Astro.url.pathname);
+const { pages, home } = content(locale);
+const copy = pages.make;
+const named = (template: string) =>
+  withPlaceholder(template, 'make', make.name);
+---
+
+<Shell
+  title={named(copy.metaTitleTemplate)}
+  description={named(copy.metaDescriptionTemplate)}
+>
+  <PageHero
+    eyebrow={make.name}
+    heading={named(copy.headingTemplate)}
+    lead={named(copy.leadTemplate)}
+    crumbs={[
+      { href: PathBuilder.carsMake(locale, make.slug), label: make.name },
+    ]}
+  />
+
+  <section class="wrap py-band md:py-band-lg">
+    <h2 class="text-section">{named(copy.servicesHeadingTemplate)}</h2>
+    <div class="mt-5 md:mt-6">
+      <ServiceList />
+    </div>
+  </section>
+
+  <section class="wrap pb-band">
+    <h2 class="text-section">{named(copy.worksHeadingTemplate)}</h2>
+    <WorkGrid works={works.slice(0, MAX_WORKS)} class="mt-5 md:mt-6" />
+    <a
+      href={PathBuilder.worksOfMake(locale, make.slug)}
+      class="link-underlined mt-5 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-ink"
+    >
+      {named(copy.worksAllTemplate)}
+      <Icon name="chevronRight" size={14} />
+    </a>
+  </section>
+
+  <FinalCta
+    eyebrow={home.finalCta.eyebrow}
+    heading={named(copy.ctaHeadingTemplate)}
+    body={copy.ctaBody}
+    commentPlaceholder={copy.ctaCommentPlaceholder}
+  />
+</Shell>
