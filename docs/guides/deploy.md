@@ -1299,7 +1299,7 @@ Only the image rolls back: migrations do not. If the ship changed the schema,
 restore the `db-<stamp>-pre-deploy.dump` that deploy wrote just before migrating
 instead: Medusa's migrations are not guaranteed to be backwards compatible, and an
 old image against a schema already migrated forward may fail to boot or corrupt
-data. The shop's own migrations stay additive for the same reason (AGENTS.md). After a manual rollback the
+data. The shop's own migrations stay additive for the same reason ([shop-migrations.md](shop-migrations.md)). After a manual rollback the
 `deployed/auto-service-shop` tag points at a version that is not in production; delete it
 once the fix is in `main`.
 
