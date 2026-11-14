@@ -32,6 +32,10 @@ export const PathBuilder = {
     `/${locale}/parts/${part ? `?${new URLSearchParams({ part })}` : ''}#${PARTS_INQUIRY_ANCHOR}`,
   work: (locale: Locale, slug: string) => `/${locale}/works/${slug}/`,
   bmw: (locale: Locale) => `/${locale}/bmw/`,
+  carsMake: (locale: Locale, make: string) => `/${locale}/cars/${make}/`,
+  blog: (locale: Locale, page: number | string = 1) =>
+    `/${locale}/blog/${Number(page) > 1 ? `${page}/` : ''}`,
+  blogArticle: (locale: Locale, slug: string) => `/${locale}/blog/${slug}/`,
   contact: (locale: Locale) => `/${locale}/contact/`,
   thanks: (locale: Locale) => `/${locale}/thanks/`,
   partsThanks: (locale: Locale) => `/${locale}/thanks/parts/`,

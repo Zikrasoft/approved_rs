@@ -204,6 +204,9 @@ importers:
       '@keystatic/core':
         specifier: 0.6.9
         version: 0.6.9(@keystar/ui@0.10.0(react-aria@3.50.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react-stately@3.48.0(react@19.2.8))(react@19.2.8))(react-aria@3.50.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react-dom@19.2.8(react@19.2.8))(react-stately@3.48.0(react@19.2.8))(react@19.2.8)(supports-color@8.1.1)
+      '@podbor/blog':
+        specifier: workspace:*
+        version: link:../../packages/blog
       '@podbor/brands':
         specifier: workspace:*
         version: link:../../packages/brands

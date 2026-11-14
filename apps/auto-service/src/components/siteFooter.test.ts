@@ -63,4 +63,17 @@ describe('SiteFooter', async () => {
     expect(navs[0].parentElement?.classList.contains('grid-cols-2')).toBe(true);
     expect(footer.textContent).toContain(site.footer.aboutLabel);
   });
+
+  it('leads to the blog under «Блог», after the Works', () => {
+    const company = footer.querySelectorAll('nav')[1];
+    const links = [...company.querySelectorAll('a')];
+    const blog = company.querySelector<HTMLAnchorElement>(
+      'a[href="/ru/blog/"]',
+    )!;
+
+    expect(blog.textContent?.trim()).toBe('Блог');
+    expect(links.indexOf(blog)).toBe(
+      links.findIndex((link) => link.getAttribute('href') === '/ru/works/') + 1,
+    );
+  });
 });

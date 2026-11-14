@@ -1,6 +1,7 @@
 import { defineCollection } from 'astro:content';
 import { z } from 'astro/zod';
 import { glob } from 'astro/loaders';
+import { articleSchema } from '@podbor/blog/article';
 import { SERVICE_SLUGS } from './utils/services';
 import { MAKE_SLUGS } from './utils/makes';
 
@@ -47,4 +48,9 @@ const works = defineCollection({
       }),
 });
 
-export const collections = { works };
+const articles = defineCollection({
+  loader: glob({ pattern: '*/index.md', base: './src/content/articles' }),
+  schema: ({ image }) => articleSchema({ image: image(), makes: MAKE_SLUGS }),
+});
+
+export const collections = { works, articles };

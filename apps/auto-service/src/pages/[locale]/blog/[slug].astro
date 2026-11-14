@@ -1,0 +1,102 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import { blogArticles, localizedArticle } from '@podbor/blog/article';
+import { faqPageSchema, safeMarkdown } from '@podbor/site-kit';
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import Faq from '@/components/Faq.astro';
+import InkLink from '@/components/InkLink.astro';
+import Icon from '@/components/Icon.astro';
+import FinalCta from '@/components/FinalCta.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { PathBuilder, withLocales } from '@/utils/paths';
+import { articleDate, type Article } from '@/utils/blog';
+import { makeName } from '@/utils/makes';
+import { blogArticleSchema } from '@/utils/schema';
+import { SITE_NAME } from '@/utils/constants';
+
+export async function getStaticPaths() {
+  return withLocales(
+    blogArticles(await getCollection('articles')).map((article) => ({
+      params: { slug: article.id },
+      props: { article },
+    })),
+  );
+}
+
+const { article } = Astro.props as { article: Article };
+const locale = localeFrom(Astro.url.pathname);
+const { blog } = content(locale);
+const localized = localizedArticle(article, locale);
+const { title, lead, body, faq } = localized;
+const { make, date, image } = article.data;
+const makeLabel = make && makeName(make);
+---
+
+<Shell
+  title={`${title} | ${SITE_NAME}`}
+  description={lead}
+  jsonLd={[
+    blogArticleSchema(article, localized),
+    ...(faq.length > 0 ? [faqPageSchema(faq)] : []),
+  ]}
+>
+  <PageHero
+    eyebrow={blog.navLabel}
+    heading={title}
+    lead={lead}
+    compact
+    crumbs={[
+      { href: PathBuilder.blog(locale), label: blog.navLabel },
+      { href: PathBuilder.blogArticle(locale, article.id), label: title },
+    ]}
+  />
+
+  <article class="wrap flex flex-col gap-8 pt-6 md:pt-8">
+    <Image
+      src={image}
+      alt=""
+      widths={[560, 760, 1080, 1280]}
+      sizes="(min-width: 1224px) 1144px, calc(100vw - 2.5rem)"
+      quality={72}
+      loading="eager"
+      class="aspect-[3/2] w-full rounded-block object-cover md:aspect-[21/9]"
+    />
+    <div class="flex max-w-2xl flex-col gap-6">
+      <time
+        datetime={date.toISOString().slice(0, 10)}
+        class="text-sm text-muted"
+      >
+        {articleDate(date, locale)}
+      </time>
+      {body.trim() && <div class="prose-shop" set:html={safeMarkdown(body)} />}
+      {
+        make && makeLabel && (
+          <InkLink
+            href={PathBuilder.carsMake(locale, make)}
+            class="w-fit gap-1.5"
+          >
+            {blog.makeLink.replace('{make}', makeLabel)}
+            <Icon name="chevronRight" size={16} />
+          </InkLink>
+        )
+      }
+    </div>
+    {
+      faq.length > 0 && (
+        <section class="flex max-w-3xl flex-col">
+          <h2 class="text-section">{blog.faqHeading}</h2>
+          <Faq items={faq} class="mt-6" />
+        </section>
+      )
+    }
+  </article>
+
+  <FinalCta
+    eyebrow={blog.navLabel}
+    heading={blog.ctaHeading}
+    body={blog.ctaBody}
+  />
+</Shell>

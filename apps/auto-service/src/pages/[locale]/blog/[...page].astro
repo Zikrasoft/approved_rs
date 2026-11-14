@@ -1,0 +1,88 @@
+---
+import { getCollection } from 'astro:content';
+import { blogPages } from '@podbor/blog/article';
+import type { Page } from '@podbor/site-kit/pagination';
+import Shell from '@/layouts/Shell.astro';
+import PageHero from '@/components/PageHero.astro';
+import ArticleCard from '@/components/ArticleCard.astro';
+import Pagination from '@/components/Pagination.astro';
+import FinalCta from '@/components/FinalCta.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { PathBuilder, withLocales } from '@/utils/paths';
+import { BLOG_PAGE_SIZE, type Article } from '@/utils/blog';
+import { SITE_NAME } from '@/utils/constants';
+
+export async function getStaticPaths() {
+  const pages = blogPages(await getCollection('articles'), BLOG_PAGE_SIZE);
+  return withLocales(
+    pages.map((listing) => ({
+      params: {
+        page: listing.number > 1 ? String(listing.number) : undefined,
+      },
+      props: { listing },
+    })),
+  );
+}
+
+const { listing } = Astro.props as { listing: Page<Article> };
+const locale = localeFrom(Astro.url.pathname);
+const { blog } = content(locale);
+const pageHref = (number: number) => PathBuilder.blog(locale, number);
+const heading =
+  listing.number > 1
+    ? blog.pageName.replace('{page}', String(listing.number))
+    : blog.heading;
+---
+
+<Shell
+  title={listing.number > 1 ? `${heading} | ${SITE_NAME}` : blog.metaTitle}
+  description={blog.metaDescription}
+>
+  <PageHero
+    eyebrow={blog.navLabel}
+    heading={heading}
+    lead={listing.number === 1 ? blog.lead : undefined}
+    compact
+    desktopLead
+    crumbs={[{ href: PathBuilder.blog(locale), label: blog.navLabel }]}
+  />
+
+  <section class="wrap flex flex-col gap-8 pt-6 pb-band md:py-band-lg">
+    {
+      listing.items.length === 0 ? (
+        <p class="card p-6 text-base text-muted">{blog.empty}</p>
+      ) : (
+        <ul class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {listing.items.map((article, index) => (
+            <li>
+              <ArticleCard article={article} eager={index < 3} />
+            </li>
+          ))}
+        </ul>
+      )
+    }
+    {
+      listing.count > 1 && (
+        <Pagination
+          label={blog.pagination}
+          prev={listing.number > 1 ? pageHref(listing.number - 1) : null}
+          next={
+            listing.number < listing.count ? pageHref(listing.number + 1) : null
+          }
+          numbered={{
+            current: listing.number,
+            count: listing.count,
+            href: pageHref,
+          }}
+        />
+      )
+    }
+  </section>
+
+  <FinalCta
+    eyebrow={blog.navLabel}
+    heading={blog.ctaHeading}
+    body={blog.ctaBody}
+  />
+</Shell>
