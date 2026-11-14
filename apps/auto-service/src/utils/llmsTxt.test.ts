@@ -37,6 +37,19 @@ const { articles, works } = vi.hoisted(() => ({
         date: new Date('2026-04-01'),
       },
     },
+    {
+      id: 'seat-dsg',
+      body: 'Текст.',
+      data: {
+        title: 'DSG на SEAT',
+        lead: 'Про DSG.',
+        published: true,
+        overview: false,
+        make: 'seat',
+        faq: [],
+        date: new Date('2026-02-01'),
+      },
+    },
   ],
   works: [
     {
@@ -102,18 +115,25 @@ describe('generateLlmsTxt', () => {
     expect(await generateLlmsTxt('en')).toContain('[BMW X5 — плёнка PPF]');
   });
 
-  it('links a Make page for each Make with a Work, in every locale', async () => {
+  it('links a Make page for each Make with a Work or an Article, in every locale', async () => {
     for (const locale of SUPPORTED_LOCALES) {
       const heading = content(locale).pages.make.headingTemplate.replace(
         '{make}',
-        'BMW',
+        'SEAT',
       );
       const body = await generateLlmsTxt(locale);
       expect(body).toContain(
-        `[${heading}](https://carlab.rs/${locale}/cars/bmw/)`,
+        `[${heading}](https://carlab.rs/${locale}/cars/seat/)`,
       );
+      expect(body).toContain(`](https://carlab.rs/${locale}/cars/bmw/)`);
       expect(body).not.toContain('/cars/audi/');
     }
+  });
+
+  it('names a Make page by its overview when it has one', async () => {
+    expect(await generateLlmsTxt('ru')).toContain(
+      '[Обзор BMW](https://carlab.rs/ru/cars/bmw/)',
+    );
   });
 
   it('"other languages" links to the other locales, not the current one', async () => {
@@ -364,11 +384,6 @@ describe('generateLlmsTxt', () => {
       '- [Kada menjati ulje](https://carlab.rs/sr/blog/oil-change/): Ukratko.',
     );
     expect(body).not.toContain('/sr/blog/bmw/');
-  });
-
-  it('links the BMW landing page', async () => {
-    const body = await generateLlmsTxt('sr');
-    expect(body).toContain(`](https://carlab.rs/sr/bmw/)`);
   });
 
   it('describes the parts catalogue on the parts index link', async () => {

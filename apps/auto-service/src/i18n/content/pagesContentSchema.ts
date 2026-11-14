@@ -158,22 +158,6 @@ export const pagesContentSchema = z
           .strict(),
       })
       .strict(),
-    bmw: z
-      .object({
-        metaTitle: z.string(),
-        metaDescription: z.string(),
-        eyebrow: z.string(),
-        heading: z.string(),
-        lead: z.string(),
-        trustHeading: z.string(),
-        trust: z.array(z.string()),
-        worksHeading: z.string(),
-        ctaEyebrow: z.string(),
-        ctaHeading: z.string(),
-        ctaBody: z.string(),
-        ctaCommentPlaceholder: z.string(),
-      })
-      .strict(),
     make: z
       .object({
         metaTitleTemplate: z.string().includes('{make}'),
@@ -185,6 +169,8 @@ export const pagesContentSchema = z
         partsHubTemplate: z.string().includes('{make}'),
         worksHeadingTemplate: z.string().includes('{make}'),
         worksAllTemplate: z.string().includes('{make}'),
+        faqHeadingTemplate: z.string().includes('{make}'),
+        articlesHeadingTemplate: z.string().includes('{make}'),
         ctaHeadingTemplate: z.string().includes('{make}'),
         ctaBody: z.string(),
         ctaCommentPlaceholder: z.string(),

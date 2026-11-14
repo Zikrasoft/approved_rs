@@ -1,5 +1,5 @@
 import type { Redirect } from '@podbor/site-kit/redirects';
-import { SUPPORTED_LOCALES } from '../i18n/config.ts';
+import { PRIMARY_LOCALE, SUPPORTED_LOCALES } from '../i18n/config.ts';
 import { PathBuilder } from './paths.ts';
 
 export const LEGACY_CATEGORY_TARGETS: Record<string, string> = {
@@ -69,7 +69,20 @@ export const lowercasedCategoryPath = (pathname: string): string | null =>
     ? pathname.toLowerCase()
     : null;
 
+export const bmwPageRedirects = (): Redirect[] =>
+  [
+    ...SUPPORTED_LOCALES.map((locale) => [`/${locale}/bmw`, locale] as const),
+    ['/bmw', PRIMARY_LOCALE] as const,
+  ].flatMap(([path, locale]) =>
+    [path, `${path}/`].map((source) => ({
+      source,
+      destination: PathBuilder.carsMake(locale, 'bmw'),
+      permanent: true,
+    })),
+  );
+
 export const siteRedirects = (): Redirect[] => [
+  ...bmwPageRedirects(),
   ...legacyCategoryRedirects(),
   ...legacyShopRedirects(),
   ...categoryFirstPageRedirects(),

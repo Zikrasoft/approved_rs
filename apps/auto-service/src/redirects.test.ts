@@ -10,6 +10,7 @@ import {
   categoryFirstPageRedirects,
   legacyCategoryRedirects,
   legacyShopRedirects,
+  siteRedirects,
 } from './utils/legacyCategories';
 import { PathBuilder } from './utils/paths';
 
@@ -30,9 +31,27 @@ describe('redirects', () => {
     ['/thanks', '/sr/thanks/'],
     ['/privacy/', '/sr/privacy/'],
     ['/about', '/sr/about/'],
-    ['/bmw', '/sr/bmw/'],
   ])('sends %s to %s', (path, target) => {
     expect(redirectFor(path)).toBe(target);
+  });
+
+  it.each([
+    ['/bmw', '/sr/cars/bmw/'],
+    ['/bmw/', '/sr/cars/bmw/'],
+    ['/ru/bmw/', '/ru/cars/bmw/'],
+    ['/sr/bmw', '/sr/cars/bmw/'],
+    ['/en/bmw/', '/en/cars/bmw/'],
+  ])('sends the old BMW page %s to the BMW Make page %s', (path, target) => {
+    expect(createRedirectMatcher(siteRedirects())(path)).toBe(target);
+  });
+
+  it('ships the old BMW page redirect to the edge as permanent', () => {
+    expect(edgeRules()).toEqual(
+      expect.arrayContaining([
+        { source: '/bmw/', destination: '/sr/cars/bmw/', permanent: true },
+        { source: '/en/bmw', destination: '/en/cars/bmw/', permanent: true },
+      ]),
+    );
   });
 
   it.each([

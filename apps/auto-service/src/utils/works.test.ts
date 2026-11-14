@@ -282,7 +282,12 @@ describe('the makes of a list of Works', () => {
   });
 
   it('names every Make at least one Work carries', () => {
-    expect(makesOf(works)).toEqual(['Audi', 'BMW', 'Škoda', 'Volkswagen']);
+    expect(makesOf(works).map(({ slug, name }) => [slug, name])).toEqual([
+      ['audi', 'Audi'],
+      ['bmw', 'BMW'],
+      ['skoda', 'Škoda'],
+      ['volkswagen', 'Volkswagen'],
+    ]);
   });
 });
 

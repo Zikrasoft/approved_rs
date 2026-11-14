@@ -1,9 +1,15 @@
 import type { ImageMetadata } from 'astro';
 import type { CollectionEntry } from 'astro:content';
+import { makeArticles } from '@podbor/blog/article';
 import { makePages } from '@podbor/blog/make-pages';
 import { normalizePartNumber } from '@podbor/catalog-contract';
-import { localizedEntry, publishedByNewest } from '@podbor/i18n';
+import {
+  localizedEntry,
+  publishedByNewest,
+  publishedEntries,
+} from '@podbor/i18n';
 import type { Locale } from '@/i18n/config';
+import type { Article } from './blog';
 import type { MakePartsEntry, PartPageEntry } from './catalogueSnapshot';
 import { MAKES } from './makes';
 import type { ServiceSlug } from './services';
@@ -75,20 +81,21 @@ const carried = (works: Work[], count: number) =>
 export const sharedMakes = (works: Work[]) =>
   carried(works, 2).map(({ slug, name }) => ({ label: name, group: slug }));
 
-export const makesOf = (works: Work[]): string[] =>
-  carried(works, 1).map(({ name }) => name);
+export const makesOf = (works: Work[]) => carried(works, 1);
 
 export const workshopMakePages = (
   works: WorkEntry[],
+  articles: Article[],
   parts: MakePartsEntry[],
 ) =>
   makePages(MAKES, {
     works: featuredWorks(works),
+    articles: publishedEntries(articles),
     parts: parts.map((entry) => ({
       ...entry,
       data: { make: entry.make.slug },
     })),
-  });
+  }).map((page) => ({ ...page, ...makeArticles(page.articles) }));
 
 export type WorkshopMakePage = ReturnType<typeof workshopMakePages>[number];
 
