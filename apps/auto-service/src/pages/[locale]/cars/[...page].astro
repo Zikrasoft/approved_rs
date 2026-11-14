@@ -7,12 +7,12 @@ import Shell from '@/layouts/Shell.astro';
 import Icon from '@/components/Icon.astro';
 import MakeCard from '@/components/MakeCard.astro';
 import PageHero from '@/components/PageHero.astro';
-import Pagination from '@/components/Pagination.astro';
+import ListingPager from '@/components/ListingPager.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { makePartsForBuild } from '@/utils/catalogueEnv';
-import { SITE_NAME } from '@/utils/constants';
+import { listingHeading, listingTitle } from '@/utils/listing';
 import type { Make } from '@/utils/makes';
 import { PathBuilder, withLocales } from '@/utils/paths';
 import { CARS_PAGE_SIZE, makeCover, workshopMakePages } from '@/utils/works';
@@ -47,10 +47,7 @@ const locale = localeFrom(Astro.url.pathname);
 const { pages, home } = content(locale);
 const copy = pages.cars;
 const pageHref = (number: number) => PathBuilder.cars(locale, number);
-const heading =
-  listing.number > 1
-    ? copy.pageName.replace('{page}', String(listing.number))
-    : copy.heading;
+const heading = listingHeading(listing.number, copy);
 const searchIndex = await Promise.all(
   cards.map(async ({ make, cover }) => ({
     name: make.name,
@@ -63,7 +60,7 @@ const searchIndex = await Promise.all(
 ---
 
 <Shell
-  title={listing.number > 1 ? `${heading} | ${SITE_NAME}` : copy.metaTitle}
+  title={listingTitle(listing.number, copy)}
   description={copy.metaDescription}
 >
   <PageHero
@@ -137,24 +134,13 @@ const searchIndex = await Promise.all(
           </p>
           <p data-search-status aria-live="polite" class="sr-only" />
 
-          {listing.count > 1 && (
-            <div data-search-idle>
-              <Pagination
-                label={copy.pagination}
-                prev={listing.number > 1 ? pageHref(listing.number - 1) : null}
-                next={
-                  listing.number < listing.count
-                    ? pageHref(listing.number + 1)
-                    : null
-                }
-                numbered={{
-                  current: listing.number,
-                  count: listing.count,
-                  href: pageHref,
-                }}
-              />
-            </div>
-          )}
+          <div data-search-idle class="contents">
+            <ListingPager
+              label={copy.pagination}
+              listing={listing}
+              href={pageHref}
+            />
+          </div>
         </list-search>
       )
     }

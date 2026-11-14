@@ -5,13 +5,13 @@ import type { Page } from '@podbor/site-kit/pagination';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import ArticleCard from '@/components/ArticleCard.astro';
-import Pagination from '@/components/Pagination.astro';
+import ListingPager from '@/components/ListingPager.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PathBuilder, withLocales } from '@/utils/paths';
 import { BLOG_PAGE_SIZE, type Article } from '@/utils/blog';
-import { SITE_NAME } from '@/utils/constants';
+import { listingHeading, listingTitle } from '@/utils/listing';
 
 export async function getStaticPaths() {
   const pages = blogPages(await getCollection('articles'), BLOG_PAGE_SIZE);
@@ -29,14 +29,11 @@ const { listing } = Astro.props as { listing: Page<Article> };
 const locale = localeFrom(Astro.url.pathname);
 const { blog } = content(locale);
 const pageHref = (number: number) => PathBuilder.blog(locale, number);
-const heading =
-  listing.number > 1
-    ? blog.pageName.replace('{page}', String(listing.number))
-    : blog.heading;
+const heading = listingHeading(listing.number, blog);
 ---
 
 <Shell
-  title={listing.number > 1 ? `${heading} | ${SITE_NAME}` : blog.metaTitle}
+  title={listingTitle(listing.number, blog)}
   description={blog.metaDescription}
 >
   <PageHero
@@ -62,22 +59,7 @@ const heading =
         </ul>
       )
     }
-    {
-      listing.count > 1 && (
-        <Pagination
-          label={blog.pagination}
-          prev={listing.number > 1 ? pageHref(listing.number - 1) : null}
-          next={
-            listing.number < listing.count ? pageHref(listing.number + 1) : null
-          }
-          numbered={{
-            current: listing.number,
-            count: listing.count,
-            href: pageHref,
-          }}
-        />
-      )
-    }
+    <ListingPager label={blog.pagination} listing={listing} href={pageHref} />
   </section>
 
   <FinalCta

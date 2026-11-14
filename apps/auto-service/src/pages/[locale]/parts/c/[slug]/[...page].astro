@@ -3,7 +3,8 @@ import { localizedUnit, translated } from '@podbor/catalog-contract';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import VinInquiryCard from '@/components/VinInquiryCard.astro';
-import Pagination from '@/components/Pagination.astro';
+import ListingPager from '@/components/ListingPager.astro';
+import { withPlaceholder } from '@podbor/i18n';
 import InquiryLink from '@/components/InquiryLink.astro';
 import PartRow from '@/components/PartRow.astro';
 import FacetFilters from '@/components/FacetFilters.astro';
@@ -30,6 +31,7 @@ import { PARTS_INQUIRY_ANCHOR, PathBuilder, withLocales } from '@/utils/paths';
 import { partThumbnail } from '@/utils/partImages';
 import { partSuccessor } from '@/utils/partSuccessor';
 import { rangeText, withFacetCopy } from '@/utils/partsSearch';
+import { listingHeading, neighbours } from '@/utils/listing';
 
 export async function getStaticPaths() {
   const categories = await categoryPagesForBuild();
@@ -69,15 +71,11 @@ const categoryAttributes = category.pages.map(({ part }) => part.attributes);
 const firstPage = listing.number === 1;
 const pageHref = (number: number) =>
   PathBuilder.partsCategory(locale, category.slug, number);
-const prev = listing.number > 1 ? pageHref(listing.number - 1) : null;
-const next =
-  listing.number < listing.count ? pageHref(listing.number + 1) : null;
-const pageTitle =
-  listing.number > 1
-    ? copy.pageName
-        .replace('{name}', name)
-        .replace('{page}', String(listing.number))
-    : name;
+const { prev, next } = neighbours(listing, pageHref);
+const pageTitle = listingHeading(listing.number, {
+  heading: name,
+  pageName: withPlaceholder(copy.pageName, 'name', name),
+});
 const bySlug = new Map(category.pages.map((page) => [page.slug, page]));
 const searchCopy = content(locale).partsSearch;
 const facets = withFacetCopy(categoryFacets(category, locale), searchCopy);
@@ -115,7 +113,7 @@ const fields = category.fields
 ---
 
 <Shell
-  title={copy.metaTitleTemplate.replace('{name}', pageTitle)}
+  title={withPlaceholder(copy.metaTitleTemplate, 'name', pageTitle)}
   description={lead ?? inquiry.metaDescription}
 >
   {prev && <link slot="head" rel="prev" href={prev} />}
@@ -210,18 +208,11 @@ const fields = category.fields
                 />
               ))}
             </ul>
-            {listing.count > 1 && (
-              <Pagination
-                label={copy.pagination}
-                prev={prev}
-                next={next}
-                numbered={{
-                  current: listing.number,
-                  count: listing.count,
-                  href: pageHref,
-                }}
-              />
-            )}
+            <ListingPager
+              label={copy.pagination}
+              listing={listing}
+              href={pageHref}
+            />
             <InquiryLink topic={name} />
           </div>
         )
