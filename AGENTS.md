@@ -33,7 +33,9 @@ contracts** a package owns, and an app that breaks one fails silently:
 `data-primary-contact` / `data-primary-channel` (preferred contact channel),
 `data-lead-form` / `data-brand-link` / `data-developer-credit` /
 `data-field` / `aria-invalid` (funnel tracking), `data-depth-slug` / `data-depth-door` / `data-revealed` (browsing
-depth on case and work pages), `data-contact-channel` /
+depth on case and work pages), `data-search-input` / `data-search-item` /
+`data-search-empty` / `data-search-idle` (the list `defineListSearch` filters
+in place, hidden items included), `data-contact-channel` /
 `data-contact-placement` (contact clicks, whose placement half
 `.github/scripts/contact-placement.ts` enforces against the built HTML) and
 `data-contact-cta` (in-flow contact regions the floating CTA's `watch`
