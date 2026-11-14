@@ -75,6 +75,9 @@ const navLink =
         <span class={eyebrow}>
           {site.footer.companyHeading}
         </span>
+        <a href={PathBuilder.cars(locale)} class={navLink}
+          >{content(locale).pages.cars.navLabel}</a
+        >
         <a href={PathBuilder.works(locale)} class={navLink}>{site.nav.works}</a>
         <a href={PathBuilder.blog(locale)} class={navLink}>{blog.navLabel}</a>
         <a href={PathBuilder.parts(locale)} class={navLink}>{site.nav.parts}</a>

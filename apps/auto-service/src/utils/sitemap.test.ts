@@ -11,8 +11,10 @@ describe('sitemapFilter', () => {
     expect(keep(`${SITE}/sr/services/vin-parts-inquiry/`)).toBe(true);
   });
 
-  it('lists the Make pages', () => {
+  it('lists /cars/, its later pages and the Make pages', () => {
     const keep = sitemapFilter(SITE);
+    expect(keep(`${SITE}/ru/cars/`)).toBe(true);
+    expect(keep(`${SITE}/ru/cars/2/`)).toBe(true);
     expect(keep(`${SITE}/sr/cars/bmw/`)).toBe(true);
     expect(keep(`${SITE}/en/cars/mercedes-benz/`)).toBe(true);
   });

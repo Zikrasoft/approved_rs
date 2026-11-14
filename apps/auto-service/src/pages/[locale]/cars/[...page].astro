@@ -1,0 +1,181 @@
+---
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import { getCollection } from 'astro:content';
+import { paginate, type Page } from '@podbor/site-kit/pagination';
+import Shell from '@/layouts/Shell.astro';
+import Icon from '@/components/Icon.astro';
+import PageHero from '@/components/PageHero.astro';
+import Pagination from '@/components/Pagination.astro';
+import FinalCta from '@/components/FinalCta.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { makePartsForBuild } from '@/utils/catalogueEnv';
+import { coverScale, coverSizes } from '@/utils/coverSizes';
+import { SITE_NAME } from '@/utils/constants';
+import type { Make } from '@/utils/makes';
+import { PathBuilder, withLocales } from '@/utils/paths';
+import { CARS_PAGE_SIZE, makeCover, workshopMakePages } from '@/utils/works';
+
+type MakeCard = { make: Make; cover: ImageMetadata | undefined };
+
+export async function getStaticPaths() {
+  const cards: MakeCard[] = workshopMakePages(
+    await getCollection('works'),
+    await getCollection('articles'),
+    await makePartsForBuild(),
+  ).map((page) => ({ make: page.make, cover: makeCover(page) }));
+  return withLocales(
+    paginate(cards, CARS_PAGE_SIZE).map((listing) => ({
+      params: {
+        page: listing.number > 1 ? String(listing.number) : undefined,
+      },
+      props: { listing, cards },
+    })),
+  );
+}
+
+interface Props {
+  listing: Page<MakeCard>;
+  cards: MakeCard[];
+}
+
+const EAGER = 4;
+
+const { listing, cards } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const { pages, home } = content(locale);
+const copy = pages.cars;
+const pageHref = (number: number) => PathBuilder.cars(locale, number);
+const heading =
+  listing.number > 1
+    ? copy.pageName.replace('{page}', String(listing.number))
+    : copy.heading;
+const onPage = new Set(listing.items.map(({ make }) => make.slug));
+const eager = new Set(
+  listing.items.slice(0, EAGER).map(({ make }) => make.slug),
+);
+---
+
+<Shell
+  title={listing.number > 1 ? `${heading} | ${SITE_NAME}` : copy.metaTitle}
+  description={copy.metaDescription}
+>
+  <PageHero
+    eyebrow={copy.navLabel}
+    heading={heading}
+    lead={listing.number === 1 ? copy.lead : undefined}
+    compact
+    desktopLead
+    crumbs={[{ href: PathBuilder.cars(locale), label: copy.navLabel }]}
+  />
+
+  <section class="wrap pt-6 pb-band md:py-band-lg">
+    {
+      cards.length === 0 ? (
+        <p class="card p-6 text-base text-muted">{copy.empty}</p>
+      ) : (
+        <list-search class="flex flex-col gap-6 md:gap-8">
+          <label class="relative block w-full sm:max-w-sm">
+            <span class="sr-only">{copy.searchLabel}</span>
+            <Icon
+              name="search"
+              size={16}
+              class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted"
+            />
+            <input
+              type="search"
+              data-search-input
+              autocomplete="off"
+              autocapitalize="off"
+              spellcheck="false"
+              enterkeyhint="search"
+              placeholder={copy.searchPlaceholder}
+              class="field min-h-12 py-2 pl-9 [&::-webkit-search-cancel-button]:appearance-none"
+            />
+          </label>
+
+          <ul class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
+            {cards.map(({ make, cover }) => (
+              <li data-search-item hidden={!onPage.has(make.slug)}>
+                <a
+                  href={PathBuilder.carsMake(locale, make.slug)}
+                  data-make-card
+                  class="card group flex h-full flex-col overflow-hidden transition-colors duration-150 hover:border-ink"
+                >
+                  {cover ? (
+                    <Image
+                      src={cover}
+                      alt=""
+                      widths={[240, 360, 560]}
+                      sizes={coverSizes(
+                        '(min-width: 1024px) 25vw, (min-width: 640px) 33vw, calc(50vw - 1.5rem)',
+                        coverScale(cover, 3 / 2),
+                      )}
+                      quality={68}
+                      loading={eager.has(make.slug) ? 'eager' : 'lazy'}
+                      class="aspect-[3/2] w-full object-cover"
+                    />
+                  ) : (
+                    <div
+                      data-make-placeholder
+                      aria-hidden="true"
+                      class="flex aspect-[3/2] w-full items-end overflow-hidden bg-shade px-3 pb-1 sm:px-4"
+                    >
+                      <span class="truncate text-[2.5rem] leading-none font-semibold tracking-tight text-line sm:text-5xl">
+                        {make.name}
+                      </span>
+                    </div>
+                  )}
+                  <h2 class="border-t border-line px-3 py-3 text-block font-semibold text-ink group-hover:underline sm:px-4">
+                    {make.name}
+                  </h2>
+                </a>
+              </li>
+            ))}
+          </ul>
+
+          <p
+            data-search-empty
+            hidden
+            aria-live="polite"
+            class="card p-6 text-base text-muted"
+          >
+            {copy.noMatch}
+          </p>
+
+          {listing.count > 1 && (
+            <div data-search-idle>
+              <Pagination
+                label={copy.pagination}
+                prev={listing.number > 1 ? pageHref(listing.number - 1) : null}
+                next={
+                  listing.number < listing.count
+                    ? pageHref(listing.number + 1)
+                    : null
+                }
+                numbered={{
+                  current: listing.number,
+                  count: listing.count,
+                  href: pageHref,
+                }}
+              />
+            </div>
+          )}
+        </list-search>
+      )
+    }
+  </section>
+
+  <FinalCta
+    eyebrow={home.finalCta.eyebrow}
+    heading={copy.ctaHeading}
+    body={copy.ctaBody}
+  />
+</Shell>
+
+<script>
+  import { defineListSearch } from '@podbor/site-kit/list-search';
+
+  defineListSearch();
+</script>

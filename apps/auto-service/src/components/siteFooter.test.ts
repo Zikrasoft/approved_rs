@@ -76,4 +76,17 @@ describe('SiteFooter', async () => {
       links.findIndex((link) => link.getAttribute('href') === '/ru/works/') + 1,
     );
   });
+
+  it('leads to the Make pages under «Машины», before the Works', () => {
+    const company = footer.querySelectorAll('nav')[1];
+    const links = [...company.querySelectorAll('a')];
+    const cars = company.querySelector<HTMLAnchorElement>(
+      'a[href="/ru/cars/"]',
+    )!;
+
+    expect(cars.textContent?.trim()).toBe('Машины');
+    expect(links.indexOf(cars)).toBe(
+      links.findIndex((link) => link.getAttribute('href') === '/ru/works/') - 1,
+    );
+  });
 });

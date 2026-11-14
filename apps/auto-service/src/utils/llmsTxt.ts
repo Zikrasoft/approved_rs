@@ -135,6 +135,21 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
         })),
       },
       {
+        heading: pages.cars.navLabel,
+        index: {
+          label: pages.cars.heading,
+          href: url(PathBuilder.cars(locale)),
+        },
+        entries: workshopMakePages(workEntries, articleEntries, makeParts).map(
+          ({ make, overview }) => ({
+            label: overview
+              ? localizedArticle(overview, locale).title
+              : withPlaceholder(pages.make.headingTemplate, 'make', make.name),
+            href: url(PathBuilder.carsMake(locale, make.slug)),
+          }),
+        ),
+      },
+      {
         heading: blog.navLabel,
         index: { label: blog.heading, href: url(PathBuilder.blog(locale)) },
         entries: articles.map((article) => {
@@ -149,14 +164,6 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
     ],
     other: [
       { label: site.common.homeLabel, href: url(PathBuilder.home(locale)) },
-      ...workshopMakePages(workEntries, articleEntries, makeParts).map(
-        ({ make, overview }) => ({
-          label: overview
-            ? localizedArticle(overview, locale).title
-            : withPlaceholder(pages.make.headingTemplate, 'make', make.name),
-          href: url(PathBuilder.carsMake(locale, make.slug)),
-        }),
-      ),
       { label: site.nav.contact, href: url(PathBuilder.contact(locale)) },
       {
         label: site.footer.aboutLabel,

@@ -176,6 +176,23 @@ export const pagesContentSchema = z
         ctaCommentPlaceholder: z.string(),
       })
       .strict(),
+    cars: z
+      .object({
+        navLabel: z.string(),
+        metaTitle: z.string(),
+        metaDescription: z.string(),
+        heading: z.string(),
+        lead: z.string(),
+        pageName: z.string().includes('{page}'),
+        pagination: z.string(),
+        searchLabel: z.string(),
+        searchPlaceholder: z.string(),
+        noMatch: z.string(),
+        empty: z.string(),
+        ctaHeading: z.string(),
+        ctaBody: z.string(),
+      })
+      .strict(),
   })
   .strict();
 

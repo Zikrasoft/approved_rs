@@ -94,6 +94,12 @@ describe('PathBuilder', () => {
     expect(PathBuilder.blogArticle('sr', 'oil')).toBe('/sr/blog/oil/');
     expect(PathBuilder.carsMake('sr', 'bmw')).toBe('/sr/cars/bmw/');
   });
+
+  it('puts the list of Make pages and its later pages under /cars/', () => {
+    expect(PathBuilder.cars('en')).toBe('/en/cars/');
+    expect(PathBuilder.cars('en', 1)).toBe('/en/cars/');
+    expect(PathBuilder.cars('en', 3)).toBe('/en/cars/3/');
+  });
 });
 
 describe('swapLocale', () => {

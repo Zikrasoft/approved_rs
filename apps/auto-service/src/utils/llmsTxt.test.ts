@@ -130,6 +130,20 @@ describe('generateLlmsTxt', () => {
     }
   });
 
+  it('lists the Make pages under the /cars/ index, in every locale', async () => {
+    for (const locale of SUPPORTED_LOCALES) {
+      const { cars } = content(locale).pages;
+      const body = await generateLlmsTxt(locale);
+      const section = body.slice(body.indexOf(`## ${cars.navLabel}\n`));
+      const lines = section.split('\n## ')[0].split('\n').filter(Boolean);
+
+      expect(lines[1]).toBe(
+        `- [${cars.heading}](https://carlab.rs/${locale}/cars/)`,
+      );
+      expect(lines.filter((line) => line.includes('/cars/'))).toHaveLength(3);
+    }
+  });
+
   it('names a Make page by its overview when it has one', async () => {
     expect(await generateLlmsTxt('ru')).toContain(
       '[Обзор BMW](https://carlab.rs/ru/cars/bmw/)',

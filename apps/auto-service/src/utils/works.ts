@@ -99,6 +99,11 @@ export const workshopMakePages = (
 
 export type WorkshopMakePage = ReturnType<typeof workshopMakePages>[number];
 
+export const makeCover = ({ overview, works }: WorkshopMakePage) =>
+  overview?.data.image ?? publishedByNewest(works)[0]?.data.image;
+
+export const CARS_PAGE_SIZE = 24;
+
 const WORKSHOP = 'workshop';
 
 const SERVICE_PHOTO: Partial<Record<ServiceSlug, string>> = {
