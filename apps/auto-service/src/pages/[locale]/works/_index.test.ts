@@ -35,9 +35,10 @@ describe('the works list', () => {
 
   it('offers a chip for each make two Works share, all pressed by default', async () => {
     const root = await page([
-      work({ id: 'a', car: 'BMW X3' }),
-      work({ id: 'b', car: 'BMW 118D' }),
-      work({ id: 'c', car: 'VW Golf' }),
+      work({ id: 'a', make: 'bmw' }),
+      work({ id: 'b', make: 'bmw', car: '118D' }),
+      work({ id: 'c', make: 'volkswagen' }),
+      work({ id: 'd' }),
     ]);
 
     expect(chips(root).map((chip) => chip.textContent?.trim())).toEqual([
@@ -55,8 +56,42 @@ describe('the works list', () => {
 
   it('shows no chips when no make repeats', async () => {
     expect(
-      chips(await page([work({ id: 'a' }), work({ id: 'b', car: 'VW Golf' })])),
+      chips(
+        await page([
+          work({ id: 'a', make: 'bmw' }),
+          work({ id: 'b', make: 'volkswagen' }),
+        ]),
+      ),
     ).toEqual([]);
+  });
+
+  it('groups no Work by the make its car name starts with', async () => {
+    expect(
+      chips(
+        await page([
+          work({ id: 'a', car: 'BMW X3' }),
+          work({ id: 'b', car: 'BMW 118D' }),
+        ]),
+      ),
+    ).toEqual([]);
+  });
+
+  it('lists a Work without a Make under all and in no make group', async () => {
+    const root = await page([
+      work({ id: 'a', make: 'bmw' }),
+      work({ id: 'b', make: 'bmw' }),
+      work({ id: 'brakes', car: 'Обслуживание тормозов' }),
+    ]);
+    const items = [...root.querySelectorAll<HTMLElement>('[data-filter-item]')];
+
+    expect(items.map((item) => item.dataset.group)).toEqual([
+      'bmw',
+      'bmw',
+      undefined,
+    ]);
+    expect(items[2].querySelector('a')?.getAttribute('href')).toBe(
+      '/ru/works/brakes/',
+    );
   });
 
   it('says the list is coming when there is no Work yet', async () => {

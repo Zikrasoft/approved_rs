@@ -8,8 +8,8 @@ vi.mock('astro:content', () => ({
   getCollection: vi
     .fn()
     .mockResolvedValue([
-      work({ id: 'a', car: 'BMW X3' }),
-      work({ id: 'b', car: 'SEAT LEON' }),
+      work({ id: 'a', make: 'bmw' }),
+      work({ id: 'b', make: 'seat', car: 'Leon' }),
       work({ id: 'c', car: 'Обслуживание тормозов' }),
     ]),
 }));
@@ -46,7 +46,7 @@ describe('the about page', () => {
   it('names the makes from the Works and links the BMW page and every Work', async () => {
     const root = await page();
     const makes = [...root.querySelectorAll('p')].filter(
-      (line) => line.textContent?.trim() === 'BMW, Seat',
+      (line) => line.textContent?.trim() === 'BMW, SEAT',
     );
 
     expect(makes).toHaveLength(1);

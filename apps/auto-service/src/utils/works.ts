@@ -4,6 +4,7 @@ import { normalizePartNumber } from '@podbor/catalog-contract';
 import { localizedEntry, publishedByNewest } from '@podbor/i18n';
 import type { Locale } from '@/i18n/config';
 import type { PartPageEntry } from './catalogueSnapshot';
+import { MAKES } from './makes';
 import type { ServiceSlug } from './services';
 
 type WorkEntry = CollectionEntry<'works'>;
@@ -62,36 +63,19 @@ export const workLeadService = ({ data: { servicesApplied } }: Work) =>
     ? PARTS_SOURCING
     : servicesApplied[0];
 
-const MAKES = [
-  'Alfa Romeo',
-  'Audi',
-  'BMW',
-  'Honda',
-  'Mercedes-Benz',
-  'MINI',
-  'Peugeot',
-  'Seat',
-  'Skoda',
-  'VW',
-];
+export const makeGroup = ({ data: { make } }: Work): string | undefined => make;
 
-export const makeOf = ({ data: { car } }: Work): string | undefined =>
-  MAKES.find((make) => car.toLowerCase().startsWith(make.toLowerCase()));
-
-const groupOf = (make: string) => make.toLowerCase().replaceAll(' ', '-');
-
-export const makeGroup = (work: Work): string | undefined => {
-  const make = makeOf(work);
-  return make && groupOf(make);
-};
+const carried = (works: Work[], count: number) =>
+  MAKES.filter(
+    ({ slug }) =>
+      works.filter((work) => makeGroup(work) === slug).length >= count,
+  );
 
 export const sharedMakes = (works: Work[]) =>
-  MAKES.filter(
-    (make) => works.filter((work) => makeOf(work) === make).length > 1,
-  ).map((make) => ({ label: make, group: groupOf(make) }));
+  carried(works, 2).map(({ slug, name }) => ({ label: name, group: slug }));
 
 export const makesOf = (works: Work[]): string[] =>
-  MAKES.filter((make) => works.some((work) => makeOf(work) === make));
+  carried(works, 1).map(({ name }) => name);
 
 const WORKSHOP = 'workshop';
 

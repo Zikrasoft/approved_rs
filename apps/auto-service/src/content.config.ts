@@ -2,6 +2,7 @@ import { defineCollection } from 'astro:content';
 import { z } from 'astro/zod';
 import { glob } from 'astro/loaders';
 import { SERVICE_SLUGS } from './utils/services';
+import { MAKE_SLUGS } from './utils/makes';
 
 const translationSchema = z
   .object({
@@ -21,6 +22,7 @@ const works = defineCollection({
           .object({ sr: translationSchema, en: translationSchema })
           .optional(),
         car: z.string(),
+        make: z.enum(MAKE_SLUGS).optional(),
         year: z.number().optional(),
         servicesApplied: z.array(z.enum(SERVICE_SLUGS)).default([]),
         parts: z

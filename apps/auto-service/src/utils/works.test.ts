@@ -4,7 +4,6 @@ import {
   featuredWorks,
   localizedWork,
   makeGroup,
-  makeOf,
   makesOf,
   publishedWorks,
   servicePhoto,
@@ -250,54 +249,40 @@ describe('workLeadService', () => {
   });
 });
 
-describe('makeOf', () => {
-  it('reads the make off the start of the car, whatever its case', () => {
-    expect(makeOf(makeWork({ car: 'SEAT LEON' }))).toBe('Seat');
-    expect(makeOf(makeWork({ car: 'Mercedes-Benz C-Class' }))).toBe(
-      'Mercedes-Benz',
-    );
-    expect(makeOf(makeWork({ car: 'BMW' }))).toBe('BMW');
-  });
-
-  it('leaves a car outside the list without a make', () => {
-    expect(makeOf(makeWork({ car: 'Обслуживание тормозной системы' }))).toBe(
-      undefined,
-    );
-  });
-});
-
 describe('makeGroup', () => {
-  it('keys a make as one space-free token the chip filter can match', () => {
-    expect(makeGroup(makeWork({ car: 'Alfa Romeo Giulia' }))).toBe(
-      'alfa-romeo',
+  it('keys a Work by the Make chosen for it', () => {
+    expect(makeGroup(makeWork({ make: 'mercedes-benz' }))).toBe(
+      'mercedes-benz',
     );
-    expect(makeGroup(makeWork({ car: 'Обслуживание тормозов' }))).toBe(
-      undefined,
-    );
+  });
+
+  it('leaves a Work without a Make out of every group', () => {
+    expect(makeGroup(makeWork({ car: 'BMW X5' }))).toBe(undefined);
   });
 });
 
 describe('the makes of a list of Works', () => {
   const works = [
-    'Skoda Octavia',
-    'BMW X3',
-    'Alfa Romeo Giulia',
-    'Skoda Fabia',
-    'BMW 118D',
-    'Alfa Romeo 159',
-    'VW Golf',
-  ].map((car) => makeWork({ car }));
+    makeWork({ make: 'skoda', car: 'Octavia' }),
+    makeWork({ make: 'bmw' }),
+    makeWork({ make: 'audi' }),
+    makeWork({ make: 'skoda' }),
+    makeWork({ make: 'bmw' }),
+    makeWork({ make: 'audi' }),
+    makeWork({ make: 'volkswagen' }),
+    makeWork({ car: 'Обслуживание тормозов' }),
+  ];
 
-  it('offers a chip only for a make two or more Works share, in list order', () => {
+  it('offers a chip only for a Make two or more Works share, by name', () => {
     expect(sharedMakes(works)).toEqual([
-      { label: 'Alfa Romeo', group: 'alfa-romeo' },
+      { label: 'Audi', group: 'audi' },
       { label: 'BMW', group: 'bmw' },
-      { label: 'Skoda', group: 'skoda' },
+      { label: 'Škoda', group: 'skoda' },
     ]);
   });
 
-  it('names every make at least one Work carries', () => {
-    expect(makesOf(works)).toEqual(['Alfa Romeo', 'BMW', 'Skoda', 'VW']);
+  it('names every Make at least one Work carries', () => {
+    expect(makesOf(works)).toEqual(['Audi', 'BMW', 'Škoda', 'Volkswagen']);
   });
 });
 
