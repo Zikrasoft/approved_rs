@@ -3,7 +3,8 @@ import { Image } from 'astro:assets';
 import { localizedArticle } from '@podbor/blog/article';
 import { localeFrom } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
-import { articleDate, type Article } from '@/utils/blog';
+import type { Article } from '@/utils/blog';
+import ArticleDate from './ArticleDate.astro';
 import { coverScale, coverSizes } from '@/utils/coverSizes';
 
 interface Props {
@@ -35,12 +36,7 @@ const { title, lead } = localizedArticle(article, locale);
     class="aspect-[3/2] w-full object-cover"
   />
   <div class="flex flex-1 flex-col gap-2 border-t border-line p-4 sm:p-5">
-    <time
-      datetime={article.data.date.toISOString().slice(0, 10)}
-      class="text-xs text-muted"
-    >
-      {articleDate(article.data.date, locale)}
-    </time>
+    <ArticleDate date={article.data.date} class="text-xs text-muted" />
     <Heading
       class:list={[
         'font-semibold text-ink group-hover:underline',

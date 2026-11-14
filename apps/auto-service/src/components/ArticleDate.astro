@@ -1,0 +1,15 @@
+---
+import { localeFrom } from '@/i18n/config';
+import { articleDate } from '@/utils/blog';
+
+interface Props {
+  date: Date;
+  class?: string;
+}
+
+const { date, class: className } = Astro.props;
+---
+
+<time datetime={date.toISOString().slice(0, 10)} class={className}>
+  {articleDate(date, localeFrom(Astro.url.pathname))}
+</time>

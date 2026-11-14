@@ -3,16 +3,18 @@ import { getCollection } from 'astro:content';
 import { Image } from 'astro:assets';
 import { blogArticles, localizedArticle } from '@podbor/blog/article';
 import { faqPageSchema, safeMarkdown } from '@podbor/site-kit';
+import { withPlaceholder } from '@podbor/i18n';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import Faq from '@/components/Faq.astro';
 import InkLink from '@/components/InkLink.astro';
 import Icon from '@/components/Icon.astro';
+import ArticleDate from '@/components/ArticleDate.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PathBuilder, withLocales } from '@/utils/paths';
-import { articleDate, type Article } from '@/utils/blog';
+import type { Article } from '@/utils/blog';
 import { makeName } from '@/utils/makes';
 import { blogArticleSchema } from '@/utils/schema';
 import { SITE_NAME } from '@/utils/constants';
@@ -65,12 +67,7 @@ const makeLabel = make && makeName(make);
       class="aspect-[3/2] w-full rounded-block object-cover md:aspect-[21/9]"
     />
     <div class="flex max-w-2xl flex-col gap-6">
-      <time
-        datetime={date.toISOString().slice(0, 10)}
-        class="text-sm text-muted"
-      >
-        {articleDate(date, locale)}
-      </time>
+      <ArticleDate date={date} class="text-sm text-muted" />
       {body.trim() && <div class="prose-shop" set:html={safeMarkdown(body)} />}
       {
         make && makeLabel && (
@@ -78,7 +75,7 @@ const makeLabel = make && makeName(make);
             href={PathBuilder.carsMake(locale, make)}
             class="min-h-11 w-fit gap-1.5"
           >
-            {blog.makeLink.replace('{make}', makeLabel)}
+            {withPlaceholder(blog.makeLink, 'make', makeLabel)}
             <Icon name="chevronRight" size={16} />
           </InkLink>
         )
