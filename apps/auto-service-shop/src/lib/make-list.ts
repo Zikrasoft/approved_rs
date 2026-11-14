@@ -1,12 +1,4 @@
-type Make = { slug: string; name: string };
-
-const byName = new Intl.Collator('en', { sensitivity: 'base' }).compare;
+import { sortedMakes, type Make } from '@podbor/catalog-contract';
 
 export const makeListJson = (makes: Make[]): string =>
-  `${JSON.stringify(
-    makes
-      .map(({ slug, name }) => ({ slug, name }))
-      .sort((a, b) => byName(a.name, b.name)),
-    null,
-    2,
-  )}\n`;
+  `${JSON.stringify(sortedMakes(makes), null, 2)}\n`;

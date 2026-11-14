@@ -13,6 +13,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@podbor/catalog-contract": "workspace:*",
     "@podbor/i18n": "workspace:*",
     "@podbor/site-kit": "workspace:*",
     "zod": "4.6.7"

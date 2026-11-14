@@ -1,4 +1,4 @@
-export type Make = { slug: string; name: string };
+import type { Make } from '@podbor/catalog-contract';
 
 export type MakeLinked = { data: { make?: string | null } };
 

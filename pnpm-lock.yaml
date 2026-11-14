@@ -507,6 +507,9 @@ importers:
 
   packages/blog:
     dependencies:
+      '@podbor/catalog-contract':
+        specifier: workspace:*
+        version: link:../catalog-contract
       '@podbor/i18n':
         specifier: workspace:*
         version: link:../i18n
