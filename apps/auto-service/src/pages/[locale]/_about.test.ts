@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { content } from '@/i18n/content';
-import { render } from '@/components/renderAstro';
+import { render, heroPartsSearch } from '@/components/renderAstro';
 import { work } from '@/components/workFixture';
 import AboutPage from './about.astro';
 
@@ -165,5 +165,11 @@ describe('the about page', () => {
     );
     expect(following(equipment, sign)).toBeTruthy();
     expect(following(sign, makes)).toBeTruthy();
+  });
+});
+
+describe('the hero of the about page', () => {
+  it('offers the VIN parts search', async () => {
+    expect(heroPartsSearch(await page())).not.toBeNull();
   });
 });

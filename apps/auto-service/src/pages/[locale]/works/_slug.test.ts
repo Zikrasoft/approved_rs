@@ -2,7 +2,7 @@ import { getCollection } from 'astro:content';
 import { describe, expect, it, vi } from 'vitest';
 import tall from '@/assets/mechanic-engine-teardown-tall.jpg';
 import { content } from '@/i18n/content';
-import { render } from '@/components/renderAstro';
+import { render, heroPartsSearch } from '@/components/renderAstro';
 import { work } from '@/components/workFixture';
 import WorkPage, { getStaticPaths } from './[slug].astro';
 
@@ -125,5 +125,11 @@ describe('a work page', () => {
     expect(root.querySelector('#lead h2')?.textContent?.trim()).toBe(
       pages.works.sourcingCta.heading,
     );
+  });
+});
+
+describe('the hero of a work page', () => {
+  it('leaves the VIN parts search to the section pages', async () => {
+    expect((await page()).querySelector('[data-hero-parts-search]')).toBeNull();
   });
 });

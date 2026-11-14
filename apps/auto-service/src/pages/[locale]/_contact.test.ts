@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { content } from '@/i18n/content';
-import { render } from '@/components/renderAstro';
+import { render, heroPartsSearch } from '@/components/renderAstro';
 import ContactPage from './contact.astro';
 
 const { pages, site } = content('ru');
@@ -81,5 +81,11 @@ describe('the contacts page', () => {
         '[data-contact-placement="visit"] picture ~ * carlab-map',
       ),
     ).not.toBeNull();
+  });
+});
+
+describe('the hero of the contacts page', () => {
+  it('offers the VIN parts search', async () => {
+    expect(heroPartsSearch(await page())).not.toBeNull();
   });
 });

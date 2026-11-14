@@ -5,7 +5,7 @@ import tall from '@/assets/mechanic-engine-teardown-tall.jpg';
 import bay from '@/assets/workshop-bay-open-hood.jpg';
 import { content } from '@/i18n/content';
 import type { Locale } from '@/i18n/config';
-import { orangeIn, render } from '@/components/renderAstro';
+import { orangeIn, render, heroPartsSearch } from '@/components/renderAstro';
 import { work } from '@/components/workFixture';
 import { article } from '@/components/articleFixture';
 import { makePartsForBuild } from '@/utils/catalogueEnv';
@@ -271,5 +271,11 @@ describe('the /cars/ list', () => {
     const root = await page();
 
     expect(orangeIn(root.querySelector('list-search')!)).toEqual([]);
+  });
+});
+
+describe('the hero of the /cars/ list', () => {
+  it('offers the VIN parts search', async () => {
+    expect(heroPartsSearch(await page())).not.toBeNull();
   });
 });

@@ -67,6 +67,7 @@ const faq = about?.faq ?? [];
   jsonLd={faq.length > 0 ? [faqPageSchema(faq)] : []}
 >
   <PageHero
+    partsSearch
     heading={about?.title ?? named(copy.headingTemplate)}
     lead={about?.lead ?? named(copy.leadTemplate)}
     crumbs={[

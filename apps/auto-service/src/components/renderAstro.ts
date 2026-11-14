@@ -85,3 +85,8 @@ export const orangeIn = (root: Element) =>
   [...root.querySelectorAll('*')]
     .filter(isOrange)
     .map((element) => element.textContent?.replace(/\s+/g, ' ').trim());
+
+export const heroPartsSearch = (root: Element) => {
+  const block = root.querySelector('[data-hero-parts-search]');
+  return block?.closest('section')?.querySelector('h1') ? block : null;
+};

@@ -1,5 +1,6 @@
 ---
 import Breadcrumbs, { type Crumb } from './Breadcrumbs.astro';
+import HeroPartsSearch from './HeroPartsSearch.astro';
 import PanelPicture from './PanelPicture.astro';
 import type { PanelPhoto } from '@/utils/panelPhoto';
 
@@ -48,6 +49,7 @@ const { heading, hook, lead, crumbs, photo } = Astro.props;
         }
       </div>
       <slot />
+      <HeroPartsSearch tone="panel" />
     </div>
   </div>
 </section>

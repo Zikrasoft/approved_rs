@@ -5,6 +5,7 @@ import Breadcrumbs from '@/components/Breadcrumbs.astro';
 import VisitPanel from '@/components/VisitPanel.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import ContactChannels from '@/components/ContactChannels.astro';
+import HeroPartsSearch from '@/components/HeroPartsSearch.astro';
 import { localeFrom } from '@/i18n/config';
 import { localePaths, PathBuilder } from '@/utils/paths';
 import { content } from '@/i18n/content';
@@ -43,6 +44,7 @@ const cards = [
       tone="panel"
       only={['telegram', 'whatsapp', 'viber']}
     />
+    <HeroPartsSearch tone="panel" trust={false} />
   </VisitPanel>
 
   <section class="wrap grid gap-4 pt-band md:grid-cols-2 md:pt-band-lg">

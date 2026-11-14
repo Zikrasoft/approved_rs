@@ -3,7 +3,12 @@ import { withPlaceholder } from '@podbor/i18n';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { content } from '@/i18n/content';
 import type { Locale } from '@/i18n/config';
-import { orangeIn, partPage, render } from '@/components/renderAstro';
+import {
+  orangeIn,
+  partPage,
+  render,
+  heroPartsSearch,
+} from '@/components/renderAstro';
 import { work } from '@/components/workFixture';
 import { makePartsForBuild } from '@/utils/catalogueEnv';
 import type { MakePartsEntry } from '@/utils/catalogueSnapshot';
@@ -527,5 +532,11 @@ describe('the Articles on a Make page', () => {
 
     expect(sections).toHaveLength(3);
     expect(sections.flatMap((section) => orangeIn(section))).toEqual([]);
+  });
+});
+
+describe('the hero of a Make page', () => {
+  it('offers the VIN parts search', async () => {
+    expect(heroPartsSearch(await page())).not.toBeNull();
   });
 });
