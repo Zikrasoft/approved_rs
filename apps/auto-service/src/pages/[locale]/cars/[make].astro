@@ -16,15 +16,21 @@ import FinalCta from '@/components/FinalCta.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PathBuilder, withLocales } from '@/utils/paths';
-import { workshopMakePages, type WorkshopMakePage } from '@/utils/works';
+import {
+  overviewConflicts,
+  workshopMakePages,
+  type WorkshopMakePage,
+} from '@/utils/works';
 
 export async function getStaticPaths() {
+  const pages = workshopMakePages(
+    await getCollection('works'),
+    await getCollection('articles'),
+    await makePartsForBuild(),
+  );
+  overviewConflicts(pages).forEach((conflict) => console.warn(conflict));
   return withLocales(
-    workshopMakePages(
-      await getCollection('works'),
-      await getCollection('articles'),
-      await makePartsForBuild(),
-    ).map((page) => ({
+    pages.map((page) => ({
       params: { make: page.make.slug },
       props: { page },
     })),

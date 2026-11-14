@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
 import {
   articleSchema,
@@ -156,30 +156,22 @@ describe('the Articles of a Make page', () => {
     ).toEqual({ overview: undefined, articles: [] });
   });
 
-  it('warns about two overviews of one Make and uses the later one', () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  it('uses the later of two overviews of one Make and hands back the other', () => {
+    const { overview, ignoredOverviews } = makeArticles([
+      entry('first', '2026-01-01', { make: 'bmw', overview: true }),
+      entry('second', '2026-03-01', { make: 'bmw', overview: true }),
+    ]);
 
-    expect(
-      ids(
-        makeArticles([
-          entry('first', '2026-01-01', { make: 'bmw', overview: true }),
-          entry('second', '2026-03-01', { make: 'bmw', overview: true }),
-        ]),
-      ),
-    ).toEqual({ overview: 'second', articles: [] });
-    expect(warn).toHaveBeenCalledWith(
-      'Make bmw has 2 overview Articles (second, first); using second',
-    );
-    warn.mockRestore();
+    expect(overview?.id).toBe('second');
+    expect(ignoredOverviews.map(({ id }) => id)).toEqual(['first']);
   });
 
-  it('stays quiet with a single overview', () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
-
-    makeArticles([entry('one', '2026-01-01', { make: 'bmw', overview: true })]);
-
-    expect(warn).not.toHaveBeenCalled();
-    warn.mockRestore();
+  it('ignores no overview when there is a single one', () => {
+    expect(
+      makeArticles([
+        entry('one', '2026-01-01', { make: 'bmw', overview: true }),
+      ]).ignoredOverviews,
+    ).toEqual([]);
   });
 });
 

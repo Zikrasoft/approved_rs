@@ -1,6 +1,9 @@
 import { describe, it, expect } from 'vitest';
+import { article } from '@/components/articleFixture';
 import type { PartPageEntry } from './catalogueSnapshot';
 import {
+  overviewConflicts,
+  workshopMakePages,
   featuredWorks,
   localizedWork,
   makeGroup,
@@ -322,5 +325,33 @@ describe('servicePhoto', () => {
       servicePhoto('vin-parts-inquiry', [work('bmw-x3', '/x3.jpg')], workshop),
     ).toBe(undefined);
     expect(servicePhoto('diagnostics', [hidden], workshop)).toBe(undefined);
+  });
+});
+
+describe('overviewConflicts', () => {
+  it('names a Make with more than one overview and the one its page uses', () => {
+    const pages = workshopMakePages(
+      [],
+      [
+        article({
+          id: 'first',
+          make: 'bmw',
+          overview: true,
+          date: new Date('2026-01-01'),
+        }),
+        article({
+          id: 'second',
+          make: 'bmw',
+          overview: true,
+          date: new Date('2026-03-01'),
+        }),
+        article({ id: 'audi', make: 'audi', overview: true }),
+      ],
+      [],
+    );
+
+    expect(overviewConflicts(pages)).toEqual([
+      'Make bmw has 2 overview Articles (second, first); using second',
+    ]);
   });
 });

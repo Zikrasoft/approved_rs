@@ -99,6 +99,15 @@ export const workshopMakePages = (
 
 export type WorkshopMakePage = ReturnType<typeof workshopMakePages>[number];
 
+export const overviewConflicts = (pages: WorkshopMakePage[]) =>
+  pages.flatMap(({ make, overview, ignoredOverviews }) =>
+    overview && ignoredOverviews.length > 0
+      ? [
+          `Make ${make.slug} has ${ignoredOverviews.length + 1} overview Articles (${[overview, ...ignoredOverviews].map(({ id }) => id).join(', ')}); using ${overview.id}`,
+        ]
+      : [],
+  );
+
 export const makeCover = ({ overview, works }: WorkshopMakePage) =>
   overview?.data.image ?? publishedByNewest(works)[0]?.data.image;
 

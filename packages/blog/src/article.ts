@@ -68,16 +68,14 @@ export const blogListed = (articles: ArticleEntry[]): boolean =>
 
 export function makeArticles<A extends ArticleEntry>(
   articles: A[],
-): { overview: A | undefined; articles: A[] } {
+): { overview: A | undefined; ignoredOverviews: A[]; articles: A[] } {
   const published = publishedByNewest(articles);
-  const overviews = published.filter(({ data }) => data.overview);
-  const [overview] = overviews;
-  if (overviews.length > 1)
-    console.warn(
-      `Make ${overview.data.make} has ${overviews.length} overview Articles (${overviews.map(({ id }) => id).join(', ')}); using ${overview.id}`,
-    );
+  const [overview, ...ignoredOverviews] = published.filter(
+    ({ data }) => data.overview,
+  );
   return {
     overview,
+    ignoredOverviews,
     articles: published.filter(({ data }) => !data.overview),
   };
 }
