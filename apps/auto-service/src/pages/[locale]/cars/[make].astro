@@ -16,6 +16,7 @@ import FinalCta from '@/components/FinalCta.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PathBuilder, withLocales } from '@/utils/paths';
+import { SITE_NAME } from '@/utils/constants';
 import {
   overviewConflicts,
   workshopMakePages,
@@ -56,8 +57,10 @@ const faq = about?.faq ?? [];
 ---
 
 <Shell
-  title={named(copy.metaTitleTemplate)}
-  description={named(copy.metaDescriptionTemplate)}
+  title={about
+    ? `${about.title} | ${SITE_NAME}`
+    : named(copy.metaTitleTemplate)}
+  description={about?.lead ?? named(copy.metaDescriptionTemplate)}
   jsonLd={faq.length > 0 ? [faqPageSchema(faq)] : []}
 >
   <PageHero

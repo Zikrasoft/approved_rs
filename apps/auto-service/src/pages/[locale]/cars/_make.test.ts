@@ -9,6 +9,7 @@ import { makePartsForBuild } from '@/utils/catalogueEnv';
 import type { MakePartsEntry } from '@/utils/catalogueSnapshot';
 import type { Category } from '@podbor/catalog-contract';
 import { article } from '@/components/articleFixture';
+import { SITE_NAME } from '@/utils/constants';
 import type { Article } from '@/utils/blog';
 import MakePage, { getStaticPaths } from './[make].astro';
 
@@ -369,6 +370,18 @@ describe('a Make page with an overview', () => {
     expect(root.querySelector('.prose-shop')?.textContent).toContain(
       'Диагностика на ISTA/ISTA+.',
     );
+  });
+
+  it('takes its title and description from the overview', async () => {
+    withArticles([overview()]);
+    const root = await page();
+
+    expect(root.querySelector('title')?.textContent).toBe(
+      `Ремонт и обслуживание BMW | ${SITE_NAME}`,
+    );
+    expect(
+      root.querySelector('meta[name="description"]')?.getAttribute('content'),
+    ).toBe('Знаем характерные проблемы N47, N20, N55.');
   });
 
   it('reads the overview in Serbian when it is translated', async () => {
