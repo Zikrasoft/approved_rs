@@ -54,6 +54,14 @@ describe('the works list', () => {
     ).toBe(pages.works.filterLabel);
   });
 
+  it('narrows to the make the address names', async () => {
+    const root = await page([work({ id: 'a', make: 'bmw' })]);
+
+    expect(root.querySelector<HTMLElement>('chip-filter')?.dataset.param).toBe(
+      'make',
+    );
+  });
+
   it('shows no chips when no make repeats', async () => {
     expect(
       chips(

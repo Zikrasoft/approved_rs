@@ -5,7 +5,7 @@ import PageHero from '@/components/PageHero.astro';
 import WorkGrid from '@/components/WorkGrid.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import { localeFrom } from '@/i18n/config';
-import { localePaths, PathBuilder } from '@/utils/paths';
+import { localePaths, PathBuilder, WORKS_MAKE_PARAM } from '@/utils/paths';
 import { featuredWorks, sharedMakes } from '@/utils/works';
 import { content } from '@/i18n/content';
 
@@ -36,7 +36,7 @@ const CHIP = 'chip shrink-0 aria-pressed:bg-ink aria-pressed:text-white';
       works.length === 0 ? (
         <p class="card p-6 text-base text-muted">{site.common.emptyWorks}</p>
       ) : (
-        <chip-filter class="block">
+        <chip-filter class="block" data-param={WORKS_MAKE_PARAM}>
           {makes.length > 0 && (
             <div
               role="group"

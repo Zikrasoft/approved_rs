@@ -23,9 +23,19 @@ export function defineChipFilter(tagName = 'chip-filter'): void {
           this.querySelector<HTMLButtonElement>('[data-filter-more]');
         const cap = Number(this.dataset.cap);
         let expanded = false;
+        const press = (pressed?: HTMLButtonElement) => {
+          for (const chip of chips)
+            chip.setAttribute('aria-pressed', String(chip === pressed));
+        };
+        const named = this.dataset.param
+          ? new URLSearchParams(location.search).get(this.dataset.param)
+          : null;
         let group =
+          named ??
           chips.find((chip) => chip.getAttribute('aria-pressed') === 'true')
-            ?.dataset.group ?? ALL_GROUPS;
+            ?.dataset.group ??
+          ALL_GROUPS;
+        if (named) press(chips.find((chip) => chip.dataset.group === named));
 
         const apply = () => {
           const capped = Number.isFinite(cap) && cap > 0 && !expanded;
@@ -60,8 +70,7 @@ export function defineChipFilter(tagName = 'chip-filter'): void {
             'click',
             () => {
               group = chip.dataset.group ?? ALL_GROUPS;
-              for (const other of chips)
-                other.setAttribute('aria-pressed', String(other === chip));
+              press(chip);
               apply();
             },
             { signal },

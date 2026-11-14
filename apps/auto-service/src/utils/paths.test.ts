@@ -30,6 +30,18 @@ describe('PathBuilder.partsModelSearch', () => {
   });
 });
 
+describe('Make paths', () => {
+  it('puts a Make page under /cars/ by the catalogue slug', () => {
+    expect(PathBuilder.carsMake('sr', 'mercedes-benz')).toBe(
+      '/sr/cars/mercedes-benz/',
+    );
+  });
+
+  it('narrows the Works list to one Make', () => {
+    expect(PathBuilder.worksOfMake('en', 'bmw')).toBe('/en/works/?make=bmw');
+  });
+});
+
 describe('PathBuilder', () => {
   it('prefixes every path with the locale and ends with a slash', () => {
     const paths = [

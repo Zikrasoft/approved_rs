@@ -30,7 +30,10 @@ export const PathBuilder = {
   partsPrices: (locale: Locale) => `/${locale}/parts/prices/`,
   partsInquiry: (locale: Locale, part?: string) =>
     `/${locale}/parts/${part ? `?${new URLSearchParams({ part })}` : ''}#${PARTS_INQUIRY_ANCHOR}`,
+  worksOfMake: (locale: Locale, make: string) =>
+    `/${locale}/works/?${new URLSearchParams({ [WORKS_MAKE_PARAM]: make })}`,
   work: (locale: Locale, slug: string) => `/${locale}/works/${slug}/`,
+  carsMake: (locale: Locale, make: string) => `/${locale}/cars/${make}/`,
   bmw: (locale: Locale) => `/${locale}/bmw/`,
   contact: (locale: Locale) => `/${locale}/contact/`,
   thanks: (locale: Locale) => `/${locale}/thanks/`,
@@ -40,6 +43,8 @@ export const PathBuilder = {
 };
 
 export const PARTS_INQUIRY_ANCHOR = 'inquiry';
+
+export const WORKS_MAKE_PARAM = 'make';
 
 export type SeriesAddress = { name: string; make: { slug: string } };
 
