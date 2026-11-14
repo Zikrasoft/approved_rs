@@ -122,7 +122,7 @@ const eager = new Set(
                       aria-hidden="true"
                       class="flex aspect-[3/2] w-full items-end overflow-hidden bg-shade px-3 pb-1 sm:px-4"
                     >
-                      <span class="truncate text-[2.5rem] leading-none font-semibold tracking-tight text-line sm:text-5xl">
+                      <span class="truncate text-[2.5rem] leading-none font-semibold tracking-tight text-line-strong sm:text-5xl">
                         {make.name}
                       </span>
                     </div>
@@ -135,14 +135,10 @@ const eager = new Set(
             ))}
           </ul>
 
-          <p
-            data-search-empty
-            hidden
-            aria-live="polite"
-            class="card p-6 text-base text-muted"
-          >
+          <p data-search-empty hidden class="card p-6 text-base text-muted">
             {copy.noMatch}
           </p>
+          <p data-search-status aria-live="polite" class="sr-only" />
 
           {listing.count > 1 && (
             <div data-search-idle>

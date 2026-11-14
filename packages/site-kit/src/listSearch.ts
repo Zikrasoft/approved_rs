@@ -28,6 +28,7 @@ export function defineListSearch(tagName = 'list-search'): void {
           resting: item.hidden,
         }));
         const empty = this.querySelector<HTMLElement>('[data-search-empty]');
+        const status = this.querySelector<HTMLElement>('[data-search-status]');
         const idle = [
           ...this.querySelectorAll<HTMLElement>('[data-search-idle]'),
         ];
@@ -43,7 +44,13 @@ export function defineListSearch(tagName = 'list-search'): void {
               item.hidden = !shown;
             }
             for (const element of idle) element.hidden = Boolean(query);
-            if (empty) empty.hidden = !query || matched > 0;
+            const nothing = Boolean(query) && matched === 0;
+            if (empty) empty.hidden = !nothing;
+            if (status) {
+              status.textContent = nothing
+                ? (empty?.textContent?.trim() ?? '')
+                : '';
+            }
           },
           { signal: this.controller.signal },
         );

@@ -19,7 +19,8 @@ const LIST = `
     <li data-search-item hidden>Škoda</li>
     <li data-search-item hidden>Seat</li>
   </ul>
-  <p data-search-empty hidden>Nothing</p>
+  <p data-search-empty hidden> Nothing </p>
+  <p data-search-status></p>
   <nav data-search-idle>pages</nav>
 `;
 
@@ -66,6 +67,27 @@ describe('defineListSearch', () => {
     type(root, 'lada');
     expect(shown(root)).toEqual([]);
     expect(hidden(root, '[data-search-empty]')).toBe(false);
+  });
+
+  it('announces that nothing matches through a status that never hides', () => {
+    const root = mount(LIST);
+    const status = root.querySelector<HTMLElement>('[data-search-status]')!;
+    type(root, 'lada');
+    expect(status.textContent).toBe('Nothing');
+    expect(status.hidden).toBe(false);
+    type(root, 'bmw');
+    expect(status.textContent).toBe('');
+    type(root, 'lada');
+    type(root, '');
+    expect(status.textContent).toBe('');
+  });
+
+  it('announces nothing without an empty state to read from', () => {
+    const root = mount(
+      '<input data-search-input /><p data-search-status></p><p data-search-item>Audi</p>',
+    );
+    type(root, 'x');
+    expect(root.querySelector('[data-search-status]')!.textContent).toBe('');
   });
 
   it('puts the list back as it came once the query is cleared', () => {

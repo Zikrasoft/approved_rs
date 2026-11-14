@@ -153,6 +153,18 @@ describe('the /cars/ list', () => {
     ).not.toBeNull();
   });
 
+  it('announces a search with no match through a status that is always there', async () => {
+    source(worksOn(2));
+    const search = (await page()).querySelector('list-search')!;
+    const status = search.querySelector('[data-search-status]');
+
+    expect(status?.getAttribute('aria-live')).toBe('polite');
+    expect(status?.hasAttribute('hidden')).toBe(false);
+    expect(
+      search.querySelector('[data-search-empty]')?.hasAttribute('aria-live'),
+    ).toBe(false);
+  });
+
   it('offers no pagination when every Make fits one page', async () => {
     source(worksOn(3));
 
