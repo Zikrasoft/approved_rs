@@ -111,10 +111,10 @@ medusaIntegrationTestRunner({
       });
 
       it('ranks the queries that found nothing by how often they were asked', async () => {
-        await demand.recordMissedQuery('k&n 33-2304', AT);
-        await demand.recordMissedQuery('k&n 33-2304', daysBefore(1));
-        await demand.recordMissedQuery('mann c 37 001', AT);
-        await demand.recordMissedQuery('old query', daysBefore(40));
+        await demand.recordMissedQuery('k&n 33-2304', { at: AT });
+        await demand.recordMissedQuery('k&n 33-2304', { at: daysBefore(1) });
+        await demand.recordMissedQuery('mann c 37 001', { at: AT });
+        await demand.recordMissedQuery('old query', { at: daysBefore(40) });
 
         expect(await demand.missedQueriesSince(daysBefore(30), 10)).toEqual([
           { query: 'k&n 33-2304', count: 2 },
@@ -125,6 +125,22 @@ medusaIntegrationTestRunner({
         );
       });
 
+      it('counts a visitor repeating a missed query once a day', async () => {
+        const visitorId = '2b1f0c4e-8f5a-4d7b-9c3e-1a2b3c4d5e6f';
+        await demand.recordMissedQuery('hu 816', { visitorId, at: AT });
+        await demand.recordMissedQuery('hu 816', { visitorId, at: AT });
+        await demand.recordMissedQuery('hu 816', {
+          visitorId,
+          at: daysBefore(1),
+        });
+        await demand.recordMissedQuery('hu 816', { at: AT });
+        await demand.recordMissedQuery('hu 816', { at: AT });
+
+        expect(await demand.missedQueriesSince(daysBefore(30), 10)).toEqual([
+          { query: 'hu 816', count: 4 },
+        ]);
+      });
+
       it('forgets the days, receipts and missed queries older than a cutoff', async () => {
         await demand.record({
           signal: 'order',
@@ -132,7 +148,7 @@ medusaIntegrationTestRunner({
           key: 'order:old',
           at: daysBefore(200),
         });
-        await demand.recordMissedQuery('forgotten', daysBefore(200));
+        await demand.recordMissedQuery('forgotten', { at: daysBefore(200) });
 
         expect(await demand.pruneBefore(daysBefore(150))).toBe(3);
 
