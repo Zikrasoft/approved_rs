@@ -313,6 +313,17 @@ describe('generateLlmsTxt', () => {
     expect(body).not.toContain('https://carlab.rs/sr/parts/bmw/');
   });
 
+  it('links the Make page of a Make with Parts and no Work', async () => {
+    const bmwWork = works.find(({ id }) => id === 'bmw-x5')!;
+    bmwWork.data.make = 'audi';
+    const body = await withBackend('true').finally(() => {
+      bmwWork.data.make = 'bmw';
+    });
+
+    expect(body).toContain('](https://carlab.rs/sr/cars/bmw/)');
+    expect(body).toContain('](https://carlab.rs/sr/cars/audi/)');
+  });
+
   it('leaves the page of every Make out while no Make has enough Parts for a page', async () => {
     const body = await withBackend('true', 'sr', []);
 

@@ -16,8 +16,10 @@ import {
   cataloguePagesFrom,
   categoryPagesFrom,
   makeHubsFrom,
+  makePartsFrom,
   type CategoryPageEntry,
   type MakeHubEntry,
+  type MakePartsEntry,
   type PartPageEntry,
 } from './catalogueSnapshot';
 import { makeDrift } from './makes';
@@ -273,6 +275,13 @@ export async function makeHubsForBuild(
 ): Promise<MakeHubEntry[]> {
   const snapshot = await snapshotForBuild(env);
   return snapshot ? makeHubsFrom(snapshot) : [];
+}
+
+export async function makePartsForBuild(
+  env = siteEnv(),
+): Promise<MakePartsEntry[]> {
+  const snapshot = await snapshotForBuild(env);
+  return snapshot ? makePartsFrom(snapshot) : [];
 }
 
 export async function redirectsForBuild(

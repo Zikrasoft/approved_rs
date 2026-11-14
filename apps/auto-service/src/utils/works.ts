@@ -4,7 +4,7 @@ import { makePages } from '@podbor/blog/make-pages';
 import { normalizePartNumber } from '@podbor/catalog-contract';
 import { localizedEntry, publishedByNewest } from '@podbor/i18n';
 import type { Locale } from '@/i18n/config';
-import type { PartPageEntry } from './catalogueSnapshot';
+import type { MakePartsEntry, PartPageEntry } from './catalogueSnapshot';
 import { MAKES } from './makes';
 import type { ServiceSlug } from './services';
 
@@ -78,8 +78,17 @@ export const sharedMakes = (works: Work[]) =>
 export const makesOf = (works: Work[]): string[] =>
   carried(works, 1).map(({ name }) => name);
 
-export const workshopMakePages = (works: WorkEntry[]) =>
-  makePages(MAKES, { works: featuredWorks(works) });
+export const workshopMakePages = (
+  works: WorkEntry[],
+  parts: MakePartsEntry[],
+) =>
+  makePages(MAKES, {
+    works: featuredWorks(works),
+    parts: parts.map((entry) => ({
+      ...entry,
+      data: { make: entry.make.slug },
+    })),
+  });
 
 export type WorkshopMakePage = ReturnType<typeof workshopMakePages>[number];
 

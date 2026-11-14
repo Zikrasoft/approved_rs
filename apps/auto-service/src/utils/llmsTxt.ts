@@ -14,6 +14,7 @@ import { translated } from '@podbor/catalog-contract';
 import {
   categoriesForBuild,
   makeHubsForBuild,
+  makePartsForBuild,
   shopOpen,
 } from '@/utils/catalogueEnv';
 import { categoryAddon } from '@/utils/categoryAddon';
@@ -43,6 +44,7 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
   const blog = content(locale).blog;
   const categories = await categoriesForBuild();
   const makes = await makeHubsForBuild();
+  const makeParts = await makePartsForBuild();
 
   return renderBrandLlmsTxt({
     site: { name: SITE_NAME, url: SITE_URL, summary: home.meta.description },
@@ -146,7 +148,7 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
     ],
     other: [
       { label: site.common.homeLabel, href: url(PathBuilder.home(locale)) },
-      ...workshopMakePages(workEntries).map(({ make }) => ({
+      ...workshopMakePages(workEntries, makeParts).map(({ make }) => ({
         label: withPlaceholder(pages.make.headingTemplate, 'make', make.name),
         href: url(PathBuilder.carsMake(locale, make.slug)),
       })),

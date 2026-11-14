@@ -171,6 +171,8 @@ make:
   headingTemplate: Ремонт и обслуживание {make} в Белграде
   leadTemplate: 'Диагностируем, обслуживаем и ремонтируем {make}: от замены масла до двигателя и коробки. Скажем, что нужно сделать и сколько это стоит, до начала работ.'
   servicesHeadingTemplate: Что мы делаем на {make}
+  partsHeadingTemplate: Запчасти для {make}
+  partsHubTemplate: Все запчасти для {make}
   worksHeadingTemplate: Наши работы на {make}
   worksAllTemplate: Все работы на {make}
   ctaHeadingTemplate: Запишите {make} в сервис

@@ -181,6 +181,8 @@ export const pagesContentSchema = z
         headingTemplate: z.string().includes('{make}'),
         leadTemplate: z.string().includes('{make}'),
         servicesHeadingTemplate: z.string().includes('{make}'),
+        partsHeadingTemplate: z.string().includes('{make}'),
+        partsHubTemplate: z.string().includes('{make}'),
         worksHeadingTemplate: z.string().includes('{make}'),
         worksAllTemplate: z.string().includes('{make}'),
         ctaHeadingTemplate: z.string().includes('{make}'),

@@ -1,6 +1,8 @@
 ---
 import { getCollection } from 'astro:content';
 import { withPlaceholder } from '@podbor/i18n';
+import { translated } from '@podbor/catalog-contract';
+import { makePartsForBuild } from '@/utils/catalogueEnv';
 import Shell from '@/layouts/Shell.astro';
 import Icon from '@/components/Icon.astro';
 import PageHero from '@/components/PageHero.astro';
@@ -14,7 +16,10 @@ import { workshopMakePages, type WorkshopMakePage } from '@/utils/works';
 
 export async function getStaticPaths() {
   return withLocales(
-    workshopMakePages(await getCollection('works')).map((page) => ({
+    workshopMakePages(
+      await getCollection('works'),
+      await makePartsForBuild(),
+    ).map((page) => ({
       params: { make: page.make.slug },
       props: { page },
     })),
@@ -26,8 +31,10 @@ interface Props {
 }
 
 const MAX_WORKS = 6;
+const TOP_CATEGORIES = 6;
 
-const { make, works } = Astro.props.page;
+const { make, works, parts } = Astro.props.page;
+const [catalogue] = parts;
 const locale = localeFrom(Astro.url.pathname);
 const { pages, home } = content(locale);
 const copy = pages.make;
@@ -55,17 +62,50 @@ const named = (template: string) =>
     </div>
   </section>
 
-  <section class="wrap pb-band">
-    <h2 class="text-section">{named(copy.worksHeadingTemplate)}</h2>
-    <WorkGrid works={works.slice(0, MAX_WORKS)} class="mt-5 md:mt-6" />
-    <a
-      href={PathBuilder.worksOfMake(locale, make.slug)}
-      class="link-underlined mt-5 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-ink"
-    >
-      {named(copy.worksAllTemplate)}
-      <Icon name="chevronRight" size={14} />
-    </a>
-  </section>
+  {
+    catalogue && (
+      <section class="wrap pb-band">
+        <h2 class="text-section">{named(copy.partsHeadingTemplate)}</h2>
+        <ul class="mt-5 flex flex-wrap gap-2 md:mt-6">
+          {catalogue.categories.slice(0, TOP_CATEGORIES).map((category) => (
+            <li class="max-w-full">
+              <a
+                href={PathBuilder.partsCategory(locale, category.slug)}
+                class="inline-flex min-h-11 max-w-full items-center rounded-pill border border-line bg-paper px-4 py-2 text-sm text-ink transition-colors hover:border-ink motion-reduce:transition-none"
+              >
+                {translated(category, 'name', locale)}
+              </a>
+            </li>
+          ))}
+        </ul>
+        {catalogue.hub && (
+          <a
+            href={PathBuilder.partsMake(locale, make.slug)}
+            class="link-underlined mt-5 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-ink"
+          >
+            {named(copy.partsHubTemplate)}
+            <Icon name="chevronRight" size={14} />
+          </a>
+        )}
+      </section>
+    )
+  }
+
+  {
+    works.length > 0 && (
+      <section class="wrap pb-band">
+        <h2 class="text-section">{named(copy.worksHeadingTemplate)}</h2>
+        <WorkGrid works={works.slice(0, MAX_WORKS)} class="mt-5 md:mt-6" />
+        <a
+          href={PathBuilder.worksOfMake(locale, make.slug)}
+          class="link-underlined mt-5 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-ink"
+        >
+          {named(copy.worksAllTemplate)}
+          <Icon name="chevronRight" size={14} />
+        </a>
+      </section>
+    )
+  }
 
   <FinalCta
     eyebrow={home.finalCta.eyebrow}
