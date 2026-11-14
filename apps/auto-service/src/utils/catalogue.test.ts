@@ -1512,6 +1512,22 @@ describe('the deploy build', () => {
     );
   });
 
+  it('names MEDUSA_BACKEND_URL and the URL it tried when the shop is down', async () => {
+    const down = new TypeError('fetch failed');
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.reject(down)),
+    );
+    const env = shopEnv();
+
+    const failure = await partPagesForBuild(env).catch((error) => error);
+
+    expect(failure.message).toContain('MEDUSA_BACKEND_URL');
+    expect(failure.message).toContain(env.MEDUSA_BACKEND_URL);
+    expect(failure.message).toContain('fetch failed');
+    expect(failure.cause).toBe(down);
+  });
+
   it('fails when the live site cannot say what it serves', async () => {
     vi.stubGlobal(
       'fetch',

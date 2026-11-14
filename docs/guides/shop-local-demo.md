@@ -18,7 +18,8 @@ One command, on a fresh clone or an existing setup. It builds the CommonJS
 workspace packages, then `shop:prepare` (`apps/auto-service-shop/scripts/shop-prepare.sh`):
 
 - creates `apps/auto-service-shop/.env` with the demo values below and random JWT and
-  cookie secrets, only if the file is missing;
+  cookie secrets, only if the file is missing, and fills the `S3_*` and
+  `FILE_URL` demo values where a key is absent or empty;
 - creates `apps/auto-service/.env.local` from `.env.example` if missing, and
   fills the Telegram placeholders (`TELEGRAM_BOT_TOKEN=1:fake`,
   `TELEGRAM_BOT_USERNAME=demo_crm_bot`, `TELEGRAM_GROUP_ID=-1`,
@@ -26,10 +27,13 @@ workspace packages, then `shop:prepare` (`apps/auto-service-shop/scripts/shop-pr
   is absent or empty, leaving every other line alone;
 - creates `apps/auto-service-shop/.local-demo/supplier-overrides.json` (`{}`, see
   step 7);
-- starts Postgres (55444) and Typesense (58444) from
+- starts Postgres (55444), Typesense (58444) and MinIO (59444, both buckets
+  created by its healthcheck) from
   `apps/auto-service-shop/docker-compose.demo.yml` (project `carlab-demo`, named
-  volumes), replacing `carlab-demo-pg` / `carlab-demo-ts` containers left over
-  from a hand-run `docker run`;
+  volumes), replacing `carlab-demo-pg` / `carlab-demo-ts` / `carlab-demo-s3`
+  containers left over from a hand-run `docker run`. MinIO takes its root
+  user, password and bucket names from the `S3_*` lines of the shop `.env`, so
+  an existing `.env` with its own keys keeps working;
 - drops and recreates the demo database once if it still carries the shop
   modules' pre-squash migration history (each module now has a single initial
   migration, and the old history cannot be migrated forward), or if it ran
@@ -38,10 +42,13 @@ workspace packages, then `shop:prepare` (`apps/auto-service-shop/scripts/shop-pr
   the old `Migration20261025160000` needs nothing: the row is ignored and the
   tables are already there;
 - runs `db:migrate`, `seed:demo`, `import:local` and `publish:local`, all safe
-  to rerun.
+  to rerun. `publish:local` runs with `OPENAI_API_KEY` emptied, so the demo
+  never calls OpenAI (a key without credits would stop the startup); run
+  `pnpm publish:local` in `apps/auto-service-shop` by hand to translate.
 
-Then it runs `medusa develop` on 9009 and, once `/health` answers, `astro dev`
-on 4321 with `.env.local` loaded into `process.env`. Ctrl-C stops both; the
+Then it runs `medusa develop` on the shop `.env`'s `PORT` (9009 for a new
+file) and, once `/health` answers at the `MEDUSA_BACKEND_URL` that `seed:demo`
+wrote into `apps/auto-service/.env.local`, `astro dev` on 4321 with `.env.local` loaded into `process.env`. Ctrl-C stops both; the
 containers stay up. The root `pnpm dev` starts none of this.
 
 Start over with an empty database:
@@ -70,12 +77,21 @@ The sections below are what the command does, for reference.
 | `SUPPLIER_ADAPTERS`       | `demo`                                                |
 | `DEMO_SUPPLIER_OVERRIDES` | an absolute path to a JSON file, see step 7           |
 | `STOREFRONT_ORIGIN`       | `http://127.0.0.1:4321`                               |
+| `S3_ENDPOINT`             | `http://127.0.0.1:59444`                              |
+| `S3_REGION`               | `us-east-1`                                           |
+| `S3_ACCESS_KEY_ID`        | `carlab-demo` (a local demo credential)               |
+| `S3_SECRET_ACCESS_KEY`    | `carlab-demo-secret` (a local demo credential)        |
+| `S3_PUBLIC_BUCKET`        | `carlab-public`                                       |
+| `S3_PRIVATE_BUCKET`       | `carlab-private`                                      |
+| `FILE_URL`                | `http://127.0.0.1:59444/carlab-public`                |
 
 Orders go to `/api/shop-orders` on that origin (deploy.md, `STOREFRONT_ORIGIN`).
 It names `127.0.0.1`, not `localhost`: Node resolves `localhost` to `[::1]`
 first, and anything else listening on IPv6 port 4321 gets the order.
 
-Leave `OPENAI_API_KEY` and `PUBLISH_DISPATCH_TOKEN` unset. Leave `SHOP_OPEN`
+`import:local` stores crawled pages in the private bucket and fails without
+the `S3_*` values. Leave `PUBLISH_DISPATCH_TOKEN` unset; `OPENAI_API_KEY` is
+only read when you run `pnpm publish:local` yourself. Leave `SHOP_OPEN`
 unset too: outside `NODE_ENV=production` the backend sells to everyone. Set
 `SHOP_OPEN=false` to try the closed beta locally.
 `SUPPLIER_ADAPTERS=demo` is refused when `NODE_ENV=production`.
@@ -161,7 +177,7 @@ pnpm publish:local
 
 `import:local` imports every Supplier whose import is on, as one Import run.
 `publish:local` imports nothing (ADR-0048): it skips translate when
-`OPENAI_API_KEY` is unset and reindexes Typesense. Each holds the catalogue
+`OPENAI_API_KEY` is unset (as `shop:prepare` runs it) and reindexes Typesense. Each holds the catalogue
 writer lock, so neither starts while an Import, Publish or deletion runs. The deploy step is left out: `publish.yml`
 rebuilds production, and locally "deploy" means rebuilding the storefront (step 6).
 
@@ -211,7 +227,9 @@ reads the Telegram variables from there, so `dev:shop` starts it under
 `node --env-file-if-exists=.env.local`. The placeholders are enough: the Lead
 is stored in `apps/auto-service/.local-data/data/leads.json` (gitignored) and
 the Telegram notification fails in the log. The Astro config fetches the part
-pages from Medusa at load, so the storefront waits for the backend.
+pages from Medusa at load, so the storefront waits for the backend; started
+with the backend down, it stops with «Could not read the catalogue from
+MEDUSA_BACKEND_URL (…)» naming the URL it tried.
 
 Storefront: <http://localhost:4321/ru/parts/>. Leads only reach the local file
 under `astro dev`; a production build writes to Vercel Blob.
