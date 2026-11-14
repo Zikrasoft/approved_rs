@@ -48,12 +48,21 @@ const browse = (props: Record<string, unknown>) =>
   }).then((html) => html.querySelector(`[${PARTS_BROWSE_ATTRIBUTE}]`)!);
 
 describe('the parts browse list', () => {
+  const range = copy.shownRange
+    .replace('{from}', '13')
+    .replace('{to}', '14')
+    .replace('{count}', '26');
+
   it('says which parts of how many it shows, for the page that swaps it in', async () => {
     expect((await browse({})).getAttribute(PARTS_BROWSE_STATUS_ATTRIBUTE)).toBe(
-      copy.shownRange
-        .replace('{from}', '13')
-        .replace('{to}', '14')
-        .replace('{count}', '26'),
+      range,
+    );
+  });
+
+  it('shows the same range beside the pager', async () => {
+    const list = await browse({ next: '/ru/parts/search/?offset=24' });
+    expect(list.querySelector('nav')?.previousElementSibling?.textContent).toBe(
+      range,
     );
   });
 

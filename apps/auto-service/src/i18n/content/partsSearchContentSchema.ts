@@ -70,7 +70,6 @@ export const partsSearchContentSchema = z
     closeSearch: z.string(),
     llmsSearch: z.string(),
     allHeading: z.string(),
-    allLead: z.string(),
     shownRange: z.string(),
     llmsAll: z.string(),
   })

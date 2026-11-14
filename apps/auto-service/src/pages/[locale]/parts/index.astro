@@ -65,6 +65,7 @@ const categories = byDemand(props.categories, ({ demand }) => demand).map(
   <PageHero
     actions={false}
     eyebrow={copy.eyebrow}
+    desktopLead
     heading={copy.heading}
     lead={copy.lead}
     crumbs={[{ href: PathBuilder.parts(locale), label: site.nav.parts }]}
@@ -80,14 +81,9 @@ const categories = byDemand(props.categories, ({ demand }) => demand).map(
   {
     browse && (
       <parts-browse class="wrap flex flex-col gap-4 pt-8 md:pt-10">
-        <div class="flex flex-col gap-1">
-          <h2 tabindex="-1" class="scroll-mt-24 text-section outline-none">
-            {searchCopy.allHeading}
-          </h2>
-          <p class="max-w-2xl text-sm leading-relaxed text-muted">
-            {searchCopy.allLead}
-          </p>
-        </div>
+        <h2 tabindex="-1" class="scroll-mt-24 text-section outline-none">
+          {searchCopy.allHeading}
+        </h2>
         <p class="sr-only" aria-live="polite" />
         <PartsBrowse found={browse.found} prev={null} next={browse.next} />
       </parts-browse>
@@ -95,7 +91,7 @@ const categories = byDemand(props.categories, ({ demand }) => demand).map(
   }
 
   <section
-    class="wrap flex flex-col gap-12 pt-8 pb-band md:gap-16 md:pt-10 md:pb-band-lg"
+    class="wrap flex flex-col gap-12 pt-12 pb-band md:gap-16 md:pt-16 md:pb-band-lg"
   >
     <cart-badge
       class="self-start"

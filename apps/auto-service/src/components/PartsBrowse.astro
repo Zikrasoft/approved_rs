@@ -19,12 +19,13 @@ interface Props {
 
 const { found, category, prev, next } = Astro.props;
 const copy = content(localeFrom(Astro.url.pathname)).partsSearch;
+const range = copy.shownRange
+  .replace('{from}', String(found.offset + 1))
+  .replace('{to}', String(found.offset + found.results.length))
+  .replace('{count}', String(found.count));
 const hooks = {
   [PARTS_BROWSE_ATTRIBUTE]: '',
-  [PARTS_BROWSE_STATUS_ATTRIBUTE]: copy.shownRange
-    .replace('{from}', String(found.offset + 1))
-    .replace('{to}', String(found.offset + found.results.length))
-    .replace('{count}', String(found.count)),
+  [PARTS_BROWSE_STATUS_ATTRIBUTE]: range,
 };
 ---
 
@@ -58,9 +59,14 @@ const hooks = {
       ))
     }
   </ul>
-  {
-    (prev || next) && (
-      <Pagination label={copy.pagination} prev={prev} next={next} />
-    )
-  }
+  <div
+    class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
+  >
+    <p class="text-sm text-muted">{range}</p>
+    {
+      (prev || next) && (
+        <Pagination label={copy.pagination} prev={prev} next={next} />
+      )
+    }
+  </div>
 </div>
