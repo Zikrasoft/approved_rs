@@ -30,6 +30,7 @@ describe('CONTACT_PLACEMENTS', () => {
       'header',
       'thanks',
       'visit',
+      'modal',
     ]);
   });
 

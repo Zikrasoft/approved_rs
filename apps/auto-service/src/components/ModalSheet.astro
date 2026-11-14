@@ -43,6 +43,7 @@ const { trigger, label, heading, subheading, callbackHeading } = Astro.props;
               </p>
             )
           }
+          <slot name="aside" />
         </div>
         <SheetClose />
       </div>

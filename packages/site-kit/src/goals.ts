@@ -31,6 +31,7 @@ export const CONTACT_PLACEMENTS = [
   'header',
   'thanks',
   'visit',
+  'modal',
 ] as const;
 
 export type ContactPlacement = (typeof CONTACT_PLACEMENTS)[number];

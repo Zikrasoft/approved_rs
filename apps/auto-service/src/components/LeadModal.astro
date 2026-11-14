@@ -1,6 +1,9 @@
 ---
+import { contactPlacement } from '@podbor/site-kit/contact-control';
+import ContactControl from './ContactControl.astro';
 import LeadForm from './LeadForm.astro';
 import ModalSheet from './ModalSheet.astro';
+import PhoneNumber from './PhoneNumber.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import type { ServiceSlug } from '@/utils/services';
@@ -22,5 +25,20 @@ const form = content(localeFrom(Astro.url.pathname)).site.form;
   subheading={form.subheading}
   callbackHeading={form.callbackTitle}
 >
+  <p
+    slot="aside"
+    class="flex flex-wrap items-center gap-x-1.5 text-sm text-muted short:hidden"
+    {...contactPlacement('modal')}
+  >
+    {form.callInstead}{' '}
+    <ContactControl
+      channel="phone"
+      showNumber
+      class="-my-3 py-3 font-medium text-ink underline decoration-line decoration-2 underline-offset-4"
+      plainClass="inline-flex text-ink"
+    >
+      <PhoneNumber />
+    </ContactControl>
+  </p>
   <LeadForm compact service={service} comment={comment} />
 </ModalSheet>
