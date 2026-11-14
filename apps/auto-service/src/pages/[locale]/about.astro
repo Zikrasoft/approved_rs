@@ -5,6 +5,7 @@ import { aboutPageSchema } from '@podbor/site-kit';
 import Shell from '@/layouts/Shell.astro';
 import { Image } from 'astro:assets';
 import PanelHero from '@/components/PanelHero.astro';
+import HeroContacts from '@/components/HeroContacts.astro';
 import SplitSection from '@/components/SplitSection.astro';
 import BulletList from '@/components/BulletList.astro';
 import VisitPanel from '@/components/VisitPanel.astro';
@@ -65,7 +66,9 @@ const photo = await panelPhoto({
     crumbs={[
       { href: PathBuilder.about(locale), label: site.footer.aboutLabel },
     ]}
-  />
+  >
+    <HeroContacts />
+  </PanelHero>
 
   <div class="wrap divide-y divide-line py-band md:py-band-lg">
     {

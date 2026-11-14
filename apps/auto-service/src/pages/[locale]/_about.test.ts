@@ -120,12 +120,17 @@ describe('the about page', () => {
     ).not.toBeNull();
   });
 
-  it('offers no call or booking above the facts', async () => {
+  it('offers the call and the booking in the hero above the VIN search', async () => {
     const hero = (await page()).querySelector('section')!;
+    const contacts = hero.querySelector('[data-contact-placement="hero"]')!;
 
+    expect(contacts.querySelector('a[href^="tel:"]')).not.toBeNull();
+    expect(contacts.querySelector('[data-open-lead-modal]')).not.toBeNull();
     expect(
-      hero.querySelector('[data-open-lead-modal], a[href^="tel:"]'),
-    ).toBeNull();
+      contacts.compareDocumentPosition(
+        hero.querySelector('[data-hero-parts-search]')!,
+      ) & contacts.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
   });
 
   it('opens on the workshop bay and preloads it', async () => {
