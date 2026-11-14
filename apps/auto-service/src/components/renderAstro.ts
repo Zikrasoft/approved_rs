@@ -90,3 +90,12 @@ export const heroPartsSearch = (root: Element) => {
   const block = root.querySelector('[data-hero-parts-search]');
   return block?.closest('section')?.querySelector('h1') ? block : null;
 };
+
+export const heroOrder = (root: Element) => {
+  const hero = root.querySelector('section')!;
+  return [
+    hero.querySelector('a[href^="https://maps.google.com"]'),
+    hero.querySelector('[data-contact-placement="hero"]'),
+    hero.querySelector('[data-hero-parts-search]'),
+  ].map((node) => [...hero.querySelectorAll('*')].indexOf(node!));
+};

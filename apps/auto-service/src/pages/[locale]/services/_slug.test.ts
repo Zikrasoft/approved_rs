@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { content } from '@/i18n/content';
-import { render, heroPartsSearch } from '@/components/renderAstro';
+import { render, heroOrder, heroPartsSearch } from '@/components/renderAstro';
 import { work } from '@/components/workFixture';
 import ServicePage from './[slug].astro';
 
@@ -151,6 +151,13 @@ describe('a service page', () => {
 });
 
 describe('the hero of a service page', () => {
+  it('puts the address above the contacts and the contacts above the VIN search, as the homepage does', async () => {
+    const [address, contacts, search] = heroOrder(await page('diagnostics'));
+
+    expect(address).toBeGreaterThan(-1);
+    expect(address).toBeLessThan(contacts);
+    expect(contacts).toBeLessThan(search);
+  });
   it('offers the VIN parts search', async () => {
     expect(heroPartsSearch(await page('diagnostics'))).not.toBeNull();
   });
