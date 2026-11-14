@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   definePartsBrowse,
   PARTS_BROWSE_ATTRIBUTE,
+  PARTS_BROWSE_SOURCE_ATTRIBUTE,
   PARTS_BROWSE_STATUS_ATTRIBUTE,
 } from './partsBrowse';
 
@@ -20,7 +21,7 @@ const block = (page: number, status = `page ${page}`) => `
 
 const mount = () => {
   document.body.innerHTML = `
-    <test-parts-browse>
+    <test-parts-browse ${PARTS_BROWSE_SOURCE_ATTRIBUTE}="/ru/parts/search/">
       <h2 tabindex="-1">All parts</h2>
       <p aria-live="polite"></p>
       ${block(1)}
@@ -47,6 +48,7 @@ const nextLink = () => document.querySelector('a[rel="next"]')!;
 
 beforeEach(() => {
   navigate.mockReset();
+  window.history.replaceState(null, '', '/ru/parts/');
 });
 
 afterEach(() => {
@@ -77,6 +79,110 @@ describe('the parts browse', () => {
       'Parts 13 to 24 of 30',
     );
     expect(document.activeElement).toBe(element.querySelector('h2'));
+    expect(navigate).not.toHaveBeenCalled();
+    expect(window.location.pathname + window.location.search).toBe(
+      '/ru/parts/?offset=12',
+    );
+  });
+
+  it('remembers the first page without an offset', async () => {
+    window.history.replaceState(null, '', '/ru/parts/?offset=12');
+    vi.stubGlobal('fetch', answer(block(1)));
+    document.body.innerHTML = `<test-parts-browse>${block(2)}</test-parts-browse>`;
+
+    click(document.querySelector('a[rel="prev"]')!);
+    await settle();
+
+    expect(window.location.pathname + window.location.search).toBe(
+      '/ru/parts/',
+    );
+  });
+
+  it('opens on the page the address remembers, without taking focus', async () => {
+    window.history.replaceState(null, '', '/ru/parts/?offset=24');
+    const fetch = answer(block(3, 'Parts 25 to 30 of 30'));
+    vi.stubGlobal('fetch', fetch);
+
+    const element = mount();
+    await settle();
+
+    expect(fetch).toHaveBeenCalledWith('/ru/parts/search/?offset=24', {
+      headers: { accept: 'text/html' },
+    });
+    expect(element.querySelector('ul')!.textContent).toContain('part 3');
+    expect(document.activeElement).not.toBe(element.querySelector('h2'));
+  });
+
+  it('follows the history back and forth', async () => {
+    vi.stubGlobal('fetch', answer(block(2)));
+    const element = mount();
+    click(nextLink());
+    await settle();
+    const fetch = answer(block(1));
+    vi.stubGlobal('fetch', fetch);
+
+    window.history.replaceState(null, '', '/ru/parts/');
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    await settle();
+
+    expect(fetch).toHaveBeenCalledWith('/ru/parts/search/', {
+      headers: { accept: 'text/html' },
+    });
+    expect(element.querySelector('ul')!.textContent).toContain('part 1');
+  });
+
+  it('opens the remembered page itself when it cannot be loaded in place', async () => {
+    window.history.replaceState(null, '', '/ru/parts/?offset=24');
+    vi.stubGlobal('fetch', answer('', false));
+
+    mount();
+    await settle();
+
+    expect(navigate).toHaveBeenCalledWith('/ru/parts/search/?offset=24');
+  });
+
+  it('stops following the history once it leaves the page', async () => {
+    const fetch = answer(block(2));
+    vi.stubGlobal('fetch', fetch);
+    mount().remove();
+
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    await settle();
+
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('follows the history once when it is put back', async () => {
+    const fetch = answer(block(2));
+    vi.stubGlobal('fetch', fetch);
+    const element = mount();
+    const parent = element.parentElement!;
+    parent.append(element);
+
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    await settle();
+
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('ignores the history without a page to load from', async () => {
+    const fetch = answer(block(2));
+    vi.stubGlobal('fetch', fetch);
+    window.history.replaceState(null, '', '/ru/parts/?offset=12');
+    document.body.innerHTML = `<test-parts-browse>${block(1)}</test-parts-browse>`;
+    await settle();
+
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('has nothing to restore without a parts list', async () => {
+    const fetch = answer(block(2));
+    vi.stubGlobal('fetch', fetch);
+    window.history.replaceState(null, '', '/ru/parts/?offset=12');
+    document.body.innerHTML = `<test-parts-browse ${PARTS_BROWSE_SOURCE_ATTRIBUTE}="/ru/parts/search/"></test-parts-browse>`;
+    await settle();
+
+    expect(fetch).not.toHaveBeenCalled();
     expect(navigate).not.toHaveBeenCalled();
   });
 

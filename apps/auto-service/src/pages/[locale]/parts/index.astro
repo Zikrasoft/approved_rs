@@ -6,10 +6,9 @@ import PageHero from '@/components/PageHero.astro';
 import VinInquiryCard from '@/components/VinInquiryCard.astro';
 import Icon from '@/components/Icon.astro';
 import CatalogueSearch from '@/components/CatalogueSearch.astro';
-import PopularParts from '@/components/PopularParts.astro';
+import { PARTS_BROWSE_SOURCE_ATTRIBUTE } from '@/scripts/partsBrowse';
 import PartsBrowse from '@/components/PartsBrowse.astro';
-import type { PartPageEntry } from '@/utils/catalogueSnapshot';
-import { byDemand, demandOf, popularPicks } from '@/utils/demand';
+import { byDemand, demandOf } from '@/utils/demand';
 import { localeFrom } from '@/i18n/config';
 import {
   browseForBuild,
@@ -29,13 +28,12 @@ export async function getStaticPaths() {
     empty: pages.length === 0,
     demand: demandOf(pages),
   }));
-  const popular = popularPicks(listed.flatMap(({ pages }) => pages));
   const makes = topMakes(await makeHubsForBuild(), TOP_MAKES).map(
     ({ make }) => make,
   );
   return localePaths().map((path) => ({
     ...path,
-    props: { categories, makes, popular },
+    props: { categories, makes },
   }));
 }
 
@@ -46,7 +44,6 @@ const copy = pages.partsInquiry;
 const props = Astro.props as {
   categories: (Category & { empty: boolean; demand: number })[];
   makes: { slug: string; name: string }[];
-  popular: PartPageEntry[];
 };
 const hubsCopy = content(locale).partsCar.hubs;
 const searchCopy = content(locale).partsSearch;
@@ -80,7 +77,12 @@ const categories = byDemand(props.categories, ({ demand }) => demand).map(
 
   {
     browse && (
-      <parts-browse class="wrap flex flex-col gap-4 pt-8 md:pt-10">
+      <parts-browse
+        class="wrap flex flex-col gap-4 pt-8 md:pt-10"
+        {...{
+          [PARTS_BROWSE_SOURCE_ATTRIBUTE]: PathBuilder.partsSearch(locale),
+        }}
+      >
         <h2 tabindex="-1" class="scroll-mt-24 text-section outline-none">
           {searchCopy.allHeading}
         </h2>
@@ -135,8 +137,6 @@ const categories = byDemand(props.categories, ({ demand }) => demand).map(
         </div>
       )
     }
-
-    <PopularParts pages={props.popular} />
 
     {
       categories.length > 0 && (

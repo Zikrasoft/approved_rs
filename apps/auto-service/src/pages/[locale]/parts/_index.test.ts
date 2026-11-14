@@ -31,12 +31,11 @@ const category = (slug: string, empty: boolean, demand = 0) => ({
 
 const hub = (
   categories = [category('batteries', false), category('wipers', true)],
-  popular: ReturnType<typeof partPage>[] = [],
 ) =>
   render(PartsHub, {
     path: '/ru/parts/',
     params: { locale: 'ru' },
-    props: { categories, makes: [], popular },
+    props: { categories, makes: [] },
   });
 
 const tileOrder = (root: Element) =>
@@ -74,7 +73,6 @@ describe('the parts hub', () => {
       props: {
         categories: [category('batteries', false), category('wipers', true)],
         makes: [{ slug: 'bmw', name: 'BMW' }],
-        popular: [],
       },
     });
     const links = [
@@ -133,27 +131,15 @@ describe('the parts hub', () => {
     expect(tileOrder(root)).toEqual(['wipers', 'batteries', 'brakes']);
   });
 
-  it('shows what is often ordered once two parts have real demand, and nothing before', async () => {
+  it('leaves the popular parts to the showcase instead of a second list', async () => {
     setShop(false);
-    const popular = (id: string, score: number) =>
-      partPage({
-        id,
-        slug: `bosch-${id}`,
-        demand: { score, popular: true, top: false },
-        part: { ...partPage().part, id: `part_${id}` },
-      });
-    const heading = (root: Element) =>
+    const root = await hub();
+
+    expect(
       [...root.querySelectorAll('h2')].map((title) =>
         title.textContent?.trim(),
-      );
-    const popularHeading = content('ru').partsSearch.popularHeading;
-
-    expect(heading(await hub(undefined, [popular('a', 6)]))).not.toContain(
-      popularHeading,
-    );
-    expect(
-      heading(await hub(undefined, [popular('a', 6), popular('b', 9)])),
-    ).toContain(popularHeading);
+      ),
+    ).not.toContain(content('ru').partsSearch.popularHeading);
   });
 
   describe('the showcase of every part', () => {
@@ -210,6 +196,9 @@ describe('the parts hub', () => {
       );
       expect(root?.querySelector('a[rel="prev"]')).toBeNull();
       expect(root?.querySelector('[aria-live]')).not.toBeNull();
+      expect(root?.getAttribute('data-parts-browse-source')).toBe(
+        '/ru/parts/search/',
+      );
     });
 
     it('draws no pager when the catalogue fits on one page', async () => {
