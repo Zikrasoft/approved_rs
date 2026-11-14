@@ -26,7 +26,7 @@ describe('the make hub', () => {
       },
     });
     const labels = [
-      ...page.querySelectorAll(`ul a[href^="/ru/parts/bmw/"]`),
+      ...page.querySelectorAll(`main ul a[href^="/ru/parts/bmw/"]`),
     ].map((link) => link.textContent?.trim().split('\n')[0]);
 
     expect(labels).toEqual(['BMW 1', 'BMW 3 GT']);

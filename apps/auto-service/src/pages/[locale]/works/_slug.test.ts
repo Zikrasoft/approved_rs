@@ -2,7 +2,7 @@ import { getCollection } from 'astro:content';
 import { describe, expect, it, vi } from 'vitest';
 import tall from '@/assets/mechanic-engine-teardown-tall.jpg';
 import { content } from '@/i18n/content';
-import { render, heroPartsSearch } from '@/components/renderAstro';
+import { render } from '@/components/renderAstro';
 import { work } from '@/components/workFixture';
 import WorkPage, { getStaticPaths } from './[slug].astro';
 
