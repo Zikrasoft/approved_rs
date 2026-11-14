@@ -1257,7 +1257,7 @@ describe('the Parts of a Make', () => {
     ]);
   });
 
-  it('shows the in-stock Parts of its top Categories first, then the priced, then the rest', async () => {
+  it('picks the in-stock Parts of its top Categories first, then the priced, then the rest, grouped by Category', async () => {
     const stocked = (page: (typeof filters)[number], stock: number) => ({
       ...page,
       offers: [
@@ -1283,7 +1283,43 @@ describe('the Parts of a Make', () => {
 
     expect(
       makePartsFrom(snapshot)[0].showcase.map(({ value }) => value),
-    ).toEqual(['HU6004X', 'P1', 'HU7020Z', 'HU816X']);
+    ).toEqual(['HU6004X', 'HU7020Z', 'HU816X', 'P1']);
+  });
+
+  it.each([
+    [
+      'leads with a Category whose Part has a photo',
+      ['P1'],
+      ['P1', 'HU816X', 'HU7020Z', 'HU6004X'],
+    ],
+    [
+      'puts the pictured Parts first inside each Category',
+      ['P1', 'HU6004X'],
+      ['HU6004X', 'HU816X', 'HU7020Z', 'P1'],
+    ],
+  ])('%s', async (_, pictured, order) => {
+    const photographed = (page: (typeof filters)[number]) =>
+      pictured.includes(page.value)
+        ? {
+            ...page,
+            supplier_data: {
+              ...page.supplier_data,
+              images: [`https://img.example/${page.value}.jpg`],
+            },
+          }
+        : page;
+    const snapshot = await catalogueWith(
+      backend({
+        pages: [...filters, pads, loose].map(photographed),
+        categories: [brakePads, oilFilters],
+        fitments: fits(VEHICLE.id, [...filters, pads, loose]),
+        vehicles: [VEHICLE],
+      }),
+    ).snapshot();
+
+    expect(
+      makePartsFrom(snapshot)[0].showcase.map(({ value }) => value),
+    ).toEqual(order);
   });
 
   it('shows at most six Parts', async () => {

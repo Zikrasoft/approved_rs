@@ -21,6 +21,7 @@ import {
 import { seriesSlugOf } from '@podbor/catalog-contract/slug';
 import { bestPage, bestPrice } from './bestPrice';
 import { byModelName } from './carName';
+import { partPicture } from './partImages';
 import { partSuccessor } from './partSuccessor';
 import { placeKey, seriesKey, type CataloguePages } from './paths';
 
@@ -455,8 +456,13 @@ const offerRank = (pages: PartPageEntry[]) => {
   return best ? (best.inStock ? 0 : 1) : 2;
 };
 
-const showcaseOf = (queues: PartPageEntry[][][]) =>
-  queues
+const pictureRank = (page: PartPageEntry) => {
+  const picture = partPicture(page, page.category);
+  return picture ? Number(picture.illustration) : 2;
+};
+
+const showcaseOf = (queues: PartPageEntry[][][]) => {
+  const picks = queues
     .flatMap((queue, column) =>
       queue
         .map((pages) => ({ pages, rank: offerRank(pages) }))
@@ -467,7 +473,23 @@ const showcaseOf = (queues: PartPageEntry[][][]) =>
       (a, b) => a.rank - b.rank || a.round - b.round || a.column - b.column,
     )
     .slice(0, MAKE_SHOWCASE)
-    .map(({ pages }) => bestPage(pages) ?? pages[0]);
+    .map(({ pages, column }) => {
+      const page = bestPage(pages) ?? pages[0];
+      return { page, column, picture: pictureRank(page) };
+    });
+  const lead = (column: number) =>
+    Math.min(
+      ...picks.filter((pick) => pick.column === column).map((p) => p.picture),
+    );
+  return picks
+    .toSorted(
+      (a, b) =>
+        lead(a.column) - lead(b.column) ||
+        a.column - b.column ||
+        a.picture - b.picture,
+    )
+    .map(({ page }) => page);
+};
 
 export const makePartsFrom = oncePerSnapshot(
   'makeParts',
