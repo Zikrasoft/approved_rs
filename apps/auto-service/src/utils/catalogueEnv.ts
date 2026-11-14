@@ -23,6 +23,8 @@ import {
   type PartPageEntry,
 } from './catalogueSnapshot';
 import { makeDrift } from './makes';
+import type { Locale } from '@/i18n/config';
+import { BROWSE_PAGE_SIZE, browseHref, planSearch } from './searchPage';
 
 const catalogueEnvKeys = [
   'MEDUSA_BACKEND_URL',
@@ -293,4 +295,21 @@ export async function redirectsForBuild(
   env = siteEnv(),
 ): Promise<CatalogueRedirect[]> {
   return (await snapshotForBuild(env))?.redirects ?? [];
+}
+
+export async function browseForBuild(locale: Locale, env = siteEnv()) {
+  const plan = await planSearch({
+    params: new URLSearchParams(),
+    locale,
+    catalogue: catalogueFromEnv(env, { timeoutMs: BUILD_CATALOGUE_TIMEOUT_MS }),
+  });
+  const found = 'view' in plan ? plan.view.found : null;
+  if (!found?.results.length) return null;
+  return {
+    found,
+    next:
+      found.count > BROWSE_PAGE_SIZE
+        ? browseHref(locale, BROWSE_PAGE_SIZE)
+        : null,
+  };
 }

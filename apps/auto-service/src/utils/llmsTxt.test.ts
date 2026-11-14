@@ -425,6 +425,12 @@ describe('generateLlmsTxt', () => {
     );
   });
 
+  it('says how to page through the whole catalogue', async () => {
+    expect(await generateLlmsTxt('ru')).toContain(
+      '[Все запчасти каталога](https://carlab.rs/ru/parts/search/): Без запроса поиск показывает весь каталог, по 12 запчастей на странице; следующая страница задается параметром offset: https://carlab.rs/ru/parts/search/?offset=12',
+    );
+  });
+
   it('links the about page with what it tells about the service', async () => {
     expect(await generateLlmsTxt('ru')).toContain(
       '[О сервисе](https://carlab.rs/ru/about/): Автосервис CarLab на Звездаре в Белграде: кто мы, оборудование, с какими машинами работаем и как нас найти.',

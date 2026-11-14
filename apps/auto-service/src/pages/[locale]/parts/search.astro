@@ -10,18 +10,16 @@ import ListingBar from '@/components/ListingBar.astro';
 import ListingSort from '@/components/ListingSort.astro';
 import CatalogueSearch from '@/components/CatalogueSearch.astro';
 import InquiryLink from '@/components/InquiryLink.astro';
-import PartRow from '@/components/PartRow.astro';
 import FilterChips from '@/components/FilterChips.astro';
 import StatusNote from '@/components/StatusNote.astro';
-import Pagination from '@/components/Pagination.astro';
 import ContactChannels from '@/components/ContactChannels.astro';
 import PartAskRow from '@/components/PartAskRow.astro';
+import PartsBrowse from '@/components/PartsBrowse.astro';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { catalogueFor } from '@/utils/catalogueEnv';
 import { PARTS_INQUIRY_ANCHOR, PathBuilder } from '@/utils/paths';
 import { chosenFilters, withFacetCopy } from '@/utils/partsSearch';
-import { currentNumber } from '@/utils/partNumbers';
 import { carName, vehicleVariant } from '@/utils/carName';
 import {
   carLink,
@@ -56,6 +54,7 @@ const {
   ranges,
   offset,
   vin,
+  browse,
   vinTypo,
   vinOutcome,
   searchable,
@@ -91,7 +90,7 @@ const unavailable = searchable && !found && !unknownScope;
 const scopedTo = scope?.model;
 const modelName = scopedTo && carName(scopedTo, locale);
 const modelCopy = content(locale).partsCar.hubs.modelCategory;
-const heading = narrowedTo?.name ?? copy.heading;
+const heading = narrowedTo?.name ?? (browse ? copy.allHeading : copy.heading);
 const fillModel = (template: string) =>
   template.replace('{category}', heading).replace('{model}', modelName ?? '');
 const facets = withFacetCopy(sheetFacets, copy);
@@ -338,36 +337,9 @@ const scopeHidden = {
               {found.results.length === 0 ? (
                 <StatusNote>{emptyMessage}</StatusNote>
               ) : (
-                <ul class="card divide-y divide-line">
-                  {found.results.map((result) => (
-                    <PartRow
-                      thumb={
-                        result.thumbnail
-                          ? {
-                              src: result.thumbnail,
-                              illustration:
-                                result.thumbnail_illustration === true,
-                            }
-                          : null
-                      }
-                      slug={result.slug}
-                      brand={result.brand.name}
-                      value={result.value}
-                      name={result.part.name}
-                      specs={result.specs}
-                      detail={category ? undefined : result.part.category?.name}
-                      superseded={result.superseded}
-                      current={currentNumber(result, found.results)}
-                      priced={result}
-                      demand={result.demand}
-                    />
-                  ))}
-                </ul>
-              )}
-
-              {(offset > 0 || offset + found.limit < found.count) && (
-                <Pagination
-                  label={copy.pagination}
+                <PartsBrowse
+                  found={found}
+                  category={category}
                   prev={
                     offset > 0
                       ? searchHref(

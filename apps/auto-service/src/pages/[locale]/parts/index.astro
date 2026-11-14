@@ -7,10 +7,12 @@ import VinInquiryCard from '@/components/VinInquiryCard.astro';
 import Icon from '@/components/Icon.astro';
 import CatalogueSearch from '@/components/CatalogueSearch.astro';
 import PopularParts from '@/components/PopularParts.astro';
+import PartsBrowse from '@/components/PartsBrowse.astro';
 import type { PartPageEntry } from '@/utils/catalogueSnapshot';
 import { byDemand, demandOf, popularPicks } from '@/utils/demand';
 import { localeFrom } from '@/i18n/config';
 import {
+  browseForBuild,
   categoryPagesForBuild,
   makeHubsForBuild,
   shopOpen,
@@ -47,6 +49,8 @@ const props = Astro.props as {
   popular: PartPageEntry[];
 };
 const hubsCopy = content(locale).partsCar.hubs;
+const searchCopy = content(locale).partsSearch;
+const browse = await browseForBuild(locale);
 const categories = byDemand(props.categories, ({ demand }) => demand).map(
   (category) => ({
     slug: category.slug,
@@ -72,6 +76,23 @@ const categories = byDemand(props.categories, ({ demand }) => demand).map(
       {copy.sourcingNote}
     </p>
   </PageHero>
+
+  {
+    browse && (
+      <parts-browse class="wrap flex flex-col gap-4 pt-8 md:pt-10">
+        <div class="flex flex-col gap-1">
+          <h2 tabindex="-1" class="scroll-mt-24 text-section outline-none">
+            {searchCopy.allHeading}
+          </h2>
+          <p class="max-w-2xl text-sm leading-relaxed text-muted">
+            {searchCopy.allLead}
+          </p>
+        </div>
+        <p class="sr-only" aria-live="polite" />
+        <PartsBrowse found={browse.found} prev={null} next={browse.next} />
+      </parts-browse>
+    )
+  }
 
   <section
     class="wrap flex flex-col gap-12 pt-8 pb-band md:gap-16 md:pt-10 md:pb-band-lg"
@@ -181,3 +202,9 @@ const categories = byDemand(props.categories, ({ demand }) => demand).map(
     </div>
   </section>
 </Shell>
+
+<script>
+  import { definePartsBrowse } from '@/scripts/partsBrowse';
+
+  definePartsBrowse();
+</script>

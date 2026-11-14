@@ -69,5 +69,9 @@ export const partsSearchContentSchema = z
     openSearch: z.string(),
     closeSearch: z.string(),
     llmsSearch: z.string(),
+    allHeading: z.string(),
+    allLead: z.string(),
+    shownRange: z.string(),
+    llmsAll: z.string(),
   })
   .strict();

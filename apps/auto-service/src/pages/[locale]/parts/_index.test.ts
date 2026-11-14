@@ -155,4 +155,71 @@ describe('the parts hub', () => {
       heading(await hub(undefined, [popular('a', 6), popular('b', 9)])),
     ).toContain(popularHeading);
   });
+
+  describe('the showcase of every part', () => {
+    const listed = (count: number) => ({
+      results: [
+        {
+          id: 'pi_hu1',
+          type: 'manufacturer-number',
+          value: 'HU 1',
+          normalized_value: 'HU1',
+          superseded: false,
+          brand: { name: 'Mann-Filter', slug: 'mann-filter' },
+          part: { id: 'part_hu1', name: 'Масляный фильтр', category: null },
+          offers: [],
+          thumbnail: null,
+        },
+      ],
+      facets: [],
+      category: null,
+      model: null,
+      count,
+      offset: 0,
+      limit: 12,
+    });
+    const empty = { ...listed(0), results: [] };
+    const searchCopy = content('ru').partsSearch;
+
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    const showcase = async (count: number) => {
+      vi.stubEnv('MEDUSA_BACKEND_URL', 'http://shop.test');
+      vi.stubEnv('MEDUSA_PUBLISHABLE_KEY', 'pk_test');
+      setShop(false);
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(async () => Response.json(count ? listed(count) : empty)),
+      );
+      return (await hub()).querySelector('parts-browse');
+    };
+
+    it('opens the hub with the first page of the catalogue and a link to the next', async () => {
+      const root = await showcase(30);
+
+      expect(root?.querySelector('h2')?.textContent?.trim()).toBe(
+        searchCopy.allHeading,
+      );
+      expect(
+        root?.querySelector('[data-parts-browse] li a')?.getAttribute('href'),
+      ).toBe('/ru/parts/p/mann-filter-hu1/');
+      expect(root?.querySelector('a[rel="next"]')?.getAttribute('href')).toBe(
+        '/ru/parts/search/?offset=12',
+      );
+      expect(root?.querySelector('a[rel="prev"]')).toBeNull();
+      expect(root?.querySelector('[aria-live]')).not.toBeNull();
+    });
+
+    it('draws no pager when the catalogue fits on one page', async () => {
+      expect((await showcase(1))?.querySelector('nav')).toBeNull();
+    });
+
+    it('shows nothing for an empty catalogue or without a shop', async () => {
+      expect(await showcase(0)).toBeNull();
+      vi.unstubAllEnvs();
+      expect((await hub()).querySelector('parts-browse')).toBeNull();
+    });
+  });
 });

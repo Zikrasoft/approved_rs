@@ -309,3 +309,70 @@ describe('the search page scoped to one Model', () => {
     expect(facts?.getAttribute('data-model')).toBe('e83-x3-20d');
   });
 });
+
+describe('the search page without a query or a scope', () => {
+  const page = (count: number, offset: number) =>
+    vi.fn(async (_url: string) =>
+      Response.json({
+        ...answer(count),
+        category: null,
+        facets: [],
+        offset,
+        limit: 12,
+        results: [
+          {
+            id: 'pi_hu2',
+            type: 'manufacturer-number',
+            value: 'HU 2',
+            normalized_value: 'HU2',
+            superseded: false,
+            brand: { name: 'Mann-Filter', slug: 'mann-filter' },
+            part: { id: 'part_hu2', name: 'Масляный фильтр', category: null },
+            offers: [],
+            thumbnail: null,
+          },
+        ],
+      }),
+    );
+
+  it('lists the next page of the whole catalogue for the hub showcase to swap in', async () => {
+    const fetch = page(30, 12);
+    vi.stubGlobal('fetch', fetch);
+
+    const root = await render(SearchPage, {
+      path: '/ru/parts/search/?offset=12',
+    });
+    const list = root.querySelector('[data-parts-browse]')!;
+
+    expect(String(fetch.mock.calls[0]?.[0])).toContain('offset=12&limit=12');
+    expect(root.querySelector('h1')?.textContent).toContain(copy.allHeading);
+    expect(list.querySelector('li a')?.getAttribute('href')).toBe(
+      '/ru/parts/p/mann-filter-hu2/',
+    );
+    expect(list.querySelector('a[rel="prev"]')?.getAttribute('href')).toBe(
+      '/ru/parts/search/',
+    );
+    expect(list.querySelector('a[rel="next"]')?.getAttribute('href')).toBe(
+      '/ru/parts/search/?offset=24',
+    );
+    expect(list.getAttribute('data-parts-browse-status')).toBe(
+      copy.shownRange
+        .replace('{from}', '13')
+        .replace('{to}', '13')
+        .replace('{count}', '30'),
+    );
+  });
+
+  it('ends on the last page with no next link', async () => {
+    vi.stubGlobal('fetch', page(25, 24));
+
+    const root = await render(SearchPage, {
+      path: '/ru/parts/search/?offset=24',
+    });
+
+    expect(root.querySelector('a[rel="next"]')).toBeNull();
+    expect(root.querySelector('a[rel="prev"]')?.getAttribute('href')).toBe(
+      '/ru/parts/search/?offset=12',
+    );
+  });
+});
