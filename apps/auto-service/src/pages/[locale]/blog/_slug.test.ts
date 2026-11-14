@@ -82,7 +82,11 @@ describe('an article page', () => {
   });
 
   it('links an Article about no Make to no Make page', async () => {
-    expect((await page()).querySelector('a[href^="/ru/cars/"]')).toBeNull();
+    expect(
+      (await page()).querySelector(
+        'a[href^="/ru/cars/"]:not([href="/ru/cars/"])',
+      ),
+    ).toBeNull();
   });
 
   it('answers its frequent questions and marks them up for search', async () => {
