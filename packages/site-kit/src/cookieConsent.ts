@@ -90,6 +90,10 @@ export function defineCookieConsent(tagName = 'cookie-consent'): void {
             );
             if (!trigger) return;
             event.preventDefault();
+            for (const decline of this.querySelectorAll<HTMLElement>(
+              `[${CONSENT_DECLINE_ATTRIBUTE}]`,
+            ))
+              decline.hidden = false;
             this.hidden = false;
           },
           { signal },

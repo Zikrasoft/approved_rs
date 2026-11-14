@@ -19,7 +19,7 @@ function mount(version = VERSION): HTMLElement {
   defineCookieConsent(tagName);
   document.body.innerHTML = `
     <${tagName} data-policy-version="${version}" hidden>
-      <button data-consent-decline>Отклонить</button>
+      <button data-consent-decline hidden>Отклонить</button>
       <button data-consent-accept><span>Принять</span></button>
     </${tagName}>
     <a href="/privacy/" data-cookie-settings>Настройки</a>
@@ -208,6 +208,19 @@ describe('defineCookieConsent', () => {
 
     expect(el.hidden).toBe(false);
     expect(event.defaultPrevented).toBe(true);
+  });
+
+  it('offers the refusal only once reopened from settings', () => {
+    const el = mount();
+    const decline = el.querySelector<HTMLElement>('[data-consent-decline]')!;
+    scrollTo(window.innerHeight);
+    expect(el.hidden).toBe(false);
+    expect(decline.hidden).toBe(true);
+
+    click('[data-consent-accept]');
+    click('[data-cookie-settings]');
+
+    expect(decline.hidden).toBe(false);
   });
 
   it('ignores an unrelated document click', () => {
