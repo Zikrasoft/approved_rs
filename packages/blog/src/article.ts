@@ -63,6 +63,22 @@ export interface LocalizedArticle {
 export const blogArticles = <A extends ArticleEntry>(articles: A[]): A[] =>
   publishedByNewest(articles).filter(({ data }) => !data.overview);
 
+export function makeArticles<A extends ArticleEntry>(
+  articles: A[],
+): { overview: A | undefined; articles: A[] } {
+  const published = publishedByNewest(articles);
+  const overviews = published.filter(({ data }) => data.overview);
+  const [overview] = overviews;
+  if (overviews.length > 1)
+    console.warn(
+      `Make ${overview.data.make} has ${overviews.length} overview Articles (${overviews.map(({ id }) => id).join(', ')}); using ${overview.id}`,
+    );
+  return {
+    overview,
+    articles: published.filter(({ data }) => !data.overview),
+  };
+}
+
 export const blogPages = <A extends ArticleEntry>(
   articles: A[],
   size: number,

@@ -1,9 +1,10 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 import {
   articleSchema,
   blogPages,
   localizedArticle,
+  makeArticles,
   type ArticleEntry,
 } from './article.ts';
 
@@ -101,6 +102,72 @@ describe('the blog list', () => {
 
   it('still has its first page when there is no Article yet', () => {
     expect(blogPages([], 12)).toEqual([{ number: 1, count: 1, items: [] }]);
+  });
+});
+
+describe('the Articles of a Make page', () => {
+  const ids = ({ overview, articles }: ReturnType<typeof makeArticles>) => ({
+    overview: overview?.id,
+    articles: articles.map(({ id }) => id),
+  });
+
+  it('heads the page with the overview and lists the rest newest first', () => {
+    expect(
+      ids(
+        makeArticles([
+          entry('old', '2026-01-01', { make: 'bmw' }),
+          entry('overview', '2026-02-01', { make: 'bmw', overview: true }),
+          entry('new', '2026-03-01', { make: 'bmw' }),
+        ]),
+      ),
+    ).toEqual({ overview: 'overview', articles: ['new', 'old'] });
+  });
+
+  it('has no overview when none is marked', () => {
+    expect(
+      ids(makeArticles([entry('oil', '2026-01-01', { make: 'bmw' })])),
+    ).toEqual({ overview: undefined, articles: ['oil'] });
+  });
+
+  it('leaves out an unpublished Article and an unpublished overview', () => {
+    expect(
+      ids(
+        makeArticles([
+          entry('draft', '2026-01-01', { make: 'bmw', published: false }),
+          entry('hidden', '2026-02-01', {
+            make: 'bmw',
+            overview: true,
+            published: false,
+          }),
+        ]),
+      ),
+    ).toEqual({ overview: undefined, articles: [] });
+  });
+
+  it('warns about two overviews of one Make and uses the later one', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    expect(
+      ids(
+        makeArticles([
+          entry('first', '2026-01-01', { make: 'bmw', overview: true }),
+          entry('second', '2026-03-01', { make: 'bmw', overview: true }),
+        ]),
+      ),
+    ).toEqual({ overview: 'second', articles: [] });
+    expect(warn).toHaveBeenCalledWith(
+      'Make bmw has 2 overview Articles (second, first); using second',
+    );
+    warn.mockRestore();
+  });
+
+  it('stays quiet with a single overview', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    makeArticles([entry('one', '2026-01-01', { make: 'bmw', overview: true })]);
+
+    expect(warn).not.toHaveBeenCalled();
+    warn.mockRestore();
   });
 });
 
