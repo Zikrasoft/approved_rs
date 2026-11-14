@@ -1399,6 +1399,33 @@ describe('the deploy build', () => {
       '503',
     );
   });
+
+  it('warns when a catalogue Make is missing from the exported list', async () => {
+    const audi = { slug: 'audi', name: 'Audi' };
+    const unknown = { slug: 'zastava', name: 'Zastava' };
+    const vehicleOf = (make: typeof audi) => ({
+      ...VEHICLE,
+      id: make.slug,
+      model: {
+        ...VEHICLE.model,
+        chassis: {
+          ...VEHICLE.model.chassis,
+          series: { ...VEHICLE.model.chassis.series, make },
+        },
+      },
+    });
+    deployed(null, backend({ vehicles: [audi, unknown].map(vehicleOf) }));
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    await partPagesForBuild(shopEnv());
+
+    expect(warn.mock.calls).toEqual([
+      [
+        'Make zastava (Zastava) is in the catalogue but not in src/content/makes.json',
+      ],
+    ]);
+    warn.mockRestore();
+  });
 });
 
 const VIN = 'WBA35BG070N074158';

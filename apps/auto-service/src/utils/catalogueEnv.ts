@@ -20,6 +20,7 @@ import {
   type MakeHubEntry,
   type PartPageEntry,
 } from './catalogueSnapshot';
+import { makeDrift } from './makes';
 
 const catalogueEnvKeys = [
   'MEDUSA_BACKEND_URL',
@@ -194,6 +195,9 @@ async function loadSnapshot(env: CatalogueEnv) {
     return null;
   }
   const snapshot = await catalogue.snapshot();
+  makeDrift(
+    snapshot.vehicles.map((vehicle) => vehicle.model.chassis.series.make),
+  ).forEach((drift) => console.warn(drift));
   const built = snapshot.entries.length;
   const shrinkAllowed = env.CATALOGUE_SHRINK_ALLOWED === 'true';
   const shrunk = !shrinkAllowed && built < live * SHRINK_FLOOR;
