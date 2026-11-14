@@ -17,7 +17,8 @@
     "./redirects": "./src/redirects.ts",
     "./stored-value": "./src/storedValue.ts",
     "./og": "./src/ogImage.ts",
-    "./pagination": "./src/pagination.ts"
+    "./pagination": "./src/pagination.ts",
+    "./list-search": "./src/listSearch.ts"
   },
   "scripts": {
     "test": "vitest run --coverage",
