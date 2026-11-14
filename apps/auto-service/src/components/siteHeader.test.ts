@@ -177,6 +177,16 @@ describe('SiteHeader', () => {
       ).toBe(true);
     });
 
+    it('hides the language suggestion while the list is open', async () => {
+      const { list } = await switcher();
+      const wrapper = list.closest('carlab-lang')!.parentElement!;
+
+      expect(wrapper.querySelector('language-suggestion')).not.toBeNull();
+      expect(wrapper.classList).toContain(
+        '[&:has(:popover-open)_language-suggestion]:hidden',
+      );
+    });
+
     it('leaves the mobile menu its own row of locale codes', async () => {
       setShop(false);
       const menu = (await header('/ru/services/')).querySelector('#site-menu')!;
