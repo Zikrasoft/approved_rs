@@ -68,4 +68,11 @@ describe('the hero of the home page', () => {
   it('offers the VIN parts search', async () => {
     expect(heroPartsSearch(await page())).not.toBeNull();
   });
+
+  it('keeps its trust ticks on a phone', async () => {
+    const ticks = heroPartsSearch(await page())!.nextElementSibling!;
+
+    expect(ticks.textContent).toContain(home.hero.badges[0]);
+    expect(ticks.classList).not.toContain('max-sm:hidden');
+  });
 });

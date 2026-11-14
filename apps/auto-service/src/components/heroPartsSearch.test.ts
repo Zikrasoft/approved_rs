@@ -60,4 +60,40 @@ describe('the hero parts search', () => {
       ),
     ).toEqual([]);
   });
+
+  it('keeps the light block and its trust ticks to the width of the contact buttons', async () => {
+    const root = await block({ tone: 'card' });
+
+    expect(root.querySelector('[data-hero-parts-search]')?.classList).toContain(
+      'max-w-xl',
+    );
+    expect(
+      root.querySelector('[data-hero-parts-search] + ul')?.classList,
+    ).toContain('max-w-xl');
+  });
+
+  it('lets the dark block run the width of its panel column', async () => {
+    const root = await block({ tone: 'panel' });
+
+    expect(
+      root.querySelector('[data-hero-parts-search]')?.classList,
+    ).not.toContain('max-w-xl');
+    expect(
+      root.querySelector('[data-hero-parts-search] + ul')?.classList,
+    ).not.toContain('max-w-xl');
+  });
+
+  it('drops the trust ticks on a phone unless the hero asks to keep them', async () => {
+    const [plain, kept] = await Promise.all([
+      block({ tone: 'panel' }),
+      block({ tone: 'panel', trustOnPhone: true }),
+    ]);
+
+    expect(
+      plain.querySelector('[data-hero-parts-search] + ul')?.classList,
+    ).toContain('max-sm:hidden');
+    expect(
+      kept.querySelector('[data-hero-parts-search] + ul')?.classList,
+    ).not.toContain('max-sm:hidden');
+  });
 });

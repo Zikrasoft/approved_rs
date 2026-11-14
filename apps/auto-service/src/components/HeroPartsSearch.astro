@@ -11,9 +11,10 @@ import { PathBuilder } from '@/utils/paths';
 interface Props {
   tone: 'panel' | 'card';
   trust?: boolean;
+  trustOnPhone?: boolean;
 }
 
-const { tone, trust = true } = Astro.props;
+const { tone, trust = true, trustOnPhone = false } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const { hero } = content(locale).home;
 const panel = tone === 'panel';
@@ -23,7 +24,7 @@ const panel = tone === 'panel';
   data-hero-parts-search
   class:list={[
     'border-t pt-5 lg:pt-6',
-    panel ? 'border-panel-line/60' : 'border-line',
+    panel ? 'border-panel-line/60' : 'max-w-xl border-line',
   ]}
 >
   <h2 class="text-base leading-snug font-semibold tracking-normal">
@@ -64,7 +65,8 @@ const panel = tone === 'panel';
     <ul
       class:list={[
         'flex flex-wrap gap-x-5 gap-y-1.5 text-[0.8125rem] lg:text-xs',
-        panel ? 'text-panel-ink' : 'text-muted',
+        panel ? 'text-panel-ink' : 'max-w-xl text-muted',
+        !trustOnPhone && 'max-sm:hidden',
       ]}
     >
       <li class="flex items-center">
