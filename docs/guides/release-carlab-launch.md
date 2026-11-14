@@ -75,15 +75,14 @@ checked (`terraform state list` prints names only, never the keys in the state).
       guidance in `apps/auto-service/src/i18n/translateConfig.ts` changed
       ("Steer CarLab en/sr translations"), which changes the prompt fingerprint
       and retranslates every carlab en/sr string once, a paid one-off run
-      (AGENTS.md § Architecture, "Editing the prompt or the model changes the
-      fingerprint"). Do not run the translate scripts locally (AGENTS.md § Commands).
+      (translation.md, "Editing the prompt or the model changes the
+      fingerprint"). Do not run the translate scripts locally (translation.md § Running the scripts).
 - [ ] Read sr and en on carlab.rs after that run, on a local build or the
       first deploy: home, services, works, contacts, about, thanks, 404, the
       parts hub, a category, a part page, search, the lead form and modal, the
       capture bot copy (`captureBot.yaml`). Serbian: case agreement and the
       formal "Vi" (AGENTS.md § i18n). Fix a translation in its own commit, never
-      together with Russian (AGENTS.md § House style, "A hand-written translation
-      survives on its own").
+      together with Russian (translation.md § Hand-written translations).
 - [ ] No hand-written RU left in components:
       `grep -rP '[а-яА-ЯёЁ]' src/components src/pages src/layouts` in each app
       (AGENTS.md § i18n).
@@ -322,8 +321,8 @@ code on this branch; whether to delete them from Vercel is not documented; ask.
       `cd apps/auto-service && node --env-file=.env.local --experimental-strip-types scripts/capture-bot-profile.ts`,
       same in `apps/detailing` (deploy.md § The capture bots' profile).
 - [ ] `PUBLIC_TG_MANAGER` set per project, so the bot-or-manager choice and
-      «Написать менеджеру» reach the manager (deploy.md § Public; AGENTS.md
-      § House style, Telegram tile).
+      «Написать менеджеру» reach the manager (deploy.md § Public; contact-controls.md,
+      Telegram tile).
 - [ ] Group: forum on; the CRM bot and the three capture bots are admins with
       **Manage topics** (deploy.md § The CRM bot).
 
@@ -350,7 +349,7 @@ code on this branch; whether to delete them from Vercel is not documented; ask.
 
 Mobile via DevTools device emulation, desktop with a mouse.
 `node --experimental-strip-types scripts/contact-controls-pass.ts https://carlab.rs /sr/ /sr/parts/`
-checks both pointer variants (AGENTS.md § House style, "A `tel:` control only
+checks both pointer variants (contact-controls.md, "A `tel:` control only
 exists where a dialer does").
 
 All three domains (deploy.md § Post-deploy checks):
@@ -369,7 +368,7 @@ carlab.rs:
       rating shown (commit subjects; `src/components/HeroContacts.astro`).
 - [ ] Lead form (inline and modal) needs only a contact; submit lands on
       `/sr/thanks/` and a card appears in the CRM chat with brand CarLab
-      (AGENTS.md § House style, "Only the contact is required").
+      (lead-forms.md, "Only the contact is required").
 - [ ] `https://carlab.rs/sr/parts/`: VIN search resolves a car; a part-number
       search finds a part; a zero-result search offers the call and the inquiry.
 - [ ] A category page `/sr/parts/c/<slug>/`: filters recount, «Для моего авто»
@@ -380,7 +379,7 @@ carlab.rs:
 - [ ] `/sr/parts/cart/` redirects to the inquiry form without the preview cookie
       (deploy.md § Closed beta).
 - [ ] `https://carlab.rs/llms.txt` answers 200 directly (no redirect), names no
-      cart, states the Google rating (AGENTS.md § House style, `/llms.txt`;
+      cart, states the Google rating (routing.md, `/llms.txt`;
       deploy.md § Closed beta).
 - [ ] Redirects: `/sr/parts/brakes/` → `/sr/parts/c/brakes/`;
       `/sr/parts/c/<slug>/1/` → `/sr/parts/c/<slug>/` (301)

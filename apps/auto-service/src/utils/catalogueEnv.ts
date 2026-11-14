@@ -196,7 +196,12 @@ async function loadSnapshot(env: CatalogueEnv) {
     }
     return null;
   }
-  const snapshot = await catalogue.snapshot();
+  const snapshot = await catalogue.snapshot().catch((error: unknown) => {
+    throw new Error(
+      `Could not read the catalogue from MEDUSA_BACKEND_URL (${env.MEDUSA_BACKEND_URL}): ${error instanceof Error ? error.message : String(error)}`,
+      { cause: error },
+    );
+  });
   makeDrift(
     snapshot.vehicles.map((vehicle) => vehicle.model.chassis.series.make),
   ).forEach((drift) => console.warn(drift));

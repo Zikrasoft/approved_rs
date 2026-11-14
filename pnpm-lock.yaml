@@ -159,6 +159,9 @@ importers:
       '@types/sanitize-html':
         specifier: 2.16.1
         version: 2.16.1
+      '@vitest/coverage-v8':
+        specifier: 3.2.6
+        version: 3.2.6(supports-color@8.1.1)(vitest@3.2.6)
       playwright-core:
         specifier: 1.63.0
         version: 1.63.0
@@ -486,6 +489,9 @@ importers:
       '@tailwindcss/vite':
         specifier: 4.3.3
         version: 4.3.3(vite@8.3.5(@types/node@24.19.2)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0))
+      '@vitest/coverage-v8':
+        specifier: 3.2.6
+        version: 3.2.6(supports-color@8.1.1)(vitest@3.2.6)
       playwright-core:
         specifier: 1.63.0
         version: 1.63.0
@@ -18421,7 +18427,7 @@ snapshots:
       std-env: 3.10.0
       test-exclude: 7.0.2
       tinyrainbow: 2.0.0
-      vitest: 3.2.6(@edge-runtime/vm@3.2.0)(@types/debug@4.1.13)(@types/node@24.13.2)(@vitest/ui@3.2.6)(jiti@2.7.0)(jsdom@30.0.1)(lightningcss@1.33.0)(supports-color@8.1.1)(tsx@4.21.0)(yaml@2.9.0)
+      vitest: 3.2.6(@edge-runtime/vm@3.2.0)(@types/debug@4.1.13)(@types/node@24.13.2)(@vitest/ui@3.2.6)(jiti@2.7.0)(jsdom@30.0.1)(lightningcss@1.32.0)(supports-color@8.1.1)(tsx@4.21.0)(yaml@2.9.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -21628,7 +21634,7 @@ snapshots:
 
   magic-string@0.30.21:
     dependencies:
-      '@jridgewell/sourcemap-codec': 1.5.5
+      '@jridgewell/sourcemap-codec': 1.6.0
 
   magic-string@0.30.5:
     dependencies:

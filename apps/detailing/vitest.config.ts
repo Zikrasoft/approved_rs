@@ -9,6 +9,16 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
+    coverage: {
+      provider: 'v8',
+      include: ['src/**/*.{ts,astro}'],
+      thresholds: {
+        statements: 82,
+        branches: 80,
+        functions: 69,
+        lines: 82,
+      },
+    },
     include: ['src/**/*.test.ts'],
     env: {
       PUBLIC_PHONE_NUMBER: '381677210533',

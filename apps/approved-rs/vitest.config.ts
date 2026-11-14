@@ -9,6 +9,16 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
+    coverage: {
+      provider: 'v8',
+      include: ['src/**/*.{ts,astro}', 'scripts/**/*.ts'],
+      thresholds: {
+        statements: 82,
+        branches: 90,
+        functions: 64,
+        lines: 82,
+      },
+    },
     include: ['src/**/*.test.ts', 'scripts/**/*.test.ts'],
     env: {
       PUBLIC_WHATSAPP_NUMBER: '381677702100',
