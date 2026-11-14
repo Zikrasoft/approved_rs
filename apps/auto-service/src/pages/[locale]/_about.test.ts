@@ -43,16 +43,12 @@ describe('the about page', () => {
     about.equipment.forEach((item) => expect(root.textContent).toContain(item));
   });
 
-  it('names the makes from the Works, each linking its Make page, and links every Work', async () => {
+  it('names the makes from the Works as tap-sized chips, each linking its Make page, and links every Work', async () => {
     const root = await page();
-    const makes = [...root.querySelectorAll('p')].filter(
-      (line) => line.textContent?.trim() === 'BMW, SEAT',
-    );
+    const makes = [...root.querySelectorAll('ul a[href^="/ru/cars/"]')];
 
-    expect(makes).toHaveLength(1);
-    expect(root.querySelector('.chip')).toBeNull();
     expect(
-      [...makes[0].querySelectorAll('a')].map((link) => [
+      makes.map((link) => [
         link.getAttribute('href'),
         link.textContent?.trim(),
       ]),
@@ -60,6 +56,11 @@ describe('the about page', () => {
       ['/ru/cars/bmw/', 'BMW'],
       ['/ru/cars/seat/', 'SEAT'],
     ]);
+    makes.forEach((link) =>
+      expect([...link.classList]).toEqual(
+        expect.arrayContaining(['inline-flex', 'min-h-11', 'rounded-pill']),
+      ),
+    );
     expect(
       [...root.querySelectorAll('a[href="/ru/works/"]')].some(
         (link) => link.textContent?.trim() === site.common.allWorks,

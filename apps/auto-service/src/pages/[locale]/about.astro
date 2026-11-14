@@ -6,6 +6,7 @@ import Shell from '@/layouts/Shell.astro';
 import { Image } from 'astro:assets';
 import PanelHero from '@/components/PanelHero.astro';
 import HeroContacts from '@/components/HeroContacts.astro';
+import LinkChip from '@/components/LinkChip.astro';
 import SplitSection from '@/components/SplitSection.astro';
 import BulletList from '@/components/BulletList.astro';
 import VisitPanel from '@/components/VisitPanel.astro';
@@ -112,19 +113,15 @@ const photo = await panelPhoto({
             </p>
           </div>
           <div class="flex flex-col gap-5">
-            <p class="text-lg leading-relaxed font-semibold text-ink">
-              {makes.map((make, index) => (
-                <>
-                  {index > 0 && ', '}
-                  <a
-                    href={PathBuilder.carsMake(locale, make.slug)}
-                    class="link-underlined"
-                  >
+            <ul class="flex flex-wrap gap-2">
+              {makes.map((make) => (
+                <li class="max-w-full">
+                  <LinkChip href={PathBuilder.carsMake(locale, make.slug)}>
                     {make.name}
-                  </a>
-                </>
+                  </LinkChip>
+                </li>
               ))}
-            </p>
+            </ul>
             <p class="flex flex-wrap gap-x-6 gap-y-1">
               <a
                 href={PathBuilder.works(locale)}
