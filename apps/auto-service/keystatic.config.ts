@@ -1,6 +1,7 @@
 import { collection, config, fields } from '@keystatic/core';
 import { SERVICE_LABELS_RU, SERVICE_SLUGS_BY_BRAND } from '@podbor/brands';
 import { SITE_NAME } from './src/utils/constants';
+import { makeField } from './src/keystatic/makeField';
 
 const APP_ROOT = import.meta.env.PROD ? 'apps/auto-service/' : '';
 
@@ -32,6 +33,7 @@ export default config({
           label: 'Автомобиль',
           validation: { isRequired: true },
         }),
+        make: makeField({ label: 'Марка' }),
         year: fields.integer({ label: 'Год' }),
         servicesApplied: fields.multiselect({
           label: 'Выполненные работы',
