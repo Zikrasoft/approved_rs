@@ -29,9 +29,8 @@ const pathname = Astro.url.pathname;
 const inLocale = (code: Locale) =>
   `${swapLocale(pathname, code)}${Astro.url.search}`;
 
-const onHome = navCurrent(pathname, PathBuilder.home(locale)) === 'page';
 const pageHasSearch =
-  onHome || navCurrent(pathname, PathBuilder.partsSearch(locale)) === 'page';
+  navCurrent(pathname, PathBuilder.partsSearch(locale)) === 'page';
 const onParts = pathname.startsWith(PathBuilder.parts(locale));
 const open = shopOpen();
 const basket = open
@@ -105,7 +104,7 @@ const links = [
 
       {
         !pageHasSearch && (
-          <div class="hidden max-w-72 min-w-0 flex-1 min-[1360px]:block">
+          <div class="hidden max-w-72 min-w-0 flex-1 min-[1360px]:block [body:has([data-hero-parts-search])_&]:hidden">
             <CatalogueSearch compact />
           </div>
         )
@@ -183,7 +182,8 @@ const links = [
           aria-label={searchCopy.openSearch}
           class:list={[
             'flex size-11 items-center justify-center rounded-control text-panel-fg transition-colors duration-150 hover:bg-panel-2',
-            !pageHasSearch && 'min-[1360px]:hidden',
+            !pageHasSearch &&
+              'min-[1360px]:hidden [body:has([data-hero-parts-search])_&]:min-[1360px]:flex',
           ]}
         >
           <Icon name="search" size={20} />

@@ -70,31 +70,38 @@ describe('SiteHeader', () => {
     ).toBe(false);
   });
 
-  it.each(['/ru/', '/ru/parts/search/'])(
-    'drops the inline header search on %s, which has its own',
+  it('drops the inline header search on the parts search page, which has its own', async () => {
+    setShop(false);
+    const root = await header('/ru/parts/search/');
+
+    expect(root.querySelector('header catalogue-search')).toBeNull();
+    expect(searchButton(root).classList.contains('min-[1360px]:hidden')).toBe(
+      false,
+    );
+  });
+
+  it.each(['/ru/', '/ru/services/', '/ru/parts/'])(
+    'shows the inline header search on %s only where no hero search sits below it',
     async (path) => {
       setShop(false);
       const root = await header(path);
+      const field = root.querySelector(
+        'header catalogue-search',
+      )!.parentElement!;
 
-      expect(
-        root.querySelector('div.min-\\[1360px\\]\\:block catalogue-search'),
-      ).toBeNull();
-      expect(searchButton(root).classList.contains('min-[1360px]:hidden')).toBe(
-        false,
+      expect(field.classList).toContain('min-[1360px]:block');
+      expect(field.classList).toContain(
+        '[body:has([data-hero-parts-search])_&]:hidden',
       );
+      expect([...searchButton(root).classList]).toEqual(
+        expect.arrayContaining([
+          'min-[1360px]:hidden',
+          '[body:has([data-hero-parts-search])_&]:min-[1360px]:flex',
+        ]),
+      );
+      expect(searchButton(root).getAttribute('href')).toBe('/ru/parts/');
     },
   );
-
-  it('keeps the inline header search on other pages', async () => {
-    setShop(false);
-    const root = await header('/ru/parts/');
-
-    expect(root.querySelector('div.min-\\[1360px\\]\\:block')).not.toBeNull();
-    expect(searchButton(root).classList.contains('min-[1360px]:hidden')).toBe(
-      true,
-    );
-    expect(searchButton(root).getAttribute('href')).toBe('/ru/parts/');
-  });
 
   it('links the about page from the primary nav instead of an in-page anchor', async () => {
     setShop(false);
