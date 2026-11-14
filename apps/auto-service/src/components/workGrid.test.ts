@@ -4,13 +4,13 @@ import { render } from './renderAstro';
 import { work } from './workFixture';
 
 describe('WorkGrid', () => {
-  it('tags each card with its make for the chip filter, and a car without one with none', async () => {
+  it('tags each card with its Make for the chip filter, and a Work without one with none', async () => {
     const root = await render(WorkGrid, {
       path: '/ru/works/',
       props: {
         works: [
-          work({ id: 'a', car: 'Alfa Romeo Giulia' }),
-          work({ id: 'b', car: 'Обслуживание тормозов' }),
+          work({ id: 'a', car: 'Giulia', make: 'alfa-romeo' }),
+          work({ id: 'b', car: 'Alfa Romeo Giulia', make: undefined }),
         ],
       },
     });
