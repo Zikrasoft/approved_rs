@@ -19,6 +19,7 @@ import {
   type Vehicle,
 } from '@podbor/catalog-contract';
 import { seriesSlugOf } from '@podbor/catalog-contract/slug';
+import { bestPage, bestPrice } from './bestPrice';
 import { byModelName } from './carName';
 import { partSuccessor } from './partSuccessor';
 import { placeKey, seriesKey, type CataloguePages } from './paths';
@@ -443,7 +444,30 @@ export type MakePartsEntry = {
   parts: number;
   hub: boolean;
   categories: Category[];
+  showcase: PartPageEntry[];
 };
+
+export const MAKE_TOP_CATEGORIES = 6;
+const MAKE_SHOWCASE = 6;
+
+const offerRank = (pages: PartPageEntry[]) => {
+  const best = bestPrice(pages);
+  return best ? (best.inStock ? 0 : 1) : 2;
+};
+
+const showcaseOf = (queues: PartPageEntry[][][]) =>
+  queues
+    .flatMap((queue, column) =>
+      queue
+        .map((pages) => ({ pages, rank: offerRank(pages) }))
+        .toSorted((a, b) => a.rank - b.rank)
+        .map((pick, round) => ({ ...pick, round, column })),
+    )
+    .toSorted(
+      (a, b) => a.rank - b.rank || a.round - b.round || a.column - b.column,
+    )
+    .slice(0, MAKE_SHOWCASE)
+    .map(({ pages }) => bestPage(pages) ?? pages[0]);
 
 export const makePartsFrom = oncePerSnapshot(
   'makeParts',
@@ -481,17 +505,28 @@ export const makePartsFrom = oncePerSnapshot(
     const hubs = new Set(makeHubsFrom(snapshot).map(({ make }) => make.slug));
     return [...byMake.values()]
       .map(({ make, parts }) => {
-        const counts = new Map<Category, number>();
-        for (const category of parts.values()) {
-          if (category) counts.set(category, (counts.get(category) ?? 0) + 1);
+        const inCategory = new Map<Category, PartPageEntry[][]>();
+        for (const [partId, category] of parts) {
+          if (category) {
+            inCategory.set(category, [
+              ...(inCategory.get(category) ?? []),
+              pagesByPart.get(partId)!,
+            ]);
+          }
         }
+        const categories = [...inCategory.entries()]
+          .toSorted((a, b) => b[1].length - a[1].length)
+          .map(([category]) => category);
         return {
           make,
           parts: parts.size,
           hub: hubs.has(make.slug),
-          categories: [...counts.entries()]
-            .toSorted((a, b) => b[1] - a[1])
-            .map(([category]) => category),
+          categories,
+          showcase: showcaseOf(
+            categories
+              .slice(0, MAKE_TOP_CATEGORIES)
+              .map((category) => inCategory.get(category)!),
+          ),
         };
       })
       .toSorted((a, b) => byName(a.make.name, b.make.name));

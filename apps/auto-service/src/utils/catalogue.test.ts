@@ -1257,6 +1257,51 @@ describe('the Parts of a Make', () => {
     ]);
   });
 
+  it('shows the in-stock Parts of its top Categories first, then the priced, then the rest', async () => {
+    const stocked = (page: (typeof filters)[number], stock: number) => ({
+      ...page,
+      offers: [
+        {
+          id: `offer_${page.part.id}`,
+          price: 1500,
+          currency: 'RSD',
+          stock_quantity: stock,
+          lead_time_days: stock > 0 ? 0 : 7,
+        },
+      ],
+    });
+    const [noPrice, onOrder, inStock] = filters;
+    const shown = [noPrice, stocked(onOrder, 0), stocked(inStock, 2)];
+    const snapshot = await catalogueWith(
+      backend({
+        pages: [...shown, stocked(pads, 1), loose],
+        categories: [brakePads, oilFilters],
+        fitments: fits(VEHICLE.id, [...filters, pads, loose]),
+        vehicles: [VEHICLE],
+      }),
+    ).snapshot();
+
+    expect(
+      makePartsFrom(snapshot)[0].showcase.map(({ value }) => value),
+    ).toEqual(['HU6004X', 'P1', 'HU7020Z', 'HU816X']);
+  });
+
+  it('shows at most six Parts', async () => {
+    const many = Array.from({ length: 8 }, (_, i) =>
+      part(`M${i}`, oilFilters.id),
+    );
+    const snapshot = await catalogueWith(
+      backend({
+        pages: many,
+        categories: [oilFilters],
+        fitments: fits(VEHICLE.id, many),
+        vehicles: [VEHICLE],
+      }),
+    ).snapshot();
+
+    expect(makePartsFrom(snapshot)[0].showcase).toHaveLength(6);
+  });
+
   it('counts the goods the Requirements of a Make match', async () => {
     const oil = category('engine-oil', 'Моторное масло');
     const ll04 = brandNumber('liqui-moly', '20646', {

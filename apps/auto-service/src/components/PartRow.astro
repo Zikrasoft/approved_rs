@@ -21,6 +21,7 @@ interface Props {
   current?: { slug: string; brand: { name: string }; value: string } | null;
   priced?: { id: string; offers: PartOffer[] };
   demand?: PartDemand | null;
+  tile?: boolean;
 }
 
 const {
@@ -35,13 +36,17 @@ const {
   current,
   priced,
   demand = null,
+  tile = false,
 } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const copy = content(locale).shopPart;
 ---
 
 <li
-  class="group relative flex items-center gap-3 px-4 py-3 transition-colors duration-150 first:rounded-t-[inherit] last:rounded-b-[inherit] hover:bg-shade sm:gap-4 sm:px-6 sm:py-4"
+  class:list={[
+    'group relative flex items-center gap-3 px-4 py-3 transition-colors duration-150 hover:bg-shade sm:gap-4 sm:px-6 sm:py-4',
+    tile ? 'card' : 'first:rounded-t-[inherit] last:rounded-b-[inherit]',
+  ]}
 >
   <PartThumb thumb={thumb} class="group-hover:bg-paper" />
   <span

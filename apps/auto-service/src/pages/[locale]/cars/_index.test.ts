@@ -85,6 +85,7 @@ describe('the /cars/ list', () => {
         parts: 3,
         hub: true,
         categories: [],
+        showcase: [],
       } as MakePartsEntry,
     ]);
 

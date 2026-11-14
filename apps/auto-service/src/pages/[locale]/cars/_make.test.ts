@@ -3,7 +3,7 @@ import { withPlaceholder } from '@podbor/i18n';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { content } from '@/i18n/content';
 import type { Locale } from '@/i18n/config';
-import { orangeIn, render } from '@/components/renderAstro';
+import { orangeIn, partPage, render } from '@/components/renderAstro';
 import { work } from '@/components/workFixture';
 import { makePartsForBuild } from '@/utils/catalogueEnv';
 import type { MakePartsEntry } from '@/utils/catalogueSnapshot';
@@ -27,10 +27,15 @@ const category = (slug: string, name: string) =>
     translations: { sr: { name: `${name} sr` } },
   }) as unknown as Category;
 
-const bmwParts = (hub = true): MakePartsEntry => ({
+const showcase = ['HU816X', 'P1'].map((value) =>
+  partPage({ slug: `mann-${value.toLowerCase()}`, value }),
+);
+
+const bmwParts = (hub = true, shown = showcase): MakePartsEntry => ({
   make: { slug: 'bmw', name: 'BMW' },
   parts: 12,
   hub,
+  showcase: shown,
   categories: [
     'oil-filters',
     'brake-pads',
@@ -106,12 +111,14 @@ describe('the Make pages', () => {
         parts: 1,
         hub: false,
         categories: [],
+        showcase: [],
       },
       {
         make: { slug: 'tesla', name: 'Tesla' },
         parts: 4,
         hub: true,
         categories: [],
+        showcase: [],
       },
     );
 
@@ -207,6 +214,45 @@ describe('the Parts block of a Make page', () => {
     ).toBe(
       withPlaceholder(content('ru').pages.make.partsHubTemplate, 'make', 'BMW'),
     );
+  });
+
+  it('shows the showcase Parts as cards between the Categories and the hub link', async () => {
+    withParts(bmwParts());
+    const block = partsHeading(await page())!.closest('section')!;
+    const cards = [...block.querySelectorAll('a[href^="/ru/parts/p/"]')];
+    const all = [...block.querySelectorAll('*')];
+
+    expect(cards.map((card) => card.getAttribute('href'))).toEqual([
+      '/ru/parts/p/mann-hu816x/',
+      '/ru/parts/p/mann-p1/',
+    ]);
+    expect(cards[0].textContent).toContain('HU816X');
+    expect(all.indexOf(cards[0])).toBeGreaterThan(
+      all.indexOf(block.querySelector('a[href^="/ru/parts/c/"]')!),
+    );
+    expect(all.indexOf(cards[1])).toBeLessThan(
+      all.indexOf(block.querySelector('a[href="/ru/parts/bmw/"]')!),
+    );
+  });
+
+  it('scrolls the Part cards sideways on a phone, as the Works do', async () => {
+    withParts(bmwParts());
+    const row = partsHeading(await page())!
+      .closest('section')!
+      .querySelector('a[href^="/ru/parts/p/"]')!
+      .closest('ul')!;
+
+    expect(classes(row)).toEqual(
+      expect.arrayContaining(['snap-x', 'overflow-x-auto', 'lg:grid']),
+    );
+  });
+
+  it('shows no Part cards when the Make has none to show', async () => {
+    withParts(bmwParts(true, []));
+    const block = partsHeading(await page())!.closest('section')!;
+
+    expect(block.querySelector('a[href^="/ru/parts/p/"]')).toBeNull();
+    expect(block.querySelector('a[href^="/ru/parts/c/"]')).not.toBeNull();
   });
 
   it('links no Parts make hub while the Make has too few Parts for one', async () => {
