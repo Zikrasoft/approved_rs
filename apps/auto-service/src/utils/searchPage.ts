@@ -32,6 +32,11 @@ export type SearchCatalogue = Pick<
 
 const SHOP_MAX_OFFSET = 10_000;
 
+export const BROWSE_PAGE_SIZE = 12;
+
+export const browseHref = (locale: Locale, offset = 0) =>
+  `${PathBuilder.partsSearch(locale)}${offset ? `?${new URLSearchParams({ offset: String(offset) })}` : ''}`;
+
 const catalogKey = (raw: string | null) => {
   const key = raw?.toLowerCase();
   return key && CATALOG_KEY_PATTERN.test(key) ? key : undefined;
@@ -137,9 +142,11 @@ export async function planSearch({
     return redirectTo(destination, 303);
   }
 
+  const browse = !typed && !category && !model && !misspeltCategory;
   const searchable =
     !vin &&
-    (searchableQuery(typed) ||
+    (browse ||
+      searchableQuery(typed) ||
       Boolean(category) ||
       Boolean(model) ||
       misspeltCategory);
@@ -153,6 +160,7 @@ export async function planSearch({
           ranges: capped.ranges,
           offset,
           sort,
+          ...(browse ? { limit: BROWSE_PAGE_SIZE } : {}),
         })
       : null,
   );
@@ -179,7 +187,8 @@ export async function planSearch({
     if (nextOffset) {
       next.set('offset', String(nextOffset));
     }
-    return `${PathBuilder.partsSearch(locale)}?${next}`;
+    const query = String(next);
+    return `${PathBuilder.partsSearch(locale)}${query ? `?${query}` : ''}`;
   };
 
   const unfiltered =
@@ -265,6 +274,7 @@ export async function planSearch({
       ranges,
       offset,
       vin,
+      browse,
       vinTypo: !vin && nearVin(typed) ? vinText(typed) : null,
       vinOutcome,
       searchable,
