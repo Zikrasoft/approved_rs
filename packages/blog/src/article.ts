@@ -4,15 +4,13 @@ import { paginate, type Page } from '@podbor/site-kit/pagination';
 
 const text = z.string().trim().min(1);
 
-const faqSchema = z.array(z.object({ question: text, answer: text }));
+const faqSchema = z.array(z.object({ q: text, a: text }));
 
 const translationSchema = z.object({
   title: z.string(),
   body: z.string(),
   lead: z.string(),
-  faq: z
-    .array(z.object({ question: z.string(), answer: z.string() }))
-    .optional(),
+  faq: z.array(z.object({ q: z.string(), a: z.string() })).optional(),
 });
 
 export function articleSchema<Image extends z.ZodType>({
@@ -62,14 +60,13 @@ export interface LocalizedArticle {
   faq: FrequentQuestion[];
 }
 
+export const blogArticles = <A extends ArticleEntry>(articles: A[]): A[] =>
+  publishedByNewest(articles).filter(({ data }) => !data.overview);
+
 export const blogPages = <A extends ArticleEntry>(
   articles: A[],
   size: number,
-): Page<A>[] =>
-  paginate(
-    publishedByNewest(articles).filter(({ data }) => !data.overview),
-    size,
-  );
+): Page<A>[] => paginate(blogArticles(articles), size);
 
 export function localizedArticle(
   { body = '', data }: ArticleEntry,

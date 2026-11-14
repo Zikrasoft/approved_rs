@@ -27,7 +27,7 @@ describe('the Article schema', () => {
   });
 
   it('keeps the Make, the overview flag and the frequent questions', () => {
-    const faq = [{ question: 'Сколько стоит?', answer: 'От 5000 RSD.' }];
+    const faq = [{ q: 'Сколько стоит?', a: 'От 5000 RSD.' }];
     expect(
       schema.parse({ ...written, make: 'bmw', overview: true, faq }),
     ).toMatchObject({ make: 'bmw', overview: true, faq });
@@ -105,12 +105,12 @@ describe('the blog list', () => {
 });
 
 describe('a localized Article', () => {
-  const faq = [{ question: 'Сколько стоит?', answer: 'От 5000 RSD.' }];
+  const faq = [{ q: 'Сколько стоит?', a: 'От 5000 RSD.' }];
   const sr = {
     title: 'Kada menjati ulje',
     body: 'Tekst.',
     lead: 'Ukratko.',
-    faq: [{ question: 'Koliko košta?', answer: 'Od 5000 RSD.' }],
+    faq: [{ q: 'Koliko košta?', a: 'Od 5000 RSD.' }],
   };
 
   it('reads the Russian text for ru', () => {
