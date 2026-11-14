@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 import {
   articleSchema,
+  blogListed,
   blogPages,
   localizedArticle,
   makeArticles,
@@ -102,6 +103,17 @@ describe('the blog list', () => {
 
   it('still has its first page when there is no Article yet', () => {
     expect(blogPages([], 12)).toEqual([{ number: 1, count: 1, items: [] }]);
+  });
+
+  it('is worth linking once it lists a published Article that is no overview', () => {
+    expect(blogListed([entry('new', '2026-03-01')])).toBe(true);
+    expect(
+      blogListed([
+        entry('bmw', '2026-06-01', { overview: true, make: 'bmw' }),
+        entry('draft', '2026-05-01', { published: false }),
+      ]),
+    ).toBe(false);
+    expect(blogListed([])).toBe(false);
   });
 });
 

@@ -400,6 +400,17 @@ describe('generateLlmsTxt', () => {
     expect(body).not.toContain('/sr/blog/bmw/');
   });
 
+  it('leaves the blog out while it lists no Article', async () => {
+    const all = articles.splice(0);
+    articles.push(...all.filter(({ data }) => data.overview));
+    const body = await generateLlmsTxt('ru').finally(() =>
+      articles.splice(0, articles.length, ...all),
+    );
+
+    expect(body).not.toContain('https://carlab.rs/ru/blog/');
+    expect(body).toContain('https://carlab.rs/ru/cars/bmw/');
+  });
+
   it('describes the parts catalogue on the parts index link', async () => {
     vi.stubEnv('SHOP_OPEN', 'true');
     const body = await generateLlmsTxt('ru').finally(() => vi.unstubAllEnvs());

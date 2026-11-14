@@ -1,10 +1,16 @@
-import { describe, expect, it } from 'vitest';
+import { getCollection } from 'astro:content';
+import { describe, expect, it, vi } from 'vitest';
 import { DEVELOPER_CREDIT_ATTRIBUTE } from '@podbor/site-kit/browser';
 import { content } from '@/i18n/content';
 import { formatPhone } from '@podbor/site-kit/format-phone';
 import { PHONE_NUMBER } from '@/utils/constants';
 import SiteFooter from './SiteFooter.astro';
 import { orangeIn, render } from './renderAstro';
+import { article } from './articleFixture';
+
+vi.mock('astro:content', () => ({
+  getCollection: vi.fn(async () => [article()]),
+}));
 
 const site = content('ru').site;
 
@@ -75,6 +81,16 @@ describe('SiteFooter', async () => {
     expect(links.indexOf(blog)).toBe(
       links.findIndex((link) => link.getAttribute('href') === '/ru/works/') + 1,
     );
+  });
+
+  it('leaves the blog out while it lists no Article, an overview alone included', async () => {
+    vi.mocked(getCollection).mockResolvedValueOnce([
+      article({ overview: true, make: 'bmw' }),
+    ] as never);
+    const empty = await render(SiteFooter, { path: '/ru/services/' });
+
+    expect(empty.querySelector('a[href="/ru/blog/"]')).toBeNull();
+    expect(empty.querySelector('a[href="/ru/cars/"]')).not.toBeNull();
   });
 
   it('leads to the Make pages under «Машины», before the Works', () => {

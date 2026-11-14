@@ -63,6 +63,9 @@ export interface LocalizedArticle {
 export const blogArticles = <A extends ArticleEntry>(articles: A[]): A[] =>
   publishedByNewest(articles).filter(({ data }) => !data.overview);
 
+export const blogListed = (articles: ArticleEntry[]): boolean =>
+  blogArticles(articles).length > 0;
+
 export function makeArticles<A extends ArticleEntry>(
   articles: A[],
 ): { overview: A | undefined; articles: A[] } {

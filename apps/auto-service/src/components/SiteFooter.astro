@@ -1,4 +1,6 @@
 ---
+import { getCollection } from 'astro:content';
+import { blogListed } from '@podbor/blog/article';
 import Wordmark from './Wordmark.astro';
 import { localeFrom } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
@@ -22,6 +24,7 @@ const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const services = content(locale).services;
 const blog = content(locale).blog;
+const showBlog = blogListed(await getCollection('articles'));
 const year = new Date().getFullYear();
 const credit = splitDeveloperCredit(site.footer.developerCredit);
 
@@ -79,7 +82,13 @@ const navLink =
           >{content(locale).pages.cars.navLabel}</a
         >
         <a href={PathBuilder.works(locale)} class={navLink}>{site.nav.works}</a>
-        <a href={PathBuilder.blog(locale)} class={navLink}>{blog.navLabel}</a>
+        {
+          showBlog && (
+            <a href={PathBuilder.blog(locale)} class={navLink}>
+              {blog.navLabel}
+            </a>
+          )
+        }
         <a href={PathBuilder.parts(locale)} class={navLink}>{site.nav.parts}</a>
         <a href={PathBuilder.contact(locale)} class={navLink}
           >{site.nav.contact}</a
