@@ -35,6 +35,7 @@ translations:
       Posebno o kočnicama. Pločice su jedan od ključnih elemenata bezbednosti i treba ih redovno proveravati. Kada menjamo pločice, uvek proverimo i **diskove, čeljusti i vođice**: ako je nešto od toga zapeklo ili istrošeno, automobil neće ravnomerno kočiti.
     car: Mercedes-Benz C-Class
 car: Mercedes-Benz C-Class
+make: mercedes-benz
 year: 2018
 servicesApplied:
   - diagnostics

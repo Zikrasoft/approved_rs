@@ -1,6 +1,7 @@
 ---
 title: 'Range Rover Sport PHEV 2.0 Ingenium: большое ТО и обслуживание ГРМ'
 car: Range Rover Sport
+make: land-rover
 year: 2019
 servicesApplied:
   - vin-parts-inquiry

@@ -28,6 +28,7 @@ translations:
       Usput smo proverili i usisne klapne. Za sada nema ničeg kritičnog, ali smo klijentu rekli da bi na sledećem malom servisu trebalo da ih skinemo i očistimo.
     car: BMW X3
 car: BMW X3
+make: bmw
 year: 2021
 servicesApplied:
   - diagnostics

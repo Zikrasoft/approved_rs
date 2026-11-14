@@ -1,6 +1,7 @@
 ---
 title: 'Audi Q7 2008: подвеска, тормоза и течь масла'
 car: Audi Q7
+make: audi
 year: 2008
 servicesApplied:
   - brakes-suspension
