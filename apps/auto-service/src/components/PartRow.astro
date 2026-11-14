@@ -44,7 +44,7 @@ const copy = content(locale).shopPart;
 
 <li
   class:list={[
-    'group relative flex items-center gap-3 px-4 py-3 transition-colors duration-150 hover:bg-shade sm:gap-4 sm:px-6 sm:py-4',
+    'group relative flex items-center gap-3 px-4 py-3 transition-colors duration-150 hover:bg-shade has-[>span>span>a:focus-visible]:outline-3 has-[>span>span>a:focus-visible]:-outline-offset-3 has-[>span>span>a:focus-visible]:outline-ink sm:gap-4 sm:px-6 sm:py-4',
     tile ? 'card' : 'first:rounded-t-[inherit] last:rounded-b-[inherit]',
   ]}
 >
@@ -55,7 +55,7 @@ const copy = content(locale).shopPart;
     <span class="flex min-w-0 flex-1 flex-col gap-1">
       <a
         href={PathBuilder.partNumber(locale, slug)}
-        class="text-ink after:absolute after:inset-0 after:rounded-[inherit]"
+        class="text-ink after:absolute after:inset-0 after:rounded-[inherit] focus-visible:outline-none"
       >
         <span class="font-semibold">{brand}</span>{' '}
         <span class="spec text-sm whitespace-nowrap">{value}</span>

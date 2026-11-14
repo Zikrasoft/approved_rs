@@ -252,6 +252,21 @@ describe('the Parts block of a Make page', () => {
     );
   });
 
+  it('rings the whole Part card, not its title, when the card link takes the keyboard focus', async () => {
+    withParts(bmwParts());
+    const link = partsHeading(await page())!
+      .closest('section')!
+      .querySelector('a[href^="/ru/parts/p/"]')!;
+
+    expect(classes(link)).toContain('focus-visible:outline-none');
+    expect(classes(link.closest('li'))).toEqual(
+      expect.arrayContaining([
+        'has-[>span>span>a:focus-visible]:outline-3',
+        'has-[>span>span>a:focus-visible]:outline-ink',
+      ]),
+    );
+  });
+
   it('shows no Part cards when the Make has none to show', async () => {
     withParts(bmwParts(true, []));
     const block = partsHeading(await page())!.closest('section')!;
