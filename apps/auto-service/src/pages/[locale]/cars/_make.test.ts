@@ -291,12 +291,31 @@ describe('a Make page', () => {
   it('shows six of the make’s Works and links the Works list narrowed to it', async () => {
     const root = await page();
 
-    expect(root.querySelectorAll('[data-filter-item]')).toHaveLength(6);
+    expect(root.querySelectorAll('a[href^="/ru/works/bmw-"]')).toHaveLength(6);
     expect(
       root.querySelector('a[href="/ru/works/?make=bmw"]')?.textContent?.trim(),
     ).toBe(
       withPlaceholder(content('ru').pages.make.worksAllTemplate, 'make', 'BMW'),
     );
+  });
+
+  it('scrolls the Works sideways on a phone, as the services page does', async () => {
+    const row = (await page())
+      .querySelector('a[href="/ru/works/bmw-0/"]')!
+      .closest('ul')!;
+
+    expect(classes(row)).toEqual(
+      expect.arrayContaining(['snap-x', 'overflow-x-auto', 'lg:grid']),
+    );
+    expect(row.querySelectorAll('li.lg\\:hidden')).toHaveLength(0);
+  });
+
+  it('names the make in the heading without an eyebrow repeating it', async () => {
+    const hero = (await page()).querySelector(
+      '[data-hero-heading]',
+    )!.parentElement!;
+
+    expect(hero.querySelector('.eyebrow')).toBeNull();
   });
 
   it('dials on a touchscreen and offers a callback on a mouse', async () => {
@@ -430,6 +449,10 @@ describe('the Articles on a Make page', () => {
       all.indexOf(headingOf(root, make.faqHeadingTemplate)!),
     );
     expect(all.indexOf(cards[0])).toBeGreaterThan(all.indexOf(heading));
+    expect(cards.map((card) => card.querySelector('h2, h3')?.tagName)).toEqual([
+      'H3',
+      'H3',
+    ]);
   });
 
   it('keeps the overview and the Articles neutral, the booking owns the orange', async () => {

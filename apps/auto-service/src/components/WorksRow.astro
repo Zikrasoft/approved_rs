@@ -1,6 +1,6 @@
 ---
 import SectionHead from './SectionHead.astro';
-import WorkCard from './WorkCard.astro';
+import WorkSnapRow from './WorkSnapRow.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PathBuilder } from '@/utils/paths';
@@ -28,22 +28,7 @@ const allWorks = PathBuilder.works(locale);
             {site.common.allWorks}
           </a>
         </div>
-        <ul class="-mx-5 mt-8 flex snap-x snap-mandatory scroll-px-5 gap-3 overflow-x-auto px-5 pb-1 [scrollbar-width:none] lg:mx-0 lg:grid lg:grid-cols-3 lg:gap-4 lg:overflow-visible lg:px-0">
-          {works.slice(0, 6).map((work, i) => (
-            <li
-              class:list={[
-                'w-[78%] shrink-0 snap-start sm:w-[46%] lg:w-auto',
-                i > 2 && 'lg:hidden',
-              ]}
-            >
-              <WorkCard
-                work={work}
-                tags={false}
-                sizes="(min-width: 1224px) 368px, (min-width: 1024px) calc(33vw - 1.5rem), (min-width: 640px) 46vw, 78vw"
-              />
-            </li>
-          ))}
-        </ul>
+        <WorkSnapRow works={works.slice(0, 6)} desktop={3} class="mt-8" />
         <a href={allWorks} class="btn btn-secondary mt-5 w-full sm:hidden">
           {site.common.allWorks}
         </a>

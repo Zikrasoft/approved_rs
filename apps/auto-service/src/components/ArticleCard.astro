@@ -9,9 +9,10 @@ import { coverScale, coverSizes } from '@/utils/coverSizes';
 interface Props {
   article: Article;
   eager?: boolean;
+  heading?: 'h2' | 'h3';
 }
 
-const { article, eager = false } = Astro.props;
+const { article, eager = false, heading: Heading = 'h2' } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const { title, lead } = localizedArticle(article, locale);
 ---
@@ -40,9 +41,14 @@ const { title, lead } = localizedArticle(article, locale);
     >
       {articleDate(article.data.date, locale)}
     </time>
-    <h2 class="text-block font-semibold text-ink group-hover:underline">
+    <Heading
+      class:list={[
+        'font-semibold text-ink group-hover:underline',
+        Heading === 'h2' && 'text-block',
+      ]}
+    >
       {title}
-    </h2>
+    </Heading>
     <p class="line-clamp-3 text-sm leading-relaxed text-muted">{lead}</p>
   </div>
 </a>

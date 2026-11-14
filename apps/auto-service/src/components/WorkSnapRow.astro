@@ -1,0 +1,36 @@
+---
+import WorkCard from './WorkCard.astro';
+import type { Work } from '@/utils/works';
+
+interface Props {
+  works: Work[];
+  desktop?: number;
+  class?: string;
+}
+
+const { works, desktop = works.length, class: className } = Astro.props;
+---
+
+<ul
+  class:list={[
+    '-mx-5 flex snap-x snap-mandatory scroll-px-5 gap-3 overflow-x-auto px-5 pb-1 [scrollbar-width:none] lg:mx-0 lg:grid lg:grid-cols-3 lg:gap-4 lg:overflow-visible lg:px-0',
+    className,
+  ]}
+>
+  {
+    works.map((work, i) => (
+      <li
+        class:list={[
+          'w-[78%] shrink-0 snap-start sm:w-[46%] lg:w-auto',
+          i >= desktop && 'lg:hidden',
+        ]}
+      >
+        <WorkCard
+          work={work}
+          tags={false}
+          sizes="(min-width: 1224px) 368px, (min-width: 1024px) calc(33vw - 1.5rem), (min-width: 640px) 46vw, 78vw"
+        />
+      </li>
+    ))
+  }
+</ul>

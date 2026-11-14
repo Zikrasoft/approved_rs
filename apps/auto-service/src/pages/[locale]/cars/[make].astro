@@ -9,7 +9,7 @@ import Shell from '@/layouts/Shell.astro';
 import Icon from '@/components/Icon.astro';
 import PageHero from '@/components/PageHero.astro';
 import ServiceList from '@/components/ServiceList.astro';
-import WorkGrid from '@/components/WorkGrid.astro';
+import WorkSnapRow from '@/components/WorkSnapRow.astro';
 import Faq from '@/components/Faq.astro';
 import ArticleCard from '@/components/ArticleCard.astro';
 import FinalCta from '@/components/FinalCta.astro';
@@ -55,7 +55,6 @@ const faq = about?.faq ?? [];
   jsonLd={faq.length > 0 ? [faqPageSchema(faq)] : []}
 >
   <PageHero
-    eyebrow={make.name}
     heading={about?.title ?? named(copy.headingTemplate)}
     lead={about?.lead ?? named(copy.leadTemplate)}
     crumbs={[
@@ -111,7 +110,7 @@ const faq = about?.faq ?? [];
     works.length > 0 && (
       <section class="wrap pb-band">
         <h2 class="text-section">{named(copy.worksHeadingTemplate)}</h2>
-        <WorkGrid works={works.slice(0, MAX_WORKS)} class="mt-5 md:mt-6" />
+        <WorkSnapRow works={works.slice(0, MAX_WORKS)} class="mt-5 md:mt-6" />
         <a
           href={PathBuilder.worksOfMake(locale, make.slug)}
           class="link-underlined mt-5 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-ink"
@@ -139,7 +138,7 @@ const faq = about?.faq ?? [];
         <ul class="mt-5 grid gap-4 md:mt-6 md:grid-cols-2 lg:grid-cols-3">
           {articles.map((article) => (
             <li>
-              <ArticleCard article={article} />
+              <ArticleCard article={article} heading="h3" />
             </li>
           ))}
         </ul>
