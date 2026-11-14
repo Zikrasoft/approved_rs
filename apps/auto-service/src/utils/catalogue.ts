@@ -42,7 +42,10 @@ import {
   SHOP_CLIENT_SECRET_HEADER,
   SHOP_PREVIEW_HEADER,
 } from '@podbor/catalog-contract/preview';
-import { REQUEST_ID_HEADER } from '@podbor/catalog-contract/events';
+import {
+  REQUEST_ID_HEADER,
+  VISITOR_ID_HEADER,
+} from '@podbor/catalog-contract/events';
 import {
   assembleSnapshot,
   categoryPagesFrom,
@@ -147,6 +150,7 @@ export function createCatalogue({
           previewToken && { [SHOP_PREVIEW_HEADER]: previewToken }),
         ...(body !== undefined && { 'content-type': 'application/json' }),
         ...(requestId && { [REQUEST_ID_HEADER]: requestId }),
+        ...(visitorId && { [VISITOR_ID_HEADER]: visitorId }),
         ...(client && {
           [SHOP_CLIENT_HEADER]: client.address,
           [SHOP_CLIENT_SECRET_HEADER]: client.secret,

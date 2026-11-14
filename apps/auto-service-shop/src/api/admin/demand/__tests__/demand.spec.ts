@@ -79,7 +79,7 @@ medusaIntegrationTestRunner({
         await demand.record({ signal: 'order', identifierIds: ['pi_deleted'] });
         await demand.recordMissedQuery('exide ea770');
         await demand.recordMissedQuery('exide ea770');
-        await demand.recordMissedQuery('k&n 33-2304', daysAgo(20));
+        await demand.recordMissedQuery('k&n 33-2304', { at: daysAgo(20) });
       });
 
       it('ranks the numbers still in the catalogue, their Categories, cars and empty queries of the last 30 days by default', async () => {

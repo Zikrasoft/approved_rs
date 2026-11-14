@@ -1620,6 +1620,28 @@ describe('catalogueFromEnv', () => {
       expect(vinUrlSent()).not.toContain(visitorId);
     });
 
+    it('hands the shop the visitor id cookie in a header, never in the URL', async () => {
+      const visitorId = '0f8fad5b-d9cb-469f-a165-70867728950e';
+      const searchSent = async (cookie: string) => {
+        const fetch = vi.fn((_url: string, _init?: RequestInit) => respond({}));
+        vi.stubGlobal('fetch', fetch);
+        await catalogueFromEnv(SHOP, {
+          visitor: new Request('https://carlab.rs/sr/parts/search/', {
+            headers: { cookie },
+          }),
+        })?.search({ q: 'hu 816', locale: 'sr', facets: [] });
+        const [url, init] = fetch.mock.calls[0] ?? [];
+        return { url: String(url), headers: new Headers(init?.headers) };
+      };
+
+      const sent = await searchSent(`lang=sr; visitor_id=${visitorId}`);
+      expect(sent.headers.get('x-visitor-id')).toBe(visitorId);
+      expect(sent.url).not.toContain(visitorId);
+      expect(
+        (await searchSent('visitor_id=not-a-uuid')).headers.has('x-visitor-id'),
+      ).toBe(false);
+    });
+
     it('names nobody without the secret, without a visitor, or for an address that is none', async () => {
       for (const sent of [
         await headersSent(SHOP, visitor),

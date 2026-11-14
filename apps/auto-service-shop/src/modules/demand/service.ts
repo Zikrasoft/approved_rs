@@ -90,13 +90,23 @@ class DemandModuleService extends MedusaService({
     return true;
   }
 
-  @InjectManager()
+  @InjectTransactionManager()
   async recordMissedQuery(
     query: string,
-    at: Date = new Date(),
+    {
+      visitorId = null,
+      at = new Date(),
+    }: { visitorId?: string | null; at?: Date } = {},
     @MedusaContext() sharedContext: Context = {},
   ): Promise<void> {
     const day = dayOf(at);
+    if (visitorId) {
+      const { rows } = await runBoundSql(sharedContext, RECEIVE, [
+        `missed:${visitorId}:${day}:${query}`,
+        day,
+      ]);
+      if (!rows.length) return;
+    }
     await runBoundSql(sharedContext, COUNT_MISSED_QUERY, [
       day,
       query,

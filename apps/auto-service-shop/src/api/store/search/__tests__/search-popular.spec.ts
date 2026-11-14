@@ -1,6 +1,7 @@
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
+import { VISITOR_ID_HEADER } from '@podbor/catalog-contract/events';
 
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
@@ -146,6 +147,29 @@ medusaIntegrationTestRunner({
         await search({ q: 'exide  ea 770' });
         await search({ q: 'petar@example.com' });
         await search({ q: 'VA 1' });
+
+        expect(
+          await demand().missedQueriesSince(
+            new Date(Date.now() - 86_400_000),
+            10,
+          ),
+        ).toEqual([{ query: 'exide ea 770', count: 2 }]);
+      });
+
+      it('counts one visitor repeating a query that found nothing once', async () => {
+        const asVisitor = (visitorId: string) =>
+          api.get(
+            `/store/search?${new URLSearchParams({ locale: 'ru', q: 'Exide EA 770' })}`,
+            {
+              headers: {
+                ...storeHeaders.headers,
+                [VISITOR_ID_HEADER]: visitorId,
+              },
+            },
+          );
+        await asVisitor('2b1f0c4e-8f5a-4d7b-9c3e-1a2b3c4d5e6f');
+        await asVisitor('2b1f0c4e-8f5a-4d7b-9c3e-1a2b3c4d5e6f');
+        await asVisitor('not-a-uuid');
 
         expect(
           await demand().missedQueriesSince(

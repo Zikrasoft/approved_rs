@@ -29,6 +29,7 @@ import {
   vehicleSchema,
   type PartOffer,
 } from '@podbor/catalog-contract';
+import { VISITOR_ID_HEADER } from '@podbor/catalog-contract/events';
 import { vinOf } from '@podbor/lead-crm/vin';
 import { z } from 'zod';
 
@@ -535,7 +536,9 @@ export async function GET(
   logSearch(count);
   const missed = loggedQuery(q);
   if (!count && missed && !offset && !facets.length && !range.length) {
-    await demandModule(req.scope).recordMissedQuery(missed);
+    await demandModule(req.scope).recordMissedQuery(missed, {
+      visitorId: z.uuid().safeParse(req.headers[VISITOR_ID_HEADER]).data,
+    });
   }
   res.json(
     searchResponseSchema.parse({

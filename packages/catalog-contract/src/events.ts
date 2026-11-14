@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 export const STOREFRONT_EVENTS_PATH = '/hooks/storefront-events';
 export const REQUEST_ID_HEADER = 'x-request-id';
+export const VISITOR_ID_HEADER = 'x-visitor-id';
 export const STOREFRONT_EVENT_MAX_BYTES = 4096;
 
 export const requestIdSchema = z.string().regex(/^[\w:.-]{1,128}$/);
