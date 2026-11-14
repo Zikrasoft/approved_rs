@@ -33,7 +33,6 @@ export const PathBuilder = {
   worksOfMake: (locale: Locale, make: string) =>
     `/${locale}/works/?${new URLSearchParams({ [WORKS_MAKE_PARAM]: make })}`,
   work: (locale: Locale, slug: string) => `/${locale}/works/${slug}/`,
-  bmw: (locale: Locale) => `/${locale}/bmw/`,
   carsMake: (locale: Locale, make: string) => `/${locale}/cars/${make}/`,
   blog: (locale: Locale, page: number | string = 1) =>
     `/${locale}/blog/${Number(page) > 1 ? `${page}/` : ''}`,

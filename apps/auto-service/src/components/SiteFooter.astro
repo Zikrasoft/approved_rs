@@ -21,7 +21,6 @@ import { content } from '@/i18n/content';
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const services = content(locale).services;
-const bmw = content(locale).pages.bmw;
 const blog = content(locale).blog;
 const year = new Date().getFullYear();
 const credit = splitDeveloperCredit(site.footer.developerCredit);
@@ -67,9 +66,6 @@ const navLink =
             </a>
           ))
         }
-        <a href={PathBuilder.bmw(locale)} class={navLink}>
-          {bmw.heading}
-        </a>
       </nav>
 
       <nav

@@ -54,7 +54,6 @@ describe('PathBuilder', () => {
       PathBuilder.thanks('sr'),
       PathBuilder.privacy('sr'),
       PathBuilder.about('sr'),
-      PathBuilder.bmw('sr'),
     ];
     paths.forEach((path) => {
       expect(path.startsWith('/sr/')).toBe(true);

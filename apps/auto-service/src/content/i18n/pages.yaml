@@ -148,23 +148,6 @@ notFound:
   partsBody: В каталоге запчастей такой страницы нет. Найдите запчасть по номеру или VIN или оставьте заявку, и мы подберем.
   cta: На главную
   writeUs: Или свяжитесь с нами
-bmw:
-  metaTitle: Ремонт и обслуживание BMW в Белграде | CarLab
-  metaDescription: Диагностика и ремонт BMW на оригинальном оборудовании ISTA. Знаем типичные болячки по двигателю и году выпуска, не гадаем, с чего начинать.
-  eyebrow: BMW
-  heading: Ремонт и обслуживание BMW
-  lead: 'Знаем характерные проблемы N47, N20, N55: от цепи ГРМ до клапана EGR. Диагностика на оригинальном оборудовании ISTA, не адаптере с Aliexpress.'
-  trustHeading: Почему к нам, а не в дилерский центр
-  trust:
-    - 'Диагностика на ISTA/ISTA+: видим то же, что видит дилер, без дилерской наценки'
-    - Знаем типичные проблемы по двигателю и году выпуска, не гадаем, с чего начать
-    - 'Оригинал или проверенный аналог: скажем, чем отличаются, и назовем цену каждого'
-    - 'Кодирование и адаптации после ремонта: машина не ругается на приборке'
-  worksHeading: Что мы уже делали с BMW
-  ctaEyebrow: BMW
-  ctaHeading: Опишите, что с машиной
-  ctaBody: 'Модель, год, двигатель и что беспокоит: скажем предварительно, с чего начинать и сколько будет стоить диагностика.'
-  ctaCommentPlaceholder: Модель, год и что беспокоит
 make:
   metaTitleTemplate: Ремонт и обслуживание {make} в Белграде | CarLab
   metaDescriptionTemplate: 'Диагностика, обслуживание и ремонт {make} в автосервисе CarLab в Белграде: реальные работы на {make}, запись по телефону или онлайн.'
@@ -329,23 +312,6 @@ translations:
           model: Model
           modelPlaceholder: Izaberite model
           submit: Prikažite auto delove
-    bmw:
-      metaTitle: Popravka i servis BMW-a u Beogradu | CarLab
-      metaDescription: Dijagnostika i popravka BMW-a uz originalnu opremu ISTA. Poznajemo tipične probleme prema motoru i godištu, ne nagađamo odakle da počnemo.
-      eyebrow: BMW
-      heading: Popravka i servis BMW-a
-      lead: Poznajemo tipične probleme motora N47, N20 i N55, od zupčastog kaiša do EGR ventila. Dijagnostiku radimo originalnom opremom ISTA, a ne adapterom sa Aliexpressa.
-      trustHeading: Zašto kod nas, a ne u ovlašćenom servisu
-      trust:
-        - 'Dijagnostika uređajima ISTA/ISTA+: vidimo isto što i u ovlašćenom servisu, bez njihovih viših cena'
-        - Poznajemo tipične probleme prema motoru i godištu, ne nagađamo odakle da počnemo
-        - 'Originalni deo ili proverena zamena: objasnićemo Vam razliku i cenu svake opcije'
-        - 'Kodiranje i adaptacije nakon popravke: nema upozorenja na instrument tabli'
-      worksHeading: Šta smo već radili na BMW vozilima
-      ctaEyebrow: BMW
-      ctaHeading: Opišite nam problem sa vozilom
-      ctaBody: Navedite model, godište, motor i šta Vas brine. Reći ćemo Vam od čega okvirno treba početi i koliko košta dijagnostika.
-      ctaCommentPlaceholder: Model, godište i šta Vas brine
   en:
     works:
       metaTitle: CarLab workshop jobs in Belgrade | CarLab
@@ -496,21 +462,4 @@ translations:
           model: Model
           modelPlaceholder: Select a model
           submit: Show parts
-    bmw:
-      metaTitle: BMW repair and servicing in Belgrade | CarLab
-      metaDescription: BMW diagnostics and repairs with genuine ISTA equipment. We know common issues by engine and model year, so we know where to start.
-      eyebrow: BMW
-      heading: BMW repair and servicing
-      lead: We know the common issues with the N47, N20 and N55, from timing chains to EGR valves. Diagnostics with genuine ISTA equipment, not an adapter from AliExpress.
-      trustHeading: Why choose us over a dealership
-      trust:
-        - 'Diagnostics with ISTA/ISTA+: see what the dealer sees, without the dealer markup'
-        - We know common issues by engine and model year, so there's no guesswork about where to start
-        - "Genuine parts or trusted alternatives: we'll explain the difference and give you the price for each"
-        - Coding and adaptations after repairs, so no warning lights on your dashboard
-      worksHeading: BMW work we've done
-      ctaEyebrow: BMW
-      ctaHeading: Tell us what's wrong with your car
-      ctaBody: Tell us the model, year, engine and what's troubling you. We'll suggest where to start and give you an estimated diagnostic cost.
-      ctaCommentPlaceholder: Model, year and what's troubling you
 translatedFrom: 23bbff05d65cb6b6

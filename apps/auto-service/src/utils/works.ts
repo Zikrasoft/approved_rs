@@ -81,8 +81,7 @@ const carried = (works: Work[], count: number) =>
 export const sharedMakes = (works: Work[]) =>
   carried(works, 2).map(({ slug, name }) => ({ label: name, group: slug }));
 
-export const makesOf = (works: Work[]): string[] =>
-  carried(works, 1).map(({ name }) => name);
+export const makesOf = (works: Work[]) => carried(works, 1);
 
 export const workshopMakePages = (works: WorkEntry[], articles: Article[]) =>
   makePages(MAKES, {

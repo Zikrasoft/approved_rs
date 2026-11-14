@@ -11,6 +11,46 @@
   },
   "redirects": [
     {
+      "source": "/ru/bmw",
+      "destination": "/ru/cars/bmw/",
+      "permanent": true
+    },
+    {
+      "source": "/ru/bmw/",
+      "destination": "/ru/cars/bmw/",
+      "permanent": true
+    },
+    {
+      "source": "/sr/bmw",
+      "destination": "/sr/cars/bmw/",
+      "permanent": true
+    },
+    {
+      "source": "/sr/bmw/",
+      "destination": "/sr/cars/bmw/",
+      "permanent": true
+    },
+    {
+      "source": "/en/bmw",
+      "destination": "/en/cars/bmw/",
+      "permanent": true
+    },
+    {
+      "source": "/en/bmw/",
+      "destination": "/en/cars/bmw/",
+      "permanent": true
+    },
+    {
+      "source": "/bmw",
+      "destination": "/sr/cars/bmw/",
+      "permanent": true
+    },
+    {
+      "source": "/bmw/",
+      "destination": "/sr/cars/bmw/",
+      "permanent": true
+    },
+    {
       "source": "/ru/parts/maintenance-consumables",
       "destination": "/ru/parts/c/maintenance-consumables/",
       "permanent": true
@@ -383,16 +423,6 @@
     {
       "source": "/parts/:path*",
       "destination": "/sr/parts/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/bmw",
-      "destination": "/sr/bmw/",
-      "permanent": true
-    },
-    {
-      "source": "/bmw/",
-      "destination": "/sr/bmw/",
       "permanent": true
     },
     {

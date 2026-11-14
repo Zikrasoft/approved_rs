@@ -375,11 +375,6 @@ describe('generateLlmsTxt', () => {
     expect(body).not.toContain('/sr/blog/bmw/');
   });
 
-  it('links the BMW landing page', async () => {
-    const body = await generateLlmsTxt('sr');
-    expect(body).toContain(`](https://carlab.rs/sr/bmw/)`);
-  });
-
   it('describes the parts catalogue on the parts index link', async () => {
     vi.stubEnv('SHOP_OPEN', 'true');
     const body = await generateLlmsTxt('ru').finally(() => vi.unstubAllEnvs());

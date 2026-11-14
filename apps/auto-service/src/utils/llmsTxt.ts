@@ -155,7 +155,6 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
           href: url(PathBuilder.carsMake(locale, make.slug)),
         }),
       ),
-      { label: pages.bmw.heading, href: url(PathBuilder.bmw(locale)) },
       { label: site.nav.contact, href: url(PathBuilder.contact(locale)) },
       {
         label: site.footer.aboutLabel,
