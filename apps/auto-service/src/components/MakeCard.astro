@@ -1,0 +1,63 @@
+---
+import type { ImageMetadata } from 'astro';
+import { Image } from 'astro:assets';
+import { coverScale, coverSizes } from '@/utils/coverSizes';
+
+interface Props {
+  name?: string;
+  href?: string;
+  cover?: ImageMetadata;
+  eager?: boolean;
+  template?: boolean;
+}
+
+const { name, href, cover, eager = false, template = false } = Astro.props;
+const picture = 'aspect-[3/2] w-full object-cover';
+---
+
+<a href={href} data-make-card data-search-href class="tile group">
+  {
+    template && (
+      <img data-search-picture alt="" loading="lazy" class={picture} />
+    )
+  }
+  {
+    cover && (
+      <Image
+        src={cover}
+        alt=""
+        widths={[240, 360, 560]}
+        sizes={coverSizes(
+          '(min-width: 1024px) 25vw, (min-width: 640px) 33vw, calc(50vw - 1.5rem)',
+          coverScale(cover, 3 / 2),
+        )}
+        quality={68}
+        loading={eager ? 'eager' : 'lazy'}
+        class={picture}
+      />
+    )
+  }
+  {
+    !cover && (
+      <div
+        data-make-placeholder
+        data-search-no-picture
+        aria-hidden="true"
+        class="flex aspect-[3/2] w-full items-end overflow-hidden bg-shade px-3 pb-1 sm:px-4"
+      >
+        <span
+          data-search-name
+          class="truncate text-[2.5rem] leading-none font-semibold tracking-tight text-line-strong sm:text-5xl"
+        >
+          {name}
+        </span>
+      </div>
+    )
+  }
+  <h2
+    data-search-name
+    class="border-t border-line px-3 py-3 text-block font-semibold text-ink group-hover:underline sm:px-4"
+  >
+    {name}
+  </h2>
+</a>

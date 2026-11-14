@@ -59,6 +59,11 @@ const shown = (root: Element) =>
     .filter((card) => !card.closest('[hidden]'))
     .map((card) => card.getAttribute('href'));
 
+const searchIndex = (root: Element) =>
+  JSON.parse(
+    root.querySelector('script[data-search-index]')?.textContent ?? 'null',
+  ) as { name: string; href: string; picture: string | null }[];
+
 const picture = (root: Element, make: string) =>
   root
     .querySelector(`[data-make-card][href="/ru/cars/${make}/"] img`)
@@ -135,22 +140,38 @@ describe('the /cars/ list', () => {
     );
   });
 
-  it('keeps every other Make on the page for the search, hidden', async () => {
+  it('renders only its own Makes and hands the search every Make', async () => {
     source(worksOn(25));
 
     const root = await page();
     const search = root.querySelector('list-search')!;
 
-    expect(cards(root)).toHaveLength(25);
-    expect(shown(root)).toHaveLength(24);
-    expect(search.querySelectorAll('[data-search-item]')).toHaveLength(25);
+    expect(cards(root)).toHaveLength(24);
+    expect(searchIndex(root)).toHaveLength(25);
+    expect(searchIndex(root)[24]).toEqual({
+      name: MAKES[24].name,
+      href: `/ru/cars/${MAKES[24].slug}/`,
+      picture: expect.stringContaining('w=560'),
+    });
     expect(search.querySelector('[data-search-input]')).not.toBeNull();
+    expect(
+      search.querySelector('[data-search-results]')?.hasAttribute('hidden'),
+    ).toBe(true);
+    const card = search.querySelector<HTMLTemplateElement>(
+      'template[data-search-template]',
+    )!.content;
+    expect(card.querySelector('[data-search-href]')).not.toBeNull();
+    expect(card.querySelector('img[data-search-picture]')).not.toBeNull();
+    expect(card.querySelector('[data-search-no-picture]')).not.toBeNull();
+    expect(card.querySelectorAll('[data-search-name]')).toHaveLength(2);
     expect(
       search.querySelector('[data-search-empty]')?.hasAttribute('hidden'),
     ).toBe(true);
+    const idle = [...search.querySelectorAll('[data-search-idle]')];
     expect(
-      search.querySelector('[data-search-idle]')?.querySelector('nav'),
-    ).not.toBeNull();
+      idle.some((element) => element.querySelector('[data-make-card]')),
+    ).toBe(true);
+    expect(idle.some((element) => element.querySelector('nav'))).toBe(true);
   });
 
   it('announces a search with no match through a status that is always there', async () => {
@@ -213,6 +234,14 @@ describe('the /cars/ list', () => {
     expect(picture(root, 'bmw')).toContain('workshop-facade');
     expect(picture(root, 'audi')).toContain('mechanic-engine-teardown-tall');
     expect(picture(root, 'seat')).toBeUndefined();
+    const indexed = new Map(
+      searchIndex(root).map((entry) => [entry.href, entry.picture]),
+    );
+    expect(indexed.get('/ru/cars/bmw/')).toContain('workshop-facade');
+    expect(indexed.get('/ru/cars/audi/')).toContain(
+      'mechanic-engine-teardown-tall',
+    );
+    expect(indexed.get('/ru/cars/seat/')).toBeNull();
     expect(
       root.querySelector('[href="/ru/cars/seat/"] [data-make-placeholder]'),
     ).not.toBeNull();

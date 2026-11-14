@@ -1,26 +1,26 @@
 ---
 import type { ImageMetadata } from 'astro';
-import { Image } from 'astro:assets';
+import { getImage } from 'astro:assets';
 import { getCollection } from 'astro:content';
 import { paginate, type Page } from '@podbor/site-kit/pagination';
 import Shell from '@/layouts/Shell.astro';
 import Icon from '@/components/Icon.astro';
+import MakeCard from '@/components/MakeCard.astro';
 import PageHero from '@/components/PageHero.astro';
 import Pagination from '@/components/Pagination.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { makePartsForBuild } from '@/utils/catalogueEnv';
-import { coverScale, coverSizes } from '@/utils/coverSizes';
 import { SITE_NAME } from '@/utils/constants';
 import type { Make } from '@/utils/makes';
 import { PathBuilder, withLocales } from '@/utils/paths';
 import { CARS_PAGE_SIZE, makeCover, workshopMakePages } from '@/utils/works';
 
-type MakeCard = { make: Make; cover: ImageMetadata | undefined };
+type MakeTile = { make: Make; cover: ImageMetadata | undefined };
 
 export async function getStaticPaths() {
-  const cards: MakeCard[] = workshopMakePages(
+  const cards: MakeTile[] = workshopMakePages(
     await getCollection('works'),
     await getCollection('articles'),
     await makePartsForBuild(),
@@ -36,8 +36,8 @@ export async function getStaticPaths() {
 }
 
 interface Props {
-  listing: Page<MakeCard>;
-  cards: MakeCard[];
+  listing: Page<MakeTile>;
+  cards: MakeTile[];
 }
 
 const EAGER = 4;
@@ -51,9 +51,14 @@ const heading =
   listing.number > 1
     ? copy.pageName.replace('{page}', String(listing.number))
     : copy.heading;
-const onPage = new Set(listing.items.map(({ make }) => make.slug));
-const eager = new Set(
-  listing.items.slice(0, EAGER).map(({ make }) => make.slug),
+const searchIndex = await Promise.all(
+  cards.map(async ({ make, cover }) => ({
+    name: make.name,
+    href: PathBuilder.carsMake(locale, make.slug),
+    picture: cover
+      ? (await getImage({ src: cover, width: 560, quality: 68 })).src
+      : null,
+  })),
 );
 ---
 
@@ -95,45 +100,37 @@ const eager = new Set(
             />
           </label>
 
-          <ul class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
-            {cards.map(({ make, cover }) => (
-              <li data-search-item hidden={!onPage.has(make.slug)}>
-                <a
+          <ul
+            data-search-idle
+            class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4"
+          >
+            {listing.items.map(({ make, cover }, index) => (
+              <li>
+                <MakeCard
+                  name={make.name}
                   href={PathBuilder.carsMake(locale, make.slug)}
-                  data-make-card
-                  class="card group flex h-full flex-col overflow-hidden transition-colors duration-150 hover:border-ink"
-                >
-                  {cover ? (
-                    <Image
-                      src={cover}
-                      alt=""
-                      widths={[240, 360, 560]}
-                      sizes={coverSizes(
-                        '(min-width: 1024px) 25vw, (min-width: 640px) 33vw, calc(50vw - 1.5rem)',
-                        coverScale(cover, 3 / 2),
-                      )}
-                      quality={68}
-                      loading={eager.has(make.slug) ? 'eager' : 'lazy'}
-                      class="aspect-[3/2] w-full object-cover"
-                    />
-                  ) : (
-                    <div
-                      data-make-placeholder
-                      aria-hidden="true"
-                      class="flex aspect-[3/2] w-full items-end overflow-hidden bg-shade px-3 pb-1 sm:px-4"
-                    >
-                      <span class="truncate text-[2.5rem] leading-none font-semibold tracking-tight text-line-strong sm:text-5xl">
-                        {make.name}
-                      </span>
-                    </div>
-                  )}
-                  <h2 class="border-t border-line px-3 py-3 text-block font-semibold text-ink group-hover:underline sm:px-4">
-                    {make.name}
-                  </h2>
-                </a>
+                  cover={cover}
+                  eager={index < EAGER}
+                />
               </li>
             ))}
           </ul>
+          <ul
+            data-search-results
+            hidden
+            class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4"
+          />
+          <template data-search-template>
+            <li>
+              <MakeCard template />
+            </li>
+          </template>
+          <script
+            is:inline
+            type="application/json"
+            data-search-index
+            set:html={JSON.stringify(searchIndex).replaceAll('<', '\\u003c')}
+          />
 
           <p data-search-empty hidden class="card p-6 text-base text-muted">
             {copy.noMatch}

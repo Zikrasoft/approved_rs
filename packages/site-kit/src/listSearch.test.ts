@@ -11,23 +11,44 @@ function mount(html: string): HTMLElement {
   return document.body.firstElementChild as HTMLElement;
 }
 
-const LIST = `
+const INDEX = [
+  { name: 'Audi', href: '/cars/audi/', picture: '/audi.jpg' },
+  { name: 'BMW', href: '/cars/bmw/', picture: null },
+  { name: 'Škoda', href: '/cars/skoda/', picture: '/skoda.jpg' },
+  { name: 'Seat', href: '/cars/seat/' },
+];
+
+const TEMPLATE = `
+  <template data-search-template>
+    <li>
+      <a data-search-href>
+        <img data-search-picture alt="" />
+        <span data-search-no-picture><b data-search-name></b></span>
+        <h2 data-search-name></h2>
+      </a>
+    </li>
+  </template>
+`;
+
+const list = (index: unknown = INDEX) => `
   <input data-search-input />
-  <ul>
-    <li data-search-item>Audi</li>
-    <li data-search-item>BMW</li>
-    <li data-search-item hidden>Škoda</li>
-    <li data-search-item hidden>Seat</li>
+  <ul data-search-idle>
+    <li>Audi</li>
+    <li>BMW</li>
   </ul>
+  <ul data-search-results hidden></ul>
+  ${TEMPLATE}
+  <script type="application/json" data-search-index>${JSON.stringify(index)}</script>
   <p data-search-empty hidden> Nothing </p>
   <p data-search-status></p>
   <nav data-search-idle>pages</nav>
 `;
 
-const shown = (root: HTMLElement) =>
-  [...root.querySelectorAll<HTMLElement>('[data-search-item]')]
-    .filter((item) => !item.hidden)
-    .map((item) => item.textContent);
+const results = (root: HTMLElement) =>
+  root.querySelector<HTMLElement>('[data-search-results]')!;
+
+const found = (root: HTMLElement) =>
+  [...results(root).querySelectorAll('h2')].map((h2) => h2.textContent);
 
 const type = (root: HTMLElement, value: string) => {
   const input = root.querySelector<HTMLInputElement>('[data-search-input]')!;
@@ -38,39 +59,74 @@ const type = (root: HTMLElement, value: string) => {
 const hidden = (root: HTMLElement, selector: string) =>
   root.querySelector<HTMLElement>(selector)!.hidden;
 
+const idleHidden = (root: HTMLElement) =>
+  [...root.querySelectorAll<HTMLElement>('[data-search-idle]')].map(
+    (element) => element.hidden,
+  );
+
 describe('defineListSearch', () => {
   beforeEach(() => {
     document.body.innerHTML = '';
   });
 
-  it('matches across the whole list, hidden items included', () => {
-    const root = mount(LIST);
+  it('matches across the whole index, not only what the page renders', () => {
+    const root = mount(list());
     type(root, 's');
-    expect(shown(root)).toEqual(['Škoda', 'Seat']);
+    expect(found(root)).toEqual(['Škoda', 'Seat']);
+    expect(results(root).hidden).toBe(false);
   });
 
   it('ignores case, accents and surrounding spaces', () => {
-    const root = mount(LIST);
+    const root = mount(list());
     type(root, '  SKO ');
-    expect(shown(root)).toEqual(['Škoda']);
+    expect(found(root)).toEqual(['Škoda']);
+  });
+
+  it('renders a match from the template with its link, name and picture', () => {
+    const root = mount(list());
+    type(root, 'audi');
+    const item = results(root).firstElementChild!;
+    expect(item.querySelector('a')?.getAttribute('href')).toBe('/cars/audi/');
+    expect(item.querySelector('img')?.getAttribute('src')).toBe('/audi.jpg');
+    expect(item.querySelector('[data-search-no-picture]')).toBeNull();
+    expect(
+      [...item.querySelectorAll('[data-search-name]')].map(
+        (name) => name.textContent,
+      ),
+    ).toEqual(['Audi']);
+  });
+
+  it('renders the stand-in for a match without a picture', () => {
+    const root = mount(list());
+    type(root, 'bmw seat');
+    type(root, 'bmw');
+    const item = results(root).firstElementChild!;
+    expect(item.querySelector('img')).toBeNull();
+    expect(
+      [...item.querySelectorAll('[data-search-name]')].map(
+        (name) => name.textContent,
+      ),
+    ).toEqual(['BMW', 'BMW']);
+    type(root, 'seat');
+    expect(results(root).querySelector('img')).toBeNull();
   });
 
   it('hides what stands idle while a query is typed', () => {
-    const root = mount(LIST);
+    const root = mount(list());
     type(root, 'bmw');
-    expect(hidden(root, '[data-search-idle]')).toBe(true);
+    expect(idleHidden(root)).toEqual([true, true]);
     expect(hidden(root, '[data-search-empty]')).toBe(true);
   });
 
   it('says nothing matches when nothing does', () => {
-    const root = mount(LIST);
+    const root = mount(list());
     type(root, 'lada');
-    expect(shown(root)).toEqual([]);
+    expect(found(root)).toEqual([]);
     expect(hidden(root, '[data-search-empty]')).toBe(false);
   });
 
   it('announces that nothing matches through a status that never hides', () => {
-    const root = mount(LIST);
+    const root = mount(list());
     const status = root.querySelector<HTMLElement>('[data-search-status]')!;
     type(root, 'lada');
     expect(status.textContent).toBe('Nothing');
@@ -84,67 +140,72 @@ describe('defineListSearch', () => {
 
   it('announces nothing without an empty state to read from', () => {
     const root = mount(
-      '<input data-search-input /><p data-search-status></p><p data-search-item>Audi</p>',
+      `<input data-search-input /><ul data-search-results></ul>${TEMPLATE}<script type="application/json" data-search-index>[]</script><p data-search-status></p>`,
     );
     type(root, 'x');
     expect(root.querySelector('[data-search-status]')!.textContent).toBe('');
   });
 
-  it('puts the list back as it came once the query is cleared', () => {
-    const root = mount(LIST);
-    type(root, 'lada');
+  it('puts the page back as it came once the query is cleared', () => {
+    const root = mount(list());
+    type(root, 'audi');
     type(root, ' ');
-    expect(shown(root)).toEqual(['Audi', 'BMW']);
-    expect(hidden(root, '[data-search-idle]')).toBe(false);
+    expect(found(root)).toEqual([]);
+    expect(results(root).hidden).toBe(true);
+    expect(idleHidden(root)).toEqual([false, false]);
     expect(hidden(root, '[data-search-empty]')).toBe(true);
   });
 
-  it('works without an empty state or anything idle', () => {
+  it('works without an empty state, a status or anything idle', () => {
     const root = mount(
-      '<input data-search-input /><p data-search-item>Audi</p>',
+      `<input data-search-input /><ul data-search-results></ul>${TEMPLATE}<script type="application/json" data-search-index>${JSON.stringify(INDEX)}</script>`,
     );
-    type(root, 'x');
-    expect(shown(root)).toEqual([]);
+    type(root, 'audi');
+    expect(found(root)).toEqual(['Audi']);
   });
 
-  it('reads an item with no text as matching nothing', () => {
-    const root = mount('<input data-search-input />');
-    root.remove();
-    const item = document.createElement('p');
-    item.dataset.searchItem = '';
-    Object.defineProperty(item, 'textContent', { get: () => null });
-    root.append(item);
-    document.body.append(root);
+  it('reads an empty index script as no entries', () => {
+    const root = mount(
+      `<input data-search-input /><ul data-search-results></ul>${TEMPLATE}<script type="application/json" data-search-index></script>`,
+    );
     type(root, 'a');
-    expect(item.hidden).toBe(true);
+    expect(found(root)).toEqual([]);
   });
 
-  it('does nothing without an input', () => {
-    const root = mount('<p data-search-item hidden>Audi</p>');
-    expect(shown(root)).toEqual([]);
+  it.each([
+    ['an input', 'data-search-input'],
+    ['a results list', 'data-search-results'],
+    ['a template', 'data-search-template'],
+    ['an index', 'data-search-index'],
+  ])('does nothing without %s', (_, attribute) => {
+    const root = mount(list().replace(attribute, 'data-other'));
+    const input = root.querySelector<HTMLInputElement>('input')!;
+    input.value = 'audi';
+    input.dispatchEvent(new Event('input'));
+    expect(root.querySelector('ul h2')).toBeNull();
+    expect(idleHidden(root)).toEqual([false, false]);
   });
 
   it('stops responding once removed from the document', () => {
-    const root = mount(LIST);
+    const root = mount(list());
     root.remove();
     type(root, 'bmw');
-    expect(shown(root)).toEqual(['Audi', 'BMW']);
+    expect(found(root)).toEqual([]);
   });
 
   it('re-binds when the same element is reconnected', () => {
-    const root = mount(LIST);
+    const root = mount(list());
     root.remove();
     document.body.append(root);
     type(root, 'bmw');
-    expect(shown(root)).toEqual(['BMW']);
+    expect(found(root)).toEqual(['BMW']);
   });
 
   it('ignores a second connect while already bound', () => {
-    const root = mount(LIST);
+    const root = mount(list());
     (root as unknown as { connectedCallback(): void }).connectedCallback();
     type(root, 'seat');
-    type(root, '');
-    expect(shown(root)).toEqual(['Audi', 'BMW']);
+    expect(found(root)).toEqual(['Seat']);
   });
 
   it('defines the element only once per tag name', () => {
