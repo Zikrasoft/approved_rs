@@ -96,6 +96,19 @@ medusaIntegrationTestRunner({
         ).toBe(true);
       });
 
+      it('lists every published part without a scope, in the default order, page by page', async () => {
+        const plain = values(await search({ category: 'batteries' }));
+        const all = await search({});
+        const first = await search({ limit: '2' });
+        const second = await search({ limit: '2', offset: '2' });
+
+        expect(all.status).toBe(200);
+        expect(all.data.count).toBe(4);
+        expect(values(all)).toEqual(plain);
+        expect([...values(first), ...values(second)]).toEqual(plain);
+        expect(second.data.count).toBe(4);
+      });
+
       it('refuses a sort it does not know', async () => {
         expect(
           (await search({ category: 'batteries', sort: 'price' })).status,
