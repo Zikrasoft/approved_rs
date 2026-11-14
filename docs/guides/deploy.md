@@ -1769,14 +1769,14 @@ required there, because Keystatic cannot make an API call from its own form, so 
 "Translate" button cannot exist there in principle.
 
 In its place there is the `translate` job in `.github/workflows/ci.yml`: on every
-push (**to any branch**, not only `main`) it walks every `apps/*/` and runs each
-script it finds (`translate-cases`, `translate-works`, `translate-i18n`), then
-commits the result back — so the translations are already in the feature branch by
-the time it is merged, rather than appearing only afterwards.
+push to `main`, and on a manual `workflow_dispatch` run for any other branch, it
+walks every `apps/*/` and runs each script it finds (`translate-cases`,
+`translate-works`, `translate-i18n`), then commits the result back to the branch it
+ran on.
 
-This is safe to run on every branch: `git.deploymentEnabled` is now `false`
-throughout and Vercel no longer deploys on a git push for any branch — a translation
-commit on a feature branch cannot possibly start a surplus build. On `main` the
+A manual run on a feature branch is safe: `git.deploymentEnabled` is `false`
+throughout and Vercel does not deploy on a git push for any branch, so a translation
+commit on a feature branch cannot start a surplus build. On `main` the
 deploy jobs follow `translate` in the same run and check out exactly the commit it
 left behind — but only what has fallen behind production ships from them (see "Not
 everything gets deployed"). The `translate` step itself is unconditional: it is one
