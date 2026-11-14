@@ -20,18 +20,23 @@ export function articleSchema<Image extends z.ZodType>({
   image: Image;
   makes: readonly string[];
 }) {
-  return z.object({
-    title: text,
-    lead: text,
-    date: z.coerce.date(),
-    image,
-    make: z.enum(makes).optional(),
-    overview: z.boolean().default(false),
-    faq: faqSchema.default([]),
-    published: z.boolean().default(true),
-    translations: z.record(z.string(), translationSchema).optional(),
-    translatedFrom: z.string().optional(),
-  });
+  return z
+    .object({
+      title: text,
+      lead: text,
+      date: z.coerce.date(),
+      image,
+      make: z.enum(makes).optional(),
+      overview: z.boolean().default(false),
+      faq: faqSchema.default([]),
+      published: z.boolean().default(true),
+      translations: z.record(z.string(), translationSchema).optional(),
+      translatedFrom: z.string().optional(),
+    })
+    .refine(({ overview, make }) => !overview || make, {
+      path: ['make'],
+      message: 'An overview Article needs a make',
+    });
 }
 
 type FrequentQuestion = z.infer<typeof faqSchema>[number];

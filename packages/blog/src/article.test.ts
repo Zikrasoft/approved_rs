@@ -35,6 +35,12 @@ describe('the Article schema', () => {
     ).toMatchObject({ make: 'bmw', overview: true, faq });
   });
 
+  it('refuses an overview about no Make, which no page would show', () => {
+    const parsed = schema.safeParse({ ...written, overview: true });
+    expect(parsed.success).toBe(false);
+    expect(parsed.error?.issues[0].path).toEqual(['make']);
+  });
+
   it('refuses a Make the catalogue does not know', () => {
     expect(schema.safeParse({ ...written, make: 'tesla' }).success).toBe(false);
   });
