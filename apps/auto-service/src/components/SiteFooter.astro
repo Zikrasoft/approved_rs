@@ -22,6 +22,7 @@ const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const services = content(locale).services;
 const bmw = content(locale).pages.bmw;
+const blog = content(locale).blog;
 const year = new Date().getFullYear();
 const credit = splitDeveloperCredit(site.footer.developerCredit);
 
@@ -79,6 +80,7 @@ const navLink =
           {site.footer.companyHeading}
         </span>
         <a href={PathBuilder.works(locale)} class={navLink}>{site.nav.works}</a>
+        <a href={PathBuilder.blog(locale)} class={navLink}>{blog.navLabel}</a>
         <a href={PathBuilder.parts(locale)} class={navLink}>{site.nav.parts}</a>
         <a href={PathBuilder.contact(locale)} class={navLink}
           >{site.nav.contact}</a

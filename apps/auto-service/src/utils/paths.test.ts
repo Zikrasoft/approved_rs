@@ -87,6 +87,14 @@ describe('PathBuilder', () => {
       );
     },
   );
+
+  it('puts the blog, its later pages, an Article and a Make page under their sections', () => {
+    expect(PathBuilder.blog('sr')).toBe('/sr/blog/');
+    expect(PathBuilder.blog('sr', 1)).toBe('/sr/blog/');
+    expect(PathBuilder.blog('sr', 2)).toBe('/sr/blog/2/');
+    expect(PathBuilder.blogArticle('sr', 'oil')).toBe('/sr/blog/oil/');
+    expect(PathBuilder.carsMake('sr', 'bmw')).toBe('/sr/cars/bmw/');
+  });
 });
 
 describe('swapLocale', () => {

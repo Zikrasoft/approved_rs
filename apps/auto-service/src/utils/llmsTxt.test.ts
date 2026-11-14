@@ -2,7 +2,43 @@ import { describe, it, expect, vi } from 'vitest';
 import { mapPlaceUrl } from '@podbor/site-kit';
 
 vi.mock('astro:content', () => ({
-  getCollection: vi.fn().mockResolvedValue([
+  getCollection: vi.fn(async (collection: string) =>
+    collection === 'articles' ? articles : works,
+  ),
+}));
+
+const { articles, works } = vi.hoisted(() => ({
+  articles: [
+    {
+      id: 'oil-change',
+      body: 'Текст.',
+      data: {
+        title: 'Когда менять масло',
+        lead: 'Коротко о сроках.',
+        published: true,
+        overview: false,
+        faq: [],
+        date: new Date('2026-03-01'),
+        translations: {
+          sr: { title: 'Kada menjati ulje', body: 'Tekst.', lead: 'Ukratko.' },
+        },
+      },
+    },
+    {
+      id: 'bmw',
+      body: 'Обзор.',
+      data: {
+        title: 'Обзор BMW',
+        lead: 'Про BMW.',
+        published: true,
+        overview: true,
+        make: 'bmw',
+        faq: [],
+        date: new Date('2026-04-01'),
+      },
+    },
+  ],
+  works: [
     {
       id: 'bmw-x5',
       body: 'Телом на русском.',
@@ -24,7 +60,7 @@ vi.mock('astro:content', () => ({
         date: new Date('2026-02-01'),
       },
     },
-  ]),
+  ],
 }));
 
 const { generateLlmsTxt } = await import('./llmsTxt');
@@ -305,6 +341,18 @@ describe('generateLlmsTxt', () => {
       'Менеджер проверит совместимость по VIN, назовет цену и срок',
     );
     expect(ru).not.toMatch(/корзин|наличи/);
+  });
+
+  it('lists the blog and each Article by its localized title and lead, without overviews', async () => {
+    const body = await generateLlmsTxt('sr');
+
+    expect(body).toContain(
+      `[${content('sr').blog.heading}](https://carlab.rs/sr/blog/)`,
+    );
+    expect(body).toContain(
+      '- [Kada menjati ulje](https://carlab.rs/sr/blog/oil-change/): Ukratko.',
+    );
+    expect(body).not.toContain('/sr/blog/bmw/');
   });
 
   it('links the BMW landing page', async () => {

@@ -8,6 +8,7 @@ import { shopPartContentSchema } from './content/shopPartContentSchema.ts';
 import { shopCartContentSchema } from './content/shopCartContentSchema.ts';
 import { partsCarContentSchema } from './content/partsCarContentSchema.ts';
 import { partsSearchContentSchema } from './content/partsSearchContentSchema.ts';
+import { blogContentSchema } from './content/blogContentSchema.ts';
 
 export const SECTIONS = [
   {
@@ -72,5 +73,12 @@ export const SECTIONS = [
     schema: partsSearchContentSchema,
     promptSubject:
       'a car parts shop search: the search box for a part number or name, the results list with its characteristic filters, empty and unavailable states that point to a parts inquiry, and pagination; keep {placeholders} intact',
+  },
+  {
+    key: 'blog',
+    path: 'src/content/i18n/blog.yaml',
+    schema: blogContentSchema,
+    promptSubject:
+      'the blog of a car service: the list of articles about car repair and maintenance, its pagination, an empty state, a link from an article to the page about servicing its car make, frequent questions and a booking prompt; keep {placeholders} intact',
   },
 ] as const satisfies readonly RegistryEntry[];

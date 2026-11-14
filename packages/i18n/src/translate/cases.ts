@@ -28,7 +28,7 @@ import { errorMessage } from './errorMessage.ts';
 export interface CaseTranslation {
   title: string;
   body: string;
-  [field: string]: string;
+  [field: string]: unknown;
 }
 
 export type CaseOutcome = 'translated' | 'backfilled' | 'skipped';
@@ -63,7 +63,10 @@ export function hashSource(
   source: CaseTranslation,
   extraFields: readonly string[] = [],
 ): string {
-  const extras = extraFields.map((field) => `\n${field}: ${source[field]}`);
+  const extras = extraFields.map((field) => {
+    const value = source[field];
+    return `\n${field}: ${typeof value === 'string' ? value : JSON.stringify(value)}`;
+  });
   return sha256Hex(`${source.title}\n${source.body}${extras.join('')}`);
 }
 
@@ -111,12 +114,15 @@ export function createCaseTranslator<L extends string>({
 
     const rawTitle = doc.get('title');
     const title = typeof rawTitle === 'string' ? rawTitle : '';
-    const extras = extraFields.filter(
-      (field) =>
-        typeof doc.get(field) === 'string' && String(doc.get(field)).trim(),
-    );
+    const fields = doc.toJS() as Record<string, unknown>;
+    const extras = extraFields.filter((field) => {
+      const value = fields[field];
+      return typeof value === 'string'
+        ? value.trim()
+        : Array.isArray(value) && value.length > 0;
+    });
     const source: CaseTranslation = { title, body: body.trim() };
-    for (const field of extras) source[field] = String(doc.get(field));
+    for (const field of extras) source[field] = fields[field];
 
     if (!title.trim() || !source.body) {
       console.warn(`- ${path} (title or body is empty, not translated)`);

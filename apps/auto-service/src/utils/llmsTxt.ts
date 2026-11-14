@@ -24,6 +24,7 @@ import {
   publishedWorks,
   workshopMakePages,
 } from '@/utils/works';
+import { blogArticles, localizedArticle } from '@podbor/blog/article';
 import { PathBuilder } from '@/utils/paths';
 import { BCP47_BY_LOCALE, SUPPORTED_LOCALES, type Locale } from '@/i18n/config';
 import { content } from '@/i18n/content';
@@ -38,6 +39,8 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
   const site = content(locale).site;
   const workEntries = await getCollection('works');
   const works = publishedWorks(workEntries);
+  const articles = blogArticles(await getCollection('articles'));
+  const blog = content(locale).blog;
   const categories = await categoriesForBuild();
   const makes = await makeHubsForBuild();
 
@@ -127,6 +130,18 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
           label: localizedWork(work, locale).title,
           href: url(PathBuilder.work(locale, work.id)),
         })),
+      },
+      {
+        heading: blog.navLabel,
+        index: { label: blog.heading, href: url(PathBuilder.blog(locale)) },
+        entries: articles.map((article) => {
+          const { title, lead } = localizedArticle(article, locale);
+          return {
+            label: title,
+            href: url(PathBuilder.blogArticle(locale, article.id)),
+            note: lead,
+          };
+        }),
       },
     ],
     other: [

@@ -33,8 +33,11 @@ export const PathBuilder = {
   worksOfMake: (locale: Locale, make: string) =>
     `/${locale}/works/?${new URLSearchParams({ [WORKS_MAKE_PARAM]: make })}`,
   work: (locale: Locale, slug: string) => `/${locale}/works/${slug}/`,
-  carsMake: (locale: Locale, make: string) => `/${locale}/cars/${make}/`,
   bmw: (locale: Locale) => `/${locale}/bmw/`,
+  carsMake: (locale: Locale, make: string) => `/${locale}/cars/${make}/`,
+  blog: (locale: Locale, page: number | string = 1) =>
+    `/${locale}/blog/${Number(page) > 1 ? `${page}/` : ''}`,
+  blogArticle: (locale: Locale, slug: string) => `/${locale}/blog/${slug}/`,
   contact: (locale: Locale) => `/${locale}/contact/`,
   thanks: (locale: Locale) => `/${locale}/thanks/`,
   partsThanks: (locale: Locale) => `/${locale}/thanks/parts/`,

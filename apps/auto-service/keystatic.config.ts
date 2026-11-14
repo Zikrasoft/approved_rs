@@ -79,5 +79,52 @@ export default config({
         translatedFrom: fields.ignored(),
       },
     }),
+    articles: collection({
+      label: 'Статьи',
+      slugField: 'title',
+      path: `${APP_ROOT}src/content/articles/*/`,
+      format: { contentField: 'content' },
+      schema: {
+        title: fields.slug({
+          name: { label: 'Заголовок', validation: { isRequired: true } },
+        }),
+        translations: fields.ignored(),
+        lead: fields.text({
+          label: 'Лид',
+          multiline: true,
+          validation: { isRequired: true },
+        }),
+        content: fields.markdoc({ label: 'Текст (RU)', extension: 'md' }),
+        image: photo(),
+        make: makeField({ label: 'Марка' }),
+        overview: fields.checkbox({
+          label: 'Обзор марки (открывает страницу марки)',
+          defaultValue: false,
+        }),
+        faq: fields.array(
+          fields.object({
+            q: fields.text({
+              label: 'Вопрос',
+              validation: { isRequired: true },
+            }),
+            a: fields.text({
+              label: 'Ответ',
+              multiline: true,
+              validation: { isRequired: true },
+            }),
+          }),
+          {
+            label: 'Частые вопросы',
+            itemLabel: (props) => props.fields.q.value,
+          },
+        ),
+        date: fields.date({ label: 'Дата', validation: { isRequired: true } }),
+        published: fields.checkbox({
+          label: 'Опубликована',
+          defaultValue: true,
+        }),
+        translatedFrom: fields.ignored(),
+      },
+    }),
   },
 });

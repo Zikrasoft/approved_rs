@@ -1,6 +1,7 @@
 import { articleSchema, citySchema, serviceSchema } from '@podbor/site-kit';
 import { SITE_URL } from '@/utils/constants';
 import type { Work } from '@/utils/works';
+import type { Article } from '@/utils/blog';
 
 export const BUSINESS_ID = `${SITE_URL}/#workshop`;
 
@@ -15,6 +16,18 @@ export const workSchema = (work: Work, headline: string) => (url: string) =>
     publisher: BUSINESS,
     url,
   });
+
+export const blogArticleSchema =
+  (article: Article, { title, lead }: { title: string; lead: string }) =>
+  (url: string) =>
+    articleSchema({
+      headline: title,
+      description: lead,
+      image: new URL(article.data.image.src, SITE_URL).href,
+      datePublished: article.data.date,
+      publisher: BUSINESS,
+      url,
+    });
 
 export const servicePageSchema =
   (service: { name: string; metaDescription: string }) => (url: string) =>

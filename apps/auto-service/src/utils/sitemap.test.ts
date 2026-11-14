@@ -17,6 +17,13 @@ describe('sitemapFilter', () => {
     expect(keep(`${SITE}/en/cars/mercedes-benz/`)).toBe(true);
   });
 
+  it('lists the blog, its later pages and every Article', () => {
+    const keep = sitemapFilter(SITE);
+    expect(keep(`${SITE}/sr/blog/`)).toBe(true);
+    expect(keep(`${SITE}/sr/blog/2/`)).toBe(true);
+    expect(keep(`${SITE}/sr/blog/oil-change/`)).toBe(true);
+  });
+
   it('never lists the root redirect or the thank-you page', () => {
     const keep = sitemapFilter(SITE);
     expect(keep(`${SITE}/`)).toBe(false);

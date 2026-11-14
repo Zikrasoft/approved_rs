@@ -386,11 +386,6 @@
       "permanent": true
     },
     {
-      "source": "/cars/:path*",
-      "destination": "/sr/cars/:path*",
-      "permanent": true
-    },
-    {
       "source": "/bmw",
       "destination": "/sr/bmw/",
       "permanent": true
@@ -398,6 +393,16 @@
     {
       "source": "/bmw/",
       "destination": "/sr/bmw/",
+      "permanent": true
+    },
+    {
+      "source": "/cars/:path*",
+      "destination": "/sr/cars/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/blog/:path*",
+      "destination": "/sr/blog/:path*",
       "permanent": true
     },
     {

@@ -7,16 +7,28 @@ import {
 } from '../src/i18n/translateConfig.ts';
 
 export const WORK_DIRS = ['src/content/works'];
+export const ARTICLE_DIRS = ['src/content/articles'];
 
-const { run } = createCaseTranslator({
-  targetLocales: TRANSLATABLE_LOCALES,
-  languageName: TARGET_LANGUAGE_NAME,
-  businessDescription: BUSINESS_DESCRIPTION,
-  localeGuidance: LOCALE_GUIDANCE,
-  subject: 'car repair write-ups and car part descriptions',
-  extraFields: ['car'],
-});
+const translator = (subject: string, extraFields: string[]) =>
+  createCaseTranslator({
+    targetLocales: TRANSLATABLE_LOCALES,
+    languageName: TARGET_LANGUAGE_NAME,
+    businessDescription: BUSINESS_DESCRIPTION,
+    localeGuidance: LOCALE_GUIDANCE,
+    subject,
+    extraFields,
+  });
+
+const works = translator('car repair write-ups and car part descriptions', [
+  'car',
+]);
+const articles = translator('car repair and maintenance blog articles', [
+  'lead',
+  'faq',
+]);
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  process.exit(await run(WORK_DIRS));
+  const failed =
+    (await works.run(WORK_DIRS)) | (await articles.run(ARTICLE_DIRS));
+  process.exit(failed);
 }
