@@ -328,6 +328,35 @@ translations:
           model: Model
           modelPlaceholder: Izaberite model
           submit: Prikažite auto delove
+    make:
+      metaTitleTemplate: Popravka i servis vozila {make} u Beogradu | CarLab
+      metaDescriptionTemplate: 'Dijagnostika, servis i popravka vozila {make} u auto servisu CarLab u Beogradu: konkretni radovi na vozilima {make}, zakazivanje telefonom ili onlajn.'
+      headingTemplate: Popravka i servis vozila {make} u Beogradu
+      leadTemplate: 'Radimo dijagnostiku, servis i popravku vozila {make}: od zamene ulja do motora i menjača. Reći ćemo Vam šta treba uraditi i koliko košta pre početka radova.'
+      servicesHeadingTemplate: Šta radimo na vozilima {make}
+      partsHeadingTemplate: Auto delovi za vozila {make}
+      partsHubTemplate: Svi auto delovi za vozila {make}
+      worksHeadingTemplate: Naši radovi na vozilima {make}
+      worksAllTemplate: Svi radovi na vozilima {make}
+      faqHeadingTemplate: Česta pitanja o popravci vozila {make}
+      articlesHeadingTemplate: Članci o vozilima {make}
+      ctaHeadingTemplate: Zakažite servis za vozilo {make}
+      ctaBody: 'Model, godište i šta Vas muči: reći ćemo Vam okvirno odakle da počnemo i koliko košta dijagnostika.'
+      ctaCommentPlaceholder: Model, godište i šta Vas brine
+    cars:
+      navLabel: Vozila
+      metaTitle: Popravka vozila po markama u Beogradu | CarLab
+      metaDescription: 'Marke vozila koje servisira i popravlja auto servis CarLab u Beogradu: naši radovi, članci i auto delovi za svaku marku.'
+      heading: Marke vozila koje servisiramo
+      lead: Izaberite marku da pogledate naše radove, članke i auto delove za tu marku.
+      pageName: Vozila, stranica {page}
+      pagination: Stranice sa spiskom marki
+      searchLabel: Pronađite marku
+      searchPlaceholder: Marka latinicom, na primer Skoda
+      noMatch: Te marke nema na spisku. Pišite nam, verovatno radimo i tu marku.
+      empty: Stranice sa markama još nisu dostupne. Napišite nam koji automobil vozite i reći ćemo Vam da li možemo da ga servisiramo.
+      ctaHeading: Niste pronašli svoju marku?
+      ctaBody: 'Marka, model i šta Vas muči: reći ćemo Vam da li možemo da servisiramo Vaš automobil i koliko košta dijagnostika.'
   en:
     works:
       metaTitle: CarLab workshop jobs in Belgrade | CarLab
@@ -478,4 +507,33 @@ translations:
           model: Model
           modelPlaceholder: Select a model
           submit: Show parts
-translatedFrom: 23bbff05d65cb6b6
+    make:
+      metaTitleTemplate: '{make} servicing and repairs in Belgrade | CarLab'
+      metaDescriptionTemplate: Diagnostics, servicing and repairs for {make} at CarLab in Belgrade. See real work on {make}. Book by phone or online.
+      headingTemplate: '{make} servicing and repairs in Belgrade'
+      leadTemplate: We diagnose, service and repair {make}, from oil changes to engine and gearbox work. We'll tell you what's needed and how much it will cost before we start.
+      servicesHeadingTemplate: What we do for {make}
+      partsHeadingTemplate: Parts for {make}
+      partsHubTemplate: All parts for {make}
+      worksHeadingTemplate: Our work on {make}
+      worksAllTemplate: All work on {make}
+      faqHeadingTemplate: Frequently asked questions about {make} repairs
+      articlesHeadingTemplate: Articles about {make}
+      ctaHeadingTemplate: Book your {make} in for service
+      ctaBody: Tell us the model, year and what's wrong. We'll give you an idea of where to start and how much diagnostics will cost.
+      ctaCommentPlaceholder: Model, year and what's troubling you
+    cars:
+      navLabel: Cars
+      metaTitle: Car servicing by make in Belgrade | CarLab
+      metaDescription: Car makes serviced and repaired at CarLab in Belgrade. See our work, articles and parts for each make.
+      heading: Car makes we work on
+      lead: Choose your car make to see our work, articles and parts for it.
+      pageName: Cars, page {page}
+      pagination: Car make list pages
+      searchLabel: Find a car make
+      searchPlaceholder: Make in Latin letters, for example Skoda
+      noMatch: That make isn't on the list. Get in touch, as we probably work on it too.
+      empty: There are no car make pages yet. Tell us what you drive and we'll let you know if we can help.
+      ctaHeading: Can't find your car make?
+      ctaBody: Tell us the make, model and what's wrong. We'll let you know if we can help and how much diagnostics will cost.
+translatedFrom: f5cf33904faf1428
