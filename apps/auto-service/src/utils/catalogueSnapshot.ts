@@ -1,3 +1,4 @@
+import { paginate } from '@podbor/site-kit/pagination';
 import {
   enrichmentGaps,
   generationOf,
@@ -467,13 +468,11 @@ export type CategoryListing = {
 export function categoryListings({
   pages,
 }: CategoryPageEntry): CategoryListing[] {
-  const count = Math.max(1, Math.ceil(pages.length / CATEGORY_PAGE_SIZE));
-  return Array.from({ length: count }, (_, index) => ({
-    number: index + 1,
-    count,
-    pages: pages.slice(
-      index * CATEGORY_PAGE_SIZE,
-      (index + 1) * CATEGORY_PAGE_SIZE,
-    ),
-  }));
+  return paginate(pages, CATEGORY_PAGE_SIZE).map(
+    ({ number, count, items }) => ({
+      number,
+      count,
+      pages: items,
+    }),
+  );
 }
