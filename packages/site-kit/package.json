@@ -16,7 +16,8 @@
     "./public-env": "./src/publicEnv.ts",
     "./redirects": "./src/redirects.ts",
     "./stored-value": "./src/storedValue.ts",
-    "./og": "./src/ogImage.ts"
+    "./og": "./src/ogImage.ts",
+    "./pagination": "./src/pagination.ts"
   },
   "scripts": {
     "test": "vitest run --coverage",
