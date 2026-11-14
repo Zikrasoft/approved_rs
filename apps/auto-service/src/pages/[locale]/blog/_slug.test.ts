@@ -79,6 +79,7 @@ describe('an article page', () => {
     );
 
     expect(link?.textContent?.trim()).toBe('Ремонт BMW в CarLab');
+    expect(link?.className.split(/\s+/)).toContain('min-h-11');
   });
 
   it('links an Article about no Make to no Make page', async () => {

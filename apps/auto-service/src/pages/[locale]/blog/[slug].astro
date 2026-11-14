@@ -76,7 +76,7 @@ const makeLabel = make && makeName(make);
         make && makeLabel && (
           <InkLink
             href={PathBuilder.carsMake(locale, make)}
-            class="w-fit gap-1.5"
+            class="min-h-11 w-fit gap-1.5"
           >
             {blog.makeLink.replace('{make}', makeLabel)}
             <Icon name="chevronRight" size={16} />
@@ -87,7 +87,7 @@ const makeLabel = make && makeName(make);
     {
       faq.length > 0 && (
         <section class="flex max-w-3xl flex-col">
-          <h2 class="text-section">{blog.faqHeading}</h2>
+          <h2 class="text-xl font-bold text-ink">{blog.faqHeading}</h2>
           <Faq items={faq} class="mt-6" />
         </section>
       )
