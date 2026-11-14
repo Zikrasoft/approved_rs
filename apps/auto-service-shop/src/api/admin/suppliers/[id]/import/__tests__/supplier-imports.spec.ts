@@ -211,6 +211,7 @@ medusaIntegrationTestRunner({
         for (const fake of [intercars, warehouse, partsfinder]) {
           fake.articles.length = 0;
           fake.unreadable.length = 0;
+          fake.complete = true;
           fake.notInScope = 0;
           fake.quotes.clear();
           fake.laterPages = null;
@@ -1556,7 +1557,7 @@ medusaIntegrationTestRunner({
           const parts = emit.mock.calls
             .flatMap(([messages]) => [messages].flat())
             .filter(({ name }) => name === PART_CHANGED_EVENT)
-            .map(({ data }) => (data as { part_id: string }).part_id);
+            .flatMap(({ data }) => (data as { part_ids: string[] }).part_ids);
           emit.mockClear();
           return parts;
         };
@@ -1600,6 +1601,28 @@ medusaIntegrationTestRunner({
         await runImport();
 
         expect((await page('HU816X'))?.offers).toEqual([]);
+      });
+
+      it('keeps the offers and flags of unlisted articles while the catalogue is still being crawled', async () => {
+        offerHu816x(
+          intercars,
+          { article_id: 'IC-11', brand: 'MANN-FILTER', category: 'IC-OIL' },
+          { cost_price: 1000, quantity: 1, lead_time_days: 0 },
+        );
+        await runImport();
+        intercars.articles.length = 0;
+        intercars.complete = false;
+
+        await runImport();
+
+        const flagged = (
+          await api.get(
+            '/admin/part-identifiers?source_missing=true&q=HU816X',
+            adminHeaders,
+          )
+        ).data.part_identifiers;
+        expect((await page('HU816X'))?.offers).toHaveLength(1);
+        expect(flagged).toEqual([]);
       });
 
       it('flags a Part gone from a readable page while another page is unreadable, sparing only the Part of that page', async () => {

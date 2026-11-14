@@ -868,12 +868,16 @@ medusaIntegrationTestRunner({
         expect(
           [...first.articles, ...second.articles].map(({ number }) => number),
         ).toEqual(['C 30 005', 'HU 816 x']);
+        expect(first.complete).toBe(true);
         expect(last).toEqual({
           articles: [],
           next: null,
           unreadable: [],
           not_in_scope: 0,
+          complete: false,
         });
+        await store.finish(mannFilter.key, new Date(START + 1000));
+        expect((await adapter.listCatalogue(second.next)).complete).toBe(true);
         expect(await adapter.quote(['HU816X_MANN-FILTER'])).toEqual([]);
       });
 

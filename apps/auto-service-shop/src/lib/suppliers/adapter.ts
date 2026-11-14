@@ -58,6 +58,7 @@ export const cataloguePageSchema = z.object({
   unreadable: z.array(unreadablePageSchema).default([]),
   not_in_scope: z.number().int().nonnegative().default(0),
   next: z.string().nullable(),
+  complete: z.boolean().default(true),
 });
 
 export const supplierQuoteSchema = z.object({

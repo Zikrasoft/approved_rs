@@ -612,6 +612,7 @@ export async function importSupplier(
     return false;
   };
   const unreadableUrls = new Set<string>();
+  let complete = true;
   let reported: Promise<unknown> = Promise.resolve();
   const report = () =>
     (reported = reported.then(() => onProgress?.(structuredClone(summary))));
@@ -619,6 +620,7 @@ export async function importSupplier(
 
   for (let cursor: string | null = null; ;) {
     const page = cataloguePageSchema.parse(await adapter.listCatalogue(cursor));
+    complete &&= page.complete;
     for (const { url, reason } of page.unreadable) {
       unreadableUrls.add(url);
       context.logger.warn(
@@ -687,7 +689,11 @@ export async function importSupplier(
     cursor = page.next;
   }
 
-  if (unreadableUrls.size) {
+  if (!complete) {
+    context.logger.warn(
+      `${adapter.key}: kept the offers and flags of unlisted articles, its catalogue is still being crawled`,
+    );
+  } else if (unreadableUrls.size) {
     context.logger.warn(
       `${adapter.key}: kept the offers of unlisted articles, ${unreadableUrls.size} pages were unreadable`,
     );
@@ -709,6 +715,7 @@ export async function importSupplier(
     adapter.key,
     [...state.listedBrandNumbers],
     [...unreadableUrls],
+    complete,
   );
   await emitIndexChanges(scope, { partIds: state.changedPartIds });
   return summary;

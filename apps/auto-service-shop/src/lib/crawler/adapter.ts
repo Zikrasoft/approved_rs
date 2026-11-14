@@ -41,14 +41,16 @@ export const crawledSupplierAdapter = (
         unreadable.push({ url, reason: errorMessage(error) });
       }
     }
+    const next =
+      snapshots.length === pageSize
+        ? snapshots[snapshots.length - 1].url
+        : null;
     return {
       articles,
       unreadable,
       not_in_scope: notInScope,
-      next:
-        snapshots.length === pageSize
-          ? snapshots[snapshots.length - 1].url
-          : null,
+      next,
+      complete: next !== null || (await store.run(site.key))?.status === 'done',
     };
   },
   quote: async () => [],

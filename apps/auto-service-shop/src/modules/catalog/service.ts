@@ -325,10 +325,10 @@ const FLAG_UNLISTED_PARTS = `
     updated_at = now()
   from listed l
   where p.id = l.id and l.missing <> l.flagged and (
-    not l.missing or case
+    not l.missing or (?::boolean and case
       when l.source_url is null then ?::boolean
       else not (l.source_url = any(?::text[]))
-    end
+    end)
   )`;
 
 const LOCK_SOURCED_VEHICLES = `
@@ -1418,11 +1418,13 @@ class CatalogModuleService extends CatalogModuleBase {
     source: string,
     listedBrandNumbers: string[],
     unreadableUrls: string[],
+    complete: boolean,
     @MedusaContext() sharedContext: Context = {},
   ): Promise<void> {
     await runBoundSql(sharedContext, FLAG_UNLISTED_PARTS, [
       listedBrandNumbers,
       source,
+      complete,
       unreadableUrls.length === 0,
       unreadableUrls,
     ]);

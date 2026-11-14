@@ -11,6 +11,7 @@ export type FakeSupplier = {
   articles: SupplierArticle[];
   unreadable: UnreadablePage[];
   notInScope: number;
+  complete: boolean;
   quotes: Map<string, Omit<SupplierQuote, 'currency'> & { currency: string }>;
   laterPages: Promise<void> | null;
   pageSize: number;
@@ -24,6 +25,7 @@ export const createFakeSupplier = (
     articles: [],
     unreadable: [],
     notInScope: 0,
+    complete: true,
     quotes: new Map(),
     laterPages: null,
     pageSize,
@@ -38,6 +40,7 @@ export const createFakeSupplier = (
           unreadable: cursor ? [] : fake.unreadable,
           not_in_scope: cursor ? 0 : fake.notInScope,
           next: end < fake.articles.length ? String(end) : null,
+          complete: fake.complete,
         };
       },
       quote: async (articleIds) =>
