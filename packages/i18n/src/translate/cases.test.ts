@@ -99,6 +99,13 @@ describe('hashSource', () => {
     );
   });
 
+  it('changes when only an answer in a list extra changes', () => {
+    const faq = (answer: string) => [{ question: 'Сколько?', answer }];
+    expect(hashSource({ ...RU_CASE, faq: faq('Час.') }, ['faq'])).not.toBe(
+      hashSource({ ...RU_CASE, faq: faq('Два.') }, ['faq']),
+    );
+  });
+
   it('changes when only an extra value changes', () => {
     expect(hashSource({ ...RU_CASE, car: 'A' }, ['car'])).not.toBe(
       hashSource({ ...RU_CASE, car: 'B' }, ['car']),
@@ -450,6 +457,33 @@ describe('extraFields', () => {
       (frontmatterOf(file).translations as Record<string, { car: string }>).en
         ?.car,
     ).toBe('Peugeot 208');
+  });
+
+  it('translates a list extra field item by item', async () => {
+    stubTranslate((text) => `t:${text}`);
+    const faq = [{ question: 'Сколько?', answer: 'Час.' }];
+    const file = caseFile('oil', { title: RU_CASE.title, faq });
+    await translator(['faq']).processFile(file, 'key', {});
+
+    expect(sentPayloads()[0]).toMatchObject({
+      'faq[0].question': 'Сколько?',
+      'faq[0].answer': 'Час.',
+    });
+    expect(frontmatterOf(file)).toMatchObject({
+      translations: {
+        en: { faq: [{ question: 't:Skoljko?', answer: 't:Cas.' }] },
+      },
+      translatedFrom: hashSource({ ...RU_CASE, faq }, ['faq']),
+    });
+  });
+
+  it('ignores an empty list extra field', async () => {
+    stubTranslate((text) => `t:${text}`);
+    const file = caseFile('oil', { title: RU_CASE.title, faq: [] });
+    await translator(['faq']).processFile(file, 'key', {});
+    expect(
+      (frontmatterOf(file).translations as Record<string, object>).en,
+    ).not.toHaveProperty('faq');
   });
 
   it('rejects a response that omits an extra field', async () => {

@@ -16,4 +16,12 @@ describe('Faq', () => {
     expect((await list({ class: '' })).classList.contains('mt-8')).toBe(false);
     expect((await list()).textContent).toContain('Сколько стоит?');
   });
+
+  it('opens from anywhere on the card header, a tap target taller than 44px', async () => {
+    const card = (await list()).querySelector('details')!;
+    const summary = card.querySelector('summary')!;
+
+    expect(card.className.split(/\s+/)).not.toContain('p-5');
+    expect(summary.className.split(/\s+/)).toContain('p-5');
+  });
 });

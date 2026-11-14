@@ -1,3 +1,4 @@
+import { paginate } from '@podbor/site-kit/pagination';
 import {
   enrichmentGaps,
   generationOf,
@@ -437,6 +438,66 @@ export const makeHubsFrom = oncePerSnapshot(
   },
 );
 
+export type MakePartsEntry = {
+  make: Make;
+  parts: number;
+  hub: boolean;
+  categories: Category[];
+};
+
+export const makePartsFrom = oncePerSnapshot(
+  'makeParts',
+  function makeParts(snapshot: CatalogueSnapshot): MakePartsEntry[] {
+    const { fits, cars, pagesByPart, retired, categoryById } = snapshot;
+    const byMake = new Map<
+      string,
+      { make: Make; parts: Map<string, Category | null> }
+    >();
+    const add = (
+      vehicle: Vehicle,
+      partId: string,
+      category: Category | null,
+    ) => {
+      const { make } = vehicle.model.chassis.series;
+      const held = byMake.get(make.slug) ?? { make, parts: new Map() };
+      byMake.set(make.slug, held);
+      held.parts.set(partId, category);
+    };
+    for (const { vehicle, part_id } of fits) {
+      const pages = pagesByPart.get(part_id);
+      if (pages && !retired(pages[0].part)) {
+        add(
+          vehicle,
+          part_id,
+          categoryById.get(pages[0].part.category_id ?? '') ?? null,
+        );
+      }
+    }
+    for (const { vehicle, matches } of cars) {
+      for (const { category, parts } of matches) {
+        parts.forEach(({ part }) => add(vehicle, part.id, category));
+      }
+    }
+    const hubs = new Set(makeHubsFrom(snapshot).map(({ make }) => make.slug));
+    return [...byMake.values()]
+      .map(({ make, parts }) => {
+        const counts = new Map<Category, number>();
+        for (const category of parts.values()) {
+          if (category) counts.set(category, (counts.get(category) ?? 0) + 1);
+        }
+        return {
+          make,
+          parts: parts.size,
+          hub: hubs.has(make.slug),
+          categories: [...counts.entries()]
+            .toSorted((a, b) => b[1] - a[1])
+            .map(([category]) => category),
+        };
+      })
+      .toSorted((a, b) => byName(a.make.name, b.make.name));
+  },
+);
+
 export const cataloguePagesFrom = oncePerSnapshot(
   'cataloguePages',
   function cataloguePages(snapshot: CatalogueSnapshot): CataloguePages {
@@ -467,13 +528,11 @@ export type CategoryListing = {
 export function categoryListings({
   pages,
 }: CategoryPageEntry): CategoryListing[] {
-  const count = Math.max(1, Math.ceil(pages.length / CATEGORY_PAGE_SIZE));
-  return Array.from({ length: count }, (_, index) => ({
-    number: index + 1,
-    count,
-    pages: pages.slice(
-      index * CATEGORY_PAGE_SIZE,
-      (index + 1) * CATEGORY_PAGE_SIZE,
-    ),
-  }));
+  return paginate(pages, CATEGORY_PAGE_SIZE).map(
+    ({ number, count, items }) => ({
+      number,
+      count,
+      pages: items,
+    }),
+  );
 }

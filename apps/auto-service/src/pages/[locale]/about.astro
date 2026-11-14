@@ -110,15 +110,19 @@ const photo = await panelPhoto({
           </div>
           <div class="flex flex-col gap-5">
             <p class="text-lg leading-relaxed font-semibold text-ink">
-              {makes.join(', ')}
+              {makes.map((make, index) => (
+                <>
+                  {index > 0 && ', '}
+                  <a
+                    href={PathBuilder.carsMake(locale, make.slug)}
+                    class="link-underlined"
+                  >
+                    {make.name}
+                  </a>
+                </>
+              ))}
             </p>
             <p class="flex flex-wrap gap-x-6 gap-y-1">
-              <a
-                href={PathBuilder.bmw(locale)}
-                class="link-underlined inline-flex min-h-11 items-center font-semibold text-ink"
-              >
-                {pages.bmw.heading}
-              </a>
               <a
                 href={PathBuilder.works(locale)}
                 class="link-underlined inline-flex min-h-11 items-center font-semibold text-ink"

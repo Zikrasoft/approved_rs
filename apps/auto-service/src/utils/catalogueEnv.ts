@@ -16,10 +16,13 @@ import {
   cataloguePagesFrom,
   categoryPagesFrom,
   makeHubsFrom,
+  makePartsFrom,
   type CategoryPageEntry,
   type MakeHubEntry,
+  type MakePartsEntry,
   type PartPageEntry,
 } from './catalogueSnapshot';
+import { makeDrift } from './makes';
 
 const catalogueEnvKeys = [
   'MEDUSA_BACKEND_URL',
@@ -194,6 +197,9 @@ async function loadSnapshot(env: CatalogueEnv) {
     return null;
   }
   const snapshot = await catalogue.snapshot();
+  makeDrift(
+    snapshot.vehicles.map((vehicle) => vehicle.model.chassis.series.make),
+  ).forEach((drift) => console.warn(drift));
   const built = snapshot.entries.length;
   const shrinkAllowed = env.CATALOGUE_SHRINK_ALLOWED === 'true';
   const shrunk = !shrinkAllowed && built < live * SHRINK_FLOOR;
@@ -269,6 +275,13 @@ export async function makeHubsForBuild(
 ): Promise<MakeHubEntry[]> {
   const snapshot = await snapshotForBuild(env);
   return snapshot ? makeHubsFrom(snapshot) : [];
+}
+
+export async function makePartsForBuild(
+  env = siteEnv(),
+): Promise<MakePartsEntry[]> {
+  const snapshot = await snapshotForBuild(env);
+  return snapshot ? makePartsFrom(snapshot) : [];
 }
 
 export async function redirectsForBuild(

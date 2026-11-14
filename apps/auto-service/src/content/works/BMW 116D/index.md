@@ -1,6 +1,7 @@
 ---
 title: 'BMW 116d: антифриз, опора двигателя и заслонка EGR'
 car: BMW 116d
+make: bmw
 year: 2021
 servicesApplied:
   - diagnostics

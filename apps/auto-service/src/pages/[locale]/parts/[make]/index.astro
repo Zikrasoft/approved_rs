@@ -1,5 +1,8 @@
 ---
 import LinkRow from '@/components/LinkRow.astro';
+import Icon from '@/components/Icon.astro';
+import { withPlaceholder } from '@podbor/i18n';
+import { makeName } from '@/utils/makes';
 import { translated } from '@podbor/catalog-contract';
 import { seriesName } from '@/utils/carName';
 import Shell from '@/layouts/Shell.astro';
@@ -65,5 +68,20 @@ const series = hub.series
         ))
       }
     </ul>
+    {
+      makeName(make.slug) && (
+        <a
+          href={PathBuilder.carsMake(locale, make.slug)}
+          class="link-underlined inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-semibold text-ink"
+        >
+          {withPlaceholder(
+            content(locale).pages.make.headingTemplate,
+            'make',
+            make.name,
+          )}
+          <Icon name="chevronRight" size={14} />
+        </a>
+      )
+    }
   </section>
 </Shell>

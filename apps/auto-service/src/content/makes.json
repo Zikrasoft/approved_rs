@@ -1,0 +1,122 @@
+[
+  {
+    "slug": "alpina",
+    "name": "Alpina"
+  },
+  {
+    "slug": "audi",
+    "name": "Audi"
+  },
+  {
+    "slug": "bmw",
+    "name": "BMW"
+  },
+  {
+    "slug": "chevrolet",
+    "name": "Chevrolet"
+  },
+  {
+    "slug": "chrysler",
+    "name": "Chrysler"
+  },
+  {
+    "slug": "citroen",
+    "name": "Citroën"
+  },
+  {
+    "slug": "cupra",
+    "name": "Cupra"
+  },
+  {
+    "slug": "dodge",
+    "name": "Dodge"
+  },
+  {
+    "slug": "ds",
+    "name": "DS"
+  },
+  {
+    "slug": "fiat",
+    "name": "Fiat"
+  },
+  {
+    "slug": "ford",
+    "name": "Ford"
+  },
+  {
+    "slug": "honda",
+    "name": "Honda"
+  },
+  {
+    "slug": "kia",
+    "name": "Kia"
+  },
+  {
+    "slug": "lamborghini",
+    "name": "Lamborghini"
+  },
+  {
+    "slug": "land-rover",
+    "name": "Land Rover"
+  },
+  {
+    "slug": "ldv",
+    "name": "LDV"
+  },
+  {
+    "slug": "lexus",
+    "name": "Lexus"
+  },
+  {
+    "slug": "mercedes-benz",
+    "name": "Mercedes-Benz"
+  },
+  {
+    "slug": "mitsubishi",
+    "name": "Mitsubishi"
+  },
+  {
+    "slug": "opel",
+    "name": "Opel"
+  },
+  {
+    "slug": "peugeot",
+    "name": "Peugeot"
+  },
+  {
+    "slug": "renault",
+    "name": "Renault"
+  },
+  {
+    "slug": "saab",
+    "name": "Saab"
+  },
+  {
+    "slug": "seat",
+    "name": "SEAT"
+  },
+  {
+    "slug": "skoda",
+    "name": "Škoda"
+  },
+  {
+    "slug": "ssangyong",
+    "name": "SsangYong"
+  },
+  {
+    "slug": "toyota",
+    "name": "Toyota"
+  },
+  {
+    "slug": "vauxhall",
+    "name": "Vauxhall"
+  },
+  {
+    "slug": "volkswagen",
+    "name": "Volkswagen"
+  },
+  {
+    "slug": "volvo",
+    "name": "Volvo"
+  }
+]

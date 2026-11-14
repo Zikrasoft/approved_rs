@@ -1,4 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { withPlaceholder } from '@podbor/i18n';
+import { content } from '@/i18n/content';
 import { render } from '@/components/renderAstro';
 import type { MakeHubEntry } from '@/utils/catalogueSnapshot';
 import MakePage from './index.astro';
@@ -28,5 +30,45 @@ describe('the make hub', () => {
     ].map((link) => link.textContent?.trim().split('\n')[0]);
 
     expect(labels).toEqual(['BMW 1', 'BMW 3 GT']);
+  });
+
+  const hubOf = (hubMake: { slug: string; name: string }, locale = 'ru') =>
+    render(MakePage, {
+      path: `/${locale}/parts/${hubMake.slug}/`,
+      params: { locale, make: hubMake.slug },
+      props: {
+        hub: {
+          make: hubMake,
+          series: [series('1', '1')],
+          parts: 3,
+        } as unknown as MakeHubEntry,
+      },
+    });
+
+  it.each(['ru', 'sr', 'en'] as const)(
+    'links back to the Make page in %s',
+    async (locale) => {
+      const page = await hubOf(make, locale);
+
+      expect(
+        page
+          .querySelector(`a[href="/${locale}/cars/bmw/"]`)
+          ?.textContent?.trim(),
+      ).toBe(
+        withPlaceholder(
+          content(locale).pages.make.headingTemplate,
+          'make',
+          'BMW',
+        ),
+      );
+    },
+  );
+
+  it('links no Make page for a Make the exported list lacks', async () => {
+    const page = await hubOf({ slug: 'tesla', name: 'Tesla' });
+
+    expect(
+      page.querySelector('a[href^="/ru/cars/"]:not([href="/ru/cars/"])'),
+    ).toBeNull();
   });
 });

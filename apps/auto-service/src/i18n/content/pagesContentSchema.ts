@@ -158,20 +158,39 @@ export const pagesContentSchema = z
           .strict(),
       })
       .strict(),
-    bmw: z
+    make: z
       .object({
-        metaTitle: z.string(),
-        metaDescription: z.string(),
-        eyebrow: z.string(),
-        heading: z.string(),
-        lead: z.string(),
-        trustHeading: z.string(),
-        trust: z.array(z.string()),
-        worksHeading: z.string(),
-        ctaEyebrow: z.string(),
-        ctaHeading: z.string(),
+        metaTitleTemplate: z.string().includes('{make}'),
+        metaDescriptionTemplate: z.string().includes('{make}'),
+        headingTemplate: z.string().includes('{make}'),
+        leadTemplate: z.string().includes('{make}'),
+        servicesHeadingTemplate: z.string().includes('{make}'),
+        partsHeadingTemplate: z.string().includes('{make}'),
+        partsHubTemplate: z.string().includes('{make}'),
+        worksHeadingTemplate: z.string().includes('{make}'),
+        worksAllTemplate: z.string().includes('{make}'),
+        faqHeadingTemplate: z.string().includes('{make}'),
+        articlesHeadingTemplate: z.string().includes('{make}'),
+        ctaHeadingTemplate: z.string().includes('{make}'),
         ctaBody: z.string(),
         ctaCommentPlaceholder: z.string(),
+      })
+      .strict(),
+    cars: z
+      .object({
+        navLabel: z.string(),
+        metaTitle: z.string(),
+        metaDescription: z.string(),
+        heading: z.string(),
+        lead: z.string(),
+        pageName: z.string().includes('{page}'),
+        pagination: z.string(),
+        searchLabel: z.string(),
+        searchPlaceholder: z.string(),
+        noMatch: z.string(),
+        empty: z.string(),
+        ctaHeading: z.string(),
+        ctaBody: z.string(),
       })
       .strict(),
   })

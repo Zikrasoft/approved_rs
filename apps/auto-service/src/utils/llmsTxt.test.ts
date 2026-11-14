@@ -2,12 +2,62 @@ import { describe, it, expect, vi } from 'vitest';
 import { mapPlaceUrl } from '@podbor/site-kit';
 
 vi.mock('astro:content', () => ({
-  getCollection: vi.fn().mockResolvedValue([
+  getCollection: vi.fn(async (collection: string) =>
+    collection === 'articles' ? articles : works,
+  ),
+}));
+
+const { articles, works } = vi.hoisted(() => ({
+  articles: [
+    {
+      id: 'oil-change',
+      body: 'Текст.',
+      data: {
+        title: 'Когда менять масло',
+        lead: 'Коротко о сроках.',
+        published: true,
+        overview: false,
+        faq: [],
+        date: new Date('2026-03-01'),
+        translations: {
+          sr: { title: 'Kada menjati ulje', body: 'Tekst.', lead: 'Ukratko.' },
+        },
+      },
+    },
+    {
+      id: 'bmw',
+      body: 'Обзор.',
+      data: {
+        title: 'Обзор BMW',
+        lead: 'Про BMW.',
+        published: true,
+        overview: true,
+        make: 'bmw',
+        faq: [],
+        date: new Date('2026-04-01'),
+      },
+    },
+    {
+      id: 'seat-dsg',
+      body: 'Текст.',
+      data: {
+        title: 'DSG на SEAT',
+        lead: 'Про DSG.',
+        published: true,
+        overview: false,
+        make: 'seat',
+        faq: [],
+        date: new Date('2026-02-01'),
+      },
+    },
+  ],
+  works: [
     {
       id: 'bmw-x5',
       body: 'Телом на русском.',
       data: {
         title: 'BMW X5 — плёнка PPF',
+        make: 'bmw',
         published: true,
         image: { src: '/image.jpg' },
         date: new Date('2026-01-01'),
@@ -23,7 +73,7 @@ vi.mock('astro:content', () => ({
         date: new Date('2026-02-01'),
       },
     },
-  ]),
+  ],
 }));
 
 const { generateLlmsTxt } = await import('./llmsTxt');
@@ -63,6 +113,41 @@ describe('generateLlmsTxt', () => {
 
   it('falls back to the Russian title when a locale has no translation', async () => {
     expect(await generateLlmsTxt('en')).toContain('[BMW X5 — плёнка PPF]');
+  });
+
+  it('links a Make page for each Make with a Work or an Article, in every locale', async () => {
+    for (const locale of SUPPORTED_LOCALES) {
+      const heading = content(locale).pages.make.headingTemplate.replace(
+        '{make}',
+        'SEAT',
+      );
+      const body = await generateLlmsTxt(locale);
+      expect(body).toContain(
+        `[${heading}](https://carlab.rs/${locale}/cars/seat/)`,
+      );
+      expect(body).toContain(`](https://carlab.rs/${locale}/cars/bmw/)`);
+      expect(body).not.toContain('/cars/audi/');
+    }
+  });
+
+  it('lists the Make pages under the /cars/ index, in every locale', async () => {
+    for (const locale of SUPPORTED_LOCALES) {
+      const { cars } = content(locale).pages;
+      const body = await generateLlmsTxt(locale);
+      const section = body.slice(body.indexOf(`## ${cars.navLabel}\n`));
+      const lines = section.split('\n## ')[0].split('\n').filter(Boolean);
+
+      expect(lines[1]).toBe(
+        `- [${cars.heading}](https://carlab.rs/${locale}/cars/)`,
+      );
+      expect(lines.filter((line) => line.includes('/cars/'))).toHaveLength(3);
+    }
+  });
+
+  it('names a Make page by its overview when it has one', async () => {
+    expect(await generateLlmsTxt('ru')).toContain(
+      '[Обзор BMW](https://carlab.rs/ru/cars/bmw/)',
+    );
   });
 
   it('"other languages" links to the other locales, not the current one', async () => {
@@ -262,6 +347,17 @@ describe('generateLlmsTxt', () => {
     expect(body).not.toContain('https://carlab.rs/sr/parts/bmw/');
   });
 
+  it('links the Make page of a Make with Parts and no Work', async () => {
+    const bmwWork = works.find(({ id }) => id === 'bmw-x5')!;
+    bmwWork.data.make = 'audi';
+    const body = await withBackend('true').finally(() => {
+      bmwWork.data.make = 'bmw';
+    });
+
+    expect(body).toContain('](https://carlab.rs/sr/cars/bmw/)');
+    expect(body).toContain('](https://carlab.rs/sr/cars/audi/)');
+  });
+
   it('leaves the page of every Make out while no Make has enough Parts for a page', async () => {
     const body = await withBackend('true', 'sr', []);
 
@@ -292,9 +388,27 @@ describe('generateLlmsTxt', () => {
     expect(ru).not.toMatch(/корзин|наличи/);
   });
 
-  it('links the BMW landing page', async () => {
+  it('lists the blog and each Article by its localized title and lead, without overviews', async () => {
     const body = await generateLlmsTxt('sr');
-    expect(body).toContain(`](https://carlab.rs/sr/bmw/)`);
+
+    expect(body).toContain(
+      `[${content('sr').blog.heading}](https://carlab.rs/sr/blog/)`,
+    );
+    expect(body).toContain(
+      '- [Kada menjati ulje](https://carlab.rs/sr/blog/oil-change/): Ukratko.',
+    );
+    expect(body).not.toContain('/sr/blog/bmw/');
+  });
+
+  it('leaves the blog out while it lists no Article', async () => {
+    const all = articles.splice(0);
+    articles.push(...all.filter(({ data }) => data.overview));
+    const body = await generateLlmsTxt('ru').finally(() =>
+      articles.splice(0, articles.length, ...all),
+    );
+
+    expect(body).not.toContain('https://carlab.rs/ru/blog/');
+    expect(body).toContain('https://carlab.rs/ru/cars/bmw/');
   });
 
   it('describes the parts catalogue on the parts index link', async () => {

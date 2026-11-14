@@ -59,6 +59,7 @@ describe.each(SUPPORTED_LOCALES)('content for %s', (locale) => {
       content(locale).home.meta.description,
       content(locale).pages.works.metaDescription,
       content(locale).pages.contact.metaDescription,
+      content(locale).blog.metaDescription,
       ...SERVICE_SLUGS.map((slug) => services[slug].metaDescription),
     ];
     descriptions.forEach((description) => {

@@ -1,0 +1,50 @@
+---
+import { Image } from 'astro:assets';
+import { localizedArticle } from '@podbor/blog/article';
+import { localeFrom } from '@/i18n/config';
+import { PathBuilder } from '@/utils/paths';
+import type { Article } from '@/utils/blog';
+import ArticleDate from './ArticleDate.astro';
+import { coverScale, coverSizes } from '@/utils/coverSizes';
+
+interface Props {
+  article: Article;
+  eager?: boolean;
+  heading?: 'h2' | 'h3';
+}
+
+const { article, eager = false, heading: Heading = 'h2' } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const { title, lead } = localizedArticle(article, locale);
+---
+
+<a
+  href={PathBuilder.blogArticle(locale, article.id)}
+  data-article-card
+  class="tile group"
+>
+  <Image
+    src={article.data.image}
+    alt=""
+    widths={[360, 560, 760, 1080]}
+    sizes={coverSizes(
+      '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, calc(100vw - 2.5rem)',
+      coverScale(article.data.image, 3 / 2),
+    )}
+    quality={68}
+    loading={eager ? 'eager' : 'lazy'}
+    class="aspect-[3/2] w-full object-cover"
+  />
+  <div class="flex flex-1 flex-col gap-2 border-t border-line p-4 sm:p-5">
+    <ArticleDate date={article.data.date} class="text-xs text-muted" />
+    <Heading
+      class:list={[
+        'font-semibold text-ink group-hover:underline',
+        Heading === 'h2' && 'text-block',
+      ]}
+    >
+      {title}
+    </Heading>
+    <p class="line-clamp-3 text-sm leading-relaxed text-muted">{lead}</p>
+  </div>
+</a>

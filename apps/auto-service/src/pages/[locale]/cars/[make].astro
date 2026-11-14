@@ -1,0 +1,164 @@
+---
+import { getCollection } from 'astro:content';
+import { withPlaceholder } from '@podbor/i18n';
+import { translated } from '@podbor/catalog-contract';
+import { makePartsForBuild } from '@/utils/catalogueEnv';
+import { localizedArticle } from '@podbor/blog/article';
+import { faqPageSchema, safeMarkdown } from '@podbor/site-kit';
+import Shell from '@/layouts/Shell.astro';
+import Icon from '@/components/Icon.astro';
+import PageHero from '@/components/PageHero.astro';
+import ServiceList from '@/components/ServiceList.astro';
+import WorkSnapRow from '@/components/WorkSnapRow.astro';
+import Faq from '@/components/Faq.astro';
+import ArticleCard from '@/components/ArticleCard.astro';
+import FinalCta from '@/components/FinalCta.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { PathBuilder, withLocales } from '@/utils/paths';
+import { SITE_NAME } from '@/utils/constants';
+import {
+  overviewConflicts,
+  workshopMakePages,
+  type WorkshopMakePage,
+} from '@/utils/works';
+
+export async function getStaticPaths() {
+  const pages = workshopMakePages(
+    await getCollection('works'),
+    await getCollection('articles'),
+    await makePartsForBuild(),
+  );
+  overviewConflicts(pages).forEach((conflict) => console.warn(conflict));
+  return withLocales(
+    pages.map((page) => ({
+      params: { make: page.make.slug },
+      props: { page },
+    })),
+  );
+}
+
+interface Props {
+  page: WorkshopMakePage;
+}
+
+const MAX_WORKS = 6;
+const TOP_CATEGORIES = 6;
+
+const { make, works, overview, articles, parts } = Astro.props.page;
+const [catalogue] = parts;
+const locale = localeFrom(Astro.url.pathname);
+const { pages, home } = content(locale);
+const copy = pages.make;
+const named = (template: string) =>
+  withPlaceholder(template, 'make', make.name);
+const about = overview && localizedArticle(overview, locale);
+const faq = about?.faq ?? [];
+---
+
+<Shell
+  title={about
+    ? `${about.title} | ${SITE_NAME}`
+    : named(copy.metaTitleTemplate)}
+  description={about?.lead ?? named(copy.metaDescriptionTemplate)}
+  jsonLd={faq.length > 0 ? [faqPageSchema(faq)] : []}
+>
+  <PageHero
+    heading={about?.title ?? named(copy.headingTemplate)}
+    lead={about?.lead ?? named(copy.leadTemplate)}
+    crumbs={[
+      { href: PathBuilder.carsMake(locale, make.slug), label: make.name },
+    ]}
+  />
+
+  {
+    about?.body.trim() && (
+      <section data-make-overview class="wrap pt-band md:pt-band-lg">
+        <div class="prose-shop max-w-2xl" set:html={safeMarkdown(about.body)} />
+      </section>
+    )
+  }
+
+  <section class="wrap py-band md:py-band-lg">
+    <h2 class="text-section">{named(copy.servicesHeadingTemplate)}</h2>
+    <div class="mt-5 md:mt-6">
+      <ServiceList />
+    </div>
+  </section>
+
+  {
+    catalogue && (
+      <section class="wrap pb-band">
+        <h2 class="text-section">{named(copy.partsHeadingTemplate)}</h2>
+        <ul class="mt-5 flex flex-wrap gap-2 md:mt-6">
+          {catalogue.categories.slice(0, TOP_CATEGORIES).map((category) => (
+            <li class="max-w-full">
+              <a
+                href={PathBuilder.partsCategory(locale, category.slug)}
+                class="inline-flex min-h-11 max-w-full items-center rounded-pill border border-line bg-paper px-4 py-2 text-sm text-ink transition-colors hover:border-ink motion-reduce:transition-none"
+              >
+                {translated(category, 'name', locale)}
+              </a>
+            </li>
+          ))}
+        </ul>
+        {catalogue.hub && (
+          <a
+            href={PathBuilder.partsMake(locale, make.slug)}
+            class="link-underlined mt-5 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-ink"
+          >
+            {named(copy.partsHubTemplate)}
+            <Icon name="chevronRight" size={14} />
+          </a>
+        )}
+      </section>
+    )
+  }
+
+  {
+    works.length > 0 && (
+      <section class="wrap pb-band">
+        <h2 class="text-section">{named(copy.worksHeadingTemplate)}</h2>
+        <WorkSnapRow works={works.slice(0, MAX_WORKS)} class="mt-5 md:mt-6" />
+        <a
+          href={PathBuilder.worksOfMake(locale, make.slug)}
+          class="link-underlined mt-5 inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-ink"
+        >
+          {named(copy.worksAllTemplate)}
+          <Icon name="chevronRight" size={14} />
+        </a>
+      </section>
+    )
+  }
+
+  {
+    faq.length > 0 && (
+      <section data-make-faq class="wrap pb-band">
+        <h2 class="text-section">{named(copy.faqHeadingTemplate)}</h2>
+        <Faq items={faq} class="mt-5 max-w-3xl md:mt-6" />
+      </section>
+    )
+  }
+
+  {
+    articles.length > 0 && (
+      <section data-make-articles class="wrap pb-band">
+        <h2 class="text-section">{named(copy.articlesHeadingTemplate)}</h2>
+        <ul class="mt-5 grid gap-4 md:mt-6 md:grid-cols-2 lg:grid-cols-3">
+          {articles.map((article) => (
+            <li>
+              <ArticleCard article={article} heading="h3" />
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  <FinalCta
+    eyebrow={home.finalCta.eyebrow}
+    heading={named(copy.ctaHeadingTemplate)}
+    body={copy.ctaBody}
+    commentPlaceholder={copy.ctaCommentPlaceholder}
+  />
+</Shell>

@@ -38,6 +38,7 @@ translations:
       Zato na velikom servisu treba proveriti ne samo zupčasti kaiš već i lanac bregastih osovina, kao i poznate specifičnosti konkretnog motora.
     car: Peugeot 308 SW
 car: Peugeot 308 SW
+make: peugeot
 year: 2024
 servicesApplied:
   - diagnostics

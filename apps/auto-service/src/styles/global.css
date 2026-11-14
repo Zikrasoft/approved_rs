@@ -190,6 +190,10 @@
   background-color: var(--color-card);
 }
 
+@utility tile {
+  @apply card flex h-full flex-col overflow-hidden transition-colors duration-150 hover:border-ink;
+}
+
 @utility eyebrow {
   width: fit-content;
   border-radius: var(--radius-pill);

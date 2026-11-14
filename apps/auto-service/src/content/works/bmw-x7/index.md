@@ -1,6 +1,7 @@
 ---
 title: BMW X7
 car: BMW X7
+make: bmw
 year: 2019
 servicesApplied:
   - diagnostics

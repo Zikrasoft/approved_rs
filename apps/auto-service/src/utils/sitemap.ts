@@ -3,8 +3,14 @@ const PART_PAGE_SEGMENT = '/parts/p/';
 export function sitemapFilter(
   site: string,
   partPages: { slug: string; indexable: boolean }[] = [],
+  blogListed = true,
 ): (page: string) => boolean {
-  const excluded = ['/thanks/', '/parts/cart/', '/admin/'];
+  const excluded = [
+    '/thanks/',
+    '/parts/cart/',
+    '/admin/',
+    ...(blogListed ? [] : ['/blog/']),
+  ];
   const indexable = new Set(
     partPages.filter((page) => page.indexable).map(({ slug }) => slug),
   );

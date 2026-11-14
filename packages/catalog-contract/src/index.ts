@@ -15,3 +15,4 @@ export * from './enrichment.ts';
 export * from './redirects.ts';
 export * from './placePages.ts';
 export * from './slug.ts';
+export * from './makeList.ts';
