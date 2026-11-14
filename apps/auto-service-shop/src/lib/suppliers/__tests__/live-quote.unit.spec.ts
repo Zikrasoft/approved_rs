@@ -73,7 +73,7 @@ describe('liveOffers', () => {
       expect.objectContaining({ id: 'offer_1', cost_price: 2000 }),
     );
     expect(emit).toHaveBeenCalledWith([
-      { name: 'parts.part.changed', data: { part_id: 'part_1' } },
+      { name: 'parts.part.changed', data: { part_ids: ['part_1'] } },
     ]);
   });
 

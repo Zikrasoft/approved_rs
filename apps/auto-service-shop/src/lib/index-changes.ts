@@ -25,6 +25,7 @@ export async function emitIndexChanges(
     deletedIdentifierIds = [],
   }: { partIds?: Iterable<string>; deletedIdentifierIds?: string[] },
 ): Promise<void> {
+  const changed = [...new Set(partIds)];
   const messages = [
     ...(deletedIdentifierIds.length
       ? [
@@ -34,14 +35,13 @@ export async function emitIndexChanges(
           },
         ]
       : []),
-    ...[...new Set(partIds)].map((part_id) => ({
-      name: PART_CHANGED_EVENT,
-      data: { part_id },
-    })),
+    ...(changed.length
+      ? [{ name: PART_CHANGED_EVENT, data: { part_ids: changed } }]
+      : []),
   ];
   if (messages.length && !(await hasNoActiveVersion(scope))) {
     await scope
       .resolve(Modules.EVENT_BUS)
-      .emit<{ part_id?: string; ids?: string[] }>(messages);
+      .emit<{ part_ids?: string[]; ids?: string[] }>(messages);
   }
 }

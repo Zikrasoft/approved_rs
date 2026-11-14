@@ -25,13 +25,13 @@ describe('emitIndexChanges', () => {
     expect(emit).not.toHaveBeenCalled();
   });
 
-  it('emits each changed Part once the index is live', async () => {
+  it('emits the changed Parts in one event, each once, once the index is live', async () => {
     const { scope, emit } = scopeWith('ready');
 
     await emitIndexChanges(scope, { partIds: ['part_1', 'part_1'] });
 
     expect(emit).toHaveBeenCalledWith([
-      { name: 'parts.part.changed', data: { part_id: 'part_1' } },
+      { name: 'parts.part.changed', data: { part_ids: ['part_1'] } },
     ]);
   });
 });

@@ -59,7 +59,7 @@ const emitPartChangedStep = createStep(
     const eventBus = container.resolve(Modules.EVENT_BUS);
     await eventBus.emit({
       name: PART_CHANGED_EVENT,
-      data: { part_id: identifier.part_id },
+      data: { part_ids: [identifier.part_id] },
     });
 
     return new StepResponse(identifier.part_id);

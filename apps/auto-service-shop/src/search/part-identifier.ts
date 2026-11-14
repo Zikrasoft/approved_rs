@@ -400,7 +400,9 @@ export default defineSearchIndex({
       const { data } = await container.query.graph({
         entity: 'part_identifier',
         fields: ['id'],
-        filters: { part_id: partChangedEventSchema.parse(event.data).part_id },
+        filters: {
+          part_id: partChangedEventSchema.parse(event.data).part_ids,
+        },
       });
       return data.map(({ id }: { id: string }) => id);
     },

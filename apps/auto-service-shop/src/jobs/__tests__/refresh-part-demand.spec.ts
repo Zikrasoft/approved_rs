@@ -35,7 +35,7 @@ medusaIntegrationTestRunner({
           emit.mock.calls
             .flatMap(([messages]) => [messages].flat())
             .filter(({ name }) => name === PART_CHANGED_EVENT)
-            .map(({ data }) => (data as { part_id: string }).part_id)
+            .flatMap(({ data }) => (data as { part_ids: string[] }).part_ids)
             .sort();
       };
 
