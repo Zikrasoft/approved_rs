@@ -1,6 +1,8 @@
 #!/bin/sh
 set -eu
 
+cd "$(dirname "$0")/../.."
+
 for script in apps/*/scripts/redirects.ts; do
   node --experimental-strip-types "$script"
 done
