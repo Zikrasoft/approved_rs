@@ -8,6 +8,7 @@
     "stop": "astro dev stop",
     "build": "astro build",
     "preview": "astro preview",
+    "preview:static": "python3 -m http.server ${PREVIEW_PORT:-4322} --bind 127.0.0.1 --directory .vercel/output/static",
     "astro": "astro",
     "test": "vitest run --passWithNoTests",
     "typecheck": "astro check",

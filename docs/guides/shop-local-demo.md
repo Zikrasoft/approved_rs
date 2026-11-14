@@ -250,7 +250,7 @@ turn the preview on, `/api/shop-preview` without a token to turn it off. See
 ```bash
 set -a; . apps/auto-service/.env.local; set +a
 pnpm turbo run build --filter=@podbor/auto-service
-python3 -m http.server 4322 --bind 127.0.0.1 --directory apps/auto-service/.vercel/output/static
+pnpm --filter @podbor/auto-service preview:static
 ```
 
 `astro preview` does not run with the Vercel adapter, so the static server
