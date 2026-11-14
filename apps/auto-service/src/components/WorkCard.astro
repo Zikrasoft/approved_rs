@@ -28,10 +28,7 @@ const applied = (tags ? work.data.servicesApplied : [])
   .map((slug) => services[slug].name);
 ---
 
-<a
-  href={PathBuilder.work(locale, work.id)}
-  class="card group flex h-full flex-col overflow-hidden transition-colors duration-150 hover:border-ink"
->
+<a href={PathBuilder.work(locale, work.id)} class="tile group">
   <Image
     src={work.data.image}
     alt={title}

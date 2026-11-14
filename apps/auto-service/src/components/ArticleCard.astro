@@ -20,7 +20,7 @@ const { title, lead } = localizedArticle(article, locale);
 <a
   href={PathBuilder.blogArticle(locale, article.id)}
   data-article-card
-  class="card group flex h-full flex-col overflow-hidden transition-colors duration-150 hover:border-ink"
+  class="tile group"
 >
   <Image
     src={article.data.image}
