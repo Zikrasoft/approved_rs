@@ -33,6 +33,9 @@ export type ImportSummary = {
   missing_fields: { number: string; category: string; fields: string[] }[];
   unanswered: Problem[];
   failed: Problem[];
+  ai_answers: number;
+  ai_input_tokens: number;
+  ai_output_tokens: number;
 };
 
 export const importTally = (supplier: string) => {
@@ -52,6 +55,9 @@ export const importTally = (supplier: string) => {
     missing_fields: [],
     unanswered: [],
     failed: [],
+    ai_answers: 0,
+    ai_input_tokens: 0,
+    ai_output_tokens: 0,
   };
   const unmapped = new Map<string, { code: string; count: number }>();
   const unknownMakes = new Map<string, { make: string; count: number }>();

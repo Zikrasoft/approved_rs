@@ -1584,7 +1584,9 @@ class CatalogModuleService extends CatalogModuleBase {
         !owned.has('description') &&
         !part.description && { description: change.description }),
     };
-    const fileable = !part.category_id && !owned.has('category_id');
+    const fileable =
+      classification?.category_id !== part.category_id &&
+      !owned.has('category_id');
     const refreshable =
       Boolean(part.category_id) &&
       classification?.category_id === part.category_id &&

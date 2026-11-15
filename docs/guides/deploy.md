@@ -967,7 +967,13 @@ number gets its CI value in that script. The non-obvious parts:
   rerun or a rebuilt database asks nothing twice; changing the model or the
   prompt asks again. The prompt carries only the article's own Category, so
   editing another Category asks nothing again. A re-import refreshes the
-  attributes of a Part it filed, unless staff edited them. An answer that fails validation twice is cached as a
+  attributes of a Part it filed, unless staff edited them, and re-files a Part
+  whose supplier category now maps to another Category, with attributes read
+  afresh for it, unless staff set the Part's Category; a code mapped to no
+  Category leaves its Parts where they are. `IMPORT_AI_LIMIT` (empty means no
+  limit) stops each Supplier's Import after that many AI answers and keeps the
+  offers and flags of the articles it did not reach, for a costed trial run:
+  the report counts `ai_answers`, `ai_input_tokens` and `ai_output_tokens`. An answer that fails validation twice is cached as a
   failure too and listed in the Import report, so a rerun does not pay for it
   again. Without S3 nothing is cached. `IMPORT_CONCURRENCY` (empty means 4) is
   how many articles are asked at once; vehicle fitting still runs one article
