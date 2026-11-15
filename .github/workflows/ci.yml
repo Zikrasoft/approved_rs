@@ -25,42 +25,82 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: ./.github/actions/setup-pnpm
       - run: pnpm lint
       - run: pnpm exec prettier --check .
       - run: node --experimental-strip-types .github/scripts/yaml-content-valid.ts
       - run: node --experimental-strip-types --test .github/scripts/russian-copy-hygiene.test.ts
       - run: node --experimental-strip-types .github/scripts/russian-copy-hygiene.ts
-      - uses: ./.github/actions/setup-auto-service-shop-env
-      - run: pnpm typecheck
-      - run: pnpm test
-      - name: Shop migrations match the models
-        run: |
-          docker compose -f apps/auto-service-shop/docker-compose.test.yml exec -T postgres sh -c "dropdb -U postgres --if-exists migration_drift && createdb -U postgres migration_drift"
-          DATABASE_URL=postgres://postgres:postgres@127.0.0.1:${SHOP_TEST_DB_PORT:-55432}/migration_drift sh .github/scripts/shop-migration-drift.sh
       - run: sh .github/scripts/shop-migrations-frozen.sh
       - run: sh .github/scripts/shop-migrations-frozen.test.sh
+      - run: sh .github/scripts/check-base.test.sh
       - run: sh .github/scripts/pinned-deps.sh
       - run: sh .github/scripts/redirects-drift.sh
 
+      - id: affected
+        env:
+          TURBO_TELEMETRY_DISABLED: '1'
+          FORCE: ${{ inputs.force || false }}
+        run: |
+          set -euo pipefail
+          base=$(sh .github/scripts/check-base.sh)
+          packages=$(pnpm exec turbo run typecheck test build ${base:+"--filter=...[$base]"} --dry=json | jq -c .packages)
+          shop=false
+          if [ -z "$base" ] || jq -e 'index("@podbor/auto-service-shop")' <<<"$packages" >/dev/null \
+             || ! git diff --quiet "$base" HEAD -- infra/auto-service-shop; then
+            shop=true
+          fi
+          sites=$(jq -r '[.[] | select(. == "@podbor/approved-rs" or . == "@podbor/detailing") | ltrimstr("@podbor/")] | join(" ")' <<<"$packages")
+          echo "Affected: $packages; shop: $shop; sites: ${sites:-none}"
+          {
+            echo "base=$base"
+            echo "shop=$shop"
+            echo "sites=$sites"
+          } >>"$GITHUB_OUTPUT"
+
+      - if: steps.affected.outputs.shop == 'true'
+        uses: ./.github/actions/setup-auto-service-shop-env
       - env:
+          BASE: ${{ steps.affected.outputs.base }}
+        run: pnpm exec turbo run typecheck ${BASE:+"--filter=...[$BASE]"}
+      - env:
+          BASE: ${{ steps.affected.outputs.base }}
+        run: pnpm exec turbo run test ${BASE:+"--filter=...[$BASE]"}
+      - name: Shop migrations match the models
+        if: steps.affected.outputs.shop == 'true'
+        run: |
+          docker compose -f apps/auto-service-shop/docker-compose.test.yml exec -T postgres sh -c "dropdb -U postgres --if-exists migration_drift && createdb -U postgres migration_drift"
+          DATABASE_URL=postgres://postgres:postgres@127.0.0.1:${SHOP_TEST_DB_PORT:-55432}/migration_drift sh .github/scripts/shop-migration-drift.sh
+
+      - if: steps.affected.outputs.sites != ''
+        env:
           PUBLIC_PHONE_NUMBER: '381000000000'
           PUBLIC_WHATSAPP_NUMBER: '381000000000'
           PUBLIC_VIBER_NUMBER: '381000000000'
           PUBLIC_THREADS_CHANNEL: check
-        run: >-
-          pnpm turbo run build
-          --filter=@podbor/approved-rs --filter=@podbor/detailing
-      - run: >-
-          node --experimental-strip-types .github/scripts/contact-placement.ts
-          apps/approved-rs/dist/client apps/detailing/dist/client
+          SITES: ${{ steps.affected.outputs.sites }}
+        run: |
+          filters=()
+          dists=()
+          for site in $SITES; do
+            filters+=("--filter=@podbor/$site")
+            dists+=("apps/$site/dist/client")
+          done
+          pnpm turbo run build "${filters[@]}"
+          node --experimental-strip-types .github/scripts/contact-placement.ts "${dists[@]}"
 
-      - run: sh infra/auto-service-shop/test/scripts.test.sh
-      - run: sh infra/auto-service-shop/test/compose.test.sh
-      - if: runner.os == 'Linux'
+      - if: steps.affected.outputs.shop == 'true'
+        run: sh infra/auto-service-shop/test/scripts.test.sh
+      - if: steps.affected.outputs.shop == 'true'
+        run: sh infra/auto-service-shop/test/compose.test.sh
+      - if: steps.affected.outputs.shop == 'true' && runner.os == 'Linux'
         run: sh infra/auto-service-shop/test/logs.test.sh
-      - run: sh infra/auto-service-shop/test/crawler-role.test.sh
-      - run: sh infra/auto-service-shop/test/harden-ssh.test.sh
+      - if: steps.affected.outputs.shop == 'true'
+        run: sh infra/auto-service-shop/test/crawler-role.test.sh
+      - if: steps.affected.outputs.shop == 'true'
+        run: sh infra/auto-service-shop/test/harden-ssh.test.sh
       - run: sh .github/scripts/shop-backend-up.test.sh
       - run: sh .github/scripts/shop-ci-env.test.sh
       - run: >-
@@ -177,10 +217,7 @@ jobs:
               reason='no deployed/ tag yet'
             elif ! git merge-base --is-ancestor "$base" HEAD; then
               reason="deployed/$app ($base) is not an ancestor of HEAD"
-            elif ! git diff --quiet "$base" HEAD -- \
-                 pnpm-lock.yaml pnpm-workspace.yaml turbo.json package.json \
-                 .npmrc .node-version .pnpmfile.cjs \
-                 .github/actions/setup-pnpm/action.yml; then
+            elif sh .github/scripts/root-changed.sh "$base"; then
               reason='root build config changed'
             elif [ "$app" = auto-service-shop ] && ! git diff --quiet "$base" HEAD -- infra/auto-service-shop; then
               reason='infra/auto-service-shop changed'

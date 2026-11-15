@@ -122,6 +122,23 @@ content moved and whatever `git pull --rebase` brought in): `translate` pushes a
 the translated tree. When nothing was translated the SHA is the pushed one, which
 `check` already tested, and `verify` runs no tests at all.
 
+### What `check` tests
+
+Lint, prettier, the YAML and Russian-copy checks, pinned versions, the
+redirects drift, the migration manifest, shellcheck and actionlint run on every
+push. Typecheck, tests, the approved.rs and details.rs builds with their
+contact-placement check, and the shop's Docker Postgres, migration drift and
+`infra/auto-service-shop/test/*.test.sh` run only for what changed since the
+newest commit every app has passed CI with:
+`.github/scripts/check-base.sh` takes the merge-base of the `deployed/*` tags
+(they move only after `check` passed and the deploy finished) and the step runs
+`turbo --filter="...[<base>]"`, dependents included. The shop counts as changed
+when turbo names `@podbor/auto-service-shop` or anything under
+`infra/auto-service-shop/` moved. `check` tests everything when there is no
+`deployed/*` tag, a tag is not an ancestor of `HEAD`, the merge-base is not
+itself a deployed commit, a root build file or anything under `.github/`, the
+eslint or prettier config changed, or a `workflow_dispatch` run sets `force`.
+
 ### Not everything gets deployed
 
 A push to `main` no longer ships all three sites. The `scope` step in the `verify`
@@ -165,8 +182,8 @@ pnpm-lock.yaml  pnpm-workspace.yaml  turbo.json  package.json
 ```
 
 Any change to those ships every app whose `deployed/*` tag is older than the
-change. The list is maintained by hand — if a new file starts affecting the build,
-it has to be added there too. The rest of `.github/` is deliberately not tracked:
+change. The list lives once, in `.github/scripts/root-changed.sh`, which `check`
+reads too. If a new file starts affecting the build, it has to be added there. The rest of `.github/` is deliberately not tracked:
 otherwise any workflow edit would ship all three sites. By the same logic
 `setup-pnpm` installs the whole workspace in every job; until that measurably
 hurts, we don't introduce `pnpm install --filter`.
@@ -630,7 +647,7 @@ workflow stays green.
 
 | Job                 | `permissions`                       | Why exactly that much                                                                        |
 | ------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------- |
-| `check`             | `contents: read`                    | checkout only                                                                                |
+| `check`             | `contents: read`                    | a checkout with `fetch-depth: 0`, for the `deployed/*` tags its test scope starts from       |
 | `translate`         | `contents: write`                   | commits and pushes translations into the same branch                                         |
 | `verify`            | `contents: read`                    | a checkout with `fetch-depth: 0`; the `deployed/*` tags arrive with the history              |
 | `shop-image`        | `contents: read`, `packages: write` | pushes `ghcr.io/zikrasoft/podbor-auto-service-shop:<sha>` to GHCR                            |
