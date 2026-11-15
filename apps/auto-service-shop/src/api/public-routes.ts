@@ -6,7 +6,6 @@ import { CATALOGUE_ID_PATTERN } from '@podbor/catalog-contract';
 export const PUBLIC_ROUTE_PREFIXES = ['/store', '/auth'] as const;
 
 export const PUBLIC_ROUTES = [
-  'GET /store/catalogue-redirects',
   'GET /store/categories',
   'GET /store/fitments',
   'GET /store/offers',

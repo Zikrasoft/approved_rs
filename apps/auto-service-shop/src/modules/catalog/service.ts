@@ -39,13 +39,12 @@ import PartIdentifier, {
   type PART_IDENTIFIER_TYPES,
 } from './models/part-identifier';
 import Series from './models/series';
-import SlugRedirect, { type SlugKind } from './models/slug-redirect';
+import SlugRedirect from './models/slug-redirect';
 import Vehicle from './models/vehicle';
 import VehicleIdentifier from './models/vehicle-identifier';
 import VehicleModel from './models/vehicle-model';
 import { adminError, alreadyExists } from '../_shared/admin-error';
 import { runBoundSql } from '../_shared/bound-sql';
-import { chunksOf } from '../_shared/chunks';
 import { keysetPages } from '../_shared/keyset-pages';
 import { modelSlugOf, slugOf, vehicleSlugOf } from '../_shared/slug';
 import { nameKey } from '../_shared/keys';
@@ -66,8 +65,6 @@ import {
 } from './identifier-status';
 import {
   SLUG_COLUMNS,
-  RETIRING_DELETES,
-  scopedKind,
   slugScopeOf,
   MODELS_LEAVING_THEIR_MAKE,
   type MovedModel,
@@ -77,9 +74,6 @@ import {
   type SluggedKind,
   type SlugInput,
   type SluggedRow,
-  type Retirement,
-  type RetiringTable,
-  retirementOf,
 } from './slugs';
 
 export type Provenance = {
@@ -421,24 +415,6 @@ class CatalogModuleService extends CatalogModuleBase {
     };
   }
 
-  private async slugRetired(
-    kind: SluggedKind,
-    slug: string,
-    scopeId: string | null,
-    context: Context,
-  ): Promise<boolean> {
-    const [, retired] = await this.listAndCountSlugRedirects(
-      {
-        kind,
-        from_slug: slug,
-        ...(scopedKind(kind) && { scope_id: scopeId }),
-      },
-      { select: ['id'], take: 1 },
-      context,
-    );
-    return retired > 0;
-  }
-
   private async slugTaken(
     kind: SluggedKind,
     slug: string,
@@ -452,9 +428,7 @@ class CatalogModuleService extends CatalogModuleBase {
           ? { make_id: scopeId }
           : {};
     const live = await this.sluggedRows(kind).list({ slug, ...scope }, context);
-    return (
-      live.length > 0 || (await this.slugRetired(kind, slug, scopeId, context))
-    );
+    return live.length > 0;
   }
 
   private async baseSlug(
@@ -513,9 +487,6 @@ class CatalogModuleService extends CatalogModuleBase {
       !(await this.slugTaken(kind, slug, scope, context));
     if (row.slug !== undefined) {
       refuseReservedSection(kind, row.slug);
-      if (await this.slugRetired(kind, row.slug, scope, context)) {
-        throw slugInUse();
-      }
       return row.slug;
     }
     const base = await this.baseSlug(kind, row, context);
@@ -587,7 +558,7 @@ class CatalogModuleService extends CatalogModuleBase {
   }
 
   private async moveModel(
-    { id, slug, chassis_id, name, from_make, to_make }: MovedModel,
+    { id, slug, chassis_id, name, to_make }: MovedModel,
     context: Context,
   ): Promise<void> {
     const moved = { chassis_id, name, make_id: to_make };
@@ -600,17 +571,6 @@ class CatalogModuleService extends CatalogModuleBase {
         slug: free
           ? slug
           : await this.slugFor('model', moved, new Set(), context),
-      },
-      context,
-    );
-    await this.createSlugRedirects(
-      {
-        kind: 'model',
-        from_id: id,
-        from_slug: slug,
-        scope_id: from_make,
-        target_kind: 'model',
-        target_id: id,
       },
       context,
     );
@@ -718,65 +678,11 @@ class CatalogModuleService extends CatalogModuleBase {
       { id, slug, updated_by: provenance.updated_by },
       sharedContext,
     );
-    await this.createSlugRedirects(
-      {
-        kind,
-        from_id: id,
-        from_slug: row.slug,
-        scope_id: scope,
-        target_kind: kind,
-        target_id: id,
-        ...provenance,
-      },
-      sharedContext,
-    );
-  }
-
-  private async retireSlugs(
-    kind: SlugKind,
-    retired: Retirement[],
-    context: Context,
-    provenance: Provenance = {},
-  ): Promise<void> {
-    if (!retired.length) return;
-    const byTarget = new Map<string, Retirement[]>();
-    for (const row of retired) {
-      const key = JSON.stringify([row.target_kind, row.target_id]);
-      byTarget.set(key, [...(byTarget.get(key) ?? []), row]);
-    }
-    for (const group of byTarget.values()) {
-      const [{ target_kind, target_id }] = group;
-      await this.updateSlugRedirects(
-        {
-          selector: { target_kind: kind, target_id: group.map(({ id }) => id) },
-          data: { target_kind, target_id },
-        },
-        context,
-      );
-    }
-    if (kind === 'part') {
-      await this.deleteSlugRedirects(
-        { kind, from_slug: retired.map(({ slug }) => slug) },
-        context,
-      );
-    }
-    await this.createSlugRedirects(
-      retired.map(({ id, slug, ...rest }) => ({
-        kind,
-        from_id: id,
-        from_slug: slug,
-        ...rest,
-        ...provenance,
-      })),
-      context,
-    );
   }
 
   private mergeSteps(): MergeSteps {
     return {
       catalog: this,
-      retireSlugs: (kind, retired, context, provenance) =>
-        this.retireSlugs(kind, retired, context, provenance),
       vehicleSlugIn: async (vehicle, modelId, context) =>
         (await this.slugTaken('vehicle', vehicle.slug, modelId, context))
           ? this.slugFor(
@@ -787,10 +693,6 @@ class CatalogModuleService extends CatalogModuleBase {
             )
           : vehicle.slug,
       flush: (context) => this.flush(context),
-      purgeMake: (id, context) =>
-        CatalogModuleBase.prototype.deleteMakes.call(this, id, context),
-      purgeModel: (id, context) =>
-        CatalogModuleBase.prototype.deleteVehicleModels.call(this, id, context),
     };
   }
 
@@ -798,122 +700,10 @@ class CatalogModuleService extends CatalogModuleBase {
   async mergeMakes(
     sourceId: string,
     targetId: string,
-    provenance: Provenance,
     @MedusaContext() sharedContext: Context = {},
   ): Promise<void> {
-    await mergeMakes(
-      this.mergeSteps(),
-      sourceId,
-      targetId,
-      provenance,
-      sharedContext,
-    );
+    await mergeMakes(this.mergeSteps(), sourceId, targetId, sharedContext);
   }
-
-  private async retirementsOf(
-    table: RetiringTable,
-    ids: string[],
-    context: Context,
-  ): Promise<Retirement[]> {
-    if (table === 'part_identifier' || table === 'part') {
-      const identifiers = await this.listPartIdentifiers(
-        table === 'part' ? { part_id: ids } : { id: ids },
-        { relations: ['brand', 'part'], take: null },
-        context,
-      );
-      return identifiers.map(retirementOf.part);
-    }
-    if (table === 'vehicle') {
-      const vehicles = await this.listVehicles(
-        { id: ids },
-        { select: ['id', 'slug', 'model_id'], take: null },
-        context,
-      );
-      return vehicles.map(retirementOf.vehicle);
-    }
-    if (table === 'model') {
-      const models = await this.listVehicleModels(
-        { id: ids },
-        { select: ['id', 'slug', 'make_id'], take: null },
-        context,
-      );
-      return models.map(retirementOf.model);
-    }
-    const rows = await this.sluggedRows(table).list({ id: ids }, context);
-    return rows.map(retirementOf.unscoped);
-  }
-
-  @InjectTransactionManager()
-  private async deleteRetiring(
-    table: RetiringTable,
-    ids: string | string[],
-    @MedusaContext() sharedContext: Context = {},
-  ): Promise<void> {
-    for (const chunk of chunksOf([ids].flat())) {
-      await this.retireSlugs(
-        table === 'part_identifier' ? 'part' : table,
-        await this.retirementsOf(table, chunk, sharedContext),
-        sharedContext,
-      );
-      await CatalogModuleBase.prototype[RETIRING_DELETES[table]].call(
-        this,
-        chunk,
-        sharedContext,
-      );
-    }
-  }
-
-  override deletePartIdentifiers = ((
-    ids: string | string[],
-    context?: Context,
-  ) =>
-    this.deleteRetiring(
-      'part_identifier',
-      ids,
-      context,
-    )) as CatalogModuleBase['deletePartIdentifiers'];
-
-  override deleteParts = ((ids: string | string[], context?: Context) =>
-    this.deleteRetiring(
-      'part',
-      ids,
-      context,
-    )) as CatalogModuleBase['deleteParts'];
-
-  override deleteVehicles = ((ids: string | string[], context?: Context) =>
-    this.deleteRetiring(
-      'vehicle',
-      ids,
-      context,
-    )) as CatalogModuleBase['deleteVehicles'];
-
-  override deleteVehicleModels = ((ids: string | string[], context?: Context) =>
-    this.deleteRetiring(
-      'model',
-      ids,
-      context,
-    )) as CatalogModuleBase['deleteVehicleModels'];
-
-  override deleteMakes = ((ids: string | string[], context?: Context) =>
-    this.deleteRetiring(
-      'make',
-      ids,
-      context,
-    )) as CatalogModuleBase['deleteMakes'];
-
-  override deleteBrands = ((ids: string | string[], context?: Context) =>
-    this.deleteRetiring(
-      'brand',
-      ids,
-      context,
-    )) as CatalogModuleBase['deleteBrands'];
-
-  override deleteCategories = ((ids: string | string[], context?: Context) =>
-    this.deleteRetiring(
-      'category',
-      ids,
-      context,
-    )) as CatalogModuleBase['deleteCategories'];
 
   @InjectTransactionManager()
   async createPartWithIdentifiers(

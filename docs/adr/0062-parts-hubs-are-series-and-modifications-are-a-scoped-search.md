@@ -28,7 +28,7 @@ Decided 2026-11-13 with the owner, before the shop opens. Refines [ADR-0049](004
 
 ## Consequences
 
-- A Series rename moves its URL without a redirect, unlike the slugs ADR-0049 freezes.
+- A Series rename moves its URL without a redirect, like every catalogue slug since 2026-11-15 (ADR-0049).
 - The vehicle page features (the maintenance kit, Requirement matches per car, the steering filter on fitments) have no static page any more; the part pages still name the cars a Part's Requirements and kits fit, linking to their Series.
 - A Series name that is not plain Latin (the demo seeds Russian names) gets a hashed slug. Production Series come from suppliers in Latin.
 - The `partsCar.hubs.model` copy now serves the Series page; its `singleCar*` strings and the vehicle page copy are unused until cleaned up together with their translations.

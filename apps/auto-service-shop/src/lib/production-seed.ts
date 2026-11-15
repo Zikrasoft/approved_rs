@@ -104,6 +104,8 @@ export const BATTERY_CATEGORY = {
     'На BMW и Mercedes-Benz после замены аккумулятор нужно зарегистрировать в блоке управления, иначе генератор будет заряжать его неправильно.',
 };
 
+const SEEDED_CATEGORIES: SeededCategory[] = [...CATEGORIES, BATTERY_CATEGORY];
+
 export type FieldDefinition = {
   key: string;
   type: CategoryFieldType;
@@ -666,18 +668,16 @@ async function seedSpellings<
 
 async function seededCategoryBySlug(catalog: CatalogModuleService) {
   const live = await catalog.listCategories({}, { take: null });
-  const retired = await catalog.listSlugRedirects(
-    { kind: 'category' },
-    { select: ['from_id', 'from_slug'], take: null },
-  );
-  const bySlug = (slug: string) =>
-    live.find((row) => row.slug === slug) ??
-    live.find(({ id }) =>
-      retired.some((row) => row.from_slug === slug && row.from_id === id),
-    );
+  const bySlug = (slug: string) => live.find((row) => row.slug === slug);
+  const byName = (name: string) =>
+    live.find((row) => nameKey(row.name) === nameKey(name));
   return (slug: string) => {
-    const formerly = CATEGORIES.find((row) => row.slug === slug)?.formerly;
-    return bySlug(slug) ?? (formerly ? bySlug(formerly) : undefined);
+    const seeded = SEEDED_CATEGORIES.find((row) => row.slug === slug);
+    return (
+      bySlug(slug) ??
+      (seeded?.formerly ? bySlug(seeded.formerly) : undefined) ??
+      (seeded ? byName(seeded.name) : undefined)
+    );
   };
 }
 
@@ -805,10 +805,9 @@ export async function seedProductionCatalogue(
 
   const catalog: CatalogModuleService = container.resolve(CATALOG_MODULE);
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
-  const categories: SeededCategory[] = [...CATEGORIES, BATTERY_CATEGORY];
   const existing = await seededCategoryBySlug(catalog);
   const photos = readdirSync(IMAGES);
-  for (const { formerly, ...category } of categories) {
+  for (const { formerly, ...category } of SEEDED_CATEGORIES) {
     const row =
       existing(category.slug) ?? (await catalog.createCategories(category));
     if (formerly && row.slug === formerly) {

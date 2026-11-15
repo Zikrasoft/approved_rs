@@ -87,22 +87,6 @@ medusaIntegrationTestRunner({
         );
       });
 
-      it('redirects each old slug to its renamed Category, once', async () => {
-        const redirects = await catalog.listSlugRedirects(
-          { kind: 'category' },
-          { take: null },
-        );
-        expect(
-          redirects.map(({ from_slug, from_id }) => [from_slug, from_id]),
-        ).toEqual(
-          expect.arrayContaining([
-            ['suspension', suspensionId],
-            ['engine-parts', engineId],
-          ]),
-        );
-        expect(redirects).toHaveLength(2);
-      });
-
       it('keeps the renamed Categories on their codes and moves the rest to the new ones', async () => {
         expect(await mappedTo('rame')).toBe(suspensionId);
         expect(await mappedTo('kanalni kaiš')).toBe(engineId);

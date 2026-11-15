@@ -236,7 +236,7 @@
     "createLabel": "New brand",
     "namePlaceholder": "Name, e.g. Mann-Filter",
     "slugPlaceholder": "URL slug, e.g. mann-filter",
-    "slugHint": "The slug is part of every part number page URL: lower-case Latin letters, digits and hyphens. A renamed slug keeps its old address as a redirect.",
+    "slugHint": "The slug is part of every part number page URL: lower-case Latin letters, digits and hyphens.",
     "create": "Add brand",
     "empty": "No brands yet. Add one before creating parts.",
     "columns": {
@@ -487,7 +487,7 @@
     "createLabel": "New Category",
     "namePlaceholder": "Name, e.g. Oil filters",
     "slugPlaceholder": "Slug, e.g. oil-filters",
-    "slugHint": "The slug is part of the Category page URL: lower-case latin letters, digits and dashes. A renamed slug keeps its old address as a redirect.",
+    "slugHint": "The slug is part of the Category page URL: lower-case latin letters, digits and dashes.",
     "create": "Add Category",
     "empty": "No Categories yet. Add the first one to describe parts.",
     "name": "Name",
@@ -644,7 +644,7 @@
       "QUOTE_UNREADABLE": "The quote could not be read. Try uploading it again.",
       "AI_NOT_CONFIGURED": "The OpenAI key (OPENAI_API_KEY) is not set, so the quote cannot be read. This is a server setting: ask a developer to add the key.",
       "INVALID_BRAND": "The brand name needs Latin letters or digits. Check the brand on the line.",
-      "SLUG_TAKEN": "This address is taken or was used before. Pick another one.",
+      "SLUG_TAKEN": "This address is taken. Pick another one.",
       "SLUG_RESERVED": "This address belongs to a storefront section. Pick another one.",
       "NO_SLUG": "The name needs Latin letters or digits to make an address.",
       "MERGE_INTO_SELF": "Pick another row to merge into."

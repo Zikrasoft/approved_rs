@@ -1,3 +1,13 @@
+export const RESERVED_PARTS_SEGMENTS = [
+  'c',
+  'p',
+  'car',
+  'cart',
+  'search',
+  'prices',
+  'makes',
+] as const;
+
 const UNDECOMPOSED: Record<string, string> = {
   đ: 'dj',
   ß: 'ss',
