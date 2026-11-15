@@ -14,10 +14,24 @@ const SLUGS = [
   'batteries',
   'body-parts',
   'brakes',
+  'bushings',
+  'control-arms',
   'electrics',
-  'engine-parts',
   'maintenance-consumables',
-  'suspension',
+  'poly-v-belts',
+  'shock-absorbers',
+  'tie-rods',
+  'timing-belts',
+  'transmission',
+];
+
+const PHOTOGRAPHED = [
+  'body-parts',
+  'brakes',
+  'control-arms',
+  'electrics',
+  'maintenance-consumables',
+  'poly-v-belts',
   'transmission',
 ];
 
@@ -37,7 +51,7 @@ medusaIntegrationTestRunner({
         await run();
       });
 
-      it('creates the eight Categories once, with their copy and every photo it ships', async () => {
+      it('creates the twelve Categories once, with their copy and every photo it ships', async () => {
         const categories = await catalog.listCategories(
           {},
           { order: { slug: 'ASC' } },
@@ -47,10 +61,8 @@ medusaIntegrationTestRunner({
         expect(brakes.name).toBe('Тормозная система');
         expect(brakes.text).toContain('Колодки, диски');
         expect(
-          categories
-            .filter(({ slug }) => slug !== 'batteries')
-            .every(({ image }) => image),
-        ).toBe(true);
+          categories.filter(({ image }) => image).map(({ slug }) => slug),
+        ).toEqual(PHOTOGRAPHED);
       });
 
       it('creates the batteries Category with its registration service', async () => {
@@ -231,14 +243,77 @@ medusaIntegrationTestRunner({
         ]);
       });
 
+      it('gives the belt and chassis categories their fields, every one optional', async () => {
+        const facets = async (slug: string) =>
+          (await fieldsOf(slug)).map(({ key, type, unit, facet, required }) => [
+            key,
+            type,
+            unit,
+            facet,
+            required,
+          ]);
+        expect(await facets('timing-belts')).toEqual([
+          ['type', 'single-select', null, true, false],
+          ['teeth', 'number', null, true, false],
+          ['width', 'number', 'мм', true, false],
+          ['length', 'number', 'мм', false, false],
+        ]);
+        expect(await facets('poly-v-belts')).toEqual([
+          ['ribs', 'number', null, true, false],
+          ['length', 'number', 'мм', true, false],
+          ['type', 'single-select', null, true, false],
+        ]);
+        expect(await facets('control-arms')).toEqual([
+          ['axle', 'single-select', null, true, false],
+          ['side', 'single-select', null, true, false],
+          ['position', 'single-select', null, true, false],
+          ['ball-joint', 'boolean', null, true, false],
+          ['material', 'single-select', null, false, false],
+        ]);
+        expect(await facets('bushings')).toEqual([
+          ['kind', 'single-select', null, true, false],
+          ['axle', 'single-select', null, true, false],
+          ['inner-diameter', 'number', 'мм', true, false],
+          ['outer-diameter', 'number', 'мм', false, false],
+          ['width', 'number', 'мм', false, false],
+        ]);
+        expect(await facets('tie-rods')).toEqual([
+          ['side', 'single-select', null, true, false],
+          ['length', 'number', 'мм', false, false],
+          ['thread', 'text', null, false, false],
+        ]);
+        expect(await facets('shock-absorbers')).toEqual([
+          ['axle', 'single-select', null, true, false],
+          ['side', 'single-select', null, true, false],
+          ['type', 'single-select', null, true, false],
+          ['min-length', 'number', 'мм', false, false],
+          ['max-length', 'number', 'мм', false, false],
+        ]);
+        const options = async (slug: string, key: string) =>
+          (await fieldsOf(slug))
+            .find((field) => field.key === key)!
+            .options.map((option) => [option.key, option.label]);
+        expect(await options('shock-absorbers', 'axle')).toEqual(
+          await options('brakes', 'axle'),
+        );
+        expect(await options('control-arms', 'side')).toEqual([
+          ['left', 'Левая'],
+          ['right', 'Правая'],
+          ['both', 'Обе стороны'],
+        ]);
+        expect(await options('timing-belts', 'type')).toEqual([
+          ['belt', 'Ремень'],
+          ['kit', 'Комплект'],
+          ['kit-water-pump', 'Комплект с помпой'],
+        ]);
+        expect(await options('bushings', 'kind')).toEqual([
+          ['arm-bushing', 'Сайлентблок рычага'],
+          ['stabilizer-bushing', 'Втулка стабилизатора'],
+        ]);
+      });
+
       it('leaves the categories it has no fields for with Brand alone', async () => {
-        for (const slug of [
-          'suspension',
-          'engine-parts',
-          'electrics',
-          'transmission',
-          'body-parts',
-        ]) {
+        for (const slug of ['electrics', 'transmission', 'body-parts']) {
           expect(await fieldsOf(slug)).toEqual([]);
         }
       });
@@ -326,15 +401,14 @@ medusaIntegrationTestRunner({
         });
         const [filtron] = await suppliers.listSuppliers({ name: 'FILTRON' });
         const [brakes] = await catalog.listCategories({ slug: 'brakes' });
-        const [engine] = await catalog.listCategories({
-          slug: 'engine-parts',
-        });
-        const [transmission] = await catalog.listCategories({
-          slug: 'transmission',
-        });
-        const [suspension] = await catalog.listCategories({
-          slug: 'suspension',
-        });
+        const categoryId = async (slug: string) =>
+          (await catalog.listCategories({ slug }))[0].id;
+        const timingBelts = await categoryId('timing-belts');
+        const polyVBelts = await categoryId('poly-v-belts');
+        const controlArms = await categoryId('control-arms');
+        const bushings = await categoryId('bushings');
+        const tieRods = await categoryId('tie-rods');
+        const shockAbsorbers = await categoryId('shock-absorbers');
         const [bilstein] = await suppliers.listSuppliers({
           name: 'bilstein group',
         });
@@ -345,18 +419,18 @@ medusaIntegrationTestRunner({
           ['kočiono crevo', brakes.id],
           ['doboš kočnice', brakes.id],
           ['sajla ručne kočnice', brakes.id],
-          ['amortizer', suspension.id],
-          ['rame', suspension.id],
-          ['nosač ramena', suspension.id],
-          ['nosač stabilizatora', suspension.id],
-          ['aksijalni zglob', suspension.id],
+          ['amortizer', shockAbsorbers],
+          ['rame', controlArms],
+          ['nosač ramena', bushings],
+          ['nosač stabilizatora', bushings],
+          ['aksijalni zglob', tieRods],
           ['uljni filter', maintenance.id],
           ['vazdušni filter', maintenance.id],
           ['filter goriva', maintenance.id],
           ['filter kabine', maintenance.id],
-          ['kanalni kaiš', engine.id],
-          ['garnitura zupčastih kaiševa', engine.id],
-          ['zupčasti kaiš', engine.id],
+          ['kanalni kaiš', polyVBelts],
+          ['garnitura zupčastih kaiševa', timingBelts],
+          ['zupčasti kaiš', timingBelts],
           ['kočioni cilindar točka', brakes.id],
           ['kontakt istrošenosti', brakes.id],
         ];
@@ -375,6 +449,8 @@ medusaIntegrationTestRunner({
           'Cabin Air Filter | Biofunctional',
           'Secondary Element',
           'Cooling Liquid Filter',
+          'Ventilator',
+          'Hydraulic Transmission Filter',
         ];
         const key = (row: { supplier_id: string; code: string }) =>
           `${row.supplier_id}:${row.code}`;
@@ -404,27 +480,13 @@ medusaIntegrationTestRunner({
               'Filter kabine',
               'Filter ulja',
               'Sekundarni element',
+              'Filter hidrauličnog prenosa',
             ].map((code) => ({
               supplier_id: filtron.id,
               code,
               category_id: maintenance.id,
             })),
             { supplier_id: filtron.id, code: 'Sušač', category_id: brakes.id },
-            {
-              supplier_id: filtron.id,
-              code: 'Filter hidrauličnog prenosa',
-              category_id: transmission.id,
-            },
-            {
-              supplier_id: mann.id,
-              code: 'Ventilator',
-              category_id: engine.id,
-            },
-            {
-              supplier_id: mann.id,
-              code: 'Hydraulic Transmission Filter',
-              category_id: transmission.id,
-            },
             ...[
               'Hydraulics',
               'Compressed Air-Oil Separation',
@@ -507,7 +569,7 @@ medusaIntegrationTestRunner({
       it('keeps what a person edited and restores what nobody did', async () => {
         const [brakes] = await catalog.listCategories({ slug: 'brakes' });
         const [suspension] = await catalog.listCategories({
-          slug: 'suspension',
+          slug: 'control-arms',
         });
         await catalog.updateCategories([
           {
@@ -525,7 +587,7 @@ medusaIntegrationTestRunner({
         expect(after.name).toBe('Тормоза');
         expect(after.image).toBeNull();
         expect((await catalog.retrieveCategory(suspension.id)).name).toBe(
-          'Подвеска и рулевое',
+          'Рычаги подвески',
         );
       });
 
@@ -734,14 +796,14 @@ medusaIntegrationTestRunner({
       });
 
       it('finds a Category again after staff renamed its slug, and keeps its supplier mappings on it', async () => {
-        const [transmission] = await catalog.listCategories({
-          slug: 'transmission',
+        const [tieRods] = await catalog.listCategories({
+          slug: 'tie-rods',
         });
         const mappedBefore = await suppliers.listSupplierCategories(
-          { category_id: transmission.id },
+          { category_id: tieRods.id },
           { take: null },
         );
-        await catalog.renameSlug('category', transmission.id, 'gearbox', {
+        await catalog.renameSlug('category', tieRods.id, 'steering-rods', {
           created_by: 'user_1',
           updated_by: 'user_1',
         });
@@ -750,15 +812,15 @@ medusaIntegrationTestRunner({
 
         expect(
           (await catalog.listCategories({}, { take: null })).filter(
-            ({ name }) => name.startsWith('Трансмиссия'),
+            ({ name }) => name === 'Рулевые тяги',
           ),
         ).toEqual([
-          expect.objectContaining({ id: transmission.id, slug: 'gearbox' }),
+          expect.objectContaining({ id: tieRods.id, slug: 'steering-rods' }),
         ]);
         expect(mappedBefore.length).toBeGreaterThan(0);
         expect(
           await suppliers.listSupplierCategories(
-            { category_id: transmission.id },
+            { category_id: tieRods.id },
             { take: null },
           ),
         ).toHaveLength(mappedBefore.length);
