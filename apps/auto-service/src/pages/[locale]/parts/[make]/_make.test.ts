@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { withPlaceholder } from '@podbor/i18n';
 import { content } from '@/i18n/content';
 import { render } from '@/components/renderAstro';
@@ -70,5 +70,31 @@ describe('the make hub', () => {
     expect(
       page.querySelector('a[href^="/ru/cars/"]:not([href="/ru/cars/"])'),
     ).toBeNull();
+  });
+});
+
+describe('the make hub cache key', () => {
+  it('changes with what the page shows, not with the models under each series', async () => {
+    const hubs = vi.hoisted(() => ({ value: [] as unknown[] }));
+    vi.doMock('@/utils/catalogueEnv', () => ({
+      makeHubsForBuild: async () => hubs.value,
+    }));
+    vi.resetModules();
+    const { getStaticPaths } = await import('./index.astro');
+    const keyOf = async (models: unknown[], name = '3') => {
+      hubs.value = [
+        {
+          make,
+          series: [{ ...series(name, name), models }],
+          parts: models.length,
+        },
+      ];
+      const [first] = await getStaticPaths();
+      return first.cacheKey;
+    };
+
+    expect(await keyOf([{ id: 'a' }])).toBe(await keyOf([{ id: 'b' }]));
+    expect(await keyOf([])).not.toBe(await keyOf([], '5'));
+    vi.doUnmock('@/utils/catalogueEnv');
   });
 });
