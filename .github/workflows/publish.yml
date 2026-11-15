@@ -2,6 +2,11 @@ name: Publish catalogue
 
 on:
   workflow_dispatch:
+    inputs:
+      ref:
+        description: Commit to build instead of the deployed one, for a storefront release CI cannot pass
+        required: false
+        default: refs/tags/deployed/auto-service
 
 concurrency:
   group: publish-catalogue
@@ -23,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: refs/tags/deployed/auto-service
+          ref: ${{ inputs.ref || 'refs/tags/deployed/auto-service' }}
           persist-credentials: false
       - uses: actions/checkout@v4
         with:
