@@ -10,20 +10,10 @@ import { localeConfig } from './src/i18n/config.ts';
 import { blogListed } from '@podbor/blog/article';
 import { sitemapFilter } from './src/utils/sitemap.ts';
 import { articleFiles } from './src/utils/articleFiles.ts';
-import {
-  cataloguePagesForBuild,
-  partPagesForBuild,
-  redirectsForBuild,
-} from './src/utils/catalogueEnv.ts';
-import {
-  catalogueRedirectsIntegration,
-  catalogueRoutes,
-} from './src/utils/catalogueRedirects.ts';
+import { partPagesForBuild } from './src/utils/catalogueEnv.ts';
 
 const site = CARLAB.url;
 const partPages = await partPagesForBuild(process.env);
-const pages = await cataloguePagesForBuild(process.env);
-const redirects = catalogueRoutes(await redirectsForBuild(process.env), pages);
 const blog = blogListed(
   await articleFiles(
     fileURLToPath(new URL('./src/content/articles/', import.meta.url)),
@@ -50,7 +40,6 @@ export default defineConfig({
         locales: Object.fromEntries(localeConfig.locales.map((l) => [l, l])),
       },
     }),
-    catalogueRedirectsIntegration(redirects),
   ],
   vite: {
     plugins: [tailwindcss()],

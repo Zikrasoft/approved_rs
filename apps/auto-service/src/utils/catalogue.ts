@@ -11,8 +11,6 @@ import {
   type CheckoutRefusal,
   type PartOffer,
   categoriesResponseSchema,
-  catalogueRedirectsResponseSchema,
-  type CatalogueRedirect,
   fitmentsResponseSchema,
   partPageSlug,
   identifierOffersResponseSchema,
@@ -245,44 +243,23 @@ export function createCatalogue({
       )
       .vehicles.find((vehicle) => vehicle.model.slug === slug)?.model ?? null;
 
-  const redirects = async (): Promise<CatalogueRedirect[]> => {
-    const path = '/store/catalogue-redirects';
-    const response = await send(path);
-    if (response.status === 404) {
-      return [];
-    }
-    if (!response.ok) {
-      throw new Error(`Catalogue ${path} answered ${response.status}`);
-    }
-    return catalogueRedirectsResponseSchema.parse(await response.json())
-      .redirects;
-  };
-
   const snapshot = async () => {
-    const [pages, allCategories, fitments, allVehicles, allRedirects] =
-      await Promise.all([
-        paged('/store/part-pages', (body) => {
-          const { pages, next } = partPagesResponseSchema.parse(body);
-          return {
-            items: pages.map((page) => unpriced(page)),
-            next,
-          };
-        }),
-        categories(),
-        paged('/store/fitments', (body) => {
-          const { fitments, next } = fitmentsResponseSchema.parse(body);
-          return { items: fitments, next };
-        }),
-        vehicles(),
-        redirects(),
-      ]);
-    return assembleSnapshot(
-      pages,
-      allCategories,
-      fitments,
-      allVehicles,
-      allRedirects,
-    );
+    const [pages, allCategories, fitments, allVehicles] = await Promise.all([
+      paged('/store/part-pages', (body) => {
+        const { pages, next } = partPagesResponseSchema.parse(body);
+        return {
+          items: pages.map((page) => unpriced(page)),
+          next,
+        };
+      }),
+      categories(),
+      paged('/store/fitments', (body) => {
+        const { fitments, next } = fitmentsResponseSchema.parse(body);
+        return { items: fitments, next };
+      }),
+      vehicles(),
+    ]);
+    return assembleSnapshot(pages, allCategories, fitments, allVehicles);
   };
 
   return {

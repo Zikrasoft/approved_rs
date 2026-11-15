@@ -381,9 +381,6 @@ carlab.rs:
 - [ ] `https://carlab.rs/llms.txt` answers 200 directly (no redirect), names no
       cart, states the Google rating (routing.md, `/llms.txt`;
       deploy.md § Closed beta).
-- [ ] Redirects: `/sr/parts/brakes/` → `/sr/parts/c/brakes/`;
-      `/sr/parts/c/<slug>/1/` → `/sr/parts/c/<slug>/` (301)
-      (`apps/auto-service/vercel.json`).
 - [ ] `https://carlab.rs/catalogue-build.json` counts part pages after Publish
       (deploy.md § How it ships, step 5).
 - [ ] `/api/csp-report` lines `[csp] …` appear in Vercel logs only for real

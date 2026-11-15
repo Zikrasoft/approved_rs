@@ -11,7 +11,6 @@ import {
   seriesCategoryHasPage,
   seriesHasPage,
   type Category,
-  type CatalogueRedirect,
   type Fitment,
   type PartPage,
   type PlaceParts,
@@ -121,7 +120,6 @@ export function assembleSnapshot(
   allCategories: Category[],
   fitments: Fitment[],
   allVehicles: Vehicle[],
-  redirects: CatalogueRedirect[] = [],
 ) {
   const categoryById = new Map(
     allCategories.map((category) => [category.id, category]),
@@ -297,7 +295,6 @@ export function assembleSnapshot(
     matchesFor,
     placeParts,
     cars,
-    redirects,
   };
 }
 

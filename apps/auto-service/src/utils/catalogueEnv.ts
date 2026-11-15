@@ -5,7 +5,7 @@ import {
 } from '@podbor/catalog-contract/preview';
 import { requestIdSchema } from '@podbor/catalog-contract/events';
 import { secretMatches } from '@podbor/lead-crm/verify-secret';
-import type { CatalogueRedirect, Category } from '@podbor/catalog-contract';
+import type { Category } from '@podbor/catalog-contract';
 import { CARLAB } from '@podbor/brands';
 import { VISITOR_ID_COOKIE } from '@podbor/site-kit';
 import { CATALOGUE_TIMEOUT_MS, createCatalogue } from './catalogue';
@@ -289,12 +289,6 @@ export async function makePartsForBuild(
 ): Promise<MakePartsEntry[]> {
   const snapshot = await snapshotForBuild(env);
   return snapshot ? makePartsFrom(snapshot) : [];
-}
-
-export async function redirectsForBuild(
-  env = siteEnv(),
-): Promise<CatalogueRedirect[]> {
-  return (await snapshotForBuild(env))?.redirects ?? [];
 }
 
 export async function browseForBuild(locale: Locale, env = siteEnv()) {
