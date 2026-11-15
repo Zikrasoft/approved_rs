@@ -121,6 +121,7 @@ medusaIntegrationTestRunner({
       it('keeps the Part prices out of the store API for a visitor without the preview flag, and shows the workshop prices', async () => {
         const search = await get(`${searchPath}&range=price:1000:1500`);
         const pages = await get('/store/part-pages');
+        const snapshot = await get('/store/catalogue-snapshot');
         const categories = await get('/store/categories');
         const live = await get(
           `/store/part-identifiers/${identifiers[0]}/offers`,
@@ -131,6 +132,7 @@ medusaIntegrationTestRunner({
         expect(prices(search.data.results)).toEqual([]);
         expect(facetKeys(search.data.facets)).not.toContain('price');
         expect(prices(pages.data.pages)).toEqual([]);
+        expect(prices(snapshot.data.pages)).toEqual([]);
         expect(categories.data.categories[0].service_price).toBe(900);
         expect(categories.data.categories[0].installation_price).toBe(700);
         expect(installations(pages.data.pages)).toEqual([700, 0]);
@@ -149,6 +151,7 @@ medusaIntegrationTestRunner({
         const search = await get(searchPath, true);
         const narrowed = await get(`${searchPath}&range=price:1000:1500`, true);
         const pages = await get('/store/part-pages', true);
+        const snapshot = await get('/store/catalogue-snapshot', true);
         const categories = await get('/store/categories', true);
         const live = await get(
           `/store/part-identifiers/${identifiers[0]}/offers`,
@@ -160,6 +163,7 @@ medusaIntegrationTestRunner({
         expect(facetKeys(search.data.facets)).toContain('price');
         expect(narrowed.data.count).toBe(1);
         expect(prices(pages.data.pages)).toEqual([1200, 2400]);
+        expect(prices(snapshot.data.pages)).toEqual([1200, 2400]);
         expect(categories.data.categories[0].service_price).toBe(900);
         expect(categories.data.categories[0].installation_price).toBe(700);
         expect(installations(pages.data.pages)).toEqual([700, 0]);

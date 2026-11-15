@@ -137,16 +137,8 @@ const backend = ({
   vehicles = [] as unknown[],
 } = {}) =>
   vi.fn((url: string) => {
-    if (url.includes('/store/part-pages')) {
-      return respond({ pages, count: pages.length, offset: 0, limit: 1000 });
-    }
-    if (url.includes('/store/fitments')) {
-      return respond({
-        fitments,
-        count: fitments.length,
-        offset: 0,
-        limit: 1000,
-      });
+    if (url.endsWith('/store/catalogue-snapshot')) {
+      return respond({ pages, categories, fitments, vehicles });
     }
     if (url.endsWith('/store/categories')) {
       return respond({ categories });
@@ -181,7 +173,7 @@ describe('catalogue.partPages', () => {
     ]);
     expect(pages[0].equivalents).toEqual(oilFilterMann.equivalents);
     expect(fetch).toHaveBeenCalledWith(
-      `${BACKEND_URL}/store/part-pages?limit=1000`,
+      `${BACKEND_URL}/store/catalogue-snapshot`,
       expect.objectContaining({
         headers: { 'x-publishable-api-key': 'pk_test' },
         signal: expect.any(AbortSignal),
@@ -198,22 +190,6 @@ describe('catalogue.partPages', () => {
       ['mann-filter-hu816x', true],
       ['bmw-11428575211', false],
     ]);
-  });
-
-  it('pages through the backend until no next cursor is named', async () => {
-    const fetch = vi.fn((url: string) => {
-      if (url.endsWith('part-pages?limit=1000')) {
-        return respond({ pages: [oilFilterMann], limit: 1, next: 'pi_mann' });
-      }
-      if (url.endsWith('part-pages?limit=1000&after=pi_mann')) {
-        return respond({ pages: [oilFilterBmw], limit: 1, next: null });
-      }
-      return backend()(url);
-    });
-
-    const pages = await catalogueWith(fetch).partPages();
-
-    expect(pages).toHaveLength(2);
   });
 
   it('builds one page when two identifiers share a Brand and number', async () => {
@@ -1459,8 +1435,8 @@ describe('the deploy build', () => {
 
     const reads = (path: string) =>
       shop.mock.calls.filter(([url]) => url.includes(path)).length;
-    expect(reads('/store/part-pages')).toBe(1);
-    expect(reads('/store/categories')).toBe(1);
+    expect(reads('/store/catalogue-snapshot')).toBe(1);
+    expect(reads('/store/categories')).toBe(0);
   });
 
   it('reads the catalogue once for a burst of dev pages, and again once it went stale', async () => {
@@ -1471,8 +1447,9 @@ describe('the deploy build', () => {
       deployed(null, shop);
       const env = shopEnv();
       const reads = () =>
-        shop.mock.calls.filter(([url]) => url.includes('/store/part-pages'))
-          .length;
+        shop.mock.calls.filter(([url]) =>
+          url.includes('/store/catalogue-snapshot'),
+        ).length;
 
       await Promise.all([partPagesForBuild(env), makeHubsForBuild(env)]);
       await categoryPagesForBuild(env);
@@ -1614,18 +1591,21 @@ const catalog = (fetch: ReturnType<typeof vi.fn>) =>
     fetch: fetch as unknown as typeof globalThis.fetch,
   });
 
-describe('catalogue.vehicles', () => {
-  it('lists the Vehicles the car pages are built from', async () => {
-    const fetch = answer({
-      vehicles: [VEHICLE],
-      count: 1,
-      offset: 0,
-      limit: 1000,
-    });
+describe('catalogue.snapshot', () => {
+  const whole = {
+    pages: [],
+    categories: [],
+    fitments: [],
+    vehicles: [VEHICLE],
+  };
 
-    expect(await catalog(fetch).vehicles()).toEqual([VEHICLE]);
+  it('reads the whole catalogue in one request', async () => {
+    const fetch = answer(whole);
+
+    expect((await catalog(fetch).snapshot()).vehicles).toEqual([VEHICLE]);
+    expect(fetch).toHaveBeenCalledTimes(1);
     expect(fetch).toHaveBeenCalledWith(
-      'http://shop.test/store/vehicles?limit=1000',
+      'http://shop.test/store/catalogue-snapshot',
       expect.objectContaining({
         headers: expect.objectContaining({
           'x-publishable-api-key': 'pk_test',
@@ -1634,40 +1614,15 @@ describe('catalogue.vehicles', () => {
     );
   });
 
-  it('pages through the Vehicles until no next cursor is named', async () => {
-    const second = { ...VEHICLE, id: 'veh_2' };
-    const fetch = vi.fn((url: string) =>
-      respond(
-        url.endsWith('vehicles?limit=1000')
-          ? { vehicles: [VEHICLE], limit: 1, next: VEHICLE.id }
-          : { vehicles: [second], limit: 1, next: null },
-      ),
-    );
-
-    expect(await catalog(fetch).vehicles()).toEqual([VEHICLE, second]);
-    expect(fetch).toHaveBeenCalledTimes(2);
-    expect(fetch).toHaveBeenLastCalledWith(
-      `http://shop.test/store/vehicles?limit=1000&after=${VEHICLE.id}`,
-      expect.anything(),
-    );
-  });
-
-  it('takes the whole list in one answer from a shop that does not page it', async () => {
-    const fetch = answer({ vehicles: [VEHICLE] });
-
-    expect(await catalog(fetch).vehicles()).toEqual([VEHICLE]);
-    expect(fetch).toHaveBeenCalledTimes(1);
-  });
-
   it('fails the build when the backend answers with an error', async () => {
-    await expect(catalog(answer({}, false)).vehicles()).rejects.toThrow(
-      '/store/vehicles?limit=1000 answered 503',
+    await expect(catalog(answer({}, false)).snapshot()).rejects.toThrow(
+      '/store/catalogue-snapshot answered 503',
     );
   });
 
   it('fails the build on a body that breaks the contract', async () => {
     await expect(
-      catalog(answer({ vehicles: [{ id: 'veh_1' }] })).vehicles(),
+      catalog(answer({ ...whole, vehicles: [{ id: 'veh_1' }] })).snapshot(),
     ).rejects.toThrow();
   });
 });

@@ -28,6 +28,7 @@ describe('CommonJS build', { timeout: 30_000 }, () => {
         limit: 1,
       }).success,
     ).toBe(true);
+    expect(contract.CATALOGUE_SNAPSHOT_PATH).toBe('/store/catalogue-snapshot');
   });
 
   it('serves the place page rules to require()', () => {

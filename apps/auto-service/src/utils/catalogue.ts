@@ -10,11 +10,11 @@ import {
   type CheckoutContact,
   type CheckoutRefusal,
   type PartOffer,
+  CATALOGUE_SNAPSHOT_PATH,
+  catalogueSnapshotResponseSchema,
   categoriesResponseSchema,
-  fitmentsResponseSchema,
   partPageSlug,
   identifierOffersResponseSchema,
-  partPagesResponseSchema,
   IN_STOCK_FACET,
   PRICE_FACET,
   rangeFilter,
@@ -33,7 +33,6 @@ import {
   type VinFacts,
   CATALOGUE_ID_PATTERN,
   MAX_OFFER_IDS,
-  MAX_PAGE,
 } from '@podbor/catalog-contract';
 import {
   SHOP_CLIENT_HEADER,
@@ -207,32 +206,9 @@ export function createCatalogue({
     }
   };
 
-  const paged = async <T>(
-    path: string,
-    read: (body: unknown) => { items: T[]; next: string | null },
-  ): Promise<T[]> => {
-    const all: T[] = [];
-    for (let after: string | null = null; ;) {
-      const page = new URLSearchParams({
-        limit: String(MAX_PAGE),
-        ...(after && { after }),
-      });
-      const { items, next } = read(await request(`${path}?${page}`));
-      all.push(...items);
-      if (!next) return all;
-      after = next;
-    }
-  };
-
   const categories = async (): Promise<Category[]> =>
     categoriesResponseSchema.parse(await request('/store/categories'))
       .categories;
-
-  const vehicles = (): Promise<Vehicle[]> =>
-    paged('/store/vehicles', (body) => {
-      const { vehicles, next } = vehiclesResponseSchema.parse(body);
-      return { items: vehicles, next };
-    });
 
   const modelNamed = async (make: string, slug: string) =>
     vehiclesResponseSchema
@@ -244,27 +220,19 @@ export function createCatalogue({
       .vehicles.find((vehicle) => vehicle.model.slug === slug)?.model ?? null;
 
   const snapshot = async () => {
-    const [pages, allCategories, fitments, allVehicles] = await Promise.all([
-      paged('/store/part-pages', (body) => {
-        const { pages, next } = partPagesResponseSchema.parse(body);
-        return {
-          items: pages.map((page) => unpriced(page)),
-          next,
-        };
-      }),
-      categories(),
-      paged('/store/fitments', (body) => {
-        const { fitments, next } = fitmentsResponseSchema.parse(body);
-        return { items: fitments, next };
-      }),
-      vehicles(),
-    ]);
-    return assembleSnapshot(pages, allCategories, fitments, allVehicles);
+    const whole = catalogueSnapshotResponseSchema.parse(
+      await request(CATALOGUE_SNAPSHOT_PATH),
+    );
+    return assembleSnapshot(
+      whole.pages.map(unpriced),
+      whole.categories,
+      whole.fitments,
+      whole.vehicles,
+    );
   };
 
   return {
     categories,
-    vehicles,
     snapshot,
 
     async partPages(): Promise<PartPageEntry[]> {

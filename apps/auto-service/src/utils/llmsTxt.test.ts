@@ -309,6 +309,14 @@ describe('generateLlmsTxt', () => {
         ],
       },
     };
+    const listed = (path: string, key: string) =>
+      (answers[path] as Record<string, unknown>)[key];
+    answers['/store/catalogue-snapshot'] = {
+      pages: listed('/store/part-pages', 'pages'),
+      categories: listed('/store/categories', 'categories'),
+      fitments: listed('/store/fitments', 'fitments'),
+      vehicles: listed('/store/vehicles', 'vehicles'),
+    };
     (globalThis as { [key: symbol]: Map<string, unknown> | undefined })[
       Symbol.for('carlab.buildSnapshots')
     ]?.clear();
