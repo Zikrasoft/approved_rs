@@ -18,7 +18,7 @@ describe('the home page', () => {
     )!;
 
     expect(trust.querySelector('li')?.textContent?.trim()).toBe(
-      '5.0 в Google · 22 отзыва',
+      '5.0 в Google · 23 отзыва',
     );
   });
 

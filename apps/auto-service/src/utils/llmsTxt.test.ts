@@ -170,7 +170,7 @@ describe('generateLlmsTxt', () => {
 
   it('states the Google rating as a key fact', async () => {
     expect(await generateLlmsTxt('ru')).toContain(
-      '- 5.0 в Google · 22 отзыва\n',
+      '- 5.0 в Google · 23 отзыва\n',
     );
   });
 
