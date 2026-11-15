@@ -100,7 +100,7 @@ describe('catalogueRoutes', () => {
       moved('/sr/parts/c/oil-filters/3/'),
     );
     expect(follow(routes, '/sr/parts/bmw/3-series/oil/')).toEqual(
-      moved('/sr/parts/bmw/3-series/oil-filters/'),
+      moved('/sr/parts/bmw/3-series/'),
     );
     expect(follow(routes, '/sr/parts/bmw/3-series/oil-filters/')).toBeNull();
   });
@@ -126,23 +126,20 @@ describe('catalogueRoutes', () => {
     expect(follow(routes, '/sr/parts/vw/golf/')).toEqual(moved('/sr/parts/'));
   });
 
-  it('sends a renamed Category under a Series only from a Series page, to the Series page when it lacks the Category', () => {
+  it('sends a renamed Category under every Series to the Series page with two routes per locale', () => {
     const routes = catalogueRoutes(
       [redirect({ category: 'oil' }, { category: 'oil-filters' })],
       pagesOf({
         makes: ['bmw'],
-        series: ['bmw/3-series', 'bmw/5-series'],
-        categories: ['bmw/3-series/oil-filters'],
+        series: Array.from({ length: 5_000 }, (_, i) => `bmw/s-${i}`),
       }),
     );
 
-    expect(follow(routes, '/sr/parts/bmw/3-series/oil/')).toEqual(
-      moved('/sr/parts/bmw/3-series/oil-filters/'),
-    );
+    expect(routes).toHaveLength(6);
     expect(follow(routes, '/sr/parts/bmw/5-series/oil/')).toEqual(
       moved('/sr/parts/bmw/5-series/'),
     );
-    expect(follow(routes, '/sr/parts/bmw/x5/oil/')).toBeNull();
+    expect(follow(routes, '/sr/parts/bmw/5-series/oil-change/')).toBeNull();
   });
 
   it('sends a deleted part to its Category and a deleted Make or Category to the nearest page', () => {

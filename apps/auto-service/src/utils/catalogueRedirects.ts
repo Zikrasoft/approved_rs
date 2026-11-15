@@ -6,7 +6,7 @@ import type {
   CatalogueRedirect,
 } from '@podbor/catalog-contract';
 import { SUPPORTED_LOCALES, type Locale } from '../i18n/config.ts';
-import { PathBuilder, placeKey, type CataloguePages } from './paths.ts';
+import { PathBuilder, type CataloguePages } from './paths.ts';
 
 export type RedirectRoute = {
   src: string;
@@ -21,12 +21,14 @@ const vercelConfigSchema = z
 type VercelConfig = z.infer<typeof vercelConfigSchema>;
 
 const PART_NUMBER = '\u0001';
+const SEGMENT = '\u0002';
 
 const pattern = (path: string) =>
   path
     .slice(0, -1)
     .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-    .replaceAll(PART_NUMBER, '([a-z0-9]+)');
+    .replaceAll(PART_NUMBER, '([a-z0-9]+)')
+    .replaceAll(SEGMENT, '([a-z0-9-]+)');
 
 const exactly = (path: string) => `^${pattern(path)}/?$`;
 
@@ -72,21 +74,19 @@ function localeRoutes(
   }
   if (from.category) {
     const listing = PathBuilder.partsCategory(locale, from.category);
-    const renamed = from.category;
-    const next = to.category;
     return [
-      route(under(listing), next ? `${target}$1` : target),
-      ...[...pages.series].map((key) => {
-        const [make, series] = key.split('/');
-        return route(
-          exactly(
-            PathBuilder.partsSeriesCategory(locale, make, series, renamed),
+      route(under(listing), to.category ? `${target}$1` : target),
+      route(
+        exactly(
+          PathBuilder.partsSeriesCategory(
+            locale,
+            SEGMENT,
+            SEGMENT,
+            from.category,
           ),
-          next && pages.categories.has(placeKey(key, next))
-            ? PathBuilder.partsSeriesCategory(locale, make, series, next)
-            : PathBuilder.partsSeries(locale, make, series),
-        );
-      }),
+        ),
+        PathBuilder.partsSeries(locale, '$1', '$2'),
+      ),
     ];
   }
   if (from.brand && to.brand) {
