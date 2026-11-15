@@ -1464,6 +1464,41 @@ describe('the deploy build', () => {
     }
   });
 
+  it('keeps a dev snapshot whose load outlasted the freshness window', async () => {
+    vi.stubEnv('MODE', 'development');
+    vi.useFakeTimers();
+    try {
+      let answer = () => {};
+      const held = new Promise<void>((resolve) => {
+        answer = resolve;
+      });
+      const shop = backend({ pages: partPages(2) });
+      deployed(
+        null,
+        vi.fn(async (url: string) => {
+          await held;
+          return shop(url);
+        }),
+      );
+      const env = shopEnv();
+
+      const loading = partPagesForBuild(env);
+      vi.advanceTimersByTime(DEV_SNAPSHOT_FRESH_MS);
+      answer();
+      await loading;
+      await categoryPagesForBuild(env);
+
+      expect(
+        shop.mock.calls.filter(([url]) =>
+          url.includes('/store/catalogue-snapshot'),
+        ),
+      ).toHaveLength(1);
+    } finally {
+      vi.useRealTimers();
+      vi.unstubAllEnvs();
+    }
+  });
+
   it('fails without the backend URL once the live site has part pages', async () => {
     deployed(120);
 

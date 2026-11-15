@@ -224,7 +224,7 @@ export const DEV_SNAPSHOT_FRESH_MS = 30_000;
 
 type SnapshotMemo = Map<
   string,
-  { loading: ReturnType<typeof loadSnapshot>; at: number }
+  { loading: ReturnType<typeof loadSnapshot>; loadedAt?: number }
 >;
 
 function snapshotForBuild(env: CatalogueEnv) {
@@ -233,13 +233,20 @@ function snapshotForBuild(env: CatalogueEnv) {
   const key = JSON.stringify(catalogueEnvKeys.map((name) => env[name]));
   const cached = memo.get(key);
   const stale =
-    cached &&
+    cached?.loadedAt !== undefined &&
     import.meta.env?.MODE === 'development' &&
-    Date.now() - cached.at >= DEV_SNAPSHOT_FRESH_MS;
+    Date.now() - cached.loadedAt >= DEV_SNAPSHOT_FRESH_MS;
   if (cached && !stale) {
     return cached.loading;
   }
-  const loading: ReturnType<typeof loadSnapshot> = loadSnapshot(env).catch(
+  const loading: ReturnType<typeof loadSnapshot> = loadSnapshot(env).then(
+    (snapshot) => {
+      const entry = memo.get(key);
+      if (entry?.loading === loading) {
+        entry.loadedAt = Date.now();
+      }
+      return snapshot;
+    },
     (error: unknown) => {
       if (memo.get(key)?.loading === loading) {
         memo.delete(key);
@@ -247,7 +254,7 @@ function snapshotForBuild(env: CatalogueEnv) {
       throw error;
     },
   );
-  memo.set(key, { loading, at: Date.now() });
+  memo.set(key, { loading });
   return loading;
 }
 
