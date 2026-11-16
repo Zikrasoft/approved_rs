@@ -70,9 +70,13 @@ which:
    `/srv/sites/<app>/current`: `--checksum` compares contents, since every build
    stamps new mtimes, and times are not preserved, so a file whose content did
    not change is hard-linked to the live release and never crosses the wire;
-5. writes the same env to `/srv/sites/<app>/.env` (mode 0600, over ssh stdin)
-   and runs `/srv/carlab/deploy-site.sh <app> <release>`, which switches
-   `current`, restarts `site-<app>`, health-checks and rolls back on failure.
+5. writes the same env into the release, `/srv/sites/<app>/releases/<release>/.env`
+   (mode 0600, over ssh stdin, after the rsync whose `--delete` would remove
+   it), and runs `/srv/carlab/deploy-site.sh <app> <release>`, which refuses a
+   release without its `.env`, switches `current`, restarts `site-<app>`,
+   health-checks and rolls back on failure. Compose reads the site env from
+   `/srv/sites/<app>/current/.env`, so a rollback brings back the code and the
+   env it ran with together.
 
 The temp dir holding the env and the ssh key is deleted on exit; nothing is
 printed or uploaded as an artifact. The release name carries the run id, so a

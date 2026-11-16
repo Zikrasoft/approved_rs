@@ -58,5 +58,5 @@ rsync -rlp --checksum --compress --delete --stats -e "$remote" \
   "--link-dest=$site/current" \
   "apps/$app/dist/client" "apps/$app/dist/server" \
   "$target:$site/releases/$release/"
-$remote "$target" "umask 077 && cat >$site/.env.next && mv -f $site/.env.next $site/.env" <"$work/site.env"
+$remote "$target" "umask 077 && cat >$site/releases/$release/.env" <"$work/site.env"
 $remote "$target" "/srv/carlab/deploy-site.sh $app $release" </dev/null

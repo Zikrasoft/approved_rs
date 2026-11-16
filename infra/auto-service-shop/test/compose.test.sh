@@ -8,6 +8,7 @@ trap 'docker rm -f "$net-medusa" "$net-site" "$net-caddy" >/dev/null 2>&1; docke
 printf 'POSTGRES_PASSWORD=x\nCRM_DB_PASSWORD=c0ffee\nTYPESENSE_API_KEY=y\nMEDUSA_TAG=%s\nADMIN_BASIC_AUTH_USER=staff\nADMIN_BASIC_AUTH_HASH=%s\nGRAFANA_ADMIN_PASSWORD=g\nMEDIA_ORIGIN=https://bucket.s3.eu-north-1.amazonaws.com\n' \
   0000000000000000000000000000000000000000 "'\$2a\$14\$hash'" >"$work/.env"
 env -u MEDIA_ORIGIN -u POSTGRES_PASSWORD -u CRM_DB_PASSWORD -u TYPESENSE_API_KEY -u MEDUSA_TAG -u ADMIN_BASIC_AUTH_USER -u ADMIN_BASIC_AUTH_HASH -u GRAFANA_ADMIN_PASSWORD -u GRAFANA_PORT docker compose -f "$here/docker-compose.yml" --project-directory "$work" --profile "*" config --format json >"$work/config.json"
+docker compose -f "$here/docker-compose.yml" --project-directory "$work" --profile "*" config --format json --no-env-resolution 2>/dev/null | jq .services >"$work/services.json"
 
 failures=0
 expect() {
@@ -84,6 +85,12 @@ for app in auto-service detailing approved-rs; do
     ".services[\"site-$app\"].healthcheck.test | join(\" \") | test(\"127.0.0.1:4321/\")"
   expect "site-$app runs node under an init that passes SIGTERM on, so background work drains" \
     ".services[\"site-$app\"].init == true"
+  if jq -e ".[\"site-$app\"].env_file == [{\"path\": \"/srv/sites/$app/current/.env\", \"required\": false}]" "$work/services.json" >/dev/null; then
+    echo "ok - site-$app reads the env of its current release, so a rollback takes its env along"
+  else
+    echo "not ok - site-$app reads the env of its current release, so a rollback takes its env along"
+    failures=$((failures + 1))
+  fi
 done
 expect 'caddy reads the site releases read-only' \
   '[.services.caddy.volumes[] | select(.target == "/srv/sites") | [.source, .read_only]] == [["/srv/sites", true]]'

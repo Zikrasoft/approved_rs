@@ -231,7 +231,7 @@ services:
     profiles: [site-auto-service]
     command: [node, /srv/sites/auto-service/current/server/entry.mjs]
     env_file:
-      - path: /srv/sites/auto-service/.env
+      - path: /srv/sites/auto-service/current/.env
         required: false
 
   site-detailing:
@@ -239,7 +239,7 @@ services:
     profiles: [site-detailing]
     command: [node, /srv/sites/detailing/current/server/entry.mjs]
     env_file:
-      - path: /srv/sites/detailing/.env
+      - path: /srv/sites/detailing/current/.env
         required: false
 
   site-approved-rs:
@@ -247,7 +247,7 @@ services:
     profiles: [site-approved-rs]
     command: [node, /srv/sites/approved-rs/current/server/entry.mjs]
     env_file:
-      - path: /srv/sites/approved-rs/.env
+      - path: /srv/sites/approved-rs/current/.env
         required: false
 
 networks:

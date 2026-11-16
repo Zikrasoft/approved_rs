@@ -24,9 +24,14 @@ release=releases/$name
   echo "No $site/$release/server/entry.mjs: upload the release first." >&2
   exit 1
 }
+[ -f "$site/$release/.env" ] || {
+  echo "No $site/$release/.env: upload the release with its env." >&2
+  exit 1
+}
 
 previous=$(readlink "$site/current" 2>/dev/null || true)
 chmod -R a+rX "$site/$release"
+chmod 600 "$site/$release/.env"
 touch "$site/$release"
 
 point() {

@@ -93,7 +93,8 @@ check "$(has 'pnpm exec turbo run build --filter=@podbor/detailing')" yes 'turbo
 check "$(has 'rsync .*--checksum.*--link-dest=/srv/sites/detailing/current .*apps/detailing/dist/client apps/detailing/dist/server deploy@vps.test:/srv/sites/detailing/releases/abc123-1-1/$')" yes 'rsync ships client and server into the release, hard-linking what current already has'
 check "$(cat "$SHIPPED")" 'PUBLIC_PHONE_NUMBER="381 11"
 MEDUSA_BACKEND_URL="https://api.test"' 'the runtime .env is the pulled env without the Vercel system variables or the Blob token'
-check "$(has "ssh .*umask 077.*/srv/sites/detailing/.env")" yes 'the runtime .env is written owner-only'
+check "$(has "ssh .*umask 077 && cat >/srv/sites/detailing/releases/abc123-1-1/.env$")" yes 'the runtime .env is written owner-only into the release, so a rollback takes its env along'
+check "$(grep -A1 '^rsync' "$LOG" | tail -n 1 | grep -c 'releases/abc123-1-1/.env')" 1 'the .env is written right after rsync, which would delete it'
 check "$(tail -n 1 "$LOG" | grep -c '/srv/carlab/deploy-site.sh detailing abc123-1-1$')" 1 'the host deploy script switches to the release last'
 check "$(has curl)" no 'only auto-service probes the shop backend'
 check "$(grep -c -e blob-secret -e key-secret -e oidc-secret "$work/out" || true)" 0 'no secret reaches the output'

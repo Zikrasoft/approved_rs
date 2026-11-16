@@ -74,6 +74,11 @@ ship() {
   mkdir -p "$SITES_ROOT/$APP/releases/$1/server" "$SITES_ROOT/$APP/releases/$1/client"
   echo "$1" >"$SITES_ROOT/$APP/releases/$1/server/entry.mjs"
   chmod 0600 "$SITES_ROOT/$APP/releases/$1/server/entry.mjs"
+  echo "RELEASE=$1" >"$SITES_ROOT/$APP/releases/$1/.env"
+  chmod 0600 "$SITES_ROOT/$APP/releases/$1/.env"
+}
+mode() {
+  stat -c %a "$1" 2>/dev/null || stat -f %Lp "$1"
 }
 run() {
   status=0
@@ -94,7 +99,9 @@ expect 'current points at the first release' current "$A"
 expect 'the site is recreated on the new release and waited for' \
   grep -qx "docker compose up -d --wait --wait-timeout 120 --no-deps --force-recreate site-$APP -> releases/$A" "$LOG"
 expect 'the release is readable by the containers' \
-  test "$(stat -c %a "$SITES_ROOT/$APP/releases/$A/server/entry.mjs" 2>/dev/null || stat -f %Lp "$SITES_ROOT/$APP/releases/$A/server/entry.mjs")" = 644
+  test "$(mode "$SITES_ROOT/$APP/releases/$A/server/entry.mjs")" = 644
+expect 'the release env stays owner-only' \
+  test "$(mode "$SITES_ROOT/$APP/releases/$A/.env")" = 600
 refuse 'no temporary link is left behind' test -L "$SITES_ROOT/$APP/current.next"
 
 ship "$B"
@@ -109,6 +116,8 @@ expect 'a failed release rolls current back' current "$B"
 expect 'the site is recreated on the previous release' \
   test "$(tail -n 1 "$LOG")" = "docker compose up -d --wait --wait-timeout 120 --no-deps --force-recreate site-$APP -> releases/$B"
 expect 'a failed release says so' grep -q "rolled back to $B" "$work/stderr"
+expect 'a rollback brings back the env the previous release ran with' \
+  grep -qx "RELEASE=$B" "$SITES_ROOT/$APP/current/.env"
 expect 'a rebuild of the live sha left the live release untouched' grep -qx "$B" "$SITES_ROOT/$APP/releases/$B/server/entry.mjs"
 unset BROKEN
 
@@ -138,6 +147,12 @@ unset BROKEN
 fresh
 refuse 'a release that was not uploaded is refused' run deploy-site.sh "$APP" "$A"
 refuse 'a missing release never reaches docker' test -s "$LOG"
+
+fresh
+ship "$A"
+rm "$SITES_ROOT/$APP/releases/$A/.env"
+refuse 'a release uploaded without its env is refused' run deploy-site.sh "$APP" "$A"
+refuse 'a release without its env never reaches docker' test -s "$LOG"
 
 fresh
 ship "$A"
