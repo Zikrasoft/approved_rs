@@ -51,26 +51,40 @@ and are separated by the lead's `brand` field, which the server stamps on
 [ADR-0007](../adr/0007-github-actions-builds-vercel-only-hosts.md).
 
 GitHub Actions builds and deploys, and only the sites that have fallen behind
-`main` (see "Not everything gets deployed" below):
+`main` (see "Not everything gets deployed" below). The `deploy-site` job is a
+matrix of `approved-rs`, `detailing` and `auto-service`; each leg runs
+`.github/scripts/deploy-site.sh <app> <sha>-<run>-<attempt>` from the repo root,
+which:
 
-- the `deploy` job — `apps/approved-rs`;
-- the `deploy-brand-site` job — a matrix of `detailing` and `auto-service`.
+1. `vercel env pull`s the project's production env into a temp file, drops
+   Vercel's own `VERCEL`/`VERCEL_*` system variables and fails, naming it, if
+   `BLOB_READ_WRITE_TOKEN` came back empty (Vercel pulls a sensitive variable as
+   `""`);
+2. for carlab.rs, probes the shop backend (exit 75, see below) and sets
+   `CATALOGUE_SHRINK_GUARD=true`;
+3. builds with `turbo run build --filter=@podbor/<app> --env-mode=loose` under
+   that env (`node --env-file`), with the deploy secrets unset;
+4. rsyncs `dist/client` and `dist/server` to
+   `/srv/sites/<app>/releases/<release>/` on the VPS, with `--link-dest` on
+   `/srv/sites/<app>/current`: `--checksum` compares contents, since every build
+   stamps new mtimes, and times are not preserved, so a file whose content did
+   not change is hard-linked to the live release and never crosses the wire;
+5. writes the same env to `/srv/sites/<app>/.env` (mode 0600, over ssh stdin)
+   and runs `/srv/carlab/deploy-site.sh <app> <release>`, which switches
+   `current`, restarts `site-<app>`, health-checks and rolls back on failure.
 
-Both do the same thing from their app's directory:
+The temp dir holding the env and the ssh key is deleted on exit; nothing is
+printed or uploaded as an artifact. The release name carries the run id, so a
+rebuild of the live SHA (a Publish, a forced run) never writes into the release
+that is serving. As a last step (`Record what is live`) the leg moves its own
+`refs/tags/deployed/<app>` tag onto the SHA just shipped. That is how the next
+run learns what is already in production. Each app deploys serially
+(`concurrency: deploy-site-<app>`, shared with `publish.yml`), the three in
+parallel.
 
-```bash
-pnpm exec vercel pull --yes --environment=production
-pnpm exec vercel build --prod
-pnpm exec vercel deploy --prebuilt --prod --archive=tgz
-```
-
-…and as a last step (`Record what is live`) they move their own
-`refs/tags/deployed/<app>` tag onto the SHA just shipped. That is how the next run
-learns what is already in production.
-
-The Vercel project exists only to hold environment variables and the domain, and to
-be a deploy target. Build settings in the dashboard are irrelevant — they are
-already fixed in each app's `vercel.json`:
+The Vercel project no longer serves anything: it only holds the environment
+variables. TODO: move the env source off Vercel. The build settings below are
+what Vercel used while it hosted the sites:
 
 ```json
 {
@@ -99,11 +113,12 @@ all three sites shows no violation from the analytics scripts or the map embed.
 ### Job order
 
 `check` (lint/prettier/typecheck/test, the shell tests for the scripts,
-shellcheck, actionlint) → `translate` → `verify` → `deploy` (approved.rs) and
-`deploy-brand-site` (details.rs, carlab.rs). Beside them, `shop-image` →
+shellcheck, actionlint) → `translate` → `verify` → `deploy-site` (approved.rs,
+details.rs, carlab.rs). Beside them, `shop-image` →
 `deploy-shop` → `record-shop` ship the shop backend to its VPS (see
 [the shop backend](#the-shop-backend-medusa-on-a-vps-apicarlabrs)), and
-`deploy-brand-site` waits for `deploy-shop`, held back only if it _failed_. The
+`deploy-site` waits for `deploy-shop`; only its carlab.rs leg is held back, and
+only if the shop deploy _failed_. The
 `deploy*` jobs only run on `main`, each only if the previous one passed. The workflow fires on a push to
 any **branch** and never
 on a tag: a tag filter without a branch filter would switch branches off entirely,
@@ -222,8 +237,8 @@ created by itself on the first run, with no protection rules.
 
 ### A consequence: environment variables live in the Vercel project
 
-`vercel pull` downloads the project's production environment variables into
-`.vercel/.env.production.local`, and `vercel build` builds with them. Which means:
+`vercel env pull` downloads the project's production environment variables,
+the build runs with them and the server runs with the same file. Which means:
 
 - **variables are set in the Vercel dashboard, not in GitHub secrets.** GitHub only
   holds the token/IDs for reaching Vercel plus `OPENAI_API_KEY` for the
@@ -623,13 +638,13 @@ prints "`AUTO_SERVICE_SHOP_VPS_* secrets are not set, skipping the shop deploy.`
 workflow stays green.
 
 > **Careful: an unset `VERCEL_PROJECT_ID_*` is not highlighted anywhere.** The
-> `guard` step in `deploy-brand-site` checks that the secret is non-empty, and if it
+> `guard` step in `deploy-site` checks that the secret is non-empty, and if it
 > is empty it **skips every remaining step and leaves the job green**. In Actions
 > that looks like a successful deploy; the `guard` log will carry the line
-> "`VERCEL_PROJECT_ID_… is not set — skipping the … deploy`". The only way to notice
-> is to read the log, or to see that nothing changed on the site. approved.rs has no
-> such guard: without `VERCEL_PROJECT_ID`, the `deploy` job fails honestly at
-> `vercel pull`.
+> "`VERCEL_PROJECT_ID… is not set, so the … env cannot be pulled`". The only way
+> to notice is to read the log, or to see that nothing changed on the site. The
+> `AUTO_SERVICE_SHOP_VPS_*` secrets have no such guard here: without them a site
+> leg fails, naming the secret.
 >
 > The check lives in a step rather than in the job's `if:` because the `matrix`
 > context is unavailable in a job-level condition.
@@ -645,16 +660,15 @@ workflow stays green.
 `GITHUB_TOKEN` is granted per job rather than for the whole file. Four jobs hold
 `contents: write`, for two different reasons:
 
-| Job                 | `permissions`                       | Why exactly that much                                                                        |
-| ------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------- |
-| `check`             | `contents: read`                    | a checkout with `fetch-depth: 0`, for the `deployed/*` tags its test scope starts from       |
-| `translate`         | `contents: write`                   | commits and pushes translations into the same branch                                         |
-| `verify`            | `contents: read`                    | a checkout with `fetch-depth: 0`; the `deployed/*` tags arrive with the history              |
-| `shop-image`        | `contents: read`, `packages: write` | pushes `ghcr.io/zikrasoft/podbor-auto-service-shop:<sha>` to GHCR                            |
-| `deploy-shop`       | `contents: read`, `packages: read`  | hands the server a one-shot token for `docker pull`; that token cannot write to the repo     |
-| `record-shop`       | `contents: write`                   | moves `deployed/auto-service-shop` after a successful `deploy-shop`, a separate job for that |
-| `deploy`            | `contents: write`                   | moves `refs/tags/deployed/approved-rs` after a successful deploy                             |
-| `deploy-brand-site` | `contents: write`                   | the same for `deployed/detailing` and `deployed/auto-service`                                |
+| Job           | `permissions`                       | Why exactly that much                                                                        |
+| ------------- | ----------------------------------- | -------------------------------------------------------------------------------------------- |
+| `check`       | `contents: read`                    | a checkout with `fetch-depth: 0`, for the `deployed/*` tags its test scope starts from       |
+| `translate`   | `contents: write`                   | commits and pushes translations into the same branch                                         |
+| `verify`      | `contents: read`                    | a checkout with `fetch-depth: 0`; the `deployed/*` tags arrive with the history              |
+| `shop-image`  | `contents: read`, `packages: write` | pushes `ghcr.io/zikrasoft/podbor-auto-service-shop:<sha>` to GHCR                            |
+| `deploy-shop` | `contents: read`, `packages: read`  | hands the server a one-shot token for `docker pull`; that token cannot write to the repo     |
+| `record-shop` | `contents: write`                   | moves `deployed/auto-service-shop` after a successful `deploy-shop`, a separate job for that |
+| `deploy-site` | `contents: write`                   | moves `refs/tags/deployed/<app>` after a successful deploy of that app                       |
 
 Write access for `translate` and write access for the deploy jobs are different
 things: the first changes a branch's contents, the second touches only housekeeping
@@ -1225,13 +1239,13 @@ moves forward again.
    fails if any script prints it).
 4. `record-shop` moves `deployed/auto-service-shop` only if `deploy-shop` actually shipped
    the image (`outputs.deployed == 'true'`).
-5. `deploy-brand-site` waits for `deploy-shop` and is held back only if it failed, so
-   carlab.rs never prerenders against a backend that failed to ship. approved.rs
-   does not wait: it does not read the shop. Right after `vercel pull` the
-   carlab.rs leg probes `MEDUSA_BACKEND_URL/health`
-   (`.github/scripts/shop-backend-up.sh`, a few retries over about 20 seconds).
-   If the backend does not answer, the leg prints a `::warning::`, skips the
-   build and the deploy, and leaves `deployed/auto-service` where it was, so the
+5. `deploy-site` waits for `deploy-shop`, and its carlab.rs leg is held back if
+   it failed, so carlab.rs never prerenders against a backend that failed to
+   ship. Right after the env pull the carlab.rs leg probes
+   `MEDUSA_BACKEND_URL/health` (`.github/scripts/shop-backend-up.sh`, a few
+   retries over about 20 seconds). If the backend does not answer,
+   `deploy-site.sh` exits 75, the leg prints a `::warning::`, skips the build
+   and the deploy, and leaves `deployed/auto-service` where it was, so the
    live site keeps serving the last build and the next run retries. Without the
    probe, a VPS outage would fail every carlab.rs deploy, since the storefront
    build throws when the backend it is pointed at is unreachable. The Publish
@@ -1240,7 +1254,7 @@ moves forward again.
 
    The build reads the catalogue once (pages, sitemap and llms.txt share it)
    and records how many part pages it serves at
-   `https://carlab.rs/catalogue-build.json`. A production build (CI sets
+   `https://carlab.rs/catalogue-build.json`. A production build (`deploy-site.sh` sets
    `CATALOGUE_SHRINK_GUARD=true`) reads that record from the live site first, and once it counts
    any part pages the catalogue is live: the build then fails without
    `MEDUSA_BACKEND_URL`, on zero part pages, and on fewer than half of what the
