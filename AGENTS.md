@@ -192,7 +192,7 @@ pnpm lint:fix
 pnpm format           # prettier --write . (never --write in a review pass — it reformats what you are meant to be reading)
 pnpm exec prettier --check .
 node --experimental-strip-types scripts/layout-shift-pass.ts <base-url> <path>...   # local only: CLS per page (load + scroll down/up) on two desktops and a phone, fails over 0.01
-pnpm --filter @podbor/auto-service preview:static   # serves a built site's dist/client on 127.0.0.1:4322 (PREVIEW_PORT) for layout-shift-pass.ts / contact-controls-pass.ts
+pnpm --filter @podbor/auto-service preview --port 4322   # serves a built site (static pages, on-demand routes and /api/*) through @astrojs/node for layout-shift-pass.ts / contact-controls-pass.ts; stop it with `astro preview stop`
 ```
 
 Scoped to one app — either `--filter` from the root, or run inside the app dir:

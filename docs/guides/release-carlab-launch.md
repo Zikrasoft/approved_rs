@@ -30,7 +30,7 @@ User-visible changes (commit subjects on `carlab-shop`):
   privacy line; the preferred channel comes first; CarLab offers a call first.
 - `search` and `search_suggestion_pick` goals on carlab.rs, `lead_modal_open`
   on all three sites, a `visit` contact placement (`packages/site-kit/src/goals.ts`).
-- CSP report-only collection on every site (deploy.md § Vercel builds nothing).
+- CSP report-only collection on every site (deploy.md § GitHub Actions builds, the VPS serves).
 - carlab.rs server-side Events go to the shop's log, readable in Grafana
   (ADR-0057).
 
@@ -385,7 +385,7 @@ carlab.rs:
 - [ ] `https://carlab.rs/catalogue-build.json` counts part pages after Publish
       (deploy.md § How it ships, step 5).
 - [ ] `/api/csp-report` lines `[csp] …` appear in the site container's logs only for real
-      violations (deploy.md § Vercel builds nothing).
+      violations (deploy.md § GitHub Actions builds, the VPS serves).
 
 Shop:
 

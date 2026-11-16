@@ -252,11 +252,11 @@ turn the preview on, `/api/shop-preview` without a token to turn it off. See
 ```bash
 set -a; . apps/auto-service/.env.local; set +a
 pnpm turbo run build --filter=@podbor/auto-service
-pnpm --filter @podbor/auto-service preview:static
+pnpm --filter @podbor/auto-service preview
 ```
 
-The static server shows the prerendered pages only (no `/api/*`);
-`node dist/server/entry.mjs` serves the whole build, `/api/*` included. Rebuild after every import to
+`astro preview` serves the whole build through `@astrojs/node`, `/api/*`
+included; `astro preview stop` stops it. Rebuild after every import to
 see new Parts on static pages.
 
 Useful pages:

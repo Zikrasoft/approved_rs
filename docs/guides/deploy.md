@@ -43,7 +43,7 @@ and are separated by the lead's `brand` field, which the server stamps on
 
 ## How the deploy works
 
-### Vercel builds nothing
+### GitHub Actions builds, the VPS serves
 
 `git.deploymentEnabled: false` in the root `vercel.json` and in each app's
 `vercel.json` disables Vercel's own git trigger — for why, see
@@ -51,7 +51,8 @@ and are separated by the lead's `brand` field, which the server stamps on
 
 GitHub Actions builds and deploys, and only the sites that have fallen behind
 `main` (see "Not everything gets deployed" below). The `deploy-site` job is a
-matrix of `approved-rs`, `detailing` and `auto-service`; each leg runs
+matrix of the sites `.github/scripts/site-env.json` names (`verify` reads its
+`sites` keys into the `sites` output); each leg runs
 `.github/scripts/deploy-site.sh <app> <sha>-<run>-<attempt>` from the repo root,
 which:
 
@@ -76,9 +77,15 @@ which:
 5. writes the same env into the release, `/srv/sites/<app>/releases/<release>/.env`
    (mode 0600, over ssh stdin, after the rsync whose `--delete` would remove
    it), and runs `/srv/carlab/deploy-site.sh <app> <release>`, which refuses a
-   release without its `.env`, switches `current`, restarts `site-<app>`,
-   health-checks and rolls back on failure. Compose reads the site env from
-   `/srv/sites/<app>/current/.env`, so a rollback brings back the code and the
+   release without its `.env` and then switches two links in order: `running`
+   (what the `site-<app>` container runs and reads its env from) first, then
+   recreates the container and waits for it to answer `/`, and only then
+   `current` (the directory Caddy serves static files from). So Caddy keeps
+   serving the old static pages until node is healthy on the new release, and
+   a release that fails its health check never has its files served: `running`
+   goes back to the previous release, its container comes back, and `current`
+   never moved. Compose reads the site env from
+   `/srv/sites/<app>/running/.env`, so a rollback brings back the code and the
    env it ran with together.
 
 The temp dir holding the env and the ssh key is deleted on exit; nothing is
@@ -90,17 +97,7 @@ run learns what is already in production. Each app deploys serially
 (`concurrency: deploy-site-<app>`, shared with `publish.yml`), the three in
 parallel.
 
-The Vercel projects no longer serve or hold anything. The build settings
-below are what Vercel used while it hosted the sites:
-
-```json
-{
-  "framework": "astro",
-  "buildCommand": "pnpm run build",
-  "installCommand": "pnpm install",
-  "outputDirectory": "dist"
-}
-```
+The Vercel projects no longer serve or hold anything.
 
 Caddy sets the security headers on every response, static file or node: `frame-ancestors 'self'`,
 `nosniff`, `strict-origin-when-cross-origin`, a `Permissions-Policy` with the
@@ -149,7 +146,7 @@ the translated tree. When nothing was translated the SHA is the pushed one, whic
 ### What `check` tests
 
 Lint, prettier, the YAML and Russian-copy checks, pinned versions, the
-redirects drift, the migration manifest, shellcheck and actionlint run on every
+security-headers drift, the Caddy split check, the migration manifest, shellcheck and actionlint run on every
 push. Typecheck, tests, the approved.rs and details.rs builds with their
 contact-placement check, and the shop's Docker Postgres, migration drift and
 `infra/auto-service-shop/test/*.test.sh` run only for what changed since the
@@ -267,7 +264,8 @@ the same file. Which means:
 ## Environment variables
 
 **One manifest, `.github/scripts/site-env.json`, lists every name a site gets.**
-Each entry is `required` or `optional`, and a `secret` or a `variable`:
+Each entry is `{ "required": true | false, "kind": "secret" | "variable" }`,
+or `"unset"`:
 
 - `shared`: one value for all three sites, set **once at repository level**
   (Settings → Secrets and variables → Actions → Repository);
@@ -1079,12 +1077,15 @@ is retried once its 10 minute lease runs out.
   200 MB, loki and alloy about 100 MB each. If the box swaps, the logs go
   first: stop them with `docker compose stop grafana alloy loki`, the shop
   runs without them.
-- The three Astro sites run from `/srv/sites/<app>/current` (a link to
-  `releases/<name>`), one `site-<app>` container each, started only once that
-  link exists (`deploy.sh` turns on the `site-<app>` profile of every released
-  site). `deploy-site.sh <app> <name>` switches the link, recreates the
-  container, waits for it to answer `/`, rolls the link back on failure and
-  keeps the last three releases. Caddy serves a release's files itself
+- The three Astro sites run from `/srv/sites/<app>/running` and Caddy serves
+  their files from `/srv/sites/<app>/current`, both links to
+  `releases/<name>`, one `site-<app>` container each, started only once a
+  release is live (`deploy.sh` turns on the `site-<app>` profile of every
+  directory under `/srv/sites` with a `current` link, and gives a site released
+  before `running` existed its link). `deploy-site.sh <app> <name>` points
+  `running` at the release, recreates the container, waits for it to answer
+  `/`, and only then points `current` at it; on failure it points `running`
+  back and leaves `current` alone. It keeps the last three releases. Caddy serves a release's files itself
   (`/_astro/*` for a year, everything else revalidated) and hands every other
   path to node, except `/_image`, which answers 404 (no sharp at runtime).
   Every redirect comes from node: each site's 404 is on demand, so middleware
@@ -1995,16 +1996,17 @@ Steps 1, 5 and 6 are one `terraform apply`: see `infra/auto-service-shop/terrafo
 
 ## Setting up a new site
 
-1. Add the app to the manifest, `.github/scripts/site-env.json` (`sites.<app>`),
-   and to the `deploy-site` matrix; `site-env.test.ts` tells you which names its
-   code reads.
+1. Add the app to the manifest, `.github/scripts/site-env.json` (`sites.<app>`);
+   the `deploy-site` matrix follows it, and `site-env.test.ts` tells you which
+   names its code reads.
 2. Create its GitHub environment, `site-<app>` (Settings → Environments), and
    set its names there per the manifest: secrets as secrets, the rest as
    variables. Shared names are already at repository level.
 3. The GitHub App for Keystatic (see above), into the same environment.
 4. Point the domain's A record at the VPS, where Caddy serves it from
    an `import site <app>` block beside a `site-<app>` service (see
-   [The server](#the-server)). `CRM_DATABASE_URL` is not a GitHub value:
+   [The server](#the-server)); `infra/auto-service-shop/test/sites.test.sh`
+   fails until compose and the Caddyfile name the same sites as the manifest. `CRM_DATABASE_URL` is not a GitHub value:
    compose sets it on the site container.
 
 Only then the first deploy. A deploy missing a required name fails, naming it,
