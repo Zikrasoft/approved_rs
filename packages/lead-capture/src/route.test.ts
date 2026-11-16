@@ -2622,12 +2622,12 @@ describe('the Lead topic', () => {
   it('opens one topic per Lead at /start, with the summary as its first message', async () => {
     await POST(makeCtx(startUpdate('vehicle-sourcing_ru')));
 
-    const [{ id }] = await stored();
+    const [{ number }] = await stored();
     expect(api.callsTo('createForumTopic', CRM_TOKEN)).toEqual([
       expect.objectContaining({
         payload: {
           chat_id: GROUP_ID,
-          name: `#${id} · Иван Петров · Approved.rs`,
+          name: `#${number} · Иван Петров · Approved.rs`,
         },
       }),
     ]);
