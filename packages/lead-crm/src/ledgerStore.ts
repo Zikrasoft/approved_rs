@@ -7,6 +7,7 @@ import type {
   LedgerOperation as OperationRow,
   OperationPrompt as PromptRow,
 } from './generated/prisma/client.ts';
+import { lower, upper } from './enumCase.ts';
 
 const MAX_OPERATION_NOTE = 500;
 const PROMPT_TTL_MS = 7 * DAY_MS;
@@ -106,11 +107,6 @@ export function operationSums(
     total: sumsOf(operations),
   };
 }
-
-const upper = <T extends string>(value: T) =>
-  value.toUpperCase() as Uppercase<T>;
-const lower = <T extends string>(value: T) =>
-  value.toLowerCase() as Lowercase<T>;
 
 const toOperation = (row: OperationRow): LedgerOperation => ({
   id: row.id,

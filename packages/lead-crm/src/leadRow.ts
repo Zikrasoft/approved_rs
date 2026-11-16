@@ -8,11 +8,7 @@ import {
   inWorkStatusSchema,
   type StoredLead,
 } from './schema.ts';
-
-const upper = <T extends string>(value: T) =>
-  value.toUpperCase() as Uppercase<T>;
-const lower = <T extends string>(value: T) =>
-  value.toLowerCase() as Lowercase<T>;
+import { lower, upper } from './enumCase.ts';
 
 const big = (value: number | null) => (value == null ? null : BigInt(value));
 const num = (value: bigint | null) => (value == null ? null : Number(value));
