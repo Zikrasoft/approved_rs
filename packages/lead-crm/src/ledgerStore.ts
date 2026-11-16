@@ -2,7 +2,12 @@ import { z } from 'zod';
 import { roundMoney, toCents } from './money.ts';
 import { businessMonth, DAY_MS } from './businessTime.ts';
 import type { MessageKey } from './schema.ts';
-import { lockKey, type CrmDatabase, type CrmTransaction } from './database.ts';
+import {
+  crmDatabase,
+  lockKey,
+  type CrmDatabase,
+  type CrmTransaction,
+} from './database.ts';
 import type {
   LedgerOperation as OperationRow,
   OperationPrompt as PromptRow,
@@ -52,7 +57,7 @@ export type RecordOutcome =
   | { ok: false; reason: 'no_prompt' };
 
 export interface LedgerStoreOptions {
-  database: CrmDatabase;
+  database?: CrmDatabase;
 }
 
 export interface FlowSums {
@@ -119,7 +124,9 @@ const isLive = (p: OperationPrompt, now: number) =>
 
 const LEDGER_LOCK = 'crm.ledger';
 
-export function createLedgerStore({ database }: LedgerStoreOptions) {
+export function createLedgerStore({
+  database = crmDatabase,
+}: LedgerStoreOptions = {}) {
   async function readOperations(
     client: CrmTransaction = database(),
   ): Promise<LedgerOperation[]> {

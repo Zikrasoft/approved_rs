@@ -26,7 +26,7 @@ const locales = {
 
 const middleware = createLocaleMiddleware({
   locales,
-  unlocalized: { exact: ['/catalogue-build.json'], prefixes: ['/admin/'] },
+  unlocalized: { prefixes: ['/admin/'] },
   redirects: [
     { source: '/ru/old/:path*', destination: '/ru/new/:path*' },
     { source: '/legacy', destination: 'https://brand.example/ru/' },
@@ -38,16 +38,11 @@ const next = () => 'next';
 describe('createLocaleMiddleware', () => {
   it.each([
     '/api/leads',
+    '/keystatic',
     '/keystatic/collection/works',
-    '/.well-known/security.txt',
-    '/_astro/old.js',
-    '/llms.txt',
-    '/robots.txt',
-    '/favicon.ico',
+    '/.well-known/apple-app-site-association',
     '/404',
     '/404/',
-    '/sitemap-index.xml',
-    '/catalogue-build.json',
     '/admin/work-draft',
   ])('passes the unlocalized %s straight through', (path) => {
     const ctx = context(path);
@@ -55,9 +50,50 @@ describe('createLocaleMiddleware', () => {
     expect(ctx.redirect).not.toHaveBeenCalled();
   });
 
+  it.each([
+    '/_astro/old.js',
+    '/llms.txt',
+    '/robots.txt',
+    '/favicon.ico',
+    '/sitemap-index.xml',
+    '/sitemap-0.xml',
+    '/catalogue-build.json',
+    '/apple-touch-icon-precomposed.png',
+    '/og-old.png',
+    '/wp-login.php',
+    '/ru/llms.txt',
+    '/ru/old/photo.jpg',
+    '/services/.env',
+  ])('passes the file %s through, so a missing one is a plain 404', (path) => {
+    const ctx = context(path);
+    expect(middleware(ctx, next)).toBe('next');
+    expect(ctx.redirect).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['/404.5/', '/sr/404.5/'],
+    ['/services/v1.2/brakes', '/sr/services/v1.2/brakes'],
+    ['/404/x', '/sr/404/x'],
+    ['/robots.txt/', '/sr/robots.txt/'],
+    ['/ru-RU/', '/sr/ru-RU/'],
+    ['/ru/works/mapi', null],
+  ])('reads only the last segment as a file name: %s', (path, target) => {
+    const ctx = context(path);
+    const result = middleware(ctx, next);
+    if (target) expect(result).toEqual({ path: target, status: 302 });
+    else expect(result).toBe('next');
+  });
+
+  it('does not take a page that merely starts with a prefix word as unlocalized', () => {
+    expect(middleware(context('/apiary'), next)).toEqual({
+      path: '/sr/apiary',
+      status: 302,
+    });
+  });
+
   it('needs no extra unlocalized paths from the caller', () => {
     const bare = createLocaleMiddleware({ locales });
-    const ctx = context('/_astro/old.js');
+    const ctx = context('/api/leads');
     expect(bare(ctx, next)).toBe('next');
     expect(bare(context('/admin/work-draft'), next)).toEqual({
       path: '/sr/admin/work-draft',

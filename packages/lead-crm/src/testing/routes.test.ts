@@ -23,7 +23,6 @@ const isLocale = (value: string): value is 'sr' | 'en' =>
 testContactClickRoute({
   brand: 'Details',
   POST: createContactClickRoute({ notifyLead, isLocale, defaultLocale: 'sr' }),
-  readLeads: leadStore.readLeads,
 });
 
 testLeadsRoute({
@@ -53,7 +52,6 @@ testLeadsRoute({
       links: [],
     }),
   }),
-  readLeads: leadStore.readLeads,
   fields: { service: 'polishing-ceramic' },
   stored: { service: 'polishing-ceramic' },
 });

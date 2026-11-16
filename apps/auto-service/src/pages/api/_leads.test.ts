@@ -201,4 +201,4 @@ describe('a lead the server cannot take', () => {
   });
 });
 
-testLeadsRoute({ brand: 'CarLab', POST, readLeads: leadStore.readLeads });
+testLeadsRoute({ brand: 'CarLab', POST });

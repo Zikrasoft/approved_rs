@@ -5,8 +5,8 @@ import { createLeadStore } from '../store.ts';
 import { createLedgerStore } from '../ledgerStore.ts';
 import { leadComment } from '../telegram/cards.ts';
 
-const store = createLeadStore({ database: crmDatabase });
-const ledger = createLedgerStore({ database: crmDatabase });
+const store = createLeadStore();
+const ledger = createLedgerStore();
 
 const newLead = {
   brand: 'CarLab',

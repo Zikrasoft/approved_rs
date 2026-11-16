@@ -40,7 +40,7 @@ async function patchLead(
 }
 
 beforeEach(() => {
-  store = createLeadStore({ database: crmDatabase });
+  store = createLeadStore();
 });
 
 describe('appendNote', () => {
@@ -688,7 +688,6 @@ describe('insertOrMergeLead with standalone services', () => {
 
   beforeEach(() => {
     store = createLeadStore({
-      database: crmDatabase,
       standaloneServices: ['parts-order'],
     });
   });
@@ -2273,7 +2272,7 @@ describe('the Lead count alert', { timeout: 30_000 }, () => {
 
   beforeEach(() => {
     alertLeadCount.mockReset().mockResolvedValue(undefined);
-    store = createLeadStore({ database: crmDatabase, alertLeadCount });
+    store = createLeadStore({ alertLeadCount });
   });
 
   it.each([4999, 9999])(

@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { crmDatabase } from './database.ts';
 import {
   createLedgerStore,
   operationSums,
@@ -45,7 +44,7 @@ function op(
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ['Date'] });
   vi.setSystemTime(new Date(NOW));
-  ledger = createLedgerStore({ database: crmDatabase });
+  ledger = createLedgerStore();
 });
 
 afterEach(() => vi.useRealTimers());
