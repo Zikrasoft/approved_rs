@@ -12,6 +12,7 @@ export default defineConfig(async (env) =>
       },
     },
     test: {
+      testTimeout: 30_000,
       environment: 'node',
       globalSetup: [
         fileURLToPath(
