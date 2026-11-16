@@ -297,3 +297,25 @@ for (const [what, text] of [
         !error.message.includes('secret-value'),
     );
   });
+
+for (const workflow of ['ci.yml', 'publish.yml']) {
+  test(`${workflow} hands the deploy exactly the manifest's secrets, by name`, () => {
+    const text = readFileSync(`.github/workflows/${workflow}`, 'utf8');
+    assert.doesNotMatch(text, /toJSON\(secrets\)/);
+    const handed = [
+      ...text.matchAll(/"(\w+)": \$\{\{ toJSON\(secrets\.(\w+)\) \}\}/g),
+    ];
+    for (const [, key, name] of handed) assert.equal(key, name);
+    const secrets = new Set(
+      SITES.flatMap((app) =>
+        siteEnvNames(app)
+          .filter(({ kind }) => kind === 'secret')
+          .map(({ name }) => name),
+      ),
+    );
+    assert.deepEqual(
+      handed.map(([, name]) => name),
+      [...secrets].sort(),
+    );
+  });
+}
