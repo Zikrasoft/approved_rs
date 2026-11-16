@@ -74,7 +74,7 @@ export BACKUP_DIR
 stage() {
   rm -rf "$work/host"
   mkdir "$work/host"
-  cp "$here/deploy.sh" "$here/backup.sh" "$here/restore.sh" "$here/crawler-role.sh" "$work/host/"
+  cp "$here/deploy.sh" "$here/backup.sh" "$here/restore.sh" "$here/crawler-role.sh" "$here/crm-role.sh" "$work/host/"
   printf 'API_HOST=api.test\nMEDUSA_TAG=%s\nPOSTGRES_PASSWORD=x\nJWT_SECRET=leak-canary\nCRAWLER_DB_PASSWORD=c0ffeec0ffee\n' "$OLD" >"$work/host/.env"
   LOG="$work/host/log"
   export LOG
@@ -84,6 +84,9 @@ stage() {
 }
 offsite() {
   printf 'BACKUP_S3_ENDPOINT=https://s3.test\nBACKUP_S3_BUCKET=carlab-backups\nBACKUP_S3_ACCESS_KEY_ID=key-canary\nBACKUP_S3_SECRET_ACCESS_KEY=secret-canary\n' >"$work/host/.env.backup"
+}
+crm_database() {
+  printf 'CRM_DB_PASSWORD=feedfacefeed\n' >>"$work/host/.env"
 }
 crm() {
   printf 'TELEGRAM_BOT_TOKEN=bot-canary\nTELEGRAM_GROUP_ID=-100123\n' >>"$work/host/.env"
@@ -307,6 +310,27 @@ refuse 'a backup without a CRM bot posts nothing' alerted
 expect 'no .part file is left behind' test -z "$(find "$work/backups" -name '*.part')"
 
 stage
+crm_database
+mkdir "$work/backups7"
+touch -t 202001010000 "$work/backups7/crm-old.dump"
+BACKUP_DIR="$work/backups7"
+export BACKUP_DIR
+expect 'a backup with a CRM database succeeds' run backup.sh ''
+expect 'the CRM database is dumped beside the shop' grep -qx DUMP "$work"/backups7/crm-2*.dump
+expect 'the CRM dump is taken by the database owner' grep -q 'pg_dump -U carlab -d crm --format=custom' "$LOG"
+refuse 'a week-old CRM dump is removed' test -e "$work/backups7/crm-old.dump"
+
+stage
+BACKUP_DIR="$work/backups7"
+expect 'a backup without a CRM database succeeds' run backup.sh ''
+refuse 'a backup without a CRM database dumps no crm' grep -q -- '-d crm' "$LOG"
+
+stage
+crm_database
+expect 'a deploy with a CRM database succeeds' run deploy.sh "$NEW"
+expect 'the deploy sets up the CRM database' test "$(grep -c 'psql -q -v ON_ERROR_STOP=1 -U carlab -d carlab' "$LOG")" -eq 2
+
+stage
 mkdir "$work/host/.deploy.lock" "$work/backups3"
 BACKUP_DIR="$work/backups3"
 export BACKUP_DIR
@@ -376,7 +400,7 @@ expect 'a backup with a bucket succeeds' run backup.sh
 expect 'the new dump goes to the bucket through a pinned rclone image' \
   grep -Eq "run --rm .*-v $work/backups4:/backups rclone/rclone:[0-9]+\.[0-9]+\.[0-9]+ copy /backups :s3:carlab-backups --include \*-2[^ ]*Z\.\*$" "$LOG"
 expect 'copies older than 30 days are deleted from the bucket' \
-  grep -Eq "rclone/rclone:[0-9.]+ delete :s3:carlab-backups --min-age 30d --include db-\*\.dump$" "$LOG"
+  grep -Eq "rclone/rclone:[0-9.]+ delete :s3:carlab-backups --min-age 30d --include \{db,crm\}-\*\.dump$" "$LOG"
 expect 'rclone gets the endpoint and keys through an env file' grep -qx 'RCLONE_S3_SECRET_ACCESS_KEY=secret-canary' "$LOG.env"
 expect 'the env file carries only the bucket credentials' test "$(grep -c . "$LOG.env")" -eq "$(grep -c '^RCLONE_S3_' "$LOG.env")"
 refuse 'no key reaches a command line' grep -q 'canary' "$LOG"
@@ -416,7 +440,7 @@ refuse 'fetch without a bucket fails' run backup.sh fetch
 unset BACKUP_DIR
 
 expect "the scripts ran and printed something" test -s "$work/printed"
-refuse "no script prints a secret from .env" grep -Eq 'leak-canary|secret-canary|key-canary|bot-canary|c0ffeec0ffee' "$work/printed"
+refuse "no script prints a secret from .env" grep -Eq 'leak-canary|secret-canary|key-canary|bot-canary|c0ffeec0ffee|feedfacefeed' "$work/printed"
 
 expect 'the image health check asks Postgres and Typesense through /health/ready' \
   grep -q 'http://127.0.0.1:9000/health/ready ' "$here/Dockerfile"

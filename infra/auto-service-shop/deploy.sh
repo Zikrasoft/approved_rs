@@ -60,6 +60,7 @@ docker compose run --rm -T medusa \
   node_modules/.bin/medusa exec ./src/scripts/seed-production.js
 
 ./crawler-role.sh
+./crm-role.sh
 
 grep -v '^MEDUSA_TAG=' .env >.env.next
 echo "MEDUSA_TAG=$tag" >>.env.next
