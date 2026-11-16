@@ -30,7 +30,7 @@ URL per bot, so `api/telegram-webhook.ts` and `api/reminders.ts` live only in
 capture bots, one per brand: each one talks to visitors, writes a lead, and has
 its own `api/telegram-capture.ts` webhook in its own project
 ([ADR-0030](../adr/0030-a-capture-bot-per-brand-takes-the-telegram-contact.md)).
-All three apps write to the same `data/leads.json` in the same Vercel Blob store
+All three apps write to the same `crm` Postgres database
 and are separated by the lead's `brand` field, which the server stamps on
 (`createBrandBot({ brand })`) — a visitor cannot set it.
 
@@ -389,10 +389,10 @@ token. What fires and when: [analytics.md](analytics.md#the-server-lead-event-fr
 
 ### Storage and cron
 
-| Variable                | approved.rs | carlab.rs | details.rs | Without it                                               |
-| ----------------------- | ----------- | --------- | ---------- | -------------------------------------------------------- |
-| `BLOB_READ_WRITE_TOKEN` | ✅ auto     | ✅ auto   | ✅ auto    | leads are not stored and the routes fail                 |
-| `CRON_SECRET`           | ✅          | —         | —          | `/api/reminders` answers 401 — the digest never goes out |
+| Variable           | approved.rs | carlab.rs | details.rs | Without it                                               |
+| ------------------ | ----------- | --------- | ---------- | -------------------------------------------------------- |
+| `CRM_DATABASE_URL` | ✅          | ✅        | ✅         | leads are not stored and the routes fail                 |
+| `CRON_SECRET`      | ✅          | —         | —          | `/api/reminders` answers 401 — the digest never goes out |
 
 ### Shop Orders (ADR-0053)
 
@@ -475,8 +475,8 @@ sends the current value.
 3. Once both sides run the new value, empty `<NAME>_PREVIOUS` everywhere and
    redeploy or restart again.
 
-**Do not set `BLOB_READ_WRITE_TOKEN` by hand** — it appears on its own once the Blob
-store is connected to the project (see the next section).
+`CRM_DATABASE_URL` is the same value in all three projects (see "The `crm`
+database shared by three sites").
 
 ### Keystatic (needed by all three projects)
 
@@ -512,47 +512,50 @@ Changing the domain means editing `site:` in `astro.config.mjs` and `env.SITE` i
 
 ---
 
-## One Blob store shared by three projects
+## The `crm` database shared by three sites
 
-All three apps create the storage identically:
+Leads, digests and the Balance live in one Postgres database, `crm`, inside the
+shop's Postgres on the VPS (`infra/auto-service-shop`), next to but separate
+from the shop's own `carlab` database. The bot and the cron live only in
+approved.rs and have to see all three brands' leads, so **all three sites get
+the same `CRM_DATABASE_URL`**:
 
-```ts
-createVercelBlobStorage({ path: 'data/leads.json' });
+```
+CRM_DATABASE_URL=postgres://crm:<CRM_DB_PASSWORD>@postgres:5432/crm
 ```
 
-The same key. So for every brand's leads to sit in one file — and they must,
-because the bot and the cron live only in approved.rs and have to see all three
-brands' leads — **there must be one store, connected to all three projects**.
+`postgres` resolves on the compose `data` network; a site service joins it with
+`networks: [data, edge]`. Brands are separated by the lead's `brand` field
+(`Approved.rs` / `CarLab` / `Details`), stamped by the server.
 
-1. Vercel Dashboard → Storage → Create → Blob (once, not one per project)
-2. On the created store → Connect Project → connect all three projects
-3. Each project then grows its own `BLOB_READ_WRITE_TOKEN` pointing at that same
-   store
+1. Put `CRM_DB_PASSWORD=$(openssl rand -hex 32)` into `/srv/carlab/.env`.
+2. `./deploy.sh` (or `./crm-role.sh` alone) creates the `crm` role and the
+   `crm` database it owns; the role can reach nothing else, and `PUBLIC` loses
+   `CONNECT` on both databases.
+3. Apply the schema before the sites start, from the repo checkout or a site
+   image: `CRM_DATABASE_URL=… pnpm --filter @podbor/lead-crm db:deploy`
+   (`prisma migrate deploy` over `packages/lead-crm/prisma/migrations`). Every
+   CRM migration is additive, like the shop's, so a site still on the previous
+   build keeps working.
+4. Once, move the old Blob data in: from `packages/lead-crm`, with
+   `BLOB_READ_WRITE_TOKEN` from any of the three Vercel projects,
+   `node --env-file=<env> --experimental-strip-types scripts/import-blob.ts --dry-run`
+   prints counts only (Leads, digests, operations, prompts, unreadable records,
+   skipped order markers), never contents. Without `--dry-run` and with
+   `CRM_DATABASE_URL` set, it upserts everything in one transaction keyed on the
+   old numeric ids (`legacy_id`), digest days, prompt keys and payload hashes,
+   so a rerun changes nothing. The Blob store is only read. Order markers are
+   not imported: nothing has read them since the old shop went, and a Lead's
+   unique `(brand, order_id)` is what keeps one order to one Lead now.
 
-Never set `BLOB_READ_WRITE_TOKEN` by hand: a value copied from another project
-easily drifts from the store, and some leads end up in a file the bot cannot see.
+The nightly `backup.sh` dumps `crm` beside `carlab` (`crm-<stamp>.dump`, same
+retention and off-host copy) once `CRM_DB_PASSWORD` is set. Restore it with
+`docker compose exec -T postgres pg_restore -U carlab -d crm --clean --if-exists --no-owner --role=crm --single-transaction <crm-<stamp>.dump`.
 
-Brands are separated by the lead's `brand` field (`Approved.rs` / `CarLab` /
-`Details`), stamped by the server. There is no per-brand file.
-
-A second file in the same store does occur, though: `data/leads-unreadable.json`.
-Records the schema stopped accepting — after a schema change, for instance — are
-copied there. It appears by itself when such a record is met, and the admin gets a
-Telegram message with the count and the name of the site that found it. **Nothing is
-deleted** from `data/leads.json` in the process: the records stay where they are
-until someone sorts them out by hand. Nothing ever disappears from the blob
-automatically.
-
-`data/ledger.json` is the third file: the Balance. It appears on the first Lead
-write after the release that introduced it, opened with whatever the old
-records said the owner still owed, and the same write drops those old money
-fields from `data/leads.json`. So that release needs three things around it —
-a backup of `data/leads.json` before it deploys, a check that `data/ledger.json`
-exists and «💶 Мне должны» matches the old «🔴 Мне должны» after the first Lead
-write, and the expectation that the first digest lists every open Lead untouched
-for 7+ days, every capture-bot `/start` Lead included — only a placeholder
-Contact click retires itself as a Ghost lead. Steps 1 and 8 of
-[`crm-bot-migration.md`](crm-bot-migration.md) walk through them.
+Locally, `docker compose -f packages/lead-crm/docker-compose.test.yml up -d`
+gives a throwaway Postgres on `127.0.0.1:55452`; point `CRM_DATABASE_URL` at
+`postgres://postgres:postgres@127.0.0.1:55452/crm` and run `db:deploy`. The
+tests start their own container on a free port and remove it afterwards.
 
 ---
 
@@ -1763,7 +1766,7 @@ For a new site (this is how all three were set up):
    to life. After that GitHub Actions deploys
 6. Settings → Domains → add `carlab.rs` (or `details.rs`) and set the DNS at the
    registrar per Vercel's instructions
-7. Storage → connect **the same** Blob store approved.rs uses
+7. Settings → Environment Variables → the same `CRM_DATABASE_URL` approved.rs uses
 8. Settings → General → copy the Project ID into the GitHub secret
    (`VERCEL_PROJECT_ID_AUTO_SERVICE` / `VERCEL_PROJECT_ID_DETAILING`)
 
@@ -1774,7 +1777,7 @@ There is no need to disable the git trigger in the dashboard —
 
 ## The order for setting up a new site
 
-First the Vercel project with its domain and variables, the shared Blob store, the
+First the Vercel project with its domain and variables, the shared `CRM_DATABASE_URL`, the
 GitHub App for Keystatic and the Project ID in the secrets — and only then the first
 deploy. A deploy started before the project has its variables will build
 successfully and ship a site with `undefined` in the contacts and a form that fails.
@@ -1854,7 +1857,7 @@ in_progress / won / lost / postponed, and lost is the archive. 🗣 on the card,
 owner's first message in the Lead's Topic, moves a new Lead into negotiations. A
 postponed Lead comes back on its date to the status it left, with a DM reminder
 to the owner. Leads are stored
-in Vercel Blob (`data/leads.json`, private access), with no external database.
+in the `crm` Postgres database on the shop VPS.
 
 The owner and the admin each have to message the bot `/start` once before it can
 send them direct messages (including the notice of a Balance operation the other
@@ -2053,6 +2056,6 @@ Additionally for approved.rs:
 
 - [ ] The buttons in the bot's DM work (meaning the webhook and
       `TELEGRAM_WEBHOOK_SECRET` match)
-- [ ] All three brands' leads are visible to the bot (meaning the Blob store really
-      is shared)
+- [ ] All three brands' leads are visible to the bot (meaning all three sites really
+      share one `CRM_DATABASE_URL`)
 - [ ] The geo banner appears when arriving from DE/RS/ES (VPN)

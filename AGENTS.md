@@ -70,11 +70,11 @@ bare node where `import.meta.env` does not exist.
 deploy filter in `ci.yml` is `turbo --filter="...[<deployed tag>]"` — the
 leading dots pull in the dependents of a changed package, so touching
 `@podbor/lead-crm` or `@podbor/i18n` marks all three sites stale at once. All
-three write the same `data/leads.json` blob, so shipping a changed package to
-one site and not the others puts two versions of the lead schema on one file:
-one site writes records another cannot parse, and they land in
-`data/leads-unreadable.json` for someone to sort out by hand. Nothing else
-enforces this — no test and no schema can see a half-deployed package. Do not
+three read and write the same `crm` Postgres database, so shipping a changed
+package to one site and not the others runs two versions of the CRM against one
+schema: a site built before a `packages/lead-crm` migration reads columns that
+moved or misses new ones. Nothing else enforces this — no test can see a
+half-deployed package. Do not
 narrow that filter to the app directories, and do not move a `deployed/*` tag
 forward by hand.
 
@@ -311,7 +311,7 @@ This site is Astro SSG (`output: 'static'`/prerendered, no SSR) — `.astro` fro
 - `src/lib/safeMarked.ts` uses `sanitize-html` instead of a custom `marked` renderer + URL-scheme regex — adopted after the regex-based version shipped a protocol-relative-URL bypass that review caught only by hand-testing payloads.
 - `packages/i18n/src/translate/openaiChat.ts` uses the official `openai` SDK instead of a hand-rolled `fetch` wrapper — gets typed errors and automatic retry-with-backoff on 429/5xx for free.
 
-Don't reach for a library reflexively, though — a hand-rolled ~10-line helper that's already correct and purpose-built to one exact call site (e.g. `packages/lead-crm/src/storage/retry.ts`'s jittered CAS-retry backoff) doesn't get simpler by wrapping it in a generic library's config API. The bar is: does an existing library solve a real edge case this code either gets wrong today or would have to re-solve by hand, not "is there a package for this."
+Don't reach for a library reflexively, though — a hand-rolled ~10-line helper that's already correct and purpose-built to one exact call site (e.g. `packages/i18n`'s leaf cache key) doesn't get simpler by wrapping it in a generic library's config API. The bar is: does an existing library solve a real edge case this code either gets wrong today or would have to re-solve by hand, not "is there a package for this."
 
 This only applies to build-time code (`.astro` frontmatter, `src/lib/`, `scripts/`). Code that ships to the browser (client-side `<script>`, hydrated islands) still carries a real bundle-size cost — weigh a new client dependency normally there.
 

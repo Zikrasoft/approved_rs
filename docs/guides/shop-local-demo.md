@@ -225,8 +225,8 @@ hand after backend edits there.
 `astro dev` does not put `.env.local` into `process.env`, and the lead route
 reads the Telegram variables from there, so `dev:shop` starts it under
 `node --env-file-if-exists=.env.local`. The placeholders are enough: the Lead
-is stored in `apps/auto-service/.local-data/data/leads.json` (gitignored) and
-the Telegram notification fails in the log. The Astro config fetches the part
+is stored in the local `crm` Postgres named by `CRM_DATABASE_URL` (see
+`.env.example`) and the Telegram notification fails in the log. The Astro config fetches the part
 pages from Medusa at load, so the storefront waits for the backend; started
 with the backend down, it stops with «Could not read the catalogue from
 MEDUSA_BACKEND_URL (…)» naming the URL it tried.
