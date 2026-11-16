@@ -9,6 +9,11 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
+    globalSetup: [
+      fileURLToPath(
+        import.meta.resolve('@podbor/lead-crm/testing/database-server'),
+      ),
+    ],
     coverage: {
       provider: 'v8',
       include: ['src/**/*.{ts,astro}'],

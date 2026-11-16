@@ -1,0 +1,17 @@
+enum LeadStatus {
+  NEW
+  NEGOTIATIONS
+  IN_PROGRESS
+  WON
+  LOST
+  POSTPONED
+
+  @@map("lead_status")
+}
+
+enum OperationType {
+  PAYOUT
+  SETTLEMENT
+
+  @@map("operation_type")
+}

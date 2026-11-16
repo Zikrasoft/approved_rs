@@ -6,9 +6,11 @@ import {
   createEnsureLeadTopic,
   createNotifyLead,
 } from './notifyLead.ts';
-import { storedLeadSchema, type LeadInput, type StoredLead } from './schema.ts';
+import { type LeadInput, type StoredLead } from './schema.ts';
 import { createLeadStore } from './store.ts';
-import { createMemoryStorage } from './storage/memory.testing.ts';
+import { crmDatabase } from './database.ts';
+
+const LEAD_ID = '0196f8a0-0000-7000-8000-000000000042';
 
 const insertOrMergeLead = vi.fn();
 const setTelegramMessage = vi.fn();
@@ -16,8 +18,7 @@ const sendLeadNotification = vi.fn();
 const refreshLeadCard = vi.fn();
 
 const realStore = createLeadStore({
-  storage: createMemoryStorage(),
-  schema: storedLeadSchema,
+  database: crmDatabase,
 });
 
 const store = {
@@ -41,7 +42,7 @@ const baseData: LeadInput = {
 const storedLead: StoredLead = {
   ...baseData,
   services: [],
-  id: 42,
+  id: LEAD_ID,
   status: 'new',
   telegramChatId: null,
   telegramMessageId: null,
@@ -97,7 +98,7 @@ describe('notifyLead', () => {
 
   it('persists the telegram message id after a successful notification', async () => {
     await notifyLead(baseData, '[test]');
-    expect(setTelegramMessage).toHaveBeenCalledWith(42, -100, 999);
+    expect(setTelegramMessage).toHaveBeenCalledWith(LEAD_ID, -100, 999);
   });
 
   it('does not throw when sendLeadNotification fails', async () => {
@@ -117,7 +118,7 @@ describe('notifyLead', () => {
     const notified = vi.mocked(sendLeadNotification).mock.calls[0][0];
     expect(notified.name).toBe('Иван');
     expect(notified.status).toBe('new');
-    expect(typeof notified.id).toBe('number');
+    expect(typeof notified.id).toBe('string');
   });
 
   it('when merged into an existing lead, refreshes its card instead of sending a new Telegram message', async () => {
@@ -216,7 +217,7 @@ describe('ensureLeadCard', () => {
     await ensureLeadCard(storedLead);
 
     expect(sendLeadNotification).toHaveBeenCalledWith(storedLead);
-    expect(setTelegramMessage).toHaveBeenCalledWith(42, -100, 999);
+    expect(setTelegramMessage).toHaveBeenCalledWith(LEAD_ID, -100, 999);
   });
 
   it('leaves a lost lead without a card — deleting it is how it was retired', async () => {
@@ -233,7 +234,7 @@ describe('ensureLeadCard', () => {
 
     expect(errorSpy).toHaveBeenCalledWith(
       '[lead-crm] failed to persist the group card id',
-      expect.objectContaining({ leadId: 42 }),
+      expect.objectContaining({ leadId: LEAD_ID }),
     );
     errorSpy.mockRestore();
   });
@@ -246,7 +247,7 @@ describe('ensureLeadCard', () => {
 
     expect(errorSpy).toHaveBeenCalledWith(
       '[lead-crm] no lead row to attach the group card to',
-      expect.objectContaining({ leadId: 42 }),
+      expect.objectContaining({ leadId: LEAD_ID }),
     );
     errorSpy.mockRestore();
   });
@@ -268,7 +269,7 @@ describe('notifyLead — failures that must not sink the lead', () => {
 
     expect(errorSpy).toHaveBeenCalledWith(
       "[test] failed to refresh the merged lead's card",
-      expect.objectContaining({ leadId: 42 }),
+      expect.objectContaining({ leadId: LEAD_ID }),
     );
     errorSpy.mockRestore();
   });
@@ -284,7 +285,7 @@ describe('notifyLead — failures that must not sink the lead', () => {
 
     expect(errorSpy).toHaveBeenCalledWith(
       '[test] failed to persist telegram message id',
-      expect.objectContaining({ leadId: 42 }),
+      expect.objectContaining({ leadId: LEAD_ID }),
     );
     errorSpy.mockRestore();
   });
@@ -375,19 +376,19 @@ describe('afterStatusChange', () => {
       'a plain change',
       { status: 'new' as const },
       { author },
-      ['card:42', 'status:42:admin:222', 'digest:42'],
+      [`card:${LEAD_ID}`, `status:${LEAD_ID}:admin:222`, `digest:${LEAD_ID}`],
     ],
     [
       'a change from a DM',
       { status: 'lost' as const },
       { surface, author },
       [
-        'card:42',
-        'unpin:42',
-        'topic:42:null',
-        'dm:7:8:42:owner',
-        'status:42:admin:222',
-        'digest:42',
+        `card:${LEAD_ID}`,
+        `unpin:${LEAD_ID}`,
+        `topic:${LEAD_ID}:null`,
+        `dm:7:8:${LEAD_ID}:owner`,
+        `status:${LEAD_ID}:admin:222`,
+        `digest:${LEAD_ID}`,
       ],
     ],
     [
@@ -395,30 +396,35 @@ describe('afterStatusChange', () => {
       { status: 'won' as const },
       { author },
       [
-        'card:42',
-        'unpin:42',
-        'topic:42:null',
-        'status:42:admin:222',
-        'digest:42',
+        `card:${LEAD_ID}`,
+        `unpin:${LEAD_ID}`,
+        `topic:${LEAD_ID}:null`,
+        `status:${LEAD_ID}:admin:222`,
+        `digest:${LEAD_ID}`,
       ],
     ],
     [
       'a Lead with a topic',
       { status: 'won' as const, topicId: 5 },
       {},
-      ['card:42', 'summary:42', 'unpin:42', 'topic:42:99'],
+      [
+        `card:${LEAD_ID}`,
+        `summary:${LEAD_ID}`,
+        `unpin:${LEAD_ID}`,
+        `topic:${LEAD_ID}:99`,
+      ],
     ],
     [
       'a topic whose summary could not be refreshed',
       { status: 'negotiations' as const, topicId: 5, name: 'broken' },
       {},
-      ['card:42', 'summary:42'],
+      [`card:${LEAD_ID}`, `summary:${LEAD_ID}`],
     ],
     [
       'the ghost sweep',
       { status: 'lost' as const },
       undefined,
-      ['card:42', 'unpin:42', 'topic:42:null'],
+      [`card:${LEAD_ID}`, `unpin:${LEAD_ID}`, `topic:${LEAD_ID}:null`],
     ],
   ])('%s', async (_, patch, options, expected) => {
     const error = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -432,8 +438,7 @@ describe('afterStatusChange', () => {
 describe('dropFromDigest', () => {
   const editDigest = vi.fn();
   const digestStore = createLeadStore({
-    storage: createMemoryStorage(),
-    schema: storedLeadSchema,
+    database: crmDatabase,
   });
   const dropFromDigest = createDropFromDigest({
     store: digestStore,
@@ -491,7 +496,7 @@ describe('dropFromDigest', () => {
   });
 
   it('edits nothing for a Lead the digest does not show', async () => {
-    await dropFromDigest(999);
+    await dropFromDigest('0196f8a0-0000-7000-8000-000000000999');
     expect(editDigest).not.toHaveBeenCalled();
   });
 });
@@ -502,8 +507,7 @@ describe('ensureLeadTopic', () => {
   const refreshLeadTopic = vi.fn();
   const deleteLeadTopic = vi.fn();
   const topicStore = createLeadStore({
-    storage: createMemoryStorage(),
-    schema: storedLeadSchema,
+    database: crmDatabase,
   });
   const ensureLeadTopic = createEnsureLeadTopic({
     store: topicStore,
@@ -585,7 +589,11 @@ describe('ensureLeadTopic', () => {
   });
 
   it('hands back the Lead when its row is gone', async () => {
-    const lead = { ...storedLead, id: 999, telegramId: 9 };
+    const lead = {
+      ...storedLead,
+      id: '0196f8a0-0000-7000-8000-000000000999',
+      telegramId: 9,
+    };
     await expect(ensureLeadTopic(lead)).resolves.toBe(lead);
     const topical = { ...lead, topicId: 5 };
     await expect(ensureLeadTopic(topical)).resolves.toBe(topical);

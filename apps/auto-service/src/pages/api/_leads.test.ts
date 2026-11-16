@@ -1,30 +1,15 @@
+import '@podbor/lead-crm/testing/database';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PARTS_ORDER_SERVICE, serviceLabel } from '@podbor/brands';
-import { LEADS_PATH } from '@podbor/lead-crm';
 import {
   ORDER_CANCELED,
   ORDER_ID_FIELD,
   ORDER_OUTCOME_FIELD,
 } from '@podbor/lead-crm/fields';
 import { PARTS_ORDER_COPY } from '@podbor/lead-crm/parts-order-copy';
-import { recordBotApi, type MemoryStorage } from '@podbor/lead-crm/testing';
+import { recordBotApi } from '@podbor/lead-crm/testing';
 import { content } from '@/i18n/content';
 import { DEMAND_PARTS_FIELD } from '@/utils/demand';
-
-const memory = vi.hoisted(() => {
-  const storages = new Map<string, MemoryStorage>();
-  return {
-    storages,
-    async module(name: string) {
-      const { createMemoryStorage } = await import('@podbor/lead-crm/testing');
-      const storageAt = (path: string) => {
-        if (!storages.has(path)) storages.set(path, createMemoryStorage());
-        return storages.get(path)!;
-      };
-      return { [name]: storageAt };
-    },
-  };
-});
 
 const pending = vi.hoisted(() => [] as Promise<unknown>[]);
 const SHOP_LEAD_SECRET = vi.hoisted(() => {
@@ -32,9 +17,6 @@ const SHOP_LEAD_SECRET = vi.hoisted(() => {
   return process.env.SHOP_LEAD_SECRET;
 });
 
-vi.mock('@podbor/lead-crm/storage/local', () =>
-  memory.module('localLeadStorage'),
-);
 vi.mock('@vercel/functions', () => ({
   waitUntil: (promise: Promise<unknown>) => pending.push(promise),
 }));
@@ -47,6 +29,7 @@ vi.mock('@/lib/shopEvents', async (original) => ({
 }));
 
 import { POST } from './leads';
+import { leadStore } from '@/lib/crm';
 
 const api = recordBotApi();
 vi.stubGlobal('fetch', api.fetch);
@@ -99,7 +82,7 @@ describe('a placed parts order posted to /api/leads', () => {
     await Promise.all(pending);
 
     expect(response.status).toBe(401);
-    expect(memory.storages.get(LEADS_PATH)?.current() ?? []).toEqual([]);
+    expect(await leadStore.readLeads()).toEqual([]);
   });
 
   it('stores the order Lead and posts its card to the CRM group', async () => {
@@ -107,7 +90,7 @@ describe('a placed parts order posted to /api/leads', () => {
     await Promise.all(pending);
 
     expect(response.status).toBe(201);
-    expect(memory.storages.get(LEADS_PATH)?.current()).toEqual([
+    expect(await leadStore.readLeads()).toEqual([
       expect.objectContaining({
         brand: 'CarLab',
         service: PARTS_ORDER_SERVICE,
@@ -141,7 +124,7 @@ describe('a parts order cancelled in the shop admin', () => {
 
     expect(refused.status).toBe(401);
     expect(response.status).toBe(204);
-    expect(memory.storages.get(LEADS_PATH)?.current()).toEqual([
+    expect(await leadStore.readLeads()).toEqual([
       expect.objectContaining({ orderId: 'order_1', status: 'lost' }),
     ]);
   });

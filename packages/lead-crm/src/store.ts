@@ -1,5 +1,6 @@
-import { logError } from './logError.ts';
+import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
+import { logError } from './logError.ts';
 import { isPhoneContact } from './contactShape.ts';
 import { inWorkStatus, isClosed, isInWork } from './schema.ts';
 import type {
@@ -11,11 +12,16 @@ import type {
   StoredLead,
 } from './schema.ts';
 import type { PromptKey } from './promptKey.ts';
-import type { StoredLeadSchema } from './schema.ts';
-import { storedRecordsSchema, type LeadStorage } from './storage/types.ts';
-import { retryOnConflict } from './storage/retry.ts';
+import { storedLeadSchema } from './schema.ts';
 import { FAILED_CHECKOUTS_PER_CONTACT_HOUR } from './limits.ts';
-import { LEADS_PATH } from './quarantine.ts';
+import {
+  isUniqueViolation,
+  lockKey,
+  type CrmDatabase,
+  type CrmTransaction,
+} from './database.ts';
+import { CLOSED, leadData, toStoredLead } from './leadRow.ts';
+import { Prisma } from './generated/prisma/client.ts';
 import { businessDay, DAY_MS } from './businessTime.ts';
 import {
   appendNote,
@@ -65,13 +71,12 @@ export interface Digest {
   due: StoredLead[];
 }
 
-const postedDigestSchema = z.object({
-  messageId: z.number().int(),
-  dueIds: z.array(z.number().int()),
-  staleIds: z.array(z.number().int()),
-  hidden: z.number().int(),
-});
-export type PostedDigest = z.infer<typeof postedDigestSchema>;
+export interface PostedDigest {
+  messageId: number;
+  dueIds: string[];
+  staleIds: string[];
+  hidden: number;
+}
 export type DigestRows = Omit<PostedDigest, 'messageId'>;
 
 export interface OpenDigest {
@@ -80,24 +85,11 @@ export interface OpenDigest {
   hidden: number;
 }
 
-const digestMarkSchema = z.object({
-  type: z.literal('digest'),
-  day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  createdAt: z.string(),
-  posted: postedDigestSchema.optional(),
-});
-type DigestMark = z.infer<typeof digestMarkSchema>;
-
 function lastActionAt(lead: StoredLead): number {
   return Math.max(
     Date.parse(lead.statusChangedAt),
     lead.lastActivityAt ? Date.parse(lead.lastActivityAt) : 0,
   );
-}
-
-interface StoreRecords {
-  leads: StoredLead[];
-  digests: DigestMark[];
 }
 
 function digestOf(leads: StoredLead[], now: Date): Digest {
@@ -114,9 +106,7 @@ function digestOf(leads: StoredLead[], now: Date): Digest {
 }
 
 export interface LeadStoreOptions {
-  storage: LeadStorage;
-  schema: StoredLeadSchema;
-  quarantine?: (entries: unknown[]) => Promise<void>;
+  database: CrmDatabase;
   alertLeadCount?: (count: number) => Promise<void>;
   standaloneServices?: readonly string[];
 }
@@ -124,12 +114,6 @@ export interface LeadStoreOptions {
 const HOUR_MS = 60 * 60 * 1000;
 
 export const LEAD_COUNT_ALERTS: readonly number[] = [5000, 10000];
-
-const promptedAt =
-  ({ chatId, messageId }: PromptKey) =>
-  (lead: StoredLead) =>
-    lead.pendingPrompt?.chatId === chatId &&
-    lead.pendingPrompt?.messageId === messageId;
 
 export const GHOST_LEAD_RETENTION_MS = DAY_MS;
 
@@ -200,15 +184,6 @@ function mergeTarget(
   return visited ? { kind: 'merge', lead: visited } : { kind: 'new' };
 }
 
-function isIdleTopic(lead: StoredLead, now: Date): boolean {
-  return (
-    lead.topicId != null &&
-    !lead.topicClosed &&
-    lead.topicActiveAt == null &&
-    now.getTime() - Date.parse(lead.createdAt) >= TOPIC_IDLE_MS
-  );
-}
-
 function pickedServices(services: string[]) {
   return { service: services[0] ?? '', services };
 }
@@ -220,29 +195,6 @@ function isGhostLead(lead: StoredLead, now: Date): boolean {
     untouched(lead) &&
     now.getTime() - Date.parse(lead.visitorActiveAt ?? lead.createdAt) >=
       GHOST_LEAD_RETENTION_MS
-  );
-}
-
-function newestOpen(
-  leads: StoredLead[],
-  brand: string,
-  matches: (lead: StoredLead) => boolean,
-): StoredLead | undefined {
-  return leads
-    .filter((l) => l.brand === brand && !isClosed(l) && matches(l))
-    .sort((a, b) => a.id - b.id)
-    .at(-1);
-}
-
-function supersede(leads: StoredLead[], landed: StoredLead): StoredLead[] {
-  if (landed.telegramId == null) return leads;
-  return leads.map((l) =>
-    l.id !== landed.id &&
-    l.brand === landed.brand &&
-    l.telegramId === landed.telegramId &&
-    l.capturePrompt
-      ? { ...l, capturePrompt: null }
-      : l,
   );
 }
 
@@ -282,153 +234,132 @@ export function resumePatch(lead: StoredLead): Partial<StoredLead> {
   };
 }
 
-const unreadableId = z.object({
-  id: z.coerce
-    .number()
-    .int()
-    .positive()
-    .max(Number.MAX_SAFE_INTEGER - 1),
-});
+const leadId = z.uuid();
 
-function unreadableIdFloor(entries: unknown[]): number {
-  return entries.reduce<number>((max, entry) => {
-    const parsed = unreadableId.safeParse(entry);
-    return parsed.success && parsed.data.id > max ? parsed.data.id : max;
-  }, 0);
+const isLeadId = (id: string) => leadId.safeParse(id).success;
+
+const OPEN_STATUSES = [
+  'NEW',
+  'NEGOTIATIONS',
+  'IN_PROGRESS',
+  'POSTPONED',
+] as const;
+
+const IN_ORDER: Prisma.LeadOrderByWithRelationInput[] = [
+  { createdAt: 'asc' },
+  { id: 'asc' },
+];
+const NEWEST_FIRST: Prisma.LeadOrderByWithRelationInput[] = [
+  { createdAt: 'desc' },
+  { id: 'desc' },
+];
+
+const dayOf = (now: Date) => new Date(`${businessDay(now)}T00:00:00Z`);
+
+type LeadPatch = Partial<StoredLead>;
+
+async function lockedLead(
+  tx: CrmTransaction,
+  where: Prisma.Sql,
+): Promise<StoredLead | undefined> {
+  const [locked] = await tx.$queryRaw<{ id: string }[]>`
+    SELECT id FROM leads WHERE ${where}
+    ORDER BY created_at, id LIMIT 1 FOR UPDATE`;
+  if (!locked) return undefined;
+  return toStoredLead(
+    await tx.lead.findUniqueOrThrow({ where: { id: locked.id } }),
+  );
+}
+
+function candidatesFor(data: LeadInput): Prisma.Sql {
+  const matches = [
+    data.visitorId != null && Prisma.sql`visitor_id = ${data.visitorId}`,
+    hasRealContact(data.contact) && Prisma.sql`contact = ${data.contact}`,
+    data.orderId != null && Prisma.sql`order_id = ${data.orderId}`,
+  ].filter((clause) => clause !== false);
+  return matches.length
+    ? Prisma.sql`brand = ${data.brand} AND (${Prisma.join(matches, ' OR ')})`
+    : Prisma.sql`FALSE`;
 }
 
 export function createLeadStore({
-  storage,
-  schema,
-  quarantine,
+  database,
   alertLeadCount,
   standaloneServices = [],
 }: LeadStoreOptions) {
-  function newStoredLead(data: LeadInput, id: number): StoredLead {
+  function newStoredLead(
+    data: LeadInput,
+    id: string = randomUUID(),
+  ): StoredLead {
     const now = new Date().toISOString();
-    return schema.parse({ ...data, id, statusChangedAt: now, createdAt: now });
-  }
-
-  async function readSnapshot(): Promise<
-    StoreRecords & { unreadable: unknown[]; version: string | undefined }
-  > {
-    const { raw, version } = await storage.read();
-    if (raw === undefined) {
-      return { leads: [], digests: [], unreadable: [], version };
-    }
-    const records = storedRecordsSchema.safeParse(raw);
-    if (!records.success) {
-      console.error('[lead-crm] stored leads are not an array', {
-        path: LEADS_PATH,
-        type: typeof raw,
-      });
-      throw new Error(
-        `[lead-crm] stored leads are ${typeof raw}, not an array — refusing to overwrite`,
-      );
-    }
-    const leads: StoredLead[] = [];
-    const digests: DigestMark[] = [];
-    const unreadable: unknown[] = [];
-    for (const entry of records.data) {
-      const digest = digestMarkSchema.safeParse(entry);
-      if (digest.success) {
-        digests.push(digest.data);
-        continue;
-      }
-      const parsed = schema.safeParse(entry);
-      if (parsed.success) leads.push(parsed.data);
-      else unreadable.push(entry);
-    }
-    return { leads, digests, unreadable, version };
-  }
-
-  async function updateRecords(
-    mutate: (records: StoreRecords, idFloor: number) => Partial<StoreRecords>,
-  ): Promise<StoreRecords> {
-    const { next, unreadable } = await retryOnConflict(async () => {
-      const { unreadable, version, ...current } = await readSnapshot();
-      const mutated = {
-        ...current,
-        ...mutate(current, unreadableIdFloor(unreadable)),
-      };
-      const next: StoreRecords = {
-        leads: mutated.leads.map((lead) => schema.parse(lead)),
-        digests: mutated.digests.map((m) => digestMarkSchema.parse(m)),
-      };
-      if (JSON.stringify(next) === JSON.stringify(current))
-        return { next, unreadable };
-      await storage.write(
-        [...next.leads, ...next.digests, ...unreadable],
-        version,
-      );
-      return { next, unreadable };
-    }, 'updateLeads: conflict retry limit exceeded');
-    await copyToQuarantine(unreadable);
-    return next;
-  }
-
-  async function updateLeads(
-    mutate: (leads: StoredLead[], idFloor: number) => StoredLead[],
-  ): Promise<StoredLead[]> {
-    const { leads } = await updateRecords(({ leads }, idFloor) => ({
-      leads: mutate(leads, idFloor),
-    }));
-    return leads;
-  }
-
-  async function readLeads(): Promise<StoredLead[]> {
-    const { leads } = await readSnapshot();
-    return leads;
-  }
-
-  async function getLead(id: number): Promise<StoredLead | undefined> {
-    const leads = await readLeads();
-    return leads.find((l) => l.id === id);
-  }
-
-  async function updateMatching(
-    matches: (lead: StoredLead) => boolean,
-    apply: (lead: StoredLead) => StoredLead,
-  ): Promise<StoredLead | undefined> {
-    let touchedId: number | undefined;
-    const next = await updateLeads((leads) => {
-      touchedId = undefined;
-      return leads.map((l) => {
-        if (!matches(l)) return l;
-        touchedId = l.id;
-        return apply(l);
-      });
+    return storedLeadSchema.parse({
+      ...data,
+      id,
+      statusChangedAt: now,
+      createdAt: now,
     });
-    return touchedId == null ? undefined : next.find((l) => l.id === touchedId);
+  }
+
+  function update(
+    where: Prisma.Sql,
+    apply: (lead: StoredLead) => LeadPatch | undefined,
+  ): Promise<StoredLead | undefined> {
+    return database().$transaction(async (tx) => {
+      const lead = await lockedLead(tx, where);
+      const patch = lead && apply(lead);
+      if (!lead || !patch) return undefined;
+      return toStoredLead(
+        await tx.lead.update({ where: { id: lead.id }, data: leadData(patch) }),
+      );
+    });
   }
 
   function updateOne(
-    id: number,
-    apply: (lead: StoredLead) => StoredLead,
+    id: string,
+    apply: (lead: StoredLead) => LeadPatch | undefined,
   ): Promise<StoredLead | undefined> {
-    return updateMatching((l) => l.id === id, apply);
+    if (!isLeadId(id)) return Promise.resolve(undefined);
+    return update(Prisma.sql`id = ${id}::uuid`, apply);
   }
 
   function updateOneIfStatus(
-    id: number,
+    id: string,
     requiredStatus: LeadStatus,
-    apply: (lead: StoredLead) => StoredLead,
+    apply: (lead: StoredLead) => LeadPatch,
   ): Promise<StoredLead | undefined> {
-    return updateMatching(
-      (l) => l.id === id && l.status === requiredStatus,
-      apply,
+    return updateOne(id, (l) =>
+      l.status === requiredStatus ? apply(l) : undefined,
     );
   }
 
-  async function copyToQuarantine(entries: unknown[]): Promise<void> {
-    if (entries.length === 0 || !quarantine) return;
-    try {
-      await quarantine(entries);
-    } catch (error) {
-      logError('[lead-crm] could not copy the unreadable records', error, {
-        count: entries.length,
-      });
-    }
+  async function findLeads(
+    where: Prisma.LeadWhereInput,
+    orderBy = IN_ORDER,
+  ): Promise<StoredLead[]> {
+    return (await database().lead.findMany({ where, orderBy })).map(
+      toStoredLead,
+    );
+  }
+
+  async function findLead(
+    where: Prisma.LeadWhereInput,
+  ): Promise<StoredLead | undefined> {
+    const row = await database().lead.findFirst({ where, orderBy: IN_ORDER });
+    return row ? toStoredLead(row) : undefined;
+  }
+
+  async function newestLeads(
+    where: Prisma.LeadWhereInput,
+  ): Promise<StoredLead[]> {
+    return findLeads(where, NEWEST_FIRST);
+  }
+
+  async function createLead(
+    client: CrmTransaction,
+    data: LeadInput,
+  ): Promise<StoredLead> {
+    const lead = { ...newStoredLead(data), id: undefined };
+    return toStoredLead(await client.lead.create({ data: leadData(lead) }));
   }
 
   async function alertOnThreshold(count: number): Promise<void> {
@@ -442,88 +373,116 @@ export function createLeadStore({
     }
   }
 
-  function nextId(leads: StoredLead[], idFloor: number): number {
-    return leads.reduce((max, l) => Math.max(max, l.id), idFloor) + 1;
+  async function releaseCapturePrompts(
+    tx: CrmTransaction,
+    landed: StoredLead,
+  ): Promise<void> {
+    if (landed.telegramId == null) return;
+    await tx.lead.updateMany({
+      where: {
+        brand: landed.brand,
+        telegramId: BigInt(landed.telegramId),
+        id: { not: landed.id },
+        capturePromptChatId: { not: null },
+      },
+      data: { capturePromptChatId: null, capturePromptStep: null },
+    });
   }
 
+  const telegramLeads = (telegramId: number, brand: string) => ({
+    brand,
+    telegramId: BigInt(telegramId),
+  });
+
   return {
-    updateLeads,
-    readLeads,
-    getLead,
+    readLeads: () => findLeads({}),
+
+    async getLead(id: string): Promise<StoredLead | undefined> {
+      return isLeadId(id) ? findLead({ id }) : undefined;
+    },
+
     newStoredLead,
 
-    async insertLead(data: LeadInput): Promise<StoredLead> {
-      let inserted!: StoredLead;
-      await updateLeads((leads, idFloor) => {
-        inserted = newStoredLead(data, nextId(leads, idFloor));
-        return [...leads, inserted];
-      });
-      return inserted;
+    insertLead(data: LeadInput): Promise<StoredLead> {
+      return createLead(database(), data);
     },
 
     async failedCheckoutCapped(
       brand: string,
       contact: string,
     ): Promise<boolean> {
-      const since = Date.now() - HOUR_MS;
-      const recent = (await readLeads()).filter(
-        (lead) =>
-          lead.brand === brand &&
-          lead.contact === contact &&
-          isFailedCheckoutOf(lead, standaloneServices) &&
-          Date.parse(lead.createdAt) >= since,
-      );
-      return recent.length >= FAILED_CHECKOUTS_PER_CONTACT_HOUR;
+      const recent = await database().lead.count({
+        where: {
+          brand,
+          contact,
+          service: { in: [...standaloneServices] },
+          OR: [{ orderId: null }, { orderId: '' }],
+          createdAt: { gte: new Date(Date.now() - HOUR_MS) },
+        },
+      });
+      return recent >= FAILED_CHECKOUTS_PER_CONTACT_HOUR;
     },
 
     async insertOrMergeLead(data: LeadInput): Promise<MergeOutcome> {
-      let outcome!: MergeOutcome;
-      let count = 0;
-      await updateLeads((leads, idFloor) => {
-        count = 0;
+      const { outcome, count } = await database().$transaction(async (tx) => {
+        await lockKey(tx, `crm.leads.merge:${data.brand}`);
+        const ids = await tx.$queryRaw<{ id: string }[]>`
+          SELECT id FROM leads WHERE ${candidatesFor(data)} FOR UPDATE`;
+        const candidates = (
+          await tx.lead.findMany({
+            where: { id: { in: ids.map(({ id }) => id) } },
+            orderBy: IN_ORDER,
+          })
+        ).map(toStoredLead);
         const now = Date.now();
-        const target = mergeTarget(data, leads, now, standaloneServices);
+        const target = mergeTarget(data, candidates, now, standaloneServices);
         if (target.kind === 'same-order') {
-          outcome = { lead: target.lead, merged: true, before: target.lead };
-          return leads;
+          const { lead } = target;
+          return { outcome: { lead, merged: true, before: lead }, count: 0 };
         }
         if (target.kind === 'new') {
-          const inserted = newStoredLead(data, nextId(leads, idFloor));
-          outcome = { lead: inserted, merged: false, before: null };
-          count = leads.length + 1;
-          return supersede([...leads, inserted], inserted);
+          const lead = await createLead(tx, data);
+          await releaseCapturePrompts(tx, lead);
+          const count = await tx.lead.count();
+          return { outcome: { lead, merged: false, before: null }, count };
         }
         const existing = target.lead;
         const merged = mergedLead(existing, data, {
           takesOver: target.kind === 'failed-checkout' && data.orderId != null,
           at: new Date(now),
         });
-        outcome = { lead: merged, merged: true, before: existing };
-        const replaced = leads.map((l) => (l.id === existing.id ? merged : l));
-        return data.telegramId == null ? replaced : supersede(replaced, merged);
+        const stored = toStoredLead(
+          await tx.lead.update({
+            where: { id: existing.id },
+            data: leadData(merged),
+          }),
+        );
+        if (data.telegramId != null) await releaseCapturePrompts(tx, stored);
+        return {
+          outcome: { lead: stored, merged: true, before: existing },
+          count: 0,
+        };
       });
       await alertOnThreshold(count);
       return outcome;
     },
 
     setTelegramMessage(
-      id: number,
+      id: string,
       chatId: number,
       messageId: number,
     ): Promise<StoredLead | undefined> {
-      return updateOne(id, (l) => ({
-        ...l,
+      return updateOne(id, () => ({
         telegramChatId: chatId,
         telegramMessageId: messageId,
       }));
     },
 
-    setTopic(id: number, topicId: number): Promise<StoredLead | undefined> {
+    setTopic(id: string, topicId: number): Promise<StoredLead | undefined> {
       return updateOne(id, (l) =>
         l.topicId != null
-          ? l
+          ? {}
           : {
-              ...l,
               topicId,
               topicMessageId: null,
               topicClosed: false,
@@ -533,73 +492,70 @@ export function createLeadStore({
     },
 
     setTopicSummary(
-      id: number,
+      id: string,
       topicMessageId: number,
     ): Promise<StoredLead | undefined> {
-      return updateOne(id, (l) => ({ ...l, topicMessageId }));
+      return updateOne(id, () => ({ topicMessageId }));
     },
 
     touchTopic(
-      id: number,
+      id: string,
       at: Date = new Date(),
     ): Promise<StoredLead | undefined> {
-      return updateOne(id, (l) => ({
-        ...l,
+      return updateOne(id, () => ({
         topicClosed: false,
         topicActiveAt: at.toISOString(),
       }));
     },
 
-    closeTopic(id: number): Promise<StoredLead | undefined> {
-      return updateOne(id, (l) => ({ ...l, topicClosed: true }));
+    closeTopic(id: string): Promise<StoredLead | undefined> {
+      return updateOne(id, () => ({ topicClosed: true }));
     },
 
-    setStatus(id: number, status: LeadStatus): Promise<StoredLead | undefined> {
-      return updateMatching(
-        (l) => l.id === id && canMoveTo(l, status),
-        (l) => ({
-          ...l,
-          ...(l.status === 'postponed' ? resumePatch(l) : {}),
-          ...statusPatch(status),
-        }),
+    setStatus(id: string, status: LeadStatus): Promise<StoredLead | undefined> {
+      return updateOne(id, (l) =>
+        canMoveTo(l, status)
+          ? {
+              ...(l.status === 'postponed' ? resumePatch(l) : {}),
+              ...statusPatch(status),
+            }
+          : undefined,
       );
     },
 
     settleOrder(
-      id: number,
+      id: string,
       status: 'won' | 'lost',
     ): Promise<StoredLead | undefined> {
-      return updateOneIfStatus(id, status, (l) => ({
-        ...l,
-        orderSettled: status,
-      }));
+      return updateOneIfStatus(id, status, () => ({ orderSettled: status }));
     },
 
     markOrderConflict(
-      id: number,
+      id: string,
       status: 'won' | 'lost',
     ): Promise<StoredLead | undefined> {
-      return updateOneIfStatus(id, status, (l) => ({
-        ...l,
-        orderConflict: status,
-      }));
+      return updateOneIfStatus(id, status, () => ({ orderConflict: status }));
     },
 
     markOrderStuck(
-      id: number,
+      id: string,
       status: 'won' | 'lost',
     ): Promise<StoredLead | undefined> {
-      return updateOneIfStatus(id, status, (l) => ({
-        ...l,
-        orderStuck: status,
-      }));
+      return updateOneIfStatus(id, status, () => ({ orderStuck: status }));
+    },
+
+    findByOrderId(orderId: string): Promise<StoredLead | undefined> {
+      return findLead({ orderId });
+    },
+
+    findUnsettledOrderLeads(): Promise<StoredLead[]> {
+      return findLeads({ orderId: { not: null }, status: { in: CLOSED } });
     },
 
     loseOrderLead(orderId: string): Promise<StoredLead | undefined> {
-      return updateMatching(
-        (l) => l.orderId === orderId && l.status !== 'won',
+      return update(
+        Prisma.sql`order_id = ${orderId} AND status <> 'WON'`,
         (l) => ({
-          ...l,
           ...(l.status === 'lost'
             ? {}
             : {
@@ -612,52 +568,59 @@ export function createLeadStore({
     },
 
     recordOwnerReply(
-      id: number,
+      id: string,
       at: Date = new Date(),
     ): Promise<StoredLead | undefined> {
       return updateOne(id, (l) => ({
-        ...l,
         lastActivityAt: at.toISOString(),
         ...(l.status === 'new' ? statusPatch('negotiations', at) : {}),
       }));
     },
 
     touchLead(
-      id: number,
+      id: string,
       at: Date = new Date(),
     ): Promise<StoredLead | undefined> {
-      return updateOne(id, (l) => ({ ...l, lastActivityAt: at.toISOString() }));
+      return updateOne(id, () => ({ lastActivityAt: at.toISOString() }));
     },
 
     setPendingPrompt(
-      id: number,
+      id: string,
       prompt: PendingPrompt | null,
     ): Promise<StoredLead | undefined> {
-      return updateOne(id, (l) => ({ ...l, pendingPrompt: prompt }));
+      return updateOne(id, () => ({ pendingPrompt: prompt }));
     },
 
-    async findByPendingPrompt(key: PromptKey): Promise<StoredLead | undefined> {
-      return (await readLeads()).find(promptedAt(key));
+    findByPendingPrompt({
+      chatId,
+      messageId,
+    }: PromptKey): Promise<StoredLead | undefined> {
+      return findLead({
+        pendingPromptChatId: BigInt(chatId),
+        pendingPromptMessageId: messageId,
+      });
     },
 
-    async findByTopic(topicId: number): Promise<StoredLead | undefined> {
-      return (await readLeads()).find((l) => l.topicId === topicId);
+    findByTopic(topicId: number): Promise<StoredLead | undefined> {
+      return findLead({ topicId });
     },
 
     resolvePendingPrompt(
-      key: PromptKey,
-      apply: (lead: StoredLead) => Partial<StoredLead>,
+      { chatId, messageId }: PromptKey,
+      apply: (lead: StoredLead) => LeadPatch,
     ): Promise<StoredLead | undefined> {
-      return updateMatching(promptedAt(key), (l) => ({
-        ...l,
-        lastActivityAt: new Date().toISOString(),
-        ...apply(l),
-        pendingPrompt: null,
-      }));
+      return update(
+        Prisma.sql`pending_prompt_chat_id = ${BigInt(chatId)} AND pending_prompt_message_id = ${messageId}`,
+        (l) => ({
+          lastActivityAt: new Date().toISOString(),
+          ...apply(l),
+          pendingPrompt: null,
+        }),
+      );
     },
 
     updateCapture(
-      id: number,
+      id: string,
       {
         note,
         contact,
@@ -670,7 +633,6 @@ export function createLeadStore({
     ): Promise<StoredLead | undefined> {
       const now = new Date().toISOString();
       return updateOne(id, (l) => ({
-        ...l,
         comment: note ? appendNote(l.comment, note) : l.comment,
         contact: contact ?? l.contact,
         ...(services ? pickedServices(services(l.services)) : {}),
@@ -683,21 +645,23 @@ export function createLeadStore({
     },
 
     markManagerHandoff(
-      id: number,
+      id: string,
       handle: string,
     ): Promise<StoredLead | undefined> {
       const at = new Date().toISOString();
-      return updateMatching(
-        (l) => l.id === id && l.managerHandoff == null,
-        (l) => ({ ...l, managerHandoff: { at, handle }, visitorActiveAt: at }),
+      return updateOne(id, (l) =>
+        l.managerHandoff == null
+          ? { managerHandoff: { at, handle }, visitorActiveAt: at }
+          : undefined,
       );
     },
 
-    async claimMetaLead(id: number): Promise<ClaimedMetaLead | undefined> {
+    async claimMetaLead(id: string): Promise<ClaimedMetaLead | undefined> {
       const at = new Date().toISOString();
-      const claimed = await updateMatching(
-        (l) => l.id === id && l.metaIds != null && l.metaLeadSentAt == null,
-        (l) => ({ ...l, metaLeadSentAt: at }),
+      const claimed = await updateOne(id, (l) =>
+        l.metaIds != null && l.metaLeadSentAt == null
+          ? { metaLeadSentAt: at }
+          : undefined,
       );
       return claimed && { ...claimed, metaLeadSentAt: at };
     },
@@ -706,182 +670,198 @@ export function createLeadStore({
       telegramId: number,
       brand: string,
     ): Promise<StoredLead | undefined> {
-      return newestOpen(
-        await readLeads(),
-        brand,
-        (l) => l.telegramId === telegramId,
-      );
+      const [newest] = await newestLeads({
+        ...telegramLeads(telegramId, brand),
+        status: { notIn: CLOSED },
+      });
+      return newest;
     },
 
     async findLatestLeadByTelegramId(
       telegramId: number,
       brand: string,
     ): Promise<StoredLead | undefined> {
-      const leads = (await readLeads())
-        .filter((l) => l.brand === brand && l.telegramId === telegramId)
-        .sort((a, b) => a.id - b.id);
-      return leads.filter((l) => !isClosed(l)).at(-1) ?? leads.at(-1);
+      const leads = await newestLeads(telegramLeads(telegramId, brand));
+      return leads.find((l) => !isClosed(l)) ?? leads[0];
     },
 
     async findPhoneByTelegramId(
       telegramId: number,
       brand: string,
     ): Promise<string | undefined> {
-      return (await readLeads())
-        .filter(
-          (l) =>
-            l.brand === brand &&
-            l.telegramId === telegramId &&
-            isPhoneContact(l.contact),
-        )
-        .sort((a, b) => a.id - b.id)
-        .at(-1)?.contact;
+      const leads = await newestLeads(telegramLeads(telegramId, brand));
+      return leads.find((l) => isPhoneContact(l.contact))?.contact;
     },
 
     async findByCapturePrompt(
       chatId: number,
       brand: string,
     ): Promise<StoredLead | undefined> {
-      return newestOpen(
-        await readLeads(),
+      const leads = await newestLeads({
         brand,
-        (l) => l.capturePrompt?.chatId === chatId && isFreshLead(l),
-      );
+        capturePromptChatId: BigInt(chatId),
+        status: { notIn: CLOSED },
+      });
+      return leads.find((l) => isFreshLead(l));
     },
 
-    resumeLead(id: number): Promise<StoredLead | undefined> {
-      return updateOneIfStatus(id, 'postponed', (l) => ({
-        ...l,
-        ...resumePatch(l),
-      }));
+    resumeLead(id: string): Promise<StoredLead | undefined> {
+      return updateOneIfStatus(id, 'postponed', resumePatch);
     },
 
     postponeLead(
-      id: number,
+      id: string,
       remindAt: string,
       note: string,
     ): Promise<StoredLead | undefined> {
-      return updateMatching(
-        (l) => l.id === id && canPostpone(l),
-        (l) => ({ ...l, ...postponePatch(l, remindAt, note) }),
+      return updateOne(id, (l) =>
+        canPostpone(l) ? postponePatch(l, remindAt, note) : undefined,
       );
     },
 
-    async deleteLead(id: number): Promise<boolean> {
-      let found = false;
-      await updateLeads((leads) => {
-        const next = leads.filter((l) => l.id !== id);
-        found = next.length !== leads.length;
-        return next;
-      });
-      return found;
+    async deleteLead(id: string): Promise<boolean> {
+      if (!isLeadId(id)) return false;
+      const { count } = await database().lead.deleteMany({ where: { id } });
+      return count > 0;
     },
 
     async searchLeads(query: string, limit = 10): Promise<StoredLead[]> {
       const q = query.trim().toLowerCase();
       if (!q) return [];
-      const leads = await readLeads();
-      return leads
+      const rows = await database().lead.findMany({ orderBy: NEWEST_FIRST });
+      return rows
         .filter(
           (l) =>
-            String(l.id) === q ||
+            l.id === q ||
+            String(l.legacyId) === q ||
             l.name.toLowerCase().includes(q) ||
             l.contact.toLowerCase().includes(q) ||
             (l.comment ?? '').toLowerCase().includes(q),
         )
-        .sort((a, b) => b.id - a.id)
-        .slice(0, limit);
+        .slice(0, limit)
+        .map(toStoredLead);
     },
 
     async claimDigest(now: Date): Promise<Digest | undefined> {
-      const day = businessDay(now);
-      let claimed: Digest | undefined;
-      await updateRecords(({ leads, digests }) => {
-        claimed = undefined;
-        if (digests.some((d) => d.day === day)) return {};
-        claimed = digestOf(leads, now);
-        if (Object.values(claimed).every((list) => list.length === 0))
-          return {};
-        const mark = {
-          type: 'digest' as const,
-          day,
-          createdAt: now.toISOString(),
-        };
-        return { digests: [mark] };
-      });
+      const day = dayOf(now);
+      if (await database().digest.findUnique({ where: { day } }))
+        return undefined;
+      const claimed = digestOf(
+        await findLeads({ status: { in: [...OPEN_STATUSES] } }),
+        now,
+      );
+      if (Object.values(claimed).every((list) => list.length === 0))
+        return claimed;
+      try {
+        await database().$transaction([
+          database().digest.create({ data: { day, createdAt: now } }),
+          database().digest.deleteMany({ where: { day: { not: day } } }),
+        ]);
+      } catch (error) {
+        if (isUniqueViolation(error)) return undefined;
+        throw error;
+      }
       return claimed;
     },
 
-    async recordDigestMessage(now: Date, posted: PostedDigest): Promise<void> {
-      const day = businessDay(now);
-      await updateRecords(({ digests }) => ({
-        digests: digests.map((d) => (d.day === day ? { ...d, posted } : d)),
-      }));
+    async recordDigestMessage(
+      now: Date,
+      { messageId, hidden, dueIds, staleIds }: PostedDigest,
+    ): Promise<void> {
+      await database().$transaction(async (tx) => {
+        const day = dayOf(now);
+        if (!(await tx.digest.findUnique({ where: { day } }))) return;
+        const digest = await tx.digest.update({
+          where: { day },
+          data: { messageId, hidden },
+        });
+        const existing = new Set(
+          (
+            await tx.lead.findMany({
+              where: { id: { in: [...dueIds, ...staleIds] } },
+              select: { id: true },
+            })
+          ).map(({ id }) => id),
+        );
+        const entries = (list: 'DUE' | 'STALE', ids: string[]) =>
+          ids.map((leadId, position) => ({
+            digestId: digest.id,
+            leadId,
+            list,
+            position,
+          }));
+        await tx.digestLead.createMany({
+          data: [
+            ...entries('DUE', dueIds),
+            ...entries('STALE', staleIds),
+          ].filter((entry) => existing.has(entry.leadId)),
+        });
+      });
     },
 
-    async takeFromDigest(leadId: number): Promise<OpenDigest | undefined> {
-      let left: OpenDigest | undefined;
-      await updateRecords(({ leads, digests }) => {
-        left = undefined;
-        const latest = digests.at(-1);
-        const posted = latest?.posted;
-        if (
-          !latest ||
-          !posted ||
-          ![...posted.dueIds, ...posted.staleIds].includes(leadId)
-        )
-          return {};
-        const stillOpen = (ids: number[]) =>
-          ids.flatMap((id) => {
-            const lead = leads.find((l) => l.id === id);
-            return id !== leadId && lead && isInWork(lead) ? [lead] : [];
-          });
-        const digest = {
-          due: stillOpen(posted.dueIds),
-          stale: stillOpen(posted.staleIds),
-        };
-        left = { messageId: posted.messageId, digest, hidden: posted.hidden };
-        const ids = (list: StoredLead[]) => list.map((l) => l.id);
+    takeFromDigest(leadId: string): Promise<OpenDigest | undefined> {
+      return database().$transaction(async (tx) => {
+        const [latest] = await tx.$queryRaw<
+          { id: string; message_id: number | null; hidden: number | null }[]
+        >`SELECT id, message_id, hidden FROM digests ORDER BY day DESC LIMIT 1 FOR UPDATE`;
+        if (!latest || latest.message_id == null) return undefined;
+        const entries = await tx.digestLead.findMany({
+          where: { digestId: latest.id },
+          orderBy: { position: 'asc' },
+          include: { lead: true },
+        });
+        if (!entries.some((entry) => entry.leadId === leadId)) return undefined;
+        const kept = entries
+          .map((entry) => ({
+            list: entry.list,
+            lead: toStoredLead(entry.lead),
+          }))
+          .filter(({ lead }) => lead.id !== leadId && isInWork(lead));
+        await tx.digestLead.deleteMany({
+          where: {
+            digestId: latest.id,
+            leadId: { notIn: kept.map(({ lead }) => lead.id) },
+          },
+        });
+        const listed = (list: 'DUE' | 'STALE') =>
+          kept.filter((entry) => entry.list === list).map(({ lead }) => lead);
         return {
-          digests: [
-            ...digests.slice(0, -1),
-            {
-              ...latest,
-              posted: {
-                ...posted,
-                dueIds: ids(digest.due),
-                staleIds: ids(digest.stale),
-              },
-            },
-          ],
+          messageId: latest.message_id,
+          digest: { due: listed('DUE'), stale: listed('STALE') },
+          hidden: latest.hidden ?? 0,
         };
       });
-      return left;
     },
 
     async releaseDigest(now: Date): Promise<void> {
-      const day = businessDay(now);
-      await updateRecords(({ digests }) => ({
-        digests: digests.filter((d) => d.day !== day),
-      }));
+      await database().digest.deleteMany({ where: { day: dayOf(now) } });
     },
 
     async expireGhostLeads(now: Date): Promise<StoredLead[]> {
-      if (!(await readLeads()).some((l) => isGhostLead(l, now))) return [];
-      let expiredIds = new Set<number>();
-      const next = await updateLeads((leads) => {
-        expiredIds = new Set(
-          leads.filter((l) => isGhostLead(l, now)).map((l) => l.id),
-        );
-        return leads.map((l) =>
-          expiredIds.has(l.id) ? { ...l, ...statusPatch('lost', now) } : l,
-        );
-      });
-      return next.filter((l) => expiredIds.has(l.id));
+      const ghosts = (
+        await findLeads({
+          kind: 'CALL_CLICK',
+          status: 'NEW',
+          lastActivityAt: null,
+        })
+      ).filter((l) => isGhostLead(l, now));
+      const expired = await Promise.all(
+        ghosts.map((ghost) =>
+          updateOne(ghost.id, (l) =>
+            isGhostLead(l, now) ? statusPatch('lost', now) : undefined,
+          ),
+        ),
+      );
+      return expired.filter((lead) => lead !== undefined);
     },
 
-    async findIdleTopics(now: Date): Promise<StoredLead[]> {
-      return (await readLeads()).filter((l) => isIdleTopic(l, now));
+    findIdleTopics(now: Date): Promise<StoredLead[]> {
+      return findLeads({
+        topicId: { not: null },
+        topicClosed: false,
+        topicActiveAt: null,
+        createdAt: { lte: new Date(now.getTime() - TOPIC_IDLE_MS) },
+      });
     },
   };
 }

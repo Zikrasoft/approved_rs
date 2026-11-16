@@ -1,6 +1,5 @@
+import '@podbor/lead-crm/testing/database';
 import { afterAll, describe, expect, it, vi } from 'vitest';
-import { LEADS_PATH } from '@podbor/lead-crm';
-import type { MemoryStorage } from '@podbor/lead-crm/testing';
 
 const token = vi.hoisted(() => {
   const token = process.env.TELEGRAM_BOT_TOKEN;
@@ -8,29 +7,8 @@ const token = vi.hoisted(() => {
   return token;
 });
 
-const memory = vi.hoisted(() => {
-  const storages = new Map<string, MemoryStorage>();
-  return {
-    storages,
-    async module(name: string) {
-      const { createMemoryStorage } = await import('@podbor/lead-crm/testing');
-      const storageAt = (path: string) => {
-        if (!storages.has(path)) storages.set(path, createMemoryStorage());
-        return storages.get(path)!;
-      };
-      return { [name]: storageAt };
-    },
-  };
-});
-
 const pending = vi.hoisted(() => [] as Promise<unknown>[]);
 
-vi.mock('@podbor/lead-crm/storage/local', () =>
-  memory.module('localLeadStorage'),
-);
-vi.mock('@podbor/lead-crm/storage/vercel-blob', () =>
-  memory.module('createVercelBlobStorage'),
-);
 vi.mock('@vercel/functions', () => ({
   waitUntil: (promise: Promise<unknown>) => pending.push(promise),
 }));
@@ -38,6 +16,7 @@ vi.spyOn(console, 'error').mockImplementation(() => {});
 
 import { POST as leads } from './leads';
 import { POST as contactClick } from './contact-click';
+import { leadStore } from '@/lib/crm';
 
 const request = (body: URLSearchParams) =>
   new Request('http://localhost/api/leads', {
@@ -71,7 +50,7 @@ describe('a Lead posted while the CRM bot is misconfigured', () => {
     await Promise.all(pending);
 
     expect(response.status).toBe(302);
-    expect(memory.storages.get(LEADS_PATH)?.current()).toEqual([
+    expect(await leadStore.readLeads()).toEqual([
       expect.objectContaining({ contact: '+381601234567' }),
       expect.objectContaining({ contactChannel: 'whatsapp' }),
     ]);

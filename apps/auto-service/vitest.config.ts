@@ -13,6 +13,11 @@ export default defineConfig(async (env) =>
     },
     test: {
       environment: 'node',
+      globalSetup: [
+        fileURLToPath(
+          import.meta.resolve('@podbor/lead-crm/testing/database-server'),
+        ),
+      ],
       include: ['src/**/*.test.ts'],
       coverage: {
         provider: 'v8',

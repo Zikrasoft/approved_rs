@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { BRANDS } from '@podbor/brands';
-import { storedLeadSchema, type StoredLead } from './schema.ts';
+import { legacyLeadSchema, type LegacyLead } from './schema.ts';
 
 interface StoredShape {
   label: string;
   record: unknown;
-  keeps: Partial<StoredLead>;
+  keeps: Partial<LegacyLead>;
 }
 
 const HISTORY: StoredShape[] = [
@@ -526,14 +526,14 @@ describe('every stored lead shape the system has written', () => {
   });
 
   it.each(HISTORY)('$label is still readable', ({ record, keeps }) => {
-    const parsed = storedLeadSchema.safeParse(record);
+    const parsed = legacyLeadSchema.safeParse(record);
     expect(parsed.success).toBe(true);
     expect(parsed.data).toMatchObject(keeps);
   });
 
   it('writes none of the retired money fields back', () => {
     for (const { record } of HISTORY) {
-      expect(Object.keys(storedLeadSchema.parse(record))).not.toEqual(
+      expect(Object.keys(legacyLeadSchema.parse(record))).not.toEqual(
         expect.arrayContaining([
           expect.stringMatching(
             /^(dealAmount|commissionPercent|paidAmount|payments|incomes|pendingCommissionClaim)$/,

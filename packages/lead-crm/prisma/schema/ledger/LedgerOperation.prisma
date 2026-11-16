@@ -1,0 +1,19 @@
+model LedgerOperation {
+  id        String        @id @default(uuid(7)) @db.Uuid
+  legacyId  Int?          @unique @map("legacy_id")
+  type      OperationType
+  amount    Decimal       @db.Decimal(14, 2)
+  note      String
+  createdBy LedgerAuthor  @map("created_by")
+  createdAt DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@index([createdAt])
+  @@map("ledger_operations")
+}
+
+enum LedgerAuthor {
+  OWNER
+  ADMIN
+
+  @@map("ledger_author")
+}

@@ -1,9 +1,9 @@
+import { randomUUID } from 'node:crypto';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import {
-  createMemoryStorage,
-  type MemoryStorage,
-} from './storage/memory.testing.ts';
-import { storedLeadSchema, type LeadInput, type StoredLead } from './schema.ts';
+import { crmDatabase } from './database.ts';
+import { leadData } from './leadRow.ts';
+import type { LeadInput, StoredLead } from './schema.ts';
+import { storedLeadSchema } from './schema.ts';
 import {
   createLeadStore,
   GHOST_LEAD_RETENTION_MS,
@@ -15,10 +15,9 @@ import {
   VISITOR_MERGE_WINDOW_MS,
   type LeadStore,
 } from './store.ts';
-import { createQuarantine, LEADS_PATH } from './quarantine.ts';
 import { hasRealContact } from './leadMerge.ts';
+import { seedLead } from './testing/seed.ts';
 
-let storage: MemoryStorage;
 let store: LeadStore;
 
 const baseData: LeadInput = {
@@ -29,18 +28,19 @@ const baseData: LeadInput = {
   locale: 'ru',
 };
 
-async function forceComplete(id: number): Promise<void> {
-  await store.updateLeads((leads) =>
-    leads.map((l) => (l.id === id ? { ...l, status: 'won' as const } : l)),
-  );
+async function forceComplete(id: string): Promise<void> {
+  await store.setStatus(id, 'won');
+}
+
+async function patchLead(
+  id: string,
+  fields: Partial<StoredLead>,
+): Promise<void> {
+  await crmDatabase().lead.update({ where: { id }, data: leadData(fields) });
 }
 
 beforeEach(() => {
-  storage = createMemoryStorage();
-  store = createLeadStore({
-    storage,
-    schema: storedLeadSchema,
-  });
+  store = createLeadStore({ database: crmDatabase });
 });
 
 describe('appendNote', () => {
@@ -78,11 +78,12 @@ describe('appendNote', () => {
 });
 
 describe('insertLead', () => {
-  it('assigns sequential ids starting at 1', async () => {
+  it('assigns every Lead its own id', async () => {
     const a = await store.insertLead(baseData);
     const b = await store.insertLead(baseData);
-    expect(a.id).toBe(1);
-    expect(b.id).toBe(2);
+    expect(a.id).toEqual(expect.any(String));
+    expect(b.id).toEqual(expect.any(String));
+    expect(a.id).not.toBe(b.id);
   });
 
   it('defaults status new, no prompt and no money on the Lead', async () => {
@@ -112,7 +113,7 @@ describe('insertOrMergeLead', () => {
       clickData('telegram'),
     );
     expect(merged).toBe(false);
-    expect(lead.id).toBe(1);
+    expect(lead.id).toEqual(expect.any(String));
   });
 
   it('merges a second channel click from the same visitor into the still-open lead', async () => {
@@ -558,12 +559,10 @@ describe('insertOrMergeLead', () => {
   });
 
   it('does not merge once the merge window has passed', async () => {
-    const { lead } = await store.insertOrMergeLead(clickData('telegram'));
-    await store.updateLeads((leads) =>
-      leads.map((l) =>
-        l.id === lead.id ? { ...l, createdAt: '2000-01-01T00:00:00.000Z' } : l,
-      ),
-    );
+    await seedLead({
+      ...clickData('telegram'),
+      createdAt: '2000-01-01T00:00:00.000Z',
+    });
 
     const { merged } = await store.insertOrMergeLead(clickData('whatsapp'));
 
@@ -571,18 +570,11 @@ describe('insertOrMergeLead', () => {
   });
 
   it('still merges into an old click whose visitor came back within the hour', async () => {
-    const { lead } = await store.insertOrMergeLead(clickData('telegram'));
-    await store.updateLeads((leads) =>
-      leads.map((l) =>
-        l.id === lead.id
-          ? {
-              ...l,
-              createdAt: '2000-01-01T00:00:00.000Z',
-              visitorActiveAt: new Date().toISOString(),
-            }
-          : l,
-      ),
-    );
+    await seedLead({
+      ...clickData('telegram'),
+      createdAt: '2000-01-01T00:00:00.000Z',
+      visitorActiveAt: new Date().toISOString(),
+    });
 
     const { merged } = await store.insertOrMergeLead(clickData('whatsapp'));
 
@@ -693,8 +685,7 @@ describe('insertOrMergeLead with standalone services', () => {
 
   beforeEach(() => {
     store = createLeadStore({
-      storage,
-      schema: storedLeadSchema,
+      database: crmDatabase,
       standaloneServices: ['parts-order'],
     });
   });
@@ -762,12 +753,9 @@ describe('insertOrMergeLead with standalone services', () => {
           'Итого: 1 650 RSD',
         ].join('\n'),
       });
-      await store.updateLeads((leads) =>
-        leads.map((l) => ({
-          ...l,
-          comment: `${l.comment}\n31.10.2026 · Владелец: перезвонить`,
-        })),
-      );
+      await patchLead(failed.id, {
+        comment: `${(await store.getLead(failed.id))!.comment}\n31.10.2026 · Владелец: перезвонить`,
+      });
       const { lead, merged } = await store.insertOrMergeLead({
         ...order('+381603333333'),
         name: 'Петр',
@@ -932,7 +920,7 @@ describe('insertOrMergeLead with standalone services', () => {
     expect(merged).toBe(true);
     expect(lead.id).toBe(first.id);
     expect(lead.status).toBe('won');
-    expect(lead.comment).toBeUndefined();
+    expect(lead.comment).toBeNull();
     expect(await store.readLeads()).toHaveLength(1);
   });
 
@@ -961,11 +949,9 @@ describe('insertOrMergeLead with standalone services', () => {
   });
 
   describe('failedCheckoutCapped', () => {
-    let id = 0;
     const failedAt = (contact: string, ago: number, extra = {}) => ({
       ...order(contact),
-      id: ++id,
-      status: 'lost',
+      status: 'lost' as const,
       createdAt: new Date(Date.now() - ago).toISOString(),
       statusChangedAt: new Date().toISOString(),
       ...extra,
@@ -974,7 +960,8 @@ describe('insertOrMergeLead with standalone services', () => {
     const MINUTE = 60 * 1000;
 
     it('caps a contact once it has three failed checkouts within the hour', async () => {
-      storage.seed([1, 2, 3].map((at) => failedAt(CONTACT, at * MINUTE)));
+      for (const at of [1, 2, 3])
+        await seedLead(failedAt(CONTACT, at * MINUTE));
       expect(await store.failedCheckoutCapped('Test', CONTACT)).toBe(true);
     });
 
@@ -985,11 +972,9 @@ describe('insertOrMergeLead with standalone services', () => {
       ['another brand', failedAt(CONTACT, MINUTE, { brand: 'Other' })],
       ['another service', failedAt(CONTACT, MINUTE, { service: 'brakes' })],
     ])('does not count %s', async (_, third) => {
-      storage.seed([
-        failedAt(CONTACT, MINUTE),
-        failedAt(CONTACT, 2 * MINUTE),
-        third,
-      ]);
+      await seedLead(failedAt(CONTACT, MINUTE));
+      await seedLead(failedAt(CONTACT, 2 * MINUTE));
+      await seedLead(third);
       expect(await store.failedCheckoutCapped('Test', CONTACT)).toBe(false);
     });
   });
@@ -1002,7 +987,7 @@ describe('isFreshLead', () => {
   const lead = (patch: Partial<StoredLead>): StoredLead =>
     storedLeadSchema.parse({
       ...baseData,
-      id: 1,
+      id: randomUUID(),
       statusChangedAt: ago(180),
       createdAt: ago(180),
       ...patch,
@@ -1073,31 +1058,6 @@ describe('resolvePendingPrompt', () => {
     expect(after?.comment).toBe('first');
   });
 
-  it('returns undefined when a concurrent write clears the prompt between retry attempts', async () => {
-    const lead = await store.insertLead(baseData);
-    await store.setPendingPrompt(lead.id, {
-      chatId: 111,
-      messageId: 999,
-      kind: 'postpone',
-    });
-    storage.failNextWrites(1, () => {
-      const leads = storage.current() as StoredLead[];
-      leads[0]!.pendingPrompt = null;
-      storage.seed(leads);
-    });
-
-    const resolved = await store.resolvePendingPrompt(
-      { chatId: 111, messageId: 999 },
-      () => ({
-        comment: 'late',
-      }),
-    );
-
-    expect(resolved).toBeUndefined();
-    const after = await store.getLead(lead.id);
-    expect(after?.comment).toBeUndefined();
-  });
-
   it('returns undefined when no lead has a matching pending prompt', async () => {
     await store.insertLead(baseData);
     const resolved = await store.resolvePendingPrompt(
@@ -1114,7 +1074,7 @@ describe('status patch builders', () => {
   const AT = new Date('2026-10-08T10:00:00.000Z');
 
   beforeEach(() => {
-    vi.useFakeTimers({ now: AT });
+    vi.useFakeTimers({ now: AT, toFake: ['Date'] });
     return () => vi.useRealTimers();
   });
 
@@ -1169,13 +1129,7 @@ describe('status patch builders', () => {
 describe('resumeLead', () => {
   it('returns a postponed lead to new when it remembers nothing, and clears remindAt', async () => {
     const lead = await store.insertLead(baseData);
-    await store.updateLeads((leads) =>
-      leads.map((l) =>
-        l.id === lead.id
-          ? { ...l, status: 'postponed' as const, remindAt: '2026-10-20' }
-          : l,
-      ),
-    );
+    await patchLead(lead.id, { status: 'postponed', remindAt: '2026-10-20' });
 
     const resumed = await store.resumeLead(lead.id);
 
@@ -1223,6 +1177,17 @@ describe('recordOwnerReply', () => {
     expect(await store.recordOwnerReply(lead.id)).toMatchObject({
       status: 'in_progress',
     });
+  });
+});
+
+describe('a Lead moved on without any recorded activity', () => {
+  it('counts the status change as its last activity', async () => {
+    const lead = await store.insertLead(baseData);
+
+    const moved = await store.setStatus(lead.id, 'negotiations');
+
+    expect(moved!.lastActivityAt).toBe(moved!.statusChangedAt);
+    expect((await store.setStatus(lead.id, 'won'))!.lastActivityAt).toBeNull();
   });
 });
 
@@ -1354,14 +1319,10 @@ describe('expireGhostLeads', () => {
   const NOW = new Date('2026-10-02T12:00:00.000Z');
   const DAY_MS = GHOST_LEAD_RETENTION_MS;
 
-  async function forceAge(id: number, ms: number): Promise<void> {
-    await store.updateLeads((leads) =>
-      leads.map((l) =>
-        l.id === id
-          ? { ...l, createdAt: new Date(NOW.getTime() - ms).toISOString() }
-          : l,
-      ),
-    );
+  async function forceAge(id: string, ms: number): Promise<void> {
+    await patchLead(id, {
+      createdAt: new Date(NOW.getTime() - ms).toISOString(),
+    });
   }
 
   async function ghost(
@@ -1449,15 +1410,13 @@ describe('expireGhostLeads', () => {
     });
   });
 
-  it('is idempotent — a second run writes nothing at all', async () => {
+  it('is idempotent — a second run changes nothing', async () => {
     await ghost();
     await store.expireGhostLeads(NOW);
     const after = await store.readLeads();
-    const writes = storage.writeAttempts();
 
     expect(await store.expireGhostLeads(NOW)).toEqual([]);
     expect(await store.readLeads()).toEqual(after);
-    expect(storage.writeAttempts()).toBe(writes);
   });
 
   it('sweeps every brand in one call and returns only what it changed', async () => {
@@ -1553,21 +1512,14 @@ describe('findIdleTopics', () => {
 
   async function topicLead(activeMsAgo: number | null): Promise<StoredLead> {
     const lead = await store.insertLead({ ...baseData, telegramId: 9 });
-    await store.setTopic(lead.id, lead.id + 100);
-    await store.updateLeads((leads) =>
-      leads.map((l) =>
-        l.id === lead.id
-          ? {
-              ...l,
-              createdAt: new Date(NOW.getTime() - TOPIC_IDLE_MS).toISOString(),
-              topicActiveAt:
-                activeMsAgo == null
-                  ? null
-                  : new Date(NOW.getTime() - activeMsAgo).toISOString(),
-            }
-          : l,
-      ),
-    );
+    await store.setTopic(lead.id, 100);
+    await patchLead(lead.id, {
+      createdAt: new Date(NOW.getTime() - TOPIC_IDLE_MS).toISOString(),
+      topicActiveAt:
+        activeMsAgo == null
+          ? null
+          : new Date(NOW.getTime() - activeMsAgo).toISOString(),
+    });
     return lead;
   }
 
@@ -1589,29 +1541,16 @@ describe('findIdleTopics', () => {
 
   it('waits a full day before closing an empty topic', async () => {
     const lead = await topicLead(null);
-    await store.updateLeads((leads) =>
-      leads.map((l) =>
-        l.id === lead.id
-          ? {
-              ...l,
-              createdAt: new Date(
-                NOW.getTime() - TOPIC_IDLE_MS + 1,
-              ).toISOString(),
-            }
-          : l,
-      ),
-    );
+    await patchLead(lead.id, {
+      createdAt: new Date(NOW.getTime() - TOPIC_IDLE_MS + 1).toISOString(),
+    });
 
     expect(await store.findIdleTopics(NOW)).toEqual([]);
   });
 
   it('skips a Lead without a topic', async () => {
     const lead = await store.insertLead(baseData);
-    await store.updateLeads((leads) =>
-      leads.map((l) =>
-        l.id === lead.id ? { ...l, createdAt: '2026-01-01T00:00:00.000Z' } : l,
-      ),
-    );
+    await patchLead(lead.id, { createdAt: '2026-01-01T00:00:00.000Z' });
 
     expect(await store.findIdleTopics(NOW)).toEqual([]);
   });
@@ -1631,7 +1570,7 @@ describe('deleteLead', () => {
 
   it('returns false for an id that does not exist', async () => {
     await store.insertLead(baseData);
-    const found = await store.deleteLead(999);
+    const found = await store.deleteLead(randomUUID());
     expect(found).toBe(false);
   });
 });
@@ -1663,7 +1602,7 @@ describe('searchLeads', () => {
 describe('getLead / findByPendingPrompt — not-found paths', () => {
   it('getLead returns undefined for an id that does not exist', async () => {
     await store.insertLead(baseData);
-    expect(await store.getLead(999)).toBeUndefined();
+    expect(await store.getLead(randomUUID())).toBeUndefined();
   });
 
   it('findByPendingPrompt returns undefined when no lead has a pending prompt at all', async () => {
@@ -1689,145 +1628,6 @@ describe('getLead / findByPendingPrompt — not-found paths', () => {
   });
 });
 
-function seedRawBlob(records: unknown[]): void {
-  storage.seed(records);
-}
-
-describe('readLeads — schema validation on the way in', () => {
-  it('backfills fields a legacy record predates with their defaults', async () => {
-    seedRawBlob([
-      {
-        id: 1,
-        name: 'Иван',
-        contact: '@ivan',
-        service: 'vehicle-sourcing',
-        locale: 'ru',
-        statusChangedAt: '2026-01-01T00:00:00.000Z',
-        createdAt: '2026-01-01T00:00:00.000Z',
-      },
-    ]);
-
-    const [lead] = await store.readLeads();
-
-    expect(lead.status).toBe('new');
-    expect(lead.pendingPrompt).toBeNull();
-  });
-
-  it('clears a stale pendingPrompt.kind retired by a later release instead of dropping the whole lead (production incident, 2026-09-03)', async () => {
-    seedRawBlob([
-      {
-        id: 1,
-        name: 'Test',
-        contact: '@test',
-        service: 'vehicle-sourcing',
-        locale: 'ru',
-        status: 'won',
-        dealAmount: 300,
-        commissionPercent: 10,
-        statusChangedAt: 'x',
-        createdAt: 'x',
-        pendingPrompt: { chatId: 1, messageId: 1, kind: 'commission_claim' },
-      },
-    ]);
-
-    const [lead] = await store.readLeads();
-
-    expect(lead).toBeDefined();
-    expect(lead.status).toBe('won');
-    expect(lead.pendingPrompt).toBeNull();
-  });
-
-  it('hides a record missing a required field from callers', async () => {
-    seedRawBlob([
-      {
-        id: 1,
-        name: 'Иван',
-        contact: '@ivan',
-        service: 'vehicle-sourcing',
-        locale: 'ru',
-        statusChangedAt: 'x',
-        createdAt: 'x',
-      },
-      {
-        id: 2,
-        name: 'Пётр',
-        /* contact missing — genuinely corrupt */ service: 'vehicle-sourcing',
-        locale: 'ru',
-        statusChangedAt: 'x',
-        createdAt: 'x',
-      },
-      {
-        id: 3,
-        name: 'Олег',
-        contact: '@oleg',
-        service: 'vehicle-sourcing',
-        locale: 'ru',
-        statusChangedAt: 'x',
-        createdAt: 'x',
-      },
-    ]);
-
-    const leads = await store.readLeads();
-
-    expect(leads.map((l) => l.id)).toEqual([1, 3]);
-  });
-
-  it('rejects a wrong-type value on a field that does exist, rather than coercing it', async () => {
-    seedRawBlob([
-      {
-        id: 1,
-        name: 'Иван',
-        contact: '@ivan',
-        service: 'vehicle-sourcing',
-        locale: 'ru',
-        statusChangedAt: 'x',
-        createdAt: 'x',
-        remindAt: 5000,
-      },
-    ]);
-
-    expect(await store.readLeads()).toEqual([]);
-    expect(storage.current()).toHaveLength(1);
-  });
-});
-
-describe('updateLeads conflict retry', () => {
-  it('re-reads and re-applies the mutation after a precondition-failed write', async () => {
-    await store.insertLead(baseData);
-    const before = storage.writeAttempts();
-    storage.failNextWrites(1);
-
-    const result = await store.updateLeads((leads: StoredLead[]) =>
-      leads.map((l) => ({ ...l, name: 'Пётр' })),
-    );
-
-    expect(result[0]!.name).toBe('Пётр');
-    expect(storage.writeAttempts() - before).toBe(2);
-  });
-
-  it('gives up and throws after exhausting all retries against a persistent conflict', async () => {
-    await store.insertLead(baseData);
-    const before = storage.writeAttempts();
-    storage.failNextWrites(Number.POSITIVE_INFINITY);
-
-    vi.useFakeTimers();
-    try {
-      const pending = store.updateLeads((leads: StoredLead[]) =>
-        leads.map((l) => ({ ...l, name: 'Пётр' })),
-      );
-      const assertion = expect(pending).rejects.toThrow(
-        'updateLeads: conflict retry limit exceeded',
-      );
-      await vi.runAllTimersAsync();
-      await assertion;
-    } finally {
-      vi.useRealTimers();
-    }
-
-    expect(storage.writeAttempts() - before).toBe(6);
-  });
-});
-
 describe('setTelegramMessage', () => {
   it('records where the lead was announced so the card can be edited later', async () => {
     const lead = await store.insertLead(baseData);
@@ -1846,7 +1646,7 @@ describe('setTelegramMessage', () => {
 
   it('is a no-op for an id that is not in the store', async () => {
     await expect(
-      store.setTelegramMessage(999, -100, 1),
+      store.setTelegramMessage(randomUUID(), -100, 1),
     ).resolves.toBeUndefined();
   });
 });
@@ -1870,167 +1670,6 @@ describe('touchLead', () => {
     const lead = await store.insertLead(baseData);
     const updated = await store.touchLead(lead.id);
     expect(updated?.lastActivityAt).toEqual(expect.any(String));
-  });
-});
-
-describe('updateLeads — failures that are not write conflicts', () => {
-  it('propagates a storage failure instead of burning retries on it', async () => {
-    await store.insertLead(baseData);
-    const boom = new Error('storage is down');
-    const failing = {
-      read: storage.read,
-      write: vi.fn().mockRejectedValue(boom),
-    };
-    const brokenStore = createLeadStore({
-      storage: failing,
-      schema: storedLeadSchema,
-    });
-
-    await expect(brokenStore.updateLeads(() => [])).rejects.toBe(boom);
-    expect(failing.write).toHaveBeenCalledTimes(1);
-  });
-});
-
-describe('readLeads — a record that is not a list at all', () => {
-  beforeEach(() => vi.spyOn(console, 'error').mockImplementation(() => {}));
-
-  it('refuses to read a payload that is not a list, and says which file', async () => {
-    storage.seed({ oops: 'this is not a list of leads' });
-
-    await expect(store.readLeads()).rejects.toThrow(
-      /stored leads are object, not an array/,
-    );
-    expect(vi.mocked(console.error)).toHaveBeenCalledWith(
-      '[lead-crm] stored leads are not an array',
-      { path: LEADS_PATH, type: 'object' },
-    );
-  });
-
-  it('refuses to write over it too, rather than replacing it with a fresh list', async () => {
-    storage.seed('garbage');
-
-    await expect(store.insertLead(baseData)).rejects.toThrow(
-      /refusing to overwrite/,
-    );
-    expect(storage.current()).toBe('garbage');
-  });
-});
-
-describe('quarantine — nothing leaves the blob on its own', () => {
-  const corrupt = { id: 7, name: 'Пётр', service: 'x', locale: 'ru' };
-
-  function guarded(quarantine: (entries: unknown[]) => Promise<void>) {
-    return createLeadStore({
-      storage,
-      schema: storedLeadSchema,
-      quarantine,
-    });
-  }
-
-  function seedOneGoodOneCorrupt(): void {
-    storage.seed([
-      {
-        id: 1,
-        name: 'Иван',
-        contact: '@ivan',
-        service: 'vehicle-sourcing',
-        locale: 'ru',
-        statusChangedAt: 'x',
-        createdAt: 'x',
-      },
-      corrupt,
-    ]);
-  }
-
-  beforeEach(() => vi.spyOn(console, 'error').mockImplementation(() => {}));
-
-  it('leaves the unreadable record in the main file after copying it out', async () => {
-    const quarantine = vi.fn().mockResolvedValue(undefined);
-    seedOneGoodOneCorrupt();
-
-    await guarded(quarantine).insertLead(baseData);
-
-    expect(quarantine).toHaveBeenCalledWith([corrupt]);
-    expect(storage.current()).toContainEqual(corrupt);
-  });
-
-  it('keeps it when the copy fails, and says so', async () => {
-    const quarantine = vi.fn().mockRejectedValue(new Error('blob down'));
-    seedOneGoodOneCorrupt();
-
-    await guarded(quarantine).insertLead(baseData);
-
-    expect(storage.current()).toContainEqual(corrupt);
-    expect(vi.mocked(console.error)).toHaveBeenCalledWith(
-      '[lead-crm] could not copy the unreadable records',
-      expect.objectContaining({ count: 1 }),
-    );
-  });
-
-  it('lands one copy and one notice across a retried write', async () => {
-    const quarantineStorage = createMemoryStorage();
-    const send = vi.fn().mockResolvedValue(undefined);
-    const withRealQuarantine = guarded(
-      createQuarantine({
-        storage: quarantineStorage,
-        brand: 'Test',
-        getNotifier: () =>
-          Promise.resolve({ notifier: { sendQuarantinedLeadsToAdmin: send } }),
-      }),
-    );
-    seedOneGoodOneCorrupt();
-    storage.failNextWrites(2);
-
-    await withRealQuarantine.insertLead(baseData);
-
-    expect(quarantineStorage.current()).toEqual([corrupt]);
-    expect(send).toHaveBeenCalledTimes(1);
-  });
-
-  it('does not reuse an id hiding in an unreadable record', async () => {
-    storage.seed([{ id: 41, name: 'Пётр', service: 'x', locale: 'ru' }]);
-
-    const lead = await store.insertLead(baseData);
-
-    expect(lead.id).toBe(42);
-  });
-
-  it('reserves that id on the form path too, not just direct inserts', async () => {
-    storage.seed([{ id: 41, name: 'Пётр', service: 'x', locale: 'ru' }]);
-
-    const { lead } = await store.insertOrMergeLead({
-      ...baseData,
-      visitorId: 'visitor-1',
-    });
-
-    expect(lead.id).toBe(42);
-  });
-
-  it('reads an id that was stored as a string', async () => {
-    storage.seed([{ id: '41', name: 'Пётр' }]);
-
-    expect((await store.insertLead(baseData)).id).toBe(42);
-  });
-
-  it('ignores ids it cannot use rather than blocking every insert', async () => {
-    storage.seed([
-      { id: 'сорок один' },
-      { id: 41.5 },
-      { id: -3 },
-      { id: Number.MAX_SAFE_INTEGER },
-      { nope: true },
-      null,
-    ]);
-
-    expect((await store.insertLead(baseData)).id).toBe(1);
-  });
-
-  it('leaves the quarantine alone when every record reads fine', async () => {
-    const quarantine = vi.fn().mockResolvedValue(undefined);
-
-    await guarded(quarantine).insertLead(baseData);
-
-    expect(quarantine).not.toHaveBeenCalled();
   });
 });
 
@@ -2136,7 +1775,8 @@ describe('a newer Lead for the same Telegram visitor', () => {
     expect(await store.getLead(old.id)).toMatchObject({ capturePrompt: null });
     expect((await store.getLead(sister.id))?.capturePrompt).not.toBeNull();
     expect(await store.findByCapturePrompt(42, bot.brand)).toBeUndefined();
-    expect(lead.id).toBe(3);
+    expect(lead.id).not.toBe(old.id);
+    expect(lead.id).not.toBe(sister.id);
   });
 
   it('takes it off when the new one merges into a click', async () => {
@@ -2196,45 +1836,6 @@ describe('a newer Lead for the same Telegram visitor', () => {
   });
 });
 
-describe('a capturePrompt stored before the per-brand Questionnaires', () => {
-  const legacy = (id: number, step: string) => ({
-    id,
-    brand: baseData.brand,
-    name: 'Иван',
-    contact: '@ivan',
-    service: '',
-    locale: 'ru',
-    statusChangedAt: 'x',
-    createdAt: 'x',
-    capturePrompt: { chatId: 700 + id, step },
-  });
-
-  it('still parses an old step and clears an unknown one without quarantining the lead', async () => {
-    const quarantine = vi.fn().mockResolvedValue(undefined);
-    const guarded = createLeadStore({
-      storage,
-      schema: storedLeadSchema,
-      quarantine,
-    });
-    storage.seed([
-      legacy(1, 'looking_for'),
-      legacy(2, 'budget'),
-      legacy(3, 'phone'),
-      legacy(4, 'model_year'),
-    ]);
-
-    const steps = (await guarded.readLeads()).map((l) => l.capturePrompt);
-
-    expect(quarantine).not.toHaveBeenCalled();
-    expect(steps).toEqual([
-      { chatId: 701, step: 'looking_for' },
-      { chatId: 702, step: 'budget' },
-      { chatId: 703, step: 'phone' },
-      null,
-    ]);
-  });
-});
-
 describe('the capture lookups', () => {
   const fromTelegram = (id: number, overrides: Partial<LeadInput> = {}) =>
     store.insertLead({ ...baseData, telegramId: id, ...overrides });
@@ -2248,13 +1849,10 @@ describe('the capture lookups', () => {
       capturePrompt: { chatId: 42, step: 'budget' },
     });
     const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
-    await store.updateLeads((leads) =>
-      leads.map((l) =>
-        l.id === lead.id
-          ? { ...l, createdAt: twoHoursAgo, visitorActiveAt: twoHoursAgo }
-          : l,
-      ),
-    );
+    await patchLead(lead.id, {
+      createdAt: twoHoursAgo,
+      visitorActiveAt: twoHoursAgo,
+    });
 
     expect(await store.findByCapturePrompt(42, baseData.brand)).toBeUndefined();
   });
@@ -2541,7 +2139,7 @@ describe('updateCapture', () => {
 
   it('returns undefined for an id that does not exist', async () => {
     expect(
-      await store.updateCapture(999, { capturePrompt: null }),
+      await store.updateCapture(randomUUID(), { capturePrompt: null }),
     ).toBeUndefined();
   });
 });
@@ -2562,38 +2160,39 @@ describe('hasRealContact', () => {
 describe('the Lead count alert', { timeout: 30_000 }, () => {
   const alertLeadCount = vi.fn();
   const createdAt = new Date().toISOString();
-  const seedLeads = (count: number) =>
-    storage.seed(
-      Array.from({ length: count }, (_, at) => ({
-        ...baseData,
-        contact: `@seed${at}`,
-        id: at + 1,
-        status: 'won',
-        createdAt,
-        statusChangedAt: createdAt,
-      })),
-    );
+  const seedLeads = async (count: number) => {
+    await crmDatabase().lead.createMany({
+      data: Array.from({ length: count }, (_, at) =>
+        leadData(
+          storedLeadSchema.parse({
+            ...baseData,
+            contact: `@seed${at}`,
+            status: 'won',
+            id: randomUUID(),
+            createdAt,
+            statusChangedAt: createdAt,
+          }),
+        ),
+      ),
+    });
+  };
 
   beforeEach(() => {
     alertLeadCount.mockReset().mockResolvedValue(undefined);
-    store = createLeadStore({
-      storage,
-      schema: storedLeadSchema,
-      alertLeadCount,
-    });
+    store = createLeadStore({ database: crmDatabase, alertLeadCount });
   });
 
   it.each([4999, 9999])(
     'tells once the new Lead after %i stored ones reaches a threshold',
     async (stored) => {
-      seedLeads(stored);
+      await seedLeads(stored);
       await store.insertOrMergeLead({ ...baseData, contact: '@fresh' });
       expect(alertLeadCount).toHaveBeenCalledExactlyOnceWith(stored + 1);
     },
   );
 
   it('stays quiet past a threshold and on a merge', async () => {
-    seedLeads(5000);
+    await seedLeads(5000);
     await store.insertOrMergeLead({ ...baseData, visitorId: 'visitor-1' });
     await store.insertOrMergeLead({ ...baseData, visitorId: 'visitor-1' });
     expect(alertLeadCount).not.toHaveBeenCalled();
@@ -2602,12 +2201,9 @@ describe('the Lead count alert', { timeout: 30_000 }, () => {
   it('keeps the Lead when the alert fails', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});
     alertLeadCount.mockRejectedValue(new Error('down'));
-    seedLeads(4999);
-    const { lead } = await store.insertOrMergeLead({
-      ...baseData,
-      contact: '@fresh',
-    });
-    expect(lead.id).toBe(5000);
+    await seedLeads(4999);
+    await store.insertOrMergeLead({ ...baseData, contact: '@fresh' });
+    expect(await store.readLeads()).toHaveLength(5000);
     expect(console.error).toHaveBeenCalledWith(
       '[lead-crm] could not send the Lead count alert',
       { count: 5000, error: { name: 'Error', message: 'down' } },

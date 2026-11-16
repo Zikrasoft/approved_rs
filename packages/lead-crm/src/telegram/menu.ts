@@ -15,7 +15,7 @@ export function buildOpenList(leads: StoredLead[]): {
 } {
   const rows: Btn[][] = leads
     .filter((l) => !isClosed(l))
-    .sort((a, b) => b.id - a.id)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     .slice(0, MAX_LIST_ROWS)
     .map((l) => [
       {
@@ -31,13 +31,13 @@ export function buildOpenList(leads: StoredLead[]): {
 
 export function buildMenu(
   role: Role,
-  balance: number | undefined,
+  balance: number,
 ): {
   text: string;
   reply_markup: Keyboard;
 } {
   const rows: Btn[][] = [
-    ...(balance === undefined ? [] : [LEDGER_ROW]),
+    LEDGER_ROW,
     [{ text: '📂 Открытые', callback_data: 'menu:open' }],
   ];
   if (role === 'admin')

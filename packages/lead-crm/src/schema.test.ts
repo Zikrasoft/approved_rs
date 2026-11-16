@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { storedLeadSchema, LEGACY_BRAND } from './schema.ts';
 
 const base = {
-  id: 1,
+  id: '0196f8a0-0000-7000-8000-000000000001',
   name: 'Иван',
   contact: '@ivan',
   service: 'detailing',

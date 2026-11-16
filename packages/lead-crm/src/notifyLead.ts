@@ -143,7 +143,7 @@ interface AfterStatusChangeOptions {
     Notifier,
     'editLeadDetailMessage' | 'sendStatusChange' | 'unpinLeadCard'
   >;
-  dropFromDigest: (leadId: number) => Promise<void>;
+  dropFromDigest: (leadId: string) => Promise<void>;
   settleOrder: (lead: StoredLead) => Promise<void>;
 }
 
@@ -154,7 +154,7 @@ export function createDropFromDigest({
   store: Pick<LeadStore, 'takeFromDigest'>;
   notifier: Pick<Notifier, 'editDigest'>;
 }) {
-  return async function dropFromDigest(leadId: number): Promise<void> {
+  return async function dropFromDigest(leadId: string): Promise<void> {
     const left = await store.takeFromDigest(leadId);
     if (!left) return;
     try {
@@ -255,7 +255,7 @@ export function createNotifyLead({
       );
       stored = false;
       try {
-        lead = store.newStoredLead(data, Date.now());
+        lead = store.newStoredLead(data);
       } catch (fallbackErr) {
         logError(
           `${logPrefix} lead failed validation, cannot notify`,
