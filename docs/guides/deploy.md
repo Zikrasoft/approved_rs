@@ -280,11 +280,15 @@ the CRM bot's username) are GitHub **Variables**; everything else is a
 **Secret**. A secret set as a variable does not count: the deploy reads each
 name only from the side the manifest names.
 
-The deploy step gets `toJSON(secrets)` and `toJSON(vars)` as two env values,
-`SITE_SECRETS` and `SITE_VARS`, so a new name needs no YAML edit. Why that is
-safe: GitHub masks every secret in the log whatever the step does with it;
-`site-env.ts` copies only the manifest's names for that site into the
-release `.env` and never prints a value (a refusal names the variable only);
+The deploy step gets two env values, `SITE_SECRETS` and `SITE_VARS`.
+`SITE_VARS` is `toJSON(vars)`. `SITE_SECRETS` is a JSON object the workflow
+spells out name by name (`"X": ${{ toJSON(secrets.X) }}`), because GitHub holds
+a workflow that dumps `toJSON(secrets)` as possibly malicious until someone
+approves the run. A new secret name therefore goes into the manifest and into
+both `ci.yml` and `publish.yml`; `site-env.test.ts` fails until the three agree.
+Why the rest is safe: GitHub masks every secret in the log whatever the step
+does with it; `site-env.ts` copies only the manifest's names for that site into
+the release `.env` and never prints a value (a refusal names the variable only);
 and `upload-site.sh` unsets both JSON values and the deploy secrets before the
 build, so pnpm, turbo, Astro and every dependency they run never see a secret
 outside the site's own env. Only the one deploy step carries them, not the job.
