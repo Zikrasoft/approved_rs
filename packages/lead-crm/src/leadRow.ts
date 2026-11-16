@@ -193,16 +193,29 @@ const MAPPERS: Mappers = {
   postponedFrom: (postponedFrom) => ({ postponedFrom: postponedFrom ?? null }),
 };
 
-export function leadData(
-  lead: Partial<StoredLead>,
-): Prisma.LeadUncheckedCreateInput {
+export function leadColumns(lead: Partial<StoredLead>): LeadColumns {
   const data: LeadColumns = {};
   for (const key of Object.keys(lead) as (keyof StoredLead)[]) {
     const mapper = MAPPERS[key] as
       ((value: unknown) => LeadColumns) | undefined;
     if (mapper) Object.assign(data, mapper(lead[key]));
   }
-  return data as Prisma.LeadUncheckedCreateInput;
+  return data;
+}
+
+export function leadData(
+  lead: Omit<StoredLead, 'id'> & { id?: StoredLead['id'] },
+): Prisma.LeadUncheckedCreateInput {
+  const { brand, name, contact, service, locale, statusChangedAt } = lead;
+  return {
+    ...leadColumns(lead),
+    brand,
+    name,
+    contact,
+    service,
+    locale,
+    statusChangedAt: new Date(statusChangedAt),
+  };
 }
 
 export const CLOSED: $Enums.LeadStatus[] = ['won', 'lost'];

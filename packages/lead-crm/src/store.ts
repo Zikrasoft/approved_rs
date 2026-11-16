@@ -21,7 +21,13 @@ import {
   type CrmDatabase,
   type CrmTransaction,
 } from './database.ts';
-import { CLOSED, leadData, toStoredLead, WITH_NOTES } from './leadRow.ts';
+import {
+  CLOSED,
+  leadColumns,
+  leadData,
+  toStoredLead,
+  WITH_NOTES,
+} from './leadRow.ts';
 import { Prisma } from './generated/prisma/client.ts';
 import { businessDay, DAY_MS } from './businessTime.ts';
 import {
@@ -313,7 +319,7 @@ export function createLeadStore({
         await tx.lead.update({
           where: { id: lead.id },
           data: {
-            ...leadData(fields),
+            ...leadColumns(fields),
             ...(addNote && {
               notes: {
                 create: { author: addNote.author, text: addNote.text },

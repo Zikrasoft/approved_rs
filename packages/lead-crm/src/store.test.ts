@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { crmDatabase } from './database.ts';
-import { leadData } from './leadRow.ts';
+import { leadColumns, leadData } from './leadRow.ts';
 import type { LeadId, LeadInput, StoredLead } from './schema.ts';
 import { storedLeadSchema } from './schema.ts';
 import {
@@ -36,7 +36,7 @@ async function patchLead(
   id: LeadId,
   fields: Partial<StoredLead>,
 ): Promise<void> {
-  await crmDatabase().lead.update({ where: { id }, data: leadData(fields) });
+  await crmDatabase().lead.update({ where: { id }, data: leadColumns(fields) });
 }
 
 beforeEach(() => {
