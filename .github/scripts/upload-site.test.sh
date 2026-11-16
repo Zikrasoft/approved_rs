@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-script="$(cd "$(dirname -- "$0")" && pwd)/deploy-site.sh"
+script="$(cd "$(dirname -- "$0")" && pwd)/upload-site.sh"
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 mkdir -p "$work/bin" "$work/repo/apps/auto-service" "$work/repo/apps/detailing" "$work/repo/apps/approved-rs"

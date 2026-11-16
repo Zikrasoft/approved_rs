@@ -2,7 +2,7 @@
   "notInSiteEnv": {
     "CRM_DATABASE_URL": "compose sets it on every site container from the host's CRM_DB_PASSWORD",
     "SHOP_INTERNAL_URL": "compose, on the host",
-    "CATALOGUE_SHRINK_GUARD": "deploy-site.sh sets it for the carlab.rs production build",
+    "CATALOGUE_SHRINK_GUARD": "upload-site.sh sets it for the carlab.rs production build",
     "OPENAI_API_KEY": "the translate job, a repository secret of its own"
   },
   "shared": {

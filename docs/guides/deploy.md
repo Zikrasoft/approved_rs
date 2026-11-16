@@ -53,7 +53,7 @@ GitHub Actions builds and deploys, and only the sites that have fallen behind
 `main` (see "Not everything gets deployed" below). The `deploy-site` job is a
 matrix of the sites `.github/scripts/site-env.json` names (`verify` reads its
 `sites` keys into the `sites` output); each leg runs
-`.github/scripts/deploy-site.sh <app> <sha>-<run>-<attempt>` from the repo root,
+`.github/scripts/upload-site.sh <app> <sha>-<run>-<attempt>` from the repo root,
 which:
 
 1. writes the site env into a temp file (mode 0600) with
@@ -285,7 +285,7 @@ The deploy step gets `toJSON(secrets)` and `toJSON(vars)` as two env values,
 safe: GitHub masks every secret in the log whatever the step does with it;
 `site-env.ts` copies only the manifest's names for that site into the
 release `.env` and never prints a value (a refusal names the variable only);
-and `deploy-site.sh` unsets both JSON values and the deploy secrets before the
+and `upload-site.sh` unsets both JSON values and the deploy secrets before the
 build, so pnpm, turbo, Astro and every dependency they run never see a secret
 outside the site's own env. Only the one deploy step carries them, not the job.
 
@@ -1471,7 +1471,7 @@ moves forward again.
    ship. Right after writing the env the carlab.rs leg probes
    `MEDUSA_BACKEND_URL/health` (`.github/scripts/shop-backend-up.sh`, a few
    retries over about 20 seconds). If the backend does not answer,
-   `deploy-site.sh` exits 75, the leg prints a `::warning::`, skips the build
+   `upload-site.sh` exits 75, the leg prints a `::warning::`, skips the build
    and the deploy, and leaves `deployed/auto-service` where it was, so the
    live site keeps serving the last build and the next run retries. Without the
    probe, a VPS outage would fail every carlab.rs deploy, since the storefront
@@ -1481,7 +1481,7 @@ moves forward again.
 
    The build reads the catalogue once (pages, sitemap and llms.txt share it)
    and records how many part pages it serves at
-   `https://carlab.rs/catalogue-build.json`. A production build (`deploy-site.sh` sets
+   `https://carlab.rs/catalogue-build.json`. A production build (`upload-site.sh` sets
    `CATALOGUE_SHRINK_GUARD=true`) reads that record from the live site first, and once it counts
    any part pages the catalogue is live: the build then fails without
    `MEDUSA_BACKEND_URL`, on zero part pages, and on fewer than half of what the

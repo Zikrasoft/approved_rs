@@ -47,4 +47,4 @@ jobs:
           VPS_KNOWN_HOSTS: ${{ secrets.AUTO_SERVICE_SHOP_VPS_KNOWN_HOSTS }}
         run: |
           sha=$(git rev-parse HEAD)
-          sh workflow/.github/scripts/deploy-site.sh auto-service "$sha-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          sh workflow/.github/scripts/upload-site.sh auto-service "$sha-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"

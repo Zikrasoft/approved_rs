@@ -5,13 +5,13 @@ app=${1:-}
 release=${2:-}
 case "$app" in
   '' | -* | *[!abcdefghijklmnopqrstuvwxyz0123456789-]*)
-    echo "usage: deploy-site.sh <app> <release>, the app being a site in site-env.json" >&2
+    echo "usage: upload-site.sh <app> <release>, the app being a site in site-env.json" >&2
     exit 2
     ;;
 esac
 case "$release" in
   '' | *[!0-9a-f-]*)
-    echo "usage: deploy-site.sh <app> <release>, the release being <sha>-<run>-<attempt>" >&2
+    echo "usage: upload-site.sh <app> <release>, the release being <sha>-<run>-<attempt>" >&2
     exit 2
     ;;
 esac
