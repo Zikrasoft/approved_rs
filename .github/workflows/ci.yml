@@ -53,7 +53,8 @@ jobs:
              || ! git diff --quiet "$base" HEAD -- infra/auto-service-shop; then
             shop=true
           fi
-          sites=$(jq -r '[.[] | select(. == "@podbor/approved-rs" or . == "@podbor/detailing" or . == "@podbor/auto-service") | ltrimstr("@podbor/")] | join(" ")' <<<"$packages")
+          sites=$(jq -r --argjson sites "$(jq -c '.sites | keys | map("@podbor/" + .)' .github/scripts/site-env.json)" \
+            '[.[] | select(. as $p | $sites | index($p)) | ltrimstr("@podbor/")] | join(" ")' <<<"$packages")
           echo "Affected: $packages; shop: $shop; sites: ${sites:-none}"
           {
             echo "base=$base"
@@ -83,15 +84,16 @@ jobs:
           PUBLIC_THREADS_CHANNEL: check
           SITES: ${{ steps.affected.outputs.sites }}
         run: |
+          read -ra sites <<<"$SITES"
           filters=()
           dists=()
-          for site in $SITES; do
+          for site in "${sites[@]}"; do
             filters+=("--filter=@podbor/$site")
             dists+=("apps/$site/dist/client")
           done
           pnpm turbo run build "${filters[@]}"
           node --experimental-strip-types .github/scripts/contact-placement.ts "${dists[@]}"
-          node --experimental-strip-types .github/scripts/caddy-split.ts $SITES
+          node --experimental-strip-types .github/scripts/caddy-split.ts "${sites[@]}"
 
       - if: steps.affected.outputs.shop == 'true'
         run: sh infra/auto-service-shop/test/scripts.test.sh
@@ -109,7 +111,7 @@ jobs:
         run: sh infra/auto-service-shop/test/harden-ssh.test.sh
       - run: sh .github/scripts/shop-backend-up.test.sh
       - run: sh .github/scripts/shop-ci-env.test.sh
-      - run: sh .github/scripts/deploy-site.test.sh
+      - run: sh .github/scripts/upload-site.test.sh
       - run: node --experimental-strip-types --test .github/scripts/site-env.test.ts .github/scripts/env-to-github.test.ts .github/scripts/caddy-split.test.ts
       - run: >-
           docker run --rm -v "$PWD:/repo" -w /repo --entrypoint shellcheck "$ACTIONLINT_IMAGE"
@@ -467,7 +469,7 @@ jobs:
           VPS_KNOWN_HOSTS: ${{ secrets.AUTO_SERVICE_SHOP_VPS_KNOWN_HOSTS }}
         run: |
           status=0
-          sh .github/scripts/deploy-site.sh "$APP" "$SHA-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" || status=$?
+          sh .github/scripts/upload-site.sh "$APP" "$SHA-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" || status=$?
           if [ "$status" -eq 75 ]; then
             echo "::warning::The shop backend does not answer /health, so auto-service is not deployed; deployed/auto-service stays put and the next run retries. The live site keeps serving."
             exit 0
