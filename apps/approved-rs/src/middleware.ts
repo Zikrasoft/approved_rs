@@ -33,6 +33,6 @@ export const onRequest = defineMiddleware((context, next) => {
     context.cookies.get(LOCALE_COOKIE)?.value,
   );
   return pathname === '/'
-    ? context.rewrite(`/${locale}/${search}`)
+    ? context.redirect(`/${locale}/${search}`, 302)
     : context.redirect(`/${locale}${pathname}${search}`, 301);
 });

@@ -36,7 +36,6 @@ function makeContext(
       get: () => (cookie ? { value: cookie } : undefined),
     },
     redirect: vi.fn((path: string, status?: number) => ({ path, status })),
-    rewrite: vi.fn((path: string) => ({ path })),
   };
 }
 
@@ -58,19 +57,19 @@ describe('onRequest', () => {
     expect(context.redirect).not.toHaveBeenCalled();
   });
 
-  it('rewrites the bare root to the detected locale without pinning it', () => {
+  it('redirects the bare root to the detected locale for this visit only', () => {
     const context = makeContext('/?utm_source=ig', {
       acceptLanguage: 'en-US,en;q=0.9,ru;q=0.8',
     });
     run(context);
-    expect(context.rewrite).toHaveBeenCalledWith('/en/?utm_source=ig');
+    expect(context.redirect).toHaveBeenCalledWith('/en/?utm_source=ig', 302);
     expect(context.cookies.set).not.toHaveBeenCalled();
   });
 
   it('falls back to the primary locale for a language the site does not serve', () => {
     const context = makeContext('/', { acceptLanguage: 'zh-CN,zh;q=0.9' });
     run(context);
-    expect(context.rewrite).toHaveBeenCalledWith('/ru/');
+    expect(context.redirect).toHaveBeenCalledWith('/ru/', 302);
   });
 
   it('still prefers an existing cookie over Accept-Language', () => {
@@ -79,7 +78,7 @@ describe('onRequest', () => {
       cookie: 'sr',
     });
     run(context);
-    expect(context.rewrite).toHaveBeenCalledWith('/sr/');
+    expect(context.redirect).toHaveBeenCalledWith('/sr/', 302);
   });
 
   it('keeps the query string on the cross-brand 301', () => {
