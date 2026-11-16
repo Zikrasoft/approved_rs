@@ -666,6 +666,12 @@ and the bot switch together. Nothing here prints a secret; keep it that way.
    Done: Settings → Environments lists the three `site-*`, and the dry run
    prints no `missing:` line you did not expect.
 
+Steps 1 and 2 are also done **before merging #465**: the merge's first CI run
+ships the new stack files to the host ("Ship the stack files") and then runs
+`deploy.sh`, which refuses to start without `CRM_DB_PASSWORD` in
+`/srv/carlab/.env`, leaving the host with the new files and the old
+containers; the site legs after it need `rsync` and `/srv/sites`.
+
 1. **Host prerequisites.** On a host bootstrapped before the sites moved, copy
    `infra/auto-service-shop/bootstrap-host.sh` over and rerun it as root: it
    installs `rsync`, makes `/srv/sites` and enables the `carlab-reminders`
@@ -679,7 +685,9 @@ and the bot switch together. Nothing here prints a secret; keep it that way.
 3. **Database.** Ship the shop (a push to `main` that deploys
    `auto-service-shop`, or `./deploy.sh <live sha>` on the host): `crm-role.sh`
    creates the role and database, `deploy.sh` migrates it. Check with
-   `docker compose exec -T postgres psql -U carlab -d crm -c '\dt'`.
+   `docker compose exec -T postgres psql -U carlab -d crm -c '\dt'`. The
+   shop deploy also creates the `running` link beside an existing `current`,
+   so it runs before the first site deploy.
 4. **Sites on the host.** Let `deploy-site` ship all three (delete their
    `deployed/*` tags or run CI with **Deploy every app**). They answer only
    through Caddy, whose hosts still resolve to Vercel, so no visitor reaches
