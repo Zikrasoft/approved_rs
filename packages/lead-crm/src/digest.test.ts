@@ -162,9 +162,9 @@ describe('the posted digest', () => {
     const entries = await crmDatabase().digestLead.findMany({
       orderBy: { position: 'asc' },
     });
-    const listed = (list: 'DUE' | 'STALE') =>
+    const listed = (list: 'due' | 'stale') =>
       entries.filter((e) => e.list === list).map((e) => nth(e.leadId));
-    return { dueIds: listed('DUE'), staleIds: listed('STALE') };
+    return { dueIds: listed('due'), staleIds: listed('stale') };
   };
 
   beforeEach(async () => {

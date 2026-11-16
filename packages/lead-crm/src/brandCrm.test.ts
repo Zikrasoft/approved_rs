@@ -4,7 +4,7 @@ import { createBrandBot } from './brandBot.ts';
 import { recordBotApi } from './testing/botApi.ts';
 import { crmDatabase } from './database.ts';
 import { leadData } from './leadRow.ts';
-import { seedLead } from './testing/seed.ts';
+import { seedLead, testLeadId } from './testing/seed.ts';
 
 const ENV = {
   TELEGRAM_BOT_TOKEN: '3001:token',
@@ -342,7 +342,7 @@ describe('the Lead topic lifecycle', () => {
 
   it('hands back the Lead when its row is gone', async () => {
     const { crm, lead } = await withTopic();
-    const gone = { ...lead, id: '0196f8a0-0000-7000-8000-000000000999' };
+    const gone = { ...lead, id: testLeadId(999) };
 
     await expect(crm.touchLeadTopic(gone)).resolves.toBe(gone);
   });

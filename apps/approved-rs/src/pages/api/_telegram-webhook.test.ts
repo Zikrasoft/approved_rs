@@ -1,7 +1,7 @@
 import '@podbor/lead-crm/testing/database';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { APIContext } from 'astro';
-import { businessDay, crmDatabase } from '@podbor/lead-crm';
+import { businessDay, crmDatabase, leadIdSchema } from '@podbor/lead-crm';
 import {
   recordBotApi,
   seedLead,
@@ -90,7 +90,7 @@ const LATER = '20.10.2099';
 let nextUpdateId = 1;
 
 const L = (n: number) =>
-  `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
+  leadIdSchema.parse(`00000000-0000-4000-8000-${String(n).padStart(12, '0')}`);
 
 function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
   return {
@@ -104,8 +104,7 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     notes: [],
     locale: 'ru',
     status: 'new',
-    telegramChatId: CARD_CHAT_ID,
-    telegramMessageId: CARD_MESSAGE_ID,
+    telegramCard: { chatId: CARD_CHAT_ID, messageId: CARD_MESSAGE_ID },
     statusChangedAt: '2026-01-01T00:00:00.000Z',
     lastActivityAt: null,
     createdAt: '2026-01-01T00:00:00.000Z',
@@ -756,7 +755,7 @@ describe('POST /api/telegram-webhook', () => {
           hidden: 0,
         },
       });
-      const entries = (list: 'DUE' | 'STALE', ids: number[]) =>
+      const entries = (list: 'due' | 'stale', ids: number[]) =>
         ids.map((n, position) => ({
           digestId: digest.id,
           leadId: L(n),
@@ -764,7 +763,7 @@ describe('POST /api/telegram-webhook', () => {
           position,
         }));
       await crmDatabase().digestLead.createMany({
-        data: [...entries('DUE', due), ...entries('STALE', stale)],
+        data: [...entries('due', due), ...entries('stale', stale)],
       });
     };
     const digestEdits = () =>
@@ -780,8 +779,15 @@ describe('POST /api/telegram-webhook', () => {
         [6, 7],
         makeLead({ id: L(4), status: 'won' }),
         makeLead({ id: L(5) }),
-        makeLead({ id: L(6), telegramMessageId: 556, status: 'negotiations' }),
-        makeLead({ id: L(7), telegramMessageId: 557 }),
+        makeLead({
+          id: L(6),
+          telegramCard: { chatId: CARD_CHAT_ID, messageId: 556 },
+          status: 'negotiations',
+        }),
+        makeLead({
+          id: L(7),
+          telegramCard: { chatId: CARD_CHAT_ID, messageId: 557 },
+        }),
       );
 
       await tap(`st:${L(6)}:lost`, ADMIN_ID, { id: 'cb-dg' });
@@ -999,8 +1005,7 @@ describe('POST /api/telegram-webhook', () => {
       expect(crm('pinChatMessage')).toEqual([]);
       expect(await stored()).toMatchObject({
         status: 'postponed',
-        telegramChatId: Number(GROUP_ID),
-        telegramMessageId: PROMPT_ID,
+        telegramCard: { chatId: Number(GROUP_ID), messageId: PROMPT_ID },
       });
     });
 

@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { crmDatabase } from './database.ts';
 import { createLeadStore, type LeadStore } from './store.ts';
 import { createLedgerStore, type LedgerStore } from './ledgerStore.ts';
-import type { LeadInput } from './schema.ts';
+import type { LeadId, LeadInput } from './schema.ts';
 
 const TIMES = 8;
 
@@ -17,7 +17,7 @@ beforeEach(() => {
   ledger = createLedgerStore({ database: crmDatabase });
 });
 
-const click = (channel: string): LeadInput => ({
+const click = (channel: LeadInput['contactChannel']): LeadInput => ({
   brand: 'Test',
   name: '',
   contact: '—',
@@ -181,8 +181,8 @@ describe('concurrent writers', () => {
     const now = new Date('2026-06-11T08:00:00Z');
     vi.useFakeTimers({ toFake: ['Date'] });
     vi.setSystemTime(new Date('2026-06-01T08:00:00Z'));
-    const ids: string[] = [];
-    for (const channel of ['telegram', 'viber', 'whatsapp']) {
+    const ids: LeadId[] = [];
+    for (const channel of ['telegram', 'viber', 'whatsapp'] as const) {
       const lead = await store.insertLead({
         ...click(channel),
         visitorId: channel,

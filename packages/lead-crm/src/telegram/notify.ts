@@ -139,26 +139,24 @@ export function createNotifier({
     },
 
     async unpinLeadCard(lead: StoredLead): Promise<void> {
-      if (lead.telegramChatId == null || lead.telegramMessageId == null) return;
+      const card = lead.telegramCard;
+      if (!card) return;
       try {
-        await client.api.unpinChatMessage(
-          lead.telegramChatId,
-          lead.telegramMessageId,
-        );
+        await client.api.unpinChatMessage(card.chatId, card.messageId);
       } catch (err) {
         logError('[telegram] unpinChatMessage failed', err, {
-          messageId: lead.telegramMessageId,
+          messageId: card.messageId,
         });
       }
     },
 
     async refreshLeadCard(lead: StoredLead): Promise<boolean> {
-      if (lead.telegramChatId == null || lead.telegramMessageId == null)
-        return false;
+      const card = lead.telegramCard;
+      if (!card) return false;
       try {
         await client.safeEditMessage(
-          lead.telegramChatId,
-          lead.telegramMessageId,
+          card.chatId,
+          card.messageId,
           formatter.formatTeaser(lead, await visitorSearches(lead)),
           formatter.deepLinkKeyboard(lead),
         );

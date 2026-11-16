@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { BRANDS } from '@podbor/brands';
-import { legacyLeadSchema, type LegacyLead } from './schema.ts';
+import { legacyLeadSchema, type LegacyLead } from './import.ts';
 
 interface StoredShape {
   label: string;
@@ -53,7 +53,7 @@ const HISTORY: StoredShape[] = [
       locale: 'ru',
       kind: 'lead',
       status: 'in_progress',
-      telegramChatId: -1001234567890,
+      telegramCard: { chatId: -1001234567890, messageId: 42 },
       pendingPrompt: null,
       remindAt: null,
     },
@@ -121,6 +121,8 @@ const HISTORY: StoredShape[] = [
     keeps: {
       id: 3,
       brand: 'Approved.rs',
+      contact: 'milan@example.rs',
+      contactChannel: null,
       locale: 'sr',
       status: 'postponed',
       remindAt: '2026-03-20',
@@ -357,7 +359,7 @@ const HISTORY: StoredShape[] = [
       status: 'postponed',
       postponedFrom: 'negotiations',
       remindAt: '2026-04-01',
-      telegramChatId: -1009876543210,
+      telegramCard: { chatId: -1009876543210, messageId: 101 },
     },
   },
   {
@@ -417,8 +419,7 @@ const HISTORY: StoredShape[] = [
       services: [],
       remindAt: null,
       pendingPrompt: null,
-      telegramChatId: null,
-      telegramMessageId: null,
+      telegramCard: null,
     },
   },
   {

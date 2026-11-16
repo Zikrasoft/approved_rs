@@ -9,7 +9,7 @@ const token = vi.hoisted(() => {
 
 const pending = vi.hoisted(() => [] as Promise<unknown>[]);
 
-vi.mock('@podbor/site-kit/background', () => ({
+vi.mock('@podbor/lead-crm/background', () => ({
   inBackground: (promise: Promise<unknown>) => pending.push(promise),
 }));
 vi.spyOn(console, 'error').mockImplementation(() => {});

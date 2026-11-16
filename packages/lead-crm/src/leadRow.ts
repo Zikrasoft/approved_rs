@@ -6,10 +6,13 @@ import {
 } from './generated/prisma/client.ts';
 import {
   adSourceSchema,
+  leadIdSchema,
   inWorkStatusSchema,
+  type CapturePrompt,
+  type MessageKey,
+  type PendingPrompt,
   type StoredLead,
 } from './schema.ts';
-import { lower, upper } from './enumCase.ts';
 
 const big = (value: number | null) => (value == null ? null : BigInt(value));
 const num = (value: bigint | null) => (value == null ? null : Number(value));
@@ -19,7 +22,7 @@ const at = (value: string | null | undefined) =>
 const day = (value: string | null) =>
   value == null ? null : new Date(`${value}T00:00:00Z`);
 
-const ADVANCED: $Enums.LeadStatus[] = ['NEGOTIATIONS', 'IN_PROGRESS'];
+const ADVANCED: $Enums.LeadStatus[] = ['negotiations', 'in_progress'];
 
 const storedAdSource = adSourceSchema.nullable().catch(null);
 const storedPostponedFrom = inWorkStatusSchema.nullable().catch(null);
@@ -30,9 +33,53 @@ export const WITH_NOTES = {
 
 export type LeadRow = Lead & { notes: LeadNoteRow[] };
 
+type LeadColumns = Partial<Prisma.LeadUncheckedCreateInput>;
+
+function messageKey(
+  chatId: bigint | null,
+  messageId: number | null,
+): MessageKey | null {
+  return chatId != null && messageId != null
+    ? { chatId: Number(chatId), messageId }
+    : null;
+}
+
+const telegramCard = {
+  read: (row: Lead) => messageKey(row.telegramChatId, row.telegramMessageId),
+  write: (card: MessageKey | null): LeadColumns => ({
+    telegramChatId: big(card?.chatId ?? null),
+    telegramMessageId: card?.messageId ?? null,
+  }),
+};
+
+const pendingPrompt = {
+  read: (row: Lead): PendingPrompt | null => {
+    const key = messageKey(row.pendingPromptChatId, row.pendingPromptMessageId);
+    return key && row.pendingPromptKind
+      ? { ...key, kind: row.pendingPromptKind }
+      : null;
+  },
+  write: (prompt: PendingPrompt | null): LeadColumns => ({
+    pendingPromptChatId: big(prompt?.chatId ?? null),
+    pendingPromptMessageId: prompt?.messageId ?? null,
+    pendingPromptKind: prompt?.kind ?? null,
+  }),
+};
+
+const capturePrompt = {
+  read: (row: Lead): CapturePrompt | null =>
+    row.capturePromptChatId != null && row.capturePromptStep
+      ? { chatId: Number(row.capturePromptChatId), step: row.capturePromptStep }
+      : null,
+  write: (prompt: CapturePrompt | null): LeadColumns => ({
+    capturePromptChatId: big(prompt?.chatId ?? null),
+    capturePromptStep: prompt?.step ?? null,
+  }),
+};
+
 export function toStoredLead(row: LeadRow): StoredLead {
   return {
-    id: row.id,
+    id: leadIdSchema.parse(row.id),
     number: row.number,
     brand: row.brand,
     name: row.name,
@@ -42,7 +89,7 @@ export function toStoredLead(row: LeadRow): StoredLead {
     contactChannel: row.contactChannel,
     comment: row.comment,
     notes: row.notes.map((note) => ({
-      author: lower(note.author),
+      author: note.author,
       text: note.text,
       createdAt: note.createdAt.toISOString(),
     })),
@@ -50,10 +97,9 @@ export function toStoredLead(row: LeadRow): StoredLead {
     source_url: row.sourceUrl,
     visitorId: row.visitorId,
     locale: row.locale,
-    kind: row.kind ? lower(row.kind) : undefined,
-    status: lower(row.status),
-    telegramChatId: num(row.telegramChatId),
-    telegramMessageId: row.telegramMessageId,
+    kind: row.kind ?? undefined,
+    status: row.status,
+    telegramCard: telegramCard.read(row),
     statusChangedAt: row.statusChangedAt.toISOString(),
     lastActivityAt:
       iso(row.lastActivityAt) ??
@@ -62,30 +108,15 @@ export function toStoredLead(row: LeadRow): StoredLead {
         : null),
     visitorActiveAt: iso(row.visitorActiveAt) ?? undefined,
     createdAt: row.createdAt.toISOString(),
-    pendingPrompt:
-      row.pendingPromptChatId != null &&
-      row.pendingPromptMessageId != null &&
-      row.pendingPromptKind
-        ? {
-            chatId: Number(row.pendingPromptChatId),
-            messageId: row.pendingPromptMessageId,
-            kind: lower(row.pendingPromptKind),
-          }
-        : null,
-    capturePrompt:
-      row.capturePromptChatId != null && row.capturePromptStep
-        ? {
-            chatId: Number(row.capturePromptChatId),
-            step: lower(row.capturePromptStep),
-          }
-        : null,
+    pendingPrompt: pendingPrompt.read(row),
+    capturePrompt: capturePrompt.read(row),
     telegramId: num(row.telegramId),
     topicId: row.topicId,
     topicMessageId: row.topicMessageId,
     topicClosed: row.topicClosed,
     topicActiveAt: iso(row.topicActiveAt),
     questionnaireDone: row.questionnaireDone,
-    referredBy: row.referredBy ? lower(row.referredBy) : null,
+    referredBy: row.referredBy,
     managerHandoff:
       row.managerHandoffAt && row.managerHandoffHandle
         ? {
@@ -103,24 +134,17 @@ export function toStoredLead(row: LeadRow): StoredLead {
         : null,
     metaLeadSentAt: iso(row.metaLeadSentAt),
     orderId: row.orderId,
-    orderSettled: row.orderSettled ? lower(row.orderSettled) : undefined,
-    orderConflict: row.orderConflict ? lower(row.orderConflict) : undefined,
-    orderStuck: row.orderStuck ? lower(row.orderStuck) : undefined,
+    orderSettled: row.orderSettled ?? undefined,
+    orderConflict: row.orderConflict ?? undefined,
+    orderStuck: row.orderStuck ?? undefined,
     remindAt: row.remindAt?.toISOString().slice(0, 10) ?? null,
-    postponedFrom: storedPostponedFrom.parse(
-      row.postponedFrom && lower(row.postponedFrom),
-    ),
+    postponedFrom: storedPostponedFrom.parse(row.postponedFrom),
   };
 }
 
 type Mappers = {
-  [K in keyof StoredLead]?: (
-    value: StoredLead[K],
-  ) => Partial<Prisma.LeadUncheckedCreateInput>;
+  [K in keyof StoredLead]?: (value: StoredLead[K]) => LeadColumns;
 };
-
-const outcome = (value: 'won' | 'lost' | undefined) =>
-  value ? upper(value) : null;
 
 const MAPPERS: Mappers = {
   id: (id) => ({ id }),
@@ -138,32 +162,22 @@ const MAPPERS: Mappers = {
   source_url: (sourceUrl) => ({ sourceUrl: sourceUrl ?? null }),
   visitorId: (visitorId) => ({ visitorId: visitorId ?? null }),
   locale: (locale) => ({ locale }),
-  kind: (kind) => ({ kind: kind ? upper(kind) : null }),
-  status: (status) => ({ status: upper(status) }),
-  telegramChatId: (id) => ({ telegramChatId: big(id) }),
-  telegramMessageId: (telegramMessageId) => ({ telegramMessageId }),
+  kind: (kind) => ({ kind: kind ?? null }),
+  status: (status) => ({ status }),
+  telegramCard: telegramCard.write,
   statusChangedAt: (value) => ({ statusChangedAt: new Date(value) }),
   lastActivityAt: (value) => ({ lastActivityAt: at(value) }),
   visitorActiveAt: (value) => ({ visitorActiveAt: at(value) }),
   createdAt: (value) => ({ createdAt: new Date(value) }),
-  pendingPrompt: (prompt) => ({
-    pendingPromptChatId: big(prompt?.chatId ?? null),
-    pendingPromptMessageId: prompt?.messageId ?? null,
-    pendingPromptKind: prompt ? upper(prompt.kind) : null,
-  }),
-  capturePrompt: (prompt) => ({
-    capturePromptChatId: big(prompt?.chatId ?? null),
-    capturePromptStep: prompt ? upper(prompt.step) : null,
-  }),
+  pendingPrompt: pendingPrompt.write,
+  capturePrompt: capturePrompt.write,
   telegramId: (id) => ({ telegramId: big(id) }),
   topicId: (topicId) => ({ topicId }),
   topicMessageId: (topicMessageId) => ({ topicMessageId }),
   topicClosed: (topicClosed) => ({ topicClosed }),
   topicActiveAt: (value) => ({ topicActiveAt: at(value) }),
   questionnaireDone: (questionnaireDone) => ({ questionnaireDone }),
-  referredBy: (referredBy) => ({
-    referredBy: referredBy ? upper(referredBy) : null,
-  }),
+  referredBy: (referredBy) => ({ referredBy: referredBy ?? null }),
   managerHandoff: (handoff) => ({
     managerHandoffAt: at(handoff?.at),
     managerHandoffHandle: handoff?.handle ?? null,
@@ -172,26 +186,23 @@ const MAPPERS: Mappers = {
   metaIds: (ids) => ({ metaFbc: ids?.fbc ?? null, metaFbp: ids?.fbp ?? null }),
   metaLeadSentAt: (value) => ({ metaLeadSentAt: at(value) }),
   orderId: (orderId) => ({ orderId: orderId ?? null }),
-  orderSettled: (value) => ({ orderSettled: outcome(value) }),
-  orderConflict: (value) => ({ orderConflict: outcome(value) }),
-  orderStuck: (value) => ({ orderStuck: outcome(value) }),
+  orderSettled: (orderSettled) => ({ orderSettled: orderSettled ?? null }),
+  orderConflict: (orderConflict) => ({ orderConflict: orderConflict ?? null }),
+  orderStuck: (orderStuck) => ({ orderStuck: orderStuck ?? null }),
   remindAt: (value) => ({ remindAt: day(value) }),
-  postponedFrom: (value) => ({
-    postponedFrom: value ? upper(value) : null,
-  }),
+  postponedFrom: (postponedFrom) => ({ postponedFrom: postponedFrom ?? null }),
 };
 
 export function leadData(
   lead: Partial<StoredLead>,
 ): Prisma.LeadUncheckedCreateInput {
-  const data: Partial<Prisma.LeadUncheckedCreateInput> = {};
+  const data: LeadColumns = {};
   for (const key of Object.keys(lead) as (keyof StoredLead)[]) {
     const mapper = MAPPERS[key] as
-      | ((value: unknown) => Partial<Prisma.LeadUncheckedCreateInput>)
-      | undefined;
+      ((value: unknown) => LeadColumns) | undefined;
     if (mapper) Object.assign(data, mapper(lead[key]));
   }
   return data as Prisma.LeadUncheckedCreateInput;
 }
 
-export const CLOSED: $Enums.LeadStatus[] = ['WON', 'LOST'];
+export const CLOSED: $Enums.LeadStatus[] = ['won', 'lost'];

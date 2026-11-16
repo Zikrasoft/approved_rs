@@ -1,3 +1,4 @@
+import { inBackground as keepRunning } from '../background.ts';
 import { z } from 'zod';
 import {
   CONTACT_INPUT_FIELDS,
@@ -54,7 +55,7 @@ export interface RefusalCopy {
 
 export interface LeadsRouteOptions<L extends string> {
   notifyLead: NotifyLead;
-  inBackground: (promise: Promise<unknown>) => void;
+  inBackground?: (promise: Promise<unknown>) => void;
   isLocale: (value: string) => value is L;
   defaultLocale: L;
   localeCookie: string;
@@ -164,7 +165,7 @@ ${links}
 
 export function createLeadsRoute<L extends string>({
   notifyLead,
-  inBackground,
+  inBackground = keepRunning,
   isLocale,
   defaultLocale,
   localeCookie,

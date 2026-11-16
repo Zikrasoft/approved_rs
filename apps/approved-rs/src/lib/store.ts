@@ -43,6 +43,7 @@ export {
   businessDay,
   MAX_FIELD_LENGTH,
   MAX_LIST_ROWS,
+  leadIdSchema,
 } from '@podbor/lead-crm';
 
 export type {
@@ -51,6 +52,7 @@ export type {
   OperationType,
   PendingPrompt,
   PostedDigest,
-  PromptKey,
+  LeadId,
+  MessageKey,
   StoredLead,
 } from '@podbor/lead-crm';

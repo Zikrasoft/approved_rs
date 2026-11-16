@@ -1,8 +1,12 @@
 const running = new Set<Promise<void>>();
 let listening = false;
 
+export async function backgroundIdle(): Promise<void> {
+  while (running.size) await Promise.all(running);
+}
+
 const exitWhenSettled = () => {
-  void Promise.all(running).then(() => process.exit(0));
+  void backgroundIdle().then(() => process.exit(0));
 };
 
 export function inBackground(task: Promise<unknown>): void {

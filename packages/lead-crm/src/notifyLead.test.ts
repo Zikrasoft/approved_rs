@@ -9,8 +9,9 @@ import {
 import { type LeadInput, type StoredLead } from './schema.ts';
 import { createLeadStore } from './store.ts';
 import { crmDatabase } from './database.ts';
+import { testLeadId } from './testing/seed.ts';
 
-const LEAD_ID = '0196f8a0-0000-7000-8000-000000000042';
+const LEAD_ID = testLeadId(42);
 
 const insertOrMergeLead = vi.fn();
 const setTelegramMessage = vi.fn();
@@ -46,8 +47,7 @@ const storedLead: StoredLead = {
   id: LEAD_ID,
   number: 1,
   status: 'new',
-  telegramChatId: null,
-  telegramMessageId: null,
+  telegramCard: null,
   statusChangedAt: '2026-01-01T00:00:00.000Z',
   lastActivityAt: null,
   createdAt: '2026-01-01T00:00:00.000Z',
@@ -126,8 +126,7 @@ describe('notifyLead', () => {
   it('when merged into an existing lead, refreshes its card instead of sending a new Telegram message', async () => {
     const merged: StoredLead = {
       ...storedLead,
-      telegramChatId: -100,
-      telegramMessageId: 999,
+      telegramCard: { chatId: -100, messageId: 999 },
     };
     vi.mocked(insertOrMergeLead).mockResolvedValueOnce({
       lead: merged,
@@ -183,7 +182,7 @@ describe('notifyLead — delivery result', () => {
 
   it('reports a merged lead as delivered once its card is refreshed', async () => {
     vi.mocked(insertOrMergeLead).mockResolvedValueOnce({
-      lead: { ...storedLead, telegramChatId: -100, telegramMessageId: 999 },
+      lead: { ...storedLead, telegramCard: { chatId: -100, messageId: 999 } },
       merged: true,
     });
 
@@ -259,7 +258,7 @@ describe('notifyLead — failures that must not sink the lead', () => {
   it("still finishes when refreshing a merged lead's card fails", async () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     insertOrMergeLead.mockResolvedValue({
-      lead: { ...storedLead, telegramChatId: -100, telegramMessageId: 5 },
+      lead: { ...storedLead, telegramCard: { chatId: -100, messageId: 5 } },
       merged: true,
     });
     refreshLeadCard.mockRejectedValue(new Error('telegram down'));
@@ -498,7 +497,7 @@ describe('dropFromDigest', () => {
   });
 
   it('edits nothing for a Lead the digest does not show', async () => {
-    await dropFromDigest('0196f8a0-0000-7000-8000-000000000999');
+    await dropFromDigest(testLeadId(999));
     expect(editDigest).not.toHaveBeenCalled();
   });
 });
@@ -593,7 +592,7 @@ describe('ensureLeadTopic', () => {
   it('hands back the Lead when its row is gone', async () => {
     const lead = {
       ...storedLead,
-      id: '0196f8a0-0000-7000-8000-000000000999',
+      id: testLeadId(999),
       telegramId: 9,
     };
     await expect(ensureLeadTopic(lead)).resolves.toBe(lead);

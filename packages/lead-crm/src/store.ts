@@ -1,18 +1,18 @@
 import { randomUUID } from 'node:crypto';
-import { z } from 'zod';
 import { logError } from './logError.ts';
 import { isPhoneContact } from './contactShape.ts';
 import { inWorkStatus, isClosed, isInWork } from './schema.ts';
 import type {
   CapturePrompt,
   Referrer,
+  LeadId,
   LeadInput,
   LeadStatus,
+  MessageKey,
   NewLeadNote,
   PendingPrompt,
   StoredLead,
 } from './schema.ts';
-import type { PromptKey } from './promptKey.ts';
 import { storedLeadSchema } from './schema.ts';
 import { FAILED_CHECKOUTS_PER_CONTACT_HOUR } from './limits.ts';
 import {
@@ -22,7 +22,6 @@ import {
   type CrmTransaction,
 } from './database.ts';
 import { CLOSED, leadData, toStoredLead, WITH_NOTES } from './leadRow.ts';
-import { upper } from './enumCase.ts';
 import { Prisma } from './generated/prisma/client.ts';
 import { businessDay, DAY_MS } from './businessTime.ts';
 import {
@@ -75,8 +74,8 @@ export interface Digest {
 
 export interface PostedDigest {
   messageId: number;
-  dueIds: string[];
-  staleIds: string[];
+  dueIds: LeadId[];
+  staleIds: LeadId[];
   hidden: number;
 }
 export type DigestRows = Omit<PostedDigest, 'messageId'>;
@@ -236,15 +235,11 @@ export function resumePatch(lead: StoredLead): Partial<StoredLead> {
   };
 }
 
-const leadId = z.uuid();
-
-const isLeadId = (id: string) => leadId.safeParse(id).success;
-
 const OPEN_STATUSES = [
-  'NEW',
-  'NEGOTIATIONS',
-  'IN_PROGRESS',
-  'POSTPONED',
+  'new',
+  'negotiations',
+  'in_progress',
+  'postponed',
 ] as const;
 
 const IN_ORDER: Prisma.LeadOrderByWithRelationInput[] = [
@@ -321,7 +316,7 @@ export function createLeadStore({
             ...leadData(fields),
             ...(addNote && {
               notes: {
-                create: { author: upper(addNote.author), text: addNote.text },
+                create: { author: addNote.author, text: addNote.text },
               },
             }),
           },
@@ -332,15 +327,14 @@ export function createLeadStore({
   }
 
   function updateOne(
-    id: string,
+    id: LeadId,
     apply: (lead: StoredLead) => LeadPatch | undefined,
   ): Promise<StoredLead | undefined> {
-    if (!isLeadId(id)) return Promise.resolve(undefined);
     return update(Prisma.sql`id = ${id}::uuid`, apply);
   }
 
   function updateOneIfStatus(
-    id: string,
+    id: LeadId,
     requiredStatus: LeadStatus,
     apply: (lead: StoredLead) => LeadPatch,
   ): Promise<StoredLead | undefined> {
@@ -420,8 +414,8 @@ export function createLeadStore({
   return {
     readLeads: () => findLeads({}),
 
-    async getLead(id: string): Promise<StoredLead | undefined> {
-      return isLeadId(id) ? findLead({ id }) : undefined;
+    async getLead(id: LeadId): Promise<StoredLead | undefined> {
+      return findLead({ id });
     },
 
     newStoredLead,
@@ -493,17 +487,14 @@ export function createLeadStore({
     },
 
     setTelegramMessage(
-      id: string,
+      id: LeadId,
       chatId: number,
       messageId: number,
     ): Promise<StoredLead | undefined> {
-      return updateOne(id, () => ({
-        telegramChatId: chatId,
-        telegramMessageId: messageId,
-      }));
+      return updateOne(id, () => ({ telegramCard: { chatId, messageId } }));
     },
 
-    setTopic(id: string, topicId: number): Promise<StoredLead | undefined> {
+    setTopic(id: LeadId, topicId: number): Promise<StoredLead | undefined> {
       return updateOne(id, (l) =>
         l.topicId != null
           ? {}
@@ -517,14 +508,14 @@ export function createLeadStore({
     },
 
     setTopicSummary(
-      id: string,
+      id: LeadId,
       topicMessageId: number,
     ): Promise<StoredLead | undefined> {
       return updateOne(id, () => ({ topicMessageId }));
     },
 
     touchTopic(
-      id: string,
+      id: LeadId,
       at: Date = new Date(),
     ): Promise<StoredLead | undefined> {
       return updateOne(id, () => ({
@@ -533,11 +524,11 @@ export function createLeadStore({
       }));
     },
 
-    closeTopic(id: string): Promise<StoredLead | undefined> {
+    closeTopic(id: LeadId): Promise<StoredLead | undefined> {
       return updateOne(id, () => ({ topicClosed: true }));
     },
 
-    setStatus(id: string, status: LeadStatus): Promise<StoredLead | undefined> {
+    setStatus(id: LeadId, status: LeadStatus): Promise<StoredLead | undefined> {
       return updateOne(id, (l) =>
         canMoveTo(l, status)
           ? {
@@ -549,21 +540,21 @@ export function createLeadStore({
     },
 
     settleOrder(
-      id: string,
+      id: LeadId,
       status: 'won' | 'lost',
     ): Promise<StoredLead | undefined> {
       return updateOneIfStatus(id, status, () => ({ orderSettled: status }));
     },
 
     markOrderConflict(
-      id: string,
+      id: LeadId,
       status: 'won' | 'lost',
     ): Promise<StoredLead | undefined> {
       return updateOneIfStatus(id, status, () => ({ orderConflict: status }));
     },
 
     markOrderStuck(
-      id: string,
+      id: LeadId,
       status: 'won' | 'lost',
     ): Promise<StoredLead | undefined> {
       return updateOneIfStatus(id, status, () => ({ orderStuck: status }));
@@ -579,7 +570,7 @@ export function createLeadStore({
 
     loseOrderLead(orderId: string): Promise<StoredLead | undefined> {
       return update(
-        Prisma.sql`order_id = ${orderId} AND status <> 'WON'`,
+        Prisma.sql`order_id = ${orderId} AND status <> 'won'`,
         (l) => ({
           ...(l.status === 'lost'
             ? {}
@@ -593,7 +584,7 @@ export function createLeadStore({
     },
 
     recordOwnerReply(
-      id: string,
+      id: LeadId,
       at: Date = new Date(),
     ): Promise<StoredLead | undefined> {
       return updateOne(id, (l) => ({
@@ -603,14 +594,14 @@ export function createLeadStore({
     },
 
     touchLead(
-      id: string,
+      id: LeadId,
       at: Date = new Date(),
     ): Promise<StoredLead | undefined> {
       return updateOne(id, () => ({ lastActivityAt: at.toISOString() }));
     },
 
     setPendingPrompt(
-      id: string,
+      id: LeadId,
       prompt: PendingPrompt | null,
     ): Promise<StoredLead | undefined> {
       return updateOne(id, () => ({ pendingPrompt: prompt }));
@@ -619,7 +610,7 @@ export function createLeadStore({
     findByPendingPrompt({
       chatId,
       messageId,
-    }: PromptKey): Promise<StoredLead | undefined> {
+    }: MessageKey): Promise<StoredLead | undefined> {
       return findLead({
         pendingPromptChatId: BigInt(chatId),
         pendingPromptMessageId: messageId,
@@ -631,7 +622,7 @@ export function createLeadStore({
     },
 
     resolvePendingPrompt(
-      { chatId, messageId }: PromptKey,
+      { chatId, messageId }: MessageKey,
       apply: (lead: StoredLead) => LeadPatch,
     ): Promise<StoredLead | undefined> {
       return update(
@@ -645,7 +636,7 @@ export function createLeadStore({
     },
 
     updateCapture(
-      id: string,
+      id: LeadId,
       {
         note,
         contact,
@@ -670,7 +661,7 @@ export function createLeadStore({
     },
 
     markManagerHandoff(
-      id: string,
+      id: LeadId,
       handle: string,
     ): Promise<StoredLead | undefined> {
       const at = new Date().toISOString();
@@ -681,7 +672,7 @@ export function createLeadStore({
       );
     },
 
-    async claimMetaLead(id: string): Promise<ClaimedMetaLead | undefined> {
+    async claimMetaLead(id: LeadId): Promise<ClaimedMetaLead | undefined> {
       const at = new Date().toISOString();
       const claimed = await updateOne(id, (l) =>
         l.metaIds != null && l.metaLeadSentAt == null
@@ -730,12 +721,12 @@ export function createLeadStore({
       return leads.find((l) => isFreshLead(l));
     },
 
-    resumeLead(id: string): Promise<StoredLead | undefined> {
+    resumeLead(id: LeadId): Promise<StoredLead | undefined> {
       return updateOneIfStatus(id, 'postponed', resumePatch);
     },
 
     postponeLead(
-      id: string,
+      id: LeadId,
       remindAt: string,
       note: NewLeadNote,
     ): Promise<StoredLead | undefined> {
@@ -744,8 +735,7 @@ export function createLeadStore({
       );
     },
 
-    async deleteLead(id: string): Promise<boolean> {
-      if (!isLeadId(id)) return false;
+    async deleteLead(id: LeadId): Promise<boolean> {
       const { count } = await database().lead.deleteMany({ where: { id } });
       return count > 0;
     },
@@ -813,7 +803,7 @@ export function createLeadStore({
             })
           ).map(({ id }) => id),
         );
-        const entries = (list: 'DUE' | 'STALE', ids: string[]) =>
+        const entries = (list: 'due' | 'stale', ids: LeadId[]) =>
           ids.map((leadId, position) => ({
             digestId: digest.id,
             leadId,
@@ -822,14 +812,14 @@ export function createLeadStore({
           }));
         await tx.digestLead.createMany({
           data: [
-            ...entries('DUE', dueIds),
-            ...entries('STALE', staleIds),
+            ...entries('due', dueIds),
+            ...entries('stale', staleIds),
           ].filter((entry) => existing.has(entry.leadId)),
         });
       });
     },
 
-    takeFromDigest(leadId: string): Promise<OpenDigest | undefined> {
+    takeFromDigest(leadId: LeadId): Promise<OpenDigest | undefined> {
       return database().$transaction(async (tx) => {
         const [latest] = await tx.$queryRaw<
           { id: string; message_id: number | null; hidden: number | null }[]
@@ -853,11 +843,11 @@ export function createLeadStore({
             leadId: { notIn: kept.map(({ lead }) => lead.id) },
           },
         });
-        const listed = (list: 'DUE' | 'STALE') =>
+        const listed = (list: 'due' | 'stale') =>
           kept.filter((entry) => entry.list === list).map(({ lead }) => lead);
         return {
           messageId: latest.message_id,
-          digest: { due: listed('DUE'), stale: listed('STALE') },
+          digest: { due: listed('due'), stale: listed('stale') },
           hidden: latest.hidden ?? 0,
         };
       });
@@ -870,8 +860,8 @@ export function createLeadStore({
     async expireGhostLeads(now: Date): Promise<StoredLead[]> {
       const ghosts = (
         await findLeads({
-          kind: 'CALL_CLICK',
-          status: 'NEW',
+          kind: 'call_click',
+          status: 'new',
           lastActivityAt: null,
         })
       ).filter((l) => isGhostLead(l, now));

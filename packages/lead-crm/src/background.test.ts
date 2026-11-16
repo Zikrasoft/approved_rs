@@ -69,4 +69,22 @@ describe('inBackground', () => {
 
     await vi.waitFor(() => expect(process.exit).toHaveBeenCalledWith(0));
   });
+
+  it('reports idle only once a task started by a running task settles too', async () => {
+    const { inBackground, backgroundIdle } = await import('./background.ts');
+    const second = deferred();
+    let done = false;
+    inBackground(
+      Promise.resolve().then(() =>
+        inBackground(second.promise.then(() => (done = true))),
+      ),
+    );
+
+    const idle = backgroundIdle();
+    await tick();
+    second.resolve();
+    await idle;
+
+    expect(done).toBe(true);
+  });
 });

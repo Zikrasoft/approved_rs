@@ -1,7 +1,16 @@
 import { describe, it, expect } from 'vitest';
-import { storedLeadSchema, LEGACY_BRAND } from './schema.ts';
+import { $Enums } from './generated/prisma/client.ts';
+import { TRACKED_CONTACT_CHANNELS } from './contactChannel.ts';
+import {
+  CAPTURE_STEPS,
+  LEAD_STATUSES,
+  PROMPT_KINDS,
+  REFERRERS,
+  storedLeadSchema,
+} from './schema.ts';
 
 const base = {
+  brand: 'CarLab',
   id: '0196f8a0-0000-7000-8000-000000000001',
   name: 'Иван',
   contact: '@ivan',
@@ -31,10 +40,6 @@ describe('services on a lead', () => {
 });
 
 describe('brand on a store shared by several businesses', () => {
-  it('reads a record written before the brand field existed as the original business', () => {
-    expect(schema.parse(base).brand).toBe(LEGACY_BRAND);
-  });
-
   it('keeps the brand already stored on the lead, so one store can hold several businesses', () => {
     expect(schema.parse({ ...base, brand: 'PRIZMA' }).brand).toBe('PRIZMA');
   });
@@ -147,4 +152,16 @@ describe('pendingPrompt on a lead', () => {
       expect(lead.contact).toBe('@ivan');
     },
   );
+});
+
+describe('the database enums', () => {
+  it.each([
+    ['ContactChannel', $Enums.ContactChannel, TRACKED_CONTACT_CHANNELS],
+    ['LeadStatus', $Enums.LeadStatus, LEAD_STATUSES],
+    ['PromptKind', $Enums.PromptKind, PROMPT_KINDS],
+    ['CaptureStep', $Enums.CaptureStep, CAPTURE_STEPS],
+    ['Referrer', $Enums.Referrer, REFERRERS],
+  ])('holds exactly the domain values of %s', (_, database, domain) => {
+    expect(Object.values(database).sort()).toEqual([...domain].sort());
+  });
 });

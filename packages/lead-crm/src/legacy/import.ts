@@ -1,14 +1,65 @@
 import { createHash } from 'node:crypto';
 import { z } from 'zod';
-import type { CrmDatabase, CrmTransaction } from './database.ts';
-import { Prisma } from './generated/prisma/client.ts';
-import { upper } from './enumCase.ts';
-import { leadData } from './leadRow.ts';
-import { legacyLedgerSchema } from './ledgerStore.ts';
-import { isDatedNote } from './notes.ts';
-import { legacyLeadSchema, type LeadNote, type LegacyLead } from './schema.ts';
-import { LEAD_ACTION_COPY } from './telegram/cards.ts';
-import { OPERATION_AUTHORS } from './telegram/ledger.ts';
+import type { CrmDatabase, CrmTransaction } from '../database.ts';
+import { Prisma } from '../generated/prisma/client.ts';
+import { leadData } from '../leadRow.ts';
+import { operationSchema, promptSchema } from '../ledgerStore.ts';
+import { isDatedNote } from '../notes.ts';
+import {
+  isClosed,
+  LEAD_STATUSES,
+  leadStatusSchema,
+  storedLeadFieldsSchema,
+  type LeadNote,
+  type StoredLead,
+} from '../schema.ts';
+import { LEAD_ACTION_COPY } from '../telegram/cards.ts';
+import { OPERATION_AUTHORS } from '../telegram/ledger.ts';
+
+// TODO: delete src/legacy/, scripts/import-blob.ts and the @vercel/blob devDependency in one commit once the Vercel fallback week after the cutover ends.
+
+export const LEGACY_BRAND = 'Approved.rs';
+
+export type LegacyLead = Omit<StoredLead, 'id'> & { id: number };
+
+export const legacyLeadSchema: z.ZodType<LegacyLead, unknown> =
+  storedLeadFieldsSchema
+    .omit({ brand: true, status: true, telegramCard: true })
+    .extend({
+      id: z.number().int().positive(),
+      brand: z.string().default(LEGACY_BRAND),
+      status: z.enum([...LEAD_STATUSES, 'open']).default('new'),
+      archived: z.boolean().optional(),
+      contactChannel: storedLeadFieldsSchema.shape.contactChannel.catch(null),
+      telegramChatId: z.number().int().nullable().default(null),
+      telegramMessageId: z.number().int().nullable().default(null),
+    })
+    .transform(
+      ({ archived, status, telegramChatId, telegramMessageId, ...lead }) => {
+        const current = leadStatusSchema.catch('new').parse(status);
+        const advanced =
+          current === 'negotiations' || current === 'in_progress';
+        return {
+          ...lead,
+          status: archived && !isClosed({ status: current }) ? 'lost' : current,
+          telegramCard:
+            telegramChatId != null && telegramMessageId != null
+              ? { chatId: telegramChatId, messageId: telegramMessageId }
+              : null,
+          lastActivityAt:
+            lead.lastActivityAt ?? (advanced ? lead.statusChangedAt : null),
+        };
+      },
+    );
+
+export const legacyLedgerSchema = z
+  .object({
+    operations: z.array(
+      operationSchema.extend({ id: z.number().int().positive() }),
+    ),
+    prompts: z.array(promptSchema),
+  })
+  .strict();
 
 export const LEGACY_PATHS = {
   leads: 'data/leads.json',
@@ -215,7 +266,7 @@ async function importLeads(
         number: legacyId,
         notes: {
           create: lead.notes.map(({ author, text, createdAt }) => ({
-            author: upper(author),
+            author,
             text,
             createdAt: new Date(createdAt),
           })),
@@ -245,15 +296,15 @@ async function importDigests(
         hidden: posted?.hidden ?? null,
       },
     });
-    const entries = (list: 'DUE' | 'STALE', legacy: number[] = []) =>
+    const entries = (list: 'due' | 'stale', legacy: number[] = []) =>
       legacy.flatMap((legacyId, position) => {
         const leadId = ids.get(legacyId);
         return leadId ? [{ digestId: digest.id, leadId, list, position }] : [];
       });
     await tx.digestLead.createMany({
       data: [
-        ...entries('DUE', posted?.dueIds),
-        ...entries('STALE', posted?.staleIds),
+        ...entries('due', posted?.dueIds),
+        ...entries('stale', posted?.staleIds),
       ],
       skipDuplicates: true,
     });
@@ -268,11 +319,11 @@ async function importLedger(
     data: operations.map(
       ({ id: legacyId, type, amount, note, createdAt, createdBy }) => ({
         legacyId,
-        type: upper(type),
+        type,
         amount,
         note,
         createdAt: new Date(createdAt),
-        createdBy: upper(createdBy),
+        createdBy,
       }),
     ),
     skipDuplicates: true,
@@ -281,7 +332,7 @@ async function importLedger(
     data: prompts.map(({ chatId, messageId, type, createdAt }) => ({
       chatId: BigInt(chatId),
       messageId,
-      type: upper(type),
+      type,
       createdAt: new Date(createdAt),
     })),
     skipDuplicates: true,

@@ -1,4 +1,4 @@
-import { inBackground } from '@podbor/site-kit/background';
+import { inBackground } from '@podbor/lead-crm/background';
 import {
   eventCodeSchema,
   STOREFRONT_EVENTS_PATH,

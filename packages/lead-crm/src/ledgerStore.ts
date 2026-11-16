@@ -1,13 +1,12 @@
 import { z } from 'zod';
 import { roundMoney, toCents } from './money.ts';
 import { businessMonth, DAY_MS } from './businessTime.ts';
-import type { PromptKey } from './promptKey.ts';
+import type { MessageKey } from './schema.ts';
 import { lockKey, type CrmDatabase, type CrmTransaction } from './database.ts';
 import type {
   LedgerOperation as OperationRow,
   OperationPrompt as PromptRow,
 } from './generated/prisma/client.ts';
-import { lower, upper } from './enumCase.ts';
 
 const MAX_OPERATION_NOTE = 500;
 const PROMPT_TTL_MS = 7 * DAY_MS;
@@ -19,7 +18,7 @@ export type LedgerAuthor = z.infer<typeof ledgerAuthorSchema>;
 const operationTypeSchema = z.enum(['payout', 'settlement']);
 export type OperationType = z.infer<typeof operationTypeSchema>;
 
-const operationSchema = z
+export const operationSchema = z
   .object({
     id: z.string(),
     type: operationTypeSchema,
@@ -31,7 +30,7 @@ const operationSchema = z
   .strict();
 export type LedgerOperation = z.infer<typeof operationSchema>;
 
-const promptSchema = z
+export const promptSchema = z
   .object({
     chatId: z.number().int(),
     messageId: z.number().int(),
@@ -41,15 +40,6 @@ const promptSchema = z
   .strict();
 export type OperationPrompt = z.infer<typeof promptSchema>;
 export type FoundOperationPrompt = OperationPrompt & { expired: boolean };
-
-export const legacyLedgerSchema = z
-  .object({
-    operations: z.array(
-      operationSchema.extend({ id: z.number().int().positive() }),
-    ),
-    prompts: z.array(promptSchema),
-  })
-  .strict();
 
 const newOperationSchema = operationSchema.omit({ id: true, createdAt: true });
 
@@ -110,21 +100,21 @@ export function operationSums(
 
 const toOperation = (row: OperationRow): LedgerOperation => ({
   id: row.id,
-  type: lower(row.type),
+  type: row.type,
   amount: row.amount.toNumber(),
   note: row.note,
   createdAt: row.createdAt.toISOString(),
-  createdBy: lower(row.createdBy),
+  createdBy: row.createdBy,
 });
 
 const toPrompt = (row: PromptRow): OperationPrompt => ({
   chatId: Number(row.chatId),
   messageId: row.messageId,
-  type: lower(row.type),
+  type: row.type,
   createdAt: row.createdAt.toISOString(),
 });
 
-const promptKey = ({ chatId, messageId }: PromptKey) => ({
+const promptKey = ({ chatId, messageId }: MessageKey) => ({
   chatId_messageId: { chatId: BigInt(chatId), messageId },
 });
 
@@ -160,10 +150,10 @@ export function createLedgerStore({ database }: LedgerStoreOptions) {
     const operation = toOperation(
       await tx.ledgerOperation.create({
         data: {
-          type: upper(input.type),
+          type: input.type,
           amount: input.amount,
           note: input.note,
-          createdBy: upper(input.createdBy),
+          createdBy: input.createdBy,
           createdAt: new Date(),
         },
       }),
@@ -187,8 +177,8 @@ export function createLedgerStore({ database }: LedgerStoreOptions) {
     },
 
     openOperationPrompt(
-      prompt: PromptKey & { type: OperationType },
-      replacing?: PromptKey,
+      prompt: MessageKey & { type: OperationType },
+      replacing?: MessageKey,
     ): Promise<OperationPrompt> {
       return database().$transaction(async (tx) => {
         const createdAt = new Date();
@@ -204,7 +194,7 @@ export function createLedgerStore({ database }: LedgerStoreOptions) {
             ],
           },
         });
-        const fields = { type: upper(prompt.type), createdAt };
+        const fields = { type: prompt.type, createdAt };
         return toPrompt(
           await tx.operationPrompt.upsert({
             where: promptKey(prompt),
@@ -216,7 +206,7 @@ export function createLedgerStore({ database }: LedgerStoreOptions) {
     },
 
     async findOperationPrompt(
-      key: PromptKey,
+      key: MessageKey,
     ): Promise<FoundOperationPrompt | undefined> {
       const row = await database().operationPrompt.findUnique({
         where: promptKey(key),
@@ -227,7 +217,7 @@ export function createLedgerStore({ database }: LedgerStoreOptions) {
     },
 
     answerOperationPrompt(
-      key: PromptKey,
+      key: MessageKey,
       answer: Omit<OperationInput, 'type'>,
     ): Promise<RecordOutcome> {
       return database().$transaction(async (tx) => {

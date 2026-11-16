@@ -5,7 +5,7 @@ import {
   importLegacy,
   LEGACY_PATHS,
   readLegacy,
-} from '../src/legacyImport.ts';
+} from '../src/legacy/import.ts';
 import { requireEnv } from '../src/requireEnv.ts';
 
 const dryRun = process.argv.includes('--dry-run');
