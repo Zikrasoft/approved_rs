@@ -90,6 +90,7 @@ jobs:
           done
           pnpm turbo run build "${filters[@]}"
           node --experimental-strip-types .github/scripts/contact-placement.ts "${dists[@]}"
+          node --experimental-strip-types .github/scripts/on-demand-images.ts $SITES
 
       - if: steps.affected.outputs.shop == 'true'
         run: sh infra/auto-service-shop/test/scripts.test.sh
