@@ -4,7 +4,7 @@ House style for all three sites. The form's markup hooks are in
 [markup-contracts.md](markup-contracts.md).
 
 - **The lead form carries its own `locale`** in a hidden input. Middleware never
-  runs for a prerendered page on Vercel's static output, so the `lang` cookie
+  runs for a prerendered page, which Caddy serves from disk, so the `lang` cookie
   may not exist — without the field, every non-Russian visitor lands on
   `/ru/thanks/` and the lead is stored as `locale: 'ru'`.
 - **Only the contact is required**, on all three sites: `@podbor/lead-crm`'s

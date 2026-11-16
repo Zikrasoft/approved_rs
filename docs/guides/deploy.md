@@ -1,4 +1,4 @@
-# Deploy: three sites on Vercel, the shop backend on a VPS
+# Deploy: three sites and the shop backend on one VPS
 
 ## Stack
 
@@ -6,7 +6,9 @@
   (`export const prerender = false`)
 - **pnpm v11 + Turborepo** — a monorepo, apps in `apps/*`, shared packages in
   `packages/*`
-- **Vercel** — hosting. Three separate projects, one per app
+- **The VPS** (`infra/auto-service-shop`): Caddy serves each site's static
+  files and proxies the rest to its node server, beside the shop backend. The
+  three Vercel projects, one per app, only hold the environment variables
 - **GitHub Actions** — the only place where a build or a deploy actually happens
   (`.github/workflows/ci.yml`)
 
@@ -112,8 +114,8 @@ fails `check` on a hand edit. Its `report-uri` is each site's `/api/csp-report`,
 which logs one `[csp] <directive> <blocked host>` line per violation and nothing
 about the visitor.
 
-TODO: enforce the script CSP once a week of `[csp]` lines in the Vercel logs of
-all three sites shows no violation from the analytics scripts or the map embed.
+TODO: enforce the script CSP once a week of `[csp]` lines in the logs of
+all three site containers shows no violation from the analytics scripts or the map embed.
 
 ### Job order
 
@@ -235,7 +237,7 @@ part in release notes, and exactly one step — `scope` — reads them.
 If everything needs redeploying at once — Actions → CI → Run workflow, with the
 **Deploy every app, whatever the tags say** checkbox. It is for when something
 changed outside git: an environment variable or a project setting in the Vercel
-dashboard, a Blob store rotation. Such edits require a rebuild but leave no trace in
+dashboard, a rotated secret. Such edits require a rebuild but leave no trace in
 the repository's history, and `scope` only looks at git.
 
 `environment: production` on the deploy jobs is an ordinary GitHub Environment,
@@ -520,16 +522,15 @@ A special case: it does not need setting in the dashboard.
   is where Astro fills `import.meta.env.SITE` from, which `src/utils/constants.ts`
   reads. A `SITE` environment variable does not affect that value — Astro inlines
   only `PUBLIC_*` and its own built-in keys into `import.meta.env`;
-- each app's `vercel.json` additionally puts `env.SITE` into the functions' runtime,
-  in case anything needs it;
 - in practice, only the local `scripts/register-webhook.ts` reads
   `process.env.SITE` (from the `.env.local` handed to `--env-file`), and it is
   the host the webhook is registered against — so point it at the `.env.local`
   of the project that hosts that bot's webhook, which for a capture bot is that
   brand's own project.
 
-Changing the domain means editing `site:` in `astro.config.mjs` and `env.SITE` in
-`vercel.json`, not a dashboard variable.
+Changing the domain means editing `site:` in `astro.config.mjs` and the host
+Caddy serves it on (`APPROVED_HOST`, `CARLAB_HOST`, `DETAILS_HOST` in the
+shop's compose), not a dashboard variable.
 
 ---
 
@@ -557,31 +558,53 @@ is healthy. Brands are separated by the lead's `brand` field
    `CONNECT` on both databases.
 3. Every shop deploy then migrates `crm` (see "CRM migrations" below), so
    the schema is in place before any site starts.
-4. Once, move the old Blob data in: from `packages/lead-crm`, with
-   `BLOB_READ_WRITE_TOKEN` from any of the three Vercel projects,
+4. Move the old Blob data in during the cutover window (below). From
+   `packages/lead-crm`, with `BLOB_READ_WRITE_TOKEN` from any of the three
+   Vercel projects,
    `node --env-file=<env> --experimental-strip-types scripts/import-blob.ts --dry-run`
    prints counts only (Leads, digests, operations, prompts, unreadable records,
-   skipped order markers), never contents. Without `--dry-run` and with
-   `CRM_DATABASE_URL` set, it upserts everything in one transaction keyed on the
-   old numeric ids (`legacy_id`), digest days, prompt keys and payload hashes,
-   so a rerun changes nothing. Each Lead keeps its old id as its `number`
-   (what the bot shows as `#123`), and the number sequence then continues
-   above the highest one. A new Lead that already took an old number stops the
-   import, which then changes nothing. The Blob store is only read. Order markers are
-   not imported: nothing has read them since the old shop went, and a Lead's
-   unique `(brand, order_id)` is what keeps one order to one Lead now.
+   staff notes, comments kept whole, skipped order markers), never contents.
+   Without `--dry-run` and with `CRM_DATABASE_URL` set, it runs in one
+   transaction and inserts only what is not there yet, keyed on the old
+   numeric ids (`legacy_id`), digest days, prompt keys, ledger ids and payload
+   hashes. A row a previous run imported is left exactly as it is, since staff
+   may have changed its status or notes since, so a rerun only adds what
+   reached Blob in between. Each Lead keeps its old id as its `number` (what
+   the bot shows as `#123`). After the first run the sequence for new Leads
+   continues at the highest imported number + 1000: the gap is reserved for
+   the Leads that still reach Vercel while DNS moves, which the second run
+   inserts with their own numbers. A Lead whose number is already taken stops
+   the import, which then changes nothing, and it goes in by hand.
+
+   Staff notes were appended to the Lead's comment as signed lines
+   (`16.10.2026 · Админ: Звонил`). The import moves each such line into
+   `lead_notes` with its author and that day, and leaves the visitor's text in
+   the comment. Where a signed line is followed by a line that is neither
+   another dated line nor `Отложено до <date>` (a note written over several
+   lines, or a visitor message appended after it), the import cannot tell
+   where the note ends, so it keeps that comment whole, notes and all, and
+   counts it under `commentsKeptWhole`. Unsigned `Отложено до <date>` lines
+   stay in the comment, since they never named an author. The Blob store is
+   only read. Order markers are not imported: nothing has read them since the
+   old shop went, and a Lead's unique `(brand, order_id)` is what keeps one
+   order to one Lead now.
 
 ### Cutover from Vercel
 
-Once, in this order. Nothing here prints a secret; keep it that way.
+All three sites move in **one window**, never one by one: the CRM bot's
+webhook and the reminder cron live in approved.rs, and the bot must read and
+write the same leads as the sites that capture them, so the leads storage
+and the bot switch together. Nothing here prints a secret; keep it that way.
+
+**Before the window**
 
 1. **Host prerequisites.** On a host bootstrapped before the sites moved, copy
    `infra/auto-service-shop/bootstrap-host.sh` over and rerun it as root: it
    installs `rsync`, makes `/srv/sites` and enables the `carlab-reminders`
-   timer. Stop that timer until step 7
+   timer. Stop that timer until the window
    (`sudo systemctl disable --now carlab-reminders.timer`), or it posts a
-   digest from the host while Vercel still posts its own. Lower the TTL of the three apex and `www` records to 300 s a day
-   ahead.
+   digest from the host while Vercel still posts its own. A day ahead, lower
+   the TTL of the three apex and `www` records to 300 s.
 2. **Password.** Append `CRM_DB_PASSWORD=$(openssl rand -hex 32)` to
    `/srv/carlab/.env` on the host (mode 600). It lives only there, never in
    Vercel or GitHub.
@@ -595,29 +618,57 @@ Once, in this order. Nothing here prints a secret; keep it that way.
    them yet. If Grafana was left running from a look, stop it
    (`docker compose stop grafana`): the budget with the three sites counts it
    off.
-5. **Import.** On the owner's Mac, open the crawler's tunnel
+5. **Import env.** On the owner's Mac, open the crawler's tunnel
    (`ssh -i ~/.ssh/carlab-crawler -N -L 15432:10.200.0.10:5432 crawler@<IPv4>`,
    see [the crawler](#the-crawler-on-the-owners-mac)) and write a local env
    file (mode 600) with `BLOB_READ_WRITE_TOKEN` and
    `CRM_DATABASE_URL=postgres://crm:<CRM_DB_PASSWORD>@127.0.0.1:15432/crm`.
    From `packages/lead-crm`, run
-   `node --env-file=<env> --experimental-strip-types scripts/import-blob.ts --dry-run`,
-   check the counts, then run it without `--dry-run` right before the first
-   DNS switch, and delete the env file. Leads that reach Vercel after this stay
-   in Blob: a rerun picks them up, unless a new Lead already took their number,
-   in which case it stops, changes nothing, and they go in by hand.
-6. **DNS, one domain at a time** (details.rs, carlab.rs, then approved.rs):
-   point the apex and `www` A/AAAA records at the reserved IP, wait for them to
-   resolve there, then reload Caddy so it fetches the certificate at once
+   `node --env-file=<env> --experimental-strip-types scripts/import-blob.ts --dry-run`
+   and check the counts, `commentsKeptWhole` included.
+
+**The window**, between two 08:00 UTC digests, in this order. Ask the owner
+and the admin not to press any CRM button from step 1 until step 6: the
+first import is final for every Lead it takes, so a status changed on Vercel
+after it is lost.
+
+1. **Cron off on Vercel.** Vercel → the approved.rs project → Settings → Cron
+   Jobs: disable it. The last Vercel deployment keeps calling its own
+   Blob-backed `/api/reminders` otherwise.
+2. **First import.** Run `scripts/import-blob.ts` without `--dry-run`. The
+   sequence now continues at the highest imported number + 1000.
+3. **DNS, all three at once.** Point the apex and `www` A records of
+   approved.rs, carlab.rs and details.rs at the reserved IP, and remove any
+   AAAA record that still names Vercel.
+4. **Caddy.** As soon as the three names resolve to the host
+   (`dig +short <domain> A` against a couple of public resolvers), reload Caddy
+   so it fetches the certificates at once
    (`docker compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile`)
-   and open the site. Point each capture bot's webhook at its domain
-   again if it named a Vercel URL (see [The Telegram webhooks](#the-telegram-webhooks)).
-7. **Cron.** Once approved.rs resolves to the host, disable the Vercel cron
-   (Vercel → the approved.rs project → Settings → Cron Jobs: the last Vercel
-   deployment keeps calling its own Blob-backed `/api/reminders` otherwise)
-   and start the host one
-   (`sudo systemctl enable --now carlab-reminders.timer`). Doing both between
-   08:00 UTC runs keeps the group at one digest a day.
+   and open each site. Point any bot webhook that named a Vercel URL at its
+   domain again (see [The Telegram webhooks](#the-telegram-webhooks)).
+5. **Cron on the host.** `sudo systemctl enable --now carlab-reminders.timer`.
+6. **Second import.** Once every resolver you check answers with the host and
+   Vercel's logs show no more `/api/*` calls (wait out the 300 s TTL, then a
+   margin), run the import again. It inserts the Leads that reached Blob while
+   DNS moved, each with its own number inside the reserved gap, and leaves
+   everything the first run imported alone. Then delete the local env file.
+
+**After the window.** The three Vercel projects stay for a week as the
+fallback, but they must not serve anyone. Check, and keep checking for that
+week:
+
+- each domain is removed from its Vercel project (Settings → Domains), so a
+  stale record cannot route to it;
+- Deployment Protection (Vercel Authentication) covers production, so the
+  `*.vercel.app` URLs of the last deployments answer 401 instead of taking
+  Leads into Blob;
+- `getWebhookInfo` for the CRM bot and the three capture bots names the brand
+  domains, never a `vercel.app` URL;
+- the Cron Job stays disabled, and Vercel's logs show no function calls.
+
+After the week, delete the Blob store and the old deployments. The projects
+themselves stay while they hold the environment variables (see the TODO in
+[How the deploy works](#how-the-deploy-works)).
 
 ### CRM migrations
 
@@ -766,7 +817,7 @@ only for `packages`, and only in the two shop jobs.
 
 Both deploy jobs check out with `persist-credentials: false`. They need the token
 only on the last step, where it is passed explicitly through `GH_TOKEN`, and in
-between `vercel build` executes the repository's code — there is no reason to leave
+between the build executes the repository's code — there is no reason to leave
 it a write-capable token recorded in `.git/config`.
 
 Two traps, both of which look like "the Vercel secrets broke" while having nothing
@@ -783,7 +834,7 @@ to do with them:
 
 ## The shop backend: Medusa on a VPS (`api.carlab.rs`)
 
-`apps/auto-service-shop` is not on Vercel. It is docker compose on a single DigitalOcean
+`apps/auto-service-shop` is docker compose on a single DigitalOcean
 Droplet in Frankfurt (`fra1`, Ubuntu 24.04, Basic `s-2vcpu-4gb`: 2 vCPU, 4 GB,
 80 GB SSD, 4 TB transfer, $24 a month, IPv4 only). The S3 buckets and IAM users
 stay on AWS in `eu-north-1`: AWS would not enable a 4 GB Lightsail plan for the
@@ -1118,8 +1169,8 @@ number gets its CI value in that script. The non-obvious parts:
   long a part's offer view reuses a supplier's live quote; the cart and checkout
   always quote afresh. `STORE_WRITES_PER_MINUTE` (empty means 120) and
   `STORE_SEARCHES_PER_MINUTE` (empty means 600) are the per-client limits on
-  store cart/VIN writes and on search. Storefront traffic arrives from Vercel's
-  shared egress, so carlab.rs names the visitor behind each call: its
+  store cart/VIN writes and on search. Storefront traffic arrives from the
+  carlab.rs server, one address for every visitor, so carlab.rs names the visitor behind each call: its
   server-side catalogue sends the visitor's address (`x-real-ip`, else the
   first `x-forwarded-for` hop) as `x-shop-client` beside
   `x-shop-client-secret: $SHOP_CLIENT_SECRET`, and the shop counts that visitor
@@ -1171,7 +1222,7 @@ number gets its CI value in that script. The non-obvious parts:
   memory. A re-send cannot make a second Lead: the post carries `order_id`, and
   the lead store answers a known order with the Lead it already made. The last
   failed attempt is reported to the CRM group through `TELEGRAM_BOT_TOKEN` and
-  `TELEGRAM_GROUP_ID`, the same names and values as the CRM bot's on Vercel.
+  `TELEGRAM_GROUP_ID`, the same names and values as the sites' CRM bot.
   Both are optional; unset, the failure is only logged.
 - `VIN_DECODERS` is the VIN decoder chain, comma-separated, in the order they
   are tried. An unknown name stops the server at startup. Each decoder works
@@ -1248,8 +1299,8 @@ number gets its CI value in that script. The non-obvious parts:
 - `SHOP_EVENTS_SECRET` (and `SHOP_EVENTS_SECRET_PREVIOUS` while it rotates) is
   the Bearer secret carlab.rs posts its Events with, see
   [Shop Orders](#shop-orders-adr-0053). `STOREFRONT_EVENTS_PER_MINUTE` (empty
-  means 1200) caps those posts; they all come from Vercel's egress, so it is
-  one bucket for the whole storefront.
+  means 1200) caps those posts; they all come from the carlab.rs server, so
+  it is one bucket for the whole storefront.
 - `GRAFANA_ADMIN_PASSWORD` is Grafana's `admin` password,
   `openssl rand -hex 32`. Required: compose refuses to start the stack without
   it, so set it before the first deploy that carries the logs. Grafana keeps
@@ -1845,7 +1896,7 @@ Steps 1, 5 and 6 are one `terraform apply`: see `infra/auto-service-shop/terrafo
     closed, `PUBLISH_DISPATCH_TOKEN` and `OPENAI_API_KEY` as described in
     [`.env`](#env); `docker compose up -d medusa` after editing.
     Done: `cut -d= -f1 /srv/carlab/.env` lists all four names.
-11. **carlab.rs on Vercel.** In the carlab.rs project (Production):
+11. **carlab.rs env.** In the carlab.rs Vercel project (Production), which holds its env:
     `MEDUSA_BACKEND_URL=https://api.carlab.rs`, `MEDUSA_PUBLISHABLE_KEY` = the key
     from step 9, and `SHOP_OPEN` **unset** until the shop opens. Then press Publish
     in the admin so the Categories get their Serbian and English text and carlab.rs
@@ -1879,12 +1930,12 @@ For a new site (this is how all three were set up):
    already set in the app's `vercel.json` and will override the dashboard
 4. Environment Variables — per the tables above (public contacts, Telegram,
    Keystatic). They can be added right on the import screen
-5. Deploy — Vercel does the first build itself; it only exists to bring the project
-   to life. After that GitHub Actions deploys
-6. Settings → Domains → add `carlab.rs` (or `details.rs`) and set the DNS at the
-   registrar per Vercel's instructions
-7. Settings → Environment Variables → the same `CRM_DATABASE_URL` approved.rs uses
-8. Settings → General → copy the Project ID into the GitHub secret
+5. No domain and no deploy on Vercel: the project only holds the env. Point
+   the domain's A record at the VPS, where Caddy serves it from
+   `caddy/sites/<app>.caddy` beside a `site-<app>` service (see
+   [The server](#the-server)). `CRM_DATABASE_URL` is not a project variable:
+   compose sets it on the site container
+6. Settings → General → copy the Project ID into the GitHub secret
    (`VERCEL_PROJECT_ID_AUTO_SERVICE` / `VERCEL_PROJECT_ID_DETAILING`)
 
 There is no need to disable the git trigger in the dashboard —
@@ -1894,7 +1945,7 @@ There is no need to disable the git trigger in the dashboard —
 
 ## The order for setting up a new site
 
-First the Vercel project with its domain and variables, the shared `CRM_DATABASE_URL`, the
+First the Vercel project with its variables, the domain pointing at the VPS, the
 GitHub App for Keystatic and the Project ID in the secrets — and only then the first
 deploy. A deploy started before the project has its variables will build
 successfully and ship a site with `undefined` in the contacts and a form that fails.
@@ -2083,17 +2134,9 @@ cd apps/detailing && node --env-file=.env.local --experimental-strip-types scrip
 
 ## The reminder cron (approved.rs only)
 
-On the VPS the `carlab-reminders` timer calls the route (see
-[The server](#the-server)); the Vercel cron below only matters until the
-cutover turns it off ([Cutover from Vercel](#cutover-from-vercel)).
-
-`apps/approved-rs/vercel.json`:
-
-```json
-"crons": [{ "path": "/api/reminders", "schedule": "0 8 * * *" }]
-```
-
-Every day at 08:00 UTC, Vercel calls `/api/reminders` with
+Every day at 08:00 UTC the host's `carlab-reminders` timer calls
+`/api/reminders` inside the approved.rs container (see
+[The server](#the-server)) with
 `Authorization: Bearer $CRON_SECRET` — the route marks expired Ghost leads lost,
 closes every Topic nobody has written in a day after its Lead was created (once;
 a quiet conversation stays open; the next message reopens it), then posts one digest to the group: postponed leads whose day has come (returned
@@ -2108,24 +2151,28 @@ There is no monthly summary: the Balance is in the bot's menu. Without
 `CRON_SECRET` in the project the route answers 401 and the digest silently never
 arrives.
 
-The cron belongs to a project, not to the bot: the other two projects have no
-`crons` section in `vercel.json` and do not need one — otherwise the same reminders
-would go out several times over.
+The timer calls approved.rs alone, never the other two sites: otherwise the
+same reminders would go out several times over. The `crons` section left in
+`apps/approved-rs/vercel.json` only mattered while Vercel served the site; the
+cutover disables it in the dashboard
+([Cutover from Vercel](#cutover-from-vercel)).
 
 ---
 
 ## A custom domain
 
-1. Vercel Dashboard → the project → Settings → Domains
-2. Add the domain (`approved.rs` / `carlab.rs` / `details.rs`)
-3. Set the DNS records (A or CNAME) at the registrar per Vercel's instructions
-4. Check that `site:` in that app's `astro.config.mjs` and `env.SITE` in its
-   `vercel.json` match the domain — the canonical links, the sitemap and the OG tags
+1. Point the apex and `www` A records at the VPS's reserved IP
+2. Set the host in the shop's compose (`APPROVED_HOST` / `CARLAB_HOST` /
+   `DETAILS_HOST`) if it is not the default, and reload Caddy
+3. Check that `site:` in that app's `astro.config.mjs` matches the domain — the canonical links, the sitemap and the OG tags
    all depend on them
 
 ---
 
 ## pnpm on Vercel
+
+Vercel no longer builds or serves the sites; this only explains why
+`pnpm-workspace.yaml` lists the allowed builds twice.
 
 A real deploy (`git push origin main` → `ci.yml`) does not touch any of this:
 `vercel build`/`vercel deploy` run from GitHub Actions, where `pnpm/action-setup`

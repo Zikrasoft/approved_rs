@@ -190,8 +190,9 @@ carlab.rs:
 - [ ] Check present: `PUBLIC_PHONE_NUMBER`, `PUBLIC_WHATSAPP_NUMBER`,
       `PUBLIC_VIBER_NUMBER`, `PUBLIC_TG_MANAGER` (`carlabrs`), the
       `TELEGRAM_*` set incl. `TELEGRAM_CAPTURE_BOT_TOKEN` and
-      `TELEGRAM_CAPTURE_WEBHOOK_SECRET`, `META_CAPI_TOKEN`, the Keystatic four,
-      Blob connected (deploy.md § Environment variables).
+      `TELEGRAM_CAPTURE_WEBHOOK_SECRET`, `META_CAPI_TOKEN`, the Keystatic four
+      (deploy.md § Environment variables). `CRM_DATABASE_URL` is not among
+      them: compose sets it on the site container.
 
 approved.rs:
 
@@ -240,9 +241,8 @@ code on this branch; whether to delete them from Vercel is not documented; ask.
       and the parts hub and search answer with the VIN inquiry form and the
       messenger tiles (`apps/auto-service/src/utils/catalogueEnv.ts`). Do
       section 7 straight away to shorten it.
-- [ ] Nothing new in `data/leads-unreadable.json` and no admin alert about
-      unreadable records after the first Leads (deploy.md § One Blob store
-      shared by three projects).
+- [ ] The first Leads reach the CRM group as cards with their `#N`
+      (deploy.md § The `crm` database shared by three sites).
 
 ## 7. After the first shop deploy
 
@@ -296,7 +296,7 @@ code on this branch; whether to delete them from Vercel is not documented; ask.
       their language (issue #442 "First production Publish").
 - [ ] `CATALOGUE_SHRINK_ALLOWED=true` only for one intended shrink (a supplier
       removed), then remove it (deploy.md § How it ships, step 5).
-- [ ] After the second Publish: check the Vercel build time and size, and that
+- [ ] After the second Publish: check the CI build time and size, and that
       its log shows `(restored)` pages (issue #442, #380; ADR-0055).
 - [ ] Acceptance: `docker stats --no-stream` within limits; a manual
       `/srv/carlab/backup.sh` ends with `Copied to the <bucket> bucket`;
@@ -383,7 +383,7 @@ carlab.rs:
       deploy.md § Closed beta).
 - [ ] `https://carlab.rs/catalogue-build.json` counts part pages after Publish
       (deploy.md § How it ships, step 5).
-- [ ] `/api/csp-report` lines `[csp] …` appear in Vercel logs only for real
+- [ ] `/api/csp-report` lines `[csp] …` appear in the site container's logs only for real
       violations (deploy.md § Vercel builds nothing).
 
 Shop:
@@ -407,8 +407,8 @@ Shop:
   there is no previous tag.
 - Shop down: carlab.rs deploys are skipped with a warning and the live site
   keeps serving; a Publish fails (deploy.md § How it ships, step 5).
-- A Vercel site: not documented for this repo beyond redeploying from git;
-  ask (Vercel dashboard rollback is not covered in deploy.md). To redeploy one
+- A site: `/srv/carlab/deploy-site.sh <app> <previous release>` on the host
+  brings back that release's code and env (deploy.md § How the deploy works). To redeploy one
   site from `main`: `git push origin :refs/tags/deployed/<app>`, then Actions →
   CI → Run workflow (deploy.md § The `deployed/*` tags).
 - Close prices again: `SHOP_OPEN` anything but `true` on both sides, restart
@@ -438,7 +438,7 @@ Issue #442 ("Release prep: owner decisions for carlab.rs"), open:
 - [ ] [bug] Social account URLs per brand, incl. details.rs Instagram.
 - [ ] [feature] Telegram tile on the order confirmation tied to the order.
 - [ ] [feature] VIN and decode retention period.
-- [ ] [feature] Where Leads live long term (archive blob or Postgres).
+- [x] [feature] Where Leads live long term: Postgres (ADR-0063).
 - [ ] [feature] VPS sizing before the full catalogue import.
 - [ ] [bug] Analytics before consent: opt-out or opt-in.
 - [ ] [feature] Spam protection on forms (Vercel Firewall rules or Turnstile).
@@ -486,10 +486,7 @@ not recorded anywhere in the repository; measure it before trusting a number.
       build near that limit needs a manual reindex or a longer limit.
 - [ ] Not verified, check before the catalogue is large: GitHub Actions' cache
       size limit per repository against the size of `node_modules/.astro`, and
-      whether Vercel accepts a `vercel deploy --prebuilt --archive=tgz` with
-      100 000 or more output files (the limits page documents 15 000 files for
-      source uploads of CLI deployments and says nothing for prebuilt output;
-      https://vercel.com/docs/limits).
+      how long the rsync of 100 000 or more output files to the VPS takes.
 - [ ] If the build is too slow, the options in rising cost: publish only part of
       the Parts (the `listed` flag already exists on published numbers,
       `src/modules/catalog/cross-module-sql.ts`; how it affects the build has not

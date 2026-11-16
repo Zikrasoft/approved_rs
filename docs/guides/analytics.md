@@ -233,7 +233,7 @@ bot Lead that absorbs the click inherits them, and the first one wins.
 **When it fires.** Once per Lead, when the bot request becomes real: the
 Questionnaire is completed, or the visitor shares a phone, whichever comes
 first. A bare `/start` sends nothing. The Lead's `metaLeadSentAt` is set in the
-same compare-and-swap write that claims the event (`claimMetaLead`), so a second
+same locked row update that claims the event (`claimMetaLead`), so a second
 completion, a second phone or a retry never sends it again. A Lead without
 `metaIds` (the visitor never came through the site, or refused) sends nothing.
 
