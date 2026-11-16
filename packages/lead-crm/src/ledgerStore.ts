@@ -18,30 +18,26 @@ export type LedgerAuthor = z.infer<typeof ledgerAuthorSchema>;
 const operationTypeSchema = z.enum(['payout', 'settlement']);
 export type OperationType = z.infer<typeof operationTypeSchema>;
 
-export const operationSchema = z
+const newOperationSchema = z
   .object({
-    id: z.string(),
     type: operationTypeSchema,
     amount: z.number().transform(roundMoney).pipe(z.number().positive()),
     note: z.string().max(MAX_OPERATION_NOTE),
-    createdAt: z.iso.datetime(),
     createdBy: ledgerAuthorSchema,
   })
   .strict();
-export type LedgerOperation = z.infer<typeof operationSchema>;
+export type LedgerOperation = z.infer<typeof newOperationSchema> & {
+  id: string;
+  createdAt: string;
+};
 
-export const promptSchema = z
-  .object({
-    chatId: z.number().int(),
-    messageId: z.number().int(),
-    type: operationTypeSchema,
-    createdAt: z.iso.datetime(),
-  })
-  .strict();
-export type OperationPrompt = z.infer<typeof promptSchema>;
+export interface OperationPrompt {
+  chatId: number;
+  messageId: number;
+  type: OperationType;
+  createdAt: string;
+}
 export type FoundOperationPrompt = OperationPrompt & { expired: boolean };
-
-const newOperationSchema = operationSchema.omit({ id: true, createdAt: true });
 
 export interface OperationInput {
   type: OperationType;
