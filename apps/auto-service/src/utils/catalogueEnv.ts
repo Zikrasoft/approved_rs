@@ -42,6 +42,13 @@ export type CatalogueEnv = Partial<
 const unsetWhenEmpty = <T extends z.ZodType>(schema: T) =>
   z.preprocess((value) => value || undefined, schema.optional());
 
+const internalUrlSchema = unsetWhenEmpty(z.url()).catch(undefined);
+
+export const shopBackendUrl = (
+  buildUrl: string | undefined,
+  internalUrl = process.env.SHOP_INTERNAL_URL,
+): string | undefined => internalUrlSchema.parse(internalUrl) ?? buildUrl;
+
 const catalogueEnvSchema = z
   .object({
     MEDUSA_BACKEND_URL: unsetWhenEmpty(z.url()),
@@ -139,11 +146,16 @@ export function catalogueFromEnv(
   });
 }
 
-export const catalogueFor = (request: Request) =>
-  catalogueFromEnv(siteEnv(), {
-    preview: previewRequested(request),
-    visitor: request,
-  });
+export const catalogueFor = (request: Request) => {
+  const env = siteEnv();
+  return catalogueFromEnv(
+    { ...env, MEDUSA_BACKEND_URL: shopBackendUrl(env.MEDUSA_BACKEND_URL) },
+    {
+      preview: previewRequested(request),
+      visitor: request,
+    },
+  );
+};
 
 export const uncachedJson = (body: unknown, init?: ResponseInit) =>
   Response.json(body, {

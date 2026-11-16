@@ -92,6 +92,12 @@ for app in auto-service detailing approved-rs; do
     failures=$((failures + 1))
   fi
 done
+expect 'site-auto-service reaches the shop over the internal network, keeping its site settings' \
+  '.services["site-auto-service"].environment | .SHOP_INTERNAL_URL == "http://medusa:9000" and .PORT == "4321" and (.CRM_DATABASE_URL | length > 0)'
+expect 'the other sites get no internal shop address' \
+  '[.services["site-detailing", "site-approved-rs"].environment.SHOP_INTERNAL_URL] == [null, null]'
+expect 'the shop answers on the data network the site shares, as medusa' \
+  '(.services.medusa.networks | has("data")) and (.services["site-auto-service"].networks | has("data"))'
 expect 'caddy reads the site releases read-only' \
   '[.services.caddy.volumes[] | select(.target == "/srv/sites") | [.source, .read_only]] == [["/srv/sites", true]]'
 expect 'caddy serves the three sites on their own domains' \

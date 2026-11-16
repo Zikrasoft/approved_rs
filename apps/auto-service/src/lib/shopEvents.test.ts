@@ -83,6 +83,26 @@ describe('createShopEvents', () => {
     ).toEqual([null, null]);
   });
 
+  it('posts to the internal shop address when SHOP_INTERNAL_URL is set', async () => {
+    vi.stubEnv('MEDUSA_BACKEND_URL', 'https://api.carlab.test');
+    vi.stubEnv('SHOP_INTERNAL_URL', 'http://medusa:9000');
+    vi.stubEnv('SHOP_EVENTS_SECRET', 'events-secret');
+    const fetchMock = vi.fn(
+      async (_url: string) => new Response(null, { status: 204 }),
+    );
+    const kept: Promise<unknown>[] = [];
+    createShopEvents({
+      fetch: fetchMock as never,
+      keepAlive: (sending) => kept.push(sending),
+    })(null, CHECKOUT);
+    await Promise.all(kept);
+    vi.unstubAllEnvs();
+
+    expect(String(fetchMock.mock.calls[0]![0])).toMatch(
+      /^http:\/\/medusa:9000\//,
+    );
+  });
+
   it.each([
     ['no backend', { SHOP_EVENTS_SECRET: 'events-secret' }],
     ['no secret', { MEDUSA_BACKEND_URL: 'https://api.carlab.test' }],

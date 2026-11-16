@@ -17,7 +17,7 @@ x-site: &site
   cap_drop: [ALL]
   security_opt: ['no-new-privileges:true']
   networks: [data, edge]
-  environment:
+  environment: &site-environment
     HOST: 0.0.0.0
     PORT: '4321'
     NODE_OPTIONS: --max-old-space-size=112
@@ -229,6 +229,9 @@ services:
   site-auto-service:
     <<: *site
     profiles: [site-auto-service]
+    environment:
+      <<: *site-environment
+      SHOP_INTERNAL_URL: http://medusa:9000
     command: [node, /srv/sites/auto-service/current/server/entry.mjs]
     env_file:
       - path: /srv/sites/auto-service/current/.env

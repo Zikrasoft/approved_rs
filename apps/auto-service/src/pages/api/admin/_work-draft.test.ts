@@ -90,6 +90,16 @@ const committedFile = () => {
 };
 
 describe('POST /api/admin/work-draft', () => {
+  it('reads the order from SHOP_INTERNAL_URL when set', async () => {
+    vi.stubEnv('SHOP_INTERNAL_URL', 'http://medusa:9000');
+
+    await draft('order_01', 'staff-token');
+
+    expect(
+      calls.some(({ url }) => url.startsWith('http://medusa:9000/hooks/')),
+    ).toBe(true);
+  });
+
   it('commits one unpublished Parts sourcing Work with the car, the Parts and the total', async () => {
     const response = await draft('order_01', 'staff-token');
 

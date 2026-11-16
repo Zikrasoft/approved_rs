@@ -7,6 +7,7 @@ import {
   type CatalogueEnv,
   browseForBuild,
   catalogueFromEnv,
+  shopBackendUrl,
   categoriesForBuild,
   categoryPagesForBuild,
   makeHubsForBuild,
@@ -2549,5 +2550,28 @@ describe('the build record', () => {
     const response = await recordBuild({} as Parameters<typeof recordBuild>[0]);
 
     expect(await response.json()).toEqual({ partPages: 0 });
+  });
+});
+
+describe('shopBackendUrl', () => {
+  it.each([
+    [
+      'the internal address when set',
+      'http://medusa:9000',
+      'http://medusa:9000',
+    ],
+    ['the build address when unset', undefined, 'https://api.carlab.test'],
+    ['the build address when empty', '', 'https://api.carlab.test'],
+    ['the build address when not a URL', 'medusa', 'https://api.carlab.test'],
+  ])('is %s', (_, internal, expected) => {
+    expect(shopBackendUrl('https://api.carlab.test', internal)).toBe(expected);
+  });
+
+  it('reads SHOP_INTERNAL_URL from the process environment by default', () => {
+    vi.stubEnv('SHOP_INTERNAL_URL', 'http://medusa:9000');
+    expect(shopBackendUrl('https://api.carlab.test')).toBe(
+      'http://medusa:9000',
+    );
+    vi.unstubAllEnvs();
   });
 });

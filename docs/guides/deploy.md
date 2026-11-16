@@ -428,6 +428,11 @@ token. What fires and when: [analytics.md](analytics.md#the-server-lead-event-fr
 | `SHOP_CLIENT_SECRET`           | no          | ✅ secret | no         | all shoppers share one store rate-limit bucket                                                             |
 | `SHOP_EVENTS_SECRET`           | no          | ✅ secret | no         | carlab.rs sends no Events to the shop's log; the shop's own Events still log                               |
 
+`SHOP_INTERNAL_URL` is set by `docker-compose.yml` on `site-auto-service` alone
+(`http://medusa:9000`, the shop over the `data` network): the running server
+calls the shop there instead of at `MEDUSA_BACKEND_URL`, which the Mac runner's
+build keeps using, and an unset or invalid value falls back to `MEDUSA_BACKEND_URL`.
+
 `SHOP_API_URL` is the shop's public API origin, `https://api.carlab.rs`. When
 the bot marks a `parts-order` Lead ✅ it completes the Order, ❌ cancels it,
 through `POST /hooks/carlab-orders/:id/outcome` with
