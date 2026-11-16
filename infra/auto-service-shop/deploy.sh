@@ -62,6 +62,14 @@ docker compose run --rm -T medusa \
 ./crawler-role.sh
 ./crm-role.sh
 
+crm_password=$(sed -n 's/^CRM_DB_PASSWORD=//p' .env)
+if [ -n "$crm_password" ]; then
+  echo "==> CRM migrations"
+  CRM_DATABASE_URL="postgres://crm:$crm_password@postgres:5432/crm" CHECKPOINT_DISABLE=1 \
+    docker compose run --rm -T -e CRM_DATABASE_URL -e CHECKPOINT_DISABLE \
+    -w /server/node_modules/@podbor/lead-crm medusa node_modules/.bin/prisma migrate deploy
+fi
+
 grep -v '^MEDUSA_TAG=' .env >.env.next
 echo "MEDUSA_TAG=$tag" >>.env.next
 mv .env.next .env

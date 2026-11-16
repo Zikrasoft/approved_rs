@@ -6,7 +6,9 @@
   "version": "0.0.1",
   "files": [
     "dist",
-    "src"
+    "src",
+    "prisma",
+    "prisma.config.ts"
   ],
   "exports": {
     ".": "./src/index.ts",

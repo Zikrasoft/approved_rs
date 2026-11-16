@@ -18,6 +18,10 @@ if [ "$1" = run ]; then
 fi
 case "$*" in
 *db:migrate*) exit "${MIGRATE_EXIT:-0}" ;;
+*'prisma migrate deploy'*)
+  echo "${CRM_DATABASE_URL:-}" >"$LOG.crm"
+  exit "${CRM_MIGRATE_EXIT:-0}"
+  ;;
 *check-schema*) exit "${SCHEMA_EXIT:-0}" ;;
 *seed-production*) exit "${SEED_EXIT:-0}" ;;
 *ON_ERROR_STOP*) exit "${ROLE_EXIT:-0}" ;;
@@ -354,6 +358,33 @@ stage
 crm_database
 expect 'a deploy with a CRM database succeeds' run deploy.sh "$NEW"
 expect 'the deploy sets up the CRM database' test "$(grep -c 'psql -q -v ON_ERROR_STOP=1 -U carlab -d carlab' "$LOG")" -eq 2
+crm_migrate="docker[$NEW] compose run --rm -T -e CRM_DATABASE_URL -e CHECKPOINT_DISABLE -w /server/node_modules/@podbor/lead-crm medusa node_modules/.bin/prisma migrate deploy"
+line_of() {
+  grep -nF -e "$1" "$LOG" | tail -n 1 | cut -d: -f1
+}
+migrates_between_role_and_restart() {
+  role=$(line_of 'ON_ERROR_STOP=1')
+  migrate=$(grep -nxF -e "$crm_migrate" "$LOG" | cut -d: -f1)
+  restart=$(line_of 'up -d --wait --wait-timeout')
+  [ -n "$migrate" ] && [ "$role" -lt "$migrate" ] && [ "$migrate" -lt "$restart" ]
+}
+expect 'the deploy migrates the CRM database with the image Prisma CLI after its role, before any restart' \
+  migrates_between_role_and_restart
+expect 'the CRM migrations connect as the crm role' grep -qx 'postgres://crm:feedfacefeed@postgres:5432/crm' "$LOG.crm"
+refuse 'the CRM password never reaches a command line' grep -q feedfacefeed "$LOG"
+
+stage
+crm_database
+CRM_MIGRATE_EXIT=1
+export CRM_MIGRATE_EXIT
+refuse 'a failed CRM migration fails the deploy' run deploy.sh "$NEW"
+unset CRM_MIGRATE_EXIT
+expect 'a failed CRM migration leaves .env on the old tag' has "MEDUSA_TAG=$OLD" "$work/host/.env"
+refuse 'a failed CRM migration restarts nothing' grep -q 'up -d --wait --wait-timeout' "$LOG"
+
+stage
+expect 'a deploy without a CRM database succeeds' run deploy.sh "$NEW"
+refuse 'a deploy without a CRM database runs no CRM migration' grep -q 'prisma' "$LOG"
 
 stage
 mkdir "$work/host/.deploy.lock" "$work/backups3"
@@ -469,6 +500,8 @@ refuse "no script prints a secret from .env" grep -Eq 'leak-canary|secret-canary
 
 expect 'the image health check asks Postgres and Typesense through /health/ready' \
   grep -q 'http://127.0.0.1:9000/health/ready ' "$here/Dockerfile"
+expect 'the production image carries the CRM migrations and their pinned Prisma CLI' \
+  grep -q 'node_modules/@podbor/lead-crm/node_modules/.bin/prisma' "$here/Dockerfile"
 expect 'the production image carries the Sentry SDK' grep -q "require('@sentry/node')" "$here/Dockerfile"
 expect 'the env template names SENTRY_DSN, empty until the owner has a project' \
   grep -qx 'SENTRY_DSN=' "$here/production.env.example"

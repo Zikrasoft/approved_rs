@@ -227,6 +227,15 @@ migration is **additive**; `check` runs `.github/scripts/shop-migration-drift.sh
 and `.github/scripts/shop-migrations-frozen.sh` against the
 `apps/auto-service-shop/migrations.sha256` manifest.
 
+## CRM migrations
+
+`packages/lead-crm/prisma/migrations` follows the same additive rule as the
+shop's, for the same reason: the shop deploy migrates `crm` with the new shop
+image while the sites still serve the previous build, and a rollback brings an
+older image over the newer schema. Folder names start with a timestamp, since
+Prisma applies them in name order. How it ships: `docs/guides/deploy.md`, "CRM
+migrations".
+
 ## Architecture
 
 **Stack:** Astro v7, `output: 'static'` (prerendered) with `@astrojs/node` in `standalone` mode — most pages are static; a page opts into SSR individually via `export const prerender = false` (used by the `/api/*` routes and the homepage, which middleware rewrites bare `/` into). There is no global SSR mode. A build is `dist/client/` (every static file, served from disk by Caddy) plus `dist/server/entry.mjs`, a self-contained Node server (`vite.ssr.noExternal: true`, no `node_modules` at runtime) that answers only what is not a file and reads its config from `process.env` (`HOST`, `PORT`). `security.allowedDomains` names the brand's domain, so the proxy's `Host` and `X-Forwarded-Proto` make `request.url` the public origin; without it every form POST fails Astro's origin check. A server-only `import.meta.env.X` is inlined at build time, a `process.env.X` is read at runtime. Work that must outlive the response (the Telegram notify, Meta CAPI, shop Events) goes through `inBackground` from `@podbor/site-kit/background`: it logs a rejection instead of leaving it unhandled and holds `SIGTERM` until the running tasks settle.

@@ -283,6 +283,14 @@ jobs:
           docker logs "${COMPOSE_PROJECT_NAME:-podbor}-shop" 2>&1 | tail -40
           [ "$status" = healthy ]
 
+      - name: Migrate a blank CRM database with the image's Prisma CLI
+        run: |
+          docker compose -f apps/auto-service-shop/docker-compose.test.yml exec -T postgres \
+            sh -c "dropdb -U postgres --if-exists crm_check && createdb -U postgres crm_check"
+          docker run --rm --network host -e CHECKPOINT_DISABLE=1 \
+            -e CRM_DATABASE_URL="postgres://postgres:postgres@127.0.0.1:${SHOP_TEST_DB_PORT:-55432}/crm_check" \
+            -w /server/node_modules/@podbor/lead-crm "$SHOP_IMAGE:$SHA" node_modules/.bin/prisma migrate deploy
+
       - name: Push
         if: github.ref == 'refs/heads/main'
         env:
@@ -354,7 +362,7 @@ jobs:
       - name: Ship the stack files
         if: steps.guard.outputs.deploy == 'true'
         run: |
-          tar -C infra/auto-service-shop -cf - docker-compose.yml caddy/Caddyfile deploy.sh backup.sh restore.sh crawler-role.sh move-static-to-s3.sh \
+          tar -C infra/auto-service-shop -cf - docker-compose.yml caddy/Caddyfile deploy.sh backup.sh restore.sh crawler-role.sh crm-role.sh move-static-to-s3.sh \
             logs-export.sh loki/config.yaml alloy/config.alloy grafana deploy-site.sh reminders.sh caddy/sites \
             | ssh -o BatchMode=yes -o StrictHostKeyChecking=yes "$TARGET" 'tar -C /srv/carlab -xf -'
       - name: Deploy
@@ -391,7 +399,7 @@ jobs:
               -f ref="refs/tags/deployed/$APP" -f sha="$SHA"
 
   deploy-site:
-    needs: [translate, verify, deploy-shop]
+    needs: [translate, verify, shop-image, deploy-shop]
     if: >-
       !cancelled() &&
       needs.verify.result == 'success' &&
@@ -429,14 +437,15 @@ jobs:
         env:
           CHANGED: ${{ needs.verify.outputs.changed }}
           SHOP: ${{ needs.deploy-shop.result }}
+          SHOP_IMAGE_RESULT: ${{ needs.shop-image.result }}
           PROJECT_SECRET: ${{ matrix.project_secret }}
         run: |
           if [ -z "$VERCEL_PROJECT_ID" ]; then
             echo "deploy=false" >> "$GITHUB_OUTPUT"
             echo "$PROJECT_SECRET is not set, so the $APP env cannot be pulled: skipping the $APP deploy."
-          elif [ "$APP" = auto-service ] && [ "$SHOP" = failure ]; then
+          elif [ "$SHOP" = failure ] || [ "$SHOP_IMAGE_RESULT" = failure ]; then
             echo "deploy=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::The shop deploy failed, so auto-service is not deployed; deployed/auto-service stays put."
+            echo "::warning::The shop image or deploy failed, so the CRM migrations it carries may not have run: $APP is not deployed; deployed/$APP stays put."
           elif ! jq -e 'type == "array"' <<<"$CHANGED" >/dev/null; then
             echo "deploy=true" >> "$GITHUB_OUTPUT"
             echo "::warning::unreadable changed list, deploying $APP anyway"
