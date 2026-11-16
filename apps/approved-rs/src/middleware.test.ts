@@ -36,12 +36,15 @@ const run = (context: unknown, next = vi.fn(() => 'next')) =>
   (onRequest as unknown as Handler)(context, next);
 
 describe('onRequest', () => {
-  it('passes an unlocalized path straight through', () => {
-    const context = makeContext('/api/leads');
-    const next = vi.fn(() => 'next');
-    expect(run(context, next)).toBe('next');
-    expect(context.redirect).not.toHaveBeenCalled();
-  });
+  it.each(['/api/leads', '/admin/case-photos', '/_astro/old.js', '/404'])(
+    'passes the unlocalized %s straight through',
+    (pathname) => {
+      const context = makeContext(pathname);
+      const next = vi.fn(() => 'next');
+      expect(run(context, next)).toBe('next');
+      expect(context.redirect).not.toHaveBeenCalled();
+    },
+  );
 
   it('serves a localized page without recording it as a language choice', () => {
     const context = makeContext('/en/vehicle-sourcing/de/');

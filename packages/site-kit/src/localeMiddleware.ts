@@ -13,22 +13,31 @@ export interface LocaleMiddlewareContext<Redirected> {
 }
 
 export interface LocaleMiddlewareOptions {
-  isLocale(value: string): boolean;
-  detectLocale(
-    acceptLanguage: string | null,
-    cookie: string | undefined,
-  ): string;
-  unlocalized: UnlocalizedPaths;
+  locales: {
+    isLocale(value: string): boolean;
+    detectLocale(
+      acceptLanguage: string | null,
+      cookie: string | undefined,
+    ): string;
+  };
+  unlocalized?: Partial<UnlocalizedPaths>;
   redirects?: readonly Redirect[];
 }
 
+const EVERY_SITE: UnlocalizedPaths = {
+  exact: ['/llms.txt', '/robots.txt', '/favicon.ico', '/404', '/404/'],
+  prefixes: ['/api/', '/keystatic', '/.well-known/', '/_astro/'],
+};
+
 export function createLocaleMiddleware({
-  isLocale,
-  detectLocale,
-  unlocalized,
+  locales: { isLocale, detectLocale },
+  unlocalized: { exact = [], prefixes = [] } = {},
   redirects = [],
 }: LocaleMiddlewareOptions) {
-  const isUnlocalized = createUnlocalizedMatcher(unlocalized);
+  const isUnlocalized = createUnlocalizedMatcher({
+    exact: [...EVERY_SITE.exact, ...exact],
+    prefixes: [...EVERY_SITE.prefixes, ...prefixes],
+  });
   const redirectFor = createRedirectMatcher(redirects);
 
   return <Redirected, Next>(

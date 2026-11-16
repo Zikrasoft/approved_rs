@@ -1,8 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createLocaleMiddleware } from './localeMiddleware.ts';
 
-const isLocale = (value: string) => ['ru', 'en', 'sr'].includes(value);
-
 function context(url: string, acceptLanguage = '', cookie?: string) {
   return {
     url: new URL(url, 'https://site.example'),
@@ -20,13 +18,15 @@ function context(url: string, acceptLanguage = '', cookie?: string) {
   };
 }
 
-const detectLocale = (acceptLanguage: string | null, cookie?: string) =>
-  cookie ?? (acceptLanguage?.startsWith('en') ? 'en' : 'sr');
+const locales = {
+  isLocale: (value: string) => ['ru', 'en', 'sr'].includes(value),
+  detectLocale: (acceptLanguage: string | null, cookie?: string) =>
+    cookie ?? (acceptLanguage?.startsWith('en') ? 'en' : 'sr'),
+};
 
 const middleware = createLocaleMiddleware({
-  isLocale,
-  detectLocale,
-  unlocalized: { exact: ['/llms.txt'], prefixes: ['/api/'] },
+  locales,
+  unlocalized: { exact: ['/catalogue-build.json'], prefixes: ['/admin/'] },
   redirects: [
     { source: '/ru/old/:path*', destination: '/ru/new/:path*' },
     { source: '/legacy', destination: 'https://brand.example/ru/' },
@@ -36,14 +36,40 @@ const middleware = createLocaleMiddleware({
 const next = () => 'next';
 
 describe('createLocaleMiddleware', () => {
-  it.each(['/api/leads', '/llms.txt', '/sitemap-index.xml'])(
-    'passes the unlocalized %s straight through',
-    (path) => {
-      const ctx = context(path);
-      expect(middleware(ctx, next)).toBe('next');
-      expect(ctx.redirect).not.toHaveBeenCalled();
-    },
-  );
+  it.each([
+    '/api/leads',
+    '/keystatic/collection/works',
+    '/.well-known/security.txt',
+    '/_astro/old.js',
+    '/llms.txt',
+    '/robots.txt',
+    '/favicon.ico',
+    '/404',
+    '/404/',
+    '/sitemap-index.xml',
+    '/catalogue-build.json',
+    '/admin/work-draft',
+  ])('passes the unlocalized %s straight through', (path) => {
+    const ctx = context(path);
+    expect(middleware(ctx, next)).toBe('next');
+    expect(ctx.redirect).not.toHaveBeenCalled();
+  });
+
+  it('needs no extra unlocalized paths from the caller', () => {
+    const bare = createLocaleMiddleware({ locales });
+    const ctx = context('/_astro/old.js');
+    expect(bare(ctx, next)).toBe('next');
+    expect(bare(context('/admin/work-draft'), next)).toEqual({
+      path: '/sr/admin/work-draft',
+      status: 302,
+    });
+  });
+
+  it('lets /_image fall to the locale redirect, since Caddy answers it first', () => {
+    const ctx = context('/_image?href=x');
+    middleware(ctx, next);
+    expect(ctx.redirect).toHaveBeenCalledWith('/sr/_image?href=x', 302);
+  });
 
   it('passes a path that starts with a locale through', () => {
     expect(middleware(context('/en/services/'), next)).toBe('next');

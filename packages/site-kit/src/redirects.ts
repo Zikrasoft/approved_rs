@@ -41,19 +41,3 @@ export function createRedirectMatcher(
     return null;
   };
 }
-
-function servedPaths(file: string): string[] {
-  const page = /^(.*\/)index\.html$/.exec(file)?.[1];
-  if (!page) return [file];
-  return page === '/' ? [file, page] : [file, page, page.slice(0, -1)];
-}
-
-export function shadowedRedirects(
-  rules: readonly Redirect[],
-  files: readonly string[],
-): string[] {
-  const redirectFor = createRedirectMatcher(rules);
-  return files
-    .flatMap(servedPaths)
-    .filter((path) => redirectFor(path) !== null);
-}

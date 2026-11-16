@@ -53,7 +53,7 @@ jobs:
              || ! git diff --quiet "$base" HEAD -- infra/auto-service-shop; then
             shop=true
           fi
-          sites=$(jq -r '[.[] | select(. == "@podbor/approved-rs" or . == "@podbor/detailing") | ltrimstr("@podbor/")] | join(" ")' <<<"$packages")
+          sites=$(jq -r '[.[] | select(. == "@podbor/approved-rs" or . == "@podbor/detailing" or . == "@podbor/auto-service") | ltrimstr("@podbor/")] | join(" ")' <<<"$packages")
           echo "Affected: $packages; shop: $shop; sites: ${sites:-none}"
           {
             echo "base=$base"
@@ -91,10 +91,7 @@ jobs:
           done
           pnpm turbo run build "${filters[@]}"
           node --experimental-strip-types .github/scripts/contact-placement.ts "${dists[@]}"
-          if [[ " $SITES " == *" approved-rs "* ]]; then
-            node --experimental-strip-types .github/scripts/redirects-shadowed.ts apps/approved-rs/dist/client
-          fi
-          node --experimental-strip-types .github/scripts/on-demand-images.ts $SITES
+          node --experimental-strip-types .github/scripts/caddy-split.ts $SITES
 
       - if: steps.affected.outputs.shop == 'true'
         run: sh infra/auto-service-shop/test/scripts.test.sh
@@ -113,7 +110,7 @@ jobs:
       - run: sh .github/scripts/shop-backend-up.test.sh
       - run: sh .github/scripts/shop-ci-env.test.sh
       - run: sh .github/scripts/deploy-site.test.sh
-      - run: node --experimental-strip-types --test .github/scripts/site-env.test.ts .github/scripts/env-to-github.test.ts
+      - run: node --experimental-strip-types --test .github/scripts/site-env.test.ts .github/scripts/env-to-github.test.ts .github/scripts/caddy-split.test.ts
       - run: >-
           docker run --rm -v "$PWD:/repo" -w /repo --entrypoint shellcheck "$ACTIONLINT_IMAGE"
           .github/scripts/*.sh infra/auto-service-shop/*.sh infra/auto-service-shop/test/*.sh
