@@ -103,6 +103,7 @@ jobs:
         run: sh infra/auto-service-shop/test/harden-ssh.test.sh
       - run: sh .github/scripts/shop-backend-up.test.sh
       - run: sh .github/scripts/shop-ci-env.test.sh
+      - run: sh .github/scripts/deploy-site.test.sh
       - run: >-
           docker run --rm -v "$PWD:/repo" -w /repo --entrypoint shellcheck "$ACTIONLINT_IMAGE"
           .github/scripts/*.sh infra/auto-service-shop/*.sh infra/auto-service-shop/test/*.sh
@@ -385,86 +386,59 @@ jobs:
             || gh api -X POST "repos/$GITHUB_REPOSITORY/git/refs" \
               -f ref="refs/tags/deployed/$APP" -f sha="$SHA"
 
-  deploy:
-    needs: [translate, verify]
-    if: >-
-      !cancelled() &&
-      needs.verify.result == 'success' &&
-      github.ref == 'refs/heads/main' &&
-      contains(fromJSON(needs.verify.outputs.changed), 'approved-rs')
-    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
-    environment: production
-    permissions:
-      contents: write
-    env:
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-    defaults:
-      run:
-        working-directory: apps/approved-rs
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.translate.outputs.sha }}
-          persist-credentials: false
-      - uses: ./.github/actions/setup-pnpm
-      - run: pnpm exec vercel pull --yes --environment=production
-      - run: pnpm exec vercel build --prod
-      - run: pnpm exec vercel deploy --prebuilt --prod --archive=tgz
-      - name: Record what is live
-        env:
-          GH_TOKEN: ${{ github.token }}
-          SHA: ${{ needs.translate.outputs.sha }}
-          APP: approved-rs
-        run: |
-          gh api -X PATCH "repos/$GITHUB_REPOSITORY/git/refs/tags/deployed/$APP" \
-              -f sha="$SHA" -F force=true \
-            || gh api -X POST "repos/$GITHUB_REPOSITORY/git/refs" \
-              -f ref="refs/tags/deployed/$APP" -f sha="$SHA"
-
-  deploy-brand-site:
+  deploy-site:
     needs: [translate, verify, deploy-shop]
     if: >-
       !cancelled() &&
       needs.verify.result == 'success' &&
-      needs.deploy-shop.result != 'failure' &&
       github.ref == 'refs/heads/main' &&
       needs.verify.outputs.changed != '[]'
     runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
     environment: production
     permissions:
       contents: write
+    concurrency:
+      group: deploy-site-${{ matrix.app }}
+      cancel-in-progress: false
     strategy:
+      fail-fast: false
       matrix:
         include:
+          - app: approved-rs
+            project_secret: VERCEL_PROJECT_ID
           - app: detailing
             project_secret: VERCEL_PROJECT_ID_DETAILING
           - app: auto-service
             project_secret: VERCEL_PROJECT_ID_AUTO_SERVICE
     env:
+      APP: ${{ matrix.app }}
+      SHA: ${{ needs.translate.outputs.sha }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets[matrix.project_secret] }}
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-    defaults:
-      run:
-        working-directory: apps/${{ matrix.app }}
+      VPS_HOST: ${{ secrets.AUTO_SERVICE_SHOP_VPS_HOST }}
+      VPS_USER: ${{ secrets.AUTO_SERVICE_SHOP_VPS_USER }}
+      VPS_SSH_KEY: ${{ secrets.AUTO_SERVICE_SHOP_VPS_SSH_KEY }}
+      VPS_KNOWN_HOSTS: ${{ secrets.AUTO_SERVICE_SHOP_VPS_KNOWN_HOSTS }}
     steps:
       - id: guard
-        working-directory: .
         env:
           CHANGED: ${{ needs.verify.outputs.changed }}
-          APP: ${{ matrix.app }}
+          SHOP: ${{ needs.deploy-shop.result }}
+          PROJECT_SECRET: ${{ matrix.project_secret }}
         run: |
           if [ -z "$VERCEL_PROJECT_ID" ]; then
             echo "deploy=false" >> "$GITHUB_OUTPUT"
-            echo "${{ matrix.project_secret }} is not set — skipping the $APP deploy."
+            echo "$PROJECT_SECRET is not set, so the $APP env cannot be pulled: skipping the $APP deploy."
+          elif [ "$APP" = auto-service ] && [ "$SHOP" = failure ]; then
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::The shop deploy failed, so auto-service is not deployed; deployed/auto-service stays put."
           elif ! jq -e 'type == "array"' <<<"$CHANGED" >/dev/null; then
             echo "deploy=true" >> "$GITHUB_OUTPUT"
-            echo "::warning::unreadable changed list — deploying $APP anyway"
+            echo "::warning::unreadable changed list, deploying $APP anyway"
           elif ! jq -e --arg a "$APP" 'index($a)' <<<"$CHANGED" >/dev/null; then
             echo "deploy=false" >> "$GITHUB_OUTPUT"
-            echo "$APP is current in production — skipping."
+            echo "$APP is current in production, skipping."
           else
             echo "deploy=true" >> "$GITHUB_OUTPUT"
           fi
@@ -481,27 +455,21 @@ jobs:
           path: apps/auto-service/node_modules/.astro
           key: astro-carlab-${{ github.ref_name }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: astro-carlab-${{ github.ref_name }}-
-      - run: pnpm exec vercel pull --yes --environment=production
+      - id: deploy
         if: steps.guard.outputs.deploy == 'true'
-      - id: backend
-        if: steps.guard.outputs.deploy == 'true' && matrix.app == 'auto-service'
         run: |
-          if sh ../../.github/scripts/shop-backend-up.sh; then
-            echo "up=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "up=false" >> "$GITHUB_OUTPUT"
+          status=0
+          sh .github/scripts/deploy-site.sh "$APP" "$SHA-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" || status=$?
+          if [ "$status" -eq 75 ]; then
             echo "::warning::The shop backend does not answer /health, so auto-service is not deployed; deployed/auto-service stays put and the next run retries. The live site keeps serving."
+            exit 0
           fi
-      - run: pnpm exec vercel build --prod
-        if: steps.guard.outputs.deploy == 'true' && steps.backend.outputs.up != 'false'
-      - run: pnpm exec vercel deploy --prebuilt --prod --archive=tgz
-        if: steps.guard.outputs.deploy == 'true' && steps.backend.outputs.up != 'false'
+          [ "$status" -ne 0 ] || echo "live=true" >> "$GITHUB_OUTPUT"
+          exit "$status"
       - name: Record what is live
-        if: steps.guard.outputs.deploy == 'true' && steps.backend.outputs.up != 'false'
+        if: steps.deploy.outputs.live == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
-          SHA: ${{ needs.translate.outputs.sha }}
-          APP: ${{ matrix.app }}
         run: |
           gh api -X PATCH "repos/$GITHUB_REPOSITORY/git/refs/tags/deployed/$APP" \
               -f sha="$SHA" -F force=true \
