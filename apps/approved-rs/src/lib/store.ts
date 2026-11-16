@@ -9,7 +9,6 @@ export const {
 } = ledgerStore;
 
 export const {
-  updateLeads,
   readLeads,
   getLead,
   newStoredLead,
@@ -43,7 +42,6 @@ export {
   statusPatch,
   parseOperationReply,
   businessDay,
-  LedgerUnreadableError,
   MAX_FIELD_LENGTH,
   MAX_LIST_ROWS,
 } from '@podbor/lead-crm';

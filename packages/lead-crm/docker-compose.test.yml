@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16.15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: crm
+    tmpfs:
+      - /var/lib/postgresql/data
+    ports:
+      - '127.0.0.1:${CRM_TEST_DB_PORT:-55452}:5432'
+    healthcheck:
+      test: ['CMD', 'pg_isready', '-h', 'localhost', '-U', 'postgres']
+      interval: 1s
+      timeout: 5s
+      retries: 60

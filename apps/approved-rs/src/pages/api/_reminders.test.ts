@@ -1,35 +1,13 @@
+import '@podbor/lead-crm/testing/database';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { APIContext } from 'astro';
-import { LEADS_PATH } from '@podbor/lead-crm';
-import {
-  createMemoryStorage,
-  recordBotApi,
-  type MemoryStorage,
-} from '@podbor/lead-crm/testing';
+import { crmDatabase } from '@podbor/lead-crm';
+import { recordBotApi, seedLead } from '@podbor/lead-crm/testing';
 import type { StoredLead } from '@/lib/store';
-
-const memory = vi.hoisted(() => {
-  const storages = new Map<string, MemoryStorage>();
-  return {
-    storages,
-    async module(name: string) {
-      const { createMemoryStorage } = await import('@podbor/lead-crm/testing');
-      const storageAt = (path: string) => {
-        if (!storages.has(path)) storages.set(path, createMemoryStorage());
-        return storages.get(path)!;
-      };
-      return { [name]: storageAt };
-    },
-  };
-});
-
-vi.mock('@podbor/lead-crm/storage/local', () =>
-  memory.module('localLeadStorage'),
-);
 
 import { GET } from './reminders';
 import { POST as webhook } from './telegram-webhook';
-import { getLead, touchLead } from '@/lib/store';
+import { getLead, readLeads, touchLead } from '@/lib/store';
 
 const api = recordBotApi();
 vi.stubGlobal('fetch', api.fetch);
@@ -44,15 +22,18 @@ const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
 const GROUP_ID = '-1009876543210';
 
-function leadsStorage(): MemoryStorage {
-  if (!memory.storages.has(LEADS_PATH))
-    memory.storages.set(LEADS_PATH, createMemoryStorage());
-  return memory.storages.get(LEADS_PATH)!;
+const L = (n: number) =>
+  `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
+const numberOf = (id: string) => Number(id.slice(-12));
+
+async function seed(leads: StoredLead[]): Promise<void> {
+  await crmDatabase().lead.deleteMany();
+  for (const lead of leads) await seedLead(lead);
 }
 
 function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
   return {
-    id: 9,
+    id: L(9),
     brand: 'Approved.rs',
     name: 'Иван',
     contact: '@ivan',
@@ -61,7 +42,7 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     locale: 'ru',
     status: 'postponed',
     telegramChatId: CARD_CHAT_ID,
-    telegramMessageId: 500 + (overrides.id ?? 9),
+    telegramMessageId: 500 + numberOf(overrides.id ?? L(9)),
     statusChangedAt: '2026-10-01T00:00:00.000Z',
     lastActivityAt: null,
     createdAt: '2026-10-01T00:00:00.000Z',
@@ -88,7 +69,7 @@ function ghost(overrides: Partial<StoredLead> = {}): StoredLead {
   const createdAt =
     overrides.createdAt ?? new Date(NOW.getTime() - 25 * HOUR_MS).toISOString();
   return makeLead({
-    id: 7,
+    id: L(7),
     name: '',
     contact: '—',
     service: '',
@@ -117,8 +98,8 @@ const crm = (method: string) =>
 const digestIds = () =>
   crm('sendMessage')
     .filter((p) => p.chat_id === GROUP_ID)
-    .flatMap((p) => [...String(p.text).matchAll(/>#(\d+)</g)])
-    .map((m) => Number(m[1]));
+    .flatMap((p) => [...String(p.text).matchAll(/>#([0-9a-f-]{36})</g)])
+    .map((m) => m[1]);
 
 const textsTo = (chatId: number) =>
   crm('sendMessage')
@@ -130,18 +111,18 @@ const cardEdits = (messageId: number) =>
     (p) => p.chat_id === CARD_CHAT_ID && p.message_id === messageId,
   );
 
-async function stored(id: number): Promise<StoredLead> {
-  const lead = await getLead(id);
+async function stored(n: number): Promise<StoredLead> {
+  const lead = await getLead(L(n));
   expect(lead).toBeDefined();
   return lead!;
 }
 
 describe('GET /api/reminders', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.useFakeTimers({ toFake: ['Date'] });
     vi.setSystemTime(NOW);
     api.reset();
-    leadsStorage().seed([]);
+    await seed([]);
   });
 
   afterEach(() => vi.useRealTimers());
@@ -161,28 +142,28 @@ describe('GET /api/reminders', () => {
     ['an empty Authorization header', { authorization: '' }],
     ['"Bearer " with no token after it', { authorization: 'Bearer ' }],
   ])('rejects %s without touching anything', async (_label, headers) => {
-    leadsStorage().seed([makeLead(), ghost()]);
-    const writes = leadsStorage().writeAttempts();
+    await seed([makeLead(), ghost()]);
+    const writes = await readLeads();
 
     const res = await GET(makeCtx(headers));
 
     expect(res.status).toBe(401);
     expect(api.calls).toEqual([]);
-    expect(leadsStorage().writeAttempts()).toBe(writes);
+    expect(await readLeads()).toEqual(writes);
   });
 
   it('posts one digest to the group: due postponed and idle for 7 days, never won ones', async () => {
-    leadsStorage().seed([
-      makeLead({ id: 9 }),
-      makeLead({ id: 10, status: 'won' }),
+    await seed([
+      makeLead({ id: L(9) }),
+      makeLead({ id: L(10), status: 'won' }),
       makeLead({
-        id: 11,
+        id: L(11),
         status: 'new',
         remindAt: null,
         lastActivityAt: '2026-10-13T08:00:00.000Z',
       }),
       makeLead({
-        id: 12,
+        id: L(12),
         status: 'new',
         remindAt: null,
         lastActivityAt: '2026-10-14T08:00:00.000Z',
@@ -203,14 +184,14 @@ describe('GET /api/reminders', () => {
     expect(digest.text).toContain('⏰ Пора вернуться');
     expect(digest.text).not.toContain('💶');
     expect(digest.text).toContain('🕐 Без движения 7 дней');
-    expect(digestIds()).toEqual([9, 11]);
+    expect(digestIds()).toEqual([L(9), L(11)]);
     expect(digest.reply_markup).toBeUndefined();
-    expect(textsTo(OWNER_ID)).toEqual([expect.stringContaining('#9')]);
+    expect(textsTo(OWNER_ID)).toEqual([expect.stringContaining(`#${L(9)}`)]);
     expect(textsTo(ADMIN_ID)).toEqual([]);
   });
 
   it('reopens a due postponed Lead once it is listed, starting its clock again', async () => {
-    leadsStorage().seed([makeLead()]);
+    await seed([makeLead()]);
 
     await GET(makeCtx());
 
@@ -240,7 +221,7 @@ describe('GET /api/reminders', () => {
   it.each(['new', 'negotiations', 'in_progress'] as const)(
     'returns a due Lead postponed from %s to it and reminds the owner in a DM',
     async (status) => {
-      leadsStorage().seed([makeLead({ postponedFrom: status })]);
+      await seed([makeLead({ postponedFrom: status })]);
 
       await GET(makeCtx());
 
@@ -252,24 +233,24 @@ describe('GET /api/reminders', () => {
       const [reminder] = crm('sendMessage').filter(
         (p) => p.chat_id === OWNER_ID,
       );
-      expect(reminder.text).toContain('⏰ Напоминание по заявке #9');
+      expect(reminder.text).toContain(`⏰ Напоминание по заявке #${L(9)}`);
       expect(reminder.text).toContain(
         'Ты просил напомнить сегодня — заявка снова активна.',
       );
       expect(reminder.reply_markup).toEqual({
         inline_keyboard: [
-          [{ text: '📂 Открыть заявку', callback_data: 'open:9' }],
+          [{ text: '📂 Открыть заявку', callback_data: `open:${L(9)}` }],
         ],
       });
     },
   );
 
   it('posts nothing when no Lead needs a decision', async () => {
-    leadsStorage().seed([
+    await seed([
       makeLead({ remindAt: '2026-10-21' }),
-      makeLead({ id: 10, status: 'new', remindAt: null }),
-      makeLead({ id: 11, status: 'lost', remindAt: null }),
-      makeLead({ id: 12, status: 'won', remindAt: null }),
+      makeLead({ id: L(10), status: 'new', remindAt: null }),
+      makeLead({ id: L(11), status: 'lost', remindAt: null }),
+      makeLead({ id: L(12), status: 'won', remindAt: null }),
     ]);
 
     vi.setSystemTime(new Date('2026-10-07T08:00:00.000Z'));
@@ -285,26 +266,26 @@ describe('GET /api/reminders', () => {
   });
 
   it('drops a Lead from the digest once 🔵 resets its clock', async () => {
-    leadsStorage().seed([makeLead({ status: 'new', remindAt: null })]);
+    await seed([makeLead({ status: 'new', remindAt: null })]);
 
     await GET(makeCtx());
-    expect(digestIds()).toEqual([9]);
+    expect(digestIds()).toEqual([L(9)]);
 
     api.reset();
-    await touchLead(9);
+    await touchLead(L(9));
     vi.setSystemTime(new Date(NOW.getTime() + 6 * DAY_MS));
     await GET(makeCtx());
     expect(api.calls).toEqual([]);
 
     vi.setSystemTime(new Date(NOW.getTime() + 7 * DAY_MS));
     await GET(makeCtx());
-    expect(digestIds()).toEqual([9]);
+    expect(digestIds()).toEqual([L(9)]);
   });
 
   it('expires an old Ghost instead of listing it as idle', async () => {
-    leadsStorage().seed([
+    await seed([
       ghost({ createdAt: '2026-10-01T00:00:00.000Z' }),
-      makeLead({ id: 10, status: 'new', remindAt: null }),
+      makeLead({ id: L(10), status: 'new', remindAt: null }),
     ]);
 
     const res = await GET(makeCtx());
@@ -315,12 +296,12 @@ describe('GET /api/reminders', () => {
       digestSent: true,
     });
     expect((await stored(7)).status).toBe('lost');
-    expect(digestIds()).toEqual([10]);
+    expect(digestIds()).toEqual([L(10)]);
   });
 
   it('keeps a due Lead postponed when the digest could not be sent', async () => {
     const error = vi.spyOn(console, 'error').mockImplementation(() => {});
-    leadsStorage().seed([makeLead()]);
+    await seed([makeLead()]);
     api.fail('sendMessage', 'Forbidden: bot was kicked', 403);
 
     const res = await GET(makeCtx());
@@ -336,24 +317,24 @@ describe('GET /api/reminders', () => {
   });
 
   it('posts the digest once a day, however often the cron runs', async () => {
-    leadsStorage().seed([makeLead({ status: 'new', remindAt: null })]);
+    await seed([makeLead({ status: 'new', remindAt: null })]);
 
     await GET(makeCtx());
     vi.setSystemTime(new Date(NOW.getTime() + 2 * HOUR_MS));
     const rerun = await GET(makeCtx());
 
     expect((await rerun.json()).digestSent).toBe(false);
-    expect(digestIds()).toEqual([9]);
+    expect(digestIds()).toEqual([L(9)]);
 
     api.reset();
     vi.setSystemTime(new Date(NOW.getTime() + DAY_MS));
     await GET(makeCtx());
-    expect(digestIds()).toEqual([9]);
+    expect(digestIds()).toEqual([L(9)]);
   });
 
   it('gives the day back when the digest fails, so the next run sends it', async () => {
     const error = vi.spyOn(console, 'error').mockImplementation(() => {});
-    leadsStorage().seed([makeLead()]);
+    await seed([makeLead()]);
     api.fail('sendMessage', 'Bad Request: chat not found');
     await GET(makeCtx());
 
@@ -361,13 +342,13 @@ describe('GET /api/reminders', () => {
     const retried = await GET(makeCtx());
 
     expect((await retried.json()).digestSent).toBe(true);
-    expect(digestIds()).toEqual([9]);
+    expect(digestIds()).toEqual([L(9)]);
     error.mockRestore();
   });
 
   it('still lists the rest when reopening one due Lead fails', async () => {
     const error = vi.spyOn(console, 'error').mockImplementation(() => {});
-    leadsStorage().seed([makeLead({ id: 9 }), makeLead({ id: 10 })]);
+    await seed([makeLead({ id: L(9) }), makeLead({ id: L(10) })]);
     api.fail('editMessageText', 'Bad Request: chat not found');
 
     const res = await GET(makeCtx());
@@ -384,7 +365,7 @@ describe('GET /api/reminders', () => {
   });
 
   it('marks a Ghost lead lost and unpins its card, quietly and without an archive', async () => {
-    leadsStorage().seed([ghost()]);
+    await seed([ghost()]);
 
     const res = await GET(makeCtx());
 
@@ -399,9 +380,6 @@ describe('GET /api/reminders', () => {
       statusChangedAt: NOW.toISOString(),
     });
     expect(lead).not.toHaveProperty('archived');
-    expect(leadsStorage().current()).toEqual([
-      expect.not.objectContaining({ archived: expect.anything() }),
-    ]);
     expect(cardEdits(507)).toHaveLength(1);
     expect(crm('unpinChatMessage')).toEqual([
       { chat_id: CARD_CHAT_ID, message_id: 507 },
@@ -410,12 +388,12 @@ describe('GET /api/reminders', () => {
   });
 
   it('spares a click still inside its 24 hours and one the owner marked in work', async () => {
-    leadsStorage().seed([
+    await seed([
       ghost({
-        id: 7,
+        id: L(7),
         createdAt: new Date(NOW.getTime() - HOUR_MS).toISOString(),
       }),
-      ghost({ id: 8, lastActivityAt: '2026-10-19T12:00:00.000Z' }),
+      ghost({ id: L(8), lastActivityAt: '2026-10-19T12:00:00.000Z' }),
     ]);
 
     const res = await GET(makeCtx());
@@ -432,7 +410,7 @@ describe('GET /api/reminders', () => {
 
   it('still counts a swept ghost whose card refresh failed', async () => {
     const error = vi.spyOn(console, 'error').mockImplementation(() => {});
-    leadsStorage().seed([ghost({ id: 7 }), ghost({ id: 8 })]);
+    await seed([ghost({ id: L(7) }), ghost({ id: L(8) })]);
     api.fail('editMessageText', 'Bad Request: chat not found');
 
     const res = await GET(makeCtx());
@@ -451,15 +429,15 @@ describe('GET /api/reminders', () => {
   it('retires a placeholder click and never a capture-bot Lead, even a bare /start', async () => {
     const start = (id: number, contact: string) =>
       ghost({
-        id,
+        id: L(id),
         contact,
         kind: 'lead',
         contactChannel: 'telegram',
         telegramId: 40 + id,
         createdAt: '2026-10-01T00:00:00.000Z',
       });
-    leadsStorage().seed([
-      ghost({ id: 6, createdAt: '2026-10-01T00:00:00.000Z' }),
+    await seed([
+      ghost({ id: L(6), createdAt: '2026-10-01T00:00:00.000Z' }),
       start(7, 'tg://user?id=47'),
       start(8, '+381601234567'),
       start(10, '@ivan'),
@@ -474,11 +452,11 @@ describe('GET /api/reminders', () => {
     });
     expect((await stored(6)).status).toBe('lost');
     for (const id of [7, 8, 10]) expect((await stored(id)).status).toBe('new');
-    expect(digestIds()).toEqual([7, 8, 10]);
+    expect(digestIds()).toEqual([L(7), L(8), L(10)]);
   });
 
   it('spares a click the owner gave a contact to in the bot', async () => {
-    leadsStorage().seed([ghost({ createdAt: '2026-10-01T00:00:00.000Z' })]);
+    await seed([ghost({ createdAt: '2026-10-01T00:00:00.000Z' })]);
     api.respond('sendMessage', (payload: Record<string, unknown>) => ({
       ok: true,
       result: {
@@ -500,7 +478,7 @@ describe('GET /api/reminders', () => {
       {
         callback_query: {
           id: 'cb',
-          data: 'edit:7:contact',
+          data: `edit:${L(7)}:contact`,
           from: { id: OWNER_ID },
           message: { message_id: 1, chat: dm },
         },
@@ -533,23 +511,17 @@ describe('GET /api/reminders', () => {
   });
 
   it('redraws the digest whenever a listed Lead is decided on, until all is sorted', async () => {
-    leadsStorage().seed([
-      makeLead({ id: 9, status: 'new', remindAt: null }),
+    await seed([
+      makeLead({ id: L(9), status: 'new', remindAt: null }),
       makeLead({
-        id: 11,
+        id: L(11),
         status: 'new',
         remindAt: null,
         telegramMessageId: 511,
       }),
     ]);
     await GET(makeCtx());
-    const mark = (
-      leadsStorage().current() as {
-        type?: string;
-        posted?: { messageId: number };
-      }[]
-    ).find((r) => r.type === 'digest');
-    const digestId = mark!.posted!.messageId;
+    const digestId = (await crmDatabase().digest.findFirstOrThrow()).messageId;
     const tap = async (data: string, updateId: number) => {
       api.reset();
       await webhook({
@@ -574,24 +546,24 @@ describe('GET /api/reminders', () => {
       return crm('editMessageText').find((p) => p.message_id === digestId);
     };
 
-    const first = await tap('st:9:lost', 71001);
+    const first = await tap(`st:${L(9)}:lost`, 71001);
     expect((await stored(9)).status).toBe('lost');
     expect(first).toMatchObject({ chat_id: GROUP_ID });
-    expect(first!.text).not.toContain('#9<');
-    expect(first!.text).toContain('#11<');
+    expect(first!.text).not.toContain(`#${L(9)}<`);
+    expect(first!.text).toContain(`#${L(11)}<`);
     expect(first!.reply_markup).toBeUndefined();
 
-    const last = await tap('work:11', 71002);
+    const last = await tap(`work:${L(11)}`, 71002);
     expect((await stored(11)).status).toBe('in_progress');
     expect(last!.text).toContain('✅ Всё разобрано');
 
-    expect(await tap('won:11', 71003)).toBeUndefined();
+    expect(await tap(`won:${L(11)}`, 71003)).toBeUndefined();
   });
 
   describe('topics nobody wrote in for a day', () => {
     const emptyTopic = (id: number, openedMsAgo: number) =>
       makeLead({
-        id,
+        id: L(id),
         status: 'new',
         remindAt: null,
         createdAt: new Date(NOW.getTime() - openedMsAgo).toISOString(),
@@ -603,7 +575,7 @@ describe('GET /api/reminders', () => {
       });
 
     it('closes an empty topic once and leaves a younger one open', async () => {
-      leadsStorage().seed([emptyTopic(7, DAY_MS), emptyTopic(8, DAY_MS - 1)]);
+      await seed([emptyTopic(7, DAY_MS), emptyTopic(8, DAY_MS - 1)]);
 
       const res = await GET(makeCtx());
 
@@ -629,7 +601,7 @@ describe('GET /api/reminders', () => {
     });
 
     it('counts a topic Telegram already had closed', async () => {
-      leadsStorage().seed([emptyTopic(7, DAY_MS)]);
+      await seed([emptyTopic(7, DAY_MS)]);
       api.fail('closeForumTopic', 'Bad Request: TOPIC_CLOSED');
 
       const res = await GET(makeCtx());
@@ -640,7 +612,7 @@ describe('GET /api/reminders', () => {
 
     it('logs a topic it could not close and tries it again on the next run', async () => {
       const error = vi.spyOn(console, 'error').mockImplementation(() => {});
-      leadsStorage().seed([emptyTopic(7, DAY_MS), emptyTopic(8, DAY_MS)]);
+      await seed([emptyTopic(7, DAY_MS), emptyTopic(8, DAY_MS)]);
       api.fail('closeForumTopic', 'Bad Request: not enough rights');
 
       const res = await GET(makeCtx());
@@ -659,7 +631,7 @@ describe('GET /api/reminders', () => {
     });
 
     it('never closes a topic with a conversation in it, however long it is quiet', async () => {
-      leadsStorage().seed([
+      await seed([
         {
           ...emptyTopic(7, 14 * DAY_MS),
           topicActiveAt: new Date(NOW.getTime() - 14 * DAY_MS).toISOString(),
@@ -675,7 +647,7 @@ describe('GET /api/reminders', () => {
 
   it('posts no monthly summary on the 1st', async () => {
     vi.setSystemTime(new Date('2026-11-01T08:00:00.000Z'));
-    leadsStorage().seed([makeLead({ id: 9, status: 'new', remindAt: null })]);
+    await seed([makeLead({ id: L(9), status: 'new', remindAt: null })]);
 
     const res = await GET(makeCtx());
 
@@ -687,11 +659,7 @@ describe('GET /api/reminders', () => {
     const posted = crm('sendMessage');
     expect(posted).toHaveLength(1);
     expect(String(posted[0]!.text)).not.toContain('Итоги месяца');
-    expect(
-      (leadsStorage().current() as { type?: string }[]).map(
-        (r) => r.type ?? 'lead',
-      ),
-    ).toEqual(['lead', 'digest']);
+    expect(await crmDatabase().digest.count()).toBe(1);
     expect(textsTo(ADMIN_ID)).toEqual([]);
   });
 });

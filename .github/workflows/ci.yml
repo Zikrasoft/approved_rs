@@ -102,6 +102,8 @@ jobs:
       - if: steps.affected.outputs.shop == 'true'
         run: sh infra/auto-service-shop/test/crawler-role.test.sh
       - if: steps.affected.outputs.shop == 'true'
+        run: sh infra/auto-service-shop/test/crm-role.test.sh
+      - if: steps.affected.outputs.shop == 'true'
         run: sh infra/auto-service-shop/test/harden-ssh.test.sh
       - run: sh .github/scripts/shop-backend-up.test.sh
       - run: sh .github/scripts/shop-ci-env.test.sh

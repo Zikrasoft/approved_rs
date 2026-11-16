@@ -1,7 +1,6 @@
 import { channelLabel } from '../channelLabels.ts';
 import { isHandleContact } from '../contactShape.ts';
 import { shownPage } from '../form.ts';
-import { LEADS_PATH } from '../quarantine.ts';
 import { isClosed, isInWork, type StoredLead } from '../schema.ts';
 import { isPlaceholderContact } from '../leadMerge.ts';
 import type { Digest } from '../store.ts';
@@ -51,7 +50,7 @@ const QUICK_REMIND_DAYS = [
   { label: 'Через месяц', days: 30 },
 ] as const;
 
-export function buildRemindPicker(id: number): {
+export function buildRemindPicker(id: string): {
   text: string;
   reply_markup: Keyboard;
 } {
@@ -216,19 +215,6 @@ export const LEAD_ACTION_COPY = {
   topicFailed:
     '⚠️ Тему открыть не удалось: включите темы в группе и дайте боту право «Управление темами».',
 } as const;
-
-export function quarantinedLeadsText(
-  count: number,
-  path: string,
-  brand: string,
-): string {
-  return [
-    `⚠️ Нечитаемых заявок: ${count}`,
-    ``,
-    `Нашёл сайт ${escapeHtml(brand)} и скопировал в ${escapeHtml(path)}.`,
-    `Из ${escapeHtml(LEADS_PATH)} ничего не убирал — удалить можно только руками.`,
-  ].join('\n');
-}
 
 export function managerHandoffText(handle: string): string {
   return `👤 Ушёл к менеджеру @${escapeHtml(handle)}`;

@@ -13,7 +13,7 @@ const leadStatusSchema = z.enum(LEAD_STATUSES);
 export type LeadStatus = z.infer<typeof leadStatusSchema>;
 
 const IN_WORK_STATUSES = ['new', 'negotiations', 'in_progress'] as const;
-const inWorkStatusSchema = z.enum(IN_WORK_STATUSES);
+export const inWorkStatusSchema = z.enum(IN_WORK_STATUSES);
 export type InWorkStatus = z.infer<typeof inWorkStatusSchema>;
 
 const storedStatusSchema = z.enum([...LEAD_STATUSES, 'open']);
@@ -91,7 +91,6 @@ export const REFERRERS = ['approved'] as const;
 export type Referrer = (typeof REFERRERS)[number];
 
 const baseStoredLeadSchema = z.object({
-  id: z.number().int().positive(),
   brand: z.string().default(LEGACY_BRAND),
   name: z.string(),
   contact: z.string(),
@@ -136,6 +135,7 @@ const baseStoredLeadSchema = z.object({
 type StoredShape = z.infer<typeof baseStoredLeadSchema>;
 
 export type StoredLead = Omit<StoredShape, 'archived' | 'status'> & {
+  id: string;
   status: LeadStatus;
 };
 
@@ -151,11 +151,11 @@ export function inWorkStatus(lead: Pick<StoredLead, 'status'>): InWorkStatus {
   return inWorkStatusSchema.parse(lead.status);
 }
 
-function withCurrentStatuses({
+function withCurrentStatuses<Id>({
   archived,
   status,
   ...lead
-}: StoredShape): StoredLead {
+}: StoredShape & { id: Id }): Omit<StoredLead, 'id'> & { id: Id } {
   const advanced = status === 'negotiations' || status === 'in_progress';
   const current = leadStatusSchema.catch('new').parse(status);
   return {
@@ -195,7 +195,12 @@ export type LeadInput = Pick<
 
 export type LeadSubmission = Omit<LeadInput, 'brand'>;
 
-export type StoredLeadSchema = z.ZodType<StoredLead, unknown>;
+export const storedLeadSchema: z.ZodType<StoredLead, unknown> =
+  baseStoredLeadSchema.extend({ id: z.uuid() }).transform(withCurrentStatuses);
 
-export const storedLeadSchema: StoredLeadSchema =
-  baseStoredLeadSchema.transform(withCurrentStatuses);
+export type LegacyLead = Omit<StoredLead, 'id'> & { id: number };
+
+export const legacyLeadSchema: z.ZodType<LegacyLead, unknown> =
+  baseStoredLeadSchema
+    .extend({ id: z.number().int().positive() })
+    .transform(withCurrentStatuses);

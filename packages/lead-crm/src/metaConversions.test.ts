@@ -11,7 +11,7 @@ const SENT_AT = '2026-10-12T09:30:00.000Z';
 const PIXEL = '29229430643330595';
 
 const lead = {
-  id: 42,
+  id: '0196f8a0-0000-7000-8000-000000000042',
   metaIds: { fbc: FBC, fbp: FBP },
   metaLeadSentAt: SENT_AT,
 };
@@ -46,7 +46,7 @@ describe('metaLeadEvent', () => {
         {
           event_name: 'Lead',
           event_time: Date.parse(SENT_AT) / 1000,
-          event_id: 'lead-42',
+          event_id: 'lead-0196f8a0-0000-7000-8000-000000000042',
           action_source: 'chat',
           user_data: { fbc: FBC, fbp: FBP },
         },
@@ -124,7 +124,7 @@ describe('createMetaLeadReporter', () => {
     await Promise.all(pending);
     expect(console.error).toHaveBeenCalledWith(
       '[meta-capi] Lead event refused',
-      { leadId: 42, status: 400, body: 'bad' },
+      { leadId: lead.id, status: 400, body: 'bad' },
     );
   });
 
@@ -146,7 +146,7 @@ describe('createMetaLeadReporter', () => {
     await expect(Promise.all(pending)).resolves.toBeDefined();
     expect(console.error).toHaveBeenCalledWith(
       '[meta-capi] could not send the Lead event',
-      { leadId: 42, error: expect.anything() },
+      { leadId: lead.id, error: expect.anything() },
     );
   });
 });

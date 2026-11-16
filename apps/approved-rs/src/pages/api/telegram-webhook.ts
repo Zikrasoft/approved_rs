@@ -76,7 +76,6 @@ import {
   answerOperationPrompt,
   parseOperationReply,
   businessDay,
-  LedgerUnreadableError,
   MAX_FIELD_LENGTH,
   type OperationType,
   type LeadStatus,
@@ -157,12 +156,15 @@ type Ctx = {
 };
 type CrmContext = Context & { crm: Ctx };
 type Handler = (ctx: Ctx, ...groups: string[]) => Promise<void>;
-type IdHandler = (ctx: Ctx, id: number, ...rest: string[]) => Promise<void>;
+type IdHandler = (ctx: Ctx, id: string, ...rest: string[]) => Promise<void>;
+
+const LEAD_ID =
+  '([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})';
 type CallbackRow = [RegExp, Role | 'any', Handler];
 type PromptKind = PendingPrompt['kind'];
 
 function withId(handler: IdHandler): Handler {
-  return (ctx, id, ...rest) => handler(ctx, Number(id), ...rest);
+  return (ctx, id, ...rest) => handler(ctx, id!, ...rest);
 }
 
 async function ack(ctx: Ctx): Promise<void> {
@@ -178,11 +180,7 @@ async function withErrorAck(
     await action();
   } catch (err) {
     logError('[telegram-webhook] callback handler failed', err, logCtx);
-    const text =
-      err instanceof LedgerUnreadableError
-        ? LEDGER_COPY.unavailable
-        : LEAD_ACTION_COPY.failed;
-    await answerCallback(cbId, text).catch(() => {});
+    await answerCallback(cbId, LEAD_ACTION_COPY.failed).catch(() => {});
   }
 }
 
@@ -212,7 +210,7 @@ async function afterStatusChangeOn(
 
 async function startPrompt(
   ctx: Ctx,
-  id: number,
+  id: string,
   {
     prompt,
     kind,
@@ -226,7 +224,7 @@ async function startPrompt(
 
 async function startLeadPrompt(
   ctx: Ctx,
-  id: number,
+  id: string,
   prompt: Parameters<typeof startPrompt>[2],
 ): Promise<void> {
   if (!(await getLead(id))) return ack(ctx);
@@ -235,7 +233,7 @@ async function startLeadPrompt(
 
 async function changeStatus(
   ctx: Ctx,
-  id: number,
+  id: string,
   key: LeadStatus,
   fromDetail = true,
 ): Promise<void> {
@@ -252,7 +250,7 @@ async function changeStatus(
   );
 }
 
-async function markInWork(ctx: Ctx, id: number): Promise<void> {
+async function markInWork(ctx: Ctx, id: string): Promise<void> {
   const lead = await getLead(id);
   if (lead?.status !== 'in_progress')
     return changeStatus(ctx, id, 'in_progress', false);
@@ -261,7 +259,7 @@ async function markInWork(ctx: Ctx, id: number): Promise<void> {
   await answerCallback(ctx.cbId, LEAD_ACTION_COPY.inWork);
 }
 
-async function openRemindPicker(ctx: Ctx, id: number): Promise<void> {
+async function openRemindPicker(ctx: Ctx, id: string): Promise<void> {
   const lead = await getLead(id);
   if (!lead) return ack(ctx);
   if (!canPostpone(lead))
@@ -271,7 +269,7 @@ async function openRemindPicker(ctx: Ctx, id: number): Promise<void> {
   await answerCallback(ctx.cbId);
 }
 
-async function remindIn(ctx: Ctx, id: number, days: string): Promise<void> {
+async function remindIn(ctx: Ctx, id: string, days: string): Promise<void> {
   const remindAt = businessDay(new Date(), Number(days));
   const updated = await postponeLead(
     id,
@@ -283,14 +281,14 @@ async function remindIn(ctx: Ctx, id: number, days: string): Promise<void> {
   await answerCallback(ctx.cbId, LEAD_ACTION_COPY.postponed);
 }
 
-async function resume(ctx: Ctx, id: number): Promise<void> {
+async function resume(ctx: Ctx, id: string): Promise<void> {
   const updated = await resumeLead(id);
   if (!updated) return ack(ctx);
   await afterStatusChangeOn(ctx, updated);
   await answerCallback(ctx.cbId, LEAD_ACTION_COPY.resumed);
 }
 
-async function backToLead(ctx: Ctx, id: number): Promise<void> {
+async function backToLead(ctx: Ctx, id: string): Promise<void> {
   const lead = await getLead(id);
   if (lead && onGroupCard(ctx, lead)) {
     await ensureLeadCard(lead);
@@ -307,7 +305,7 @@ async function backToLead(ctx: Ctx, id: number): Promise<void> {
   await answerCallback(ctx.cbId);
 }
 
-async function askDelete(ctx: Ctx, id: number): Promise<void> {
+async function askDelete(ctx: Ctx, id: string): Promise<void> {
   const lead = await getLead(id);
   if (!lead) return ack(ctx);
   const { text, reply_markup } = buildDeleteConfirm(lead);
@@ -315,9 +313,9 @@ async function askDelete(ctx: Ctx, id: number): Promise<void> {
   await answerCallback(ctx.cbId);
 }
 
-async function confirmDelete(ctx: Ctx, id: number): Promise<void> {
-  await deleteLead(id);
+async function confirmDelete(ctx: Ctx, id: string): Promise<void> {
   await dropFromDigest(id);
+  await deleteLead(id);
   await safeEditMessage(ctx.chatId, ctx.messageId, LEAD_ACTION_COPY.deleted, {
     inline_keyboard: [],
   });
@@ -357,7 +355,7 @@ async function listOpen(ctx: Ctx): Promise<void> {
   await ack(ctx);
 }
 
-async function openLead(ctx: Ctx, id: number): Promise<void> {
+async function openLead(ctx: Ctx, id: string): Promise<void> {
   const lead = await getLead(id);
   if (lead) {
     const { text, reply_markup } = await leadDetail(lead, ctx.role);
@@ -366,7 +364,7 @@ async function openLead(ctx: Ctx, id: number): Promise<void> {
   await ack(ctx);
 }
 
-async function startTopic(ctx: Ctx, id: number): Promise<void> {
+async function startTopic(ctx: Ctx, id: string): Promise<void> {
   const lead = await getLead(id);
   if (!lead) return ack(ctx);
   const opened =
@@ -391,7 +389,7 @@ async function startTopic(ctx: Ctx, id: number): Promise<void> {
 
 function editRow(field: EditField): CallbackRow {
   return [
-    new RegExp(`^edit:(\\d+):${field}$`),
+    new RegExp(`^edit:${LEAD_ID}:${field}$`),
     'any',
     withId((ctx, id) =>
       startLeadPrompt(ctx, id, {
@@ -405,7 +403,7 @@ function editRow(field: EditField): CallbackRow {
 
 function statusRow(key: LeadStatus): CallbackRow {
   return [
-    new RegExp(`^st:(\\d+):${key}$`),
+    new RegExp(`^st:${LEAD_ID}:${key}$`),
     'any',
     withId((ctx, id) => changeStatus(ctx, id, key)),
   ];
@@ -417,25 +415,25 @@ export const CALLBACKS: CallbackRow[] = [
   statusRow('negotiations'),
   statusRow('in_progress'),
   [
-    /^won:(\d+)$/,
+    new RegExp(`^won:${LEAD_ID}$`),
     'any',
     withId((ctx, id) => changeStatus(ctx, id, 'won', false)),
   ],
   [
-    /^lost:(\d+)$/,
+    new RegExp(`^lost:${LEAD_ID}$`),
     'any',
     withId((ctx, id) => changeStatus(ctx, id, 'lost', false)),
   ],
   [
-    /^talk:(\d+)$/,
+    new RegExp(`^talk:${LEAD_ID}$`),
     'any',
     withId((ctx, id) => changeStatus(ctx, id, 'negotiations', false)),
   ],
-  [/^work:(\d+)$/, 'any', withId(markInWork)],
-  [/^postpone:(\d+)$/, 'any', withId(openRemindPicker)],
-  [/^remindpick:(\d+):(\d+)$/, 'any', withId(remindIn)],
+  [new RegExp(`^work:${LEAD_ID}$`), 'any', withId(markInWork)],
+  [new RegExp(`^postpone:${LEAD_ID}$`), 'any', withId(openRemindPicker)],
+  [new RegExp(`^remindpick:${LEAD_ID}:(\\d+)$`), 'any', withId(remindIn)],
   [
-    /^remindtype:(\d+)$/,
+    new RegExp(`^remindtype:${LEAD_ID}$`),
     'any',
     withId((ctx, id) =>
       startLeadPrompt(ctx, id, {
@@ -445,18 +443,18 @@ export const CALLBACKS: CallbackRow[] = [
       }),
     ),
   ],
-  [/^remindcancel:(\d+)$/, 'any', withId(backToLead)],
-  [/^resume:(\d+)$/, 'any', withId(resume)],
-  [/^del:(\d+)$/, 'admin', withId(askDelete)],
-  [/^delconfirm:(\d+)$/, 'admin', withId(confirmDelete)],
-  [/^delcancel:(\d+)$/, 'admin', withId(backToLead)],
+  [new RegExp(`^remindcancel:${LEAD_ID}$`), 'any', withId(backToLead)],
+  [new RegExp(`^resume:${LEAD_ID}$`), 'any', withId(resume)],
+  [new RegExp(`^del:${LEAD_ID}$`), 'admin', withId(askDelete)],
+  [new RegExp(`^delconfirm:${LEAD_ID}$`), 'admin', withId(confirmDelete)],
+  [new RegExp(`^delcancel:${LEAD_ID}$`), 'admin', withId(backToLead)],
   [/^menu:open$/, 'any', listOpen],
-  [/^open:(\d+)$/, 'any', withId(openLead)],
-  [/^topic:(\d+)$/, 'any', withId(startTopic)],
+  [new RegExp(`^open:${LEAD_ID}$`), 'any', withId(openLead)],
+  [new RegExp(`^topic:${LEAD_ID}$`), 'any', withId(startTopic)],
   editRow('name'),
   editRow('contact'),
   [
-    /^note:(\d+)$/,
+    new RegExp(`^note:${LEAD_ID}$`),
     'any',
     withId((ctx, id) =>
       startLeadPrompt(ctx, id, {
@@ -589,7 +587,7 @@ async function afterEdit(
 
 async function reAskEdit(
   reply: Reply,
-  id: number,
+  id: string,
   field: EditField | 'note',
 ): Promise<void> {
   const messageId = await sendForceReplyPrompt(
@@ -670,21 +668,10 @@ async function replyToPrompt(reply: Reply): Promise<boolean> {
   return true;
 }
 
-async function findLiveOperationPrompt(reply: Reply, key: PromptKey) {
-  try {
-    return await findOperationPrompt(key);
-  } catch (err) {
-    if (!(err instanceof LedgerUnreadableError)) throw err;
-    await sendMessage(reply.chatId, LEDGER_COPY.unavailable);
-    return 'unavailable';
-  }
-}
-
 async function replyToOperationPrompt(reply: Reply): Promise<boolean> {
   if (!reply.inPrivateChat) return false;
   const key = { chatId: reply.chatId, messageId: reply.replyToMessageId };
-  const prompt = await findLiveOperationPrompt(reply, key);
-  if (prompt === 'unavailable') return true;
+  const prompt = await findOperationPrompt(key);
   if (!prompt) return false;
   if (prompt.expired) {
     await sendMessage(reply.chatId, LEDGER_COPY.expired);
@@ -736,17 +723,8 @@ async function routeReply(reply: Reply): Promise<boolean> {
   return false;
 }
 
-async function readBalanceIfReadable(): Promise<number | undefined> {
-  try {
-    return await readBalance();
-  } catch (err) {
-    if (err instanceof LedgerUnreadableError) return undefined;
-    throw err;
-  }
-}
-
 async function sendMenuMessage(chatId: number, role: Role): Promise<void> {
-  const menu = buildMenu(role, await readBalanceIfReadable());
+  const menu = buildMenu(role, await readBalance());
   await sendMessage(chatId, menu.text, { reply_markup: menu.reply_markup });
 }
 
@@ -762,9 +740,11 @@ async function handlePrivateMessage(msg: TelegramMessage): Promise<void> {
       return;
     }
     const payload = startMatch?.[1];
-    const leadMatch = payload ? /^lead_(\d+)$/.exec(payload) : null;
+    const leadMatch = payload
+      ? new RegExp(`^lead_${LEAD_ID}$`).exec(payload)
+      : null;
     if (leadMatch) {
-      const lead = await getLead(Number(leadMatch[1]));
+      const lead = await getLead(leadMatch[1]!);
       if (lead) {
         const { text: detailText, reply_markup } = await leadDetail(lead, role);
         await sendMessage(chatId, detailText, { reply_markup });

@@ -1,57 +1,32 @@
-import { storedLeadSchema } from './schema.ts';
-import {
-  createQuarantine,
-  LEADS_PATH,
-  QUARANTINE_PATH,
-  type QuarantineOptions,
-} from './quarantine.ts';
 import { createLeadStore } from './store.ts';
-import { createLedgerStore, LEDGER_PATH } from './ledgerStore.ts';
-import type { LeadStorage } from './storage/types.ts';
+import { createLedgerStore } from './ledgerStore.ts';
+import { crmDatabase, type CrmDatabase } from './database.ts';
 import { createNotifyLead, type NotifyLeadOptions } from './notifyLead.ts';
-
-type QuarantineNotifier = Awaited<
-  ReturnType<QuarantineOptions['getNotifier']>
->['notifier'];
 
 export interface BrandStoreOptions {
   brand: string;
-  storageFor: (path: string) => LeadStorage;
+  database?: CrmDatabase;
   standaloneServices?: readonly string[];
   getNotifier: () => Promise<{
-    notifier: QuarantineNotifier &
-      NotifyLeadOptions['notifier'] & {
-        sendUnreadableLedgerToAdmin(path: string, brand: string): Promise<void>;
-        sendLeadCountAlert(count: number, brand: string): Promise<void>;
-      };
+    notifier: NotifyLeadOptions['notifier'] & {
+      sendLeadCountAlert(count: number, brand: string): Promise<void>;
+    };
   }>;
 }
 
 export function createBrandStore({
   brand,
-  storageFor,
+  database = crmDatabase,
   getNotifier,
   standaloneServices,
 }: BrandStoreOptions) {
   const leadStore = createLeadStore({
-    storage: storageFor(LEADS_PATH),
-    schema: storedLeadSchema,
+    database,
     standaloneServices,
     alertLeadCount: async (count) =>
       (await getNotifier()).notifier.sendLeadCountAlert(count, brand),
-    quarantine: createQuarantine({
-      storage: storageFor(QUARANTINE_PATH),
-      brand,
-      getNotifier,
-    }),
   });
-  const ledgerStore = createLedgerStore({
-    storage: storageFor(LEDGER_PATH),
-    onUnreadable: async () => {
-      const { notifier } = await getNotifier();
-      await notifier.sendUnreadableLedgerToAdmin(LEDGER_PATH, brand);
-    },
-  });
+  const ledgerStore = createLedgerStore({ database });
   const notifyLead = createNotifyLead({
     store: leadStore,
     brand,

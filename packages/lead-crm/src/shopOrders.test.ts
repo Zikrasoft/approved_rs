@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createBrandStore } from './brandStore.ts';
 import { createBrandBot } from './brandBot.ts';
 import { recordBotApi } from './testing/botApi.ts';
-import { createMemoryStorage } from './storage/memory.testing.ts';
 
 const ENV = {
   TELEGRAM_BOT_TOKEN: '3001:token',
@@ -30,13 +29,8 @@ let shopCalls: { url: string; init: RequestInit }[];
 let api: ReturnType<typeof recordBotApi>;
 
 function crm() {
-  const storages = new Map<string, ReturnType<typeof createMemoryStorage>>();
   const { leadStore } = createBrandStore({
     brand: 'CarLab',
-    storageFor: (path) => {
-      if (!storages.has(path)) storages.set(path, createMemoryStorage());
-      return storages.get(path)!;
-    },
     getNotifier: vi.fn(),
   });
   const bot = createBrandBot({
@@ -254,7 +248,7 @@ describe('a shop Order cancelled in the shop admin', () => {
   it('resumes a postponed Lead into lost', async () => {
     const { leadStore, bot } = crm();
     const lead = await leadStore.insertLead(order);
-    await leadStore.postponeLead(lead.id, '2030-01-01T00:00:00.000Z', 'later');
+    await leadStore.postponeLead(lead.id, '2030-01-01', 'later');
 
     await bot.cancelOrderLead('order_01');
 

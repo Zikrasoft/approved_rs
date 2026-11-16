@@ -1,0 +1,192 @@
+import { describe, expect, it } from 'vitest';
+import { crmDatabase } from './database.ts';
+import { importLegacy, readLegacy, type LegacyBlobs } from './legacyImport.ts';
+import { createLeadStore } from './store.ts';
+import { createLedgerStore } from './ledgerStore.ts';
+
+const store = createLeadStore({ database: crmDatabase });
+const ledger = createLedgerStore({ database: crmDatabase });
+
+const legacyLead = (id: number, fields: object = {}) => ({
+  id,
+  brand: 'CarLab',
+  name: ['Анна', 'Борис', 'Вера', 'Глеб', 'Дина'][id - 1],
+  contact: `@${['anna', 'boris', 'vera', 'gleb', 'dina'][id - 1]}`,
+  service: 'brakes',
+  locale: 'sr',
+  status: 'negotiations',
+  statusChangedAt: '2026-03-01T10:00:00.000Z',
+  createdAt: '2026-03-01T09:00:00.000Z',
+  ...fields,
+});
+
+const blobs: LegacyBlobs = {
+  leads: [
+    legacyLead(1, { orderId: 'order_1', archived: true, status: 'open' }),
+    legacyLead(2, {
+      pendingPrompt: { chatId: -1001, messageId: 5, kind: 'note' },
+      remindAt: '2026-04-01',
+      status: 'postponed',
+      postponedFrom: 'in_progress',
+    }),
+    {
+      type: 'digest',
+      day: '2026-03-10',
+      createdAt: '2026-03-10T07:00:00.000Z',
+      posted: { messageId: 77, dueIds: [2, 99], staleIds: [1], hidden: 3 },
+    },
+    {
+      type: 'digest',
+      day: '2026-03-09',
+      createdAt: '2026-03-09T07:00:00.000Z',
+    },
+    { id: 3 },
+    legacyLead(4, { orderId: 'order_1' }),
+    legacyLead(5, { createdAt: 'not a date' }),
+  ],
+  ledger: {
+    operations: [
+      {
+        id: 1,
+        type: 'payout',
+        amount: 150.5,
+        note: 'март',
+        createdAt: '2026-03-02T10:00:00.000Z',
+        createdBy: 'owner',
+      },
+      {
+        id: 2,
+        type: 'settlement',
+        amount: 50,
+        note: '',
+        createdAt: '2026-03-03T10:00:00.000Z',
+        createdBy: 'admin',
+      },
+    ],
+    prompts: [
+      {
+        chatId: 42,
+        messageId: 8,
+        type: 'payout',
+        createdAt: '2026-03-04T10:00:00.000Z',
+      },
+      {
+        chatId: 42,
+        messageId: 9,
+        type: 'settlement',
+        createdAt: '2026-03-04T10:00:00.000Z',
+      },
+    ],
+  },
+  quarantine: [{ id: 'broken' }, null],
+};
+
+describe('readLegacy', () => {
+  it('sorts the blobs into Leads, digests, the ledger and what it cannot read', () => {
+    const records = readLegacy(blobs);
+
+    expect(records.leads.map((l) => l.id)).toEqual([1, 2]);
+    expect(records.leads[0]!.status).toBe('lost');
+    expect(records.digests.map((d) => d.day)).toEqual([
+      '2026-03-10',
+      '2026-03-09',
+    ]);
+    expect(records.ledger.operations).toHaveLength(2);
+    expect(records.unreadable).toEqual([
+      { source: 'quarantine', payload: { id: 'broken' } },
+      { source: 'quarantine', payload: null },
+      { source: 'leads', payload: { id: 3 } },
+      { source: 'leads', payload: legacyLead(4, { orderId: 'order_1' }) },
+      { source: 'leads', payload: legacyLead(5, { createdAt: 'not a date' }) },
+    ]);
+  });
+
+  it('keeps a whole blob it cannot read as one unreadable record', () => {
+    const records = readLegacy({
+      leads: { not: 'an array' },
+      ledger: 'garbage',
+      quarantine: undefined,
+    });
+
+    expect(records.leads).toEqual([]);
+    expect(records.unreadable).toEqual([
+      { source: 'leads', payload: { not: 'an array' } },
+      { source: 'ledger', payload: 'garbage' },
+    ]);
+  });
+
+  it('reads nothing from blobs that do not exist', () => {
+    expect(
+      readLegacy({
+        leads: undefined,
+        ledger: undefined,
+        quarantine: undefined,
+      }),
+    ).toEqual({
+      leads: [],
+      digests: [],
+      ledger: { operations: [], prompts: [] },
+      unreadable: [],
+    });
+  });
+});
+
+describe('importLegacy', () => {
+  it('imports every readable record and keeps the old number searchable', async () => {
+    const counts = await importLegacy(crmDatabase, readLegacy(blobs));
+
+    expect(counts).toEqual({
+      leads: 2,
+      digests: 2,
+      operations: 2,
+      prompts: 2,
+      quarantined: 5,
+    });
+    const [first] = await store.searchLeads('1');
+    expect(first).toMatchObject({
+      name: 'Анна',
+      status: 'lost',
+      orderId: 'order_1',
+      createdAt: '2026-03-01T09:00:00.000Z',
+    });
+    const second = await store.findByPendingPrompt({
+      chatId: -1001,
+      messageId: 5,
+    });
+    expect(second).toMatchObject({
+      name: 'Борис',
+      remindAt: '2026-04-01',
+      postponedFrom: 'in_progress',
+    });
+    expect(await ledger.readBalance()).toBe(100.5);
+    expect(
+      await ledger.findOperationPrompt({ chatId: 42, messageId: 9 }),
+    ).toMatchObject({ type: 'settlement', expired: true });
+  });
+
+  it('maps the digest rows onto the new ids', async () => {
+    await importLegacy(crmDatabase, readLegacy(blobs));
+
+    const left = await store.takeFromDigest(
+      (await store.searchLeads('2'))[0]!.id,
+    );
+
+    expect(left).toEqual({
+      messageId: 77,
+      hidden: 3,
+      digest: { due: [], stale: [] },
+    });
+  });
+
+  it('changes nothing when it runs again', async () => {
+    await importLegacy(crmDatabase, readLegacy(blobs));
+    const leads = await store.readLeads();
+
+    await importLegacy(crmDatabase, readLegacy(blobs));
+
+    expect(await store.readLeads()).toEqual(leads);
+    expect(await ledger.readOperations()).toHaveLength(2);
+    expect(await crmDatabase().quarantinedRecord.count()).toBe(5);
+    expect(await crmDatabase().digest.count()).toBe(2);
+  });
+});

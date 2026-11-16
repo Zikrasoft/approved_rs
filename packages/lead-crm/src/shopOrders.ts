@@ -32,7 +32,10 @@ function orderUnsettled(lead: StoredLead): lead is ClosedLead {
 export interface ShopOrdersOptions {
   store: Pick<
     LeadStore,
-    'readLeads' | 'settleOrder' | 'markOrderConflict' | 'markOrderStuck'
+    | 'findUnsettledOrderLeads'
+    | 'settleOrder'
+    | 'markOrderConflict'
+    | 'markOrderStuck'
   >;
   notifier: Pick<Notifier, 'sendOrderConflict' | 'sendOrderStuck'>;
   shopUrl?: string;
@@ -95,9 +98,12 @@ export function createShopOrders({
   }
 
   async function settlePendingOrders(): Promise<number> {
-    const pending = (await store.readLeads()).filter(orderUnsettled);
+    const pending = (await store.findUnsettledOrderLeads()).filter(
+      orderUnsettled,
+    );
     for (const lead of pending) await settleOrder(lead, true);
-    return (await store.readLeads()).filter(orderUnsettled).length;
+    return (await store.findUnsettledOrderLeads()).filter(orderUnsettled)
+      .length;
   }
 
   return { settleOrder, settlePendingOrders, recordConflict };
