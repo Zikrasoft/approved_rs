@@ -116,9 +116,6 @@ importers:
       '@podbor/site-kit':
         specifier: workspace:*
         version: link:../../packages/site-kit
-      '@vercel/blob':
-        specifier: 2.8.0
-        version: 2.8.0
       astro:
         specifier: 7.3.8
         version: 7.3.8(@types/node@24.19.2)(@vercel/blob@2.8.0)(@vercel/functions@3.9.5(@aws-sdk/credential-provider-web-identity@3.972.80)(ws@8.21.3))(esbuild@0.28.1)(idb-keyval@6.2.6)(ioredis@5.11.1(supports-color@8.1.1))(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0)
@@ -225,9 +222,6 @@ importers:
       '@podbor/site-kit':
         specifier: workspace:*
         version: link:../../packages/site-kit
-      '@vercel/blob':
-        specifier: 2.8.0
-        version: 2.8.0
       astro:
         specifier: 7.3.8
         version: 7.3.8(@types/node@24.19.2)(@vercel/blob@2.8.0)(@vercel/functions@3.9.5(@aws-sdk/credential-provider-web-identity@3.972.80)(ws@8.21.3))(esbuild@0.28.1)(idb-keyval@6.2.6)(ioredis@5.11.1(supports-color@8.1.1))(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0)
@@ -455,9 +449,6 @@ importers:
       '@podbor/site-kit':
         specifier: workspace:*
         version: link:../../packages/site-kit
-      '@vercel/blob':
-        specifier: 2.8.0
-        version: 2.8.0
       astro:
         specifier: 7.3.8
         version: 7.3.8(@types/node@24.19.2)(@vercel/blob@2.8.0)(@vercel/functions@3.9.5(@aws-sdk/credential-provider-web-identity@3.972.80)(ws@8.21.3))(esbuild@0.28.1)(idb-keyval@6.2.6)(ioredis@5.11.1(supports-color@8.1.1))(jiti@2.7.0)(tsx@4.21.0)(yaml@2.9.0)

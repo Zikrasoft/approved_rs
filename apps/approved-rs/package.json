@@ -28,7 +28,6 @@
     "@podbor/lead-capture": "workspace:*",
     "@podbor/lead-crm": "workspace:*",
     "@podbor/site-kit": "workspace:*",
-    "@vercel/blob": "2.8.0",
     "astro": "7.3.8",
     "date-fns": "4.4.0",
     "grammy": "1.46.0",
