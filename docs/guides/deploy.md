@@ -264,8 +264,8 @@ the same file. Which means:
 ## Environment variables
 
 **One manifest, `.github/scripts/site-env.json`, lists every name a site gets.**
-Each entry is `{ "required": true | false, "kind": "secret" | "variable" }`,
-or `"unset"`:
+Each entry is `"secret"` or `"variable"`, where it is kept, with a trailing
+`?` when the name is optional (`"secret?"`, `"variable?"`), or `"unset"`:
 
 - `shared`: one value for all three sites, set **once at repository level**
   (Settings → Secrets and variables → Actions → Repository);

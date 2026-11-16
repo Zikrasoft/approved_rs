@@ -6,260 +6,80 @@
     "OPENAI_API_KEY": "the translate job, a repository secret of its own"
   },
   "shared": {
-    "TELEGRAM_BOT_TOKEN": {
-      "required": true,
-      "kind": "secret"
-    },
-    "TELEGRAM_BOT_USERNAME": {
-      "required": true,
-      "kind": "variable"
-    },
-    "TELEGRAM_GROUP_ID": {
-      "required": true,
-      "kind": "secret"
-    },
-    "TELEGRAM_OWNER_ID": {
-      "required": false,
-      "kind": "secret"
-    },
-    "PUBLIC_PHONE_NUMBER": {
-      "required": true,
-      "kind": "variable"
-    },
-    "SHOP_API_URL": {
-      "required": false,
-      "kind": "variable"
-    }
+    "TELEGRAM_BOT_TOKEN": "secret",
+    "TELEGRAM_BOT_USERNAME": "variable",
+    "TELEGRAM_GROUP_ID": "secret",
+    "TELEGRAM_OWNER_ID": "secret?",
+    "PUBLIC_PHONE_NUMBER": "variable",
+    "SHOP_API_URL": "variable?"
   },
   "sites": {
     "approved-rs": {
-      "SITE": {
-        "required": false,
-        "kind": "variable"
-      },
-      "PUBLIC_THREADS_CHANNEL": {
-        "required": true,
-        "kind": "variable"
-      },
-      "PUBLIC_TG_MANAGER": {
-        "required": false,
-        "kind": "variable"
-      },
-      "PUBLIC_KEYSTATIC_GITHUB_APP_SLUG": {
-        "required": true,
-        "kind": "variable"
-      },
-      "KEYSTATIC_GITHUB_CLIENT_ID": {
-        "required": true,
-        "kind": "secret"
-      },
-      "KEYSTATIC_GITHUB_CLIENT_SECRET": {
-        "required": true,
-        "kind": "secret"
-      },
-      "KEYSTATIC_SECRET": {
-        "required": true,
-        "kind": "secret"
-      },
-      "TELEGRAM_WEBHOOK_SECRET": {
-        "required": true,
-        "kind": "secret"
-      },
-      "TELEGRAM_CAPTURE_BOT_TOKEN": {
-        "required": true,
-        "kind": "secret"
-      },
-      "TELEGRAM_CAPTURE_WEBHOOK_SECRET": {
-        "required": true,
-        "kind": "secret"
-      },
-      "TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB": {
-        "required": false,
-        "kind": "secret"
-      },
-      "TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS": {
-        "required": false,
-        "kind": "secret"
-      },
-      "CRON_SECRET": {
-        "required": true,
-        "kind": "secret"
-      },
-      "SHOP_ORDER_OUTCOME_SECRET": {
-        "required": false,
-        "kind": "secret"
-      },
-      "SHOP_VISITOR_SEARCHES_SECRET": {
-        "required": false,
-        "kind": "secret"
-      },
+      "SITE": "variable?",
+      "PUBLIC_THREADS_CHANNEL": "variable",
+      "PUBLIC_TG_MANAGER": "variable?",
+      "PUBLIC_KEYSTATIC_GITHUB_APP_SLUG": "variable",
+      "KEYSTATIC_GITHUB_CLIENT_ID": "secret",
+      "KEYSTATIC_GITHUB_CLIENT_SECRET": "secret",
+      "KEYSTATIC_SECRET": "secret",
+      "TELEGRAM_WEBHOOK_SECRET": "secret",
+      "TELEGRAM_CAPTURE_BOT_TOKEN": "secret",
+      "TELEGRAM_CAPTURE_WEBHOOK_SECRET": "secret",
+      "TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB": "secret?",
+      "TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS": "secret?",
+      "CRON_SECRET": "secret",
+      "SHOP_ORDER_OUTCOME_SECRET": "secret?",
+      "SHOP_VISITOR_SEARCHES_SECRET": "secret?",
       "META_CAPI_TOKEN": "unset",
       "META_CAPI_TEST_CODE": "unset",
-      "TELEGRAM_ADMIN_ID": {
-        "required": false,
-        "kind": "secret"
-      },
-      "PUBLIC_WHATSAPP_NUMBER": {
-        "required": true,
-        "kind": "variable"
-      },
-      "PUBLIC_VIBER_NUMBER": {
-        "required": true,
-        "kind": "variable"
-      }
+      "TELEGRAM_ADMIN_ID": "secret?",
+      "PUBLIC_WHATSAPP_NUMBER": "variable",
+      "PUBLIC_VIBER_NUMBER": "variable"
     },
     "auto-service": {
-      "SITE": {
-        "required": false,
-        "kind": "variable"
-      },
-      "PUBLIC_TG_MANAGER": {
-        "required": false,
-        "kind": "variable"
-      },
-      "PUBLIC_KEYSTATIC_GITHUB_APP_SLUG": {
-        "required": true,
-        "kind": "variable"
-      },
-      "KEYSTATIC_GITHUB_CLIENT_ID": {
-        "required": true,
-        "kind": "secret"
-      },
-      "KEYSTATIC_GITHUB_CLIENT_SECRET": {
-        "required": true,
-        "kind": "secret"
-      },
-      "KEYSTATIC_SECRET": {
-        "required": true,
-        "kind": "secret"
-      },
-      "TELEGRAM_CAPTURE_BOT_TOKEN": {
-        "required": true,
-        "kind": "secret"
-      },
-      "TELEGRAM_CAPTURE_WEBHOOK_SECRET": {
-        "required": true,
-        "kind": "secret"
-      },
-      "GOOGLE_PLACES_API_KEY": {
-        "required": false,
-        "kind": "secret"
-      },
-      "GOOGLE_PLACE_ID": {
-        "required": false,
-        "kind": "variable"
-      },
-      "MEDUSA_BACKEND_URL": {
-        "required": false,
-        "kind": "variable"
-      },
-      "MEDUSA_PUBLISHABLE_KEY": {
-        "required": false,
-        "kind": "secret"
-      },
-      "SHOP_OPEN": {
-        "required": false,
-        "kind": "variable"
-      },
-      "SHOP_PREVIEW_TOKEN": {
-        "required": false,
-        "kind": "secret"
-      },
-      "SHOP_LEAD_SECRET": {
-        "required": false,
-        "kind": "secret"
-      },
-      "SHOP_LEAD_SECRET_PREVIOUS": {
-        "required": false,
-        "kind": "secret"
-      },
-      "SHOP_CLIENT_SECRET": {
-        "required": false,
-        "kind": "secret"
-      },
-      "SHOP_EVENTS_SECRET": {
-        "required": false,
-        "kind": "secret"
-      },
-      "SHOP_VISITOR_SEARCHES_SECRET": {
-        "required": false,
-        "kind": "secret"
-      },
-      "META_CAPI_TOKEN": {
-        "required": false,
-        "kind": "secret"
-      },
-      "META_CAPI_TEST_CODE": {
-        "required": false,
-        "kind": "secret"
-      },
-      "CATALOGUE_SHRINK_ALLOWED": {
-        "required": false,
-        "kind": "variable"
-      },
+      "SITE": "variable?",
+      "PUBLIC_TG_MANAGER": "variable?",
+      "PUBLIC_KEYSTATIC_GITHUB_APP_SLUG": "variable",
+      "KEYSTATIC_GITHUB_CLIENT_ID": "secret",
+      "KEYSTATIC_GITHUB_CLIENT_SECRET": "secret",
+      "KEYSTATIC_SECRET": "secret",
+      "TELEGRAM_CAPTURE_BOT_TOKEN": "secret",
+      "TELEGRAM_CAPTURE_WEBHOOK_SECRET": "secret",
+      "GOOGLE_PLACES_API_KEY": "secret?",
+      "GOOGLE_PLACE_ID": "variable?",
+      "MEDUSA_BACKEND_URL": "variable?",
+      "MEDUSA_PUBLISHABLE_KEY": "secret?",
+      "SHOP_OPEN": "variable?",
+      "SHOP_PREVIEW_TOKEN": "secret?",
+      "SHOP_LEAD_SECRET": "secret?",
+      "SHOP_LEAD_SECRET_PREVIOUS": "secret?",
+      "SHOP_CLIENT_SECRET": "secret?",
+      "SHOP_EVENTS_SECRET": "secret?",
+      "SHOP_VISITOR_SEARCHES_SECRET": "secret?",
+      "META_CAPI_TOKEN": "secret?",
+      "META_CAPI_TEST_CODE": "secret?",
+      "CATALOGUE_SHRINK_ALLOWED": "variable?",
       "SHOP_ORDER_OUTCOME_SECRET": "unset",
-      "TELEGRAM_ADMIN_ID": {
-        "required": false,
-        "kind": "secret"
-      },
-      "PUBLIC_WHATSAPP_NUMBER": {
-        "required": true,
-        "kind": "variable"
-      },
-      "PUBLIC_VIBER_NUMBER": {
-        "required": true,
-        "kind": "variable"
-      }
+      "TELEGRAM_ADMIN_ID": "secret?",
+      "PUBLIC_WHATSAPP_NUMBER": "variable",
+      "PUBLIC_VIBER_NUMBER": "variable"
     },
     "detailing": {
-      "SITE": {
-        "required": false,
-        "kind": "variable"
-      },
-      "PUBLIC_TG_MANAGER": {
-        "required": false,
-        "kind": "variable"
-      },
-      "PUBLIC_KEYSTATIC_GITHUB_APP_SLUG": {
-        "required": true,
-        "kind": "variable"
-      },
-      "KEYSTATIC_GITHUB_CLIENT_ID": {
-        "required": true,
-        "kind": "secret"
-      },
-      "KEYSTATIC_GITHUB_CLIENT_SECRET": {
-        "required": true,
-        "kind": "secret"
-      },
-      "KEYSTATIC_SECRET": {
-        "required": true,
-        "kind": "secret"
-      },
-      "TELEGRAM_CAPTURE_BOT_TOKEN": {
-        "required": true,
-        "kind": "secret"
-      },
-      "TELEGRAM_CAPTURE_WEBHOOK_SECRET": {
-        "required": true,
-        "kind": "secret"
-      },
+      "SITE": "variable?",
+      "PUBLIC_TG_MANAGER": "variable?",
+      "PUBLIC_KEYSTATIC_GITHUB_APP_SLUG": "variable",
+      "KEYSTATIC_GITHUB_CLIENT_ID": "secret",
+      "KEYSTATIC_GITHUB_CLIENT_SECRET": "secret",
+      "KEYSTATIC_SECRET": "secret",
+      "TELEGRAM_CAPTURE_BOT_TOKEN": "secret",
+      "TELEGRAM_CAPTURE_WEBHOOK_SECRET": "secret",
       "SHOP_ORDER_OUTCOME_SECRET": "unset",
       "SHOP_VISITOR_SEARCHES_SECRET": "unset",
       "META_CAPI_TOKEN": "unset",
       "META_CAPI_TEST_CODE": "unset",
-      "TELEGRAM_ADMIN_ID": {
-        "required": false,
-        "kind": "secret"
-      },
-      "PUBLIC_WHATSAPP_NUMBER": {
-        "required": true,
-        "kind": "variable"
-      },
-      "PUBLIC_VIBER_NUMBER": {
-        "required": true,
-        "kind": "variable"
-      }
+      "TELEGRAM_ADMIN_ID": "secret?",
+      "PUBLIC_WHATSAPP_NUMBER": "variable",
+      "PUBLIC_VIBER_NUMBER": "variable"
     }
   }
 }

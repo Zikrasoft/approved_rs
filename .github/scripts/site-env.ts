@@ -3,13 +3,14 @@ import { z } from 'zod';
 
 const ENV_NAME = /^[A-Z][A-Z0-9_]*$/;
 
-const entry = z.union([
-  z.literal('unset'),
-  z.strictObject({
-    required: z.boolean(),
-    kind: z.enum(['secret', 'variable']),
-  }),
-]);
+const kind = z.enum(['secret', 'variable']);
+const need = z
+  .enum(['secret', 'secret?', 'variable', 'variable?'])
+  .transform((entry) => ({
+    kind: kind.parse(entry.replace('?', '')),
+    required: !entry.endsWith('?'),
+  }));
+const entry = z.union([z.literal('unset'), need]);
 const names = z.record(z.string().regex(ENV_NAME), entry);
 
 export const siteEnvManifest = z.strictObject({
@@ -24,10 +25,8 @@ export const manifest = siteEnvManifest.parse(
 
 export const SITES = Object.keys(manifest.sites);
 
-export type SiteEnvName = {
+export type SiteEnvName = z.output<typeof need> & {
   name: string;
-  required: boolean;
-  kind: 'secret' | 'variable';
   shared: boolean;
 };
 

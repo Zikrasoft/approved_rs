@@ -220,23 +220,39 @@ test('an unknown site is refused', () => {
   assert.throws(() => siteEnvNames('shop'), /unknown site shop/);
 });
 
-test('a manifest entry outside the vocabulary is refused', () => {
+const rawManifest = JSON.parse(
+  readFileSync(new URL('./site-env.json', import.meta.url), 'utf8'),
+);
+
+test('the manifest file parses as it stands', () => {
+  assert.equal(siteEnvManifest.safeParse(rawManifest).success, true);
+});
+
+for (const entry of ['secrte', 'required secret', 'secret??', '?secret'])
+  test(`a manifest entry outside the vocabulary is refused: ${entry}`, () => {
+    const result = siteEnvManifest.safeParse({
+      ...rawManifest,
+      shared: { ...rawManifest.shared, NEW_NAME: entry },
+    });
+    assert.equal(result.success, false);
+  });
+
+test('a manifest entry still in the old object shape is refused', () => {
   const result = siteEnvManifest.safeParse({
-    ...manifest,
+    ...rawManifest,
     shared: {
-      ...manifest.shared,
-      NEW_NAME: { required: true, kind: 'secrte' },
+      ...rawManifest.shared,
+      NEW_NAME: { required: true, kind: 'secret' },
     },
   });
   assert.equal(result.success, false);
 });
 
-test('a manifest entry still in the old one-string shape is refused', () => {
-  const result = siteEnvManifest.safeParse({
-    ...manifest,
-    shared: { ...manifest.shared, NEW_NAME: 'required secret' },
-  });
-  assert.equal(result.success, false);
+test('a manifest entry reads as a kind, a trailing ? marking it optional', () => {
+  assert.equal(rawManifest.shared.TELEGRAM_BOT_TOKEN, 'secret');
+  assert.equal(rawManifest.shared.TELEGRAM_OWNER_ID, 'secret?');
+  assert.equal(rawManifest.shared.TELEGRAM_BOT_USERNAME, 'variable');
+  assert.equal(rawManifest.shared.SHOP_API_URL, 'variable?');
 });
 
 test('a manifest entry says whether a name is required and where it is kept', () => {
