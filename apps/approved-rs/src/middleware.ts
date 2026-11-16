@@ -8,7 +8,6 @@ export const onRequest = defineMiddleware(
     isLocale,
     detectLocale,
     redirects: REDIRECTS,
-    rewriteRoot: true,
     unlocalized: {
       exact: ['/llms.txt', '/404', '/404/'],
       prefixes: [

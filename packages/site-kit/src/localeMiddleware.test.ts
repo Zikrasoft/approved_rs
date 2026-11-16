@@ -17,7 +17,6 @@ function context(url: string, acceptLanguage = '', cookie?: string) {
         name === 'lang' && cookie ? { value: cookie } : undefined,
     },
     redirect: vi.fn((path: string, status: number) => ({ path, status })),
-    rewrite: vi.fn((path: string) => ({ rewritten: path })),
   };
 }
 
@@ -80,34 +79,9 @@ describe('createLocaleMiddleware', () => {
     expect(ctx.redirect).toHaveBeenCalledWith('/sr/anything/ru/', 302);
   });
 
-  it('redirects the root to the detected locale by default', () => {
+  it('redirects the root to the detected locale', () => {
     const ctx = context('/?utm=ig', 'en');
     middleware(ctx, next);
     expect(ctx.redirect).toHaveBeenCalledWith('/en/?utm=ig', 302);
-    expect(ctx.rewrite).not.toHaveBeenCalled();
-  });
-
-  it('rewrites the root in place when the site renders its home on demand', () => {
-    const rewriting = createLocaleMiddleware({
-      isLocale,
-      detectLocale,
-      unlocalized: { exact: [], prefixes: [] },
-      rewriteRoot: true,
-    });
-    const ctx = context('/?utm=ig', 'en');
-    expect(rewriting(ctx, next)).toEqual({ rewritten: '/en/?utm=ig' });
-    expect(ctx.redirect).not.toHaveBeenCalled();
-  });
-
-  it('rewrites nothing but the root', () => {
-    const rewriting = createLocaleMiddleware({
-      isLocale,
-      detectLocale,
-      unlocalized: { exact: [], prefixes: [] },
-      rewriteRoot: true,
-    });
-    const ctx = context('/about');
-    rewriting(ctx, next);
-    expect(ctx.redirect).toHaveBeenCalledWith('/sr/about', 302);
   });
 });

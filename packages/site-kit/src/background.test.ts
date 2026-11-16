@@ -14,6 +14,7 @@ describe('inBackground', () => {
   beforeEach(() => {
     vi.resetModules();
     vi.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+    vi.spyOn(process, 'kill').mockImplementation(() => true);
   });
 
   afterEach(() => {
@@ -36,7 +37,7 @@ describe('inBackground', () => {
     expect(error).toHaveBeenCalledWith('[background] task failed', failure);
   });
 
-  it('exits on SIGTERM only once the running tasks settle', async () => {
+  it('re-raises SIGTERM only once the running tasks settle', async () => {
     const inBackground = await load();
     const task = deferred();
     inBackground(task.promise);
@@ -44,10 +45,45 @@ describe('inBackground', () => {
 
     process.emit('SIGTERM');
     await tick();
-    expect(process.exit).not.toHaveBeenCalled();
+    expect(process.kill).not.toHaveBeenCalled();
 
     task.resolve();
-    await vi.waitFor(() => expect(process.exit).toHaveBeenCalledWith(0));
+    await vi.waitFor(() =>
+      expect(process.kill).toHaveBeenCalledWith(process.pid, 'SIGTERM'),
+    );
+    expect(process.exit).not.toHaveBeenCalled();
+  });
+
+  it('also waits for a task that starts while it drains', async () => {
+    const inBackground = await load();
+    const first = deferred();
+    const late = deferred();
+    inBackground(first.promise);
+
+    process.emit('SIGTERM');
+    inBackground(late.promise);
+    first.resolve();
+    await tick();
+    await tick();
+    expect(process.kill).not.toHaveBeenCalled();
+
+    late.resolve();
+    await vi.waitFor(() => expect(process.kill).toHaveBeenCalledOnce());
+  });
+
+  it('leaves the shutdown to another SIGTERM listener when there is one', async () => {
+    const other = vi.fn();
+    const inBackground = await load();
+    inBackground(Promise.resolve());
+    process.on('SIGTERM', other);
+
+    process.emit('SIGTERM');
+    await tick();
+    await tick();
+
+    expect(other).toHaveBeenCalledOnce();
+    expect(process.kill).not.toHaveBeenCalled();
+    expect(process.exit).not.toHaveBeenCalled();
   });
 
   it('listens for SIGTERM once however many tasks run', async () => {
@@ -60,13 +96,15 @@ describe('inBackground', () => {
     expect(process.listenerCount('SIGTERM')).toBe(before + 1);
   });
 
-  it('exits on SIGTERM at once when every task has finished', async () => {
+  it('re-raises SIGTERM at once when every task has finished', async () => {
     const inBackground = await load();
     inBackground(Promise.resolve());
     await tick();
 
     process.emit('SIGTERM');
 
-    await vi.waitFor(() => expect(process.exit).toHaveBeenCalledWith(0));
+    await vi.waitFor(() =>
+      expect(process.kill).toHaveBeenCalledWith(process.pid, 'SIGTERM'),
+    );
   });
 });

@@ -713,9 +713,12 @@ after it is lost.
    approved.rs, carlab.rs and details.rs at the reserved IP, and remove any
    AAAA record that still names Vercel.
 4. **Caddy.** As soon as the three names resolve to the host
-   (`dig +short <domain> A` against a couple of public resolvers), reload Caddy
-   so it fetches the certificates at once
-   (`docker compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile`)
+   (`dig +short <domain> A` against a couple of public resolvers), force a
+   Caddy reload so it asks for the certificates at once
+   (`docker compose exec -T caddy caddy reload --force --config /etc/caddy/Caddyfile --adapter caddyfile`).
+   A plain `caddy reload` with an unchanged Caddyfile does nothing and leaves a
+   failed ACME attempt waiting out its backoff; `--force` reapplies the config
+   and starts the certificate requests again
    and open each site. Point any bot webhook that named a Vercel URL at its
    domain again (see [The Telegram webhooks](#the-telegram-webhooks)).
 5. **Cron on the host.** `sudo systemctl enable --now carlab-reminders.timer`.
@@ -770,7 +773,9 @@ name order, so every one, `20261116000000_init` included, starts with its
 timestamp.
 
 The nightly `backup.sh` dumps `crm` beside `carlab` (`crm-<stamp>.dump`, same
-retention and off-host copy) once `CRM_DB_PASSWORD` is set. Restore it with
+retention and off-host copy) once `CRM_DB_PASSWORD` is set, which is why
+approved.rs's own `scripts/backup-leads.ts` and `scripts/restore-leads.ts` are
+gone. Restore it with
 `docker compose exec -T postgres pg_restore -U carlab -d crm --clean --if-exists --no-owner --role=crm --single-transaction <crm-<stamp>.dump`.
 
 Locally, `docker compose -f packages/lead-crm/docker-compose.test.yml up -d`
@@ -1706,6 +1711,12 @@ includes it). Set it up once:
 
 1. Create an HTTP(S) monitor on `https://api.carlab.rs/health/ready`, expecting
    status 200, every 5 minutes or more often, with a timeout of about 10 seconds.
+   Add one more for each site on its bare root: `https://approved.rs/`,
+   `https://carlab.rs/` and `https://details.rs/`, same interval and timeout,
+   following redirects. The sites have no health route, and every other page is
+   a file Caddy answers from disk, but `/` has no file: Caddy hands it to the
+   site's Node container, whose middleware 302s it to the visitor's locale. A
+   container that is down or out of memory turns it into a 502.
 2. Add Telegram as an alert contact, the way the service's own guide describes
    (usually a bot you start in Telegram that links the chat), and attach it to
    the monitor for both "down" and "up again".
@@ -1755,7 +1766,11 @@ itself. At that cap the worst case is about 2 GB of compressed chunks; at
 real traffic it is tens of MB. Check with
 `docker system df -v | grep carlab_lokidata`.
 
-**Opening Grafana.** It listens on the server's `127.0.0.1:3000` only, and
+**Opening Grafana.** It runs only behind the `grafana` compose profile, to keep
+the three site containers inside the host's memory budget: start it with
+`docker compose --profile grafana up -d grafana` before you open the tunnel,
+and `docker compose stop grafana` when you are done. It listens on the server's
+`127.0.0.1:3000` only, and
 `deploy` may open a tunnel to that one address and nothing else. On a server
 hardened before this, rerun the hardening once (it keeps the crawler's key):
 
@@ -2201,7 +2216,9 @@ that carried one is disabled in the dashboard at the cutover
 
 1. Point the apex and `www` A records at the VPS's reserved IP
 2. Set the host in the shop's compose (`APPROVED_HOST` / `CARLAB_HOST` /
-   `DETAILS_HOST`) if it is not the default, and reload Caddy
+   `DETAILS_HOST`) if it is not the default, and recreate Caddy with
+   `docker compose up -d caddy`: the host names reach it as environment, which
+   a reload does not reread
 3. Check that `site:` in that app's `astro.config.mjs` matches the domain: the canonical links, the sitemap and the OG tags
    all depend on them
 

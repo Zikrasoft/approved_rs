@@ -172,8 +172,8 @@ ship "$A"
 run deploy-site.sh "$APP" "$A"
 : >"$LOG"
 expect 'reminders run once approved.rs is live' run reminders.sh '' ''
-expect 'reminders call the route inside the approved.rs container with its own CRON_SECRET' \
-  called 'docker compose exec -T site-approved-rs node -e .*/api/reminders.*process.env.CRON_SECRET'
+expect 'reminders call the route inside the approved.rs container with its own CRON_SECRET, whatever COMPOSE_PROFILES says' \
+  called 'docker compose --profile site-approved-rs exec -T site-approved-rs node -e .*/api/reminders.*process.env.CRON_SECRET'
 REMINDERS_EXIT=1
 export REMINDERS_EXIT
 refuse 'a failed reminders run fails the unit' run reminders.sh '' ''

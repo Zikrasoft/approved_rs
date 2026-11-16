@@ -1,34 +1,49 @@
 import { readFileSync, writeFileSync } from 'node:fs';
+import { z } from 'zod';
 
-type Kind = 'secret' | 'variable';
-type Entry = `${'required' | 'optional'} ${Kind}` | 'unset';
-export type SiteEnvName = {
-  name: string;
-  required: boolean;
-  kind: Kind;
-  shared: boolean;
-};
+const ENV_NAME = /^[A-Z][A-Z0-9_]*$/;
 
-const manifest: {
-  shared: Record<string, Entry>;
-  sites: Record<string, Record<string, Entry>>;
-} = JSON.parse(
-  readFileSync(new URL('./site-env.json', import.meta.url), 'utf8'),
+const entry = z.enum([
+  'required secret',
+  'optional secret',
+  'required variable',
+  'optional variable',
+  'unset',
+]);
+const names = z.record(z.string().regex(ENV_NAME), entry);
+
+export const siteEnvManifest = z.strictObject({
+  notInSiteEnv: z.record(z.string().regex(ENV_NAME), z.string()),
+  shared: names,
+  sites: z.record(z.string(), names),
+});
+
+export const manifest = siteEnvManifest.parse(
+  JSON.parse(readFileSync(new URL('./site-env.json', import.meta.url), 'utf8')),
 );
 
 export const SITES = Object.keys(manifest.sites);
 
-const ENTRY = /^(required|optional) (secret|variable)$/;
+export type SiteEnvName = {
+  name: string;
+  required: boolean;
+  kind: 'secret' | 'variable';
+  shared: boolean;
+};
 
-const entries = (names: Record<string, Entry>, shared: boolean) =>
-  Object.entries(names).flatMap(([name, entry]): SiteEnvName[] => {
-    if (entry === 'unset') return [];
-    const [, need, kind] = ENTRY.exec(entry) ?? [];
-    if (!need) throw new Error(`site-env.json: ${name} is "${entry}"`);
-    return [
-      { name, required: need === 'required', kind: kind as Kind, shared },
-    ];
-  });
+const entries = (list: z.infer<typeof names>, shared: boolean) =>
+  Object.entries(list).flatMap(([name, need]): SiteEnvName[] =>
+    need === 'unset'
+      ? []
+      : [
+          {
+            name,
+            required: need.startsWith('required'),
+            kind: need.endsWith('secret') ? 'secret' : 'variable',
+            shared,
+          },
+        ],
+  );
 
 export function siteEnvNames(app: string): SiteEnvName[] {
   const own = manifest.sites[app];
@@ -36,14 +51,33 @@ export function siteEnvNames(app: string): SiteEnvName[] {
   return [...entries(manifest.shared, true), ...entries(own, false)];
 }
 
-type Values = Record<string, unknown>;
+type Values = Record<string, string>;
+
+const jsonValues = z
+  .string()
+  .transform((text, context): unknown => {
+    try {
+      return JSON.parse(text);
+    } catch {
+      context.addIssue({ code: 'custom', message: 'not JSON' });
+      return z.NEVER;
+    }
+  })
+  .pipe(z.record(z.string(), z.string()));
+
+export function siteValues(name: string, text: string | undefined): Values {
+  const parsed = jsonValues.safeParse(text || '{}');
+  if (!parsed.success)
+    throw new Error(`${name} is not a JSON object of strings`);
+  return parsed.data;
+}
 
 export function siteEnvFile(app: string, secrets: Values, vars: Values) {
   const lines: string[] = [];
   const missing: string[] = [];
   for (const { name, required, kind } of siteEnvNames(app)) {
     const value = (kind === 'secret' ? secrets : vars)[name];
-    if (typeof value !== 'string' || value === '') {
+    if (!value) {
       if (required) missing.push(`${name} (${kind})`);
       continue;
     }
@@ -56,29 +90,17 @@ export function siteEnvFile(app: string, secrets: Values, vars: Values) {
   return lines.map((line) => `${line}\n`).join('');
 }
 
-const readJson = (name: string): Values => {
-  let value: unknown;
-  try {
-    value = JSON.parse(process.env[name] || '{}');
-  } catch {
-    value = null;
-  }
-  if (!value || typeof value !== 'object')
-    throw new Error(`${name} is not a JSON object`);
-  return value as Values;
-};
-
 if (import.meta.main) {
   const [app, out] = process.argv.slice(2);
   try {
     const file = siteEnvFile(
       app ?? '',
-      readJson('SITE_SECRETS'),
-      readJson('SITE_VARS'),
+      siteValues('SITE_SECRETS', process.env.SITE_SECRETS),
+      siteValues('SITE_VARS', process.env.SITE_VARS),
     );
     writeFileSync(out ?? '', file, { mode: 0o600 });
   } catch (error) {
-    console.error((error as Error).message);
+    console.error(error instanceof Error ? error.message : error);
     process.exit(1);
   }
 }

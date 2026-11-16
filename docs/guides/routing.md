@@ -17,9 +17,8 @@ All three sites follow it:
   serve a Russian 404 to every visitor).
 - **`/` redirects, it does not rewrite.** Astro forbids rewriting from an
   on-demand route to a prerendered one, and `src/pages/[locale]/index.astro` is
-  prerendered in both new apps — a rewrite returns a 500 for every hit on the
-  site root. approved.rs renders its home on demand, so it rewrites
-  (`rewriteRoot: true`). `src/pages/index.astro` still has to exist with
+  prerendered on all three sites, so a rewrite returns a 500 for every hit on
+  the site root. `src/pages/index.astro` still has to exist with
   `prerender = false` so `/` reaches the node server and its middleware at all.
 - **`/llms.txt` is served, never redirected.** Each app has both
   `src/pages/llms.txt.ts` (the default locale's copy, at the well-known root
@@ -44,4 +43,4 @@ exists, that would be configuration for a single caller.
 
 ## i18n routing on approved.rs
 
-**i18n routing (`src/middleware.ts` + `src/i18n/`):** 5 locales (`ru` default, `en`, `sr`, `es`, `de`), `routing: 'manual'` in `astro.config.mjs`. Every app's middleware is `createLocaleMiddleware` from `@podbor/site-kit/locale-middleware`, the single owner of redirects on all three sites. It passes the app's unlocalized paths through, 301s a path matching one of the app's redirect rules (approved.rs only: `src/redirects.ts`, `{ source, destination }` path-to-regexp rules built from small tables: legacy paths, slug renames × all five locales, the de spoke, buyback countries, moved brand hubs), passes a locale-prefixed path through, and sends anything else to the locale detected from the cookie or Accept-Language (`detectLocale`, backed by `@podbor/i18n`'s `createLocaleSet`) with a 302. approved.rs rewrites bare `/` in place instead (`rewriteRoot`); the brand sites 302 it. `404.astro` is on demand (`prerender = false`) on all three sites: a prerendered 404 is served from disk without middleware, so an unmatched legacy URL would never reach its rule. Caddy serves every file under `dist/client` before node sees the request, so a rule whose source is a built file never fires: `.github/scripts/redirects-shadowed.ts` fails `check` on one.
+**i18n routing (`src/middleware.ts` + `src/i18n/`):** 5 locales (`ru` default, `en`, `sr`, `es`, `de`), `routing: 'manual'` in `astro.config.mjs`. Every app's middleware is `createLocaleMiddleware` from `@podbor/site-kit/locale-middleware`, the single owner of redirects on all three sites. It passes the app's unlocalized paths through, 301s a path matching one of the app's redirect rules (approved.rs only: `src/redirects.ts`, `{ source, destination }` path-to-regexp rules built from small tables: legacy paths, slug renames × all five locales, the de spoke, buyback countries, moved brand hubs), passes a locale-prefixed path through, and sends anything else to the locale detected from the cookie or Accept-Language (`detectLocale`, backed by `@podbor/i18n`'s `createLocaleSet`) with a 302. Bare `/` gets the same 302 on all three sites: every homepage is prerendered, and Astro cannot rewrite an on-demand route into a prerendered one. `404.astro` is on demand (`prerender = false`) on all three sites: a prerendered 404 is served from disk without middleware, so an unmatched legacy URL would never reach its rule. Caddy serves every file under `dist/client` before node sees the request, so a rule whose source is a built file never fires: `.github/scripts/redirects-shadowed.ts` fails `check` on one.

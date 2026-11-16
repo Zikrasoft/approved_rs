@@ -1,14 +1,16 @@
 const running = new Set<Promise<void>>();
 let listening = false;
 
-const exitWhenSettled = () => {
-  void Promise.all(running).then(() => process.exit(0));
+const drainThenTerminate = async () => {
+  while (running.size) await Promise.all(running);
+  if (process.listenerCount('SIGTERM') === 0)
+    process.kill(process.pid, 'SIGTERM');
 };
 
 export function inBackground(task: Promise<unknown>): void {
   if (!listening) {
     listening = true;
-    process.once('SIGTERM', exitWhenSettled);
+    process.once('SIGTERM', () => void drainThenTerminate());
   }
   const settled: Promise<void> = task
     .then(

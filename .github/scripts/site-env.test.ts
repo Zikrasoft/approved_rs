@@ -2,7 +2,14 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
-import { SITES, siteEnvFile, siteEnvNames } from './site-env.ts';
+import {
+  SITES,
+  manifest,
+  siteEnvFile,
+  siteEnvManifest,
+  siteEnvNames,
+  siteValues,
+} from './site-env.ts';
 
 const ASTRO_BUILT_INS = new Set(['DEV', 'PROD', 'MODE', 'SSR', 'BASE_URL']);
 const SOURCE = /\.(ts|mts|mjs|js|astro)$/;
@@ -64,10 +71,6 @@ function envNamesReadBy(app: string): Set<string> {
     files.flatMap((file) => envNamesIn(readFileSync(file, 'utf8'))),
   );
 }
-
-const manifest = JSON.parse(
-  readFileSync(new URL('./site-env.json', import.meta.url), 'utf8'),
-);
 
 for (const app of SITES)
   test(`the manifest names every variable ${app} reads`, () => {
@@ -216,3 +219,38 @@ test('a value a .env cannot hold literally is refused by name', () => {
 test('an unknown site is refused', () => {
   assert.throws(() => siteEnvNames('shop'), /unknown site shop/);
 });
+
+test('a manifest entry outside the vocabulary is refused', () => {
+  const result = siteEnvManifest.safeParse({
+    ...manifest,
+    shared: { ...manifest.shared, NEW_NAME: 'required secrte' },
+  });
+  assert.equal(result.success, false);
+});
+
+test('an unset values variable reads as no values', () => {
+  assert.deepEqual(siteValues('SITE_VARS', undefined), {});
+  assert.deepEqual(siteValues('SITE_VARS', ''), {});
+});
+
+test('the values come from a JSON object of strings', () => {
+  assert.deepEqual(siteValues('SITE_VARS', '{"A":"1","B":""}'), {
+    A: '1',
+    B: '',
+  });
+});
+
+for (const [what, text] of [
+  ['not JSON', "{'A':'secret-value'}"],
+  ['an array', '["secret-value"]'],
+  ['a non-string value', '{"A":{"nested":"secret-value"}}'],
+  ['null', 'null'],
+])
+  test(`values that are ${what} are refused by variable name alone`, () => {
+    assert.throws(
+      () => siteValues('SITE_SECRETS', text),
+      (error: Error) =>
+        error.message === 'SITE_SECRETS is not a JSON object of strings' &&
+        !error.message.includes('secret-value'),
+    );
+  });

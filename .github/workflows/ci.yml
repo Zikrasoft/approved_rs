@@ -93,6 +93,7 @@ jobs:
           if [[ " $SITES " == *" approved-rs "* ]]; then
             node --experimental-strip-types .github/scripts/redirects-shadowed.ts apps/approved-rs/dist/client
           fi
+          node --experimental-strip-types .github/scripts/on-demand-images.ts $SITES
 
       - if: steps.affected.outputs.shop == 'true'
         run: sh infra/auto-service-shop/test/scripts.test.sh
