@@ -301,9 +301,11 @@ for (const [what, text] of [
 for (const workflow of ['ci.yml', 'publish.yml']) {
   test(`${workflow} hands the deploy exactly the manifest's secrets, by name`, () => {
     const text = readFileSync(`.github/workflows/${workflow}`, 'utf8');
-    assert.doesNotMatch(text, /toJSON\(secrets\)/);
+    assert.doesNotMatch(text, /toJSON\(secrets\)|toJSON\(secrets\.\w+\)/);
     const handed = [
-      ...text.matchAll(/"(\w+)": \$\{\{ toJSON\(secrets\.(\w+)\) \}\}/g),
+      ...text.matchAll(
+        /"(\w+)": \$\{\{ toJSON\(secrets\.(\w+) \|\| ''\) \}\}/g,
+      ),
     ];
     for (const [, key, name] of handed) assert.equal(key, name);
     const secrets = new Set(
