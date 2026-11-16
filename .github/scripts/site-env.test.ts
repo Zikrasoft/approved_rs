@@ -223,9 +223,36 @@ test('an unknown site is refused', () => {
 test('a manifest entry outside the vocabulary is refused', () => {
   const result = siteEnvManifest.safeParse({
     ...manifest,
-    shared: { ...manifest.shared, NEW_NAME: 'required secrte' },
+    shared: {
+      ...manifest.shared,
+      NEW_NAME: { required: true, kind: 'secrte' },
+    },
   });
   assert.equal(result.success, false);
+});
+
+test('a manifest entry still in the old one-string shape is refused', () => {
+  const result = siteEnvManifest.safeParse({
+    ...manifest,
+    shared: { ...manifest.shared, NEW_NAME: 'required secret' },
+  });
+  assert.equal(result.success, false);
+});
+
+test('a manifest entry says whether a name is required and where it is kept', () => {
+  assert.deepEqual(manifest.shared.TELEGRAM_BOT_TOKEN, {
+    required: true,
+    kind: 'secret',
+  });
+  assert.deepEqual(
+    siteEnvNames('detailing').find(({ name }) => name === 'TELEGRAM_OWNER_ID'),
+    {
+      name: 'TELEGRAM_OWNER_ID',
+      required: false,
+      kind: 'secret',
+      shared: true,
+    },
+  );
 });
 
 test('an unset values variable reads as no values', () => {

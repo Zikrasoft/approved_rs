@@ -92,6 +92,7 @@ TELEGRAM_CAPTURE_BOT_TOKEN='2:capture-secret'
 TELEGRAM_CAPTURE_WEBHOOK_SECRET='tcws-secret'
 PUBLIC_WHATSAPP_NUMBER='381'
 PUBLIC_VIBER_NUMBER='381'" 'the runtime .env holds only the names the manifest gives detailing'
+check "$(has "ssh .*umask 022 && mkdir -p /srv/sites/detailing/releases/abc123-1-1$")" yes 'a new site gets its release directory open to caddy and node'
 check "$(has "ssh .*umask 077 && cat >/srv/sites/detailing/releases/abc123-1-1/.env$")" yes 'the runtime .env is written owner-only into the release, so a rollback takes its env along'
 check "$(grep -A1 '^rsync' "$LOG" | tail -n 1 | grep -c 'releases/abc123-1-1/.env')" 1 'the .env is written right after rsync, which would delete it'
 check "$(tail -n 1 "$LOG" | grep -c '/srv/carlab/deploy-site.sh detailing abc123-1-1$')" 1 'the host deploy script switches to the release last'
@@ -126,7 +127,14 @@ check "$(find "$work/tmp" -type f | wc -l | tr -d ' ')" 0 'a refused deploy leav
 secrets=$all_secrets
 
 deploy shop abc123-1-1
-check "$status" 2 'an unknown app is refused'
+check "$status" 1 'an app site-env.json does not name is refused'
+check "$(grep -c 'unknown site shop' "$work/out")" 1 'the refusal names the unknown app'
+check "$(has 'turbo\|rsync\|ssh')" no 'an unknown app is never built or shipped'
+
+for bad in ../detailing detailing/x Detailing -x ''; do
+  deploy "$bad" abc123-1-1
+  check "$status" 2 "app '$bad' is refused before anything runs"
+done
 
 deploy detailing
 check "$status" 2 'a missing release is refused'

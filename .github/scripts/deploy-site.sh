@@ -4,9 +4,8 @@ set -eu
 app=${1:-}
 release=${2:-}
 case "$app" in
-  auto-service | detailing | approved-rs) ;;
-  *)
-    echo "usage: deploy-site.sh <auto-service|detailing|approved-rs> <release>" >&2
+  '' | -* | *[!abcdefghijklmnopqrstuvwxyz0123456789-]*)
+    echo "usage: deploy-site.sh <app> <release>, the app being a site in site-env.json" >&2
     exit 2
     ;;
 esac
@@ -52,7 +51,7 @@ node --env-file="$work/site.env" -e '
 remote="ssh -i $work/key -o IdentitiesOnly=yes -o UserKnownHostsFile=$work/known_hosts -o BatchMode=yes -o StrictHostKeyChecking=yes"
 target="$VPS_USER@$VPS_HOST"
 
-$remote "$target" "mkdir -p $site/releases/$release" </dev/null
+$remote "$target" "umask 022 && mkdir -p $site/releases/$release" </dev/null
 rsync -rlp --checksum --compress --delete --stats -e "$remote" \
   "--link-dest=$site/current" \
   "apps/$app/dist/client" "apps/$app/dist/server" \

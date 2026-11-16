@@ -176,6 +176,7 @@ jobs:
       contents: read
     outputs:
       changed: ${{ steps.scope.outputs.changed || '[]' }}
+      sites: ${{ steps.scope.outputs.sites || '[]' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -242,6 +243,7 @@ jobs:
             changed=$(jq -cn --argjson c "$changed" --arg a "$app" '$c + [$a]')
           done
           echo "changed=$changed" >> "$GITHUB_OUTPUT"
+          echo "sites=$(jq -c '.sites | keys' .github/scripts/site-env.json)" >> "$GITHUB_OUTPUT"
 
   shop-image:
     needs: [translate, verify]
@@ -421,7 +423,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        app: [approved-rs, detailing, auto-service]
+        app: ${{ fromJSON(needs.verify.outputs.sites) }}
     env:
       APP: ${{ matrix.app }}
       SHA: ${{ needs.translate.outputs.sha }}

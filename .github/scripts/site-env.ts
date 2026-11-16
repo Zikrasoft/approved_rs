@@ -3,12 +3,12 @@ import { z } from 'zod';
 
 const ENV_NAME = /^[A-Z][A-Z0-9_]*$/;
 
-const entry = z.enum([
-  'required secret',
-  'optional secret',
-  'required variable',
-  'optional variable',
-  'unset',
+const entry = z.union([
+  z.literal('unset'),
+  z.strictObject({
+    required: z.boolean(),
+    kind: z.enum(['secret', 'variable']),
+  }),
 ]);
 const names = z.record(z.string().regex(ENV_NAME), entry);
 
@@ -33,16 +33,7 @@ export type SiteEnvName = {
 
 const entries = (list: z.infer<typeof names>, shared: boolean) =>
   Object.entries(list).flatMap(([name, need]): SiteEnvName[] =>
-    need === 'unset'
-      ? []
-      : [
-          {
-            name,
-            required: need.startsWith('required'),
-            kind: need.endsWith('secret') ? 'secret' : 'variable',
-            shared,
-          },
-        ],
+    need === 'unset' ? [] : [{ name, ...need, shared }],
   );
 
 export function siteEnvNames(app: string): SiteEnvName[] {
@@ -52,6 +43,8 @@ export function siteEnvNames(app: string): SiteEnvName[] {
 }
 
 type Values = Record<string, string>;
+
+const literalEnvValue = z.string().regex(/^[^'\r\n]*$/);
 
 const jsonValues = z
   .string()
@@ -81,7 +74,7 @@ export function siteEnvFile(app: string, secrets: Values, vars: Values) {
       if (required) missing.push(`${name} (${kind})`);
       continue;
     }
-    if (/['\r\n]/.test(value))
+    if (!literalEnvValue.safeParse(value).success)
       throw new Error(`${app}: ${name} holds a quote or a line break`);
     lines.push(`${name}='${value}'`);
   }
