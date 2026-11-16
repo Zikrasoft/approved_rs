@@ -37,7 +37,7 @@ User-visible changes (commit subjects on `carlab-shop`):
 ## 1. Before you start
 
 - [ ] GitHub admin on `Zikrasoft/approved_rs` (secrets, Actions, tags).
-- [ ] Vercel access to the three projects (approved.rs, carlab.rs, details.rs).
+- [ ] GitHub access to the three `site-*` environments (approved.rs, carlab.rs, details.rs).
 - [ ] AWS: S3/IAM administrator; DigitalOcean: an API token with write scope (deploy.md § The first ship: a checklist).
 - [ ] DNS at the `carlab.rs` registrar (same, step 3).
 - [ ] An OpenAI key for the shop, a fine-grained GitHub token for
@@ -125,25 +125,25 @@ one `terraform apply`: `infra/auto-service-shop/terraform/README.md`.
 - [ ] `/srv/carlab/.env` from `infra/auto-service-shop/production.env.example`,
       mode 600 (§ The first ship, step 4). Every name in the template:
 
-  | Name                                                                                                                        | Value                                                                  | Source                    |
-  | --------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | ------------------------- |
-  | `API_HOST`, `ADMIN_HOST`, `STORE_CORS`, `ADMIN_CORS`, `AUTH_CORS`, `NODE_ENV`, `PORT`, `DATABASE_SSL`                       | keep the template's                                                    | `production.env.example`  |
-  | `MEDUSA_TAG`                                                                                                                | leave empty; `deploy.sh` writes it                                     | deploy.md § `.env`        |
-  | `POSTGRES_PASSWORD`, `TYPESENSE_API_KEY`, `JWT_SECRET`, `COOKIE_SECRET`, `CRAWLER_DB_PASSWORD`                              | `openssl rand -hex 32` each                                            | deploy.md § `.env`        |
-  | `ADMIN_BASIC_AUTH_USER`, `ADMIN_BASIC_AUTH_HASH`                                                                            | `caddy hash-password`; the hash in single quotes                       | deploy.md § `.env`        |
-  | `OPENAI_API_KEY`, `IMPORT_CONCURRENCY`                                                                                      | the shop's own OpenAI key; keep the template's concurrency             | deploy.md § `.env`        |
-  | `PUBLISH_DISPATCH_TOKEN`                                                                                                    | fine-grained token, `actions: write` on this repository, short expiry  | deploy.md § `.env`        |
-  | `STOREFRONT_ORIGIN`                                                                                                         | `https://carlab.rs`                                                    | § The first ship, step 10 |
-  | `SHOP_LEAD_SECRET`, `SHOP_CLIENT_SECRET`, `SHOP_ORDER_OUTCOME_SECRET`, `SHOP_EVENTS_SECRET`, `SHOP_VISITOR_SEARCHES_SECRET` | `openssl rand -hex 32` each; the same value goes to Vercel (section 5) | deploy.md § Shop Orders   |
-  | `*_PREVIOUS` of those five                                                                                                  | empty (rotation only)                                                  | deploy.md § Shop Orders   |
-  | `SHOP_OPEN`                                                                                                                 | `false`                                                                | deploy.md § Closed beta   |
-  | `SHOP_PREVIEW_TOKEN`                                                                                                        | `openssl rand -hex 32`; same value on carlab.rs                        | deploy.md § Closed beta   |
-  | `STORE_WRITES_PER_MINUTE`, `STORE_SEARCHES_PER_MINUTE`, `STOREFRONT_EVENTS_PER_MINUTE`, `LIVE_QUOTE_CACHE_SECONDS`          | keep the template's (120, 600, 1200, 60)                               | deploy.md § `.env`        |
-  | `VIN_DECODERS`, `SUPPLIER_ADAPTERS`                                                                                         | keep the template's                                                    | deploy.md § `.env`        |
-  | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_GROUP_ID`                                                                                   | the CRM bot's values, as on Vercel                                     | deploy.md § `.env`        |
-  | `FILE_URL`, `S3_REGION`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_PUBLIC_BUCKET`, `S3_PRIVATE_BUCKET`                | from the S3 step; `S3_ENDPOINT` empty for AWS                          | deploy.md § `.env`        |
-  | `SENTRY_DSN`                                                                                                                | optional                                                               | deploy.md § Monitoring    |
-  | `GRAFANA_ADMIN_PASSWORD`                                                                                                    | `openssl rand -hex 32`; required, compose refuses to start without it  | deploy.md § `.env`        |
+  | Name                                                                                                                        | Value                                                                                               | Source                    |
+  | --------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ------------------------- |
+  | `API_HOST`, `ADMIN_HOST`, `STORE_CORS`, `ADMIN_CORS`, `AUTH_CORS`, `NODE_ENV`, `PORT`, `DATABASE_SSL`                       | keep the template's                                                                                 | `production.env.example`  |
+  | `MEDUSA_TAG`                                                                                                                | leave empty; `deploy.sh` writes it                                                                  | deploy.md § `.env`        |
+  | `POSTGRES_PASSWORD`, `TYPESENSE_API_KEY`, `JWT_SECRET`, `COOKIE_SECRET`, `CRAWLER_DB_PASSWORD`                              | `openssl rand -hex 32` each                                                                         | deploy.md § `.env`        |
+  | `ADMIN_BASIC_AUTH_USER`, `ADMIN_BASIC_AUTH_HASH`                                                                            | `caddy hash-password`; the hash in single quotes                                                    | deploy.md § `.env`        |
+  | `OPENAI_API_KEY`, `IMPORT_CONCURRENCY`                                                                                      | the shop's own OpenAI key; keep the template's concurrency                                          | deploy.md § `.env`        |
+  | `PUBLISH_DISPATCH_TOKEN`                                                                                                    | fine-grained token, `actions: write` on this repository, short expiry                               | deploy.md § `.env`        |
+  | `STOREFRONT_ORIGIN`                                                                                                         | `https://carlab.rs`                                                                                 | § The first ship, step 10 |
+  | `SHOP_LEAD_SECRET`, `SHOP_CLIENT_SECRET`, `SHOP_ORDER_OUTCOME_SECRET`, `SHOP_EVENTS_SECRET`, `SHOP_VISITOR_SEARCHES_SECRET` | `openssl rand -hex 32` each; the same value goes to the `site-auto-service` environment (section 5) | deploy.md § Shop Orders   |
+  | `*_PREVIOUS` of those five                                                                                                  | empty (rotation only)                                                                               | deploy.md § Shop Orders   |
+  | `SHOP_OPEN`                                                                                                                 | `false`                                                                                             | deploy.md § Closed beta   |
+  | `SHOP_PREVIEW_TOKEN`                                                                                                        | `openssl rand -hex 32`; same value on carlab.rs                                                     | deploy.md § Closed beta   |
+  | `STORE_WRITES_PER_MINUTE`, `STORE_SEARCHES_PER_MINUTE`, `STOREFRONT_EVENTS_PER_MINUTE`, `LIVE_QUOTE_CACHE_SECONDS`          | keep the template's (120, 600, 1200, 60)                                                            | deploy.md § `.env`        |
+  | `VIN_DECODERS`, `SUPPLIER_ADAPTERS`                                                                                         | keep the template's                                                                                 | deploy.md § `.env`        |
+  | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_GROUP_ID`                                                                                   | the CRM bot's values, as in the repo secrets                                                        | deploy.md § `.env`        |
+  | `FILE_URL`, `S3_REGION`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_PUBLIC_BUCKET`, `S3_PRIVATE_BUCKET`                | from the S3 step; `S3_ENDPOINT` empty for AWS                                                       | deploy.md § `.env`        |
+  | `SENTRY_DSN`                                                                                                                | optional                                                                                            | deploy.md § Monitoring    |
+  | `GRAFANA_ADMIN_PASSWORD`                                                                                                    | `openssl rand -hex 32`; required, compose refuses to start without it                               | deploy.md § `.env`        |
 
 - [ ] No value wrapped in `"…"` (deploy.md § Easy to miss, "`.env` is read literally").
 - [ ] `stat -c %a /srv/carlab/.env` and `.env.backup` print `600`.
@@ -156,9 +156,8 @@ one `terraform apply`: `infra/auto-service-shop/terraform/README.md`.
 Settings → Secrets and variables → Actions, **repository** secrets (deploy.md
 § GitHub Actions secrets).
 
-- [ ] Already set: `OPENAI_API_KEY`, `VERCEL_TOKEN`, `VERCEL_ORG_ID`,
-      `VERCEL_PROJECT_ID`, `VERCEL_PROJECT_ID_AUTO_SERVICE`,
-      `VERCEL_PROJECT_ID_DETAILING` (seen in `gh secret list`, 2026-11-02).
+- [ ] Already set: `OPENAI_API_KEY` and the site env in the `site-*`
+      environments (`.github/scripts/site-env.json`).
 - [ ] CI's ssh key: `ssh-keygen -t ed25519`, public half in `deploy`'s
       `authorized_keys` with `restrict`; `ssh-keyscan -t ed25519 <IPv4>`,
       fingerprint verified separately (§ The first ship, step 7).
@@ -211,7 +210,7 @@ details.rs:
 
 Old names `SHOP_ORDER_HOOK_SECRET`, `SHOP_ORDER_HOOK_URL`, `MEDUSA_URL`,
 `GITHUB_DISPATCH_TOKEN` and `PUBLIC_INSTAGRAM` are no longer read by any app
-code on this branch; whether to delete them from Vercel is not documented; ask.
+code on this branch; they were not migrated to GitHub.
 
 ## 6. Merge and deploy
 
@@ -256,7 +255,7 @@ code on this branch; whether to delete them from Vercel is not documented; ask.
       crawled sites (§ The first ship, step 9). The seed runs on every deploy and
       fills new or unedited Categories and fields; anything with `updated_by`
       set is left alone (deploy.md § How it ships, production seed).
-- [ ] carlab.rs Vercel: `MEDUSA_BACKEND_URL=https://api.carlab.rs`,
+- [ ] carlab.rs (`site-auto-service` environment): `MEDUSA_BACKEND_URL=https://api.carlab.rs`,
       `MEDUSA_PUBLISHABLE_KEY` = that key (§ The first ship, step 11).
 - [ ] Crawler on the Mac, once: `pnpm exec playwright install chromium` in
       `apps/auto-service-shop`, `.env.crawler` from `.env.crawler.example`

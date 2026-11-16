@@ -4,7 +4,7 @@ The sites run on `@astrojs/node` behind Caddy, and Vercel serves nothing. Every 
 
 ## Considered Options
 
-- **Generate the rules into Caddy** (and `vercel.json`): what we had. Two copies of the table, a generated Caddy file per site, and a drift check; and the edge answered an unprefixed path with the primary locale while middleware detected it.
+- **Generate the rules into Caddy** (and `vercel.json`), the first shape of this move, never shipped: two copies of the table, a generated Caddy file per site, and a drift check; and the edge answered an unprefixed path with the primary locale while middleware detected it.
 
 ## Consequences
 
