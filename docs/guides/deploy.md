@@ -56,10 +56,11 @@ matrix of `approved-rs`, `detailing` and `auto-service`; each leg runs
 `.github/scripts/deploy-site.sh <app> <sha>-<run>-<attempt>` from the repo root,
 which:
 
-1. `vercel env pull`s the project's production env into a temp file, drops
-   Vercel's own `VERCEL`/`VERCEL_*` system variables and fails, naming it, if
-   `BLOB_READ_WRITE_TOKEN` came back empty (Vercel pulls a sensitive variable as
-   `""`);
+1. `vercel env pull`s the project's production env into a temp file and drops
+   Vercel's own `VERCEL`/`VERCEL_*` system variables and the old
+   `BLOB_READ_WRITE_TOKEN` (leads live in Postgres now). `CRM_DATABASE_URL`
+   never comes from Vercel: compose sets it on the site container from the
+   host's `CRM_DB_PASSWORD`, over anything the env file holds;
 2. for carlab.rs, probes the shop backend (exit 75, see below) and sets
    `CATALOGUE_SHRINK_GUARD=true`;
 3. builds with `turbo run build --filter=@podbor/<app> --env-mode=loose` under
@@ -117,8 +118,9 @@ shellcheck, actionlint) → `translate` → `verify` → `deploy-site` (approved
 details.rs, carlab.rs). Beside them, `shop-image` →
 `deploy-shop` → `record-shop` ship the shop backend to its VPS (see
 [the shop backend](#the-shop-backend-medusa-on-a-vps-apicarlabrs)), and
-`deploy-site` waits for `deploy-shop`; only its carlab.rs leg is held back, and
-only if the shop deploy _failed_. The
+`deploy-site` waits for `shop-image` and `deploy-shop`, and holds every leg
+back if either _failed_: the shop image carries the `crm` migrations, so a site
+never ships against a schema that was not migrated. The
 `deploy*` jobs only run on `main`, each only if the previous one passed. The workflow fires on a push to
 any **branch** and never
 on a tag: a tag filter without a branch filter would switch branches off entirely,
@@ -539,19 +541,18 @@ the same `CRM_DATABASE_URL`**:
 CRM_DATABASE_URL=postgres://crm:<CRM_DB_PASSWORD>@postgres:5432/crm
 ```
 
-`postgres` resolves on the compose `data` network; a site service joins it with
-`networks: [data, edge]`. Brands are separated by the lead's `brand` field
+`postgres` resolves on the compose `data` network. Compose sets this URL on
+every `site-<app>` service from the host's `CRM_DB_PASSWORD` (never from
+Vercel), puts it on `networks: [data, edge]` and starts it only once Postgres
+is healthy. Brands are separated by the lead's `brand` field
 (`Approved.rs` / `CarLab` / `Details`), stamped by the server.
 
 1. Put `CRM_DB_PASSWORD=$(openssl rand -hex 32)` into `/srv/carlab/.env`.
 2. `./deploy.sh` (or `./crm-role.sh` alone) creates the `crm` role and the
    `crm` database it owns; the role can reach nothing else, and `PUBLIC` loses
    `CONNECT` on both databases.
-3. Apply the schema before the sites start, from the repo checkout or a site
-   image: `CRM_DATABASE_URL=… pnpm --filter @podbor/lead-crm db:deploy`
-   (`prisma migrate deploy` over `packages/lead-crm/prisma/migrations`). Every
-   CRM migration is additive, like the shop's, so a site still on the previous
-   build keeps working.
+3. Every shop deploy then migrates `crm` (see "CRM migrations" below), so
+   the schema is in place before any site starts.
 4. Once, move the old Blob data in: from `packages/lead-crm`, with
    `BLOB_READ_WRITE_TOKEN` from any of the three Vercel projects,
    `node --env-file=<env> --experimental-strip-types scripts/import-blob.ts --dry-run`
@@ -559,9 +560,86 @@ CRM_DATABASE_URL=postgres://crm:<CRM_DB_PASSWORD>@postgres:5432/crm
    skipped order markers), never contents. Without `--dry-run` and with
    `CRM_DATABASE_URL` set, it upserts everything in one transaction keyed on the
    old numeric ids (`legacy_id`), digest days, prompt keys and payload hashes,
-   so a rerun changes nothing. The Blob store is only read. Order markers are
+   so a rerun changes nothing. Each Lead keeps its old id as its `number`
+   (what the bot shows as `#123`), and the number sequence then continues
+   above the highest one. A new Lead that already took an old number stops the
+   import, which then changes nothing. The Blob store is only read. Order markers are
    not imported: nothing has read them since the old shop went, and a Lead's
    unique `(brand, order_id)` is what keeps one order to one Lead now.
+
+### Cutover from Vercel
+
+Once, in this order. Nothing here prints a secret; keep it that way.
+
+1. **Host prerequisites.** On a host bootstrapped before the sites moved, copy
+   `infra/auto-service-shop/bootstrap-host.sh` over and rerun it as root: it
+   installs `rsync`, makes `/srv/sites` and enables the `carlab-reminders`
+   timer. Stop that timer until step 7
+   (`sudo systemctl disable --now carlab-reminders.timer`), or it posts a
+   digest from the host while Vercel still posts its own. Lower the TTL of the three apex and `www` records to 300 s a day
+   ahead.
+2. **Password.** Append `CRM_DB_PASSWORD=$(openssl rand -hex 32)` to
+   `/srv/carlab/.env` on the host (mode 600). It lives only there, never in
+   Vercel or GitHub.
+3. **Database.** Ship the shop (a push to `main` that deploys
+   `auto-service-shop`, or `./deploy.sh <live sha>` on the host): `crm-role.sh`
+   creates the role and database, `deploy.sh` migrates it. Check with
+   `docker compose exec -T postgres psql -U carlab -d crm -c '\dt'`.
+4. **Sites on the host.** Let `deploy-site` ship all three (delete their
+   `deployed/*` tags or run CI with **Deploy every app**). They answer only
+   through Caddy, whose hosts still resolve to Vercel, so no visitor reaches
+   them yet. If Grafana was left running from a look, stop it
+   (`docker compose stop grafana`): the budget with the three sites counts it
+   off.
+5. **Import.** On the owner's Mac, open the crawler's tunnel
+   (`ssh -i ~/.ssh/carlab-crawler -N -L 15432:10.200.0.10:5432 crawler@<IPv4>`,
+   see [the crawler](#the-crawler-on-the-owners-mac)) and write a local env
+   file (mode 600) with `BLOB_READ_WRITE_TOKEN` and
+   `CRM_DATABASE_URL=postgres://crm:<CRM_DB_PASSWORD>@127.0.0.1:15432/crm`.
+   From `packages/lead-crm`, run
+   `node --env-file=<env> --experimental-strip-types scripts/import-blob.ts --dry-run`,
+   check the counts, then run it without `--dry-run` right before the first
+   DNS switch, and delete the env file. Leads that reach Vercel after this stay
+   in Blob: a rerun picks them up, unless a new Lead already took their number,
+   in which case it stops, changes nothing, and they go in by hand.
+6. **DNS, one domain at a time** (details.rs, carlab.rs, then approved.rs):
+   point the apex and `www` A/AAAA records at the reserved IP, wait for them to
+   resolve there, then reload Caddy so it fetches the certificate at once
+   (`docker compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile`)
+   and open the site. Point each capture bot's webhook at its domain
+   again if it named a Vercel URL (see [The Telegram webhooks](#the-telegram-webhooks)).
+7. **Cron.** Once approved.rs resolves to the host, disable the Vercel cron
+   (Vercel → the approved.rs project → Settings → Cron Jobs: the last Vercel
+   deployment keeps calling its own Blob-backed `/api/reminders` otherwise)
+   and start the host one
+   (`sudo systemctl enable --now carlab-reminders.timer`). Doing both between
+   08:00 UTC runs keeps the group at one digest a day.
+
+### CRM migrations
+
+`deploy.sh` runs `prisma migrate deploy` for `crm` on every shop deploy, after
+`crm-role.sh` and before anything restarts, in a one-off container of the new
+shop image: `@podbor/lead-crm` is a shop dependency, so the image already
+carries the lockfile-pinned Prisma CLI with its linux-musl schema engine, and
+the package ships `prisma/` beside it. The site containers stay plain node with
+no CLI in them. A failed migration fails the deploy before `MEDUSA_TAG` moves.
+The `shop-image` job migrates a blank database with the built image, so a
+broken migrator fails CI before it reaches the host.
+
+Any change under `packages/lead-crm` makes the shop a dependent in turbo's
+`...[tag]` filter, so a new CRM migration always ships with a shop deploy, and
+`deploy-site` waits for it. `crm-role.sh` and the migration are skipped while
+`CRM_DB_PASSWORD` is unset.
+
+**Every CRM migration is additive**, like the shop's: the running sites keep
+serving the previous build while the new schema lands, and a rollback brings
+an older shop image over a newer schema. Add a column nullable or with a
+default, add a table or an index; a rename or a drop ships in two deploys,
+first the code that stops reading the old shape, then the migration. Generate
+one with `pnpm --filter @podbor/lead-crm exec prisma migrate dev --name <name>`
+against the local test database and commit it: Prisma applies the folders in
+name order, so every one, `20261116000000_init` included, starts with its
+timestamp.
 
 The nightly `backup.sh` dumps `crm` beside `carlab` (`crm-<stamp>.dump`, same
 retention and off-host copy) once `CRM_DB_PASSWORD` is set. Restore it with
@@ -2000,6 +2078,10 @@ cd apps/detailing && node --env-file=.env.local --experimental-strip-types scrip
 ---
 
 ## The reminder cron (approved.rs only)
+
+On the VPS the `carlab-reminders` timer calls the route (see
+[The server](#the-server)); the Vercel cron below only matters until the
+cutover turns it off ([Cutover from Vercel](#cutover-from-vercel)).
 
 `apps/approved-rs/vercel.json`:
 
