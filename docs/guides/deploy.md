@@ -412,10 +412,10 @@ token. What fires and when: [analytics.md](analytics.md#the-server-lead-event-fr
 
 ### Storage and cron
 
-| Variable           | approved.rs | carlab.rs | details.rs | Without it                                               |
-| ------------------ | ----------- | --------- | ---------- | -------------------------------------------------------- |
-| `CRM_DATABASE_URL` | ✅          | ✅        | ✅         | leads are not stored and the routes fail                 |
-| `CRON_SECRET`      | ✅          | —         | —          | `/api/reminders` answers 401 — the digest never goes out |
+| Variable           | approved.rs | carlab.rs | details.rs | Without it                                              |
+| ------------------ | ----------- | --------- | ---------- | ------------------------------------------------------- |
+| `CRM_DATABASE_URL` | ✅          | ✅        | ✅         | leads are not stored and the routes fail                |
+| `CRON_SECRET`      | ✅          | no        | no         | `/api/reminders` answers 401, the digest never goes out |
 
 ### Shop Orders (ADR-0053)
 
@@ -817,7 +817,7 @@ only for `packages`, and only in the two shop jobs.
 
 Both deploy jobs check out with `persist-credentials: false`. They need the token
 only on the last step, where it is passed explicitly through `GH_TOKEN`, and in
-between the build executes the repository's code — there is no reason to leave
+between the build executes the repository's code, so there is no reason to leave
 it a write-capable token recorded in `.git/config`.
 
 Two traps, both of which look like "the Vercel secrets broke" while having nothing
@@ -2164,7 +2164,7 @@ cutover disables it in the dashboard
 1. Point the apex and `www` A records at the VPS's reserved IP
 2. Set the host in the shop's compose (`APPROVED_HOST` / `CARLAB_HOST` /
    `DETAILS_HOST`) if it is not the default, and reload Caddy
-3. Check that `site:` in that app's `astro.config.mjs` matches the domain — the canonical links, the sitemap and the OG tags
+3. Check that `site:` in that app's `astro.config.mjs` matches the domain: the canonical links, the sitemap and the OG tags
    all depend on them
 
 ---

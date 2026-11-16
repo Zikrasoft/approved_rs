@@ -73,7 +73,7 @@ leading dots pull in the dependents of a changed package, so touching
 three read and write the same `crm` Postgres database, so shipping a changed
 package to one site and not the others runs two versions of the CRM against one
 schema: a site built before a `packages/lead-crm` migration reads columns that
-moved or misses new ones. Nothing else enforces this — no test can see a
+moved or misses new ones. Nothing else enforces this: no test can see a
 half-deployed package. Do not
 narrow that filter to the app directories, and do not move a `deployed/*` tag
 forward by hand.
@@ -240,7 +240,7 @@ migrations".
 
 ## Architecture
 
-**Stack:** Astro v7, `output: 'static'` (prerendered) with `@astrojs/node` in `standalone` mode — most pages are static; a page opts into SSR individually via `export const prerender = false` (used by the `/api/*` routes and the homepage, which middleware rewrites bare `/` into). There is no global SSR mode. A build is `dist/client/` (every static file, served from disk by Caddy) plus `dist/server/entry.mjs`, a self-contained Node server (`vite.ssr.noExternal: true`, no `node_modules` at runtime) that answers only what is not a file and reads its config from `process.env` (`HOST`, `PORT`). `security.allowedDomains` names the brand's domain, so the proxy's `Host` and `X-Forwarded-Proto` make `request.url` the public origin; without it every form POST fails Astro's origin check. A server-only `import.meta.env.X` is inlined at build time, a `process.env.X` is read at runtime. Work that must outlive the response (the Telegram notify, Meta CAPI, shop Events) goes through `inBackground` from `@podbor/site-kit/background`: it logs a rejection instead of leaving it unhandled and holds `SIGTERM` until the running tasks settle.
+**Stack:** Astro v7, `output: 'static'` (prerendered) with `@astrojs/node` in `standalone` mode. Most pages are static; a page opts into SSR individually via `export const prerender = false` (used by the `/api/*` routes and the homepage, which middleware rewrites bare `/` into). There is no global SSR mode. A build is `dist/client/` (every static file, served from disk by Caddy) plus `dist/server/entry.mjs`, a self-contained Node server (`vite.ssr.noExternal: true`, no `node_modules` at runtime) that answers only what is not a file and reads its config from `process.env` (`HOST`, `PORT`). `security.allowedDomains` names the brand's domain, so the proxy's `Host` and `X-Forwarded-Proto` make `request.url` the public origin; without it every form POST fails Astro's origin check. A server-only `import.meta.env.X` is inlined at build time, a `process.env.X` is read at runtime. Work that must outlive the response (the Telegram notify, Meta CAPI, shop Events) goes through `inBackground` from `@podbor/site-kit/background`: it logs a rejection instead of leaving it unhandled and holds `SIGTERM` until the running tasks settle.
 
 **Touching lead storage, a lead or contact-click route, the CRM bot, a capture
 bot or the reminder cron:** read [docs/guides/lead-crm.md](docs/guides/lead-crm.md).
@@ -317,7 +317,7 @@ This site is Astro SSG (`output: 'static'`/prerendered, no SSR) — `.astro` fro
 - `src/lib/safeMarked.ts` uses `sanitize-html` instead of a custom `marked` renderer + URL-scheme regex — adopted after the regex-based version shipped a protocol-relative-URL bypass that review caught only by hand-testing payloads.
 - `packages/i18n/src/translate/openaiChat.ts` uses the official `openai` SDK instead of a hand-rolled `fetch` wrapper — gets typed errors and automatic retry-with-backoff on 429/5xx for free.
 
-Don't reach for a library reflexively, though — a hand-rolled ~10-line helper that's already correct and purpose-built to one exact call site (e.g. `packages/i18n`'s leaf cache key) doesn't get simpler by wrapping it in a generic library's config API. The bar is: does an existing library solve a real edge case this code either gets wrong today or would have to re-solve by hand, not "is there a package for this."
+Don't reach for a library reflexively, though. A hand-rolled ~10-line helper that's already correct and purpose-built to one exact call site (e.g. `packages/i18n`'s leaf cache key) doesn't get simpler by wrapping it in a generic library's config API. The bar is: does an existing library solve a real edge case this code either gets wrong today or would have to re-solve by hand, not "is there a package for this."
 
 This only applies to build-time code (`.astro` frontmatter, `src/lib/`, `scripts/`). Code that ships to the browser (client-side `<script>`, hydrated islands) still carries a real bundle-size cost — weigh a new client dependency normally there.
 

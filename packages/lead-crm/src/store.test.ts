@@ -1474,7 +1474,7 @@ describe('expireGhostLeads', () => {
     });
   });
 
-  it('is idempotent — a second run changes nothing', async () => {
+  it('is idempotent: a second run changes nothing', async () => {
     await ghost();
     await store.expireGhostLeads(NOW);
     const after = await store.readLeads();
