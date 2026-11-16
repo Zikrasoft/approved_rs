@@ -108,6 +108,7 @@ jobs:
       - run: sh .github/scripts/shop-backend-up.test.sh
       - run: sh .github/scripts/shop-ci-env.test.sh
       - run: sh .github/scripts/deploy-site.test.sh
+      - run: node --experimental-strip-types --test .github/scripts/site-env.test.ts .github/scripts/env-to-github.test.ts
       - run: >-
           docker run --rm -v "$PWD:/repo" -w /repo --entrypoint shellcheck "$ACTIONLINT_IMAGE"
           .github/scripts/*.sh infra/auto-service-shop/*.sh infra/auto-service-shop/test/*.sh
@@ -406,7 +407,7 @@ jobs:
       github.ref == 'refs/heads/main' &&
       needs.verify.outputs.changed != '[]'
     runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
-    environment: production
+    environment: site-${{ matrix.app }}
     permissions:
       contents: write
     concurrency:
@@ -415,35 +416,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - app: approved-rs
-            project_secret: VERCEL_PROJECT_ID
-          - app: detailing
-            project_secret: VERCEL_PROJECT_ID_DETAILING
-          - app: auto-service
-            project_secret: VERCEL_PROJECT_ID_AUTO_SERVICE
+        app: [approved-rs, detailing, auto-service]
     env:
       APP: ${{ matrix.app }}
       SHA: ${{ needs.translate.outputs.sha }}
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets[matrix.project_secret] }}
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      VPS_HOST: ${{ secrets.AUTO_SERVICE_SHOP_VPS_HOST }}
-      VPS_USER: ${{ secrets.AUTO_SERVICE_SHOP_VPS_USER }}
-      VPS_SSH_KEY: ${{ secrets.AUTO_SERVICE_SHOP_VPS_SSH_KEY }}
-      VPS_KNOWN_HOSTS: ${{ secrets.AUTO_SERVICE_SHOP_VPS_KNOWN_HOSTS }}
     steps:
       - id: guard
         env:
           CHANGED: ${{ needs.verify.outputs.changed }}
           SHOP: ${{ needs.deploy-shop.result }}
           SHOP_IMAGE_RESULT: ${{ needs.shop-image.result }}
-          PROJECT_SECRET: ${{ matrix.project_secret }}
         run: |
-          if [ -z "$VERCEL_PROJECT_ID" ]; then
-            echo "deploy=false" >> "$GITHUB_OUTPUT"
-            echo "$PROJECT_SECRET is not set, so the $APP env cannot be pulled: skipping the $APP deploy."
-          elif [ "$SHOP" = failure ] || [ "$SHOP_IMAGE_RESULT" = failure ]; then
+          if [ "$SHOP" = failure ] || [ "$SHOP_IMAGE_RESULT" = failure ]; then
             echo "deploy=false" >> "$GITHUB_OUTPUT"
             echo "::warning::The shop image or deploy failed, so the CRM migrations it carries may not have run: $APP is not deployed; deployed/$APP stays put."
           elif ! jq -e 'type == "array"' <<<"$CHANGED" >/dev/null; then
@@ -470,6 +454,13 @@ jobs:
           restore-keys: astro-carlab-${{ github.ref_name }}-
       - id: deploy
         if: steps.guard.outputs.deploy == 'true'
+        env:
+          SITE_SECRETS: ${{ toJSON(secrets) }}
+          SITE_VARS: ${{ toJSON(vars) }}
+          VPS_HOST: ${{ secrets.AUTO_SERVICE_SHOP_VPS_HOST }}
+          VPS_USER: ${{ secrets.AUTO_SERVICE_SHOP_VPS_USER }}
+          VPS_SSH_KEY: ${{ secrets.AUTO_SERVICE_SHOP_VPS_SSH_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.AUTO_SERVICE_SHOP_VPS_KNOWN_HOSTS }}
         run: |
           status=0
           sh .github/scripts/deploy-site.sh "$APP" "$SHA-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" || status=$?

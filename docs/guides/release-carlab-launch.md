@@ -168,10 +168,11 @@ Settings → Secrets and variables → Actions, **repository** secrets (deploy.m
 - [ ] Settings → Actions → General → Workflow permissions: Read and write; no
       tag protection rule covers `deployed/*` (deploy.md § Job permissions).
 
-## 5. Vercel env per project
+## 5. GitHub env per site
 
-Production environment only; a change applies at the next deploy (deploy.md
-§ A consequence: environment variables live in the Vercel project).
+Shared names at repository level, the rest in the site's `site-<app>`
+environment, as `.github/scripts/site-env.json` says; a change applies at the
+next deploy (deploy.md § A consequence: environment variables live in GitHub).
 
 carlab.rs:
 

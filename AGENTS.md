@@ -245,7 +245,7 @@ migrations".
 **Touching lead storage, a lead or contact-click route, the CRM bot, a capture
 bot or the reminder cron:** read [docs/guides/lead-crm.md](docs/guides/lead-crm.md).
 
-See `docs/guides/deploy.md` for the full environment-variable list, the deploy to the VPS and the Vercel projects that now only hold the env.
+See `docs/guides/deploy.md` for the full environment-variable list and the deploy to the VPS. The sites' env lives in GitHub, shared names at repository level and the rest in each site's `site-<app>` environment, and `.github/scripts/site-env.json` is the one manifest of those names: a variable a site starts reading goes into it in the same change, or `site-env.test.ts` fails `check`.
 
 ## i18n
 

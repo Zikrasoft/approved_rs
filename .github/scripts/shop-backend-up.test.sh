@@ -40,6 +40,9 @@ probe 'MEDUSA_BACKEND_URL="https://api.test/"'
 check "$status" 0 'a healthy backend passes'
 check "$(grep -c 'https://api.test/health$' "$LOG")" 1 'the probe hits /health once'
 
+probe "MEDUSA_BACKEND_URL='https://quoted.test'"
+check "$(grep -c 'https://quoted.test/health$' "$LOG")" 1 'a single-quoted URL is probed without its quotes'
+
 HEALTH_EXIT=7
 export HEALTH_EXIT
 probe 'MEDUSA_BACKEND_URL=https://api.test'
