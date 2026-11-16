@@ -14,10 +14,13 @@ await admin.$disconnect();
 
 process.env.CRM_DATABASE_URL = new URL(`/${name}`, templateUrl).href;
 
+const tables = await crmDatabase().$queryRaw<{ name: string }[]>`
+  SELECT tablename AS name FROM pg_tables
+  WHERE schemaname = 'public' AND tablename <> '_prisma_migrations'`;
+const truncate = `TRUNCATE ${tables.map(({ name }) => `"${name}"`).join(', ')} RESTART IDENTITY`;
+
 beforeEach(async () => {
-  await crmDatabase().$executeRawUnsafe(
-    'TRUNCATE leads, lead_notes, digests, digest_leads, ledger_operations, operation_prompts, quarantined_records RESTART IDENTITY',
-  );
+  await crmDatabase().$executeRawUnsafe(truncate);
 });
 
 afterAll(async () => {

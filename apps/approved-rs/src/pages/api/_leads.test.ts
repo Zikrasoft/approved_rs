@@ -1,4 +1,3 @@
-import '@podbor/lead-crm/testing/database';
 import { describe } from 'vitest';
 import { PARTNER_SERVICE } from '@podbor/brands';
 import { testLeadsRoute } from '@podbor/lead-crm/testing';

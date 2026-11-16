@@ -1,4 +1,3 @@
-import '@podbor/lead-crm/testing/database';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { PARTS_ORDER_SERVICE, serviceLabel } from '@podbor/brands';
 import {

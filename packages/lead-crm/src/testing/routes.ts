@@ -1,3 +1,4 @@
+import './database.ts';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { backgroundIdle } from '../background.ts';
 import type { StoredLead } from '../schema.ts';
