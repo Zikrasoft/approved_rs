@@ -92,8 +92,7 @@ check "$(has 'build PUBLIC_PHONE_NUMBER=381 11 GUARD= KEY= VERCEL=$')" yes 'the 
 check "$(has 'pnpm exec turbo run build --filter=@podbor/detailing')" yes 'turbo builds the app'
 check "$(has 'rsync .*--checksum.*--link-dest=/srv/sites/detailing/current .*apps/detailing/dist/client apps/detailing/dist/server deploy@vps.test:/srv/sites/detailing/releases/abc123-1-1/$')" yes 'rsync ships client and server into the release, hard-linking what current already has'
 check "$(cat "$SHIPPED")" 'PUBLIC_PHONE_NUMBER="381 11"
-BLOB_READ_WRITE_TOKEN="blob-secret"
-MEDUSA_BACKEND_URL="https://api.test"' 'the runtime .env is the pulled env without the Vercel system variables'
+MEDUSA_BACKEND_URL="https://api.test"' 'the runtime .env is the pulled env without the Vercel system variables or the Blob token'
 check "$(has "ssh .*umask 077.*/srv/sites/detailing/.env")" yes 'the runtime .env is written owner-only'
 check "$(tail -n 1 "$LOG" | grep -c '/srv/carlab/deploy-site.sh detailing abc123-1-1$')" 1 'the host deploy script switches to the release last'
 check "$(has curl)" no 'only auto-service probes the shop backend'
@@ -114,9 +113,8 @@ unset HEALTH_EXIT
 
 PULLED="$work/no-blob.env"
 deploy approved-rs abc123-1-1
-check "$status" 1 'an empty required variable fails the deploy'
-check "$(grep -c 'BLOB_READ_WRITE_TOKEN' "$work/out")" 1 'the failure names the missing variable'
-check "$(has 'turbo\|rsync\|ssh')" no 'nothing is built or shipped without it'
+check "$status" 0 'a site deploys without a Blob token, the leads live in Postgres'
+check "$(grep -c BLOB_READ_WRITE_TOKEN "$SHIPPED" || true)" 0 'an empty Blob token is not shipped either'
 PULLED="$work/full.env"
 
 deploy shop abc123-1-1

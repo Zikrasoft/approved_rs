@@ -34,12 +34,7 @@ printf '%s\n' "$VPS_KNOWN_HOSTS" >"$work/known_hosts"
 chmod 600 "$work/key"
 (cd "apps/$app" && pnpm exec vercel env pull "$work/vercel.env" --yes --environment=production)
 unset VERCEL_TOKEN VPS_SSH_KEY VPS_KNOWN_HOSTS
-grep -v -e '^VERCEL=' -e '^VERCEL_' "$work/vercel.env" >"$work/site.env" || true
-
-if ! grep -Eq '^BLOB_READ_WRITE_TOKEN="?[^"]' "$work/site.env"; then
-  echo "::error::BLOB_READ_WRITE_TOKEN is empty in the Vercel production env of $app (a sensitive variable pulls as empty). Nothing was deployed." >&2
-  exit 1
-fi
+grep -v -e '^VERCEL=' -e '^VERCEL_' -e '^BLOB_READ_WRITE_TOKEN=' "$work/vercel.env" >"$work/site.env" || true
 
 if [ "$app" = auto-service ]; then
   if ! sh "$scripts/shop-backend-up.sh" "$work/site.env"; then
