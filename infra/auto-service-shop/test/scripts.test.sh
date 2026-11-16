@@ -26,7 +26,8 @@ case "$*" in
   exit "${PGDUMP_EXIT:-0}"
   ;;
 *pg_tables*) printf '%s' "${TABLES:-0}" ;;
-*'up -d --wait --wait-timeout'*) exit "${UP_EXIT:-0}" ;;
+*'up -d --wait --wait-timeout'*) echo "${COMPOSE_PROFILES-unset}" >"$LOG.profiles"
+  exit "${UP_EXIT:-0}" ;;
 *'image ls'*) printf '%s\n' ${IMAGE_TAGS:-} ;;
 *'image rm'*) exit "${RM_EXIT:-0}" ;;
 esac
@@ -42,7 +43,13 @@ case "$*" in
 esac
 exit "${HEALTH_EXIT:-0}"
 STUB
-chmod +x "$work/bin/docker" "$work/bin/curl"
+cat >"$work/bin/sudo" <<'STUB'
+#!/bin/sh
+echo "sudo $*" >>"$LOG.sudo"
+shift 7
+mkdir -p "$@"
+STUB
+chmod +x "$work/bin/docker" "$work/bin/curl" "$work/bin/sudo"
 
 failures=0
 expect() {
@@ -70,6 +77,8 @@ OLD=1111111111111111111111111111111111111111
 NEW=2222222222222222222222222222222222222222
 BACKUP_DIR="$work/deploy-backups"
 export BACKUP_DIR
+SITES_ROOT="$work/sites"
+export SITES_ROOT
 
 stage() {
   rm -rf "$work/host"
@@ -135,6 +144,22 @@ expect '.env names the new tag' has "MEDUSA_TAG=$NEW" "$work/host/.env"
 expect '.env keeps every other line' has 'POSTGRES_PASSWORD=x' "$work/host/.env"
 expect 'the old tag is kept for rollback' has "$OLD" "$work/host/.previous-tag"
 expect 'the lock is released after a deploy' test ! -d "$work/host/.deploy.lock"
+expect 'a deploy on a host without a sites root makes it as root, for the deploy user' grep -q "^sudo install -d -m 0755 -o $(id -u) -g $(id -g) $SITES_ROOT\$" "$LOG.sudo"
+expect 'a deploy before any site release starts no site' test "$(cat "$LOG.profiles")" = ''
+expect 'a deploy makes a directory each site release lands in, open to caddy and node' \
+  test "$(find "$SITES_ROOT" -mindepth 2 -maxdepth 2 -name releases -perm -0755 | wc -l | tr -d ' ')" -eq 3
+
+stage
+mkdir -p "$SITES_ROOT/detailing/releases/r" "$SITES_ROOT/approved-rs/releases/r"
+ln -sfn releases/r "$SITES_ROOT/detailing/current"
+ln -sfn releases/r "$SITES_ROOT/approved-rs/current"
+expect 'a deploy with site releases succeeds' run deploy.sh "$NEW"
+expect 'a deploy keeps every released site running and starts no other' \
+  test "$(cat "$LOG.profiles")" = site-detailing,site-approved-rs
+rm -rf "$SITES_ROOT"
+
+stage
+expect 'a deploy succeeds again' run deploy.sh "$NEW"
 expect 'a deploy dumps the database before migrating' \
   test "$(cat "$work/deploy-backups"/db-*-pre-deploy.dump)" = DUMP
 expect 'a deploy leaves no .part dump' test -z "$(find "$work/deploy-backups" -name '*.part')"

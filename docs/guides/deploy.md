@@ -863,12 +863,33 @@ is retried once its 10 minute lease runs out.
   the userland proxy back on, or every IPv6 client becomes the docker gateway's
   address.
 - Memory limits for 4 GB: medusa 1536m (a 1024 MB Node heap), typesense 768m,
-  postgres 512m, caddy 128m, and for the logs grafana 256m, loki 192m,
-  alloy 160m: 3552 MB together, under 3.5 GB (checked by the compose test),
-  with the 2 GB swap `bootstrap-host.sh` makes behind it. Measured idle in
-  `infra/auto-service-shop/test/logs.test.sh`: grafana about 200 MB, loki and
-  alloy about 100 MB each. If the box swaps, the logs go first: stop them with
-  `docker compose stop grafana alloy loki`, the shop runs without them. The crawler runs on the owner's Mac, so it is not in the budget.
+  postgres 512m, caddy 128m, the three sites 160m each (a 112 MB Node heap),
+  loki 192m, alloy 160m: 3776 MB for what always runs, under 3.75 GB, and
+  grafana's 256m on demand only, 4032 MB with it, under the 4 GB of the host
+  (both checked by the compose test), with the 2 GB swap `bootstrap-host.sh`
+  makes behind it. Grafana sits behind the `grafana` profile: start it for a
+  look with `docker compose --profile grafana up -d grafana` and stop it after.
+  Measured idle in `infra/auto-service-shop/test/logs.test.sh`: grafana about
+  200 MB, loki and alloy about 100 MB each. If the box swaps, the logs go
+  first: stop them with `docker compose stop grafana alloy loki`, the shop
+  runs without them.
+- The three Astro sites run from `/srv/sites/<app>/current` (a link to
+  `releases/<name>`), one `site-<app>` container each, started only once that
+  link exists (`deploy.sh` turns on the `site-<app>` profile of every released
+  site). `deploy-site.sh <app> <name>` switches the link, recreates the
+  container, waits for it to answer `/`, rolls the link back on failure and
+  keeps the last three releases. Caddy serves a release's files itself
+  (`/_astro/*` for a year, everything else revalidated) and hands every other
+  path to node, except `/_image`, which answers 404 (no sharp at runtime).
+  Node only runs middleware for paths that match a route, so Caddy applies each
+  site's edge redirects and security headers itself, from
+  `caddy/sites/<app>.caddy`: the app's `scripts/redirects.ts` writes it from the
+  same rules and `SECURITY_HEADERS` as `vercel.json`, and
+  `.github/scripts/redirects-drift.sh` fails `check` when either drifts.
+  Proxied requests keep the apex `Host`, carry `X-Forwarded-Proto: https` and an
+  `X-Request-Id`, and `X-Forwarded-For` is Caddy's own view of the client. The `carlab-reminders`
+  systemd timer runs `reminders.sh` at 08:00 UTC, which calls approved.rs's
+  `/api/reminders` inside its container with the container's own `CRON_SECRET`. The crawler runs on the owner's Mac, so it is not in the budget.
   Typesense holds its whole index in memory; measure it with
   `docker stats --no-stream` once the catalogue is at scale, and raise the limit
   before the index outgrows it.

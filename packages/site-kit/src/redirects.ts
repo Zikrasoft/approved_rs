@@ -67,6 +67,37 @@ export function writeVercelConfig(
   );
 }
 
+export function caddySiteConfig(redirects: readonly Redirect[]): string {
+  const headers = SECURITY_HEADERS.flatMap((rule) => rule.headers).map(
+    ({ key, value }) => `\t${key} ${JSON.stringify(value)}`,
+  );
+  const rules = redirects.flatMap((redirect, index) => {
+    const name = `redirect${index}`;
+    const { regex, location } = compileRule(redirect);
+    const target = location.replace(/\$(\d+)/g, `{re.${name}.$1}`);
+    return [
+      `@${name} path_regexp ${name} \`${regex.source}\``,
+      `redir @${name} ${target}{?query} ${redirect.permanent ? 308 : 307}`,
+    ];
+  });
+  return [
+    'header {',
+    '\tdefer',
+    ...headers,
+    '\t-Server',
+    '}',
+    ...rules,
+    '',
+  ].join('\n');
+}
+
+export function writeCaddySiteConfig(
+  file: URL,
+  redirects: readonly Redirect[],
+): void {
+  writeFileSync(file, caddySiteConfig(redirects));
+}
+
 type PathBuilders<L extends string> = Record<
   string,
   { build(locale: L, ...params: string[]): string }['build']
