@@ -2,18 +2,17 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { Prisma, PrismaClient } from './generated/prisma/client.ts';
 import { requireEnv } from './requireEnv.ts';
 
-export type CrmClient = PrismaClient;
 export type CrmTransaction = Prisma.TransactionClient;
-export type CrmDatabase = () => CrmClient;
+export type CrmDatabase = () => PrismaClient;
 
-export function createCrmClient(connectionString: string): CrmClient {
+export function createCrmClient(connectionString: string): PrismaClient {
   return new PrismaClient({
     adapter: new PrismaPg({ connectionString }),
     transactionOptions: { maxWait: 10_000, timeout: 20_000 },
   });
 }
 
-let shared: CrmClient | undefined;
+let shared: PrismaClient | undefined;
 
 export const crmDatabase: CrmDatabase = () =>
   (shared ??= createCrmClient(requireEnv('CRM_DATABASE_URL')));

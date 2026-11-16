@@ -2,18 +2,20 @@ import './database.ts';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { backgroundIdle } from '../background.ts';
 import type { StoredLead } from '../schema.ts';
+import { createLeadStore } from '../store.ts';
 import { recordBotApi } from './botApi.ts';
 
 export interface RouteSuite {
   brand: string;
   POST: (context: never) => Response | Promise<Response>;
-  readLeads(): Promise<StoredLead[]>;
 }
 
 export interface LeadsRouteSuite extends RouteSuite {
   fields?: Record<string, string>;
   stored?: Partial<StoredLead>;
 }
+
+const { readLeads } = createLeadStore();
 
 const VISITOR_ID = '9f1c2b7e-4a3d-4c9e-8b21-6f0d5a7c3e11';
 
@@ -53,7 +55,7 @@ function postedTo(path: string, POST: RouteSuite['POST']) {
   };
 }
 
-export function testContactClickRoute({ brand, POST, readLeads }: RouteSuite) {
+export function testContactClickRoute({ brand, POST }: RouteSuite) {
   describe('a contact click posted to /api/contact-click', () => {
     const { post, groupCards } = postedTo('/api/contact-click', POST);
     const click = (visitorId: string) =>
@@ -89,7 +91,6 @@ export function testContactClickRoute({ brand, POST, readLeads }: RouteSuite) {
 export function testLeadsRoute({
   brand,
   POST,
-  readLeads,
   fields = {},
   stored = {},
 }: LeadsRouteSuite) {

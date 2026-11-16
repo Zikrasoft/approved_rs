@@ -1,11 +1,9 @@
 import { createLeadStore } from './store.ts';
 import { createLedgerStore } from './ledgerStore.ts';
-import { crmDatabase, type CrmDatabase } from './database.ts';
 import { createNotifyLead, type NotifyLeadOptions } from './notifyLead.ts';
 
 export interface BrandStoreOptions {
   brand: string;
-  database?: CrmDatabase;
   standaloneServices?: readonly string[];
   getNotifier: () => Promise<{
     notifier: NotifyLeadOptions['notifier'] & {
@@ -16,17 +14,15 @@ export interface BrandStoreOptions {
 
 export function createBrandStore({
   brand,
-  database = crmDatabase,
   getNotifier,
   standaloneServices,
 }: BrandStoreOptions) {
   const leadStore = createLeadStore({
-    database,
     standaloneServices,
     alertLeadCount: async (count) =>
       (await getNotifier()).notifier.sendLeadCountAlert(count, brand),
   });
-  const ledgerStore = createLedgerStore({ database });
+  const ledgerStore = createLedgerStore();
   const notifyLead = createNotifyLead({
     store: leadStore,
     brand,

@@ -1,5 +1,4 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { crmDatabase } from './database.ts';
 import { createLeadStore, type LeadStore } from './store.ts';
 import { createLedgerStore, type LedgerStore } from './ledgerStore.ts';
 import type { LeadId, LeadInput } from './schema.ts';
@@ -11,10 +10,9 @@ let ledger: LedgerStore;
 
 beforeEach(() => {
   store = createLeadStore({
-    database: crmDatabase,
     standaloneServices: ['parts-order'],
   });
-  ledger = createLedgerStore({ database: crmDatabase });
+  ledger = createLedgerStore();
 });
 
 const click = (channel: LeadInput['contactChannel']): LeadInput => ({

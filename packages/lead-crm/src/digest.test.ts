@@ -49,7 +49,7 @@ const digestMarks = async () =>
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ['Date'] });
   onDay(1);
-  store = createLeadStore({ database: crmDatabase });
+  store = createLeadStore();
 });
 
 afterEach(() => vi.useRealTimers());

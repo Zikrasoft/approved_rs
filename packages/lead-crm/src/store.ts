@@ -16,6 +16,7 @@ import type {
 import { storedLeadSchema } from './schema.ts';
 import { FAILED_CHECKOUTS_PER_CONTACT_HOUR } from './limits.ts';
 import {
+  crmDatabase,
   isUniqueViolation,
   lockKey,
   type CrmDatabase,
@@ -113,7 +114,7 @@ function digestOf(leads: StoredLead[], now: Date): Digest {
 }
 
 export interface LeadStoreOptions {
-  database: CrmDatabase;
+  database?: CrmDatabase;
   alertLeadCount?: (count: number) => Promise<void>;
   standaloneServices?: readonly string[];
 }
@@ -289,10 +290,10 @@ function candidatesFor(data: LeadInput): Prisma.Sql {
 }
 
 export function createLeadStore({
-  database,
+  database = crmDatabase,
   alertLeadCount,
   standaloneServices = [],
-}: LeadStoreOptions) {
+}: LeadStoreOptions = {}) {
   function newStoredLead(
     data: LeadInput,
     id: string = randomUUID(),

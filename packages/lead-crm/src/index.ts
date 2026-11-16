@@ -34,8 +34,7 @@ export {
   VISITOR_MERGE_WINDOW_MS,
 } from './store.ts';
 export type { CaptureUpdate, LeadStore, PostedDigest } from './store.ts';
-export { createCrmClient, crmDatabase } from './database.ts';
-export type { CrmClient, CrmDatabase } from './database.ts';
+export { crmDatabase } from './database.ts';
 export type { LedgerOperation, OperationType } from './ledgerStore.ts';
 export { parseOperationReply } from './operationReply.ts';
 export { BUSINESS_TIME_ZONE, businessDay } from './businessTime.ts';

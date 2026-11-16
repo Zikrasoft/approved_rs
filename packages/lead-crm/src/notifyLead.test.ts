@@ -8,7 +8,6 @@ import {
 } from './notifyLead.ts';
 import { type LeadInput, type StoredLead } from './schema.ts';
 import { createLeadStore } from './store.ts';
-import { crmDatabase } from './database.ts';
 import { testLeadId } from './testing/seed.ts';
 
 const LEAD_ID = testLeadId(42);
@@ -18,9 +17,7 @@ const setTelegramMessage = vi.fn();
 const sendLeadNotification = vi.fn();
 const refreshLeadCard = vi.fn();
 
-const realStore = createLeadStore({
-  database: crmDatabase,
-});
+const realStore = createLeadStore();
 
 const store = {
   newStoredLead: realStore.newStoredLead,
@@ -438,9 +435,7 @@ describe('afterStatusChange', () => {
 
 describe('dropFromDigest', () => {
   const editDigest = vi.fn();
-  const digestStore = createLeadStore({
-    database: crmDatabase,
-  });
+  const digestStore = createLeadStore();
   const dropFromDigest = createDropFromDigest({
     store: digestStore,
     notifier: { editDigest },
@@ -507,9 +502,7 @@ describe('ensureLeadTopic', () => {
   const postLeadTopicSummary = vi.fn();
   const refreshLeadTopic = vi.fn();
   const deleteLeadTopic = vi.fn();
-  const topicStore = createLeadStore({
-    database: crmDatabase,
-  });
+  const topicStore = createLeadStore();
   const ensureLeadTopic = createEnsureLeadTopic({
     store: topicStore,
     notifier: {
