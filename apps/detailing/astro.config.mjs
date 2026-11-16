@@ -1,5 +1,5 @@
 import { defineConfig } from 'astro/config';
-import vercel from '@astrojs/vercel';
+import node from '@astrojs/node';
 import react from '@astrojs/react';
 import keystatic from '@keystatic/astro';
 import sitemap from '@astrojs/sitemap';
@@ -12,7 +12,10 @@ const site = DETAILS.url;
 export default defineConfig({
   site,
   output: 'static',
-  adapter: vercel(),
+  adapter: node({ mode: 'standalone' }),
+  security: {
+    allowedDomains: [{ hostname: DETAILS.domain, protocol: 'https' }],
+  },
   prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
   i18n: {
     locales: [...localeConfig.locales],
@@ -33,5 +36,6 @@ export default defineConfig({
   ],
   vite: {
     plugins: [tailwindcss()],
+    ssr: { noExternal: true },
   },
 });

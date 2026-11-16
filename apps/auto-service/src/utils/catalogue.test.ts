@@ -1426,7 +1426,7 @@ describe('the deploy build', () => {
   it('reads the catalogue once for every page, the sitemap and llms.txt', async () => {
     const shop = backend({ pages: partPages(2) });
     deployed(2, shop);
-    const env = shopEnv({ VERCEL: '1' });
+    const env = shopEnv({ CATALOGUE_SHRINK_GUARD: 'true' });
 
     await partPagesForBuild(env);
     await categoriesForBuild(env);
@@ -1502,15 +1502,17 @@ describe('the deploy build', () => {
   it('fails without the backend URL once the live site has part pages', async () => {
     deployed(120);
 
-    await expect(partPagesForBuild({ VERCEL: '1' })).rejects.toThrow(
-      'MEDUSA_BACKEND_URL',
-    );
+    await expect(
+      partPagesForBuild({ CATALOGUE_SHRINK_GUARD: 'true' }),
+    ).rejects.toThrow('MEDUSA_BACKEND_URL');
   });
 
   it('builds without a catalogue while the live site has none', async () => {
     deployed(null);
 
-    expect(await partPagesForBuild({ VERCEL: '1' })).toEqual([]);
+    expect(await partPagesForBuild({ CATALOGUE_SHRINK_GUARD: 'true' })).toEqual(
+      [],
+    );
   });
 
   it('fails on a shop with no part pages once the catalogue is live, even when shrinking is allowed', async () => {
@@ -1518,7 +1520,10 @@ describe('the deploy build', () => {
 
     await expect(
       partPagesForBuild(
-        shopEnv({ VERCEL: '1', CATALOGUE_SHRINK_ALLOWED: 'true' }),
+        shopEnv({
+          CATALOGUE_SHRINK_GUARD: 'true',
+          CATALOGUE_SHRINK_ALLOWED: 'true',
+        }),
       ),
     ).rejects.toThrow('0 part pages');
   });
@@ -1526,15 +1531,17 @@ describe('the deploy build', () => {
   it('fails on far fewer part pages than the live site has', async () => {
     deployed(10, backend({ pages: partPages(4) }));
 
-    await expect(partPagesForBuild(shopEnv({ VERCEL: '1' }))).rejects.toThrow(
-      '4 part pages',
-    );
+    await expect(
+      partPagesForBuild(shopEnv({ CATALOGUE_SHRINK_GUARD: 'true' })),
+    ).rejects.toThrow('4 part pages');
   });
 
   it('builds a catalogue that shrank by less than half', async () => {
     deployed(10, backend({ pages: partPages(6) }));
 
-    expect(await partPagesForBuild(shopEnv({ VERCEL: '1' }))).toHaveLength(6);
+    expect(
+      await partPagesForBuild(shopEnv({ CATALOGUE_SHRINK_GUARD: 'true' })),
+    ).toHaveLength(6);
   });
 
   it('builds a shrunken catalogue the owner allowed', async () => {
@@ -1542,7 +1549,10 @@ describe('the deploy build', () => {
 
     expect(
       await partPagesForBuild(
-        shopEnv({ VERCEL: '1', CATALOGUE_SHRINK_ALLOWED: 'true' }),
+        shopEnv({
+          CATALOGUE_SHRINK_GUARD: 'true',
+          CATALOGUE_SHRINK_ALLOWED: 'true',
+        }),
       ),
     ).toHaveLength(4);
   });
@@ -1581,9 +1591,9 @@ describe('the deploy build', () => {
       vi.fn(() => respond({}, false)),
     );
 
-    await expect(partPagesForBuild(shopEnv({ VERCEL: '1' }))).rejects.toThrow(
-      '503',
-    );
+    await expect(
+      partPagesForBuild(shopEnv({ CATALOGUE_SHRINK_GUARD: 'true' })),
+    ).rejects.toThrow('503');
   });
 
   it('warns when a catalogue Make is missing from the exported list', async () => {
@@ -1751,17 +1761,31 @@ describe('catalogueFromEnv', () => {
       expect(headers.get('x-shop-client-secret')).toBe('secret');
     });
 
-    it("passes Vercel's request id on as the shop's, and only a well-formed one", async () => {
+    it('takes the address the proxy forwarded over one the visitor claims', async () => {
+      const headers = await headersSent(
+        { ...SHOP, SHOP_CLIENT_SECRET: 'secret' },
+        new Request('https://carlab.rs/api/cart', {
+          headers: {
+            'x-real-ip': '198.51.100.7',
+            'x-forwarded-for': '203.0.113.5',
+          },
+        }),
+      );
+
+      expect(headers.get('x-shop-client')).toBe('203.0.113.5');
+    });
+
+    it("passes the proxy's request id on as the shop's, and only a well-formed one", async () => {
       const traced = await headersSent(
         SHOP,
         new Request('https://carlab.rs/api/cart', {
-          headers: { 'x-vercel-id': 'fra1::iad1::abc-1700000000000' },
+          headers: { 'x-request-id': 'fra1::iad1::abc-1700000000000' },
         }),
       );
       const malformed = await headersSent(
         SHOP,
         new Request('https://carlab.rs/api/cart', {
-          headers: { 'x-vercel-id': 'not a request id' },
+          headers: { 'x-request-id': 'not a request id' },
         }),
       );
 

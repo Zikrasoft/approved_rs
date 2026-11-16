@@ -25,8 +25,8 @@ const crm = {
   failedCheckoutCapped: vi.fn(async () => true),
 };
 
-vi.mock('@vercel/functions', () => ({
-  waitUntil: (promise: Promise<unknown>) => pending.push(promise),
+vi.mock('@podbor/site-kit/background', () => ({
+  inBackground: (promise: Promise<unknown>) => pending.push(promise),
 }));
 vi.mock('@/utils/catalogueEnv', async (original) => ({
   ...(await original<typeof import('@/utils/catalogueEnv')>()),
@@ -39,7 +39,7 @@ vi.mock('@/lib/crm', () => ({
 }));
 
 const BACKEND = 'https://api.carlab.test';
-const VERCEL_ID = 'fra1::iad1::route-test-1';
+const REQUEST_ID = 'fra1::iad1::route-test-1';
 const posted: Record<string, unknown>[] = [];
 
 const events = async () => {
@@ -54,7 +54,7 @@ const context = (
 ) => {
   const request = new Request(url, {
     ...init,
-    headers: { 'x-vercel-id': VERCEL_ID, ...headers },
+    headers: { 'x-request-id': REQUEST_ID, ...headers },
   });
   return {
     url: new URL(url),
@@ -127,7 +127,7 @@ describe('/api/search', () => {
       ),
     );
 
-  it('reports a suggestion search with its count, under the Vercel id', async () => {
+  it('reports a suggestion search with its count, under the proxy request id', async () => {
     catalogue.search.mockResolvedValue(found(4));
 
     expect((await search('hu816x')).status).toBe(200);
@@ -135,7 +135,7 @@ describe('/api/search', () => {
     expect(await events()).toEqual([
       {
         event: 'storefront.search',
-        request_id: VERCEL_ID,
+        request_id: REQUEST_ID,
         route: 'suggest',
         intent: 'query',
         outcome: 'ok',
@@ -395,7 +395,7 @@ describe('/api/leads', () => {
     expect(await events()).toEqual([
       {
         event: 'storefront.lead',
-        request_id: VERCEL_ID,
+        request_id: REQUEST_ID,
         source: 'leads',
         service: null,
         outcome: 'refused',
@@ -465,13 +465,13 @@ describe('/api/part-pick', () => {
       }),
     );
 
-  it('reports the part a visitor picked from the suggestions, under the Vercel id', async () => {
+  it('reports the part a visitor picked from the suggestions, under the proxy request id', async () => {
     expect((await pick('mann-filter-hu816x')).status).toBe(204);
 
     expect(await events()).toEqual([
       {
         event: 'storefront.demand',
-        request_id: VERCEL_ID,
+        request_id: REQUEST_ID,
         signal: 'pick',
         parts: ['mann-filter-hu816x'],
       },

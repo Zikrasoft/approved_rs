@@ -447,7 +447,7 @@ in the shop first, restart it, then on carlab.rs and redeploy.
 `SHOP_EVENTS_SECRET` is one more value set twice, on carlab.rs and in the shop's
 `.env`: carlab.rs's search, cart, checkout, lead and CSP-report routes post one
 Event per request to `POST /hooks/storefront-events` with it as a Bearer token
-(ADR-0057), through `waitUntil` with a 2-second timeout, so a slow or refusing
+(ADR-0057), through `inBackground` with a 2-second timeout, so a slow or refusing
 shop never slows or fails the visitor. The secret can do nothing but add a line
 to the log. Unset on carlab.rs, nothing is sent; unset in the shop, the route
 answers 401.
@@ -1240,12 +1240,12 @@ moves forward again.
 
    The build reads the catalogue once (pages, sitemap and llms.txt share it)
    and records how many part pages it serves at
-   `https://carlab.rs/catalogue-build.json`. A `vercel build` (it sets
-   `VERCEL=1`) reads that record from the live site first, and once it counts
+   `https://carlab.rs/catalogue-build.json`. A production build (CI sets
+   `CATALOGUE_SHRINK_GUARD=true`) reads that record from the live site first, and once it counts
    any part pages the catalogue is live: the build then fails without
    `MEDUSA_BACKEND_URL`, on zero part pages, and on fewer than half of what the
    live site serves. A shrink that is meant (a supplier removed) goes through
-   with `CATALOGUE_SHRINK_ALLOWED=true` in the carlab.rs Vercel project for one
+   with `CATALOGUE_SHRINK_ALLOWED=true` in the carlab.rs build env for one
    build; remove it afterwards. Part pages list only published numbers, the same
    ones search finds, so a CI deploy and a Publish build the same catalogue.
 

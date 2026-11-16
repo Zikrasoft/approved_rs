@@ -189,7 +189,7 @@ pnpm lint:fix
 pnpm format           # prettier --write . (never --write in a review pass — it reformats what you are meant to be reading)
 pnpm exec prettier --check .
 node --experimental-strip-types scripts/layout-shift-pass.ts <base-url> <path>...   # local only: CLS per page (load + scroll down/up) on two desktops and a phone, fails over 0.01
-pnpm --filter @podbor/auto-service preview:static   # serves a built site's .vercel/output/static on 127.0.0.1:4322 (PREVIEW_PORT) for layout-shift-pass.ts / contact-controls-pass.ts; astro preview does not run with the Vercel adapter
+pnpm --filter @podbor/auto-service preview:static   # serves a built site's dist/client on 127.0.0.1:4322 (PREVIEW_PORT) for layout-shift-pass.ts / contact-controls-pass.ts
 ```
 
 Scoped to one app — either `--filter` from the root, or run inside the app dir:
@@ -199,11 +199,6 @@ pnpm --filter @podbor/approved-rs dev
 pnpm --filter @podbor/approved-rs exec vitest run path/to/file.test.ts   # single test file
 pnpm --filter @podbor/approved-rs exec vitest run -t "name substring"    # single test by name
 ```
-
-`pnpm build` may finish rendering every page and only then fail at the
-`@astrojs/vercel` "astro:build:done" hook locally with a `sharp` binary `ENOENT`
-— that's a local-machine artifact unrelated to code changes, not a real build
-failure; check the page-rendering output above it, not the final exit code.
 
 `astro dev` does not put unprefixed `.env` variables into `process.env`, and the
 Telegram client reads them from there — so `/api/*` routes fail locally with
@@ -234,7 +229,7 @@ and `.github/scripts/shop-migrations-frozen.sh` against the
 
 ## Architecture
 
-**Stack:** Astro v7, `output: 'static'` (prerendered) with the Vercel adapter — most pages are static; a page opts into SSR individually via `export const prerender = false` (used by the two `/api/*` routes and the homepage, which middleware rewrites bare `/` into). There is no global SSR mode.
+**Stack:** Astro v7, `output: 'static'` (prerendered) with `@astrojs/node` in `standalone` mode — most pages are static; a page opts into SSR individually via `export const prerender = false` (used by the `/api/*` routes and the homepage, which middleware rewrites bare `/` into). There is no global SSR mode. A build is `dist/client/` (every static file, served from disk by Caddy) plus `dist/server/entry.mjs`, a self-contained Node server (`vite.ssr.noExternal: true`, no `node_modules` at runtime) that answers only what is not a file and reads its config from `process.env` (`HOST`, `PORT`). `security.allowedDomains` names the brand's domain, so the proxy's `Host` and `X-Forwarded-Proto` make `request.url` the public origin; without it every form POST fails Astro's origin check. A server-only `import.meta.env.X` is inlined at build time, a `process.env.X` is read at runtime. Work that must outlive the response (the Telegram notify, Meta CAPI, shop Events) goes through `inBackground` from `@podbor/site-kit/background`: it logs a rejection instead of leaving it unhandled and holds `SIGTERM` until the running tasks settle.
 
 **Touching lead storage, a lead or contact-click route, the CRM bot, a capture
 bot or the reminder cron:** read [docs/guides/lead-crm.md](docs/guides/lead-crm.md).

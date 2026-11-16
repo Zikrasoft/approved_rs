@@ -7,7 +7,7 @@ import {
   checkoutContactSchema,
 } from '@podbor/catalog-contract';
 import { fitComment } from '@podbor/catalog-contract/comment';
-import { waitUntil } from '@vercel/functions';
+import { inBackground } from '@podbor/site-kit/background';
 import {
   readForm,
   HONEYPOT_FIELD,
@@ -126,7 +126,7 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     limit: MAX_COMMENT_LENGTH,
     more: PARTS_ORDER_COPY.notPlacedLeftOut,
   });
-  waitUntil(
+  inBackground(
     notifyLead(
       orderLeadSubmission(
         null,

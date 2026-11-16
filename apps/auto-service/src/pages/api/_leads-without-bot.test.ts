@@ -31,8 +31,8 @@ vi.mock('@podbor/lead-crm/storage/local', () =>
 vi.mock('@podbor/lead-crm/storage/vercel-blob', () =>
   memory.module('createVercelBlobStorage'),
 );
-vi.mock('@vercel/functions', () => ({
-  waitUntil: (promise: Promise<unknown>) => pending.push(promise),
+vi.mock('@podbor/site-kit/background', () => ({
+  inBackground: (promise: Promise<unknown>) => pending.push(promise),
 }));
 vi.spyOn(console, 'error').mockImplementation(() => {});
 

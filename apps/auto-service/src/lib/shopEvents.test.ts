@@ -33,14 +33,14 @@ const setUp = (
 };
 
 describe('createShopEvents', () => {
-  it('posts the event with the bearer secret and the Vercel request id, kept alive past the response', async () => {
+  it('posts the event with the bearer secret and the proxy request id, kept alive past the response', async () => {
     const { report, fetchMock, kept } = setUp(
       async () => new Response(null, { status: 204 }),
     );
 
     report(
       new Request('https://carlab.rs/api/order', {
-        headers: { 'x-vercel-id': 'fra1::abc-1' },
+        headers: { 'x-request-id': 'fra1::abc-1' },
       }),
       CHECKOUT,
     );
@@ -70,7 +70,7 @@ describe('createShopEvents', () => {
     report(null, CHECKOUT);
     report(
       new Request('https://carlab.rs/', {
-        headers: { 'x-vercel-id': 'a b' },
+        headers: { 'x-request-id': 'a b' },
       }),
       CHECKOUT,
     );

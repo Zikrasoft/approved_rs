@@ -1,4 +1,4 @@
-import { waitUntil } from '@vercel/functions';
+import { inBackground } from '@podbor/site-kit/background';
 import {
   eventCodeSchema,
   STOREFRONT_EVENTS_PATH,
@@ -40,7 +40,7 @@ const siteEventsEnv = (): EventsEnv => ({
 export const createShopEvents =
   ({
     fetch = (input, init) => globalThis.fetch(input, init),
-    keepAlive = waitUntil,
+    keepAlive = inBackground,
     env = siteEventsEnv,
   }: ShopEventsOptions = {}) =>
   (request: Request | null, event: ShopEvent): void => {

@@ -1,6 +1,6 @@
 export const prerender = false;
 
-import { waitUntil } from '@vercel/functions';
+import { inBackground } from '@podbor/site-kit/background';
 import { createLeadsRoute } from '@podbor/lead-crm';
 import { LOCALE_COOKIE } from '@podbor/site-kit';
 import { phoneLink, whatsappLink } from '@podbor/site-kit/contact-links';
@@ -13,7 +13,7 @@ import { PathBuilder } from '@/utils/paths';
 
 export const POST = createLeadsRoute({
   notifyLead,
-  waitUntil,
+  waitUntil: inBackground,
   isLocale,
   defaultLocale: PRIMARY_LOCALE,
   localeCookie: LOCALE_COOKIE,

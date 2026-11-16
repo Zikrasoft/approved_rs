@@ -6,7 +6,7 @@ import {
   requireEnv,
   type TelegramClient,
 } from '@podbor/lead-crm';
-import { waitUntil } from '@vercel/functions';
+import { inBackground } from '@podbor/site-kit/background';
 import { z } from 'zod';
 import { META_PIXEL_ID } from '@/utils/analytics';
 
@@ -55,5 +55,5 @@ export const captureClientFor = (brand: string): TelegramClient | undefined =>
 export const reportMetaLead = createMetaLeadReporter({
   pixelId: META_PIXEL_ID,
   env: process.env,
-  waitUntil,
+  waitUntil: inBackground,
 });

@@ -35,8 +35,8 @@ const SHOP_LEAD_SECRET = vi.hoisted(() => {
 vi.mock('@podbor/lead-crm/storage/local', () =>
   memory.module('localLeadStorage'),
 );
-vi.mock('@vercel/functions', () => ({
-  waitUntil: (promise: Promise<unknown>) => pending.push(promise),
+vi.mock('@podbor/site-kit/background', () => ({
+  inBackground: (promise: Promise<unknown>) => pending.push(promise),
 }));
 
 const demand = vi.hoisted(() => ({ inquiries: [] as FormData[] }));
