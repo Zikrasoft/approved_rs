@@ -1,5 +1,6 @@
 model Lead {
   id                     String        @id @default(uuid(7)) @db.Uuid
+  number                 Int           @unique @default(autoincrement())
   legacyId               Int?          @unique @map("legacy_id")
   brand                  String
   name                   String

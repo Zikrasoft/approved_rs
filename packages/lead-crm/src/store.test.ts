@@ -1575,7 +1575,36 @@ describe('deleteLead', () => {
   });
 });
 
+describe('Lead numbers', () => {
+  it('gives each new Lead the next number', async () => {
+    const first = await store.insertLead(baseData);
+    const second = await store.insertLead({ ...baseData, contact: '@petr' });
+    expect(second.number).toBe(first.number! + 1);
+  });
+
+  it('keeps the number when the Lead changes', async () => {
+    const lead = await store.insertLead(baseData);
+    const won = await store.setStatus(lead.id, 'won');
+    expect(won?.number).toBe(lead.number);
+  });
+
+  it('has no number for a Lead that was never stored', () => {
+    expect(store.newStoredLead(baseData).number).toBeNull();
+  });
+});
+
 describe('searchLeads', () => {
+  it('finds a Lead by its number, with or without #', async () => {
+    await store.insertLead({ ...baseData, name: 'Пётр', contact: '@petr' });
+    const lead = await store.insertLead(baseData);
+    expect(
+      (await store.searchLeads(`#${lead.number}`)).map((l) => l.id),
+    ).toEqual([lead.id]);
+    expect(
+      (await store.searchLeads(String(lead.number))).map((l) => l.id),
+    ).toEqual([lead.id]);
+  });
+
   it('still finds a lost lead', async () => {
     const lead = await store.insertLead(baseData);
     await store.setStatus(lead.id, 'lost');

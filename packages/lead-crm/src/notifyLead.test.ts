@@ -43,6 +43,7 @@ const storedLead: StoredLead = {
   ...baseData,
   services: [],
   id: LEAD_ID,
+  number: 1,
   status: 'new',
   telegramChatId: null,
   telegramMessageId: null,

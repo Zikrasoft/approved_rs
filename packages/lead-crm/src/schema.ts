@@ -91,6 +91,7 @@ export const REFERRERS = ['approved'] as const;
 export type Referrer = (typeof REFERRERS)[number];
 
 const baseStoredLeadSchema = z.object({
+  number: z.number().int().positive().nullable().default(null),
   brand: z.string().default(LEGACY_BRAND),
   name: z.string(),
   contact: z.string(),

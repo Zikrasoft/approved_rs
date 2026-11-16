@@ -80,6 +80,7 @@ describe('createBrandStore', () => {
           leadData({
             ...seed,
             id: undefined,
+            number: null,
             contact: `@seed${at}`,
           }),
         ),

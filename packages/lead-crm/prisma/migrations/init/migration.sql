@@ -49,6 +49,7 @@ CREATE TABLE "digest_leads" (
 -- CreateTable
 CREATE TABLE "leads" (
     "id" UUID NOT NULL,
+    "number" SERIAL NOT NULL,
     "legacy_id" INTEGER,
     "brand" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -139,6 +140,9 @@ CREATE UNIQUE INDEX "digests_day_key" ON "digests"("day");
 CREATE INDEX "digest_leads_lead_id_idx" ON "digest_leads"("lead_id");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "leads_number_key" ON "leads"("number");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "leads_legacy_id_key" ON "leads"("legacy_id");
 
 -- CreateIndex
@@ -185,3 +189,4 @@ ALTER TABLE "digest_leads" ADD CONSTRAINT "digest_leads_digest_id_fkey" FOREIGN 
 
 -- AddForeignKey
 ALTER TABLE "digest_leads" ADD CONSTRAINT "digest_leads_lead_id_fkey" FOREIGN KEY ("lead_id") REFERENCES "leads"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+

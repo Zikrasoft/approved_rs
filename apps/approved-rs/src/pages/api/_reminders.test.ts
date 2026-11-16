@@ -34,6 +34,7 @@ async function seed(leads: StoredLead[]): Promise<void> {
 function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
   return {
     id: L(9),
+    number: numberOf(overrides.id ?? L(9)),
     brand: 'Approved.rs',
     name: 'Иван',
     contact: '@ivan',
@@ -98,7 +99,9 @@ const crm = (method: string) =>
 const digestIds = () =>
   crm('sendMessage')
     .filter((p) => p.chat_id === GROUP_ID)
-    .flatMap((p) => [...String(p.text).matchAll(/>#([0-9a-f-]{36})</g)])
+    .flatMap((p) => [
+      ...String(p.text).matchAll(/start=lead_([0-9a-f-]{36})"/g),
+    ])
     .map((m) => m[1]);
 
 const textsTo = (chatId: number) =>
@@ -186,7 +189,7 @@ describe('GET /api/reminders', () => {
     expect(digest.text).toContain('🕐 Без движения 7 дней');
     expect(digestIds()).toEqual([L(9), L(11)]);
     expect(digest.reply_markup).toBeUndefined();
-    expect(textsTo(OWNER_ID)).toEqual([expect.stringContaining(`#${L(9)}`)]);
+    expect(textsTo(OWNER_ID)).toEqual([expect.stringContaining(`#9`)]);
     expect(textsTo(ADMIN_ID)).toEqual([]);
   });
 
@@ -233,7 +236,7 @@ describe('GET /api/reminders', () => {
       const [reminder] = crm('sendMessage').filter(
         (p) => p.chat_id === OWNER_ID,
       );
-      expect(reminder.text).toContain(`⏰ Напоминание по заявке #${L(9)}`);
+      expect(reminder.text).toContain(`⏰ Напоминание по заявке #9`);
       expect(reminder.text).toContain(
         'Ты просил напомнить сегодня — заявка снова активна.',
       );
@@ -549,8 +552,8 @@ describe('GET /api/reminders', () => {
     const first = await tap(`st:${L(9)}:lost`, 71001);
     expect((await stored(9)).status).toBe('lost');
     expect(first).toMatchObject({ chat_id: GROUP_ID });
-    expect(first!.text).not.toContain(`#${L(9)}<`);
-    expect(first!.text).toContain(`#${L(11)}<`);
+    expect(first!.text).not.toContain(`#9<`);
+    expect(first!.text).toContain(`#11<`);
     expect(first!.reply_markup).toBeUndefined();
 
     const last = await tap(`work:${L(11)}`, 71002);

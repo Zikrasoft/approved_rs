@@ -7,6 +7,14 @@ import { createLedgerStore } from './ledgerStore.ts';
 const store = createLeadStore({ database: crmDatabase });
 const ledger = createLedgerStore({ database: crmDatabase });
 
+const newLead = {
+  brand: 'CarLab',
+  name: 'Дарья',
+  contact: '@darya',
+  service: 'brakes',
+  locale: 'sr',
+};
+
 const legacyLead = (id: number, fields: object = {}) => ({
   id,
   brand: 'CarLab',
@@ -162,6 +170,32 @@ describe('importLegacy', () => {
     expect(
       await ledger.findOperationPrompt({ chatId: 42, messageId: 9 }),
     ).toMatchObject({ type: 'settlement', expired: true });
+  });
+
+  it('keeps the old number as the Lead number and numbers new Leads after it', async () => {
+    await importLegacy(crmDatabase, readLegacy(blobs));
+
+    expect((await store.searchLeads('#2'))[0]).toMatchObject({
+      number: 2,
+      name: 'Борис',
+    });
+    expect((await store.insertLead(newLead)).number).toBe(3);
+  });
+
+  it('numbers new Leads after a rerun still after the old ones', async () => {
+    await importLegacy(crmDatabase, readLegacy(blobs));
+    await importLegacy(crmDatabase, readLegacy(blobs));
+
+    expect((await store.insertLead(newLead)).number).toBe(3);
+  });
+
+  it('refuses to import over a new Lead that took an old number', async () => {
+    const taken = await store.insertLead(newLead);
+
+    await expect(
+      importLegacy(crmDatabase, readLegacy(blobs)),
+    ).rejects.toThrow();
+    expect(await store.readLeads()).toEqual([taken]);
   });
 
   it('maps the digest rows onto the new ids', async () => {

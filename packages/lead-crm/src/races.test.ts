@@ -32,6 +32,14 @@ const together = <T>(times: number, run: (i: number) => Promise<T>) =>
   Promise.all(Array.from({ length: times }, (_, i) => run(i)));
 
 describe('concurrent writers', () => {
+  it('numbers Leads inserted at once without a repeat', async () => {
+    const leads = await together(TIMES, (i) =>
+      store.insertLead({ ...click('phone'), visitorId: `visitor-${i}` }),
+    );
+
+    expect(new Set(leads.map((l) => l.number)).size).toBe(TIMES);
+  });
+
   it('merges simultaneous clicks of one visitor into a single Lead', async () => {
     const outcomes = await together(TIMES, (i) =>
       store.insertOrMergeLead(click(i % 2 ? 'whatsapp' : 'viber')),

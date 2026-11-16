@@ -161,7 +161,7 @@ describe('a shop Order decided in the CRM bot', () => {
     expect(notices.map(({ payload }) => payload.chat_id).sort()).toEqual([
       1, 3,
     ]);
-    expect(String(notices[0]!.payload.text)).toContain(`#${lead.id}`);
+    expect(String(notices[0]!.payload.text)).toContain(`#${lead.number}`);
   });
 
   it.each([
@@ -190,7 +190,7 @@ describe('a shop Order decided in the CRM bot', () => {
       expect(notices.map(({ payload }) => payload.chat_id).sort()).toEqual([
         1, 3,
       ]);
-      expect(String(notices[0]!.payload.text)).toContain(`#${lead.id}`);
+      expect(String(notices[0]!.payload.text)).toContain(`#${lead.number}`);
     },
   );
 

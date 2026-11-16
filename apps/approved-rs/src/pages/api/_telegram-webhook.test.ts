@@ -96,6 +96,7 @@ const L = (n: number) =>
 function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
   return {
     id: L(5),
+    number: Number((overrides.id ?? L(5)).slice(-12)),
     brand: 'Approved.rs',
     name: 'Иван',
     contact: '@ivan',
@@ -388,7 +389,7 @@ describe('POST /api/telegram-webhook', () => {
         ]);
         expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toHaveLength(1);
         expect(textsTo(OWNER_ID)).toEqual([
-          `🔔 Заявка #${L(5)} Иван: статус — ${mark}\n✍️ Админ`,
+          `🔔 Заявка #5 Иван: статус — ${mark}\n✍️ Админ`,
         ]);
         expect(textsTo(ADMIN_ID)).toEqual([]);
         expect(answers()).toEqual([
@@ -438,7 +439,7 @@ describe('POST /api/telegram-webhook', () => {
         }),
       ]);
       expect(textsTo(ADMIN_ID)).toEqual([
-        `🔔 Заявка #${L(5)} Иван: статус — ❌ Отказ\n✍️ Владелец`,
+        `🔔 Заявка #5 Иван: статус — ❌ Отказ\n✍️ Владелец`,
       ]);
       expect(answers()).toEqual([
         { callback_query_id: 'cb-1', text: 'Статус обновлён' },
@@ -720,7 +721,7 @@ describe('POST /api/telegram-webhook', () => {
         expect((await stored()).status).toBe(status);
         expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toHaveLength(1);
         expect(textsTo(OWNER_ID)).toEqual([
-          `🔔 Заявка #${L(5)} Иван: статус — ${mark}\n✍️ Админ`,
+          `🔔 Заявка #5 Иван: статус — ${mark}\n✍️ Админ`,
         ]);
         expect(textsTo(ADMIN_ID)).toEqual([]);
         expect(answers()).toEqual([
@@ -771,7 +772,7 @@ describe('POST /api/telegram-webhook', () => {
         (p) => p.chat_id === GROUP_ID && p.message_id === DIGEST_ID,
       );
     const link = (n: number) =>
-      `<a href="https://t.me/approved_test_bot?start=lead_${L(n)}">#${L(n)}</a> Иван · Approved.rs`;
+      `<a href="https://t.me/approved_test_bot?start=lead_${L(n)}">#${n}</a> Иван · Approved.rs`;
 
     it('drops a Lead the admin closes from its card, and Leads closed meanwhile', async () => {
       await seedWithDigest(
@@ -802,7 +803,7 @@ describe('POST /api/telegram-webhook', () => {
       ]);
       expect(digestEdits()[0]!.reply_markup).toBeUndefined();
       expect(textsTo(OWNER_ID)).toEqual([
-        `🔔 Заявка #${L(6)} Иван: статус — ❌ Отказ\n✍️ Админ`,
+        `🔔 Заявка #6 Иван: статус — ❌ Отказ\n✍️ Админ`,
       ]);
     });
 
@@ -819,7 +820,7 @@ describe('POST /api/telegram-webhook', () => {
       expect((await stored()).lastActivityAt).not.toBeNull();
       expect(digestEdits()).toEqual([
         expect.objectContaining({
-          text: expect.not.stringContaining(`#${L(5)}<`),
+          text: expect.not.stringContaining(`#5<`),
         }),
       ]);
       expect(answers()).toEqual([
@@ -851,7 +852,7 @@ describe('POST /api/telegram-webhook', () => {
 
       expect(digestEdits()).toEqual([
         expect.objectContaining({
-          text: expect.not.stringContaining(`#${L(5)}<`),
+          text: expect.not.stringContaining(`#5<`),
         }),
       ]);
     });
@@ -903,7 +904,7 @@ describe('POST /api/telegram-webhook', () => {
       await tap(`topic:${L(5)}`, ADMIN_ID, { id: 'cb-topic', ...onCard });
 
       expect(crm('createForumTopic')).toEqual([
-        { chat_id: GROUP_ID, name: `#${L(5)} · Иван · Approved.rs` },
+        { chat_id: GROUP_ID, name: `#5 · Иван · Approved.rs` },
       ]);
       const lead = await stored();
       expect(lead.topicId).toEqual(expect.any(Number));
@@ -911,7 +912,7 @@ describe('POST /api/telegram-webhook', () => {
       expect(sentTo(GROUP_ID)).toEqual([
         expect.objectContaining({
           message_thread_id: lead.topicId,
-          text: expect.stringContaining(`Заявка #${L(5)}`),
+          text: expect.stringContaining(`Заявка #5`),
         }),
       ]);
       const [card] = edits(CARD_CHAT_ID, CARD_MESSAGE_ID);
@@ -1977,7 +1978,7 @@ describe('POST /api/telegram-webhook', () => {
         {
           chat_id: GROUP_ID,
           message_thread_id: 77,
-          name: `#${L(5)} · Пётр · Approved.rs`,
+          name: `#5 · Пётр · Approved.rs`,
         },
       ]);
     });
@@ -2111,7 +2112,7 @@ describe('POST /api/telegram-webhook', () => {
         );
         expect(notices(ADMIN_ID)).toEqual([]);
         expect(textsTo(ADMIN_ID)).toEqual([
-          `📝 Заявка #${L(5)} Иван · Владелец: Доп. контакт: ${added}`,
+          `📝 Заявка #5 Иван · Владелец: Доп. контакт: ${added}`,
         ]);
         expect(textsTo(OWNER_ID)).not.toContainEqual(
           expect.stringContaining('📝 Заявка'),
@@ -2147,7 +2148,7 @@ describe('POST /api/telegram-webhook', () => {
       );
       expect(notices(OWNER_ID)).toEqual([]);
       expect(textsTo(OWNER_ID)).toEqual([
-        `📝 Заявка #${L(5)} Иван · Админ: Перезвонить в пятницу`,
+        `📝 Заявка #5 Иван · Админ: Перезвонить в пятницу`,
       ]);
       expect(textsTo(ADMIN_ID)).not.toContainEqual(
         expect.stringContaining('📝 Заявка'),

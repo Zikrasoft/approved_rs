@@ -30,6 +30,7 @@ const storedPostponedFrom = inWorkStatusSchema.nullable().catch(null);
 export function toStoredLead(row: LeadRow): StoredLead {
   return {
     id: row.id,
+    number: row.number,
     brand: row.brand,
     name: row.name,
     contact: row.contact,
@@ -115,6 +116,7 @@ const outcome = (value: 'won' | 'lost' | undefined) =>
 
 const MAPPERS: Mappers = {
   id: (id) => ({ id }),
+  number: (number) => (number == null ? {} : { number }),
   brand: (brand) => ({ brand }),
   name: (name) => ({ name }),
   contact: (contact) => ({ contact }),

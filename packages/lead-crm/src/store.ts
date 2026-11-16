@@ -728,12 +728,13 @@ export function createLeadStore({
     async searchLeads(query: string, limit = 10): Promise<StoredLead[]> {
       const q = query.trim().toLowerCase();
       if (!q) return [];
+      const number = q.replace(/^#/, '');
       const rows = await database().lead.findMany({ orderBy: NEWEST_FIRST });
       return rows
         .filter(
           (l) =>
             l.id === q ||
-            String(l.legacyId) === q ||
+            String(l.number) === number ||
             l.name.toLowerCase().includes(q) ||
             l.contact.toLowerCase().includes(q) ||
             (l.comment ?? '').toLowerCase().includes(q),

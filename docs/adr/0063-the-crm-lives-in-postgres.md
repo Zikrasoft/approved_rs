@@ -17,9 +17,12 @@ read-modify-write, a per-brand advisory lock plus candidate row locks for
 Settlement cannot overdraw and an operation prompt is answered once. Each is
 tested as a race against real Postgres.
 
-Lead and operation ids become uuid v7. Old numeric ids are kept as
-`legacy_id` for search only; Telegram buttons and digest links sent before the
-move stop working, which the owner accepted.
+Lead and operation ids become uuid v7, used inside the system and in callback
+data. People see a Lead's `number` instead: a short sequence (`#123`) the bot,
+the cards, the digest and search show. A Lead imported from Blob keeps its old
+numeric id as its `number` (and as `legacy_id`, the import's key), and the
+sequence continues above the highest imported one. Telegram buttons and digest
+links sent before the move stop working, which the owner accepted.
 
 ## Considered Options
 
@@ -28,4 +31,5 @@ move stop working, which the owner accepted.
 - **A JSON column per Lead in Postgres**: keeps the shape but none of the
   constraints, so the races the CAS loop handled would come back.
 - **Keep numeric ids**: a sequence per table would do, but the owner wants the
-  same uuid v7 ids as his other projects and accepted losing old buttons.
+  same uuid v7 ids as his other projects and accepted losing old buttons. A
+  uuid is unreadable on a card, so a Lead carries its number beside it.

@@ -78,6 +78,7 @@ const {
 function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
   return {
     id: lid(42),
+    number: Number((overrides.id ?? lid(42)).slice(-12)),
     brand: 'Approved.rs',
     name: 'Иван',
     contact: '@ivan',
@@ -197,7 +198,7 @@ describe('sendLeadNotification', () => {
     );
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.chat_id).toBe('-1009876543210');
-    expect(body.text).toContain('#0196f8a0-0000-7000-8000-000000000042');
+    expect(body.text).toContain('#42');
     expect(body.text).toContain('Автоподбор');
     expect(body.text).toContain('Иван');
     expect(body.text).toContain('🆕 Новая');
@@ -206,12 +207,18 @@ describe('sendLeadNotification', () => {
     expect(body.text).not.toContain('BMW X5');
   });
 
+  it('shows a dash for a Lead the store could not number', () => {
+    expect(formatter.formatTeaser(makeLead({ number: null }))).toContain(
+      '🚗 Заявка #— · Иван',
+    );
+  });
+
   it('shows the reminder date on a postponed card', () => {
     const text = formatter.formatTeaser(
       makeLead({ id: lid(42), status: 'postponed', remindAt: '2026-10-20' }),
     );
     expect(text.split('\n').slice(0, 2)).toEqual([
-      '🚗 Заявка #0196f8a0-0000-7000-8000-000000000042 · Иван · Автоподбор · ⏸️ Отложена',
+      '🚗 Заявка #42 · Иван · Автоподбор · ⏸️ Отложена',
       '⏰ Напомнить: 20.10.2026',
     ]);
   });
@@ -610,10 +617,10 @@ describe('sendDigest', () => {
       '<b>📋 Заявки ждут решения</b>',
       '',
       '<b>⏰ Пора вернуться</b>',
-      '<a href="https://t.me/approved_test_bot?start=lead_0196f8a0-0000-7000-8000-000000000005">#0196f8a0-0000-7000-8000-000000000005</a> — · Approved.rs',
+      '<a href="https://t.me/approved_test_bot?start=lead_0196f8a0-0000-7000-8000-000000000005">#5</a> — · Approved.rs',
       '',
       '<b>🕐 Без движения 7 дней</b>',
-      '<a href="https://t.me/approved_test_bot?start=lead_0196f8a0-0000-7000-8000-000000000003">#0196f8a0-0000-7000-8000-000000000003</a> &lt;Пётр&gt; · Approved.rs',
+      '<a href="https://t.me/approved_test_bot?start=lead_0196f8a0-0000-7000-8000-000000000003">#3</a> &lt;Пётр&gt; · Approved.rs',
     ]);
     expect(body.reply_markup).toBeUndefined();
   });
@@ -656,7 +663,7 @@ describe('sendDigest', () => {
       '<b>📋 Заявки ждут решения</b>',
       '',
       '<b>🕐 Без движения 7 дней</b>',
-      '<a href="https://t.me/approved_test_bot?start=lead_0196f8a0-0000-7000-8000-000000000004">#0196f8a0-0000-7000-8000-000000000004</a> Иван · Approved.rs',
+      '<a href="https://t.me/approved_test_bot?start=lead_0196f8a0-0000-7000-8000-000000000004">#4</a> Иван · Approved.rs',
       '',
       '+2 ещё',
     ]);
@@ -696,7 +703,7 @@ describe('sendPostponeReminder', () => {
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body.chat_id).toBe(111);
     expect(body.text.split('\n')).toEqual([
-      '⏰ Напоминание по заявке #0196f8a0-0000-7000-8000-000000000009',
+      '⏰ Напоминание по заявке #9',
       '',
       '&lt;Пётр&gt; — Автоподбор',
       'Ты просил напомнить сегодня — заявка снова активна.',
@@ -743,7 +750,7 @@ describe('sendStatusChange', () => {
       const body = JSON.parse(mockFetch.mock.calls[0][1].body);
       expect(body).toMatchObject({
         chat_id: recipient,
-        text: `🔔 Заявка #0196f8a0-0000-7000-8000-000000000009 Пётр: статус — ❌ Отказ\n✍️ ${author}`,
+        text: `🔔 Заявка #9 Пётр: статус — ❌ Отказ\n✍️ ${author}`,
       });
     },
   );
@@ -764,7 +771,7 @@ describe('sendNoteNotice', () => {
     const body = JSON.parse(mockFetch.mock.calls[0][1].body);
     expect(body).toMatchObject({
       chat_id: 111,
-      text: '📝 Заявка #0196f8a0-0000-7000-8000-000000000009 Пётр · Админ: Перезвонить &lt;завтра&gt;',
+      text: '📝 Заявка #9 Пётр · Админ: Перезвонить &lt;завтра&gt;',
     });
   });
 });
@@ -787,7 +794,7 @@ describe('sendFieldChange', () => {
     expect(sent()).toEqual([
       expect.objectContaining({
         chat_id: 222,
-        text: '✏️ Заявка #0196f8a0-0000-7000-8000-000000000009 Пётр: контакт\n✍️ Владелец\n\nБыло: —\nСтало: +381641234567',
+        text: '✏️ Заявка #9 Пётр: контакт\n✍️ Владелец\n\nБыло: —\nСтало: +381641234567',
       }),
     ]);
   });
@@ -886,7 +893,7 @@ describe('buildSearchResults', () => {
     expect(reply_markup.inline_keyboard).toEqual([
       [
         {
-          text: '🆕 #0196f8a0-0000-7000-8000-000000000005 Approved.rs Пётр — @petr',
+          text: '🆕 #5 Approved.rs Пётр — @petr',
           callback_data: 'open:0196f8a0-0000-7000-8000-000000000005',
         },
       ],
@@ -898,7 +905,7 @@ describe('buildSearchResults', () => {
       makeLead({ id: lid(5), name: 'Пётр', contact: '@petr', status: 'lost' }),
     ]);
     expect(reply_markup.inline_keyboard[0][0].text).toBe(
-      '❌ #0196f8a0-0000-7000-8000-000000000005 Approved.rs Пётр — @petr',
+      '❌ #5 Approved.rs Пётр — @petr',
     );
   });
 
@@ -1135,10 +1142,10 @@ describe('buildOpenList', () => {
       ([b]) => `${b.text} ${b.callback_data}`,
     );
     expect(rows).toEqual([
-      '#0196f8a0-0000-7000-8000-000000000006 Иван · Approved.rs · 🔵 open:0196f8a0-0000-7000-8000-000000000006',
-      '#0196f8a0-0000-7000-8000-000000000005 Иван · Approved.rs · 🗣 open:0196f8a0-0000-7000-8000-000000000005',
-      '#0196f8a0-0000-7000-8000-000000000003 Иван · Approved.rs · ⏸️ open:0196f8a0-0000-7000-8000-000000000003',
-      '#0196f8a0-0000-7000-8000-000000000001 Иван · Approved.rs · 🆕 open:0196f8a0-0000-7000-8000-000000000001',
+      '#6 Иван · Approved.rs · 🔵 open:0196f8a0-0000-7000-8000-000000000006',
+      '#5 Иван · Approved.rs · 🗣 open:0196f8a0-0000-7000-8000-000000000005',
+      '#3 Иван · Approved.rs · ⏸️ open:0196f8a0-0000-7000-8000-000000000003',
+      '#1 Иван · Approved.rs · 🆕 open:0196f8a0-0000-7000-8000-000000000001',
     ]);
   });
 
@@ -1245,7 +1252,7 @@ describe('buildLeadDetail', () => {
       makeLead({ id: lid(7), status: 'new' }),
       'owner',
     );
-    expect(text).toContain('#0196f8a0-0000-7000-8000-000000000007');
+    expect(text).toContain('#7');
     expect(text).not.toContain('€');
     const data = reply_markup.inline_keyboard
       .flat()
@@ -1324,7 +1331,7 @@ describe('buildDeleteConfirm', () => {
     const { text, reply_markup } = buildDeleteConfirm(
       makeLead({ id: lid(9), name: 'Test' }),
     );
-    expect(text).toContain('#0196f8a0-0000-7000-8000-000000000009');
+    expect(text).toContain('#9');
     expect(text).toContain('Test');
     expect(reply_markup.inline_keyboard).toEqual([
       [
@@ -1467,9 +1474,7 @@ describe('a lead that asked for several services at once', () => {
       kind: 'call_click',
       contactChannel: 'telegram',
     });
-    expect(buildLeadDetail(upgraded, 'owner').text).toContain(
-      'Заявка #0196f8a0-0000-7000-8000-000000000042 — —',
-    );
+    expect(buildLeadDetail(upgraded, 'owner').text).toContain('Заявка #42 — —');
   });
 
   it('marks a click whose channel never reached the record', () => {
@@ -1514,7 +1519,7 @@ describe('a lead that asked for several services at once', () => {
   it('marks a lead that named no service instead of leaving a gap', () => {
     const serviceless = makeLead({ service: '', services: [] });
     expect(buildLeadDetail(serviceless, 'owner').text).toContain(
-      'Заявка #0196f8a0-0000-7000-8000-000000000042 — —',
+      'Заявка #42 — —',
     );
     expect(formatter.formatTeaser(serviceless)).toContain('· — ·');
   });
@@ -1586,7 +1591,7 @@ describe('the Lead topic', () => {
     await expect(postLeadTopicSummary(lead, 1)).resolves.toBe(1000);
     expect(api.callsTo('createForumTopic')[0].payload).toEqual({
       chat_id: '-1009876543210',
-      name: '#0196f8a0-0000-7000-8000-000000000042 · Иван · Approved.rs',
+      name: '#42 · Иван · Approved.rs',
     });
     expect(api.callsTo('sendMessage')[0].payload).toMatchObject({
       chat_id: '-1009876543210',
@@ -1605,7 +1610,7 @@ describe('the Lead topic', () => {
       {
         chat_id: '-1009876543210',
         message_thread_id: 7,
-        name: '#0196f8a0-0000-7000-8000-000000000042 · Пётр · Approved.rs',
+        name: '#42 · Пётр · Approved.rs',
       },
     ]);
   });

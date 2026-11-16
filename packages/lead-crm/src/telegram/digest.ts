@@ -1,5 +1,5 @@
 import { MAX_LIST_ROWS, type Digest, type DigestRows } from '../store.ts';
-import { escapeHtml, leadDisplayName } from './markup.ts';
+import { escapeHtml, leadDisplayName, leadTag } from './markup.ts';
 
 const DIGEST_SECTIONS: [keyof Digest, string][] = [
   ['due', '⏰ Пора вернуться'],
@@ -30,7 +30,7 @@ export function renderDigest(
     for (const l of visible) {
       const name = leadDisplayName(l).slice(0, MAX_DIGEST_NAME);
       lines.push(
-        `<a href="https://t.me/${botUsername}?start=lead_${l.id}">#${l.id}</a> ${escapeHtml(name)} · ${escapeHtml(l.brand)}`,
+        `<a href="https://t.me/${botUsername}?start=lead_${l.id}">${leadTag(l)}</a> ${escapeHtml(name)} · ${escapeHtml(l.brand)}`,
       );
       shown[`${key}Ids`].push(l.id);
     }

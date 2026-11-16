@@ -9,6 +9,7 @@ import {
   escapeHtml,
   formatDateRu,
   leadDisplayName,
+  leadTag,
   statusLine,
   statusMark,
   type Btn,
@@ -91,7 +92,7 @@ export function buildDeleteConfirm(lead: StoredLead): {
   reply_markup: Keyboard;
 } {
   return {
-    text: `❗ Удалить заявку #${lead.id} (${escapeHtml(leadDisplayName(lead))}) навсегда? Это нельзя отменить.`,
+    text: `❗ Удалить заявку ${leadTag(lead)} (${escapeHtml(leadDisplayName(lead))}) навсегда? Это нельзя отменить.`,
     reply_markup: {
       inline_keyboard: [
         [
@@ -143,7 +144,7 @@ export function noteNoticeText(
   note: string,
   by: Role,
 ): string {
-  return `📝 Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))} · ${OPERATION_AUTHORS[by]}: ${escapeHtml(note)}`;
+  return `📝 Заявка ${leadTag(lead)} ${escapeHtml(leadDisplayName(lead))} · ${OPERATION_AUTHORS[by]}: ${escapeHtml(note)}`;
 }
 
 const FIELD_PREVIEW_LIMIT = 120;
@@ -165,7 +166,7 @@ export function fieldChangeText(
   by: Role,
 ): string {
   return [
-    `✏️ Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: ${EDIT_FIELD_LABELS[field]}`,
+    `✏️ Заявка ${leadTag(lead)} ${escapeHtml(leadDisplayName(lead))}: ${EDIT_FIELD_LABELS[field]}`,
     `✍️ ${OPERATION_AUTHORS[by]}`,
     ``,
     `Было: ${fieldPreview(before)}`,
@@ -275,12 +276,12 @@ function remindLine(lead: StoredLead): string {
 }
 
 export function statusChangeText(lead: StoredLead, by: Role): string {
-  return `🔔 Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: статус — ${statusMark(lead.status)}\n✍️ ${OPERATION_AUTHORS[by]}`;
+  return `🔔 Заявка ${leadTag(lead)} ${escapeHtml(leadDisplayName(lead))}: статус — ${statusMark(lead.status)}\n✍️ ${OPERATION_AUTHORS[by]}`;
 }
 
 export function orderConflictText(lead: StoredLead & { orderId: string }) {
   return [
-    `⚠️ Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: ${statusMark(lead.status)}, а магазин уже закрыл заказ ${escapeHtml(lead.orderId)} иначе или не знает его.`,
+    `⚠️ Заявка ${leadTag(lead)} ${escapeHtml(leadDisplayName(lead))}: ${statusMark(lead.status)}, а магазин уже закрыл заказ ${escapeHtml(lead.orderId)} иначе или не знает его.`,
     `Сверь заказ в админке магазина: сами они не сойдутся.`,
   ].join('\n');
 }
@@ -295,7 +296,7 @@ export function leadCountAlertText(count: number, brand: string): string {
 
 export function orderStuckText(lead: StoredLead & { orderId: string }) {
   return [
-    `⚠️ Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: ${statusMark(lead.status)}, но магазин не принимает этот исход для заказа ${escapeHtml(lead.orderId)}.`,
+    `⚠️ Заявка ${leadTag(lead)} ${escapeHtml(leadDisplayName(lead))}: ${statusMark(lead.status)}, но магазин не принимает этот исход для заказа ${escapeHtml(lead.orderId)}.`,
     `Бот будет пробовать каждый день. Закрой заказ в админке магазина сам или проверь секрет магазина.`,
   ].join('\n');
 }
@@ -336,7 +337,7 @@ export function createFormatter({
       ? ` (${escapeHtml(channelLabel(lead.contactChannel))})`
       : '';
     const lines: string[] = [
-      `🚗 Заявка #${lead.id} — ${escapeHtml(servicesLabel(lead))}`,
+      `🚗 Заявка ${leadTag(lead)} — ${escapeHtml(servicesLabel(lead))}`,
       brandLine(lead),
       statusLine(lead.status),
     ];
@@ -375,7 +376,7 @@ export function createFormatter({
     formatLeadText,
 
     topicName(lead: StoredLead): string {
-      return `#${lead.id} · ${leadDisplayName(lead)} · ${lead.brand}`.slice(
+      return `${leadTag(lead)} · ${leadDisplayName(lead)} · ${lead.brand}`.slice(
         0,
         MAX_TOPIC_NAME,
       );
@@ -389,12 +390,12 @@ export function createFormatter({
       const searched = searchLines(searches)
         .map((line) => `\n${line}`)
         .join('');
-      return `🚗 Заявка #${lead.id} · ${escapeHtml(leadDisplayName(lead))} · ${escapeHtml(servicesLabel(lead))} · ${statusMark(lead.status)}${remindLine(lead)}\n${brandLine(lead)}${searched}${adHashtag(lead, '\n')}`;
+      return `🚗 Заявка ${leadTag(lead)} · ${escapeHtml(leadDisplayName(lead))} · ${escapeHtml(servicesLabel(lead))} · ${statusMark(lead.status)}${remindLine(lead)}\n${brandLine(lead)}${searched}${adHashtag(lead, '\n')}`;
     },
 
     postponeReminderText(lead: StoredLead): string {
       return [
-        `⏰ Напоминание по заявке #${lead.id}`,
+        `⏰ Напоминание по заявке ${leadTag(lead)}`,
         ``,
         `${escapeHtml(leadDisplayName(lead))} — ${escapeHtml(servicesLabel(lead))}`,
         `Ты просил напомнить сегодня — заявка снова активна.`,

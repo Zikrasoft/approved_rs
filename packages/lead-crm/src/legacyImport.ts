@@ -133,7 +133,7 @@ async function importLeads(
 ): Promise<Map<number, string>> {
   const ids = new Map<number, string>();
   for (const { id: legacyId, ...lead } of leads) {
-    const data = { ...leadData(lead), legacyId };
+    const data = { ...leadData(lead), legacyId, number: legacyId };
     const { id } = await tx.lead.upsert({
       where: { legacyId },
       create: data,
@@ -142,6 +142,9 @@ async function importLeads(
     });
     ids.set(legacyId, id);
   }
+  await tx.$executeRaw`
+    SELECT setval(pg_get_serial_sequence('leads', 'number'), COALESCE(MAX(number), 0) + 1, false)
+    FROM leads`;
   return ids;
 }
 

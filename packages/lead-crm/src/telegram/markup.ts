@@ -12,6 +12,9 @@ export type Keyboard = { inline_keyboard: Btn[][] };
 export const leadDisplayName = (lead: { name: string }): string =>
   lead.name || '—';
 
+export const leadTag = (lead: { number: number | null }): string =>
+  `#${lead.number ?? '—'}`;
+
 export const STATUS_META: Record<LeadStatus, { emoji: string; label: string }> =
   {
     new: { emoji: '🆕', label: 'Новая' },
