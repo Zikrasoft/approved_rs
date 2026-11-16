@@ -14,7 +14,7 @@ const clickedChannelSchema = contactChannelSchema.catch('phone');
 
 export interface ContactClickRouteOptions {
   notifyLead: NotifyLead;
-  waitUntil: (promise: Promise<unknown>) => void;
+  inBackground: (promise: Promise<unknown>) => void;
   isLocale: (value: string) => boolean;
   defaultLocale: string;
 }
@@ -30,7 +30,7 @@ export function localeFromUrl(
 
 export function createContactClickRoute({
   notifyLead,
-  waitUntil,
+  inBackground,
   isLocale,
   defaultLocale,
 }: ContactClickRouteOptions) {
@@ -53,7 +53,7 @@ export function createContactClickRoute({
       new URL(request.url).origin,
     );
 
-    waitUntil(
+    inBackground(
       notifyLead(
         {
           name: '',

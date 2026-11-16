@@ -7,7 +7,7 @@ import { PRIMARY_LOCALE, isLocale } from '@/i18n/config';
 
 export const POST = createContactClickRoute({
   notifyLead,
-  waitUntil: inBackground,
+  inBackground,
   isLocale,
   defaultLocale: PRIMARY_LOCALE,
 });

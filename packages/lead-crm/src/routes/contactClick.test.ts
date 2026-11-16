@@ -2,11 +2,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createContactClickRoute } from './contactClick.ts';
 
 const notifyLead = vi.fn().mockResolvedValue(undefined);
-const waitUntil = vi.fn();
+const inBackground = vi.fn();
 
 const POST = createContactClickRoute({
   notifyLead,
-  waitUntil,
+  inBackground,
   isLocale: (v: string) => ['ru', 'sr', 'en'].includes(v),
   defaultLocale: 'ru',
 });
@@ -29,7 +29,7 @@ function makeCtx(fields: Record<string, string>) {
 describe('createContactClickRoute', () => {
   beforeEach(() => {
     notifyLead.mockReset().mockResolvedValue(undefined);
-    waitUntil.mockReset();
+    inBackground.mockReset();
   });
 
   it('returns 204', async () => {
@@ -75,9 +75,9 @@ describe('createContactClickRoute', () => {
     );
   });
 
-  it('dispatches notifyLead via waitUntil with the clicked channel', async () => {
+  it('dispatches notifyLead in the background with the clicked channel', async () => {
     await POST(makeCtx({ channel: 'telegram', source_url: '/ru/' }));
-    expect(waitUntil).toHaveBeenCalledTimes(1);
+    expect(inBackground).toHaveBeenCalledTimes(1);
     expect(notifyLead).toHaveBeenCalledWith(
       expect.objectContaining({
         kind: 'call_click',

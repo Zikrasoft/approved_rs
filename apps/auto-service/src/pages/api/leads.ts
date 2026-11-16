@@ -17,7 +17,7 @@ import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 
 const leadsRoute = createLeadsRoute({
   notifyLead,
-  waitUntil: inBackground,
+  inBackground,
   isLocale,
   defaultLocale: PRIMARY_LOCALE,
   localeCookie: LOCALE_COOKIE,

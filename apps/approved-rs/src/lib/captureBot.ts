@@ -55,5 +55,5 @@ export const captureClientFor = (brand: string): TelegramClient | undefined =>
 export const reportMetaLead = createMetaLeadReporter({
   pixelId: META_PIXEL_ID,
   env: process.env,
-  waitUntil: inBackground,
+  inBackground,
 });

@@ -13,7 +13,7 @@ import { PathBuilder } from '@/utils/paths';
 
 export const POST = createLeadsRoute({
   notifyLead,
-  waitUntil: inBackground,
+  inBackground,
   isLocale,
   defaultLocale: PRIMARY_LOCALE,
   localeCookie: LOCALE_COOKIE,

@@ -21,7 +21,7 @@ const MISSING_FIELDS_MESSAGE: Record<Locale, string> = {
 
 export const POST = createLeadsRoute({
   notifyLead,
-  waitUntil: inBackground,
+  inBackground,
   isLocale,
   defaultLocale: PRIMARY_LOCALE,
   localeCookie: LOCALE_COOKIE,

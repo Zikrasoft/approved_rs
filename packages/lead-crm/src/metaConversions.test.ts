@@ -18,7 +18,7 @@ const lead = {
 
 let fetchMock: ReturnType<typeof vi.fn>;
 let pending: Promise<unknown>[];
-const waitUntil = (promise: Promise<unknown>) => {
+const inBackground = (promise: Promise<unknown>) => {
   pending.push(promise);
 };
 
@@ -36,7 +36,7 @@ afterEach(() => {
 });
 
 function reporter(env: Record<string, unknown> = { META_CAPI_TOKEN: 'tok' }) {
-  return createMetaLeadReporter({ pixelId: PIXEL, env, waitUntil });
+  return createMetaLeadReporter({ pixelId: PIXEL, env, inBackground });
 }
 
 describe('metaLeadEvent', () => {
@@ -72,13 +72,13 @@ describe('createMetaLeadReporter', () => {
       createMetaLeadReporter({
         pixelId: undefined,
         env: { META_CAPI_TOKEN: 'tok' },
-        waitUntil,
+        inBackground,
       }),
     ).toBeUndefined();
     expect(console.info).toHaveBeenCalledTimes(3);
   });
 
-  it('posts the event to the pixel through waitUntil', async () => {
+  it('posts the event to the pixel in the background', async () => {
     reporter({ META_CAPI_TOKEN: 'tok', META_CAPI_TEST_CODE: 'TEST123' })!(lead);
     await Promise.all(pending);
     expect(pending).toHaveLength(1);
@@ -140,7 +140,7 @@ describe('createMetaLeadReporter', () => {
     createMetaLeadReporter({
       pixelId: PIXEL,
       env: { META_CAPI_TOKEN: 'tok' },
-      waitUntil,
+      inBackground,
       timeoutMs: 5,
     })!(lead);
     await expect(Promise.all(pending)).resolves.toBeDefined();

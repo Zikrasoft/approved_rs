@@ -18,5 +18,5 @@ export const captureBot = createTelegramClient(
 export const reportMetaLead = createMetaLeadReporter({
   pixelId: META_PIXEL_ID,
   env: process.env,
-  waitUntil: inBackground,
+  inBackground,
 });
