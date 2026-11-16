@@ -136,3 +136,18 @@ www.{$DETAILS_HOST} {
 www.{$APPROVED_HOST} {
 	import www {$APPROVED_HOST}
 }
+
+{$CRM_HOST} {
+	import security-headers.caddy
+
+	@bots path /api/telegram-webhook /api/telegram-capture
+	handle @bots {
+		reverse_proxy site-approved-rs:4321 {
+			header_up X-Request-Id {http.request.uuid}
+		}
+	}
+
+	handle {
+		respond 404
+	}
+}

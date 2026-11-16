@@ -103,6 +103,8 @@ expect 'caddy reads the site releases read-only' \
   '[.services.caddy.volumes[] | select(.target == "/srv/sites") | [.source, .read_only]] == [["/srv/sites", true]]'
 expect 'caddy serves the three sites on their own domains' \
   '.services.caddy.environment | .CARLAB_HOST == "carlab.rs" and .DETAILS_HOST == "details.rs" and .APPROVED_HOST == "approved.rs"'
+expect 'caddy serves the CRM bot webhooks on a host of their own' \
+  '.services.caddy.environment.CRM_HOST == "crm.carlab.rs"'
 expect 'every image is pinned to an exact tag' \
   '[.services[] | .image] | all(test(":(v?[0-9]+\\.[0-9]+[.a-z0-9-]*|[0-9a-f]{40})$"))'
 
@@ -124,7 +126,7 @@ docker run -d --name "$net-caddy" --network "$net" -p 127.0.0.1::443 \
   -e API_HOST=api.localhost -e ADMIN_HOST=admin.localhost \
   -e MEDIA_HOST=media.localhost -e MEDIA_ORIGIN=http://medusa:9000 \
   -e ADMIN_BASIC_AUTH_USER=staff -e ADMIN_BASIC_AUTH_HASH="$hash" \
-  -e CARLAB_HOST=carlab.localhost -e DETAILS_HOST=details.localhost -e APPROVED_HOST=approved.localhost \
+  -e CARLAB_HOST=carlab.localhost -e DETAILS_HOST=details.localhost -e APPROVED_HOST=approved.localhost -e CRM_HOST=crm.localhost \
   -v "$work/sites:/srv/sites:ro" \
   -v "$here/caddy:/etc/caddy:ro" "$caddy_image" >/dev/null
 port=$(docker port "$net-caddy" 443/tcp | sed -n '1s/.*://p')
@@ -245,6 +247,10 @@ secured 'a node response carries the site security headers'
 header 'caddy adds no cache to a node response' '' cache-control
 serves 'a path with no file goes to node' node carlab /ru/no-such-page/
 serves 'an API route goes to node' node details /api/leads -X POST
+serves 'the CRM host passes the CRM bot webhook to approved.rs node' node crm /api/telegram-webhook -X POST
+serves 'the CRM host passes the approved.rs capture bot webhook to node' node crm /api/telegram-capture -X POST
+answers 'the CRM host closes the lead form route' 404 crm /api/leads -X POST
+answers 'the CRM host serves no pages' 404 crm /ru/
 upstream() {
   if grep -Eqi '^x-upstream: carlab.localhost https [0-9a-f.:]+ [0-9a-f-]{36}$' "$work/headers.clean" && ! grep -q 6.6.6.6 "$work/headers.clean"; then
     echo "ok - $1"

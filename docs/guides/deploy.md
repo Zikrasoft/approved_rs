@@ -571,7 +571,7 @@ optional variable per site).
   `process.env.SITE` (from the `.env.local` handed to `--env-file`), and it is
   the host the webhook is registered against — so point it at the `.env.local`
   of the project that hosts that bot's webhook, which for a capture bot is that
-  brand's own project.
+  brand's own project, and `https://crm.carlab.rs` for approved.rs's two bots.
 
 Changing the domain means editing `site:` in `astro.config.mjs` and the host
 Caddy serves it on (`APPROVED_HOST`, `CARLAB_HOST`, `DETAILS_HOST` in the
@@ -634,10 +634,15 @@ is healthy. Brands are separated by the lead's `brand` field
 
 ### Cutover from Vercel
 
-All three sites move in **one window**, never one by one: the CRM bot's
-webhook and the reminder cron live in approved.rs, and the bot must read and
-write the same leads as the sites that capture them, so the leads storage
-and the bot switch together. Nothing here prints a secret; keep it that way.
+The leads storage and the CRM bot switch together, in **one window**: the bot
+must read and write the same Leads as the sites that capture them. The bot
+does not wait for approved.rs's DNS: its webhook and approved.rs's capture bot
+answer on `crm.carlab.rs` (`CRM_HOST`, see [The Telegram webhooks](#the-telegram-webhooks)),
+and the reminder cron runs on the host, so approved.rs may move later than the
+other two. Until it does, its form and contact clicks still land in Blob on
+Vercel: their cards reach the chat, their buttons answer only once an import
+has taken them, so rerun the import while that lasts. Nothing here prints a
+secret; keep it that way.
 
 **Before the window**
 
@@ -721,9 +726,10 @@ after it is lost.
    `orderMarkersSkipped`): nothing has read them since the old shop went, and
    the unique `(brand, order_id)` on `leads` is what keeps one order to one
    Lead now.
-3. **DNS, all three at once.** Point the apex and `www` A records of
-   approved.rs, carlab.rs and details.rs at the reserved IP, and remove any
-   AAAA record that still names Vercel.
+3. **DNS.** Point the apex and `www` A records of carlab.rs and details.rs,
+   and `crm.carlab.rs`, at the reserved IP, and remove any AAAA record that
+   still names Vercel. approved.rs's apex and `www` go in the same step when
+   its registrar allows, or later (step 7).
 4. **Caddy.** As soon as the three names resolve to the host
    (`dig +short <domain> A` against a couple of public resolvers), force a
    Caddy reload so it asks for the certificates at once
@@ -731,14 +737,21 @@ after it is lost.
    A plain `caddy reload` with an unchanged Caddyfile does nothing and leaves a
    failed ACME attempt waiting out its backoff; `--force` reapplies the config
    and starts the certificate requests again
-   and open each site. Point any bot webhook that named a Vercel URL at its
-   domain again (see [The Telegram webhooks](#the-telegram-webhooks)).
+   and open each site. Register the CRM bot and approved.rs's capture bot on
+   `https://crm.carlab.rs` (see [The Telegram webhooks](#the-telegram-webhooks)),
+   and point any other bot webhook that named a Vercel URL at its domain again.
 5. **Cron on the host.** `sudo systemctl enable --now carlab-reminders.timer`.
 6. **Second import.** Once every resolver you check answers with the host and
    Vercel's logs show no more `/api/*` calls (wait out the 300 s TTL, then a
    margin), run the import again. It inserts the Leads that reached Blob while
    DNS moved, each with its own number inside the reserved gap, and leaves
-   everything the first run imported alone. Then delete the local env file.
+   everything the first run imported alone. Then delete the local env file,
+   unless approved.rs is still on Vercel.
+7. **approved.rs, if it moved later.** Rerun the import once a day until its
+   apex and `www` resolve to the host; after the DNS change, `caddy reload
+--force` as in step 4, a last import once Vercel's logs show no more
+   `/api/*` calls, then delete the local env file. Every run takes only the
+   Leads it has not taken yet, each keeping its Blob number.
 
 **After the window.** The three Vercel projects stay for a week as the
 fallback, but they must not serve anyone. Check, and keep checking for that
@@ -749,8 +762,9 @@ week:
 - Deployment Protection (Vercel Authentication) covers production, so the
   `*.vercel.app` URLs of the last deployments answer 401 instead of taking
   Leads into Blob;
-- `getWebhookInfo` for the CRM bot and the three capture bots names the brand
-  domains, never a `vercel.app` URL;
+- `getWebhookInfo` names `crm.carlab.rs` for the CRM bot and approved.rs's
+  capture bot, and their own domains for the other two capture bots, never a
+  `vercel.app` URL;
 - the Cron Job stays disabled, and Vercel's logs show no function calls.
 
 After the week, delete the Blob store and the three Vercel projects: they hold
@@ -2079,12 +2093,15 @@ Two kinds, and only the CRM one is approved.rs-only.
   webhook, and it lives in approved.rs; carlab.rs and details.rs have no such
   route. Its `secret_token` is approved.rs's `TELEGRAM_WEBHOOK_SECRET`.
 - **`/api/telegram-capture`** — the brand's own capture bot, in **all three**
-  projects. `@ApprovedRsBot` is registered against `approved.rs`, `@CarLabRsBot`
+  projects. `@ApprovedRsBot` is registered against `crm.carlab.rs`, `@CarLabRsBot`
   against `carlab.rs`, `@DetailsRsBot` against `details.rs`, each with that
   project's `TELEGRAM_CAPTURE_WEBHOOK_SECRET`
   ([ADR-0030](../adr/0030-a-capture-bot-per-brand-takes-the-telegram-contact.md)).
 
-Each is registered once per bot, four registrations in total.
+Each is registered once per bot, four registrations in total. approved.rs's
+two bots are registered on `crm.carlab.rs`, not on `approved.rs`: Caddy's
+`CRM_HOST` passes only these two paths to approved.rs's node and answers 404
+to anything else, so the bots follow the host rather than approved.rs's DNS.
 
 ### The CRM bot
 
@@ -2137,7 +2154,7 @@ The webhook must carry a `secret_token` equal to the approved.rs project's
 request:
 
 ```bash
-curl "https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/setWebhook?url=https://approved.rs/api/telegram-webhook&secret_token=<TELEGRAM_WEBHOOK_SECRET>"
+curl "https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/setWebhook?url=https://crm.carlab.rs/api/telegram-webhook&secret_token=<TELEGRAM_WEBHOOK_SECRET>"
 ```
 
 To check:
@@ -2151,11 +2168,12 @@ bot as its one argument — `crm` reads `TELEGRAM_BOT_TOKEN` /
 `TELEGRAM_WEBHOOK_SECRET` and registers `/api/telegram-webhook`, `capture` reads
 `TELEGRAM_CAPTURE_BOT_TOKEN` / `TELEGRAM_CAPTURE_WEBHOOK_SECRET` and registers
 `/api/telegram-capture`. Both take the target host from `SITE`, and an unknown
-bot or a missing variable exits non-zero without calling Telegram:
+bot or a missing variable exits non-zero without calling Telegram. A `SITE` set
+on the command line wins over the env file's:
 
 ```bash
 cd apps/approved-rs
-node --env-file=.env.local --experimental-strip-types scripts/register-webhook.ts crm
+SITE=https://crm.carlab.rs node --env-file=.env.local --experimental-strip-types scripts/register-webhook.ts crm
 ```
 
 > Until 2026-09-13 the script registered a non-existent `${SITE}/api/telegram` and
@@ -2172,7 +2190,7 @@ The script reads nothing but `process.env`, so the one copy in
 
 ```bash
 cd apps/approved-rs
-node --env-file=.env.local --experimental-strip-types scripts/register-webhook.ts capture
+SITE=https://crm.carlab.rs node --env-file=.env.local --experimental-strip-types scripts/register-webhook.ts capture
 node --env-file=../auto-service/.env.local --experimental-strip-types scripts/register-webhook.ts capture
 node --env-file=../detailing/.env.local --experimental-strip-types scripts/register-webhook.ts capture
 ```
