@@ -9,10 +9,10 @@ cp "$here/deploy-site.sh" "$here/reminders.sh" "$work/host/"
 
 cat >"$work/bin/docker" <<'STUB'
 #!/bin/sh
-echo "docker $* -> $(readlink "$SITES_ROOT/$APP/current" 2>/dev/null || echo none)" >>"$LOG"
+echo "docker $* -> $(readlink "$SITES_ROOT/$APP/running" 2>/dev/null || echo none) (caddy $(readlink "$SITES_ROOT/$APP/current" 2>/dev/null || echo none))" >>"$LOG"
 case "$*" in
 *'up -d --wait'*)
-  case "$(readlink "$SITES_ROOT/$APP/current")" in
+  case "$(readlink "$SITES_ROOT/$APP/running")" in
   *"${BROKEN:-none}") exit 1 ;;
   esac
   ;;
@@ -86,7 +86,7 @@ run() {
   return "$status"
 }
 current() {
-  [ "$(readlink "$SITES_ROOT/$APP/current")" = "releases/$1" ]
+  [ "$(readlink "$SITES_ROOT/$APP/current")" = "releases/$1" ] && [ "$(readlink "$SITES_ROOT/$APP/running")" = "releases/$1" ]
 }
 released() {
   [ "$(find "$SITES_ROOT/$APP/releases" -mindepth 1 -maxdepth 1 | wc -l | tr -d ' ')" -eq "$1" ]
@@ -96,17 +96,20 @@ fresh
 ship "$A"
 expect 'a first release deploys' run deploy-site.sh "$APP" "$A"
 expect 'current points at the first release' current "$A"
-expect 'the site is recreated on the new release and waited for' \
-  grep -qx "docker compose up -d --wait --wait-timeout 120 --no-deps --force-recreate site-$APP -> releases/$A" "$LOG"
+expect 'the site is recreated on the new release and waited for before caddy serves it' \
+  grep -qx "docker compose up -d --wait --wait-timeout 120 --no-deps --force-recreate site-$APP -> releases/$A (caddy none)" "$LOG"
 expect 'the release is readable by the containers' \
   test "$(mode "$SITES_ROOT/$APP/releases/$A/server/entry.mjs")" = 644
 expect 'the release env stays owner-only' \
   test "$(mode "$SITES_ROOT/$APP/releases/$A/.env")" = 600
 refuse 'no temporary link is left behind' test -L "$SITES_ROOT/$APP/current.next"
+refuse 'no temporary running link is left behind' test -L "$SITES_ROOT/$APP/running.next"
 
 ship "$B"
 expect 'a second release deploys' run deploy-site.sh "$APP" "$B"
 expect 'current moves to the second release' current "$B"
+expect 'caddy keeps the old static files until the new container is healthy' \
+  grep -qx "docker compose up -d --wait --wait-timeout 120 --no-deps --force-recreate site-$APP -> releases/$B (caddy releases/$A)" "$LOG"
 
 ship "$C"
 BROKEN=$C
@@ -114,10 +117,11 @@ export BROKEN
 refuse 'a release that fails its health check fails the deploy' run deploy-site.sh "$APP" "$C"
 expect 'a failed release rolls current back' current "$B"
 expect 'the site is recreated on the previous release' \
-  test "$(tail -n 1 "$LOG")" = "docker compose up -d --wait --wait-timeout 120 --no-deps --force-recreate site-$APP -> releases/$B"
+  test "$(tail -n 1 "$LOG")" = "docker compose up -d --wait --wait-timeout 120 --no-deps --force-recreate site-$APP -> releases/$B (caddy releases/$B)"
+refuse 'caddy never serves the static files of a failed release' grep -q "caddy releases/$C" "$LOG"
 expect 'a failed release says so' grep -q "rolled back to $B" "$work/stderr"
 expect 'a rollback brings back the env the previous release ran with' \
-  grep -qx "RELEASE=$B" "$SITES_ROOT/$APP/current/.env"
+  grep -qx "RELEASE=$B" "$SITES_ROOT/$APP/running/.env"
 expect 'a rebuild of the live sha left the live release untouched' grep -qx "$B" "$SITES_ROOT/$APP/releases/$B/server/entry.mjs"
 unset BROKEN
 
@@ -141,6 +145,7 @@ BROKEN=$A
 export BROKEN
 refuse 'a broken first release fails the deploy' run deploy-site.sh "$APP" "$A"
 refuse 'a broken first release leaves no current link' test -L "$SITES_ROOT/$APP/current"
+refuse 'a broken first release leaves no running link' test -L "$SITES_ROOT/$APP/running"
 expect 'a broken first release stops its container' grep -q "docker compose rm -sf site-$APP" "$LOG"
 unset BROKEN
 
@@ -156,13 +161,18 @@ refuse 'a release without its env never reaches docker' test -s "$LOG"
 
 fresh
 ship "$A"
-for bad in shop ../detailing ''; do
+for bad in shop ../detailing detailing/ . .. Detailing ''; do
   refuse "app '$bad' is refused" run deploy-site.sh "$bad" "$A"
 done
 for bad in latest 2222 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa0-1-1 -aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa ../../x "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-1/x"; do
   refuse "release name '$bad' is refused" run deploy-site.sh "$APP" "$bad"
 done
 refuse 'a refused deploy never reaches docker' test -s "$LOG"
+
+APP=new-brand
+fresh
+ship "$A"
+expect 'a site with an uploaded release deploys without a list naming it' run deploy-site.sh "$APP" "$A"
 
 APP=approved-rs
 fresh
@@ -178,5 +188,15 @@ REMINDERS_EXIT=1
 export REMINDERS_EXIT
 refuse 'a failed reminders run fails the unit' run reminders.sh '' ''
 unset REMINDERS_EXIT
+
+sites_of() {
+  sort -u | tr '\n' ' '
+}
+manifest=$(jq -r '.sites | keys[]' "$here/../../.github/scripts/site-env.json" | sites_of)
+expect 'site-env.json names the sites' test -n "$manifest"
+expect 'compose runs a container for every site in site-env.json and no other' \
+  test "$(sed -n 's/^  site-\([a-z0-9-]*\):$/\1/p' "$here/docker-compose.yml" | sites_of)" = "$manifest"
+expect 'caddy serves every site in site-env.json and no other' \
+  test "$(sed -n 's/^[[:space:]]*import site \([a-z0-9-]*\)$/\1/p' "$here/caddy/Caddyfile" | sites_of)" = "$manifest"
 
 [ "$failures" -eq 0 ]

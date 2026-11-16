@@ -109,6 +109,7 @@
 }
 
 (www) {
+	import security-headers.caddy
 	redir https://{args[0]}{uri} permanent
 }
 

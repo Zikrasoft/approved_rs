@@ -68,10 +68,11 @@ expect 'every service has a memory limit, together under the 4 GB of the host' \
 expect 'what runs without grafana stays under 3.75 GB' \
   '[.services[] | select(.profiles != ["grafana"]) | .mem_limit | tonumber] | add < 3840 * 1024 * 1024'
 expect 'grafana runs only on demand' '.services.grafana.profiles == ["grafana"]'
+sites=$(jq -r '.sites | keys[]' "$here/../../.github/scripts/site-env.json")
 shop_node=$(sed -n 's/^FROM \(node:[^ ]*\).*/\1/p' "$here/Dockerfile" | tail -n 1)
-for app in auto-service detailing approved-rs; do
-  expect "site-$app runs its current release on the shop's pinned node ($shop_node)" \
-    ".services[\"site-$app\"] | .image == \"$shop_node\" and .command == [\"node\", \"/srv/sites/$app/current/server/entry.mjs\"]"
+for app in $sites; do
+  expect "site-$app runs its running release on the shop's pinned node ($shop_node), not the one caddy serves" \
+    ".services[\"site-$app\"] | .image == \"$shop_node\" and .command == [\"node\", \"/srv/sites/$app/running/server/entry.mjs\"]"
   expect "site-$app starts only once it has a release" ".services[\"site-$app\"].profiles == [\"site-$app\"]"
   expect "site-$app listens for caddy on 4321 with a heap inside its limit" \
     ".services[\"site-$app\"] | .environment.HOST == \"0.0.0.0\" and .environment.PORT == \"4321\" and .environment.NODE_OPTIONS == \"--max-old-space-size=112\" and .mem_limit == \"167772160\""
@@ -85,10 +86,10 @@ for app in auto-service detailing approved-rs; do
     ".services[\"site-$app\"].healthcheck.test | join(\" \") | test(\"127.0.0.1:4321/\")"
   expect "site-$app runs node under an init that passes SIGTERM on, so background work drains" \
     ".services[\"site-$app\"].init == true"
-  if jq -e ".[\"site-$app\"].env_file == [{\"path\": \"/srv/sites/$app/current/.env\", \"required\": false}]" "$work/services.json" >/dev/null; then
-    echo "ok - site-$app reads the env of its current release, so a rollback takes its env along"
+  if jq -e ".[\"site-$app\"].env_file == [{\"path\": \"/srv/sites/$app/running/.env\", \"required\": false}]" "$work/services.json" >/dev/null; then
+    echo "ok - site-$app reads the env of its running release, so a rollback takes its env along"
   else
-    echo "not ok - site-$app reads the env of its current release, so a rollback takes its env along"
+    echo "not ok - site-$app reads the env of its running release, so a rollback takes its env along"
     failures=$((failures + 1))
   fi
 done
@@ -113,7 +114,7 @@ docker run -d --name "$net-medusa" --network "$net" --network-alias medusa "$cad
 docker run -d --name "$net-site" --network "$net" --network-alias site-auto-service --network-alias site-detailing \
   --network-alias site-approved-rs "$caddy_image" caddy respond --listen :4321 \
   -H 'X-Upstream: {http.request.host} {http.request.header.X-Forwarded-Proto} {http.request.header.X-Forwarded-For} {http.request.header.X-Request-Id}' node >/dev/null
-for app in auto-service detailing approved-rs; do
+for app in $sites; do
   mkdir -p "$work/sites/$app/releases/r/client/ru" "$work/sites/$app/releases/r/client/_astro"
   echo "$app ru" >"$work/sites/$app/releases/r/client/ru/index.html"
   echo "$app js" >"$work/sites/$app/releases/r/client/_astro/app.js"
@@ -265,6 +266,7 @@ fetch carlab '/_image?href=/x.png' >/dev/null
 if [ "$(status_of)" = 404 ]; then echo 'ok - the unused image endpoint is closed'; else echo "not ok - /_image answered $(status_of)"; failures=$((failures + 1)); fi
 fetch www.carlab '/ru/?a=1' >/dev/null
 header 'www.carlab.rs redirects to the apex' 'https://carlab.localhost/ru/?a=1' location
+secured 'a www redirect carries the site security headers'
 fetch www.details / >/dev/null
 header 'www.details.rs redirects to the apex' 'https://details.localhost/' location
 fetch www.approved / >/dev/null

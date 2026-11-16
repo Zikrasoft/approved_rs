@@ -5,12 +5,11 @@ cd "$(dirname -- "$0")"
 app=${1:-}
 name=${2:-}
 usage() {
-  echo "usage: $0 <auto-service|detailing|approved-rs> <release name: 40-character commit sha, then -run-attempt>" >&2
+  echo "usage: $0 <app> <release name: 40-character commit sha, then -run-attempt>" >&2
   exit 2
 }
 case $app in
-auto-service | detailing | approved-rs) ;;
-*) usage ;;
+'' | -* | *[!abcdefghijklmnopqrstuvwxyz0123456789-]*) usage ;;
 esac
 case $name in
 '' | *[!0-9a-f-]*) usage ;;
@@ -29,27 +28,27 @@ release=releases/$name
   exit 1
 }
 
-previous=$(readlink "$site/current" 2>/dev/null || true)
+previous=$(readlink "$site/running" 2>/dev/null || true)
 chmod -R a+rX "$site/$release"
 chmod 600 "$site/$release/.env"
 touch "$site/$release"
 
 point() {
-  ln -sfn "$1" "$site/current.next"
-  mv -T "$site/current.next" "$site/current"
+  ln -sfn "$2" "$site/$1.next"
+  mv -T "$site/$1.next" "$site/$1"
 }
 start() {
   docker compose up -d --wait --wait-timeout 120 --no-deps --force-recreate "site-$app"
 }
 
-point "$release"
+point running "$release"
 if ! start; then
   if [ -z "$previous" ]; then
-    rm -f "$site/current"
+    rm -f "$site/running"
     docker compose rm -sf "site-$app" || true
     echo "site-$app failed its health check on its first release $name, nothing is serving it." >&2
   elif [ "$previous" != "$release" ]; then
-    point "$previous"
+    point running "$previous"
     start || true
     echo "site-$app failed its health check on $name, rolled back to ${previous#releases/}." >&2
   else
@@ -57,6 +56,7 @@ if ! start; then
   fi
   exit 1
 fi
+point current "$release"
 
 find "$site/releases" -mindepth 1 -maxdepth 1 -type d -exec ls -1dt {} + | tail -n +4 | while read -r old; do
   [ "$old" = "$site/$release" ] || rm -rf "$old"

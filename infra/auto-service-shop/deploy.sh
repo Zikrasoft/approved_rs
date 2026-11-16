@@ -84,11 +84,10 @@ trap '[ $? -eq 0 ] || [ ! -s .previous-tag ] || echo "Roll back with: $0 $(cat .
 sites=${SITES_ROOT:-/srv/sites}
 [ -d "$sites" ] || sudo install -d -m 0755 -o "$(id -u)" -g "$(id -g)" "$sites"
 COMPOSE_PROFILES=
-for app in auto-service detailing approved-rs; do
-  (umask 022 && mkdir -p "$sites/$app/releases")
-  if [ -e "$sites/$app/current" ]; then
-    COMPOSE_PROFILES="${COMPOSE_PROFILES:+$COMPOSE_PROFILES,}site-$app"
-  fi
+for site in "$sites"/*; do
+  [ -L "$site/current" ] || continue
+  [ -L "$site/running" ] || ln -s "$(readlink "$site/current")" "$site/running"
+  COMPOSE_PROFILES="${COMPOSE_PROFILES:+$COMPOSE_PROFILES,}site-${site##*/}"
 done
 export COMPOSE_PROFILES
 

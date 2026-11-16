@@ -156,16 +156,20 @@ expect 'the old tag is kept for rollback' has "$OLD" "$work/host/.previous-tag"
 expect 'the lock is released after a deploy' test ! -d "$work/host/.deploy.lock"
 expect 'a deploy on a host without a sites root makes it as root, for the deploy user' grep -q "^sudo install -d -m 0755 -o $(id -u) -g $(id -g) $SITES_ROOT\$" "$LOG.sudo"
 expect 'a deploy before any site release starts no site' test "$(cat "$LOG.profiles")" = ''
-expect 'a deploy makes a directory each site release lands in, open to caddy and node' \
-  test "$(find "$SITES_ROOT" -mindepth 2 -maxdepth 2 -name releases -perm -0755 | wc -l | tr -d ' ')" -eq 3
 
 stage
-mkdir -p "$SITES_ROOT/detailing/releases/r" "$SITES_ROOT/approved-rs/releases/r"
+mkdir -p "$SITES_ROOT/detailing/releases/r" "$SITES_ROOT/approved-rs/releases/r" "$SITES_ROOT/new-brand/releases/r" "$SITES_ROOT/auto-service/releases"
+ln -sfn releases/r "$SITES_ROOT/detailing/running"
 ln -sfn releases/r "$SITES_ROOT/detailing/current"
+ln -sfn releases/r "$SITES_ROOT/new-brand/running"
+ln -sfn releases/r "$SITES_ROOT/new-brand/current"
 ln -sfn releases/r "$SITES_ROOT/approved-rs/current"
 expect 'a deploy with site releases succeeds' run deploy.sh "$NEW"
-expect 'a deploy keeps every released site running and starts no other' \
-  test "$(cat "$LOG.profiles")" = site-detailing,site-approved-rs
+expect 'a deploy keeps every released site under the sites root running and starts no other' \
+  test "$(tr ',' '\n' <"$LOG.profiles" | sort | tr '\n' ' ')" = 'site-approved-rs site-detailing site-new-brand '
+expect 'a site released before the running link gets one on its current release' \
+  test "$(readlink "$SITES_ROOT/approved-rs/running")" = releases/r
+refuse 'a site with no release gets no running link' test -L "$SITES_ROOT/auto-service/running"
 rm -rf "$SITES_ROOT"
 
 stage
