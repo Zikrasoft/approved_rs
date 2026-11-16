@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { z } from 'zod';
 import type { CrmDatabase, CrmTransaction } from './database.ts';
 import { Prisma } from './generated/prisma/client.ts';
+import { upper } from './enumCase.ts';
 import { leadData } from './leadRow.ts';
 import { legacyLedgerSchema } from './ledgerStore.ts';
 import { legacyLeadSchema, type LegacyLead } from './schema.ts';
@@ -127,24 +128,39 @@ export function countLegacy(records: LegacyRecords): ImportCounts {
 const payloadHash = (payload: unknown) =>
   createHash('sha256').update(JSON.stringify(payload)).digest('hex');
 
+export const LATE_LEAD_GAP = 1000;
+
+async function reserveLateGap(tx: CrmTransaction): Promise<void> {
+  const { _max } = await tx.lead.aggregate({ _max: { legacyId: true } });
+  if (_max.legacyId == null) return;
+  const target = _max.legacyId + LATE_LEAD_GAP;
+  const [{ sequence }] = await tx.$queryRaw<[{ sequence: string }]>`
+    SELECT pg_get_serial_sequence('leads', 'number') AS sequence`;
+  const [{ next }] = await tx.$queryRawUnsafe<[{ next: bigint }]>(
+    `SELECT CASE WHEN is_called THEN last_value + 1 ELSE last_value END AS next FROM ${sequence}`,
+  );
+  if (target > Number(next))
+    await tx.$executeRaw`SELECT setval(${sequence}::regclass, ${target}, false)`;
+}
+
 async function importLeads(
   tx: CrmTransaction,
   leads: LegacyLead[],
 ): Promise<Map<number, string>> {
-  const ids = new Map<number, string>();
+  const existing = await tx.lead.findMany({
+    where: { legacyId: { in: leads.map(({ id }) => id) } },
+    select: { id: true, legacyId: true },
+  });
+  const ids = new Map(existing.map(({ id, legacyId }) => [legacyId!, id]));
   for (const { id: legacyId, ...lead } of leads) {
-    const data = { ...leadData(lead), legacyId, number: legacyId };
-    const { id } = await tx.lead.upsert({
-      where: { legacyId },
-      create: data,
-      update: data,
+    if (ids.has(legacyId)) continue;
+    const { id } = await tx.lead.create({
+      data: { ...leadData(lead), legacyId, number: legacyId },
       select: { id: true },
     });
     ids.set(legacyId, id);
   }
-  await tx.$executeRaw`
-    SELECT setval(pg_get_serial_sequence('leads', 'number'), COALESCE(MAX(number), 0) + 1, false)
-    FROM leads`;
+  await reserveLateGap(tx);
   return ids;
 }
 
@@ -154,17 +170,16 @@ async function importDigests(
   ids: Map<number, string>,
 ): Promise<void> {
   for (const { day, createdAt, posted } of digests) {
-    const fields = {
-      createdAt: new Date(createdAt),
-      messageId: posted?.messageId ?? null,
-      hidden: posted?.hidden ?? null,
-    };
-    const digest = await tx.digest.upsert({
-      where: { day: new Date(`${day}T00:00:00Z`) },
-      create: { day: new Date(`${day}T00:00:00Z`), ...fields },
-      update: fields,
+    const date = new Date(`${day}T00:00:00Z`);
+    if (await tx.digest.findUnique({ where: { day: date } })) continue;
+    const digest = await tx.digest.create({
+      data: {
+        day: date,
+        createdAt: new Date(createdAt),
+        messageId: posted?.messageId ?? null,
+        hidden: posted?.hidden ?? null,
+      },
     });
-    await tx.digestLead.deleteMany({ where: { digestId: digest.id } });
     const entries = (list: 'DUE' | 'STALE', legacy: number[] = []) =>
       legacy.flatMap((legacyId, position) => {
         const leadId = ids.get(legacyId);
@@ -184,38 +199,28 @@ async function importLedger(
   tx: CrmTransaction,
   { operations, prompts }: LegacyRecords['ledger'],
 ): Promise<void> {
-  for (const {
-    id: legacyId,
-    type,
-    amount,
-    note,
-    createdAt,
-    createdBy,
-  } of operations) {
-    const data = {
-      type: type === 'payout' ? 'PAYOUT' : 'SETTLEMENT',
-      amount,
-      note,
+  await tx.ledgerOperation.createMany({
+    data: operations.map(
+      ({ id: legacyId, type, amount, note, createdAt, createdBy }) => ({
+        legacyId,
+        type: upper(type),
+        amount,
+        note,
+        createdAt: new Date(createdAt),
+        createdBy: upper(createdBy),
+      }),
+    ),
+    skipDuplicates: true,
+  });
+  await tx.operationPrompt.createMany({
+    data: prompts.map(({ chatId, messageId, type, createdAt }) => ({
+      chatId: BigInt(chatId),
+      messageId,
+      type: upper(type),
       createdAt: new Date(createdAt),
-      createdBy: createdBy === 'owner' ? 'OWNER' : 'ADMIN',
-    } as const;
-    await tx.ledgerOperation.upsert({
-      where: { legacyId },
-      create: { ...data, legacyId },
-      update: data,
-    });
-  }
-  for (const { chatId, messageId, type, createdAt } of prompts) {
-    const data = {
-      type: type === 'payout' ? 'PAYOUT' : 'SETTLEMENT',
-      createdAt: new Date(createdAt),
-    } as const;
-    await tx.operationPrompt.upsert({
-      where: { chatId_messageId: { chatId: BigInt(chatId), messageId } },
-      create: { chatId: BigInt(chatId), messageId, ...data },
-      update: data,
-    });
-  }
+    })),
+    skipDuplicates: true,
+  });
 }
 
 export async function importLegacy(

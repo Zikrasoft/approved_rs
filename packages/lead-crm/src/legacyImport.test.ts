@@ -89,6 +89,11 @@ const blobs: LegacyBlobs = {
   quarantine: [{ id: 'broken' }, null],
 };
 
+const withLate = (lead: object): LegacyBlobs => ({
+  ...blobs,
+  leads: [...(blobs.leads as object[]), lead],
+});
+
 describe('readLegacy', () => {
   it('sorts the blobs into Leads, digests, the ledger and what it cannot read', () => {
     const records = readLegacy(blobs);
@@ -172,21 +177,41 @@ describe('importLegacy', () => {
     ).toMatchObject({ type: 'settlement', expired: true });
   });
 
-  it('keeps the old number as the Lead number and numbers new Leads after it', async () => {
+  it('keeps the old number and leaves a gap of 1000 for Leads that reach Blob late', async () => {
     await importLegacy(crmDatabase, readLegacy(blobs));
 
     expect((await store.searchLeads('#2'))[0]).toMatchObject({
       number: 2,
       name: 'Борис',
     });
-    expect((await store.insertLead(newLead)).number).toBe(3);
+    expect((await store.insertLead(newLead)).number).toBe(1002);
   });
 
-  it('numbers new Leads after a rerun still after the old ones', async () => {
+  it('leaves the numbering alone when Blob held no Leads', async () => {
+    await importLegacy(crmDatabase, readLegacy({ ...blobs, leads: [] }));
+
+    expect((await store.insertLead(newLead)).number).toBe(1);
+  });
+
+  it('numbers new Leads after a rerun still after the gap', async () => {
     await importLegacy(crmDatabase, readLegacy(blobs));
     await importLegacy(crmDatabase, readLegacy(blobs));
 
-    expect((await store.insertLead(newLead)).number).toBe(3);
+    expect((await store.insertLead(newLead)).number).toBe(1002);
+  });
+
+  it('imports a Lead that reached Blob late with its own number inside the gap', async () => {
+    await importLegacy(crmDatabase, readLegacy(blobs));
+    const first = await store.insertLead(newLead);
+
+    await importLegacy(crmDatabase, readLegacy(withLate(legacyLead(3))));
+
+    expect((await store.searchLeads('#3'))[0]).toMatchObject({
+      number: 3,
+      name: 'Вера',
+    });
+    expect(first.number).toBe(1002);
+    expect((await store.insertLead(newLead)).number).toBe(1003);
   });
 
   it('refuses to import over a new Lead that took an old number', async () => {
@@ -196,6 +221,45 @@ describe('importLegacy', () => {
       importLegacy(crmDatabase, readLegacy(blobs)),
     ).rejects.toThrow();
     expect(await store.readLeads()).toEqual([taken]);
+  });
+
+  it('refuses a late Lead whose number a new Lead already took past the gap', async () => {
+    await importLegacy(crmDatabase, readLegacy(blobs));
+    const taken = await store.insertLead(newLead);
+
+    await expect(
+      importLegacy(
+        crmDatabase,
+        readLegacy(withLate(legacyLead(3, { id: 1002 }))),
+      ),
+    ).rejects.toThrow();
+    expect(await store.getLead(taken.id)).toEqual(taken);
+  });
+
+  it('leaves the rows staff changed since the first run as they are', async () => {
+    await importLegacy(crmDatabase, readLegacy(blobs));
+    const [boris] = await store.searchLeads('#2');
+    await store.setStatus(boris!.id, 'won');
+    await store.takeFromDigest(boris!.id);
+    await crmDatabase().ledgerOperation.updateMany({
+      data: { note: 'исправлено' },
+    });
+    await crmDatabase().operationPrompt.updateMany({
+      data: { type: 'PAYOUT' },
+    });
+    const before = await store.readLeads();
+
+    await importLegacy(crmDatabase, readLegacy(blobs));
+
+    expect(await store.readLeads()).toEqual(before);
+    expect(await store.takeFromDigest(boris!.id)).toBeUndefined();
+    expect((await ledger.readOperations()).map((op) => op.note)).toEqual([
+      'исправлено',
+      'исправлено',
+    ]);
+    expect(
+      await ledger.findOperationPrompt({ chatId: 42, messageId: 9 }),
+    ).toMatchObject({ type: 'payout' });
   });
 
   it('maps the digest rows onto the new ids', async () => {
