@@ -1,13 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
-import { SUPPORTED_LOCALES } from './i18n/config';
 
 vi.mock('astro:middleware', () => ({ defineMiddleware: (fn: unknown) => fn }));
-vi.mock('astro:i18n', () => ({
-  requestHasLocale: (context: { url: URL }) =>
-    (SUPPORTED_LOCALES as readonly string[]).includes(
-      context.url.pathname.split('/')[1],
-    ),
-}));
 
 const { onRequest } = await import('./middleware');
 
@@ -106,14 +99,14 @@ describe('onRequest', () => {
     );
   });
 
-  it('301s an unprefixed content path to the detected locale', () => {
+  it('sends an unprefixed content path to the detected locale with a temporary redirect', () => {
     const context = makeContext('/vehicle-sourcing/rs/', {
       acceptLanguage: 'sr-RS,sr;q=0.9',
     });
     run(context);
     expect(context.redirect).toHaveBeenCalledWith(
       '/sr/vehicle-sourcing/rs/',
-      301,
+      302,
     );
   });
 });

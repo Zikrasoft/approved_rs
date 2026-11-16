@@ -214,7 +214,7 @@ header() {
 }
 node --experimental-strip-types --input-type=module -e "
 import { SECURITY_HEADERS } from '$here/../../packages/site-kit/src/securityHeaders.ts';
-for (const { key, value } of SECURITY_HEADERS.flatMap((rule) => rule.headers)) console.log(key + '\t' + value);
+for (const { key, value } of SECURITY_HEADERS) console.log(key + '\t' + value);
 " >"$work/security-headers"
 tab=$(printf '\t')
 secured() {
@@ -238,6 +238,7 @@ serves 'details.rs serves its own release' 'detailing ru' details /ru/
 serves 'approved.rs serves its own release' 'approved-rs ru' approved /ru/
 serves 'a hashed asset is served from the release' 'auto-service js' carlab /_astro/app.js
 header 'a hashed asset is cached for a year' 'public, max-age=31536000, immutable' cache-control
+secured 'a static file carries the site security headers'
 serves 'the site root goes to node for its locale redirect' node carlab /
 secured 'a node response carries the site security headers'
 header 'caddy adds no cache to a node response' '' cache-control
@@ -255,17 +256,11 @@ fetch carlab /no-such-page >/dev/null
 upstream 'a path no redirect names goes to node with the visitor host, https and a request id'
 fetch carlab /no-such-page -H 'X-Forwarded-For: 6.6.6.6' >/dev/null
 upstream 'a visitor cannot spoof the address node sees'
-fetch carlab '/services/brakes?utm=x' >/dev/null
-header "carlab.rs sends an unprefixed section to its primary locale" '/sr/services/brakes?utm=x' location
-fetch details /works >/dev/null
-header 'details.rs sends an unprefixed section to its primary locale' '/sr/works/' location
-fetch approved /cases/mercedes-c-2021-de/ >/dev/null
-header 'approved.rs answers a legacy URL from its redirect rules' '/ru/cases/vehicle-sourcing' location
+serves 'carlab.rs leaves an unprefixed section to node, whose middleware picks the locale' node carlab '/services/brakes?utm=x'
+serves 'approved.rs leaves a legacy URL to node, whose middleware owns every redirect' node approved /cases/mercedes-c-2021-de/
 status_of() {
   sed -n '1s/^HTTP[^ ]* \([0-9]*\).*/\1/p' "$work/headers.clean"
 }
-fetch approved /cases/ >/dev/null
-if [ "$(status_of)" = 308 ]; then echo 'ok - a redirect rule answers 308 like Vercel'; else echo "not ok - redirect status $(status_of)"; failures=$((failures + 1)); fi
 fetch carlab '/_image?href=/x.png' >/dev/null
 if [ "$(status_of)" = 404 ]; then echo 'ok - the unused image endpoint is closed'; else echo "not ok - /_image answered $(status_of)"; failures=$((failures + 1)); fi
 fetch www.carlab '/ru/?a=1' >/dev/null

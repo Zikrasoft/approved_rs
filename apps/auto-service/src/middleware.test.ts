@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 
 vi.mock('astro:middleware', () => ({ defineMiddleware: (fn: unknown) => fn }));
 
-const { isUnlocalized, onRequest } = await import('./middleware');
+const { onRequest } = await import('./middleware');
 
 type Handler = (context: unknown, next: () => unknown) => unknown;
 
@@ -27,7 +27,7 @@ function makeContext(url: string, acceptLanguage = '', cookie?: string) {
 const run = (context: unknown, next = vi.fn(() => 'next')) =>
   (onRequest as unknown as Handler)(context, next);
 
-describe('isUnlocalized', () => {
+describe('onRequest', () => {
   it.each([
     '/api/leads',
     '/keystatic/collection/works',
@@ -37,16 +37,11 @@ describe('isUnlocalized', () => {
     '/llms.txt',
     '/404',
     '/sitemap-index.xml',
-  ])('leaves %s alone', (pathname) => {
-    expect(isUnlocalized(pathname)).toBe(true);
+  ])('leaves %s to its route', (pathname) => {
+    const context = makeContext(pathname);
+    expect(run(context)).toBe('next');
+    expect(context.redirect).not.toHaveBeenCalled();
   });
-
-  it.each(['/', '/ru/', '/services/', '/sr/works/bmw-x5/', '/contact'])(
-    'routes %s through locale handling',
-    (pathname) => {
-      expect(isUnlocalized(pathname)).toBe(false);
-    },
-  );
 });
 
 describe('onRequest', () => {

@@ -37,7 +37,7 @@ jobs:
       - run: sh .github/scripts/shop-migrations-frozen.test.sh
       - run: sh .github/scripts/check-base.test.sh
       - run: sh .github/scripts/pinned-deps.sh
-      - run: sh .github/scripts/redirects-drift.sh
+      - run: sh .github/scripts/security-headers-drift.sh
 
       - id: affected
         env:
@@ -90,6 +90,9 @@ jobs:
           done
           pnpm turbo run build "${filters[@]}"
           node --experimental-strip-types .github/scripts/contact-placement.ts "${dists[@]}"
+          if [[ " $SITES " == *" approved-rs "* ]]; then
+            node --experimental-strip-types .github/scripts/redirects-shadowed.ts apps/approved-rs/dist/client
+          fi
 
       - if: steps.affected.outputs.shop == 'true'
         run: sh infra/auto-service-shop/test/scripts.test.sh
@@ -364,7 +367,7 @@ jobs:
         if: steps.guard.outputs.deploy == 'true'
         run: |
           tar -C infra/auto-service-shop -cf - docker-compose.yml caddy/Caddyfile deploy.sh backup.sh restore.sh crawler-role.sh crm-role.sh move-static-to-s3.sh \
-            logs-export.sh loki/config.yaml alloy/config.alloy grafana deploy-site.sh reminders.sh caddy/sites \
+            logs-export.sh loki/config.yaml alloy/config.alloy grafana deploy-site.sh reminders.sh caddy/security-headers.caddy \
             | ssh -o BatchMode=yes -o StrictHostKeyChecking=yes "$TARGET" 'tar -C /srv/carlab -xf -'
       - name: Deploy
         if: steps.guard.outputs.deploy == 'true'

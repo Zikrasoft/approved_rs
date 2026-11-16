@@ -19,7 +19,9 @@
     "./stored-value": "./src/storedValue.ts",
     "./og": "./src/ogImage.ts",
     "./pagination": "./src/pagination.ts",
-    "./list-search": "./src/listSearch.ts"
+    "./list-search": "./src/listSearch.ts",
+    "./locale-middleware": "./src/localeMiddleware.ts",
+    "./security-headers": "./src/securityHeaders.ts"
   },
   "scripts": {
     "test": "vitest run --coverage",

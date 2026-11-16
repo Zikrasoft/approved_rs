@@ -1,23 +1,13 @@
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { pathToFileURL } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import {
-  caddySiteConfig,
   createRedirectMatcher,
-  unprefixedSectionRedirects,
-  withVercelConfig,
-  writeCaddySiteConfig,
-  writeVercelConfig,
+  shadowedRedirects,
   type Redirect,
 } from './redirects.ts';
-import { SECURITY_HEADERS } from './securityHeaders.ts';
 
 const rule = (source: string, destination: string): Redirect => ({
   source,
   destination,
-  permanent: true,
 });
 
 describe('createRedirectMatcher', () => {
@@ -74,141 +64,32 @@ describe('createRedirectMatcher', () => {
   });
 });
 
-describe('withVercelConfig', () => {
-  it('replaces the redirects and headers and keeps key order', () => {
-    const before = JSON.stringify({
-      framework: 'astro',
-      redirects: [rule('/old', '/new')],
-      headers: [],
-    });
-    const after = withVercelConfig(before, [rule('/a', '/b')]);
-    expect(after).toBe(
-      `${JSON.stringify(
-        {
-          framework: 'astro',
-          redirects: [rule('/a', '/b')],
-          headers: SECURITY_HEADERS,
-        },
-        null,
-        2,
-      )}\n`,
-    );
-  });
+describe('shadowedRedirects', () => {
+  const rules = [
+    rule('/old', '/ru/new/'),
+    rule('/old/', '/ru/new/'),
+    rule('/legacy.txt', '/ru/'),
+    rule('/', '/ru/'),
+  ];
 
-  it('adds the keys when the file has none', () => {
-    expect(JSON.parse(withVercelConfig('{}', []))).toEqual({
-      redirects: [],
-      headers: SECURITY_HEADERS,
-    });
-  });
-});
-
-describe('writeVercelConfig', () => {
-  it('rewrites the redirects and headers of the file in place', () => {
-    const file = pathToFileURL(
-      join(mkdtempSync(join(tmpdir(), 'redirects-')), 'vercel.json'),
-    );
-    writeFileSync(file, '{"framework":"astro"}');
-    writeVercelConfig(file, [rule('/a', '/b')]);
-    expect(JSON.parse(readFileSync(file, 'utf8'))).toEqual({
-      framework: 'astro',
-      redirects: [rule('/a', '/b')],
-      headers: SECURITY_HEADERS,
-    });
-  });
-});
-
-describe('unprefixedSectionRedirects', () => {
-  type Locale = 'sr' | 'en';
-  const paths = {
-    home: (locale: Locale) => `/${locale}/`,
-    services: (locale: Locale) => `/${locale}/services/`,
-    service: (locale: Locale, slug: string) => `/${locale}/services/${slug}/`,
-    shopProduct: (locale: Locale, type: string, handle: string) =>
-      `/${locale}/shop/${type}/${handle}/`,
-    contact: (locale: Locale) => `/${locale}/contact/`,
-    llmsTxt: (locale: Locale) => `/${locale}/llms.txt`,
-  };
-  const redirects = unprefixedSectionRedirects(paths, 'sr');
-
-  it('sends a section with nested pages through a catch-all and a single page to its own URL', () => {
-    expect(redirects).toEqual([
-      rule('/services/:path*', '/sr/services/:path*'),
-      rule('/shop/:path*', '/sr/shop/:path*'),
-      rule('/contact', '/sr/contact/'),
-      rule('/contact/', '/sr/contact/'),
+  it('names every path a page directory is served under that a rule also matches', () => {
+    expect(shadowedRedirects(rules, ['/old/index.html'])).toEqual([
+      '/old/',
+      '/old',
     ]);
   });
 
-  it.each([
-    ['/services/brakes', '/sr/services/brakes'],
-    ['/services', '/sr/services/'],
-    ['/shop/oil/castrol', '/sr/shop/oil/castrol'],
-    ['/contact/', '/sr/contact/'],
-  ])('sends %s to %s', (path, target) => {
-    expect(createRedirectMatcher(redirects)(path)).toBe(target);
+  it('names a plain file a rule matches', () => {
+    expect(shadowedRedirects(rules, ['/legacy.txt'])).toEqual(['/legacy.txt']);
   });
 
-  it('never redirects a file', () => {
-    expect(createRedirectMatcher(redirects)('/llms.txt')).toBeNull();
-  });
-});
-
-describe('caddySiteConfig', () => {
-  it('sets every security header on every response and hides the server', () => {
-    expect(caddySiteConfig([])).toBe(
-      [
-        'header {',
-        '\tdefer',
-        '\tContent-Security-Policy "frame-ancestors \'self\'"',
-        `\tContent-Security-Policy-Report-Only ${JSON.stringify(SECURITY_HEADERS[0]!.headers[1]!.value)}`,
-        '\tX-Content-Type-Options "nosniff"',
-        '\tReferrer-Policy "strict-origin-when-cross-origin"',
-        '\tPermissions-Policy "camera=(), microphone=(), geolocation=()"',
-        '\tStrict-Transport-Security "max-age=63072000; includeSubDomains"',
-        '\t-Server',
-        '}',
-        '',
-      ].join('\n'),
-    );
+  it('serves the root index under the bare root', () => {
+    expect(shadowedRedirects(rules, ['/index.html'])).toEqual(['/']);
   });
 
-  it('redirects in rule order, permanent as 308, temporary as 307, keeping the query', () => {
+  it('passes files no rule matches', () => {
     expect(
-      caddySiteConfig([
-        rule('/a/', '/ru/a/'),
-        { source: '/b', destination: 'https://x.rs/b', permanent: false },
-      ]).split('}\n')[1],
-    ).toBe(
-      [
-        '@redirect0 path_regexp redirect0 `^\\/a\\/$`',
-        'redir @redirect0 /ru/a/{?query} 308',
-        '@redirect1 path_regexp redirect1 `^\\/b$`',
-        'redir @redirect1 https://x.rs/b{?query} 307',
-        '',
-      ].join('\n'),
-    );
-  });
-
-  it('carries every captured segment into the destination by position', () => {
-    expect(
-      caddySiteConfig([
-        rule('/:locale(ru|en)/old/:path*', '/:locale/new/:path*'),
-      ]),
-    ).toContain(
-      'redir @redirect0 /{re.redirect0.1}/new/{re.redirect0.2}{?query} 308',
-    );
-  });
-});
-
-describe('writeCaddySiteConfig', () => {
-  it('writes the site config to the file', () => {
-    const file = pathToFileURL(
-      join(mkdtempSync(join(tmpdir(), 'redirects-')), 'site.caddy'),
-    );
-    writeCaddySiteConfig(file, [rule('/a', '/b')]);
-    expect(readFileSync(file, 'utf8')).toBe(
-      caddySiteConfig([rule('/a', '/b')]),
-    );
+      shadowedRedirects(rules, ['/ru/index.html', '/_astro/app.js']),
+    ).toEqual([]);
   });
 });

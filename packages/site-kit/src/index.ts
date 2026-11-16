@@ -36,7 +36,6 @@ export {
 } from './localeCookie.ts';
 export { isActiveNavPath, navCurrent, swapLocalePath } from './navPath.ts';
 export { VISITOR_ID_COOKIE } from './visitorId.ts';
-export { createUnlocalizedMatcher } from './unlocalizedPath.ts';
 export {
   STORAGE_KEY as CONSENT_STORAGE_KEY,
   parseConsent,
@@ -44,4 +43,3 @@ export {
 } from './consent.ts';
 export type { Consent } from './consent.ts';
 export type { Crumb } from './breadcrumbSchema.ts';
-export type { UnlocalizedPaths } from './unlocalizedPath.ts';

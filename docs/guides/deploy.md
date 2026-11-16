@@ -19,8 +19,7 @@
 | `apps/auto-service` | `carlab.rs`   | CarLab: auto service           | the site plus `/api/leads`, `/api/contact-click`, `/api/telegram-capture`, `/api/shop-orders`                               |
 | `apps/detailing`    | `details.rs`  | Details — detailing            | the site plus `/api/leads`, `/api/contact-click`, `/api/telegram-capture`                                                   |
 
-Each app owns its own `astro.config.mjs`, `vercel.json`, `keystatic.config.ts` and
-`.env*`.
+Each app owns its own `astro.config.mjs`, `keystatic.config.ts` and `.env*`.
 
 **Four bots, one chat, one lead store, three brands.** `@SerbCRMBot` is the CRM
 bot (cards, statuses, money, postpone and reminders), and it is the same bot
@@ -35,10 +34,10 @@ and are separated by the lead's `brand` field, which the server stamps on
 (`createBrandBot({ brand })`) — a visitor cannot set it.
 
 > Unprefixed paths in this document are relative to the app being discussed
-> (`vercel.json` in the approved.rs section means
-> `apps/approved-rs/vercel.json`). The repository root holds only `.github/`, the
-> linter configs, `pnpm-lock.yaml` and an "empty" `vercel.json` carrying a single
-> `git.deploymentEnabled: false`.
+> (`astro.config.mjs` in the approved.rs section means
+> `apps/approved-rs/astro.config.mjs`). The repository root holds only `.github/`, the
+> linter configs, `pnpm-lock.yaml` and a `vercel.json` carrying a single
+> `git.deploymentEnabled: false`, like each app's.
 
 ---
 
@@ -103,15 +102,16 @@ below are what Vercel used while it hosted the sites:
 }
 ```
 
-The same file sets the security headers on every path: `frame-ancestors 'self'`,
+Caddy sets the security headers on every response, static file or node: `frame-ancestors 'self'`,
 `nosniff`, `strict-origin-when-cross-origin`, a `Permissions-Policy` with the
 camera, microphone and geolocation off, HSTS, and a script CSP in
 `Content-Security-Policy-Report-Only` that allowlists GA4, Google Ads, Metrika
-and the Pixel beside `'self'` and the inline Astro scripts. The `headers` key is
-generated with the redirects from `SECURITY_HEADERS` in `packages/site-kit`,
-whose CSP takes the tag hosts from the analytics module; change it there and
-rerun each app's `scripts/redirects.ts`. `.github/scripts/redirects-drift.sh`
-fails `check` on a hand edit. Its `report-uri` is each site's `/api/csp-report`,
+and the Pixel beside `'self'` and the inline Astro scripts. They live in
+`infra/auto-service-shop/caddy/security-headers.caddy`, generated from
+`SECURITY_HEADERS` in `packages/site-kit`, whose CSP takes the tag hosts from
+the analytics module; change it there and run
+`.github/scripts/security-headers-drift.sh`, which also fails `check` on a hand
+edit. Its `report-uri` is each site's `/api/csp-report`,
 which logs one `[csp] <directive> <blocked host>` line per violation and nothing
 about the visitor.
 
@@ -1076,11 +1076,10 @@ is retried once its 10 minute lease runs out.
   keeps the last three releases. Caddy serves a release's files itself
   (`/_astro/*` for a year, everything else revalidated) and hands every other
   path to node, except `/_image`, which answers 404 (no sharp at runtime).
-  Node only runs middleware for paths that match a route, so Caddy applies each
-  site's edge redirects and security headers itself, from
-  `caddy/sites/<app>.caddy`: the app's `scripts/redirects.ts` writes it from the
-  same rules and `SECURITY_HEADERS` as `vercel.json`, and
-  `.github/scripts/redirects-drift.sh` fails `check` when either drifts.
+  Every redirect comes from node: each site's 404 is on demand, so middleware
+  runs for every path Caddy hands over. Caddy adds only the security headers,
+  from `caddy/security-headers.caddy` (shared by the three sites;
+  `.github/scripts/security-headers-drift.sh` fails `check` when it drifts).
   Proxied requests keep the apex `Host`, carry `X-Forwarded-Proto: https` and an
   `X-Request-Id`, and `X-Forwarded-For` is Caddy's own view of the client. The `carlab-reminders`
   systemd timer runs `reminders.sh` at 08:00 UTC, which calls approved.rs's
@@ -1983,7 +1982,7 @@ Steps 1, 5 and 6 are one `terraform apply`: see `infra/auto-service-shop/terrafo
    variables. Shared names are already at repository level.
 3. The GitHub App for Keystatic (see above), into the same environment.
 4. Point the domain's A record at the VPS, where Caddy serves it from
-   `caddy/sites/<app>.caddy` beside a `site-<app>` service (see
+   an `import site <app>` block beside a `site-<app>` service (see
    [The server](#the-server)). `CRM_DATABASE_URL` is not a GitHub value:
    compose sets it on the site container.
 
@@ -2192,9 +2191,8 @@ There is no monthly summary: the Balance is in the bot's menu. Without
 arrives.
 
 The timer calls approved.rs alone, never the other two sites: otherwise the
-same reminders would go out several times over. The `crons` section left in
-`apps/approved-rs/vercel.json` only mattered while Vercel served the site; the
-cutover disables it in the dashboard
+same reminders would go out several times over. Vercel's cron for the last deployment
+that carried one is disabled in the dashboard at the cutover
 ([Cutover from Vercel](#cutover-from-vercel)).
 
 ---

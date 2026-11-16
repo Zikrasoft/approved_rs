@@ -1,26 +1,14 @@
 import { defineMiddleware } from 'astro:middleware';
+import { createLocaleMiddleware } from '@podbor/site-kit/locale-middleware';
 import { detectLocale, isLocale } from './i18n/config';
-import { LOCALE_COOKIE, createUnlocalizedMatcher } from '@podbor/site-kit';
 
-export const isUnlocalized = createUnlocalizedMatcher({
-  exact: ['/robots.txt', '/llms.txt', '/404', '/404/'],
-  prefixes: ['/api/', '/keystatic', '/_image', '/.well-known/'],
-});
-
-export const onRequest = defineMiddleware((context, next) => {
-  const { pathname, search } = context.url;
-
-  if (isUnlocalized(pathname)) return next();
-
-  const firstSegment = pathname.split('/')[1] ?? '';
-  if (isLocale(firstSegment)) return next();
-
-  const locale = detectLocale(
-    context.request.headers.get('accept-language'),
-    context.cookies.get(LOCALE_COOKIE)?.value,
-  );
-
-  if (pathname === '/') return context.redirect(`/${locale}/${search}`, 302);
-
-  return context.redirect(`/${locale}${pathname}${search}`, 302);
-});
+export const onRequest = defineMiddleware(
+  createLocaleMiddleware({
+    isLocale,
+    detectLocale,
+    unlocalized: {
+      exact: ['/robots.txt', '/llms.txt', '/404', '/404/'],
+      prefixes: ['/api/', '/keystatic', '/_image', '/.well-known/'],
+    },
+  }),
+);

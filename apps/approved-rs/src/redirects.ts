@@ -7,8 +7,8 @@ const LOCALE = `:locale(${SUPPORTED_LOCALES.join('|')})`;
 
 function withAndWithoutSlash(source: string, destination: string): Redirect[] {
   return [
-    { source, destination, permanent: true },
-    { source: `${source}/`, destination, permanent: true },
+    { source, destination },
+    { source: `${source}/`, destination },
   ];
 }
 
@@ -64,18 +64,6 @@ const SLUG_RENAMES: Record<string, string> = {
 
 const BUYBACK_COLLAPSED_COUNTRIES = ['de', 'es', 'ch', 'pt', 'fr', 'it', 'pl'];
 
-const UNPREFIXED_SECTIONS = [
-  'vehicle-sourcing',
-  'vehicle-import',
-  'vehicle-buyback',
-  'vehicle-inspection',
-  'cases',
-  'contacts',
-  'privacy',
-  'about',
-  'thanks',
-];
-
 const brandTargets = [...new Set(SUPPORTED_LOCALES.map(brandLocale))];
 const brandPrefixes = [
   ...brandTargets.map((target) => ({
@@ -115,14 +103,4 @@ export const REDIRECTS: Redirect[] = [
     ...localized(`/${old}/:path*`, `/${current}/:path*`),
     ...localized(`/cases/${old}`, `/cases/${current}`),
   ]),
-];
-
-export const EDGE_REDIRECTS: Redirect[] = [
-  ...REDIRECTS,
-  ...UNPREFIXED_SECTIONS.flatMap((section) =>
-    withAndWithoutSlash(
-      `/${section}/:path*`,
-      `/${PRIMARY_LOCALE}/${section}/:path*`,
-    ),
-  ),
 ];

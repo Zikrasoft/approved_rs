@@ -111,9 +111,6 @@ decision ([ADR-0024](../adr/0024-hand-collected-vehicle-dictionary.md)).
 
 - The consent banner does not cover the floating contact button on mobile, on all
   three sites.
-- The 301s for legacy slugs: `vercel.json` duplicates `middleware.ts` by hand, and
-  they diverge silently
-  ([ADR-0010](../adr/0010-locale-prefixed-urls-and-permanent-legacy-redirects.md)).
 - Declining in the banner really does keep the Google tag from starting on the next load.
 - Meta descriptions in non-English locales: if the site name or the city is missing
   anywhere the Russian has `{siteName}` / `{location}`, the model dropped a token.

@@ -80,7 +80,7 @@
 
 (site) {
 	encode zstd gzip
-	import sites/{args[0]}.caddy
+	import security-headers.caddy
 
 	root * /srv/sites/{args[0]}/current/client
 
