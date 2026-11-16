@@ -15,7 +15,8 @@ const LOCALES: readonly string[] = ['ru', 'en', 'sr'];
 const RS_PHONE = '+381641234567';
 
 const notifyLead = vi.fn().mockResolvedValue(undefined);
-const inBackground = vi.fn();
+const inBackground = vi.hoisted(() => vi.fn());
+vi.mock('../background.ts', () => ({ inBackground }));
 
 const refusalCopy = (locale: string) => ({
   brand: {
@@ -45,7 +46,6 @@ const refusalCopy = (locale: string) => ({
 
 const POST = createLeadsRoute<Locale>({
   notifyLead,
-  inBackground,
   isLocale: (value): value is Locale => LOCALES.includes(value),
   defaultLocale: 'ru',
   localeCookie: 'lang',
@@ -101,7 +101,6 @@ describe('createLeadsRoute', () => {
     const thanksPath = vi.fn(() => '/ru/thanks/parts/');
     const route = createLeadsRoute<Locale>({
       notifyLead,
-      inBackground,
       isLocale: (value): value is Locale => LOCALES.includes(value),
       defaultLocale: 'ru',
       localeCookie: 'lang',
@@ -619,7 +618,6 @@ describe('a shop Order cancelled in the shop admin', () => {
   const cancelOrder = vi.fn();
   const cancelPOST = createLeadsRoute<Locale>({
     notifyLead,
-    inBackground,
     isLocale: (value): value is Locale => LOCALES.includes(value),
     defaultLocale: 'ru',
     localeCookie: 'lang',

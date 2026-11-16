@@ -28,7 +28,6 @@ type EventsEnv = Partial<Record<keyof z.infer<typeof eventsEnvSchema>, string>>;
 
 type ShopEventsOptions = {
   fetch?: typeof globalThis.fetch;
-  keepAlive?: (sending: Promise<unknown>) => void;
   env?: () => EventsEnv;
 };
 
@@ -40,7 +39,6 @@ const siteEventsEnv = (): EventsEnv => ({
 export const createShopEvents =
   ({
     fetch = (input, init) => globalThis.fetch(input, init),
-    keepAlive = inBackground,
     env = siteEventsEnv,
   }: ShopEventsOptions = {}) =>
   (request: Request | null, event: ShopEvent): void => {
@@ -67,7 +65,7 @@ export const createShopEvents =
         () => undefined,
       )
       .catch(() => undefined);
-    keepAlive(sending);
+    inBackground(sending);
   };
 
 export const reportShopEvent = createShopEvents();

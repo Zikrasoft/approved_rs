@@ -18,13 +18,13 @@ const lead = {
 };
 
 let fetchMock: ReturnType<typeof vi.fn>;
-let pending: Promise<unknown>[];
-const inBackground = (promise: Promise<unknown>) => {
-  pending.push(promise);
-};
+const pending = vi.hoisted((): Promise<unknown>[] => []);
+vi.mock('./background.ts', () => ({
+  inBackground: (promise: Promise<unknown>) => pending.push(promise),
+}));
 
 beforeEach(() => {
-  pending = [];
+  pending.length = 0;
   fetchMock = vi.fn(async () => new Response('{}', { status: 200 }));
   vi.stubGlobal('fetch', fetchMock);
   vi.spyOn(console, 'info').mockImplementation(() => {});
@@ -37,7 +37,7 @@ afterEach(() => {
 });
 
 function reporter(env: Record<string, unknown> = { META_CAPI_TOKEN: 'tok' }) {
-  return createMetaLeadReporter({ pixelId: PIXEL, env, inBackground });
+  return createMetaLeadReporter({ pixelId: PIXEL, env });
 }
 
 describe('metaLeadEvent', () => {
@@ -73,7 +73,6 @@ describe('createMetaLeadReporter', () => {
       createMetaLeadReporter({
         pixelId: undefined,
         env: { META_CAPI_TOKEN: 'tok' },
-        inBackground,
       }),
     ).toBeUndefined();
     expect(console.info).toHaveBeenCalledTimes(3);
@@ -141,7 +140,6 @@ describe('createMetaLeadReporter', () => {
     createMetaLeadReporter({
       pixelId: PIXEL,
       env: { META_CAPI_TOKEN: 'tok' },
-      inBackground,
       timeoutMs: 5,
     })!(lead);
     await expect(Promise.all(pending)).resolves.toBeDefined();

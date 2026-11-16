@@ -1,5 +1,4 @@
-import '@podbor/lead-crm/testing/database';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PARTS_ORDER_SERVICE, serviceLabel } from '@podbor/brands';
 import {
   ORDER_CANCELED,
@@ -70,6 +69,8 @@ beforeEach(() => {
   api.reset();
   demand.inquiries.length = 0;
 });
+
+afterEach(backgroundIdle);
 
 describe('a placed parts order posted to /api/leads', () => {
   it('refuses an order Lead the shop did not prove it sent', async () => {

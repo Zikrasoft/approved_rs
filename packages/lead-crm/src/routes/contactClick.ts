@@ -1,4 +1,4 @@
-import { inBackground as keepRunning } from '../background.ts';
+import { inBackground } from '../background.ts';
 import {
   AD_SOURCE_FIELD,
   adSourceFieldSchema,
@@ -15,7 +15,6 @@ const clickedChannelSchema = contactChannelSchema.catch('phone');
 
 export interface ContactClickRouteOptions {
   notifyLead: NotifyLead;
-  inBackground?: (promise: Promise<unknown>) => void;
   isLocale: (value: string) => boolean;
   defaultLocale: string;
 }
@@ -31,7 +30,6 @@ export function localeFromUrl(
 
 export function createContactClickRoute({
   notifyLead,
-  inBackground = keepRunning,
   isLocale,
   defaultLocale,
 }: ContactClickRouteOptions) {

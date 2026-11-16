@@ -2,11 +2,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createContactClickRoute } from './contactClick.ts';
 
 const notifyLead = vi.fn().mockResolvedValue(undefined);
-const inBackground = vi.fn();
+const inBackground = vi.hoisted(() => vi.fn());
+vi.mock('../background.ts', () => ({ inBackground }));
 
 const POST = createContactClickRoute({
   notifyLead,
-  inBackground,
   isLocale: (v: string) => ['ru', 'sr', 'en'].includes(v),
   defaultLocale: 'ru',
 });

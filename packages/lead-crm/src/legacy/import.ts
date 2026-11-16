@@ -1,9 +1,10 @@
 import { createHash } from 'node:crypto';
 import { z } from 'zod';
+import { APPROVED } from '@podbor/brands';
 import type { CrmDatabase, CrmTransaction } from '../database.ts';
 import { Prisma } from '../generated/prisma/client.ts';
 import { leadData } from '../leadRow.ts';
-import { operationSchema, promptSchema } from '../ledgerStore.ts';
+import { roundMoney } from '../money.ts';
 import { isDatedNote } from '../notes.ts';
 import {
   isClosed,
@@ -18,8 +19,6 @@ import { OPERATION_AUTHORS } from '../telegram/ledger.ts';
 
 // TODO: delete src/legacy/, scripts/import-blob.ts and the @vercel/blob devDependency in one commit once the Vercel fallback week after the cutover ends.
 
-export const LEGACY_BRAND = 'Approved.rs';
-
 export type LegacyLead = Omit<StoredLead, 'id'> & { id: number };
 
 export const legacyLeadSchema: z.ZodType<LegacyLead, unknown> =
@@ -27,7 +26,7 @@ export const legacyLeadSchema: z.ZodType<LegacyLead, unknown> =
     .omit({ brand: true, status: true, telegramCard: true })
     .extend({
       id: z.number().int().positive(),
-      brand: z.string().default(LEGACY_BRAND),
+      brand: z.string().default(APPROVED.name),
       status: z.enum([...LEAD_STATUSES, 'open']).default('new'),
       archived: z.boolean().optional(),
       contactChannel: storedLeadFieldsSchema.shape.contactChannel.catch(null),
@@ -52,12 +51,32 @@ export const legacyLeadSchema: z.ZodType<LegacyLead, unknown> =
       },
     );
 
+const legacyOperationTypeSchema = z.enum(['payout', 'settlement']);
+
+const legacyOperationSchema = z
+  .object({
+    id: z.number().int().positive(),
+    type: legacyOperationTypeSchema,
+    amount: z.number().transform(roundMoney).pipe(z.number().positive()),
+    note: z.string().max(500),
+    createdAt: z.iso.datetime(),
+    createdBy: z.enum(['owner', 'admin']),
+  })
+  .strict();
+
+const legacyPromptSchema = z
+  .object({
+    chatId: z.number().int(),
+    messageId: z.number().int(),
+    type: legacyOperationTypeSchema,
+    createdAt: z.iso.datetime(),
+  })
+  .strict();
+
 export const legacyLedgerSchema = z
   .object({
-    operations: z.array(
-      operationSchema.extend({ id: z.number().int().positive() }),
-    ),
-    prompts: z.array(promptSchema),
+    operations: z.array(legacyOperationSchema),
+    prompts: z.array(legacyPromptSchema),
   })
   .strict();
 
@@ -233,7 +252,7 @@ export function countLegacy(records: LegacyRecords): ImportCounts {
 const payloadHash = (payload: unknown) =>
   createHash('sha256').update(JSON.stringify(payload)).digest('hex');
 
-export const LATE_LEAD_GAP = 1000;
+const LATE_LEAD_GAP = 1000;
 
 async function reserveLateGap(tx: CrmTransaction): Promise<void> {
   const { _max } = await tx.lead.aggregate({ _max: { legacyId: true } });

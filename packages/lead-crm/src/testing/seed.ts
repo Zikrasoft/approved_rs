@@ -1,3 +1,4 @@
+import './database.ts';
 import { randomUUID } from 'node:crypto';
 import { crmDatabase } from '../database.ts';
 import { leadData, toStoredLead, WITH_NOTES } from '../leadRow.ts';

@@ -207,9 +207,9 @@ describe('sendLeadNotification', () => {
     expect(body.text).not.toContain('BMW X5');
   });
 
-  it('shows a dash for a Lead the store could not number', () => {
+  it('shows a question mark for a Lead the store could not number', () => {
     expect(formatter.formatTeaser(makeLead({ number: null }))).toContain(
-      '🚗 Заявка #— · Иван',
+      '🚗 Заявка #? · Иван',
     );
   });
 

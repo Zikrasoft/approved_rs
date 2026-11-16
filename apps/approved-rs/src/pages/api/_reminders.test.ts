@@ -1,4 +1,3 @@
-import '@podbor/lead-crm/testing/database';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { APIContext } from 'astro';
 import { crmDatabase, leadIdSchema } from '@podbor/lead-crm';
