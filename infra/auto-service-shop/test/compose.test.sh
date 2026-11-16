@@ -5,9 +5,9 @@ here="$(cd "$(dirname -- "$0")/.." && pwd)"
 work=$(mktemp -d)
 net=carlab-caddy-test-$$
 trap 'docker rm -f "$net-medusa" "$net-site" "$net-caddy" >/dev/null 2>&1; docker network rm "$net" >/dev/null 2>&1; rm -rf "$work"' EXIT
-printf 'POSTGRES_PASSWORD=x\nTYPESENSE_API_KEY=y\nMEDUSA_TAG=%s\nADMIN_BASIC_AUTH_USER=staff\nADMIN_BASIC_AUTH_HASH=%s\nGRAFANA_ADMIN_PASSWORD=g\nMEDIA_ORIGIN=https://bucket.s3.eu-north-1.amazonaws.com\n' \
+printf 'POSTGRES_PASSWORD=x\nCRM_DB_PASSWORD=c0ffee\nTYPESENSE_API_KEY=y\nMEDUSA_TAG=%s\nADMIN_BASIC_AUTH_USER=staff\nADMIN_BASIC_AUTH_HASH=%s\nGRAFANA_ADMIN_PASSWORD=g\nMEDIA_ORIGIN=https://bucket.s3.eu-north-1.amazonaws.com\n' \
   0000000000000000000000000000000000000000 "'\$2a\$14\$hash'" >"$work/.env"
-env -u MEDIA_ORIGIN -u POSTGRES_PASSWORD -u TYPESENSE_API_KEY -u MEDUSA_TAG -u ADMIN_BASIC_AUTH_USER -u ADMIN_BASIC_AUTH_HASH -u GRAFANA_ADMIN_PASSWORD -u GRAFANA_PORT docker compose -f "$here/docker-compose.yml" --project-directory "$work" --profile "*" config --format json >"$work/config.json"
+env -u MEDIA_ORIGIN -u POSTGRES_PASSWORD -u CRM_DB_PASSWORD -u TYPESENSE_API_KEY -u MEDUSA_TAG -u ADMIN_BASIC_AUTH_USER -u ADMIN_BASIC_AUTH_HASH -u GRAFANA_ADMIN_PASSWORD -u GRAFANA_PORT docker compose -f "$here/docker-compose.yml" --project-directory "$work" --profile "*" config --format json >"$work/config.json"
 
 failures=0
 expect() {
@@ -74,8 +74,12 @@ for app in auto-service detailing approved-rs; do
   expect "site-$app starts only once it has a release" ".services[\"site-$app\"].profiles == [\"site-$app\"]"
   expect "site-$app listens for caddy on 4321 with a heap inside its limit" \
     ".services[\"site-$app\"] | .environment.HOST == \"0.0.0.0\" and .environment.PORT == \"4321\" and .environment.NODE_OPTIONS == \"--max-old-space-size=112\" and .mem_limit == \"167772160\""
-  expect "site-$app sits on the edge network only and reads the releases read-only" \
-    ".services[\"site-$app\"] | (.networks | keys) == [\"edge\"] and .volumes == [{\"type\": \"bind\", \"source\": \"/srv/sites\", \"target\": \"/srv/sites\", \"read_only\": true, \"bind\": {}}] and .user == \"node\" and .cap_drop == [\"ALL\"]"
+  expect "site-$app sits on the edge network and the data network, and reads the releases read-only" \
+    ".services[\"site-$app\"] | (.networks | keys) == [\"data\", \"edge\"] and .volumes == [{\"type\": \"bind\", \"source\": \"/srv/sites\", \"target\": \"/srv/sites\", \"read_only\": true, \"bind\": {}}] and .user == \"node\" and .cap_drop == [\"ALL\"]"
+  expect "site-$app reaches the crm database as the crm role with the host password" \
+    ".services[\"site-$app\"].environment.CRM_DATABASE_URL == \"postgres://crm:c0ffee@postgres:5432/crm\""
+  expect "site-$app starts only once postgres is healthy" \
+    ".services[\"site-$app\"].depends_on.postgres.condition == \"service_healthy\""
   expect "site-$app reports healthy only once it answers /" \
     ".services[\"site-$app\"].healthcheck.test | join(\" \") | test(\"127.0.0.1:4321/\")"
   expect "site-$app runs node under an init that passes SIGTERM on, so background work drains" \

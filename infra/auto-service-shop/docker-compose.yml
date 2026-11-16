@@ -16,11 +16,15 @@ x-site: &site
   user: node
   cap_drop: [ALL]
   security_opt: ['no-new-privileges:true']
-  networks: [edge]
+  networks: [data, edge]
   environment:
     HOST: 0.0.0.0
     PORT: '4321'
     NODE_OPTIONS: --max-old-space-size=112
+    CRM_DATABASE_URL: postgres://crm:${CRM_DB_PASSWORD:-}@postgres:5432/crm
+  depends_on:
+    postgres:
+      condition: service_healthy
   volumes:
     - /srv/sites:/srv/sites:ro
   healthcheck:
