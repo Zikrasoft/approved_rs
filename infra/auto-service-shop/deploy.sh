@@ -69,6 +69,17 @@ if [ -n "$previous" ] && [ "$previous" != "$tag" ]; then
 fi
 trap '[ $? -eq 0 ] || [ ! -s .previous-tag ] || echo "Roll back with: $0 $(cat .previous-tag)" >&2; rmdir .deploy.lock 2>/dev/null || true' EXIT
 
+sites=${SITES_ROOT:-/srv/sites}
+[ -d "$sites" ] || sudo install -d -m 0755 -o "$(id -u)" -g "$(id -g)" "$sites"
+COMPOSE_PROFILES=
+for app in auto-service detailing approved-rs; do
+  (umask 022 && mkdir -p "$sites/$app/releases")
+  if [ -e "$sites/$app/current" ]; then
+    COMPOSE_PROFILES="${COMPOSE_PROFILES:+$COMPOSE_PROFILES,}site-$app"
+  fi
+done
+export COMPOSE_PROFILES
+
 echo "==> Restarting"
 docker compose up -d --wait --wait-timeout 300 --remove-orphans
 docker compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile

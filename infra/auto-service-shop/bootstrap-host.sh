@@ -14,7 +14,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 echo "==> Packages"
 apt-get update -qq
-apt-get install -y -qq ca-certificates curl gnupg ufw fail2ban unattended-upgrades sudo
+apt-get install -y -qq ca-certificates curl gnupg ufw fail2ban unattended-upgrades sudo rsync
 
 echo "==> Swap"
 if [ -z "$(swapon --show)" ]; then
@@ -75,6 +75,7 @@ rm -f "$sudoers"
 
 echo "==> Directories"
 install -d -m 0750 -o "$DEPLOY_USER" -g "$DEPLOY_USER" "$DEPLOY_DIR"
+install -d -m 0755 -o "$DEPLOY_USER" -g "$DEPLOY_USER" /srv/sites
 install -d -m 0700 -o "$DEPLOY_USER" -g "$DEPLOY_USER" "$BACKUP_DIR"
 [ -e /var/log/carlab-backup.log ] || install -m 0640 -o "$DEPLOY_USER" -g "$DEPLOY_USER" /dev/null /var/log/carlab-backup.log
 
@@ -82,6 +83,31 @@ echo "==> Nightly backup"
 printf '30 3 * * * %s %s/backup.sh >>/var/log/carlab-backup.log 2>&1\n' "$DEPLOY_USER" "$DEPLOY_DIR" \
   >/etc/cron.d/carlab-backup
 chmod 0644 /etc/cron.d/carlab-backup
+
+echo "==> Daily approved.rs reminders"
+cat >/etc/systemd/system/carlab-reminders.service <<UNIT
+[Unit]
+Description=approved.rs daily CRM reminders
+After=docker.service
+
+[Service]
+Type=oneshot
+User=$DEPLOY_USER
+ExecStart=$DEPLOY_DIR/reminders.sh
+UNIT
+cat >/etc/systemd/system/carlab-reminders.timer <<'UNIT'
+[Unit]
+Description=approved.rs daily CRM reminders at 08:00 UTC
+
+[Timer]
+OnCalendar=*-*-* 08:00:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+UNIT
+systemctl daemon-reload
+systemctl enable --now carlab-reminders.timer
 
 echo "==> Firewall"
 ufw --force reset >/dev/null
