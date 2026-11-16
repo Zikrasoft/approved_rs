@@ -7,10 +7,9 @@
 - **pnpm v11 + Turborepo** — a monorepo, apps in `apps/*`, shared packages in
   `packages/*`
 - **The VPS** (`infra/auto-service-shop`): Caddy serves each site's static
-  files and proxies the rest to its node server, beside the shop backend. The
-  three Vercel projects, one per app, only hold the environment variables
+  files and proxies the rest to its node server, beside the shop backend
 - **GitHub Actions** — the only place where a build or a deploy actually happens
-  (`.github/workflows/ci.yml`)
+  (`.github/workflows/ci.yml`), and where the sites' environment variables live
 
 ## Three sites, one repository
 
@@ -21,8 +20,7 @@
 | `apps/detailing`    | `details.rs`  | Details — detailing            | the site plus `/api/leads`, `/api/contact-click`, `/api/telegram-capture`                                                   |
 
 Each app owns its own `astro.config.mjs`, `vercel.json`, `keystatic.config.ts` and
-`.env*`. The Vercel CLI identifies the project from the working directory, so every
-deploy job runs entirely from its own `apps/<app>`.
+`.env*`.
 
 **Four bots, one chat, one lead store, three brands.** `@SerbCRMBot` is the CRM
 bot (cards, statuses, money, postpone and reminders), and it is the same bot
@@ -58,15 +56,19 @@ matrix of `approved-rs`, `detailing` and `auto-service`; each leg runs
 `.github/scripts/deploy-site.sh <app> <sha>-<run>-<attempt>` from the repo root,
 which:
 
-1. `vercel env pull`s the project's production env into a temp file and drops
-   Vercel's own `VERCEL`/`VERCEL_*` system variables and the old
-   `BLOB_READ_WRITE_TOKEN` (leads live in Postgres now). `CRM_DATABASE_URL`
-   never comes from Vercel: compose sets it on the site container from the
-   host's `CRM_DB_PASSWORD`, over anything the env file holds;
+1. writes the site env into a temp file (mode 0600) with
+   `.github/scripts/site-env.ts`: the names the manifest
+   `.github/scripts/site-env.json` gives that site, taken from the GitHub
+   secrets and variables the step sees (see
+   [Environment variables](#environment-variables)), and fails naming every
+   required one that is missing. `CRM_DATABASE_URL` never comes from GitHub:
+   compose sets it on the site container from the host's `CRM_DB_PASSWORD`,
+   over anything the env file holds;
 2. for carlab.rs, probes the shop backend (exit 75, see below) and sets
    `CATALOGUE_SHRINK_GUARD=true`;
 3. builds with `turbo run build --filter=@podbor/<app> --env-mode=loose` under
-   that env (`node --env-file`), with the deploy secrets unset;
+   that env (`node --env-file`), with the secrets JSON and the deploy secrets
+   unset;
 4. rsyncs `dist/client` and `dist/server` to
    `/srv/sites/<app>/releases/<release>/` on the VPS, with `--link-dest` on
    `/srv/sites/<app>/current`: `--checksum` compares contents, since every build
@@ -89,9 +91,8 @@ run learns what is already in production. Each app deploys serially
 (`concurrency: deploy-site-<app>`, shared with `publish.yml`), the three in
 parallel.
 
-The Vercel project no longer serves anything: it only holds the environment
-variables. TODO: move the env source off Vercel. The build settings below are
-what Vercel used while it hosted the sites:
+The Vercel projects no longer serve or hold anything. The build settings
+below are what Vercel used while it hosted the sites:
 
 ```json
 {
@@ -236,21 +237,22 @@ part in release notes, and exactly one step — `scope` — reads them.
 
 If everything needs redeploying at once — Actions → CI → Run workflow, with the
 **Deploy every app, whatever the tags say** checkbox. It is for when something
-changed outside git: an environment variable or a project setting in the Vercel
-dashboard, a rotated secret. Such edits require a rebuild but leave no trace in
+changed outside git: a GitHub secret or variable of a site, a rotated secret. Such edits require a rebuild but leave no trace in
 the repository's history, and `scope` only looks at git.
 
-`environment: production` on the deploy jobs is an ordinary GitHub Environment,
-created by itself on the first run, with no protection rules.
+`environment: site-<app>` on each `deploy-site` leg (and `site-auto-service` on
+`publish.yml`) is an ordinary GitHub Environment with no protection rules: it
+holds that site's own secrets and variables. `deploy-shop` keeps
+`environment: production`.
 
-### A consequence: environment variables live in the Vercel project
+### A consequence: environment variables live in GitHub
 
-`vercel env pull` downloads the project's production environment variables,
-the build runs with them and the server runs with the same file. Which means:
+The build runs with the env the manifest assembles, and the server runs with
+the same file. Which means:
 
-- **variables are set in the Vercel dashboard, not in GitHub secrets.** GitHub only
-  holds the token/IDs for reaching Vercel plus `OPENAI_API_KEY` for the
-  `translate` job (see below);
+- **variables are set in GitHub, never in Vercel.** Settings → Secrets and
+  variables → Actions: a shared value once at repository level, a per-site one
+  in that site's environment (see [Environment variables](#environment-variables));
 - **a missing public variable fails the build, a missing server-side one fails the
   route.** `PUBLIC_*` variables are inlined into the HTML at build time, so each
   app's `src/utils/constants.ts` parses them through a zod schema at module load
@@ -264,8 +266,43 @@ the build runs with them and the server runs with the same file. Which means:
 
 ## Environment variables
 
-Set in Vercel Dashboard → the project → Settings → Environment Variables (the
-Production environment; Preview is unused — there are no preview deploys).
+**One manifest, `.github/scripts/site-env.json`, lists every name a site gets.**
+Each entry is `required` or `optional`, and a `secret` or a `variable`:
+
+- `shared`: one value for all three sites, set **once at repository level**
+  (Settings → Secrets and variables → Actions → Repository);
+- `sites.<app>`: set in that site's GitHub environment, `site-approved-rs`,
+  `site-auto-service` or `site-detailing`. `unset` marks a name the site's code
+  reads (through a shared package) but that site deliberately leaves out;
+- `notInSiteEnv`: names the code reads that never come from GitHub, with where
+  they come from instead (`CRM_DATABASE_URL` from compose, and so on).
+
+Non-secret values (`PUBLIC_*`, `SITE`, `PUBLIC_KEYSTATIC_GITHUB_APP_SLUG`, URLs,
+the CRM bot's username) are GitHub **Variables**; everything else is a
+**Secret**. A secret set as a variable does not count: the deploy reads each
+name only from the side the manifest names.
+
+The deploy step gets `toJSON(secrets)` and `toJSON(vars)` as two env values,
+`SITE_SECRETS` and `SITE_VARS`, so a new name needs no YAML edit. Why that is
+safe: GitHub masks every secret in the log whatever the step does with it;
+`site-env.ts` copies only the manifest's names for that site into the
+release `.env` and never prints a value (a refusal names the variable only);
+and `deploy-site.sh` unsets both JSON values and the deploy secrets before the
+build, so pnpm, turbo, Astro and every dependency they run never see a secret
+outside the site's own env. Only the one deploy step carries them, not the job.
+
+`.github/scripts/site-env.test.ts` scans what each app reads
+(`process.env.X`, `import.meta.env.X`, `requireEnv('X')`, the env zod schemas)
+in `apps/<app>/src`, `astro.config.mjs`, `keystatic.config.ts` and the
+`packages/*` it depends on, and fails on a name the manifest does not list for
+that site. A new variable lands in the manifest in the same change, or `check`
+goes red. A value holding a single quote or a line break is refused by name:
+the `.env` quotes values in single quotes, which compose and `node --env-file`
+both read literally.
+
+**A missing required name fails the deploy**, naming it, before anything is
+built. Keystatic's own names are read inside `@keystatic/astro`, which the scan
+cannot see; the manifest lists them by hand.
 
 `PUBLIC_*` variables are visible in the browser — no secrets there.
 
@@ -292,8 +329,7 @@ the capture bot.
 workshop's rating and review count from Places API (New) (`rating`,
 `userRatingCount`). The key is a secret: restrict it to the Places API (New).
 The Place ID comes from Google's Place ID Finder for the workshop's Maps card.
-The build pulls them through `vercel pull`, so they live in the carlab.rs
-Vercel project only. Unset, or when the API fails or answers something
+They live in the `site-auto-service` environment only. Unset, or when the API fails or answers something
 malformed, the build logs a warning and shows `GOOGLE_RATING` from
 `src/utils/constants.ts`, so update that by hand now and then. The number
 refreshes only when carlab.rs deploys.
@@ -303,7 +339,7 @@ refreshes only when carlab.rs deploys.
 The GA4 measurement ids and the Meta Pixel id are baked into each
 `src/utils/analytics.ts` and are never read from the environment: they are not
 secrets, they are publicly visible in any request from the site, and spreading
-them across three Vercel dashboards would create a third place to get them
+them across three GitHub environments would create a third place to get them
 wrong.
 
 | Site        | GA4 Measurement ID | Metrika     | Meta Pixel          | Google Ads       |
@@ -376,11 +412,11 @@ the bot id before the colon when the module loads and throws on anything else.
 `@username` — get them from [@userinfobot](https://t.me/userinfobot)),
 comma-separated if a person has several accounts (`111,222`). Their absence does not
 fail the route — it just means direct messages about this brand's leads go nowhere.
-Set the same ids in all three projects.
+They are shared: one value, at repository level.
 
 The **CRM** bot is shared across brands: `TELEGRAM_BOT_TOKEN`,
-`TELEGRAM_BOT_USERNAME` and `TELEGRAM_GROUP_ID` are identical in all three
-projects, and `TELEGRAM_WEBHOOK_SECRET` is set only on approved.rs, which hosts
+`TELEGRAM_BOT_USERNAME` and `TELEGRAM_GROUP_ID` are set once at repository
+level, and `TELEGRAM_WEBHOOK_SECRET` only in `site-approved-rs`, which hosts
 that one bot's webhook.
 
 The **capture** bots are not. `TELEGRAM_CAPTURE_BOT_TOKEN` is `@ApprovedRsBot`'s
@@ -498,8 +534,8 @@ sends the current value.
 3. Once both sides run the new value, empty `<NAME>_PREVIOUS` everywhere and
    redeploy or restart again.
 
-`CRM_DATABASE_URL` is the same value in all three projects (see "The `crm`
-database shared by three sites").
+`CRM_DATABASE_URL` is not a GitHub value: compose sets it on every site
+container (see "The `crm` database shared by three sites").
 
 ### Keystatic (needed by all three projects)
 
@@ -510,13 +546,15 @@ database shared by three sites").
 | `KEYSTATIC_SECRET`                 | no      | the same (it signs the session cookie)   |
 | `PUBLIC_KEYSTATIC_GITHUB_APP_SLUG` | **yes** | the sign-in button leads nowhere         |
 
-The values **differ** between the three projects — each site has its own GitHub App,
-see the "Keystatic: three GitHub Apps" section. `KEYSTATIC_SECRET` is an arbitrary
-random string, distinct per project.
+The values **differ** between the three sites, so each lives in its site's
+environment: each site has its own GitHub App, see the "Keystatic: three
+GitHub Apps" section. `KEYSTATIC_SECRET` is an arbitrary random string,
+distinct per site.
 
 ### `SITE`
 
-A special case: it does not need setting in the dashboard.
+A special case: it does not need setting at all (the manifest takes it as an
+optional variable per site).
 
 - the site's URL is hardcoded as `site:` in each app's `astro.config.mjs`, and that
   is where Astro fills `import.meta.env.SITE` from, which `src/utils/constants.ts`
@@ -530,7 +568,7 @@ A special case: it does not need setting in the dashboard.
 
 Changing the domain means editing `site:` in `astro.config.mjs` and the host
 Caddy serves it on (`APPROVED_HOST`, `CARLAB_HOST`, `DETAILS_HOST` in the
-shop's compose), not a dashboard variable.
+shop's compose), not a GitHub variable.
 
 ---
 
@@ -597,6 +635,35 @@ write the same leads as the sites that capture them, so the leads storage
 and the bot switch together. Nothing here prints a secret; keep it that way.
 
 **Before the window**
+
+0. **Env into GitHub, before merging the self-hosting PR (#465).** The
+   deploy reads the sites' env from GitHub from then on, so it has to be
+   there first. On the owner's Mac, logged in to both CLIs (`vercel login`,
+   `gh auth login`; install the CLI with `npm i -g vercel@59.11.7` if
+   `vercel --version` finds none), from the repository root:
+
+   ```bash
+   node --experimental-strip-types .github/scripts/env-to-github.ts --dry-run
+   node --experimental-strip-types .github/scripts/env-to-github.ts
+   ```
+
+   It links each Vercel project (`approved-rs`, `auto-service`, `detailing`
+   under the team `aleksey-zikrackiys-projects`; `VERCEL_TEAM=<slug>`
+   overrides it) inside a private temp dir, `vercel env pull`s its production
+   env there and deletes the dir on exit. A shared name whose value differs
+   between projects stops the run before anything is written, naming the
+   variable and which projects agree (never a value): make the projects agree
+   in Vercel, or set that one by hand in GitHub, and run again. Otherwise it
+   creates the `site-*` environments that are missing and writes every
+   manifest name with `gh secret set` / `gh variable set` from stdin, shared
+   ones at repository level, the rest into their site's environment. The dry
+   run pulls and prints the same names and destinations and writes nothing.
+   Both print `missing:` for a required name no project has (set it in
+   GitHub by hand, or the deploy fails naming it) and `not migrated:` for a
+   project name outside the manifest (legacy, or infra such as
+   `CRM_DATABASE_URL`: check it is not a variable the manifest forgot).
+   Done: Settings → Environments lists the three `site-*`, and the dry run
+   prints no `missing:` line you did not expect.
 
 1. **Host prerequisites.** On a host bootstrapped before the sites moved, copy
    `infra/auto-service-shop/bootstrap-host.sh` over and rerun it as root: it
@@ -666,9 +733,10 @@ week:
   domains, never a `vercel.app` URL;
 - the Cron Job stays disabled, and Vercel's logs show no function calls.
 
-After the week, delete the Blob store and the old deployments. The projects
-themselves stay while they hold the environment variables (see the TODO in
-[How the deploy works](#how-the-deploy-works)).
+After the week, delete the Blob store and the three Vercel projects: they hold
+nothing the sites need any more, the env lives in GitHub. Then the
+`VERCEL_TOKEN`, `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID*` repository secrets can
+go too: no workflow reads them.
 
 ### CRM migrations
 
@@ -730,16 +798,15 @@ For each:
 5. Generate a client secret
 6. Put `KEYSTATIC_GITHUB_CLIENT_ID`, `KEYSTATIC_GITHUB_CLIENT_SECRET`,
    `PUBLIC_KEYSTATIC_GITHUB_APP_SLUG` (the slug from the app's URL) and a random
-   `KEYSTATIC_SECRET` of its own into the corresponding Vercel project
+   `KEYSTATIC_SECRET` of its own into the site's GitHub environment
+   (`site-<app>`): the slug as a variable, the other three as secrets
 
 Local development does not go through the GitHub App: `import.meta.env.PROD` is
 `false` there and Keystatic writes straight into the working copy
 (`storage: { kind: 'local' }`).
 
-`PUBLIC_KEYSTATIC_GITHUB_APP_SLUG` must not be marked Sensitive in Vercel: such
-variables are unavailable at build time, and the slug is needed by the `/keystatic`
-client bundle. The three secrets, conversely, should be Sensitive — only the
-function reads them.
+The slug is needed by the `/keystatic` client bundle, so it is inlined at build
+time; the three secrets are read only by the server.
 
 A site without these variables builds, deploys and serves every page; only signing
 in to `/keystatic` is dead, and only once somebody tries — carlab.rs and details.rs
@@ -753,43 +820,30 @@ lived that way for twelve days. To check by hand:
 
 Settings → Secrets and variables → Actions:
 
-| Secret                              | For what                                       | Where to get it                                                |
-| ----------------------------------- | ---------------------------------------------- | -------------------------------------------------------------- |
-| `OPENAI_API_KEY`                    | the `translate` job (content auto-translation) | OpenAI. **GitHub only, not needed on Vercel**                  |
-| `VERCEL_TOKEN`                      | every deploy job                               | [vercel.com/account/tokens](https://vercel.com/account/tokens) |
-| `VERCEL_ORG_ID`                     | every deploy job                               | `.vercel/project.json` → `orgId` after `vercel link`           |
-| `VERCEL_PROJECT_ID`                 | the approved.rs deploy                         | Project Settings → General of that project                     |
-| `VERCEL_PROJECT_ID_AUTO_SERVICE`    | the carlab.rs deploy                           | the same, on the carlab.rs project                             |
-| `VERCEL_PROJECT_ID_DETAILING`       | the details.rs deploy                          | the same, on the details.rs project                            |
-| `AUTO_SERVICE_SHOP_VPS_HOST`        | the shop deploy (the server's reserved IPv4)   | `terraform output ipv4`                                        |
-| `AUTO_SERVICE_SHOP_VPS_USER`        | the shop deploy                                | `deploy` (created by `bootstrap-host.sh`)                      |
-| `AUTO_SERVICE_SHOP_VPS_SSH_KEY`     | the shop deploy (CI's private key)             | `ssh-keygen -t ed25519`; the public half gets `restrict`       |
-| `AUTO_SERVICE_SHOP_VPS_KNOWN_HOSTS` | the shop deploy (the host key)                 | `ssh-keyscan -t ed25519 <IPv4>`, fingerprint verified apart    |
+| Secret                              | For what                                       | Where to get it                                             |
+| ----------------------------------- | ---------------------------------------------- | ----------------------------------------------------------- |
+| `OPENAI_API_KEY`                    | the `translate` job (content auto-translation) | OpenAI                                                      |
+| `AUTO_SERVICE_SHOP_VPS_HOST`        | the shop deploy (the server's reserved IPv4)   | `terraform output ipv4`                                     |
+| `AUTO_SERVICE_SHOP_VPS_USER`        | the shop deploy                                | `deploy` (created by `bootstrap-host.sh`)                   |
+| `AUTO_SERVICE_SHOP_VPS_SSH_KEY`     | the shop deploy (CI's private key)             | `ssh-keygen -t ed25519`; the public half gets `restrict`    |
+| `AUTO_SERVICE_SHOP_VPS_KNOWN_HOSTS` | the shop deploy (the host key)                 | `ssh-keyscan -t ed25519 <IPv4>`, fingerprint verified apart |
 
 `AUTO_SERVICE_SHOP_VPS_*` are **repository** secrets, not `production` environment
 secrets: `shop-image` has no environment, and with environment secrets it would not
 push the image while `deploy-shop` would try to pull a tag that does not exist.
 Until all four are set, `shop-image` does not push and `deploy-shop`'s `guard` step
 prints "`AUTO_SERVICE_SHOP_VPS_* secrets are not set, skipping the shop deploy.`", and the
-workflow stays green.
+workflow stays green. A site leg has no such guard: without them, or without a
+required name from the manifest, it fails, naming what is missing.
 
-> **Careful: an unset `VERCEL_PROJECT_ID_*` is not highlighted anywhere.** The
-> `guard` step in `deploy-site` checks that the secret is non-empty, and if it
-> is empty it **skips every remaining step and leaves the job green**. In Actions
-> that looks like a successful deploy; the `guard` log will carry the line
-> "`VERCEL_PROJECT_ID… is not set, so the … env cannot be pulled`". The only way
-> to notice is to read the log, or to see that nothing changed on the site. The
-> `AUTO_SERVICE_SHOP_VPS_*` secrets have no such guard here: without them a site
-> leg fails, naming the secret.
->
-> The check lives in a step rather than in the job's `if:` because the `matrix`
-> context is unavailable in a job-level condition.
->
-> With the `deployed/*` tags, `guard` has a second and entirely normal reason to
-> skip a deploy: "`<app> is current in production — skipping`" — the site has not
-> changed since the last ship. That is it working, not a broken configuration. Tell
-> them apart by the text in the `guard` step's log: "is not set" is a configuration
-> error, "is current in production" is by design.
+The sites' own secrets and variables are not in this table: the manifest
+`.github/scripts/site-env.json` lists them (see
+[Environment variables](#environment-variables)).
+
+> With the `deployed/*` tags, `deploy-site`'s `guard` skips a deploy for an
+> entirely normal reason: "`<app> is current in production, skipping`": the
+> site has not changed since the last ship. That is it working, not a broken
+> configuration.
 
 ### Job permissions
 
@@ -820,7 +874,7 @@ only on the last step, where it is passed explicitly through `GH_TOKEN`, and in
 between the build executes the repository's code, so there is no reason to leave
 it a write-capable token recorded in `.git/config`.
 
-Two traps, both of which look like "the Vercel secrets broke" while having nothing
+Two traps, both of which look like "the site secrets broke" while having nothing
 to do with them:
 
 - Settings → Actions → General → Workflow permissions must be **Read and write**.
@@ -1314,10 +1368,10 @@ number gets its CI value in that script. The non-obvious parts:
 The parts catalogue is public and indexable, but buying is closed until both
 sides say otherwise. Two variables, one per side:
 
-| Variable    | Where                                             | Closed (default)                                                                                                                                                                                                                                                                              | `true`                       |
-| ----------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
-| `SHOP_OPEN` | carlab.rs Vercel project (Production), build time | pages carry no price, no Offer JSON-LD, no add-on price, no cart link; every part asks «Узнать цену»; search drops prices and the price filter; llms.txt names no cart                                                                                                                        | prices and cart for everyone |
-| `SHOP_OPEN` | `/srv/carlab/.env` on the shop VPS                | without the preview token, `POST /store/offer-carts`, `/store/offer-carts/:id/items` and `/store/offer-carts/:id/complete` answer 403, and every store route answers with no offers, no add-on price and no price or stock filter (search ignores `in-stock` and `price` and counts no stock) | anyone may buy               |
+| Variable    | Where                                    | Closed (default)                                                                                                                                                                                                                                                                              | `true`                       |
+| ----------- | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| `SHOP_OPEN` | `site-auto-service` variable, build time | pages carry no price, no Offer JSON-LD, no add-on price, no cart link; every part asks «Узнать цену»; search drops prices and the price filter; llms.txt names no cart                                                                                                                        | prices and cart for everyone |
+| `SHOP_OPEN` | `/srv/carlab/.env` on the shop VPS       | without the preview token, `POST /store/offer-carts`, `/store/offer-carts/:id/items` and `/store/offer-carts/:id/complete` answer 403, and every store route answers with no offers, no add-on price and no price or stock filter (search ignores `in-stock` and `price` and counts no stock) | anyone may buy               |
 
 On carlab.rs only the exact value `true` opens the shop: unset or anything else
 is closed. turbo passes `SHOP_OPEN` and `SHOP_PREVIEW_TOKEN` through to the
@@ -1326,7 +1380,7 @@ applies a change. An open build sends the preview token itself, so it builds
 with prices even if the backend is still closed.
 
 The preview is a secret token, `SHOP_PREVIEW_TOKEN`: the same value in the
-carlab.rs Vercel project (Production, server-only, never `PUBLIC_`) and in
+`site-auto-service` environment (a secret, never `PUBLIC_`) and in
 `/srv/carlab/.env`. It is 32 to 256 letters, digits, `_` or `-`; make one with
 `openssl rand -hex 32`. Both sides refuse a shorter value at start, and while
 it is unset nobody gets the preview, the open build included.
@@ -1398,7 +1452,7 @@ moves forward again.
    the image (`outputs.deployed == 'true'`).
 5. `deploy-site` waits for `deploy-shop`, and its carlab.rs leg is held back if
    it failed, so carlab.rs never prerenders against a backend that failed to
-   ship. Right after the env pull the carlab.rs leg probes
+   ship. Right after writing the env the carlab.rs leg probes
    `MEDUSA_BACKEND_URL/health` (`.github/scripts/shop-backend-up.sh`, a few
    retries over about 20 seconds). If the backend does not answer,
    `deploy-site.sh` exits 75, the leg prints a `::warning::`, skips the build
@@ -1896,7 +1950,7 @@ Steps 1, 5 and 6 are one `terraform apply`: see `infra/auto-service-shop/terrafo
     closed, `PUBLISH_DISPATCH_TOKEN` and `OPENAI_API_KEY` as described in
     [`.env`](#env); `docker compose up -d medusa` after editing.
     Done: `cut -d= -f1 /srv/carlab/.env` lists all four names.
-11. **carlab.rs env.** In the carlab.rs Vercel project (Production), which holds its env:
+11. **carlab.rs env.** In the `site-auto-service` GitHub environment:
     `MEDUSA_BACKEND_URL=https://api.carlab.rs`, `MEDUSA_PUBLISHABLE_KEY` = the key
     from step 9, and `SHOP_OPEN` **unset** until the shop opens. Then press Publish
     in the admin so the Categories get their Serbian and English text and carlab.rs
@@ -1914,43 +1968,24 @@ Steps 1, 5 and 6 are one `terraform apply`: see `infra/auto-service-shop/terrafo
 
 ---
 
-## Creating a new project in Vercel
+## Setting up a new site
 
-For a new site (this is how all three were set up):
-
-1. Vercel → Add New → Project → Import Git Repository → the same
-   `Zikrasoft/approved_rs` repository
-2. **Root Directory** → leave it empty (`./`), despite Vercel prefilling the app's
-   path from the import screen. GitHub Actions does the deploying and the job
-   already runs inside `apps/<app>`; if the project adds its own Root Directory on
-   top, the CLI will look for `apps/detailing/apps/detailing` and `vercel deploy`
-   will fail with "The provided path … does not exist". The build stays green — only
-   the deploy step breaks. The approved.rs project is configured the same way
-3. Framework Preset: **Astro**. Leave Build/Install/Output Command alone — they are
-   already set in the app's `vercel.json` and will override the dashboard
-4. Environment Variables — per the tables above (public contacts, Telegram,
-   Keystatic). They can be added right on the import screen
-5. No domain and no deploy on Vercel: the project only holds the env. Point
-   the domain's A record at the VPS, where Caddy serves it from
+1. Add the app to the manifest, `.github/scripts/site-env.json` (`sites.<app>`),
+   and to the `deploy-site` matrix; `site-env.test.ts` tells you which names its
+   code reads.
+2. Create its GitHub environment, `site-<app>` (Settings → Environments), and
+   set its names there per the manifest: secrets as secrets, the rest as
+   variables. Shared names are already at repository level.
+3. The GitHub App for Keystatic (see above), into the same environment.
+4. Point the domain's A record at the VPS, where Caddy serves it from
    `caddy/sites/<app>.caddy` beside a `site-<app>` service (see
-   [The server](#the-server)). `CRM_DATABASE_URL` is not a project variable:
-   compose sets it on the site container
-6. Settings → General → copy the Project ID into the GitHub secret
-   (`VERCEL_PROJECT_ID_AUTO_SERVICE` / `VERCEL_PROJECT_ID_DETAILING`)
+   [The server](#the-server)). `CRM_DATABASE_URL` is not a GitHub value:
+   compose sets it on the site container.
 
-There is no need to disable the git trigger in the dashboard —
-`git.deploymentEnabled: false` in the root `vercel.json` does it.
-
----
-
-## The order for setting up a new site
-
-First the Vercel project with its variables, the domain pointing at the VPS, the
-GitHub App for Keystatic and the Project ID in the secrets — and only then the first
-deploy. A deploy started before the project has its variables will build
-successfully and ship a site with `undefined` in the contacts and a form that fails.
-The first run without a `deployed/<app>` tag deploys the app unconditionally and
-creates the tag; after that, a green run with no deploy at all is the normal state.
+Only then the first deploy. A deploy missing a required name fails, naming it,
+before it builds. The first run without a `deployed/<app>` tag deploys the app
+unconditionally and creates the tag; after that, a green run with no deploy at
+all is the normal state.
 
 ---
 

@@ -16,7 +16,7 @@ case "$release" in
     exit 2
     ;;
 esac
-for name in VERCEL_TOKEN VERCEL_ORG_ID VERCEL_PROJECT_ID VPS_HOST VPS_USER VPS_SSH_KEY VPS_KNOWN_HOSTS; do
+for name in SITE_SECRETS SITE_VARS VPS_HOST VPS_USER VPS_SSH_KEY VPS_KNOWN_HOSTS; do
   eval "value=\${$name:-}"
   if [ -z "$value" ]; then
     echo "$name is not set" >&2
@@ -32,9 +32,8 @@ trap 'rm -rf "$work"' EXIT
 printf '%s\n' "$VPS_SSH_KEY" >"$work/key"
 printf '%s\n' "$VPS_KNOWN_HOSTS" >"$work/known_hosts"
 chmod 600 "$work/key"
-(cd "apps/$app" && pnpm exec vercel env pull "$work/vercel.env" --yes --environment=production)
-unset VERCEL_TOKEN VPS_SSH_KEY VPS_KNOWN_HOSTS
-grep -v -e '^VERCEL=' -e '^VERCEL_' -e '^BLOB_READ_WRITE_TOKEN=' "$work/vercel.env" >"$work/site.env" || true
+node --experimental-strip-types --no-warnings "$scripts/site-env.ts" "$app" "$work/site.env"
+unset SITE_SECRETS SITE_VARS VPS_SSH_KEY VPS_KNOWN_HOSTS
 
 if [ "$app" = auto-service ]; then
   if ! sh "$scripts/shop-backend-up.sh" "$work/site.env"; then

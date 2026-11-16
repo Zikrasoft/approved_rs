@@ -1,0 +1,79 @@
+{
+  "notInSiteEnv": {
+    "CRM_DATABASE_URL": "compose sets it on every site container from the host's CRM_DB_PASSWORD",
+    "SHOP_INTERNAL_URL": "compose, on the host",
+    "CATALOGUE_SHRINK_GUARD": "deploy-site.sh sets it for the carlab.rs production build",
+    "OPENAI_API_KEY": "the translate job, a repository secret of its own"
+  },
+  "shared": {
+    "TELEGRAM_BOT_TOKEN": "required secret",
+    "TELEGRAM_BOT_USERNAME": "required variable",
+    "TELEGRAM_GROUP_ID": "required secret",
+    "TELEGRAM_OWNER_ID": "optional secret",
+    "TELEGRAM_ADMIN_ID": "optional secret",
+    "PUBLIC_PHONE_NUMBER": "required variable",
+    "PUBLIC_WHATSAPP_NUMBER": "required variable",
+    "PUBLIC_VIBER_NUMBER": "required variable",
+    "SHOP_API_URL": "optional variable"
+  },
+  "sites": {
+    "approved-rs": {
+      "SITE": "optional variable",
+      "PUBLIC_THREADS_CHANNEL": "required variable",
+      "PUBLIC_TG_MANAGER": "optional variable",
+      "PUBLIC_KEYSTATIC_GITHUB_APP_SLUG": "required variable",
+      "KEYSTATIC_GITHUB_CLIENT_ID": "required secret",
+      "KEYSTATIC_GITHUB_CLIENT_SECRET": "required secret",
+      "KEYSTATIC_SECRET": "required secret",
+      "TELEGRAM_WEBHOOK_SECRET": "required secret",
+      "TELEGRAM_CAPTURE_BOT_TOKEN": "required secret",
+      "TELEGRAM_CAPTURE_WEBHOOK_SECRET": "required secret",
+      "TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB": "optional secret",
+      "TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS": "optional secret",
+      "CRON_SECRET": "required secret",
+      "SHOP_ORDER_OUTCOME_SECRET": "optional secret",
+      "SHOP_VISITOR_SEARCHES_SECRET": "optional secret",
+      "META_CAPI_TOKEN": "unset",
+      "META_CAPI_TEST_CODE": "unset"
+    },
+    "auto-service": {
+      "SITE": "optional variable",
+      "PUBLIC_TG_MANAGER": "optional variable",
+      "PUBLIC_KEYSTATIC_GITHUB_APP_SLUG": "required variable",
+      "KEYSTATIC_GITHUB_CLIENT_ID": "required secret",
+      "KEYSTATIC_GITHUB_CLIENT_SECRET": "required secret",
+      "KEYSTATIC_SECRET": "required secret",
+      "TELEGRAM_CAPTURE_BOT_TOKEN": "required secret",
+      "TELEGRAM_CAPTURE_WEBHOOK_SECRET": "required secret",
+      "GOOGLE_PLACES_API_KEY": "optional secret",
+      "GOOGLE_PLACE_ID": "optional variable",
+      "MEDUSA_BACKEND_URL": "optional variable",
+      "MEDUSA_PUBLISHABLE_KEY": "optional secret",
+      "SHOP_OPEN": "optional variable",
+      "SHOP_PREVIEW_TOKEN": "optional secret",
+      "SHOP_LEAD_SECRET": "optional secret",
+      "SHOP_LEAD_SECRET_PREVIOUS": "optional secret",
+      "SHOP_CLIENT_SECRET": "optional secret",
+      "SHOP_EVENTS_SECRET": "optional secret",
+      "SHOP_VISITOR_SEARCHES_SECRET": "optional secret",
+      "META_CAPI_TOKEN": "optional secret",
+      "META_CAPI_TEST_CODE": "optional secret",
+      "CATALOGUE_SHRINK_ALLOWED": "optional variable",
+      "SHOP_ORDER_OUTCOME_SECRET": "unset"
+    },
+    "detailing": {
+      "SITE": "optional variable",
+      "PUBLIC_TG_MANAGER": "optional variable",
+      "PUBLIC_KEYSTATIC_GITHUB_APP_SLUG": "required variable",
+      "KEYSTATIC_GITHUB_CLIENT_ID": "required secret",
+      "KEYSTATIC_GITHUB_CLIENT_SECRET": "required secret",
+      "KEYSTATIC_SECRET": "required secret",
+      "TELEGRAM_CAPTURE_BOT_TOKEN": "required secret",
+      "TELEGRAM_CAPTURE_WEBHOOK_SECRET": "required secret",
+      "SHOP_ORDER_OUTCOME_SECRET": "unset",
+      "SHOP_VISITOR_SEARCHES_SECRET": "unset",
+      "META_CAPI_TOKEN": "unset",
+      "META_CAPI_TEST_CODE": "unset"
+    }
+  }
+}

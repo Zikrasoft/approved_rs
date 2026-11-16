@@ -10,13 +10,10 @@ cat >"$work/bin/pnpm" <<'STUB'
 #!/bin/sh
 echo "pnpm $*" >>"$LOG"
 case "$*" in
-  'exec vercel env pull'*)
-    cp "$PULLED" "$5"
-    ;;
   'exec turbo run build'*)
     app=${5#--filter=@podbor/}
     mkdir -p "apps/$app/dist/client" "apps/$app/dist/server"
-    echo "build PUBLIC_PHONE_NUMBER=${PUBLIC_PHONE_NUMBER:-} GUARD=${CATALOGUE_SHRINK_GUARD:-} KEY=${VPS_SSH_KEY:-}${VERCEL_TOKEN:-} VERCEL=${VERCEL:-}" >>"$LOG"
+    echo "build PUBLIC_PHONE_NUMBER=${PUBLIC_PHONE_NUMBER:-} GUARD=${CATALOGUE_SHRINK_GUARD:-} KEY=${VPS_SSH_KEY:-} JSON=${SITE_SECRETS:-}${SITE_VARS:-}" >>"$LOG"
     ;;
 esac
 STUB
@@ -55,17 +52,10 @@ has() {
   if grep -q -e "$1" "$LOG"; then echo yes; else echo no; fi
 }
 
-cat >"$work/full.env" <<'ENV'
-VERCEL="1"
-VERCEL_OIDC_TOKEN="oidc-secret"
-PUBLIC_PHONE_NUMBER="381 11"
-BLOB_READ_WRITE_TOKEN="blob-secret"
-MEDUSA_BACKEND_URL="https://api.test"
-ENV
-cat >"$work/no-blob.env" <<'ENV'
-PUBLIC_PHONE_NUMBER="381"
-BLOB_READ_WRITE_TOKEN=""
-ENV
+shared_secrets='"TELEGRAM_BOT_TOKEN":"1:crm-secret","TELEGRAM_GROUP_ID":"-100"'
+site_secrets='"KEYSTATIC_GITHUB_CLIENT_ID":"id","KEYSTATIC_GITHUB_CLIENT_SECRET":"kgs-secret","KEYSTATIC_SECRET":"ks-secret","TELEGRAM_CAPTURE_BOT_TOKEN":"2:capture-secret","TELEGRAM_CAPTURE_WEBHOOK_SECRET":"tcws-secret","CRON_SECRET":"cron-secret","TELEGRAM_WEBHOOK_SECRET":"tws-secret","MEDUSA_PUBLISHABLE_KEY":"pk-secret","OPENAI_API_KEY":"openai-secret","github_token":"ghs-secret"'
+all_secrets="{$shared_secrets,$site_secrets}"
+vars='{"TELEGRAM_BOT_USERNAME":"SerbCRMBot","PUBLIC_PHONE_NUMBER":"381 11","PUBLIC_WHATSAPP_NUMBER":"381","PUBLIC_VIBER_NUMBER":"381","PUBLIC_KEYSTATIC_GITHUB_APP_SLUG":"app","PUBLIC_THREADS_CHANNEL":"t","MEDUSA_BACKEND_URL":"https://api.test","RUNNER":"self-hosted"}'
 
 deploy() {
   : >"$LOG"
@@ -75,30 +65,44 @@ deploy() {
   (
     cd "$work/repo"
     PATH="$work/bin:$PATH" TMPDIR="$work/tmp" \
-      VERCEL_TOKEN=t VERCEL_ORG_ID=o VERCEL_PROJECT_ID=p \
+      SITE_SECRETS="$secrets" SITE_VARS="$vars" \
       VPS_HOST=vps.test VPS_USER=deploy VPS_SSH_KEY="$key" VPS_KNOWN_HOSTS='vps.test ssh-ed25519 AAAA' \
       sh "$script" "$@"
   ) >"$work/out" 2>&1 || status=$?
 }
 
 key='key-secret'
-PULLED="$work/full.env"
-export PULLED
+secrets=$all_secrets
 
 deploy detailing abc123-1-1
 check "$status" 0 'a site with every variable deploys'
-check "$(has 'pnpm exec vercel env pull .* --yes --environment=production')" yes 'the env comes from the Vercel production environment'
-check "$(has 'build PUBLIC_PHONE_NUMBER=381 11 GUARD= KEY= VERCEL=$')" yes 'the build sees the pulled env without the Vercel system variables or the deploy secrets'
+check "$(has vercel)" no 'the env no longer comes from Vercel'
+check "$(has 'build PUBLIC_PHONE_NUMBER=381 11 GUARD= KEY= JSON=$')" yes 'the build sees the site env without the deploy secrets or the secrets JSON'
 check "$(has 'pnpm exec turbo run build --filter=@podbor/detailing')" yes 'turbo builds the app'
 check "$(has 'rsync .*--checksum.*--link-dest=/srv/sites/detailing/current .*apps/detailing/dist/client apps/detailing/dist/server deploy@vps.test:/srv/sites/detailing/releases/abc123-1-1/$')" yes 'rsync ships client and server into the release, hard-linking what current already has'
-check "$(cat "$SHIPPED")" 'PUBLIC_PHONE_NUMBER="381 11"
-MEDUSA_BACKEND_URL="https://api.test"' 'the runtime .env is the pulled env without the Vercel system variables or the Blob token'
+check "$(cat "$SHIPPED")" "TELEGRAM_BOT_TOKEN='1:crm-secret'
+TELEGRAM_BOT_USERNAME='SerbCRMBot'
+TELEGRAM_GROUP_ID='-100'
+PUBLIC_PHONE_NUMBER='381 11'
+PUBLIC_WHATSAPP_NUMBER='381'
+PUBLIC_VIBER_NUMBER='381'
+PUBLIC_KEYSTATIC_GITHUB_APP_SLUG='app'
+KEYSTATIC_GITHUB_CLIENT_ID='id'
+KEYSTATIC_GITHUB_CLIENT_SECRET='kgs-secret'
+KEYSTATIC_SECRET='ks-secret'
+TELEGRAM_CAPTURE_BOT_TOKEN='2:capture-secret'
+TELEGRAM_CAPTURE_WEBHOOK_SECRET='tcws-secret'" 'the runtime .env holds only the names the manifest gives detailing'
 check "$(has "ssh .*umask 077 && cat >/srv/sites/detailing/releases/abc123-1-1/.env$")" yes 'the runtime .env is written owner-only into the release, so a rollback takes its env along'
 check "$(grep -A1 '^rsync' "$LOG" | tail -n 1 | grep -c 'releases/abc123-1-1/.env')" 1 'the .env is written right after rsync, which would delete it'
 check "$(tail -n 1 "$LOG" | grep -c '/srv/carlab/deploy-site.sh detailing abc123-1-1$')" 1 'the host deploy script switches to the release last'
 check "$(has curl)" no 'only auto-service probes the shop backend'
-check "$(grep -c -e blob-secret -e key-secret -e oidc-secret "$work/out" || true)" 0 'no secret reaches the output'
-check "$(find "$work/tmp" -type f | wc -l | tr -d ' ')" 0 'the pulled env and the key are deleted'
+check "$(grep -c -e '-secret' "$work/out" || true)" 0 'no secret reaches the output'
+check "$(find "$work/tmp" -type f | wc -l | tr -d ' ')" 0 'the site env and the key are deleted'
+
+deploy approved-rs abc123-1-1
+check "$status" 0 'approved-rs deploys with its own names'
+check "$(grep -c -e '^CRON_SECRET=' -e '^PUBLIC_THREADS_CHANNEL=' "$SHIPPED")" 2 'approved-rs ships its own names'
+check "$(grep -c -e MEDUSA -e OPENAI "$SHIPPED" || true)" 0 'approved-rs ships no other site names'
 
 deploy auto-service abc123-1-1
 check "$status" 0 'auto-service deploys while the shop backend answers'
@@ -112,17 +116,26 @@ check "$status" 75 'a silent shop backend stops auto-service with its own exit c
 check "$(has 'turbo\|rsync\|ssh')" no 'nothing is built or shipped without the shop backend'
 unset HEALTH_EXIT
 
-PULLED="$work/no-blob.env"
-deploy approved-rs abc123-1-1
-check "$status" 0 'a site deploys without a Blob token, the leads live in Postgres'
-check "$(grep -c BLOB_READ_WRITE_TOKEN "$SHIPPED" || true)" 0 'an empty Blob token is not shipped either'
-PULLED="$work/full.env"
+secrets="{$site_secrets}"
+deploy detailing abc123-1-1
+check "$status" 1 'a missing required variable stops the deploy'
+check "$(grep -c 'required TELEGRAM_BOT_TOKEN (secret), TELEGRAM_GROUP_ID (secret) not set' "$work/out")" 1 'the refusal names every missing variable'
+check "$(has 'turbo\|rsync\|ssh')" no 'nothing is built or shipped without them'
+check "$(grep -c -e '-secret' "$work/out" || true)" 0 'the refusal prints no value'
+check "$(find "$work/tmp" -type f | wc -l | tr -d ' ')" 0 'a refused deploy leaves no key behind'
+secrets=$all_secrets
 
 deploy shop abc123-1-1
 check "$status" 2 'an unknown app is refused'
 
 deploy detailing
 check "$status" 2 'a missing release is refused'
+
+secrets=''
+deploy detailing abc123-1-1
+check "$status" 2 'a missing secrets JSON is refused'
+check "$(grep -c SITE_SECRETS "$work/out")" 1 'the refusal names the missing JSON'
+secrets=$all_secrets
 
 key=''
 deploy detailing abc123-1-1

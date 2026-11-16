@@ -15,20 +15,12 @@ concurrency:
 jobs:
   rebuild-carlab:
     runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
-    environment: production
+    environment: site-auto-service
     permissions:
       contents: read
     concurrency:
       group: deploy-site-auto-service
       cancel-in-progress: false
-    env:
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_AUTO_SERVICE }}
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      VPS_HOST: ${{ secrets.AUTO_SERVICE_SHOP_VPS_HOST }}
-      VPS_USER: ${{ secrets.AUTO_SERVICE_SHOP_VPS_USER }}
-      VPS_SSH_KEY: ${{ secrets.AUTO_SERVICE_SHOP_VPS_SSH_KEY }}
-      VPS_KNOWN_HOSTS: ${{ secrets.AUTO_SERVICE_SHOP_VPS_KNOWN_HOSTS }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -46,6 +38,13 @@ jobs:
           key: astro-carlab-${{ github.ref_name }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: astro-carlab-${{ github.ref_name }}-
       - name: Build and deploy
+        env:
+          SITE_SECRETS: ${{ toJSON(secrets) }}
+          SITE_VARS: ${{ toJSON(vars) }}
+          VPS_HOST: ${{ secrets.AUTO_SERVICE_SHOP_VPS_HOST }}
+          VPS_USER: ${{ secrets.AUTO_SERVICE_SHOP_VPS_USER }}
+          VPS_SSH_KEY: ${{ secrets.AUTO_SERVICE_SHOP_VPS_SSH_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.AUTO_SERVICE_SHOP_VPS_KNOWN_HOSTS }}
         run: |
           sha=$(git rev-parse HEAD)
           sh workflow/.github/scripts/deploy-site.sh auto-service "$sha-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"

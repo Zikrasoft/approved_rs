@@ -49,10 +49,11 @@ curl "https://api.telegram.org/bot<OLD_TELEGRAM_BOT_TOKEN>/deleteWebhook?drop_pe
 
 From here until step 5 the CRM buttons do nothing. That is expected.
 
-## 3. Change the Vercel values
+## 3. Change the GitHub values
 
-Two variables, in **all three** projects (`approved-rs`, `auto-service`,
-`detailing`) — all three send lead cards with the CRM bot:
+Two variables, shared by **all three** sites and so set once at repository
+level (Settings → Secrets and variables → Actions), since all three send lead cards
+with the CRM bot; the token is a secret, the username a variable:
 
 | Variable                | New value                               |
 | ----------------------- | --------------------------------------- |
@@ -68,7 +69,7 @@ from there.
 
 ## 4. Redeploy all three projects
 
-The sites take the env the Vercel projects hold only on their next deploy. Run
+The sites take the env GitHub holds only on their next deploy. Run
 CI with **Deploy every app** so `approved-rs`, `auto-service` and `detailing`
 ship again. Until this lands, the running sites still hold the old token.
 
@@ -163,7 +164,7 @@ Discard the old token once every box above is ticked.
 Two values, the two from step 3:
 
 1. Put `TELEGRAM_BOT_TOKEN` and `TELEGRAM_BOT_USERNAME` back to `@ApprovedRsBot`'s
-   in all three Vercel projects, which hold the sites' env, and redeploy them
+   at repository level in GitHub, where the sites' shared env lives, and redeploy them
    (CI with **Deploy every app**).
 2. Re-register the webhook against the old token:
 
