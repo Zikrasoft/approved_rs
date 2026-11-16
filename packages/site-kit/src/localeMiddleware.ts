@@ -1,9 +1,5 @@
 import { LOCALE_COOKIE } from './localeCookie.ts';
 import { createRedirectMatcher, type Redirect } from './redirects.ts';
-import {
-  createUnlocalizedMatcher,
-  type UnlocalizedPaths,
-} from './unlocalizedPath.ts';
 
 export interface LocaleMiddlewareContext<Redirected> {
   url: URL;
@@ -20,24 +16,24 @@ export interface LocaleMiddlewareOptions {
       cookie: string | undefined,
     ): string;
   };
-  unlocalized?: Partial<UnlocalizedPaths>;
+  unlocalized?: { prefixes?: readonly string[] };
   redirects?: readonly Redirect[];
 }
 
-const EVERY_SITE: UnlocalizedPaths = {
-  exact: ['/llms.txt', '/robots.txt', '/favicon.ico', '/404', '/404/'],
-  prefixes: ['/api/', '/keystatic', '/.well-known/', '/_astro/'],
-};
+const UNLOCALIZED_EXACT = ['/404', '/404/'];
+const UNLOCALIZED_PREFIXES = ['/api/', '/keystatic', '/.well-known/'];
+const FILE_NAME = /\/[^/]*\.[^/]*$/;
 
 export function createLocaleMiddleware({
   locales: { isLocale, detectLocale },
-  unlocalized: { exact = [], prefixes = [] } = {},
+  unlocalized: { prefixes = [] } = {},
   redirects = [],
 }: LocaleMiddlewareOptions) {
-  const isUnlocalized = createUnlocalizedMatcher({
-    exact: [...EVERY_SITE.exact, ...exact],
-    prefixes: [...EVERY_SITE.prefixes, ...prefixes],
-  });
+  const unlocalizedPrefixes = [...UNLOCALIZED_PREFIXES, ...prefixes];
+  const isUnlocalized = (pathname: string) =>
+    UNLOCALIZED_EXACT.includes(pathname) ||
+    unlocalizedPrefixes.some((prefix) => pathname.startsWith(prefix)) ||
+    FILE_NAME.test(pathname);
   const redirectFor = createRedirectMatcher(redirects);
 
   return <Redirected, Next>(

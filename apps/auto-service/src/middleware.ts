@@ -5,6 +5,6 @@ import { localeSet } from './i18n/config';
 export const onRequest = defineMiddleware(
   createLocaleMiddleware({
     locales: localeSet,
-    unlocalized: { exact: ['/catalogue-build.json'], prefixes: ['/admin/'] },
+    unlocalized: { prefixes: ['/admin/'] },
   }),
 );
