@@ -1,6 +1,7 @@
 import { randomBytes } from 'node:crypto';
 import { afterAll, beforeEach, inject } from 'vitest';
 import { createCrmClient, crmDatabase } from '../database.ts';
+import type {} from './databaseServer.ts';
 
 const templateUrl = new URL(inject('crmAdminUrl'));
 const template = templateUrl.pathname.slice(1);
