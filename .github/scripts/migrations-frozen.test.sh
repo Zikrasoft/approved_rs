@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-script="$(cd "$(dirname -- "$0")" && pwd)/shop-migrations-frozen.sh"
+script="$(cd "$(dirname -- "$0")" && pwd)/migrations-frozen.sh"
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 
@@ -30,7 +30,7 @@ stage() {
 }
 verdict() {
   status=0
-  sh "$script" "$work/shop" >/dev/null 2>"$work/stderr" || status=$?
+  sh "$script" "$work/shop" 'src/modules/*/migrations/*.ts' 'src/migration-scripts/*.ts' >/dev/null 2>"$work/stderr" || status=$?
 }
 
 stage
@@ -59,5 +59,10 @@ echo new >"$work/shop/src/modules/catalog/migrations/Migration2.ts"
 (cd "$work/shop" && digest src/modules/catalog/migrations/Migration2.ts >>migrations.sha256)
 verdict
 check "$status" 0 'an appended new migration passes'
+
+stage
+status=0
+sh "$script" "$work/shop" >/dev/null 2>"$work/stderr" || status=$?
+check "$status" 2 'a call without a migration glob is refused'
 
 [ "$failures" -eq 0 ]

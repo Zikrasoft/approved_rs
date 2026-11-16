@@ -226,7 +226,7 @@ a commit but cannot run the review itself.
 **Writing or changing a migration in `apps/auto-service-shop`:** read
 [docs/guides/shop-migrations.md](docs/guides/shop-migrations.md). Every shop
 migration is **additive**; `check` runs `.github/scripts/shop-migration-drift.sh`
-and `.github/scripts/shop-migrations-frozen.sh` against the
+and `.github/scripts/migrations-frozen.sh` against the
 `apps/auto-service-shop/migrations.sha256` manifest.
 
 ## CRM migrations
@@ -235,8 +235,11 @@ and `.github/scripts/shop-migrations-frozen.sh` against the
 shop's, for the same reason: the shop deploy migrates `crm` with the new shop
 image while the sites still serve the previous build, and a rollback brings an
 older image over the newer schema. Folder names start with a timestamp, since
-Prisma applies them in name order. How it ships: `docs/guides/deploy.md`, "CRM
-migrations".
+Prisma applies them in name order. The files are frozen the same way:
+`check` runs `.github/scripts/migrations-frozen.sh` against
+`packages/lead-crm/migrations.sha256`, and a new migration is appended to it in
+the same commit (`cd packages/lead-crm && sha256sum <file> >>migrations.sha256`).
+How it ships: `docs/guides/deploy.md`, "CRM migrations".
 
 ## Architecture
 

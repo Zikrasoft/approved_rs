@@ -45,7 +45,7 @@ on a fresh database writes anything.
 
 **The migration files are frozen by a manifest.** `apps/auto-service-shop/migrations.sha256`
 lists the sha256 of every file under `src/modules/*/migrations/*.ts` and
-`src/migration-scripts/*.ts`, and `.github/scripts/shop-migrations-frozen.sh`
+`src/migration-scripts/*.ts`, and `.github/scripts/migrations-frozen.sh`
 in `check` fails when a listed file changes or disappears, or when a migration
 file is missing from the list. A new migration is appended to it in the same
 commit: `cd apps/auto-service-shop && sha256sum <file> >>migrations.sha256`.
