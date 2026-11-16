@@ -3,7 +3,10 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { parseEnv } from 'node:util';
+import { z } from 'zod';
 import { SITES, siteEnvNames, type SiteEnvName } from './site-env.ts';
+
+// TODO: delete this script and its test once the Vercel fallback week is over.
 
 const dryRun = process.argv.includes('--dry-run');
 const team = process.env.VERCEL_TEAM || 'aleksey-zikrackiys-projects';
@@ -54,7 +57,9 @@ for (const app of SITES) {
   );
   pulled.set(
     app,
-    parseEnv(readFileSync(file, 'utf8')) as Record<string, string>,
+    z
+      .record(z.string(), z.string())
+      .parse(parseEnv(readFileSync(file, 'utf8'))),
   );
 }
 
