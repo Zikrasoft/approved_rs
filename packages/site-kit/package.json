@@ -6,6 +6,7 @@
   "version": "0.0.1",
   "exports": {
     ".": "./src/index.ts",
+    "./background": "./src/background.ts",
     "./browser": "./src/browser.ts",
     "./contact-links": "./src/contactLinks.ts",
     "./contact-control": "./src/contactControl.ts",
