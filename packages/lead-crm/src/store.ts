@@ -8,6 +8,7 @@ import type {
   Referrer,
   LeadInput,
   LeadStatus,
+  NewLeadNote,
   PendingPrompt,
   StoredLead,
 } from './schema.ts';
@@ -20,7 +21,8 @@ import {
   type CrmDatabase,
   type CrmTransaction,
 } from './database.ts';
-import { CLOSED, leadData, toStoredLead } from './leadRow.ts';
+import { CLOSED, leadData, toStoredLead, WITH_NOTES } from './leadRow.ts';
+import { upper } from './enumCase.ts';
 import { Prisma } from './generated/prisma/client.ts';
 import { businessDay, DAY_MS } from './businessTime.ts';
 import {
@@ -205,13 +207,13 @@ export function canPostpone(lead: StoredLead): boolean {
 export function postponePatch(
   lead: StoredLead,
   remindAt: string,
-  note: string,
-): Partial<StoredLead> {
+  note: NewLeadNote,
+): LeadPatch {
   return {
     ...statusPatch('postponed'),
     postponedFrom: inWorkStatus(lead),
     remindAt,
-    comment: appendNote(lead.comment, note),
+    addNote: note,
   };
 }
 
@@ -256,7 +258,7 @@ const NEWEST_FIRST: Prisma.LeadOrderByWithRelationInput[] = [
 
 const dayOf = (now: Date) => new Date(`${businessDay(now)}T00:00:00Z`);
 
-type LeadPatch = Partial<StoredLead>;
+export type LeadPatch = Partial<StoredLead> & { addNote?: NewLeadNote };
 
 async function lockedLead(
   tx: CrmTransaction,
@@ -267,7 +269,10 @@ async function lockedLead(
     ORDER BY created_at, id LIMIT 1 FOR UPDATE`;
   if (!locked) return undefined;
   return toStoredLead(
-    await tx.lead.findUniqueOrThrow({ where: { id: locked.id } }),
+    await tx.lead.findUniqueOrThrow({
+      where: { id: locked.id },
+      include: WITH_NOTES,
+    }),
   );
 }
 
@@ -308,8 +313,20 @@ export function createLeadStore({
       const lead = await lockedLead(tx, where);
       const patch = lead && apply(lead);
       if (!lead || !patch) return undefined;
+      const { addNote, ...fields } = patch;
       return toStoredLead(
-        await tx.lead.update({ where: { id: lead.id }, data: leadData(patch) }),
+        await tx.lead.update({
+          where: { id: lead.id },
+          data: {
+            ...leadData(fields),
+            ...(addNote && {
+              notes: {
+                create: { author: upper(addNote.author), text: addNote.text },
+              },
+            }),
+          },
+          include: WITH_NOTES,
+        }),
       );
     });
   }
@@ -336,15 +353,19 @@ export function createLeadStore({
     where: Prisma.LeadWhereInput,
     orderBy = IN_ORDER,
   ): Promise<StoredLead[]> {
-    return (await database().lead.findMany({ where, orderBy })).map(
-      toStoredLead,
-    );
+    return (
+      await database().lead.findMany({ where, orderBy, include: WITH_NOTES })
+    ).map(toStoredLead);
   }
 
   async function findLead(
     where: Prisma.LeadWhereInput,
   ): Promise<StoredLead | undefined> {
-    const row = await database().lead.findFirst({ where, orderBy: IN_ORDER });
+    const row = await database().lead.findFirst({
+      where,
+      orderBy: IN_ORDER,
+      include: WITH_NOTES,
+    });
     return row ? toStoredLead(row) : undefined;
   }
 
@@ -359,7 +380,9 @@ export function createLeadStore({
     data: LeadInput,
   ): Promise<StoredLead> {
     const lead = { ...newStoredLead(data), id: undefined };
-    return toStoredLead(await client.lead.create({ data: leadData(lead) }));
+    return toStoredLead(
+      await client.lead.create({ data: leadData(lead), include: WITH_NOTES }),
+    );
   }
 
   async function alertOnThreshold(count: number): Promise<void> {
@@ -432,6 +455,7 @@ export function createLeadStore({
           await tx.lead.findMany({
             where: { id: { in: ids.map(({ id }) => id) } },
             orderBy: IN_ORDER,
+            include: WITH_NOTES,
           })
         ).map(toStoredLead);
         const now = Date.now();
@@ -455,6 +479,7 @@ export function createLeadStore({
           await tx.lead.update({
             where: { id: existing.id },
             data: leadData(merged),
+            include: WITH_NOTES,
           }),
         );
         if (data.telegramId != null) await releaseCapturePrompts(tx, stored);
@@ -712,7 +737,7 @@ export function createLeadStore({
     postponeLead(
       id: string,
       remindAt: string,
-      note: string,
+      note: NewLeadNote,
     ): Promise<StoredLead | undefined> {
       return updateOne(id, (l) =>
         canPostpone(l) ? postponePatch(l, remindAt, note) : undefined,
@@ -729,7 +754,10 @@ export function createLeadStore({
       const q = query.trim().toLowerCase();
       if (!q) return [];
       const number = q.replace(/^#/, '');
-      const rows = await database().lead.findMany({ orderBy: NEWEST_FIRST });
+      const rows = await database().lead.findMany({
+        orderBy: NEWEST_FIRST,
+        include: WITH_NOTES,
+      });
       return rows
         .filter(
           (l) =>
@@ -737,7 +765,8 @@ export function createLeadStore({
             String(l.number) === number ||
             l.name.toLowerCase().includes(q) ||
             l.contact.toLowerCase().includes(q) ||
-            (l.comment ?? '').toLowerCase().includes(q),
+            (l.comment ?? '').toLowerCase().includes(q) ||
+            l.notes.some((note) => note.text.toLowerCase().includes(q)),
         )
         .slice(0, limit)
         .map(toStoredLead);
@@ -809,7 +838,7 @@ export function createLeadStore({
         const entries = await tx.digestLead.findMany({
           where: { digestId: latest.id },
           orderBy: { position: 'asc' },
-          include: { lead: true },
+          include: { lead: { include: WITH_NOTES } },
         });
         if (!entries.some((entry) => entry.leadId === leadId)) return undefined;
         const kept = entries

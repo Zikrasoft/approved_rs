@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { crmDatabase } from '../database.ts';
-import { leadData, toStoredLead } from '../leadRow.ts';
+import { leadData, toStoredLead, WITH_NOTES } from '../leadRow.ts';
 import { storedLeadSchema, type StoredLead } from '../schema.ts';
 
 export async function seedLead(
@@ -21,6 +21,7 @@ export async function seedLead(
   return toStoredLead(
     await crmDatabase().lead.create({
       data: leadData({ ...lead, id: fields.id }),
+      include: WITH_NOTES,
     }),
   );
 }

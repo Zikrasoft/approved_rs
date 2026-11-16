@@ -15,3 +15,10 @@ enum OperationType {
 
   @@map("operation_type")
 }
+
+enum StaffRole {
+  OWNER
+  ADMIN
+
+  @@map("staff_role")
+}

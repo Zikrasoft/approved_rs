@@ -37,7 +37,6 @@ import {
   REPLY_COPY,
   LEAD_ACTION_COPY,
   EDIT_COPY,
-  noteLine,
   reAskEditText,
   sendFieldChange,
   sendNoteNotice,
@@ -64,7 +63,6 @@ import {
   resumeLead,
   postponeLead,
   canPostpone,
-  appendNote,
   editedContact,
   hasRealContact,
   postponePatch,
@@ -271,11 +269,10 @@ async function openRemindPicker(ctx: Ctx, id: string): Promise<void> {
 
 async function remindIn(ctx: Ctx, id: string, days: string): Promise<void> {
   const remindAt = businessDay(new Date(), Number(days));
-  const updated = await postponeLead(
-    id,
-    remindAt,
-    `${LEAD_ACTION_COPY.postponedUntil}${formatDateRu(remindAt)}`,
-  );
+  const updated = await postponeLead(id, remindAt, {
+    author: ctx.role,
+    text: `${LEAD_ACTION_COPY.postponedUntil}${formatDateRu(remindAt)}`,
+  });
   if (!updated) return ack(ctx);
   await afterStatusChangeOn(ctx, updated);
   await answerCallback(ctx.cbId, LEAD_ACTION_COPY.postponed);
@@ -549,11 +546,10 @@ async function replyPostpone({
     { chatId, messageId: replyToMessageId },
     (lead) =>
       canPostpone(lead)
-        ? postponePatch(
-            lead,
-            remindAt,
-            `${LEAD_ACTION_COPY.postponedUntil}${formatDateRu(remindAt)}`,
-          )
+        ? postponePatch(lead, remindAt, {
+            author: role,
+            text: `${LEAD_ACTION_COPY.postponedUntil}${formatDateRu(remindAt)}`,
+          })
         : {},
   );
   if (!updated) return;
@@ -624,8 +620,9 @@ const replyContact: PromptHandler = async (reply, lead) => {
     before = current.contact;
     noted = hasRealContact(current.contact);
     if (!noted) return edited;
-    const line = noteLine(extraContactNote(edited.contact), reply.role);
-    return { comment: appendNote(current.comment, line) };
+    return {
+      addNote: { author: reply.role, text: extraContactNote(edited.contact) },
+    };
   });
   if (!updated) return;
   if (noted) {
@@ -645,8 +642,8 @@ const replyContact: PromptHandler = async (reply, lead) => {
 const replyNote: PromptHandler = async (reply, lead) => {
   const text = reply.text.trim();
   if (!text) return reAskEdit(reply, lead.id, 'note');
-  const updated = await resolvePendingPrompt(promptKey(reply), (current) => ({
-    comment: appendNote(current.comment, noteLine(text, reply.role)),
+  const updated = await resolvePendingPrompt(promptKey(reply), () => ({
+    addNote: { author: reply.role, text },
   }));
   if (!updated) return;
   await afterEdit(reply, updated, LEAD_ACTION_COPY.noteAdded);

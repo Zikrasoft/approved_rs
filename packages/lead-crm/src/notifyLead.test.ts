@@ -42,6 +42,7 @@ const baseData: LeadInput = {
 const storedLead: StoredLead = {
   ...baseData,
   services: [],
+  notes: [],
   id: LEAD_ID,
   number: 1,
   status: 'new',

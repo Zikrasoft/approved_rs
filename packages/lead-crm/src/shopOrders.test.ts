@@ -248,7 +248,10 @@ describe('a shop Order cancelled in the shop admin', () => {
   it('resumes a postponed Lead into lost', async () => {
     const { leadStore, bot } = crm();
     const lead = await leadStore.insertLead(order);
-    await leadStore.postponeLead(lead.id, '2030-01-01', 'later');
+    await leadStore.postponeLead(lead.id, '2030-01-01', {
+      author: 'owner',
+      text: 'later',
+    });
 
     await bot.cancelOrderLead('order_01');
 

@@ -3,6 +3,7 @@ import { crmDatabase } from './database.ts';
 import { importLegacy, readLegacy, type LegacyBlobs } from './legacyImport.ts';
 import { createLeadStore } from './store.ts';
 import { createLedgerStore } from './ledgerStore.ts';
+import { leadComment } from './telegram/cards.ts';
 
 const store = createLeadStore({ database: crmDatabase });
 const ledger = createLedgerStore({ database: crmDatabase });
@@ -140,11 +141,97 @@ describe('readLegacy', () => {
       digests: [],
       ledger: { operations: [], prompts: [] },
       unreadable: [],
+      commentsKeptWhole: 0,
     });
   });
 });
 
+describe('readLegacy staff notes', () => {
+  const noted = (comment: string) =>
+    readLegacy({
+      leads: [legacyLead(1, { comment })],
+      ledger: undefined,
+      quarantine: undefined,
+    });
+
+  it('splits the signed staff notes out of the visitor comment', () => {
+    const records = noted(
+      [
+        'Ищу BMW X5 до 30 000 €',
+        '14.10.2026 · Клиент (WhatsApp): Доп. контакт: +381641234567',
+        '16.10.2026 · Админ: Звонил, не взял',
+        'Отложено до 20.10.2026',
+        '17.10.2026 · Владелец: Ждет цену до пятницы',
+      ].join('\n'),
+    );
+
+    expect(records.leads[0]).toMatchObject({
+      comment: [
+        'Ищу BMW X5 до 30 000 €',
+        '14.10.2026 · Клиент (WhatsApp): Доп. контакт: +381641234567',
+        'Отложено до 20.10.2026',
+      ].join('\n'),
+      notes: [
+        {
+          author: 'admin',
+          text: 'Звонил, не взял',
+          createdAt: '2026-10-16T12:00:00.000Z',
+        },
+        {
+          author: 'owner',
+          text: 'Ждет цену до пятницы',
+          createdAt: '2026-10-17T12:00:00.001Z',
+        },
+      ],
+    });
+    expect(records.commentsKeptWhole).toBe(0);
+  });
+
+  it('leaves a comment holding only notes empty', () => {
+    expect(noted('16.10.2026 · Админ: Звонил').leads[0]!.comment).toBeNull();
+  });
+
+  it.each([
+    [
+      'a note that runs over several lines',
+      '16.10.2026 · Админ: Звонил\nперезвонить вечером',
+    ],
+    [
+      'a visitor answer written after a note',
+      '16.10.2026 · Владелец: Ждет\nСообщение: а когда?',
+    ],
+  ])(
+    'keeps a comment whole when it cannot tell where %s ends',
+    (_, comment) => {
+      const records = noted(comment);
+
+      expect(records.leads[0]).toMatchObject({ comment, notes: [] });
+      expect(records.commentsKeptWhole).toBe(1);
+    },
+  );
+});
+
 describe('importLegacy', () => {
+  it('imports the staff notes it split out, signed as before', async () => {
+    await importLegacy(
+      crmDatabase,
+      readLegacy({
+        leads: [
+          legacyLead(1, { comment: 'BMW X5\n16.10.2026 · Админ: Звонил' }),
+        ],
+        ledger: undefined,
+        quarantine: undefined,
+      }),
+    );
+
+    const [lead] = await store.readLeads();
+    expect(lead).toMatchObject({
+      comment: 'BMW X5',
+      notes: [{ author: 'admin', text: 'Звонил' }],
+    });
+    expect(leadComment(lead!)).toBe('BMW X5\n16.10.2026 · Админ: Звонил');
+  });
+
   it('imports every readable record and keeps the old number searchable', async () => {
     const counts = await importLegacy(crmDatabase, readLegacy(blobs));
 
@@ -154,6 +241,8 @@ describe('importLegacy', () => {
       operations: 2,
       prompts: 2,
       quarantined: 5,
+      notes: 0,
+      commentsKeptWhole: 0,
     });
     const [first] = await store.searchLeads('1');
     expect(first).toMatchObject({

@@ -97,6 +97,57 @@ describe('concurrent writers', () => {
     expect(answers.filter(Boolean)).toHaveLength(1);
   });
 
+  it('adds one staff note when the same reply arrives several times at once', async () => {
+    const lead = await store.insertLead(click('telegram'));
+    await store.setPendingPrompt(lead.id, {
+      chatId: -100123456789,
+      messageId: 5,
+      kind: 'note',
+    });
+
+    await together(TIMES, () =>
+      store.resolvePendingPrompt(
+        { chatId: -100123456789, messageId: 5 },
+        () => ({ addNote: { author: 'admin', text: 'Звонил' } }),
+      ),
+    );
+
+    expect((await store.getLead(lead.id))!.notes).toHaveLength(1);
+  });
+
+  it('keeps staff notes and visitor answers written to one Lead at once', async () => {
+    const lead = await store.insertLead(click('telegram'));
+    await store.setPendingPrompt(lead.id, {
+      chatId: -100123456789,
+      messageId: 5,
+      kind: 'note',
+    });
+
+    await Promise.all([
+      store.resolvePendingPrompt(
+        { chatId: -100123456789, messageId: 5 },
+        () => ({ addNote: { author: 'admin', text: 'Звонил' } }),
+      ),
+      store.postponeLead(lead.id, '2026-01-01', {
+        author: 'owner',
+        text: 'Отложено до 01.01.2026',
+      }),
+      ...Array.from({ length: TIMES }, (_, i) =>
+        store.updateCapture(lead.id, {
+          note: `answer ${i}`,
+          capturePrompt: null,
+        }),
+      ),
+    ]);
+
+    const stored = (await store.getLead(lead.id))!;
+    expect(stored.notes.map((note) => note.text).sort()).toEqual([
+      'Звонил',
+      'Отложено до 01.01.2026',
+    ]);
+    expect(stored.comment!.split('\n')).toHaveLength(TIMES);
+  });
+
   it('hands a Lead to the manager and claims its Meta Lead once', async () => {
     const lead = await store.insertLead({
       ...click('telegram'),
@@ -114,7 +165,10 @@ describe('concurrent writers', () => {
 
   it('claims a day of the digest once', async () => {
     const lead = await store.insertLead(click('telegram'));
-    await store.postponeLead(lead.id, '2026-01-01', 'later');
+    await store.postponeLead(lead.id, '2026-01-01', {
+      author: 'owner',
+      text: 'later',
+    });
 
     const claims = await together(TIMES, () =>
       store.claimDigest(new Date('2026-06-01T08:00:00Z')),

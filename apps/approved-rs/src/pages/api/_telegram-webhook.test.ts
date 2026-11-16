@@ -38,7 +38,6 @@ import {
   buildRemindPicker,
   buildSearchResults,
   EDIT_COPY,
-  noteLine,
   extraContactNote,
   reAskEditText,
   REPLY_COPY,
@@ -102,6 +101,7 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     contact: '@ivan',
     service: 'vehicle-sourcing',
     services: ['vehicle-sourcing'],
+    notes: [],
     locale: 'ru',
     status: 'new',
     telegramChatId: CARD_CHAT_ID,
@@ -1043,7 +1043,12 @@ describe('POST /api/telegram-webhook', () => {
       expect(lead).toMatchObject({
         status: 'postponed',
         remindAt: businessDay(new Date(), 7),
-        comment: expect.stringContaining('Отложено до'),
+        notes: [
+          expect.objectContaining({
+            author: 'owner',
+            text: expect.stringContaining('Отложено до'),
+          }),
+        ],
       });
       expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toHaveLength(1);
       expect(edits(DM_CHAT_ID, 1)).toHaveLength(1);
@@ -1763,7 +1768,7 @@ describe('POST /api/telegram-webhook', () => {
       expect((await stored()).pendingPrompt).toBeNull();
     });
 
-    it('postpones with the given date, appends a comment note, and notifies the admin', async () => {
+    it('postpones with the given date, adds a staff note, and notifies the admin', async () => {
       await seed(
         makeLead({ comment: 'BMW X5', pendingPrompt: awaiting('postpone') }),
       );
@@ -1771,7 +1776,13 @@ describe('POST /api/telegram-webhook', () => {
       expect(await stored()).toMatchObject({
         status: 'postponed',
         remindAt: '2099-10-20',
-        comment: `BMW X5\nОтложено до ${LATER}`,
+        comment: 'BMW X5',
+        notes: [
+          expect.objectContaining({
+            author: 'owner',
+            text: `Отложено до ${LATER}`,
+          }),
+        ],
       });
       expect(edits(CARD_CHAT_ID, CARD_MESSAGE_ID)).toHaveLength(1);
       expect(sentTo(ADMIN_ID)).toHaveLength(1);
@@ -2102,7 +2113,13 @@ describe('POST /api/telegram-webhook', () => {
         const lead = await stored();
         expect(lead).toMatchObject({
           contact,
-          comment: `BMW X5\n${noteLine(extraContactNote(added), 'owner')}`,
+          comment: 'BMW X5',
+          notes: [
+            expect.objectContaining({
+              author: 'owner',
+              text: extraContactNote(added),
+            }),
+          ],
           pendingPrompt: null,
         });
         expect(sentTo(OWNER_ID).at(-1)).toEqual(
@@ -2127,7 +2144,7 @@ describe('POST /api/telegram-webhook', () => {
       expect((await stored()).contact).toBe('@petr');
     });
 
-    it('appends a 📝 note with its author and date, keeping the comment', async () => {
+    it('adds a 📝 note with its author and date, keeping the comment', async () => {
       await seed(makeLead({ comment: 'BMW X5' }));
       await tap(`note:${L(5)}`, ADMIN_ID, { chatId: ADMIN_ID });
       expect(forceReplies()).toEqual([
@@ -2137,7 +2154,13 @@ describe('POST /api/telegram-webhook', () => {
       await message('Перезвонить в пятницу', ADMIN_ID, { replyTo: PROMPT_ID });
       const lead = await stored();
       expect(lead).toMatchObject({
-        comment: `BMW X5\n${noteLine('Перезвонить в пятницу', 'admin')}`,
+        comment: 'BMW X5',
+        notes: [
+          expect.objectContaining({
+            author: 'admin',
+            text: 'Перезвонить в пятницу',
+          }),
+        ],
         pendingPrompt: null,
       });
       expect(lead.lastActivityAt).not.toBeNull();
@@ -2161,7 +2184,7 @@ describe('POST /api/telegram-webhook', () => {
       expect(await stored()).toMatchObject({
         pendingPrompt: { chatId: OWNER_ID, kind: 'note' },
       });
-      expect((await stored()).comment).toBeNull();
+      expect((await stored()).notes).toEqual([]);
       expect(forceReplies().at(-1)).toEqual(
         expect.objectContaining({ text: reAskEditText('note') }),
       );

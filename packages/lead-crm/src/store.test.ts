@@ -1098,7 +1098,10 @@ describe('status patch builders', () => {
     async (status) => {
       const lead = await storedLead({ status });
 
-      const postponed = { ...lead, ...postponePatch(lead, '2026-10-20', 'n') };
+      const postponed = {
+        ...lead,
+        ...postponePatch(lead, '2026-10-20', { author: 'owner', text: 'n' }),
+      };
 
       expect(postponed).toMatchObject({
         status: 'postponed',
@@ -1122,7 +1125,54 @@ describe('status patch builders', () => {
 
   it('postponePatch refuses a Lead that is not in work', async () => {
     const lead = await storedLead({ status: 'won' });
-    expect(() => postponePatch(lead, '2026-10-20', 'n')).toThrow();
+    expect(() =>
+      postponePatch(lead, '2026-10-20', { author: 'owner', text: 'n' }),
+    ).toThrow();
+  });
+});
+
+describe('staff notes', () => {
+  async function answerNote(
+    id: string,
+    text: string,
+    author: 'owner' | 'admin',
+  ) {
+    await store.setPendingPrompt(id, { chatId: 1, messageId: 2, kind: 'note' });
+    return store.resolvePendingPrompt({ chatId: 1, messageId: 2 }, () => ({
+      addNote: { author, text },
+    }));
+  }
+
+  it('keeps each note apart from the visitor comment, in the order written', async () => {
+    const lead = await store.insertLead({ ...baseData, comment: 'Ищу Audi' });
+
+    await answerNote(lead.id, 'Звонил', 'admin');
+    const noted = await answerNote(lead.id, 'Ждет цену', 'owner');
+
+    expect(noted?.comment).toBe('Ищу Audi');
+    expect(noted?.notes).toEqual([
+      { author: 'admin', text: 'Звонил', createdAt: expect.any(String) },
+      { author: 'owner', text: 'Ждет цену', createdAt: expect.any(String) },
+    ]);
+    expect((await store.getLead(lead.id))?.notes).toEqual(noted?.notes);
+  });
+
+  it('finds a Lead by the text of its note', async () => {
+    const lead = await store.insertLead(baseData);
+    await answerNote(lead.id, 'Перезвонить в пятницу', 'admin');
+
+    expect((await store.searchLeads('пятниц')).map((l) => l.id)).toEqual([
+      lead.id,
+    ]);
+  });
+
+  it('deletes the notes with their Lead', async () => {
+    const lead = await store.insertLead(baseData);
+    await answerNote(lead.id, 'Звонил', 'admin');
+
+    await store.deleteLead(lead.id);
+
+    expect(await crmDatabase().leadNote.count()).toBe(0);
   });
 });
 
@@ -1227,18 +1277,24 @@ describe('findByTopic', () => {
 });
 
 describe('postponeLead', () => {
-  it('sets status/remindAt/comment on the given lead directly, no prompt correlation needed', async () => {
+  it('sets status, remindAt and a staff note on the given lead directly, no prompt correlation needed', async () => {
     const lead = await store.insertLead(baseData);
 
-    const postponed = await store.postponeLead(
-      lead.id,
-      '2026-10-20',
-      'Отложено до 20.10.2026',
-    );
+    const postponed = await store.postponeLead(lead.id, '2026-10-20', {
+      author: 'admin',
+      text: 'Отложено до 20.10.2026',
+    });
 
     expect(postponed?.status).toBe('postponed');
     expect(postponed?.remindAt).toBe('2026-10-20');
-    expect(postponed?.comment).toBe('Отложено до 20.10.2026');
+    expect(postponed?.comment ?? null).toBeNull();
+    expect(postponed?.notes).toEqual([
+      {
+        author: 'admin',
+        text: 'Отложено до 20.10.2026',
+        createdAt: expect.any(String),
+      },
+    ]);
   });
 
   it.each(['negotiations', 'in_progress'] as const)(
@@ -1247,7 +1303,10 @@ describe('postponeLead', () => {
       const lead = await store.insertLead(baseData);
       await store.setStatus(lead.id, status);
 
-      const postponed = await store.postponeLead(lead.id, '2026-10-20', 'n');
+      const postponed = await store.postponeLead(lead.id, '2026-10-20', {
+        author: 'owner',
+        text: 'n',
+      });
       expect(postponed?.status).toBe('postponed');
 
       expect(await store.resumeLead(lead.id)).toMatchObject({
@@ -1262,7 +1321,10 @@ describe('postponeLead', () => {
     'clears the reminder when a postponed Lead moves to %s',
     async (status) => {
       const lead = await store.insertLead(baseData);
-      await store.postponeLead(lead.id, '2026-10-20', 'n');
+      await store.postponeLead(lead.id, '2026-10-20', {
+        author: 'owner',
+        text: 'n',
+      });
 
       expect(await store.setStatus(lead.id, status)).toMatchObject({
         status,
@@ -1295,11 +1357,10 @@ describe('postponeLead', () => {
     const lead = await store.insertLead(baseData);
     await store.setStatus(lead.id, 'lost');
 
-    const postponed = await store.postponeLead(
-      lead.id,
-      '2026-10-20',
-      'Отложено до 20.10.2026',
-    );
+    const postponed = await store.postponeLead(lead.id, '2026-10-20', {
+      author: 'admin',
+      text: 'Отложено до 20.10.2026',
+    });
 
     expect(postponed).toBeUndefined();
     const after = await store.getLead(lead.id);
@@ -1402,7 +1463,10 @@ describe('expireGhostLeads', () => {
 
   it('leaves a click the owner postponed alone', async () => {
     const lead = await ghost();
-    await store.postponeLead(lead.id, '2026-10-20', 'Отложено');
+    await store.postponeLead(lead.id, '2026-10-20', {
+      author: 'owner',
+      text: 'Отложено',
+    });
 
     expect(await store.expireGhostLeads(NOW)).toEqual([]);
     expect(await store.getLead(lead.id)).toMatchObject({

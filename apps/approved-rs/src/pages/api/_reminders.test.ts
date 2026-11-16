@@ -40,6 +40,7 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     contact: '@ivan',
     service: 'vehicle-sourcing',
     services: ['vehicle-sourcing'],
+    notes: [],
     locale: 'ru',
     status: 'postponed',
     telegramChatId: CARD_CHAT_ID,

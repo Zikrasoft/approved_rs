@@ -34,7 +34,6 @@ export const {
 } = leadStore;
 
 export {
-  appendNote,
   canPostpone,
   editedContact,
   hasRealContact,

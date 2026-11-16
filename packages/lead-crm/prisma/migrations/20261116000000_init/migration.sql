@@ -5,6 +5,9 @@ CREATE TYPE "lead_status" AS ENUM ('NEW', 'NEGOTIATIONS', 'IN_PROGRESS', 'WON', 
 CREATE TYPE "operation_type" AS ENUM ('PAYOUT', 'SETTLEMENT');
 
 -- CreateEnum
+CREATE TYPE "staff_role" AS ENUM ('OWNER', 'ADMIN');
+
+-- CreateEnum
 CREATE TYPE "digest_list" AS ENUM ('DUE', 'STALE');
 
 -- CreateEnum
@@ -21,9 +24,6 @@ CREATE TYPE "prompt_kind" AS ENUM ('POSTPONE', 'EDIT_NAME', 'EDIT_CONTACT', 'NOT
 
 -- CreateEnum
 CREATE TYPE "capture_step" AS ENUM ('LOOKING_FOR', 'BUDGET', 'PHONE', 'CAR_ISSUE', 'CAR', 'SERVICE');
-
--- CreateEnum
-CREATE TYPE "ledger_author" AS ENUM ('OWNER', 'ADMIN');
 
 -- CreateTable
 CREATE TABLE "digests" (
@@ -99,13 +99,24 @@ CREATE TABLE "leads" (
 );
 
 -- CreateTable
+CREATE TABLE "lead_notes" (
+    "id" UUID NOT NULL,
+    "lead_id" UUID NOT NULL,
+    "author" "staff_role" NOT NULL,
+    "text" TEXT NOT NULL,
+    "created_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "lead_notes_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "ledger_operations" (
     "id" UUID NOT NULL,
     "legacy_id" INTEGER,
     "type" "operation_type" NOT NULL,
     "amount" DECIMAL(14,2) NOT NULL,
     "note" TEXT NOT NULL,
-    "created_by" "ledger_author" NOT NULL,
+    "created_by" "staff_role" NOT NULL,
     "created_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "ledger_operations_pkey" PRIMARY KEY ("id")
@@ -170,6 +181,9 @@ CREATE UNIQUE INDEX "leads_brand_order_id_key" ON "leads"("brand", "order_id");
 CREATE UNIQUE INDEX "leads_pending_prompt_chat_id_pending_prompt_message_id_key" ON "leads"("pending_prompt_chat_id", "pending_prompt_message_id");
 
 -- CreateIndex
+CREATE INDEX "lead_notes_lead_id_created_at_idx" ON "lead_notes"("lead_id", "created_at");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "ledger_operations_legacy_id_key" ON "ledger_operations"("legacy_id");
 
 -- CreateIndex
@@ -189,4 +203,7 @@ ALTER TABLE "digest_leads" ADD CONSTRAINT "digest_leads_digest_id_fkey" FOREIGN 
 
 -- AddForeignKey
 ALTER TABLE "digest_leads" ADD CONSTRAINT "digest_leads_lead_id_fkey" FOREIGN KEY ("lead_id") REFERENCES "leads"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "lead_notes" ADD CONSTRAINT "lead_notes_lead_id_fkey" FOREIGN KEY ("lead_id") REFERENCES "leads"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 

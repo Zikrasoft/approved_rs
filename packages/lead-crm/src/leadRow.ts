@@ -1,6 +1,7 @@
 import {
   Prisma,
-  type Lead as LeadRow,
+  type Lead,
+  type LeadNote as LeadNoteRow,
   type $Enums,
 } from './generated/prisma/client.ts';
 import {
@@ -23,6 +24,12 @@ const ADVANCED: $Enums.LeadStatus[] = ['NEGOTIATIONS', 'IN_PROGRESS'];
 const storedAdSource = adSourceSchema.nullable().catch(null);
 const storedPostponedFrom = inWorkStatusSchema.nullable().catch(null);
 
+export const WITH_NOTES = {
+  notes: { orderBy: [{ createdAt: 'asc' }, { id: 'asc' }] },
+} satisfies Prisma.LeadInclude;
+
+export type LeadRow = Lead & { notes: LeadNoteRow[] };
+
 export function toStoredLead(row: LeadRow): StoredLead {
   return {
     id: row.id,
@@ -34,6 +41,11 @@ export function toStoredLead(row: LeadRow): StoredLead {
     services: row.services,
     contactChannel: row.contactChannel,
     comment: row.comment,
+    notes: row.notes.map((note) => ({
+      author: lower(note.author),
+      text: note.text,
+      createdAt: note.createdAt.toISOString(),
+    })),
     country: row.country,
     source_url: row.sourceUrl,
     visitorId: row.visitorId,

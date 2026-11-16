@@ -16,7 +16,7 @@ process.env.CRM_DATABASE_URL = new URL(`/${name}`, templateUrl).href;
 
 beforeEach(async () => {
   await crmDatabase().$executeRawUnsafe(
-    'TRUNCATE leads, digests, digest_leads, ledger_operations, operation_prompts, quarantined_records RESTART IDENTITY',
+    'TRUNCATE leads, lead_notes, digests, digest_leads, ledger_operations, operation_prompts, quarantined_records RESTART IDENTITY',
   );
 });
 

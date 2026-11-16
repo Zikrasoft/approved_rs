@@ -47,6 +47,7 @@ model Lead {
   orderStuck             OrderOutcome? @map("order_stuck")
 
   digests DigestLead[]
+  notes   LeadNote[]
 
   @@unique([brand, orderId])
   @@unique([pendingPromptChatId, pendingPromptMessageId])

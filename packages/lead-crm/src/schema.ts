@@ -84,6 +84,17 @@ export const metaIdsSchema = z
   .refine(({ fbc, fbp }) => fbc != null || fbp != null);
 export type MetaIds = z.infer<typeof metaIdsSchema>;
 
+const staffRoleSchema = z.enum(['owner', 'admin']);
+export type StaffRole = z.infer<typeof staffRoleSchema>;
+
+const leadNoteSchema = z.object({
+  author: staffRoleSchema,
+  text: z.string(),
+  createdAt: z.string(),
+});
+export type LeadNote = z.infer<typeof leadNoteSchema>;
+export type NewLeadNote = Omit<LeadNote, 'createdAt'>;
+
 export const LEGACY_BRAND = 'Approved.rs';
 
 export const REFERRERS = ['approved'] as const;
@@ -99,6 +110,7 @@ const baseStoredLeadSchema = z.object({
   services: z.array(z.string()).default([]),
   contactChannel: z.string().nullable().optional(),
   comment: z.string().nullable().optional(),
+  notes: z.array(leadNoteSchema).default([]),
   country: z.string().nullable().optional(),
   source_url: z.string().nullable().optional(),
   visitorId: z.string().nullable().optional(),

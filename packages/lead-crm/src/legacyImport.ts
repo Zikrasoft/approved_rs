@@ -5,7 +5,10 @@ import { Prisma } from './generated/prisma/client.ts';
 import { upper } from './enumCase.ts';
 import { leadData } from './leadRow.ts';
 import { legacyLedgerSchema } from './ledgerStore.ts';
-import { legacyLeadSchema, type LegacyLead } from './schema.ts';
+import { isDatedNote } from './notes.ts';
+import { legacyLeadSchema, type LeadNote, type LegacyLead } from './schema.ts';
+import { LEAD_ACTION_COPY } from './telegram/cards.ts';
+import { OPERATION_AUTHORS } from './telegram/ledger.ts';
 
 export const LEGACY_PATHS = {
   leads: 'data/leads.json',
@@ -46,6 +49,7 @@ export interface LegacyRecords {
   digests: LegacyDigest[];
   ledger: z.infer<typeof legacyLedgerSchema>;
   unreadable: Unreadable[];
+  commentsKeptWhole: number;
 }
 
 export interface ImportCounts {
@@ -54,6 +58,47 @@ export interface ImportCounts {
   operations: number;
   prompts: number;
   quarantined: number;
+  notes: number;
+  commentsKeptWhole: number;
+}
+
+const AUTHORS = Object.entries(OPERATION_AUTHORS).map(([author, label]) => ({
+  author: author as LeadNote['author'],
+  label,
+}));
+const STAFF_NOTE = new RegExp(
+  `^(\\d{2})\\.(\\d{2})\\.(\\d{4}) · (${AUTHORS.map(({ label }) => label).join('|')}): (.*)$`,
+);
+const POSTPONED = new RegExp(
+  `^${LEAD_ACTION_COPY.postponedUntil}\\d{2}\\.\\d{2}\\.\\d{4}$`,
+);
+
+const endsANote = (line: string | undefined) =>
+  line === undefined || isDatedNote(line) || POSTPONED.test(line);
+
+function staffNote(line: string, order: number): LeadNote | undefined {
+  const match = STAFF_NOTE.exec(line);
+  if (!match) return undefined;
+  const [, day, month, year, label, text] = match;
+  const noon = Date.parse(`${year}-${month}-${day}T12:00:00Z`);
+  return {
+    author: AUTHORS.find((author) => author.label === label)!.author,
+    text: text!,
+    createdAt: new Date(noon + order).toISOString(),
+  };
+}
+
+function splitNotes(lead: LegacyLead): LegacyLead | undefined {
+  const lines = lead.comment?.split('\n') ?? [];
+  const kept: string[] = [];
+  const notes: LeadNote[] = [];
+  for (const [index, line] of lines.entries()) {
+    const note = staffNote(line, notes.length);
+    if (!note) kept.push(line);
+    else if (endsANote(lines[index + 1])) notes.push(note);
+    else return undefined;
+  }
+  return { ...lead, comment: kept.join('\n') || null, notes };
 }
 
 const asRecords = (raw: unknown): unknown[] => {
@@ -75,6 +120,13 @@ export function readLegacy({
       source: 'quarantine',
       payload,
     })),
+    commentsKeptWhole: 0,
+  };
+  const withNotes = (lead: LegacyLead) => {
+    const split = splitNotes(lead);
+    if (split) return split;
+    records.commentsKeptWhole += 1;
+    return lead;
   };
   const taken = new Set<string>();
   const isFirst = (lead: LegacyLead) => {
@@ -88,7 +140,7 @@ export function readLegacy({
     const lead = legacyLeadSchema.safeParse(entry);
     if (digest.success) records.digests.push(digest.data);
     else if (lead.success && hasValidDates(lead.data) && isFirst(lead.data))
-      records.leads.push(lead.data);
+      records.leads.push(withNotes(lead.data));
     else records.unreadable.push({ source: 'leads', payload: entry });
   }
   if (ledger !== undefined) {
@@ -122,6 +174,8 @@ export function countLegacy(records: LegacyRecords): ImportCounts {
     operations: records.ledger.operations.length,
     prompts: records.ledger.prompts.length,
     quarantined: records.unreadable.length,
+    notes: records.leads.reduce((sum, lead) => sum + lead.notes.length, 0),
+    commentsKeptWhole: records.commentsKeptWhole,
   };
 }
 
@@ -155,7 +209,18 @@ async function importLeads(
   for (const { id: legacyId, ...lead } of leads) {
     if (ids.has(legacyId)) continue;
     const { id } = await tx.lead.create({
-      data: { ...leadData(lead), legacyId, number: legacyId },
+      data: {
+        ...leadData(lead),
+        legacyId,
+        number: legacyId,
+        notes: {
+          create: lead.notes.map(({ author, text, createdAt }) => ({
+            author: upper(author),
+            text,
+            createdAt: new Date(createdAt),
+          })),
+        },
+      },
       select: { id: true },
     });
     ids.set(legacyId, id);

@@ -84,6 +84,7 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     contact: '@ivan',
     service: 'vehicle-sourcing',
     services: [],
+    notes: [],
     comment: 'BMW X5',
     country: 'de',
     source_url: '/ru/vehicle-sourcing/de/',
@@ -1323,6 +1324,45 @@ describe('buildLeadDetail', () => {
     expect(text).toContain('Иван');
     expect(text).toContain('@ivan (WhatsApp)');
     expect(text).toContain('BMW X5');
+  });
+
+  it('signs each staff note under the visitor comment', () => {
+    const notes = [
+      { author: 'admin', text: 'Звонил', createdAt: '2026-10-15T22:30:00Z' },
+      {
+        author: 'owner',
+        text: 'Ждет <цену>',
+        createdAt: '2026-10-17T09:00:00Z',
+      },
+    ] as const;
+
+    const { text } = buildLeadDetail(
+      makeLead({ id: lid(7), notes: [...notes] }),
+      'owner',
+    );
+
+    expect(text).toContain(
+      'Комментарий: BMW X5\n16.10.2026 · Админ: Звонил\n17.10.2026 · Владелец: Ждет &lt;цену&gt;\n',
+    );
+  });
+
+  it('shows the staff notes of a Lead without a comment', () => {
+    const { text } = buildLeadDetail(
+      makeLead({
+        id: lid(7),
+        comment: null,
+        notes: [
+          {
+            author: 'admin',
+            text: 'Звонил',
+            createdAt: '2026-10-15T22:30:00Z',
+          },
+        ],
+      }),
+      'owner',
+    );
+
+    expect(text).toContain('Комментарий: 16.10.2026 · Админ: Звонил\n');
   });
 });
 

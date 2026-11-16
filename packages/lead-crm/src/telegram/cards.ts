@@ -139,6 +139,19 @@ export function noteLine(text: string, by: Role, at = new Date()): string {
   return datedNote(`${OPERATION_AUTHORS[by]}: ${text}`, at);
 }
 
+export function leadComment(
+  lead: Pick<StoredLead, 'comment' | 'notes'>,
+): string {
+  return [
+    lead.comment,
+    ...lead.notes.map(({ text, author, createdAt }) =>
+      noteLine(text, author, new Date(createdAt)),
+    ),
+  ]
+    .filter(Boolean)
+    .join('\n');
+}
+
 export function noteNoticeText(
   lead: StoredLead,
   note: string,
@@ -350,7 +363,8 @@ export function createFormatter({
     );
     if (lead.country)
       lines.push(`Страна: ${escapeHtml(lead.country.toUpperCase())}`);
-    if (lead.comment) lines.push(`Комментарий: ${escapeHtml(lead.comment)}`);
+    const comment = leadComment(lead);
+    if (comment) lines.push(`Комментарий: ${escapeHtml(comment)}`);
     const page = lead.source_url && shownPage(lead.source_url);
     if (page) lines.push(`Страница: ${escapeHtml(page)}`);
     lines.push(...searchLines(searches));
