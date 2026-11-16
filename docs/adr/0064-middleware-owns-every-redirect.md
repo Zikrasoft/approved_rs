@@ -8,7 +8,7 @@ The sites run on `@astrojs/node` behind Caddy, and Vercel serves nothing. Every 
 
 ## Consequences
 
-- Caddy serves a file before node sees the path, so a rule whose source is a built file never fires. `.github/scripts/redirects-shadowed.ts` fails `check` when one does.
+- Caddy serves a file before node sees the path, so a rule whose source is a built file never fires. `.github/scripts/caddy-split.ts` fails `check` when one does.
 - Caddy still adds the security headers, since static files never reach node: one shared `infra/auto-service-shop/caddy/security-headers.caddy`, generated from site-kit's `SECURITY_HEADERS`.
 - An unprefixed legacy path is still matched before locale detection, so it goes to the locale its rule names.
 

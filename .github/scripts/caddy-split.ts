@@ -1,7 +1,18 @@
 import { spawn } from 'node:child_process';
 import { readFileSync, readdirSync } from 'node:fs';
 import { createServer } from 'node:net';
-import { join } from 'node:path';
+import { join, relative, sep } from 'node:path';
+import {
+  createRedirectMatcher,
+  type Redirect,
+} from '../../packages/site-kit/src/redirects.ts';
+import { REDIRECTS } from '../../apps/approved-rs/src/redirects.ts';
+
+const CADDY_404 = '/_image';
+
+const REDIRECTS_BY_APP: Record<string, readonly Redirect[]> = {
+  'approved-rs': REDIRECTS,
+};
 
 const PROBES: Record<string, Record<string, string>> = {
   'approved-rs': {
@@ -22,12 +33,39 @@ const PROBES: Record<string, Record<string, string>> = {
   },
 };
 
+export function caddyServes(files: readonly string[]): string[] {
+  return files.flatMap((file) => {
+    const page = /^(.*\/)index\.html$/.exec(file)?.[1];
+    if (!page) return [file];
+    return page === '/' ? [file, page] : [file, page, page.slice(0, -1)];
+  });
+}
+
+export function shadowedRedirects(
+  rules: readonly Redirect[],
+  files: readonly string[],
+): string[] {
+  const redirectFor = createRedirectMatcher(rules);
+  return caddyServes(files).filter((path) => redirectFor(path) !== null);
+}
+
+export const linksCaddy404 = (body: string) => body.includes(CADDY_404);
+
 const ON_DEMAND = /^export const prerender = false;?$/m;
 
 function onDemandPages(pages: string): string[] {
   return readdirSync(pages, { recursive: true, encoding: 'utf8' })
     .filter((file) => file.endsWith('.astro'))
     .filter((file) => ON_DEMAND.test(readFileSync(join(pages, file), 'utf8')));
+}
+
+function builtFiles(client: string): string[] {
+  return readdirSync(client, { recursive: true, withFileTypes: true })
+    .filter((entry) => entry.isFile())
+    .map(
+      (entry) =>
+        `/${relative(client, join(entry.parentPath, entry.name)).split(sep).join('/')}`,
+    );
 }
 
 const freePort = () =>
@@ -52,7 +90,7 @@ async function waitFor(base: string) {
   throw new Error(`${base} never answered`);
 }
 
-async function check(app: string): Promise<string[]> {
+async function probeOnDemandPages(app: string): Promise<string[]> {
   const probes = PROBES[app] ?? {};
   const failures = onDemandPages(`apps/${app}/src/pages`)
     .filter((page) => !(page in probes))
@@ -70,8 +108,10 @@ async function check(app: string): Promise<string[]> {
       const body = await response.text();
       if (response.status >= 500)
         failures.push(`${app}: ${path} answered ${response.status}`);
-      if (body.includes('/_image'))
-        failures.push(`${app}: ${path} links /_image, which Caddy answers 404`);
+      if (linksCaddy404(body))
+        failures.push(
+          `${app}: ${path} links ${CADDY_404}, which Caddy answers 404`,
+        );
     }
   } finally {
     server.kill();
@@ -79,14 +119,29 @@ async function check(app: string): Promise<string[]> {
   return failures;
 }
 
-const apps = process.argv.slice(2);
-if (apps.length === 0) {
-  console.error('usage: on-demand-images.ts <app>...');
-  process.exit(2);
+async function check(app: string): Promise<string[]> {
+  const shadowed = shadowedRedirects(
+    REDIRECTS_BY_APP[app] ?? [],
+    builtFiles(`apps/${app}/dist/client`),
+  ).map(
+    (path) =>
+      `${app}: Caddy serves ${path} from disk, so its redirect rule never fires: drop the file or the rule`,
+  );
+  return [...shadowed, ...(await probeOnDemandPages(app))];
 }
-const failures = (await Promise.all(apps.map(check))).flat();
-if (failures.length) {
-  console.error(failures.join('\n'));
-  process.exit(1);
+
+if (import.meta.main) {
+  const apps = process.argv.slice(2);
+  if (apps.length === 0) {
+    console.error('usage: caddy-split.ts <app>...');
+    process.exit(2);
+  }
+  const failures = (await Promise.all(apps.map(check))).flat();
+  if (failures.length) {
+    console.error(failures.join('\n'));
+    process.exit(1);
+  }
+  console.log(
+    `${apps.join(', ')}: no redirect rule shadowed by a built file, no on-demand page links ${CADDY_404}`,
+  );
 }
-console.log(`no on-demand page links /_image in ${apps.join(', ')}`);

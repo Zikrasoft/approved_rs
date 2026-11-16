@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { detectLocale } from './detectLocale';
+import { detectLocale } from './config';
 
 describe('detectLocale', () => {
   it('prefers a valid cookie value over Accept-Language', () => {

@@ -31,7 +31,8 @@ describe('onRequest', () => {
   it.each([
     '/api/leads',
     '/keystatic/collection/works',
-    '/_image?href=x',
+    '/_astro/old.js',
+    '/favicon.ico',
     '/robots.txt',
     '/llms.txt',
     '/404',

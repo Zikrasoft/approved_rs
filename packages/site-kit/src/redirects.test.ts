@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  createRedirectMatcher,
-  shadowedRedirects,
-  type Redirect,
-} from './redirects.ts';
+import { createRedirectMatcher, type Redirect } from './redirects.ts';
 
 const rule = (source: string, destination: string): Redirect => ({
   source,
@@ -61,35 +57,5 @@ describe('createRedirectMatcher', () => {
     expect(
       createRedirectMatcher([rule('/(a|b)/:slug', '/x/:slug')])('/b/c'),
     ).toBe('/x/c');
-  });
-});
-
-describe('shadowedRedirects', () => {
-  const rules = [
-    rule('/old', '/ru/new/'),
-    rule('/old/', '/ru/new/'),
-    rule('/legacy.txt', '/ru/'),
-    rule('/', '/ru/'),
-  ];
-
-  it('names every path a page directory is served under that a rule also matches', () => {
-    expect(shadowedRedirects(rules, ['/old/index.html'])).toEqual([
-      '/old/',
-      '/old',
-    ]);
-  });
-
-  it('names a plain file a rule matches', () => {
-    expect(shadowedRedirects(rules, ['/legacy.txt'])).toEqual(['/legacy.txt']);
-  });
-
-  it('serves the root index under the bare root', () => {
-    expect(shadowedRedirects(rules, ['/index.html'])).toEqual(['/']);
-  });
-
-  it('passes files no rule matches', () => {
-    expect(
-      shadowedRedirects(rules, ['/ru/index.html', '/_astro/app.js']),
-    ).toEqual([]);
   });
 });
