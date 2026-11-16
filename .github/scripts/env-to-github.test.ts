@@ -126,9 +126,9 @@ test('a run writes each manifest name where the manifest puts it, from stdin', (
       'secret repo TELEGRAM_BOT_TOKEN=val-crm',
       'secret repo TELEGRAM_OWNER_ID=val-owner',
       'variable --env=site-approved-rs PUBLIC_THREADS_CHANNEL=val-threads',
+      'variable --env=site-approved-rs PUBLIC_WHATSAPP_NUMBER=val-phone',
       'variable --env=site-auto-service MEDUSA_BACKEND_URL=val-medusa',
       'variable repo PUBLIC_PHONE_NUMBER=val-phone',
-      'variable repo PUBLIC_WHATSAPP_NUMBER=val-phone',
       'variable repo TELEGRAM_BOT_USERNAME=val-crm-name',
     ].sort(),
   );

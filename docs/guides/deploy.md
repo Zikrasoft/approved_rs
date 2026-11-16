@@ -376,7 +376,7 @@ gives `undefined` in the markup. carlab.rs and details.rs have fallbacks to
 placeholder numbers: the site will not break, but it will show the wrong contact,
 which is worse than a broken link because it goes unnoticed.
 
-On approved.rs, `PUBLIC_WHATSAPP_NUMBER` doubles as the number for an ordinary call
+`PUBLIC_WHATSAPP_NUMBER` and `PUBLIC_VIBER_NUMBER` are per site (each brand has its own numbers); `PUBLIC_PHONE_NUMBER` is shared. On approved.rs, `PUBLIC_WHATSAPP_NUMBER` doubles as the number for an ordinary call
 (`PHONE_NUMBER` there is an alias of it).
 
 ### Telegram (needed by all three projects)
@@ -412,7 +412,7 @@ the bot id before the colon when the module loads and throws on anything else.
 `@username` — get them from [@userinfobot](https://t.me/userinfobot)),
 comma-separated if a person has several accounts (`111,222`). Their absence does not
 fail the route — it just means direct messages about this brand's leads go nowhere.
-They are shared: one value, at repository level.
+`TELEGRAM_OWNER_ID` is shared, one value at repository level; `TELEGRAM_ADMIN_ID` is per site, because each brand can have its own admin.
 
 The **CRM** bot is shared across brands: `TELEGRAM_BOT_TOKEN`,
 `TELEGRAM_BOT_USERNAME` and `TELEGRAM_GROUP_ID` are set once at repository

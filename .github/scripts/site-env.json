@@ -10,10 +10,7 @@
     "TELEGRAM_BOT_USERNAME": "required variable",
     "TELEGRAM_GROUP_ID": "required secret",
     "TELEGRAM_OWNER_ID": "optional secret",
-    "TELEGRAM_ADMIN_ID": "optional secret",
     "PUBLIC_PHONE_NUMBER": "required variable",
-    "PUBLIC_WHATSAPP_NUMBER": "required variable",
-    "PUBLIC_VIBER_NUMBER": "required variable",
     "SHOP_API_URL": "optional variable"
   },
   "sites": {
@@ -34,7 +31,10 @@
       "SHOP_ORDER_OUTCOME_SECRET": "optional secret",
       "SHOP_VISITOR_SEARCHES_SECRET": "optional secret",
       "META_CAPI_TOKEN": "unset",
-      "META_CAPI_TEST_CODE": "unset"
+      "META_CAPI_TEST_CODE": "unset",
+      "TELEGRAM_ADMIN_ID": "optional secret",
+      "PUBLIC_WHATSAPP_NUMBER": "required variable",
+      "PUBLIC_VIBER_NUMBER": "required variable"
     },
     "auto-service": {
       "SITE": "optional variable",
@@ -59,7 +59,10 @@
       "META_CAPI_TOKEN": "optional secret",
       "META_CAPI_TEST_CODE": "optional secret",
       "CATALOGUE_SHRINK_ALLOWED": "optional variable",
-      "SHOP_ORDER_OUTCOME_SECRET": "unset"
+      "SHOP_ORDER_OUTCOME_SECRET": "unset",
+      "TELEGRAM_ADMIN_ID": "optional secret",
+      "PUBLIC_WHATSAPP_NUMBER": "required variable",
+      "PUBLIC_VIBER_NUMBER": "required variable"
     },
     "detailing": {
       "SITE": "optional variable",
@@ -73,7 +76,10 @@
       "SHOP_ORDER_OUTCOME_SECRET": "unset",
       "SHOP_VISITOR_SEARCHES_SECRET": "unset",
       "META_CAPI_TOKEN": "unset",
-      "META_CAPI_TEST_CODE": "unset"
+      "META_CAPI_TEST_CODE": "unset",
+      "TELEGRAM_ADMIN_ID": "optional secret",
+      "PUBLIC_WHATSAPP_NUMBER": "required variable",
+      "PUBLIC_VIBER_NUMBER": "required variable"
     }
   }
 }
