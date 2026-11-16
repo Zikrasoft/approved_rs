@@ -1,5 +1,4 @@
 import { captureWebhookSecret } from '@podbor/lead-capture';
-import { waitUntil } from '@vercel/functions';
 import {
   createMetaLeadReporter,
   createTelegramClient,
@@ -18,5 +17,4 @@ export const captureBot = createTelegramClient(
 export const reportMetaLead = createMetaLeadReporter({
   pixelId: META_PIXEL_ID,
   env: process.env,
-  waitUntil,
 });

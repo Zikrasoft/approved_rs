@@ -17,16 +17,14 @@ All three sites follow it:
   serve a Russian 404 to every visitor).
 - **`/` redirects, it does not rewrite.** Astro forbids rewriting from an
   on-demand route to a prerendered one, and `src/pages/[locale]/index.astro` is
-  prerendered in both new apps — a rewrite returns a 500 for every hit on the
-  site root. `src/pages/index.astro` still has to exist with
-  `prerender = false` so Vercel routes `/` through middleware at all.
+  prerendered on all three sites, so a rewrite returns a 500 for every hit on
+  the site root. `src/pages/index.astro` still has to exist with
+  `prerender = false` so `/` reaches the node server and its middleware at all.
 - **`/llms.txt` is served, never redirected.** Each app has both
   `src/pages/llms.txt.ts` (the default locale's copy, at the well-known root
   URI) and `src/pages/[locale]/llms.txt.ts`. Some AI crawlers do not follow
-  redirects, and this is the one URI where that risk is not worth taking — so
-  the root path must also be listed in the app's unlocalized-path config, or
-  middleware 302s it to `/{locale}/llms.txt` in dev and the well-known URI
-  stops being one.
+  redirects, and this is the one URI where that risk is not worth taking, so
+  `createLocaleMiddleware` keeps `/llms.txt` unlocalized for every site.
 
 ## Source locale and primary locale
 
@@ -43,4 +41,4 @@ exists, that would be configuration for a single caller.
 
 ## i18n routing on approved.rs
 
-**i18n routing (`src/middleware.ts` + `src/i18n/`):** 5 locales (`ru` default, `en`, `sr`, `es`, `de`), `routing: 'manual'` in `astro.config.mjs`. The middleware is the single place that: detects locale from cookie/Accept-Language (`detectLocale.ts`, backed by `@podbor/i18n`'s `createLocaleSet`; the five locales are declared once as `localeConfig` in `src/i18n/config.ts`), rewrites bare `/` to the detected locale without a visible redirect, and 301s legacy URLs through `createRedirectMatcher` from `@podbor/site-kit/redirects`. The rules live once, in `src/redirects.ts`, as Vercel's own `{ source, destination, permanent }` with path-to-regexp sources built from small tables (legacy paths, slug renames × all five locales, the de spoke, buyback countries, moved brand hubs). On Vercel's static output, middleware only runs for requests matching a real Astro route, so the same rules ship to the edge: `vercel.json`'s `redirects` is generated from `EDGE_REDIRECTS` (`REDIRECTS` plus the unprefixed-section catch-alls middleware answers with Accept-Language detection instead) by `node --experimental-strip-types scripts/redirects.ts`, which also writes `headers` from site-kit's `SECURITY_HEADERS`. Never hand-edit either key — `.github/scripts/redirects-drift.sh` regenerates it in `check` and fails on a diff. The two brand sites run the same generator over `unprefixedSectionRedirects(PathBuilder, PRIMARY_LOCALE)`: a section with a nested builder gets a `/:path*` catch-all, a single page its exact URL with both slash variants — so a new PathBuilder section reaches the edge by regenerating, which is why their `src/utils/paths.ts` imports `../i18n/config.ts` rather than the `@/` alias bare node cannot resolve.
+**i18n routing (`src/middleware.ts` + `src/i18n/`):** 5 locales (`ru` default, `en`, `sr`, `es`, `de`), `routing: 'manual'` in `astro.config.mjs`. Every app's middleware is `createLocaleMiddleware` from `@podbor/site-kit/locale-middleware`, the single owner of redirects on all three sites. It passes the unlocalized paths through: the ones every site has (`/api/`, `/keystatic`, `/.well-known/`, `/_astro/`, `/llms.txt`, `/robots.txt`, `/favicon.ico`, `/404`, the sitemaps) live in the module, so a missing hashed asset after a deploy gets a plain 404 rather than a 302 into a locale, and an app passes only its own extras (`/admin/...`, carlab.rs's `/catalogue-build.json`) beside its `localeSet`. It then 301s a path matching one of the app's redirect rules (approved.rs only: `src/redirects.ts`, `{ source, destination }` path-to-regexp rules built from small tables: legacy paths, slug renames × all five locales, the de spoke, buyback countries, moved brand hubs), passes a locale-prefixed path through, and sends anything else to the locale detected from the cookie or Accept-Language (`detectLocale`, backed by `@podbor/i18n`'s `createLocaleSet`) with a 302. Bare `/` gets the same 302 on all three sites: every homepage is prerendered, and Astro cannot rewrite an on-demand route into a prerendered one. `404.astro` is on demand (`prerender = false`) on all three sites: a prerendered 404 is served from disk without middleware, so an unmatched legacy URL would never reach its rule. Caddy serves every file under `dist/client` before node sees the request, so a rule whose source is a built file never fires: `.github/scripts/caddy-split.ts`, which owns that split (a file, a directory's `index.html`, `/_image` answered 404), fails `check` on one.

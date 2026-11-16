@@ -7,14 +7,13 @@ import {
   type SendExtra,
   type TelegramClient,
 } from './client.ts';
-import { operationNoticeText, unreadableLedgerText } from './ledger.ts';
+import { operationNoticeText } from './ledger.ts';
 import {
   fieldChangeText,
   leadCountAlertText,
   noteNoticeText,
   orderConflictText,
   orderStuckText,
-  quarantinedLeadsText,
   statusChangeText,
   type EditField,
   type Formatter,
@@ -140,26 +139,24 @@ export function createNotifier({
     },
 
     async unpinLeadCard(lead: StoredLead): Promise<void> {
-      if (lead.telegramChatId == null || lead.telegramMessageId == null) return;
+      const card = lead.telegramCard;
+      if (!card) return;
       try {
-        await client.api.unpinChatMessage(
-          lead.telegramChatId,
-          lead.telegramMessageId,
-        );
+        await client.api.unpinChatMessage(card.chatId, card.messageId);
       } catch (err) {
         logError('[telegram] unpinChatMessage failed', err, {
-          messageId: lead.telegramMessageId,
+          messageId: card.messageId,
         });
       }
     },
 
     async refreshLeadCard(lead: StoredLead): Promise<boolean> {
-      if (lead.telegramChatId == null || lead.telegramMessageId == null)
-        return false;
+      const card = lead.telegramCard;
+      if (!card) return false;
       try {
         await client.safeEditMessage(
-          lead.telegramChatId,
-          lead.telegramMessageId,
+          card.chatId,
+          card.messageId,
           formatter.formatTeaser(lead, await visitorSearches(lead)),
           formatter.deepLinkKeyboard(lead),
         );
@@ -178,21 +175,6 @@ export function createNotifier({
       const others = new Set([...ownerIds, ...adminIds]);
       others.delete(authorId);
       await sendToAll([...others], operationNoticeText(operation, balance));
-    },
-
-    async sendQuarantinedLeadsToAdmin(
-      count: number,
-      path: string,
-      brand: string,
-    ): Promise<void> {
-      await sendToAll(adminIds, quarantinedLeadsText(count, path, brand));
-    },
-
-    async sendUnreadableLedgerToAdmin(
-      path: string,
-      brand: string,
-    ): Promise<void> {
-      await sendToAll(adminIds, unreadableLedgerText(path, brand));
     },
 
     async sendOrderConflict(

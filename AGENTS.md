@@ -37,12 +37,12 @@ to the bottom of the screen rises by `--cookie-consent-height`; each app's
 `cookieConsentLift.test.ts` counts the spellings.
 
 Each of the three sites owns its own `astro.config.mjs`, `keystatic.config.ts`,
-`vercel.json`, `vitest.config.ts` and `tsconfig.json`, and its own `.env*`.
+`vitest.config.ts` and `tsconfig.json`, and its own `.env*`.
 Lint/format configs and the
-lockfile stay at the repo root and cover every workspace. The root
-`vercel.json` holds `git.deploymentEnabled: false` — without it every branch
-push triggers a failing preview build. **The same block is now duplicated into
-all three sites' `vercel.json` on purpose.** Why: `docs/adr/0007-github-actions-builds-vercel-only-hosts.md`.
+lockfile stay at the repo root and cover every workspace. The root and the
+three apps keep a `vercel.json` holding only `git.deploymentEnabled: false`, so
+the still-connected Vercel projects build nothing on a push (ADR-0007); delete
+them with the projects.
 
 Unqualified paths in this document are relative to `apps/approved-rs/`:
 `src/lib/store.ts` means `apps/approved-rs/src/lib/store.ts`.
@@ -62,19 +62,18 @@ touch the aggregate, and only in the three places that genuinely need every
 brand: the cross-brand link builder, the legacy-redirect host map in
 `middleware.ts`, and the partner block that links to both sister sites.
 
-`vercel.json` cannot import anything, so the domains stay hand-duplicated there
-— and in `src/i18n/translateConfig.ts`, which the translate scripts load under
-bare node where `import.meta.env` does not exist.
+The domains stay hand-duplicated in `src/i18n/translateConfig.ts`, which the
+translate scripts load under bare node where `import.meta.env` does not exist.
 
 **A `packages/*` change deploys all three sites, and that is the point.** The
 deploy filter in `ci.yml` is `turbo --filter="...[<deployed tag>]"` — the
 leading dots pull in the dependents of a changed package, so touching
 `@podbor/lead-crm` or `@podbor/i18n` marks all three sites stale at once. All
-three write the same `data/leads.json` blob, so shipping a changed package to
-one site and not the others puts two versions of the lead schema on one file:
-one site writes records another cannot parse, and they land in
-`data/leads-unreadable.json` for someone to sort out by hand. Nothing else
-enforces this — no test and no schema can see a half-deployed package. Do not
+three read and write the same `crm` Postgres database, so shipping a changed
+package to one site and not the others runs two versions of the CRM against one
+schema: a site built before a `packages/lead-crm` migration reads columns that
+moved or misses new ones. Nothing else enforces this: no test can see a
+half-deployed package. Do not
 narrow that filter to the app directories, and do not move a `deployed/*` tag
 forward by hand.
 
@@ -162,7 +161,11 @@ before touching its area:
 - **Writing a URL, reading the locale, adding a redirect or a root route (`/`,
   `/llms.txt`), or touching `SOURCE_LOCALE` / `primaryLocale`:** [docs/guides/routing.md](docs/guides/routing.md). Build every
   internal href through the app's `PathBuilder` (`src/utils/paths.ts`).
-  `vercel.json`'s `redirects` and `headers` are generated; `.github/scripts/redirects-drift.sh` fails `check` on a hand edit.
+  Middleware owns every redirect (`createLocaleMiddleware` from
+  `@podbor/site-kit/locale-middleware`); Caddy only adds the security headers,
+  from `infra/auto-service-shop/caddy/security-headers.caddy`, which
+  `.github/scripts/security-headers-drift.sh` regenerates from site-kit's
+  `SECURITY_HEADERS` and fails `check` on a hand edit.
 - **Rendering a lead form or the lead modal:**
   [docs/guides/lead-forms.md](docs/guides/lead-forms.md).
 - **Touching a contact control, `tel:` link, messenger or Telegram tile, or
@@ -189,7 +192,7 @@ pnpm lint:fix
 pnpm format           # prettier --write . (never --write in a review pass — it reformats what you are meant to be reading)
 pnpm exec prettier --check .
 node --experimental-strip-types scripts/layout-shift-pass.ts <base-url> <path>...   # local only: CLS per page (load + scroll down/up) on two desktops and a phone, fails over 0.01
-pnpm --filter @podbor/auto-service preview:static   # serves a built site's .vercel/output/static on 127.0.0.1:4322 (PREVIEW_PORT) for layout-shift-pass.ts / contact-controls-pass.ts; astro preview does not run with the Vercel adapter
+pnpm --filter @podbor/auto-service preview --port 4322   # serves a built site (static pages, on-demand routes and /api/*) through @astrojs/node for layout-shift-pass.ts / contact-controls-pass.ts; stop it with `astro preview stop`
 ```
 
 Scoped to one app — either `--filter` from the root, or run inside the app dir:
@@ -199,11 +202,6 @@ pnpm --filter @podbor/approved-rs dev
 pnpm --filter @podbor/approved-rs exec vitest run path/to/file.test.ts   # single test file
 pnpm --filter @podbor/approved-rs exec vitest run -t "name substring"    # single test by name
 ```
-
-`pnpm build` may finish rendering every page and only then fail at the
-`@astrojs/vercel` "astro:build:done" hook locally with a `sharp` binary `ENOENT`
-— that's a local-machine artifact unrelated to code changes, not a real build
-failure; check the page-rendering output above it, not the final exit code.
 
 `astro dev` does not put unprefixed `.env` variables into `process.env`, and the
 Telegram client reads them from there — so `/api/*` routes fail locally with
@@ -229,17 +227,29 @@ a commit but cannot run the review itself.
 **Writing or changing a migration in `apps/auto-service-shop`:** read
 [docs/guides/shop-migrations.md](docs/guides/shop-migrations.md). Every shop
 migration is **additive**; `check` runs `.github/scripts/shop-migration-drift.sh`
-and `.github/scripts/shop-migrations-frozen.sh` against the
+and `.github/scripts/migrations-frozen.sh` against the
 `apps/auto-service-shop/migrations.sha256` manifest.
+
+## CRM migrations
+
+`packages/lead-crm/prisma/migrations` follows the same additive rule as the
+shop's, for the same reason: the shop deploy migrates `crm` with the new shop
+image while the sites still serve the previous build, and a rollback brings an
+older image over the newer schema. Folder names start with a timestamp, since
+Prisma applies them in name order. The files are frozen the same way:
+`check` runs `.github/scripts/migrations-frozen.sh` against
+`packages/lead-crm/migrations.sha256`, and a new migration is appended to it in
+the same commit (`cd packages/lead-crm && sha256sum <file> >>migrations.sha256`).
+How it ships: `docs/guides/deploy.md`, "CRM migrations".
 
 ## Architecture
 
-**Stack:** Astro v7, `output: 'static'` (prerendered) with the Vercel adapter — most pages are static; a page opts into SSR individually via `export const prerender = false` (used by the two `/api/*` routes and the homepage, which middleware rewrites bare `/` into). There is no global SSR mode.
+**Stack:** Astro v7, `output: 'static'` (prerendered) with `@astrojs/node` in `standalone` mode. Most pages are static; a page opts into SSR individually via `export const prerender = false` (used by the `/api/*` routes and the bare `/` that middleware 302s to the visitor's locale). An on-demand page never renders an `astro:assets` image: there it becomes a `/_image` URL, which Caddy answers 404 so that no site runs sharp; `.github/scripts/caddy-split.ts` fails the build check on one. There is no global SSR mode. A build is `dist/client/` (every static file, served from disk by Caddy) plus `dist/server/entry.mjs`, a self-contained Node server (`vite.ssr.noExternal: true`, no `node_modules` at runtime) that answers only what is not a file and reads its config from `process.env` (`HOST`, `PORT`). `security.allowedDomains` names the brand's domain, so the proxy's `Host` and `X-Forwarded-Proto` make `request.url` the public origin; without it every form POST fails Astro's origin check. A server-only `import.meta.env.X` is inlined at build time, a `process.env.X` is read at runtime. Work that must outlive the response (the Telegram notify, Meta CAPI, shop Events) goes through `inBackground` from `@podbor/lead-crm/background`: it logs a rejection instead of leaving it unhandled and holds `SIGTERM` until the running tasks settle, then re-raises it so the process ends as a SIGTERM'd one would, unless another `SIGTERM` listener owns the shutdown.
 
 **Touching lead storage, a lead or contact-click route, the CRM bot, a capture
 bot or the reminder cron:** read [docs/guides/lead-crm.md](docs/guides/lead-crm.md).
 
-See `docs/guides/deploy.md` for the full environment-variable list and Vercel deployment/git.deploymentEnabled setup.
+See `docs/guides/deploy.md` for the full environment-variable list and the deploy to the VPS. The sites' env lives in GitHub, shared names at repository level and the rest in each site's `site-<app>` environment, and `.github/scripts/site-env.json` is the one manifest of those names: a variable a site starts reading goes into it in the same change, or `site-env.test.ts` fails `check`.
 
 ## i18n
 
@@ -311,7 +321,7 @@ This site is Astro SSG (`output: 'static'`/prerendered, no SSR) — `.astro` fro
 - `src/lib/safeMarked.ts` uses `sanitize-html` instead of a custom `marked` renderer + URL-scheme regex — adopted after the regex-based version shipped a protocol-relative-URL bypass that review caught only by hand-testing payloads.
 - `packages/i18n/src/translate/openaiChat.ts` uses the official `openai` SDK instead of a hand-rolled `fetch` wrapper — gets typed errors and automatic retry-with-backoff on 429/5xx for free.
 
-Don't reach for a library reflexively, though — a hand-rolled ~10-line helper that's already correct and purpose-built to one exact call site (e.g. `packages/lead-crm/src/storage/retry.ts`'s jittered CAS-retry backoff) doesn't get simpler by wrapping it in a generic library's config API. The bar is: does an existing library solve a real edge case this code either gets wrong today or would have to re-solve by hand, not "is there a package for this."
+Don't reach for a library reflexively, though. A hand-rolled ~10-line helper that's already correct and purpose-built to one exact call site (e.g. `packages/i18n`'s leaf cache key) doesn't get simpler by wrapping it in a generic library's config API. The bar is: does an existing library solve a real edge case this code either gets wrong today or would have to re-solve by hand, not "is there a package for this."
 
 This only applies to build-time code (`.astro` frontmatter, `src/lib/`, `scripts/`). Code that ships to the browser (client-side `<script>`, hydrated islands) still carries a real bundle-size cost — weigh a new client dependency normally there.
 

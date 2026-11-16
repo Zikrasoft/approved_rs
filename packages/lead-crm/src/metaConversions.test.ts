@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { testLeadId } from './testing/seed.ts';
 import {
   createMetaLeadReporter,
   META_GRAPH_VERSION,
@@ -11,19 +12,19 @@ const SENT_AT = '2026-10-12T09:30:00.000Z';
 const PIXEL = '29229430643330595';
 
 const lead = {
-  id: 42,
+  id: testLeadId(42),
   metaIds: { fbc: FBC, fbp: FBP },
   metaLeadSentAt: SENT_AT,
 };
 
 let fetchMock: ReturnType<typeof vi.fn>;
-let pending: Promise<unknown>[];
-const waitUntil = (promise: Promise<unknown>) => {
-  pending.push(promise);
-};
+const pending = vi.hoisted((): Promise<unknown>[] => []);
+vi.mock('./background.ts', () => ({
+  inBackground: (promise: Promise<unknown>) => pending.push(promise),
+}));
 
 beforeEach(() => {
-  pending = [];
+  pending.length = 0;
   fetchMock = vi.fn(async () => new Response('{}', { status: 200 }));
   vi.stubGlobal('fetch', fetchMock);
   vi.spyOn(console, 'info').mockImplementation(() => {});
@@ -36,7 +37,7 @@ afterEach(() => {
 });
 
 function reporter(env: Record<string, unknown> = { META_CAPI_TOKEN: 'tok' }) {
-  return createMetaLeadReporter({ pixelId: PIXEL, env, waitUntil });
+  return createMetaLeadReporter({ pixelId: PIXEL, env });
 }
 
 describe('metaLeadEvent', () => {
@@ -46,7 +47,7 @@ describe('metaLeadEvent', () => {
         {
           event_name: 'Lead',
           event_time: Date.parse(SENT_AT) / 1000,
-          event_id: 'lead-42',
+          event_id: 'lead-0196f8a0-0000-7000-8000-000000000042',
           action_source: 'chat',
           user_data: { fbc: FBC, fbp: FBP },
         },
@@ -72,13 +73,12 @@ describe('createMetaLeadReporter', () => {
       createMetaLeadReporter({
         pixelId: undefined,
         env: { META_CAPI_TOKEN: 'tok' },
-        waitUntil,
       }),
     ).toBeUndefined();
     expect(console.info).toHaveBeenCalledTimes(3);
   });
 
-  it('posts the event to the pixel through waitUntil', async () => {
+  it('posts the event to the pixel in the background', async () => {
     reporter({ META_CAPI_TOKEN: 'tok', META_CAPI_TEST_CODE: 'TEST123' })!(lead);
     await Promise.all(pending);
     expect(pending).toHaveLength(1);
@@ -124,7 +124,7 @@ describe('createMetaLeadReporter', () => {
     await Promise.all(pending);
     expect(console.error).toHaveBeenCalledWith(
       '[meta-capi] Lead event refused',
-      { leadId: 42, status: 400, body: 'bad' },
+      { leadId: lead.id, status: 400, body: 'bad' },
     );
   });
 
@@ -140,13 +140,12 @@ describe('createMetaLeadReporter', () => {
     createMetaLeadReporter({
       pixelId: PIXEL,
       env: { META_CAPI_TOKEN: 'tok' },
-      waitUntil,
       timeoutMs: 5,
     })!(lead);
     await expect(Promise.all(pending)).resolves.toBeDefined();
     expect(console.error).toHaveBeenCalledWith(
       '[meta-capi] could not send the Lead event',
-      { leadId: 42, error: expect.anything() },
+      { leadId: lead.id, error: expect.anything() },
     );
   });
 });

@@ -1,3 +1,4 @@
+import { inBackground } from '../background.ts';
 import { z } from 'zod';
 import {
   CONTACT_INPUT_FIELDS,
@@ -54,7 +55,6 @@ export interface RefusalCopy {
 
 export interface LeadsRouteOptions<L extends string> {
   notifyLead: NotifyLead;
-  waitUntil: (promise: Promise<unknown>) => void;
   isLocale: (value: string) => value is L;
   defaultLocale: L;
   localeCookie: string;
@@ -164,7 +164,6 @@ ${links}
 
 export function createLeadsRoute<L extends string>({
   notifyLead,
-  waitUntil,
   isLocale,
   defaultLocale,
   localeCookie,
@@ -226,7 +225,7 @@ export function createLeadsRoute<L extends string>({
       return new Response(null, { status: stored || delivered ? 201 : 503 });
     }
 
-    waitUntil(notifyLead(submission, '[leads]'));
+    inBackground(notifyLead(submission, '[leads]'));
 
     return redirect(thanksPath(locale, submission.service), 302);
   };

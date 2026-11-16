@@ -7,6 +7,40 @@ x-logging: &logging
     max-file: '5'
     labels: com.docker.compose.service
 
+x-site: &site
+  image: node:24.21.0-alpine
+  init: true
+  restart: unless-stopped
+  logging: *logging
+  mem_limit: 160m
+  user: node
+  cap_drop: [ALL]
+  security_opt: ['no-new-privileges:true']
+  networks: [data, edge]
+  environment: &site-environment
+    HOST: 0.0.0.0
+    PORT: '4321'
+    NODE_OPTIONS: --max-old-space-size=112
+    CRM_DATABASE_URL: postgres://crm:${CRM_DB_PASSWORD:-}@postgres:5432/crm
+  depends_on:
+    postgres:
+      condition: service_healthy
+  volumes:
+    - /srv/sites:/srv/sites:ro
+  healthcheck:
+    test:
+      [
+        'CMD',
+        'node',
+        '-e',
+        "fetch('http://127.0.0.1:4321/', { redirect: 'manual' }).then((r) => process.exit(r.status < 400 ? 0 : 1), () => process.exit(1))",
+      ]
+    interval: 30s
+    timeout: 5s
+    retries: 3
+    start_period: 60s
+    start_interval: 2s
+
 services:
   postgres:
     image: postgres:16.15-alpine
@@ -97,6 +131,9 @@ services:
       MEDIA_ORIGIN: ${MEDIA_ORIGIN:?}
       ADMIN_BASIC_AUTH_USER: ${ADMIN_BASIC_AUTH_USER:?}
       ADMIN_BASIC_AUTH_HASH: ${ADMIN_BASIC_AUTH_HASH:?}
+      CARLAB_HOST: ${CARLAB_HOST:-carlab.rs}
+      DETAILS_HOST: ${DETAILS_HOST:-details.rs}
+      APPROVED_HOST: ${APPROVED_HOST:-approved.rs}
     ports:
       - '${HTTP_PORT:-80}:80'
       - '${HTTPS_PORT:-443}:443'
@@ -106,6 +143,7 @@ services:
         condition: service_started
     volumes:
       - ./caddy:/etc/caddy:ro
+      - /srv/sites:/srv/sites:ro
       - caddydata:/data
       - caddyconfig:/config
     healthcheck:
@@ -160,6 +198,7 @@ services:
 
   grafana:
     image: grafana/grafana:13.2.5
+    profiles: [grafana]
     restart: unless-stopped
     logging: *logging
     mem_limit: 256m
@@ -186,6 +225,33 @@ services:
     depends_on:
       loki:
         condition: service_started
+
+  site-auto-service:
+    <<: *site
+    profiles: [site-auto-service]
+    environment:
+      <<: *site-environment
+      SHOP_INTERNAL_URL: http://medusa:9000
+    command: [node, /srv/sites/auto-service/running/server/entry.mjs]
+    env_file:
+      - path: /srv/sites/auto-service/running/.env
+        required: false
+
+  site-detailing:
+    <<: *site
+    profiles: [site-detailing]
+    command: [node, /srv/sites/detailing/running/server/entry.mjs]
+    env_file:
+      - path: /srv/sites/detailing/running/.env
+        required: false
+
+  site-approved-rs:
+    <<: *site
+    profiles: [site-approved-rs]
+    command: [node, /srv/sites/approved-rs/running/server/entry.mjs]
+    env_file:
+      - path: /srv/sites/approved-rs/running/.env
+        required: false
 
 networks:
   data:

@@ -33,11 +33,12 @@ jobs:
       - run: node --experimental-strip-types .github/scripts/yaml-content-valid.ts
       - run: node --experimental-strip-types --test .github/scripts/russian-copy-hygiene.test.ts
       - run: node --experimental-strip-types .github/scripts/russian-copy-hygiene.ts
-      - run: sh .github/scripts/shop-migrations-frozen.sh
-      - run: sh .github/scripts/shop-migrations-frozen.test.sh
+      - run: sh .github/scripts/migrations-frozen.sh apps/auto-service-shop 'src/modules/*/migrations/*.ts' 'src/migration-scripts/*.ts'
+      - run: sh .github/scripts/migrations-frozen.sh packages/lead-crm 'prisma/migrations/*/migration.sql'
+      - run: sh .github/scripts/migrations-frozen.test.sh
       - run: sh .github/scripts/check-base.test.sh
       - run: sh .github/scripts/pinned-deps.sh
-      - run: sh .github/scripts/redirects-drift.sh
+      - run: sh .github/scripts/security-headers-drift.sh
 
       - id: affected
         env:
@@ -52,7 +53,8 @@ jobs:
              || ! git diff --quiet "$base" HEAD -- infra/auto-service-shop; then
             shop=true
           fi
-          sites=$(jq -r '[.[] | select(. == "@podbor/approved-rs" or . == "@podbor/detailing") | ltrimstr("@podbor/")] | join(" ")' <<<"$packages")
+          sites=$(jq -r --argjson sites "$(jq -c '.sites | keys | map("@podbor/" + .)' .github/scripts/site-env.json)" \
+            '[.[] | select(. as $p | $sites | index($p)) | ltrimstr("@podbor/")] | join(" ")' <<<"$packages")
           echo "Affected: $packages; shop: $shop; sites: ${sites:-none}"
           {
             echo "base=$base"
@@ -82,27 +84,35 @@ jobs:
           PUBLIC_THREADS_CHANNEL: check
           SITES: ${{ steps.affected.outputs.sites }}
         run: |
+          read -ra sites <<<"$SITES"
           filters=()
           dists=()
-          for site in $SITES; do
+          for site in "${sites[@]}"; do
             filters+=("--filter=@podbor/$site")
             dists+=("apps/$site/dist/client")
           done
           pnpm turbo run build "${filters[@]}"
           node --experimental-strip-types .github/scripts/contact-placement.ts "${dists[@]}"
+          node --experimental-strip-types .github/scripts/caddy-split.ts "${sites[@]}"
 
       - if: steps.affected.outputs.shop == 'true'
         run: sh infra/auto-service-shop/test/scripts.test.sh
       - if: steps.affected.outputs.shop == 'true'
         run: sh infra/auto-service-shop/test/compose.test.sh
+      - if: steps.affected.outputs.shop == 'true'
+        run: sh infra/auto-service-shop/test/sites.test.sh
       - if: steps.affected.outputs.shop == 'true' && runner.os == 'Linux'
         run: sh infra/auto-service-shop/test/logs.test.sh
       - if: steps.affected.outputs.shop == 'true'
         run: sh infra/auto-service-shop/test/crawler-role.test.sh
       - if: steps.affected.outputs.shop == 'true'
+        run: sh infra/auto-service-shop/test/crm-role.test.sh
+      - if: steps.affected.outputs.shop == 'true'
         run: sh infra/auto-service-shop/test/harden-ssh.test.sh
       - run: sh .github/scripts/shop-backend-up.test.sh
       - run: sh .github/scripts/shop-ci-env.test.sh
+      - run: sh .github/scripts/upload-site.test.sh
+      - run: node --experimental-strip-types --test .github/scripts/site-env.test.ts .github/scripts/env-to-github.test.ts .github/scripts/caddy-split.test.ts
       - run: >-
           docker run --rm -v "$PWD:/repo" -w /repo --entrypoint shellcheck "$ACTIONLINT_IMAGE"
           .github/scripts/*.sh infra/auto-service-shop/*.sh infra/auto-service-shop/test/*.sh
@@ -165,6 +175,7 @@ jobs:
       contents: read
     outputs:
       changed: ${{ steps.scope.outputs.changed || '[]' }}
+      sites: ${{ steps.scope.outputs.sites || '[]' }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -231,6 +242,7 @@ jobs:
             changed=$(jq -cn --argjson c "$changed" --arg a "$app" '$c + [$a]')
           done
           echo "changed=$changed" >> "$GITHUB_OUTPUT"
+          echo "sites=$(jq -c '.sites | keys' .github/scripts/site-env.json)" >> "$GITHUB_OUTPUT"
 
   shop-image:
     needs: [translate, verify]
@@ -277,6 +289,14 @@ jobs:
           done
           docker logs "${COMPOSE_PROJECT_NAME:-podbor}-shop" 2>&1 | tail -40
           [ "$status" = healthy ]
+
+      - name: Migrate a blank CRM database with the image's Prisma CLI
+        run: |
+          docker compose -f apps/auto-service-shop/docker-compose.test.yml exec -T postgres \
+            sh -c "dropdb -U postgres --if-exists crm_check && createdb -U postgres crm_check"
+          docker run --rm --network host -e CHECKPOINT_DISABLE=1 \
+            -e CRM_DATABASE_URL="postgres://postgres:postgres@127.0.0.1:${SHOP_TEST_DB_PORT:-55432}/crm_check" \
+            -w /server/node_modules/@podbor/lead-crm "$SHOP_IMAGE:$SHA" node_modules/.bin/prisma migrate deploy
 
       - name: Push
         if: github.ref == 'refs/heads/main'
@@ -349,8 +369,8 @@ jobs:
       - name: Ship the stack files
         if: steps.guard.outputs.deploy == 'true'
         run: |
-          tar -C infra/auto-service-shop -cf - docker-compose.yml caddy/Caddyfile deploy.sh backup.sh restore.sh crawler-role.sh move-static-to-s3.sh \
-            logs-export.sh loki/config.yaml alloy/config.alloy grafana \
+          tar -C infra/auto-service-shop -cf - docker-compose.yml caddy/Caddyfile deploy.sh backup.sh restore.sh crawler-role.sh crm-role.sh move-static-to-s3.sh \
+            logs-export.sh loki/config.yaml alloy/config.alloy grafana deploy-site.sh reminders.sh caddy/security-headers.caddy \
             | ssh -o BatchMode=yes -o StrictHostKeyChecking=yes "$TARGET" 'tar -C /srv/carlab -xf -'
       - name: Deploy
         if: steps.guard.outputs.deploy == 'true'
@@ -385,86 +405,43 @@ jobs:
             || gh api -X POST "repos/$GITHUB_REPOSITORY/git/refs" \
               -f ref="refs/tags/deployed/$APP" -f sha="$SHA"
 
-  deploy:
-    needs: [translate, verify]
+  deploy-site:
+    needs: [translate, verify, shop-image, deploy-shop]
     if: >-
       !cancelled() &&
       needs.verify.result == 'success' &&
-      github.ref == 'refs/heads/main' &&
-      contains(fromJSON(needs.verify.outputs.changed), 'approved-rs')
-    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
-    environment: production
-    permissions:
-      contents: write
-    env:
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-    defaults:
-      run:
-        working-directory: apps/approved-rs
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ needs.translate.outputs.sha }}
-          persist-credentials: false
-      - uses: ./.github/actions/setup-pnpm
-      - run: pnpm exec vercel pull --yes --environment=production
-      - run: pnpm exec vercel build --prod
-      - run: pnpm exec vercel deploy --prebuilt --prod --archive=tgz
-      - name: Record what is live
-        env:
-          GH_TOKEN: ${{ github.token }}
-          SHA: ${{ needs.translate.outputs.sha }}
-          APP: approved-rs
-        run: |
-          gh api -X PATCH "repos/$GITHUB_REPOSITORY/git/refs/tags/deployed/$APP" \
-              -f sha="$SHA" -F force=true \
-            || gh api -X POST "repos/$GITHUB_REPOSITORY/git/refs" \
-              -f ref="refs/tags/deployed/$APP" -f sha="$SHA"
-
-  deploy-brand-site:
-    needs: [translate, verify, deploy-shop]
-    if: >-
-      !cancelled() &&
-      needs.verify.result == 'success' &&
-      needs.deploy-shop.result != 'failure' &&
       github.ref == 'refs/heads/main' &&
       needs.verify.outputs.changed != '[]'
     runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
-    environment: production
+    environment: site-${{ matrix.app }}
     permissions:
       contents: write
+    concurrency:
+      group: deploy-site-${{ matrix.app }}
+      cancel-in-progress: false
     strategy:
+      fail-fast: false
       matrix:
-        include:
-          - app: detailing
-            project_secret: VERCEL_PROJECT_ID_DETAILING
-          - app: auto-service
-            project_secret: VERCEL_PROJECT_ID_AUTO_SERVICE
+        app: ${{ fromJSON(needs.verify.outputs.sites) }}
     env:
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets[matrix.project_secret] }}
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-    defaults:
-      run:
-        working-directory: apps/${{ matrix.app }}
+      APP: ${{ matrix.app }}
+      SHA: ${{ needs.translate.outputs.sha }}
     steps:
       - id: guard
-        working-directory: .
         env:
           CHANGED: ${{ needs.verify.outputs.changed }}
-          APP: ${{ matrix.app }}
+          SHOP: ${{ needs.deploy-shop.result }}
+          SHOP_IMAGE_RESULT: ${{ needs.shop-image.result }}
         run: |
-          if [ -z "$VERCEL_PROJECT_ID" ]; then
+          if [ "$SHOP" = failure ] || [ "$SHOP_IMAGE_RESULT" = failure ]; then
             echo "deploy=false" >> "$GITHUB_OUTPUT"
-            echo "${{ matrix.project_secret }} is not set — skipping the $APP deploy."
+            echo "::warning::The shop image or deploy failed, so the CRM migrations it carries may not have run: $APP is not deployed; deployed/$APP stays put."
           elif ! jq -e 'type == "array"' <<<"$CHANGED" >/dev/null; then
             echo "deploy=true" >> "$GITHUB_OUTPUT"
-            echo "::warning::unreadable changed list — deploying $APP anyway"
+            echo "::warning::unreadable changed list, deploying $APP anyway"
           elif ! jq -e --arg a "$APP" 'index($a)' <<<"$CHANGED" >/dev/null; then
             echo "deploy=false" >> "$GITHUB_OUTPUT"
-            echo "$APP is current in production — skipping."
+            echo "$APP is current in production, skipping."
           else
             echo "deploy=true" >> "$GITHUB_OUTPUT"
           fi
@@ -481,27 +458,28 @@ jobs:
           path: apps/auto-service/node_modules/.astro
           key: astro-carlab-${{ github.ref_name }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: astro-carlab-${{ github.ref_name }}-
-      - run: pnpm exec vercel pull --yes --environment=production
+      - id: deploy
         if: steps.guard.outputs.deploy == 'true'
-      - id: backend
-        if: steps.guard.outputs.deploy == 'true' && matrix.app == 'auto-service'
+        env:
+          SITE_SECRETS: ${{ toJSON(secrets) }}
+          SITE_VARS: ${{ toJSON(vars) }}
+          VPS_HOST: ${{ secrets.AUTO_SERVICE_SHOP_VPS_HOST }}
+          VPS_USER: ${{ secrets.AUTO_SERVICE_SHOP_VPS_USER }}
+          VPS_SSH_KEY: ${{ secrets.AUTO_SERVICE_SHOP_VPS_SSH_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.AUTO_SERVICE_SHOP_VPS_KNOWN_HOSTS }}
         run: |
-          if sh ../../.github/scripts/shop-backend-up.sh; then
-            echo "up=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "up=false" >> "$GITHUB_OUTPUT"
+          status=0
+          sh .github/scripts/upload-site.sh "$APP" "$SHA-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT" || status=$?
+          if [ "$status" -eq 75 ]; then
             echo "::warning::The shop backend does not answer /health, so auto-service is not deployed; deployed/auto-service stays put and the next run retries. The live site keeps serving."
+            exit 0
           fi
-      - run: pnpm exec vercel build --prod
-        if: steps.guard.outputs.deploy == 'true' && steps.backend.outputs.up != 'false'
-      - run: pnpm exec vercel deploy --prebuilt --prod --archive=tgz
-        if: steps.guard.outputs.deploy == 'true' && steps.backend.outputs.up != 'false'
+          [ "$status" -ne 0 ] || echo "live=true" >> "$GITHUB_OUTPUT"
+          exit "$status"
       - name: Record what is live
-        if: steps.guard.outputs.deploy == 'true' && steps.backend.outputs.up != 'false'
+        if: steps.deploy.outputs.live == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
-          SHA: ${{ needs.translate.outputs.sha }}
-          APP: ${{ matrix.app }}
         run: |
           gh api -X PATCH "repos/$GITHUB_REPOSITORY/git/refs/tags/deployed/$APP" \
               -f sha="$SHA" -F force=true \

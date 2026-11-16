@@ -6,8 +6,13 @@ import {
   typedAsPhone,
 } from './contactShape.ts';
 import type { StoredLead } from './schema.ts';
+import type { TrackedContactChannel } from './contactChannel.ts';
 
-const PHONE_CHANNELS = new Set(['phone', 'whatsapp', 'viber']);
+const PHONE_CHANNELS = [
+  'phone',
+  'whatsapp',
+  'viber',
+] as const satisfies TrackedContactChannel[];
 
 const webContactSchema = z.union([
   z.email(),
@@ -25,7 +30,7 @@ export function editedContact(
   if (typedAsPhone(text)) {
     const phone = typedPhone(text, region);
     if (!phone) return undefined;
-    const kept = channel && PHONE_CHANNELS.has(channel) ? channel : 'phone';
+    const kept = PHONE_CHANNELS.find((known) => known === channel) ?? 'phone';
     return { contact: phone, contactChannel: kept };
   }
   const handle = telegramContact(text);

@@ -1,7 +1,6 @@
 export const prerender = false;
 
 import type { APIRoute } from 'astro';
-import { waitUntil } from '@vercel/functions';
 import { createLeadsRoute } from '@podbor/lead-crm';
 import { acceptedSecrets } from '@podbor/lead-crm/verify-secret';
 import { LOCALE_COOKIE } from '@podbor/site-kit';
@@ -17,7 +16,6 @@ import { VIN_INQUIRY_SERVICE } from '@/utils/services';
 
 const leadsRoute = createLeadsRoute({
   notifyLead,
-  waitUntil,
   isLocale,
   defaultLocale: PRIMARY_LOCALE,
   localeCookie: LOCALE_COOKIE,

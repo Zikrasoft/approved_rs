@@ -1,7 +1,6 @@
 import { channelLabel } from '../channelLabels.ts';
 import { isHandleContact } from '../contactShape.ts';
 import { shownPage } from '../form.ts';
-import { LEADS_PATH } from '../quarantine.ts';
 import { isClosed, isInWork, type StoredLead } from '../schema.ts';
 import { isPlaceholderContact } from '../leadMerge.ts';
 import type { Digest } from '../store.ts';
@@ -10,6 +9,7 @@ import {
   escapeHtml,
   formatDateRu,
   leadDisplayName,
+  leadTag,
   statusLine,
   statusMark,
   type Btn,
@@ -51,7 +51,7 @@ const QUICK_REMIND_DAYS = [
   { label: 'Через месяц', days: 30 },
 ] as const;
 
-export function buildRemindPicker(id: number): {
+export function buildRemindPicker(id: string): {
   text: string;
   reply_markup: Keyboard;
 } {
@@ -92,7 +92,7 @@ export function buildDeleteConfirm(lead: StoredLead): {
   reply_markup: Keyboard;
 } {
   return {
-    text: `❗ Удалить заявку #${lead.id} (${escapeHtml(leadDisplayName(lead))}) навсегда? Это нельзя отменить.`,
+    text: `❗ Удалить заявку ${leadTag(lead)} (${escapeHtml(leadDisplayName(lead))}) навсегда? Это нельзя отменить.`,
     reply_markup: {
       inline_keyboard: [
         [
@@ -139,12 +139,25 @@ export function noteLine(text: string, by: Role, at = new Date()): string {
   return datedNote(`${OPERATION_AUTHORS[by]}: ${text}`, at);
 }
 
+export function leadComment(
+  lead: Pick<StoredLead, 'comment' | 'notes'>,
+): string {
+  return [
+    lead.comment,
+    ...lead.notes.map(({ text, author, createdAt }) =>
+      noteLine(text, author, new Date(createdAt)),
+    ),
+  ]
+    .filter(Boolean)
+    .join('\n');
+}
+
 export function noteNoticeText(
   lead: StoredLead,
   note: string,
   by: Role,
 ): string {
-  return `📝 Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))} · ${OPERATION_AUTHORS[by]}: ${escapeHtml(note)}`;
+  return `📝 Заявка ${leadTag(lead)} ${escapeHtml(leadDisplayName(lead))} · ${OPERATION_AUTHORS[by]}: ${escapeHtml(note)}`;
 }
 
 const FIELD_PREVIEW_LIMIT = 120;
@@ -166,7 +179,7 @@ export function fieldChangeText(
   by: Role,
 ): string {
   return [
-    `✏️ Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: ${EDIT_FIELD_LABELS[field]}`,
+    `✏️ Заявка ${leadTag(lead)} ${escapeHtml(leadDisplayName(lead))}: ${EDIT_FIELD_LABELS[field]}`,
     `✍️ ${OPERATION_AUTHORS[by]}`,
     ``,
     `Было: ${fieldPreview(before)}`,
@@ -216,19 +229,6 @@ export const LEAD_ACTION_COPY = {
   topicFailed:
     '⚠️ Тему открыть не удалось: включите темы в группе и дайте боту право «Управление темами».',
 } as const;
-
-export function quarantinedLeadsText(
-  count: number,
-  path: string,
-  brand: string,
-): string {
-  return [
-    `⚠️ Нечитаемых заявок: ${count}`,
-    ``,
-    `Нашёл сайт ${escapeHtml(brand)} и скопировал в ${escapeHtml(path)}.`,
-    `Из ${escapeHtml(LEADS_PATH)} ничего не убирал — удалить можно только руками.`,
-  ].join('\n');
-}
 
 export function managerHandoffText(handle: string): string {
   return `👤 Ушёл к менеджеру @${escapeHtml(handle)}`;
@@ -289,12 +289,12 @@ function remindLine(lead: StoredLead): string {
 }
 
 export function statusChangeText(lead: StoredLead, by: Role): string {
-  return `🔔 Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: статус — ${statusMark(lead.status)}\n✍️ ${OPERATION_AUTHORS[by]}`;
+  return `🔔 Заявка ${leadTag(lead)} ${escapeHtml(leadDisplayName(lead))}: статус — ${statusMark(lead.status)}\n✍️ ${OPERATION_AUTHORS[by]}`;
 }
 
 export function orderConflictText(lead: StoredLead & { orderId: string }) {
   return [
-    `⚠️ Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: ${statusMark(lead.status)}, а магазин уже закрыл заказ ${escapeHtml(lead.orderId)} иначе или не знает его.`,
+    `⚠️ Заявка ${leadTag(lead)} ${escapeHtml(leadDisplayName(lead))}: ${statusMark(lead.status)}, а магазин уже закрыл заказ ${escapeHtml(lead.orderId)} иначе или не знает его.`,
     `Сверь заказ в админке магазина: сами они не сойдутся.`,
   ].join('\n');
 }
@@ -309,7 +309,7 @@ export function leadCountAlertText(count: number, brand: string): string {
 
 export function orderStuckText(lead: StoredLead & { orderId: string }) {
   return [
-    `⚠️ Заявка #${lead.id} ${escapeHtml(leadDisplayName(lead))}: ${statusMark(lead.status)}, но магазин не принимает этот исход для заказа ${escapeHtml(lead.orderId)}.`,
+    `⚠️ Заявка ${leadTag(lead)} ${escapeHtml(leadDisplayName(lead))}: ${statusMark(lead.status)}, но магазин не принимает этот исход для заказа ${escapeHtml(lead.orderId)}.`,
     `Бот будет пробовать каждый день. Закрой заказ в админке магазина сам или проверь секрет магазина.`,
   ].join('\n');
 }
@@ -350,7 +350,7 @@ export function createFormatter({
       ? ` (${escapeHtml(channelLabel(lead.contactChannel))})`
       : '';
     const lines: string[] = [
-      `🚗 Заявка #${lead.id} — ${escapeHtml(servicesLabel(lead))}`,
+      `🚗 Заявка ${leadTag(lead)} — ${escapeHtml(servicesLabel(lead))}`,
       brandLine(lead),
       statusLine(lead.status),
     ];
@@ -363,7 +363,8 @@ export function createFormatter({
     );
     if (lead.country)
       lines.push(`Страна: ${escapeHtml(lead.country.toUpperCase())}`);
-    if (lead.comment) lines.push(`Комментарий: ${escapeHtml(lead.comment)}`);
+    const comment = leadComment(lead);
+    if (comment) lines.push(`Комментарий: ${escapeHtml(comment)}`);
     const page = lead.source_url && shownPage(lead.source_url);
     if (page) lines.push(`Страница: ${escapeHtml(page)}`);
     lines.push(...searchLines(searches));
@@ -389,7 +390,7 @@ export function createFormatter({
     formatLeadText,
 
     topicName(lead: StoredLead): string {
-      return `#${lead.id} · ${leadDisplayName(lead)} · ${lead.brand}`.slice(
+      return `${leadTag(lead)} · ${leadDisplayName(lead)} · ${lead.brand}`.slice(
         0,
         MAX_TOPIC_NAME,
       );
@@ -403,12 +404,12 @@ export function createFormatter({
       const searched = searchLines(searches)
         .map((line) => `\n${line}`)
         .join('');
-      return `🚗 Заявка #${lead.id} · ${escapeHtml(leadDisplayName(lead))} · ${escapeHtml(servicesLabel(lead))} · ${statusMark(lead.status)}${remindLine(lead)}\n${brandLine(lead)}${searched}${adHashtag(lead, '\n')}`;
+      return `🚗 Заявка ${leadTag(lead)} · ${escapeHtml(leadDisplayName(lead))} · ${escapeHtml(servicesLabel(lead))} · ${statusMark(lead.status)}${remindLine(lead)}\n${brandLine(lead)}${searched}${adHashtag(lead, '\n')}`;
     },
 
     postponeReminderText(lead: StoredLead): string {
       return [
-        `⏰ Напоминание по заявке #${lead.id}`,
+        `⏰ Напоминание по заявке ${leadTag(lead)}`,
         ``,
         `${escapeHtml(leadDisplayName(lead))} — ${escapeHtml(servicesLabel(lead))}`,
         `Ты просил напомнить сегодня — заявка снова активна.`,

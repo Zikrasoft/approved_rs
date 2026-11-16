@@ -225,14 +225,16 @@ hand after backend edits there.
 `astro dev` does not put `.env.local` into `process.env`, and the lead route
 reads the Telegram variables from there, so `dev:shop` starts it under
 `node --env-file-if-exists=.env.local`. The placeholders are enough: the Lead
-is stored in `apps/auto-service/.local-data/data/leads.json` (gitignored) and
-the Telegram notification fails in the log. The Astro config fetches the part
+is stored in the local `crm` Postgres named by `CRM_DATABASE_URL` (see
+`.env.example`) and the Telegram notification fails in the log. The Astro config fetches the part
 pages from Medusa at load, so the storefront waits for the backend; started
 with the backend down, it stops with «Could not read the catalogue from
 MEDUSA_BACKEND_URL (…)» naming the URL it tried.
 
-Storefront: <http://localhost:4321/ru/parts/>. Leads only reach the local file
-under `astro dev`; a production build writes to Vercel Blob.
+Storefront: <http://localhost:4321/ru/parts/>. Leads go to the `crm` Postgres
+database `CRM_DATABASE_URL` names, in dev as in production; point it at the
+throwaway one from `packages/lead-crm/docker-compose.test.yml` (see
+[deploy.md](deploy.md#crm-migrations)).
 
 To check the build against the demo backend, export the storefront variables
 first: the sitemap reads `MEDUSA_BACKEND_URL` and `MEDUSA_PUBLISHABLE_KEY`
@@ -250,11 +252,11 @@ turn the preview on, `/api/shop-preview` without a token to turn it off. See
 ```bash
 set -a; . apps/auto-service/.env.local; set +a
 pnpm turbo run build --filter=@podbor/auto-service
-pnpm --filter @podbor/auto-service preview:static
+pnpm --filter @podbor/auto-service preview
 ```
 
-`astro preview` does not run with the Vercel adapter, so the static server
-shows the prerendered pages only (no `/api/*`). Rebuild after every import to
+`astro preview` serves the whole build through `@astrojs/node`, `/api/*`
+included; `astro preview stop` stops it. Rebuild after every import to
 see new Parts on static pages.
 
 Useful pages:

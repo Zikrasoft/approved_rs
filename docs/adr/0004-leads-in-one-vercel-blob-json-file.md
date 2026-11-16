@@ -1,5 +1,7 @@
 # Leads live in one JSON file on Vercel Blob, not in a database
 
+Superseded by [ADR-0063](0063-the-crm-lives-in-postgres.md).
+
 Every lead is a record in `data/leads.json` on Vercel Blob. All writes go through `updateLeads()`, an ETag compare-and-swap loop with jittered exponential backoff, and records are zod-validated on read. Storage sits behind a `LeadStorage` interface, so moving to Postgres later is one adapter, not a rewrite. At this volume (tens of leads a month) a database is more to run than the data justifies.
 
 ## Considered Options

@@ -31,7 +31,7 @@ const catalogueEnvKeys = [
   'MEDUSA_PUBLISHABLE_KEY',
   'SHOP_OPEN',
   'SHOP_PREVIEW_TOKEN',
-  'VERCEL',
+  'CATALOGUE_SHRINK_GUARD',
   'CATALOGUE_SHRINK_ALLOWED',
 ] as const;
 
@@ -41,6 +41,13 @@ export type CatalogueEnv = Partial<
 
 const unsetWhenEmpty = <T extends z.ZodType>(schema: T) =>
   z.preprocess((value) => value || undefined, schema.optional());
+
+const internalUrlSchema = unsetWhenEmpty(z.url()).catch(undefined);
+
+export const shopBackendUrl = (
+  buildUrl: string | undefined,
+  internalUrl = process.env.SHOP_INTERNAL_URL,
+): string | undefined => internalUrlSchema.parse(internalUrl) ?? buildUrl;
 
 const catalogueEnvSchema = z
   .object({
@@ -105,15 +112,14 @@ const visitorAddressSchema = z.union([z.ipv4(), z.ipv6()]);
 
 export const visitorAddress = (request: Request): string | undefined =>
   visitorAddressSchema.safeParse(
-    request.headers.get('x-real-ip') ??
-      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim(),
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim(),
   ).data;
 
 const visitorIdOf = (request: Request): string | undefined =>
   z.uuid().safeParse(cookieOf(request, VISITOR_ID_COOKIE)).data;
 
 export const requestIdOf = (request: Request): string | undefined =>
-  requestIdSchema.safeParse(request.headers.get('x-vercel-id')).data;
+  requestIdSchema.safeParse(request.headers.get('x-request-id')).data;
 
 export function catalogueFromEnv(
   env: CatalogueEnv,
@@ -140,11 +146,16 @@ export function catalogueFromEnv(
   });
 }
 
-export const catalogueFor = (request: Request) =>
-  catalogueFromEnv(siteEnv(), {
-    preview: previewRequested(request),
-    visitor: request,
-  });
+export const catalogueFor = (request: Request) => {
+  const env = siteEnv();
+  return catalogueFromEnv(
+    { ...env, MEDUSA_BACKEND_URL: shopBackendUrl(env.MEDUSA_BACKEND_URL) },
+    {
+      preview: previewRequested(request),
+      visitor: request,
+    },
+  );
+};
 
 export const uncachedJson = (body: unknown, init?: ResponseInit) =>
   Response.json(body, {
@@ -158,7 +169,7 @@ export const siteEnv = (): CatalogueEnv => ({
   SHOP_OPEN: import.meta.env.SHOP_OPEN,
   SHOP_PREVIEW_TOKEN: process.env.SHOP_PREVIEW_TOKEN,
   SHOP_CLIENT_SECRET: process.env.SHOP_CLIENT_SECRET,
-  VERCEL: import.meta.env.VERCEL,
+  CATALOGUE_SHRINK_GUARD: import.meta.env.CATALOGUE_SHRINK_GUARD,
   CATALOGUE_SHRINK_ALLOWED: import.meta.env.CATALOGUE_SHRINK_ALLOWED,
 });
 
@@ -186,7 +197,8 @@ async function livePartPages(): Promise<number> {
 }
 
 async function loadSnapshot(env: CatalogueEnv) {
-  const live = env.VERCEL === '1' ? await livePartPages() : 0;
+  const live =
+    env.CATALOGUE_SHRINK_GUARD === 'true' ? await livePartPages() : 0;
   const catalogue = catalogueFromEnv(env, {
     timeoutMs: BUILD_CATALOGUE_TIMEOUT_MS,
   });

@@ -37,7 +37,6 @@ import {
   REPLY_COPY,
   LEAD_ACTION_COPY,
   EDIT_COPY,
-  noteLine,
   reAskEditText,
   sendFieldChange,
   sendNoteNotice,
@@ -64,7 +63,6 @@ import {
   resumeLead,
   postponeLead,
   canPostpone,
-  appendNote,
   editedContact,
   hasRealContact,
   postponePatch,
@@ -76,12 +74,13 @@ import {
   answerOperationPrompt,
   parseOperationReply,
   businessDay,
-  LedgerUnreadableError,
   MAX_FIELD_LENGTH,
   type OperationType,
   type LeadStatus,
   type PendingPrompt,
-  type PromptKey,
+  leadIdSchema,
+  type LeadId,
+  type MessageKey,
   type StoredLead,
 } from '@/lib/store';
 
@@ -157,12 +156,15 @@ type Ctx = {
 };
 type CrmContext = Context & { crm: Ctx };
 type Handler = (ctx: Ctx, ...groups: string[]) => Promise<void>;
-type IdHandler = (ctx: Ctx, id: number, ...rest: string[]) => Promise<void>;
+type IdHandler = (ctx: Ctx, id: LeadId, ...rest: string[]) => Promise<void>;
+
+const LEAD_ID =
+  '([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})';
 type CallbackRow = [RegExp, Role | 'any', Handler];
 type PromptKind = PendingPrompt['kind'];
 
 function withId(handler: IdHandler): Handler {
-  return (ctx, id, ...rest) => handler(ctx, Number(id), ...rest);
+  return (ctx, id, ...rest) => handler(ctx, leadIdSchema.parse(id), ...rest);
 }
 
 async function ack(ctx: Ctx): Promise<void> {
@@ -178,18 +180,14 @@ async function withErrorAck(
     await action();
   } catch (err) {
     logError('[telegram-webhook] callback handler failed', err, logCtx);
-    const text =
-      err instanceof LedgerUnreadableError
-        ? LEDGER_COPY.unavailable
-        : LEAD_ACTION_COPY.failed;
-    await answerCallback(cbId, text).catch(() => {});
+    await answerCallback(cbId, LEAD_ACTION_COPY.failed).catch(() => {});
   }
 }
 
 function onGroupCard(ctx: Ctx, lead: StoredLead): boolean {
   return (
-    ctx.chatId === lead.telegramChatId &&
-    ctx.messageId === lead.telegramMessageId
+    ctx.chatId === lead.telegramCard?.chatId &&
+    ctx.messageId === lead.telegramCard.messageId
   );
 }
 
@@ -212,7 +210,7 @@ async function afterStatusChangeOn(
 
 async function startPrompt(
   ctx: Ctx,
-  id: number,
+  id: LeadId,
   {
     prompt,
     kind,
@@ -226,7 +224,7 @@ async function startPrompt(
 
 async function startLeadPrompt(
   ctx: Ctx,
-  id: number,
+  id: LeadId,
   prompt: Parameters<typeof startPrompt>[2],
 ): Promise<void> {
   if (!(await getLead(id))) return ack(ctx);
@@ -235,7 +233,7 @@ async function startLeadPrompt(
 
 async function changeStatus(
   ctx: Ctx,
-  id: number,
+  id: LeadId,
   key: LeadStatus,
   fromDetail = true,
 ): Promise<void> {
@@ -252,7 +250,7 @@ async function changeStatus(
   );
 }
 
-async function markInWork(ctx: Ctx, id: number): Promise<void> {
+async function markInWork(ctx: Ctx, id: LeadId): Promise<void> {
   const lead = await getLead(id);
   if (lead?.status !== 'in_progress')
     return changeStatus(ctx, id, 'in_progress', false);
@@ -261,7 +259,7 @@ async function markInWork(ctx: Ctx, id: number): Promise<void> {
   await answerCallback(ctx.cbId, LEAD_ACTION_COPY.inWork);
 }
 
-async function openRemindPicker(ctx: Ctx, id: number): Promise<void> {
+async function openRemindPicker(ctx: Ctx, id: LeadId): Promise<void> {
   const lead = await getLead(id);
   if (!lead) return ack(ctx);
   if (!canPostpone(lead))
@@ -271,26 +269,25 @@ async function openRemindPicker(ctx: Ctx, id: number): Promise<void> {
   await answerCallback(ctx.cbId);
 }
 
-async function remindIn(ctx: Ctx, id: number, days: string): Promise<void> {
+async function remindIn(ctx: Ctx, id: LeadId, days: string): Promise<void> {
   const remindAt = businessDay(new Date(), Number(days));
-  const updated = await postponeLead(
-    id,
-    remindAt,
-    `${LEAD_ACTION_COPY.postponedUntil}${formatDateRu(remindAt)}`,
-  );
+  const updated = await postponeLead(id, remindAt, {
+    author: ctx.role,
+    text: `${LEAD_ACTION_COPY.postponedUntil}${formatDateRu(remindAt)}`,
+  });
   if (!updated) return ack(ctx);
   await afterStatusChangeOn(ctx, updated);
   await answerCallback(ctx.cbId, LEAD_ACTION_COPY.postponed);
 }
 
-async function resume(ctx: Ctx, id: number): Promise<void> {
+async function resume(ctx: Ctx, id: LeadId): Promise<void> {
   const updated = await resumeLead(id);
   if (!updated) return ack(ctx);
   await afterStatusChangeOn(ctx, updated);
   await answerCallback(ctx.cbId, LEAD_ACTION_COPY.resumed);
 }
 
-async function backToLead(ctx: Ctx, id: number): Promise<void> {
+async function backToLead(ctx: Ctx, id: LeadId): Promise<void> {
   const lead = await getLead(id);
   if (lead && onGroupCard(ctx, lead)) {
     await ensureLeadCard(lead);
@@ -307,7 +304,7 @@ async function backToLead(ctx: Ctx, id: number): Promise<void> {
   await answerCallback(ctx.cbId);
 }
 
-async function askDelete(ctx: Ctx, id: number): Promise<void> {
+async function askDelete(ctx: Ctx, id: LeadId): Promise<void> {
   const lead = await getLead(id);
   if (!lead) return ack(ctx);
   const { text, reply_markup } = buildDeleteConfirm(lead);
@@ -315,9 +312,9 @@ async function askDelete(ctx: Ctx, id: number): Promise<void> {
   await answerCallback(ctx.cbId);
 }
 
-async function confirmDelete(ctx: Ctx, id: number): Promise<void> {
-  await deleteLead(id);
+async function confirmDelete(ctx: Ctx, id: LeadId): Promise<void> {
   await dropFromDigest(id);
+  await deleteLead(id);
   await safeEditMessage(ctx.chatId, ctx.messageId, LEAD_ACTION_COPY.deleted, {
     inline_keyboard: [],
   });
@@ -334,7 +331,7 @@ async function askOperation(
   chatId: number,
   type: OperationType,
   text: string = LEDGER_COPY.prompt[type],
-  replacing?: PromptKey,
+  replacing?: MessageKey,
 ): Promise<void> {
   const messageId = await sendForceReplyPrompt(chatId, text);
   await openOperationPrompt({ chatId, messageId, type }, replacing);
@@ -357,7 +354,7 @@ async function listOpen(ctx: Ctx): Promise<void> {
   await ack(ctx);
 }
 
-async function openLead(ctx: Ctx, id: number): Promise<void> {
+async function openLead(ctx: Ctx, id: LeadId): Promise<void> {
   const lead = await getLead(id);
   if (lead) {
     const { text, reply_markup } = await leadDetail(lead, ctx.role);
@@ -366,7 +363,7 @@ async function openLead(ctx: Ctx, id: number): Promise<void> {
   await ack(ctx);
 }
 
-async function startTopic(ctx: Ctx, id: number): Promise<void> {
+async function startTopic(ctx: Ctx, id: LeadId): Promise<void> {
   const lead = await getLead(id);
   if (!lead) return ack(ctx);
   const opened =
@@ -381,17 +378,14 @@ async function startTopic(ctx: Ctx, id: number): Promise<void> {
   if (opened.topicId == null)
     return answerCallback(ctx.cbId, LEAD_ACTION_COPY.topicFailed);
   await ensureLeadCard(opened);
-  const onGroupCard =
-    ctx.chatId === opened.telegramChatId &&
-    ctx.messageId === opened.telegramMessageId;
-  if (!onGroupCard)
+  if (!onGroupCard(ctx, opened))
     await editLeadDetailMessage(ctx.chatId, ctx.messageId, opened, ctx.role);
   await answerCallback(ctx.cbId, LEAD_ACTION_COPY.topicOpened);
 }
 
 function editRow(field: EditField): CallbackRow {
   return [
-    new RegExp(`^edit:(\\d+):${field}$`),
+    new RegExp(`^edit:${LEAD_ID}:${field}$`),
     'any',
     withId((ctx, id) =>
       startLeadPrompt(ctx, id, {
@@ -405,7 +399,7 @@ function editRow(field: EditField): CallbackRow {
 
 function statusRow(key: LeadStatus): CallbackRow {
   return [
-    new RegExp(`^st:(\\d+):${key}$`),
+    new RegExp(`^st:${LEAD_ID}:${key}$`),
     'any',
     withId((ctx, id) => changeStatus(ctx, id, key)),
   ];
@@ -417,25 +411,25 @@ export const CALLBACKS: CallbackRow[] = [
   statusRow('negotiations'),
   statusRow('in_progress'),
   [
-    /^won:(\d+)$/,
+    new RegExp(`^won:${LEAD_ID}$`),
     'any',
     withId((ctx, id) => changeStatus(ctx, id, 'won', false)),
   ],
   [
-    /^lost:(\d+)$/,
+    new RegExp(`^lost:${LEAD_ID}$`),
     'any',
     withId((ctx, id) => changeStatus(ctx, id, 'lost', false)),
   ],
   [
-    /^talk:(\d+)$/,
+    new RegExp(`^talk:${LEAD_ID}$`),
     'any',
     withId((ctx, id) => changeStatus(ctx, id, 'negotiations', false)),
   ],
-  [/^work:(\d+)$/, 'any', withId(markInWork)],
-  [/^postpone:(\d+)$/, 'any', withId(openRemindPicker)],
-  [/^remindpick:(\d+):(\d+)$/, 'any', withId(remindIn)],
+  [new RegExp(`^work:${LEAD_ID}$`), 'any', withId(markInWork)],
+  [new RegExp(`^postpone:${LEAD_ID}$`), 'any', withId(openRemindPicker)],
+  [new RegExp(`^remindpick:${LEAD_ID}:(\\d+)$`), 'any', withId(remindIn)],
   [
-    /^remindtype:(\d+)$/,
+    new RegExp(`^remindtype:${LEAD_ID}$`),
     'any',
     withId((ctx, id) =>
       startLeadPrompt(ctx, id, {
@@ -445,18 +439,18 @@ export const CALLBACKS: CallbackRow[] = [
       }),
     ),
   ],
-  [/^remindcancel:(\d+)$/, 'any', withId(backToLead)],
-  [/^resume:(\d+)$/, 'any', withId(resume)],
-  [/^del:(\d+)$/, 'admin', withId(askDelete)],
-  [/^delconfirm:(\d+)$/, 'admin', withId(confirmDelete)],
-  [/^delcancel:(\d+)$/, 'admin', withId(backToLead)],
+  [new RegExp(`^remindcancel:${LEAD_ID}$`), 'any', withId(backToLead)],
+  [new RegExp(`^resume:${LEAD_ID}$`), 'any', withId(resume)],
+  [new RegExp(`^del:${LEAD_ID}$`), 'admin', withId(askDelete)],
+  [new RegExp(`^delconfirm:${LEAD_ID}$`), 'admin', withId(confirmDelete)],
+  [new RegExp(`^delcancel:${LEAD_ID}$`), 'admin', withId(backToLead)],
   [/^menu:open$/, 'any', listOpen],
-  [/^open:(\d+)$/, 'any', withId(openLead)],
-  [/^topic:(\d+)$/, 'any', withId(startTopic)],
+  [new RegExp(`^open:${LEAD_ID}$`), 'any', withId(openLead)],
+  [new RegExp(`^topic:${LEAD_ID}$`), 'any', withId(startTopic)],
   editRow('name'),
   editRow('contact'),
   [
-    /^note:(\d+)$/,
+    new RegExp(`^note:${LEAD_ID}$`),
     'any',
     withId((ctx, id) =>
       startLeadPrompt(ctx, id, {
@@ -551,11 +545,10 @@ async function replyPostpone({
     { chatId, messageId: replyToMessageId },
     (lead) =>
       canPostpone(lead)
-        ? postponePatch(
-            lead,
-            remindAt,
-            `${LEAD_ACTION_COPY.postponedUntil}${formatDateRu(remindAt)}`,
-          )
+        ? postponePatch(lead, remindAt, {
+            author: role,
+            text: `${LEAD_ACTION_COPY.postponedUntil}${formatDateRu(remindAt)}`,
+          })
         : {},
   );
   if (!updated) return;
@@ -573,7 +566,7 @@ function threadedTo(messageId: number) {
   };
 }
 
-function promptKey({ chatId, replyToMessageId }: Reply): PromptKey {
+function promptKey({ chatId, replyToMessageId }: Reply): MessageKey {
   return { chatId, messageId: replyToMessageId };
 }
 
@@ -589,7 +582,7 @@ async function afterEdit(
 
 async function reAskEdit(
   reply: Reply,
-  id: number,
+  id: LeadId,
   field: EditField | 'note',
 ): Promise<void> {
   const messageId = await sendForceReplyPrompt(
@@ -626,8 +619,9 @@ const replyContact: PromptHandler = async (reply, lead) => {
     before = current.contact;
     noted = hasRealContact(current.contact);
     if (!noted) return edited;
-    const line = noteLine(extraContactNote(edited.contact), reply.role);
-    return { comment: appendNote(current.comment, line) };
+    return {
+      addNote: { author: reply.role, text: extraContactNote(edited.contact) },
+    };
   });
   if (!updated) return;
   if (noted) {
@@ -647,8 +641,8 @@ const replyContact: PromptHandler = async (reply, lead) => {
 const replyNote: PromptHandler = async (reply, lead) => {
   const text = reply.text.trim();
   if (!text) return reAskEdit(reply, lead.id, 'note');
-  const updated = await resolvePendingPrompt(promptKey(reply), (current) => ({
-    comment: appendNote(current.comment, noteLine(text, reply.role)),
+  const updated = await resolvePendingPrompt(promptKey(reply), () => ({
+    addNote: { author: reply.role, text },
   }));
   if (!updated) return;
   await afterEdit(reply, updated, LEAD_ACTION_COPY.noteAdded);
@@ -670,21 +664,10 @@ async function replyToPrompt(reply: Reply): Promise<boolean> {
   return true;
 }
 
-async function findLiveOperationPrompt(reply: Reply, key: PromptKey) {
-  try {
-    return await findOperationPrompt(key);
-  } catch (err) {
-    if (!(err instanceof LedgerUnreadableError)) throw err;
-    await sendMessage(reply.chatId, LEDGER_COPY.unavailable);
-    return 'unavailable';
-  }
-}
-
 async function replyToOperationPrompt(reply: Reply): Promise<boolean> {
   if (!reply.inPrivateChat) return false;
   const key = { chatId: reply.chatId, messageId: reply.replyToMessageId };
-  const prompt = await findLiveOperationPrompt(reply, key);
-  if (prompt === 'unavailable') return true;
+  const prompt = await findOperationPrompt(key);
   if (!prompt) return false;
   if (prompt.expired) {
     await sendMessage(reply.chatId, LEDGER_COPY.expired);
@@ -736,17 +719,8 @@ async function routeReply(reply: Reply): Promise<boolean> {
   return false;
 }
 
-async function readBalanceIfReadable(): Promise<number | undefined> {
-  try {
-    return await readBalance();
-  } catch (err) {
-    if (err instanceof LedgerUnreadableError) return undefined;
-    throw err;
-  }
-}
-
 async function sendMenuMessage(chatId: number, role: Role): Promise<void> {
-  const menu = buildMenu(role, await readBalanceIfReadable());
+  const menu = buildMenu(role, await readBalance());
   await sendMessage(chatId, menu.text, { reply_markup: menu.reply_markup });
 }
 
@@ -762,9 +736,11 @@ async function handlePrivateMessage(msg: TelegramMessage): Promise<void> {
       return;
     }
     const payload = startMatch?.[1];
-    const leadMatch = payload ? /^lead_(\d+)$/.exec(payload) : null;
+    const leadMatch = payload
+      ? new RegExp(`^lead_${LEAD_ID}$`).exec(payload)
+      : null;
     if (leadMatch) {
-      const lead = await getLead(Number(leadMatch[1]));
+      const lead = await getLead(leadIdSchema.parse(leadMatch[1]));
       if (lead) {
         const { text: detailText, reply_markup } = await leadDetail(lead, role);
         await sendMessage(chatId, detailText, { reply_markup });

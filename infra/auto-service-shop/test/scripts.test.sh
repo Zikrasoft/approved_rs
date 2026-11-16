@@ -18,6 +18,10 @@ if [ "$1" = run ]; then
 fi
 case "$*" in
 *db:migrate*) exit "${MIGRATE_EXIT:-0}" ;;
+*'prisma migrate deploy'*)
+  echo "${CRM_DATABASE_URL:-}" >"$LOG.crm"
+  exit "${CRM_MIGRATE_EXIT:-0}"
+  ;;
 *check-schema*) exit "${SCHEMA_EXIT:-0}" ;;
 *seed-production*) exit "${SEED_EXIT:-0}" ;;
 *ON_ERROR_STOP*) exit "${ROLE_EXIT:-0}" ;;
@@ -26,7 +30,8 @@ case "$*" in
   exit "${PGDUMP_EXIT:-0}"
   ;;
 *pg_tables*) printf '%s' "${TABLES:-0}" ;;
-*'up -d --wait --wait-timeout'*) exit "${UP_EXIT:-0}" ;;
+*'up -d --wait --wait-timeout'*) echo "${COMPOSE_PROFILES-unset}" >"$LOG.profiles"
+  exit "${UP_EXIT:-0}" ;;
 *'image ls'*) printf '%s\n' ${IMAGE_TAGS:-} ;;
 *'image rm'*) exit "${RM_EXIT:-0}" ;;
 esac
@@ -42,7 +47,13 @@ case "$*" in
 esac
 exit "${HEALTH_EXIT:-0}"
 STUB
-chmod +x "$work/bin/docker" "$work/bin/curl"
+cat >"$work/bin/sudo" <<'STUB'
+#!/bin/sh
+echo "sudo $*" >>"$LOG.sudo"
+shift 7
+mkdir -p "$@"
+STUB
+chmod +x "$work/bin/docker" "$work/bin/curl" "$work/bin/sudo"
 
 failures=0
 expect() {
@@ -70,12 +81,14 @@ OLD=1111111111111111111111111111111111111111
 NEW=2222222222222222222222222222222222222222
 BACKUP_DIR="$work/deploy-backups"
 export BACKUP_DIR
+SITES_ROOT="$work/sites"
+export SITES_ROOT
 
 stage() {
   rm -rf "$work/host"
   mkdir "$work/host"
-  cp "$here/deploy.sh" "$here/backup.sh" "$here/restore.sh" "$here/crawler-role.sh" "$work/host/"
-  printf 'API_HOST=api.test\nMEDUSA_TAG=%s\nPOSTGRES_PASSWORD=x\nJWT_SECRET=leak-canary\nCRAWLER_DB_PASSWORD=c0ffeec0ffee\n' "$OLD" >"$work/host/.env"
+  cp "$here/deploy.sh" "$here/backup.sh" "$here/restore.sh" "$here/crawler-role.sh" "$here/crm-role.sh" "$work/host/"
+  printf 'API_HOST=api.test\nMEDUSA_TAG=%s\nPOSTGRES_PASSWORD=x\nJWT_SECRET=leak-canary\nCRAWLER_DB_PASSWORD=c0ffeec0ffee\nCRM_DB_PASSWORD=feedfacefeed\n' "$OLD" >"$work/host/.env"
   LOG="$work/host/log"
   export LOG
   : >"$LOG"
@@ -84,6 +97,10 @@ stage() {
 }
 offsite() {
   printf 'BACKUP_S3_ENDPOINT=https://s3.test\nBACKUP_S3_BUCKET=carlab-backups\nBACKUP_S3_ACCESS_KEY_ID=key-canary\nBACKUP_S3_SECRET_ACCESS_KEY=secret-canary\n' >"$work/host/.env.backup"
+}
+no_crm_database() {
+  grep -v '^CRM_DB_PASSWORD=' "$work/host/.env" >"$work/host/.env.next"
+  mv "$work/host/.env.next" "$work/host/.env"
 }
 crm() {
   printf 'TELEGRAM_BOT_TOKEN=bot-canary\nTELEGRAM_GROUP_ID=-100123\n' >>"$work/host/.env"
@@ -127,6 +144,8 @@ expect 'pull, migrate, check the schema, seed, up, reload and health run in orde
   "docker[$NEW] compose run --rm -T medusa node_modules/.bin/medusa exec ./src/scripts/check-schema.js" \
   "docker[$NEW] compose run --rm -T medusa node_modules/.bin/medusa exec ./src/scripts/seed-production.js" \
   "docker[$NEW] compose exec -T postgres psql -q -v ON_ERROR_STOP=1 -U carlab -d carlab" \
+  "docker[$NEW] compose exec -T postgres psql -q -v ON_ERROR_STOP=1 -U carlab -d carlab" \
+  "docker[$NEW] compose run --rm -T -e CRM_DATABASE_URL -e CHECKPOINT_DISABLE -w /server/node_modules/@podbor/lead-crm medusa node_modules/.bin/prisma migrate deploy" \
   "docker[$NEW] compose up -d --wait --wait-timeout 300 --remove-orphans" \
   "docker[$NEW] compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile" \
   'curl -fsS -o /dev/null --max-time 10 --retry 12 --retry-delay 5 --retry-all-errors https://api.test/health/ready' \
@@ -135,6 +154,26 @@ expect '.env names the new tag' has "MEDUSA_TAG=$NEW" "$work/host/.env"
 expect '.env keeps every other line' has 'POSTGRES_PASSWORD=x' "$work/host/.env"
 expect 'the old tag is kept for rollback' has "$OLD" "$work/host/.previous-tag"
 expect 'the lock is released after a deploy' test ! -d "$work/host/.deploy.lock"
+expect 'a deploy on a host without a sites root makes it as root, for the deploy user' grep -q "^sudo install -d -m 0755 -o $(id -u) -g $(id -g) $SITES_ROOT\$" "$LOG.sudo"
+expect 'a deploy before any site release starts no site' test "$(cat "$LOG.profiles")" = ''
+
+stage
+mkdir -p "$SITES_ROOT/detailing/releases/r" "$SITES_ROOT/approved-rs/releases/r" "$SITES_ROOT/new-brand/releases/r" "$SITES_ROOT/auto-service/releases"
+ln -sfn releases/r "$SITES_ROOT/detailing/running"
+ln -sfn releases/r "$SITES_ROOT/detailing/current"
+ln -sfn releases/r "$SITES_ROOT/new-brand/running"
+ln -sfn releases/r "$SITES_ROOT/new-brand/current"
+ln -sfn releases/r "$SITES_ROOT/approved-rs/current"
+expect 'a deploy with site releases succeeds' run deploy.sh "$NEW"
+expect 'a deploy keeps every released site under the sites root running and starts no other' \
+  test "$(tr ',' '\n' <"$LOG.profiles" | sort | tr '\n' ' ')" = 'site-approved-rs site-detailing site-new-brand '
+expect 'a site released before the running link gets one on its current release' \
+  test "$(readlink "$SITES_ROOT/approved-rs/running")" = releases/r
+refuse 'a site with no release gets no running link' test -L "$SITES_ROOT/auto-service/running"
+rm -rf "$SITES_ROOT"
+
+stage
+expect 'a deploy succeeds again' run deploy.sh "$NEW"
 expect 'a deploy dumps the database before migrating' \
   test "$(cat "$work/deploy-backups"/db-*-pre-deploy.dump)" = DUMP
 expect 'a deploy leaves no .part dump' test -z "$(find "$work/deploy-backups" -name '*.part')"
@@ -157,13 +196,13 @@ refuse 'the live and the previous image are kept' grep -Eq "image rm .*($NEW|$OL
 refuse 'an untagged image is not addressed by tag' grep -q 'image rm .*<none>' "$LOG"
 
 stage
-printf 'API_HOST=api.test\nMEDUSA_IMAGE=registry.test/medusa\nMEDUSA_TAG=%s\nPOSTGRES_PASSWORD=x\n' "$OLD" >"$work/host/.env"
+printf 'API_HOST=api.test\nMEDUSA_IMAGE=registry.test/medusa\nMEDUSA_TAG=%s\nPOSTGRES_PASSWORD=x\nCRM_DB_PASSWORD=feedfacefeed\n' "$OLD" >"$work/host/.env"
 expect 'a custom MEDUSA_IMAGE deploy succeeds' run deploy.sh "$NEW"
 expect 'pruning follows MEDUSA_IMAGE from .env' grep -qxF "docker[$NEW] image rm registry.test/medusa:$OLDER" "$LOG"
 
 stage
 printf '%s\n' "$OLDER" >"$work/host/.previous-tag"
-printf 'API_HOST=api.test\nMEDUSA_TAG=%s\nPOSTGRES_PASSWORD=x\n' "$NEW" >"$work/host/.env"
+printf 'API_HOST=api.test\nMEDUSA_TAG=%s\nPOSTGRES_PASSWORD=x\nCRM_DB_PASSWORD=feedfacefeed\n' "$NEW" >"$work/host/.env"
 expect 'a redeploy of the live tag succeeds' run deploy.sh "$NEW"
 refuse 'a redeploy keeps the recorded rollback image' grep -q "image rm .*$OLDER" "$LOG"
 
@@ -284,6 +323,7 @@ expect 'restore checks tables, restores the database, migrates, then restarts, i
   "docker[] compose exec -T postgres pg_restore -U carlab -d carlab --clean --if-exists --no-owner --no-privileges --single-transaction" \
   "docker[] compose run --rm -T medusa node_modules/.bin/medusa db:migrate --execute-safe-links --all-or-nothing" \
   "docker[] compose exec -T postgres psql -q -v ON_ERROR_STOP=1 -U carlab -d carlab" \
+  "docker[] compose exec -T postgres psql -q -v ON_ERROR_STOP=1 -U carlab -d carlab" \
   "docker[] compose up -d --wait --wait-timeout 300"
 
 stage
@@ -305,6 +345,55 @@ expect 'a recent dump stays' test -e "$work/backups/db-recent.dump"
 expect 'an unrelated old file is not rotated away' test -e "$work/backups/db-old-notes.txt"
 refuse 'a backup without a CRM bot posts nothing' alerted
 expect 'no .part file is left behind' test -z "$(find "$work/backups" -name '*.part')"
+
+stage
+mkdir "$work/backups7"
+touch -t 202001010000 "$work/backups7/crm-old.dump"
+BACKUP_DIR="$work/backups7"
+export BACKUP_DIR
+expect 'a backup with a CRM database succeeds' run backup.sh ''
+expect 'the CRM database is dumped beside the shop' grep -qx DUMP "$work"/backups7/crm-2*.dump
+expect 'the CRM dump is taken by the database owner' grep -q 'pg_dump -U carlab -d crm --format=custom' "$LOG"
+refuse 'a week-old CRM dump is removed' test -e "$work/backups7/crm-old.dump"
+
+stage
+no_crm_database
+BACKUP_DIR="$work/backups7"
+expect 'a backup without a CRM database succeeds' run backup.sh ''
+refuse 'a backup without a CRM database dumps no crm' grep -q -- '-d crm' "$LOG"
+
+stage
+expect 'a deploy with a CRM database succeeds' run deploy.sh "$NEW"
+expect 'the deploy sets up the CRM database' test "$(grep -c 'psql -q -v ON_ERROR_STOP=1 -U carlab -d carlab' "$LOG")" -eq 2
+crm_migrate="docker[$NEW] compose run --rm -T -e CRM_DATABASE_URL -e CHECKPOINT_DISABLE -w /server/node_modules/@podbor/lead-crm medusa node_modules/.bin/prisma migrate deploy"
+line_of() {
+  grep -nF -e "$1" "$LOG" | tail -n 1 | cut -d: -f1
+}
+migrates_between_role_and_restart() {
+  role=$(line_of 'ON_ERROR_STOP=1')
+  migrate=$(grep -nxF -e "$crm_migrate" "$LOG" | cut -d: -f1)
+  restart=$(line_of 'up -d --wait --wait-timeout')
+  [ -n "$migrate" ] && [ "$role" -lt "$migrate" ] && [ "$migrate" -lt "$restart" ]
+}
+expect 'the deploy migrates the CRM database with the image Prisma CLI after its role, before any restart' \
+  migrates_between_role_and_restart
+expect 'the CRM migrations connect as the crm role' grep -qx 'postgres://crm:feedfacefeed@postgres:5432/crm' "$LOG.crm"
+refuse 'the CRM password never reaches a command line' grep -q feedfacefeed "$LOG"
+
+stage
+CRM_MIGRATE_EXIT=1
+export CRM_MIGRATE_EXIT
+refuse 'a failed CRM migration fails the deploy' run deploy.sh "$NEW"
+unset CRM_MIGRATE_EXIT
+expect 'a failed CRM migration leaves .env on the old tag' has "MEDUSA_TAG=$OLD" "$work/host/.env"
+refuse 'a failed CRM migration restarts nothing' grep -q 'up -d --wait --wait-timeout' "$LOG"
+
+stage
+no_crm_database
+refuse 'a deploy without CRM_DB_PASSWORD fails' run deploy.sh "$NEW"
+expect 'a deploy without CRM_DB_PASSWORD says what to set' grep -q 'CRM_DB_PASSWORD is not set' "$work/host/stderr"
+refuse 'a deploy without CRM_DB_PASSWORD never reaches docker' test -s "$LOG"
+expect 'a deploy without CRM_DB_PASSWORD leaves .env on the old tag' has "MEDUSA_TAG=$OLD" "$work/host/.env"
 
 stage
 mkdir "$work/host/.deploy.lock" "$work/backups3"
@@ -376,7 +465,7 @@ expect 'a backup with a bucket succeeds' run backup.sh
 expect 'the new dump goes to the bucket through a pinned rclone image' \
   grep -Eq "run --rm .*-v $work/backups4:/backups rclone/rclone:[0-9]+\.[0-9]+\.[0-9]+ copy /backups :s3:carlab-backups --include \*-2[^ ]*Z\.\*$" "$LOG"
 expect 'copies older than 30 days are deleted from the bucket' \
-  grep -Eq "rclone/rclone:[0-9.]+ delete :s3:carlab-backups --min-age 30d --include db-\*\.dump$" "$LOG"
+  grep -Eq "rclone/rclone:[0-9.]+ delete :s3:carlab-backups --min-age 30d --include \{db,crm\}-\*\.dump$" "$LOG"
 expect 'rclone gets the endpoint and keys through an env file' grep -qx 'RCLONE_S3_SECRET_ACCESS_KEY=secret-canary' "$LOG.env"
 expect 'the env file carries only the bucket credentials' test "$(grep -c . "$LOG.env")" -eq "$(grep -c '^RCLONE_S3_' "$LOG.env")"
 refuse 'no key reaches a command line' grep -q 'canary' "$LOG"
@@ -416,10 +505,12 @@ refuse 'fetch without a bucket fails' run backup.sh fetch
 unset BACKUP_DIR
 
 expect "the scripts ran and printed something" test -s "$work/printed"
-refuse "no script prints a secret from .env" grep -Eq 'leak-canary|secret-canary|key-canary|bot-canary|c0ffeec0ffee' "$work/printed"
+refuse "no script prints a secret from .env" grep -Eq 'leak-canary|secret-canary|key-canary|bot-canary|c0ffeec0ffee|feedfacefeed' "$work/printed"
 
 expect 'the image health check asks Postgres and Typesense through /health/ready' \
   grep -q 'http://127.0.0.1:9000/health/ready ' "$here/Dockerfile"
+expect 'the production image carries the CRM migrations and their pinned Prisma CLI' \
+  grep -q 'node_modules/@podbor/lead-crm/node_modules/.bin/prisma' "$here/Dockerfile"
 expect 'the production image carries the Sentry SDK' grep -q "require('@sentry/node')" "$here/Dockerfile"
 expect 'the env template names SENTRY_DSN, empty until the owner has a project' \
   grep -qx 'SENTRY_DSN=' "$here/production.env.example"

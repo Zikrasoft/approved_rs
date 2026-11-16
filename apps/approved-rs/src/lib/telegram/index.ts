@@ -69,7 +69,6 @@ export {
   REPLY_COPY,
   LEAD_ACTION_COPY,
   EDIT_COPY,
-  noteLine,
   extraContactNote,
   reAskEditText,
   escapeHtml,

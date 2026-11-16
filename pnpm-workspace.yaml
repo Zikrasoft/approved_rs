@@ -10,7 +10,11 @@ allowBuilds:
   '@swc/core': true
   msgpackr-extract: true
   protobufjs: true
+  '@prisma/engines': true
+  prisma: true
   '@medusajs/telemetry': false
+  '@podbor/lead-crm': false
+  '@podbor/lead-crm@file:packages/lead-crm': set this to true or false
 # Glob, not exact-versioned entries — pnpm auto-generated this list pinned
 # to the versions resolved at the time `vercel` was added; a future `vercel`
 # bump changes every one of those versions, and an exact-pinned list would
@@ -27,6 +31,8 @@ onlyBuiltDependencies:
   - msgpackr-extract
   - '@swc/core'
   - protobufjs
+  - '@prisma/engines'
+  - prisma
 packageExtensions:
   '@medusajs/core-flows':
     dependencies:

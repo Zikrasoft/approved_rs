@@ -3,7 +3,7 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".astro/**", ".vercel/output/**", ".medusa/**"]
+      "outputs": ["dist/**", ".astro/**", ".medusa/**"]
     },
     "dev": {
       "cache": false,
@@ -30,13 +30,13 @@
     },
     "@podbor/auto-service#build": {
       "dependsOn": ["^build"],
-      "outputs": [".astro/**", ".vercel/output/**"],
+      "outputs": ["dist/**", ".astro/**"],
       "env": [
         "MEDUSA_BACKEND_URL",
         "MEDUSA_PUBLISHABLE_KEY",
         "SHOP_OPEN",
         "SHOP_PREVIEW_TOKEN",
-        "VERCEL",
+        "CATALOGUE_SHRINK_GUARD",
         "CATALOGUE_SHRINK_ALLOWED"
       ]
     },

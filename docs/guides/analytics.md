@@ -233,7 +233,7 @@ bot Lead that absorbs the click inherits them, and the first one wins.
 **When it fires.** Once per Lead, when the bot request becomes real: the
 Questionnaire is completed, or the visitor shares a phone, whichever comes
 first. A bare `/start` sends nothing. The Lead's `metaLeadSentAt` is set in the
-same compare-and-swap write that claims the event (`claimMetaLead`), so a second
+same locked row update that claims the event (`claimMetaLead`), so a second
 completion, a second phone or a retry never sends it again. A Lead without
 `metaIds` (the visitor never came through the site, or refused) sends nothing.
 
@@ -276,10 +276,10 @@ carries it. `data` decoded:
 - `test_event_code` is added only while `META_CAPI_TEST_CODE` is set.
 - `v25.0` is the version Meta's own examples use; `META_GRAPH_VERSION` holds it.
 
-The call is fire-and-forget through `waitUntil`, after the visitor's reply, with
+The call is fire-and-forget through `inBackground` (`@podbor/lead-crm/background`), after the visitor's reply, with
 a 5 s timeout; a refusal or a network failure is logged as `[meta-capi]` and
 never retried. Without `META_CAPI_TOKEN` or a pixel id the app logs
-`[meta-capi] off` once per cold start and sends nothing. Whether Meta attributes
+`[meta-capi] off` once per server start and sends nothing. Whether Meta attributes
 a `chat` event that carries only `fbc`/`fbp` well enough to optimise on is not
 established ([research](../research/meta-ads-to-telegram-capture-bot.md)).
 
