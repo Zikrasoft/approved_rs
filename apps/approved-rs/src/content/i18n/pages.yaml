@@ -147,7 +147,7 @@ translations:
         - title: How we use your data
           text: "We use data from your request only to respond to it. We don't share requests with third parties or use them for advertising. Web analytics operates separately: Google and Yandex receive anonymized data about page views."
         - title: Data storage
-          text: Requests are stored in Vercel Blob's secure cloud storage and are accessible only to our team. You can request deletion of your data at any time by messaging us on Telegram.
+          text: Submissions are stored in a secure database on our server and can only be accessed by our team. You can request the deletion of your data at any time by contacting us on Telegram.
         - title: Cookies
           text: The site uses essential cookies required for it to work, as well as analytics cookies. You can opt out using the "Cookie settings" link at the bottom of the site; your choice is saved in your browser. Yandex Metrica records sessions, including cursor movements, scrolling and clicks. We exclude the enquiry form from recordings, so its contents are not captured. If you arrived via an ad and have not opted out of analytics, the site remembers this information (the source and campaign) for 30 days so we can see which ads generate enquiries. Until you opt out, the site stores a random anonymous browser ID in your browser's memory and in our own visitor_id cookie, so that clicking a messenger link and submitting an enquiry by the same visitor are not treated as separate records. After you opt out, the ID and cookie are deleted.
       contactTitle: Contact
@@ -247,7 +247,7 @@ translations:
         - title: Kako koristimo podatke
           text: 'Podatke iz upita koristimo samo da bismo vam odgovorili. Upit ne prosleđujemo trećim licima niti ga koristimo u reklamne svrhe. Veb-analitika se koristi odvojeno od upita: Google i Yandex dobijaju anonimizovane podatke o pregledanju stranica.'
         - title: Čuvanje podataka
-          text: Upiti se čuvaju u zaštićenom skladištu u oblaku Vercel Blob, a pristup ima samo naš tim. U svakom trenutku možete zatražiti brisanje svojih podataka tako što ćete nam pisati na Telegramu.
+          text: Prijave se čuvaju u zaštićenoj bazi podataka na našem serveru i dostupne su samo našem timu. U bilo kom trenutku možete zatražiti brisanje svojih podataka tako što ćete nam pisati na Telegram.
         - title: Cookies
           text: Sajt koristi tehničke kolačiće, bez kojih ne može da radi, kao i analitičke kolačiće. Možete ih odbiti putem linka "Podešavanja kolačića" pri dnu sajta; vaš izbor se čuva u pregledaču. Yandex Metrica snima sesije (kretanje kursora, pomeranje stranice i klikove). Obrazac za upit izuzeli smo iz snimanja, tako da se njegov sadržaj ne beleži. Ako ste došli preko oglasa i niste odbili analitiku, sajt pamti izvor i kampanju 30 dana, kako bismo videli koji oglasi donose upite. Dok ne odbijete analitiku, sajt čuva nasumični anonimni identifikator pregledača u memoriji pregledača i u našem kolačiću visitor_id, kako se klik na dugme za slanje poruke i upit istog posetioca ne bi prikazali kao zasebni zapisi. Nakon odbijanja, identifikator i kolačić se brišu.
       contactTitle: Kontakt
@@ -347,7 +347,7 @@ translations:
         - title: Cómo usamos los datos
           text: 'Solo usamos los datos de la solicitud para responderte. No la compartimos con terceros ni usamos los datos con fines publicitarios. Por separado, usamos herramientas de analítica web: Google y Yandex reciben datos anonimizados sobre las páginas visitadas.'
         - title: Almacenamiento de datos
-          text: Las solicitudes se guardan en el almacenamiento seguro en la nube Vercel Blob, al que solo tiene acceso nuestro equipo. Puedes solicitar la eliminación de tus datos en cualquier momento escribiéndonos por Telegram.
+          text: Las solicitudes se almacenan en una base de datos protegida en nuestro servidor y solo nuestro equipo tiene acceso a ellas. Puede solicitar que eliminemos sus datos en cualquier momento escribiéndonos por Telegram.
         - title: Cookies
           text: El sitio utiliza cookies técnicas, necesarias para su funcionamiento, y cookies analíticas. Puedes rechazarlas desde el enlace "Configuración de cookies" al pie de la página; tu elección se guarda en el navegador. Yandex Metrica registra las sesiones (movimientos del cursor, desplazamientos y clics). Excluimos el formulario de contacto de estas grabaciones, por lo que su contenido no se registra. Si llegas desde un anuncio y no rechazas las cookies analíticas, el sitio guarda el origen y la campaña durante 30 días para que podamos saber qué anuncios generan solicitudes. Mientras no las rechaces, el sitio guarda en la memoria del navegador y en nuestra propia cookie visitor_id un identificador aleatorio y anónimo del navegador, para que el clic en un servicio de mensajería y la solicitud de un mismo visitante no aparezcan como registros distintos. Al rechazarlas, el identificador y la cookie se eliminan.
       contactTitle: Contacto
@@ -447,7 +447,7 @@ translations:
         - title: Wie wir Daten verwenden
           text: 'Die Daten aus Ihrer Anfrage verwenden wir ausschließlich, um uns dazu bei Ihnen zurückzumelden. Wir geben Anfragen nicht an Dritte weiter und nutzen sie nicht für Werbung. Unabhängig davon läuft eine Webanalyse: Google und Yandex erhalten anonymisierte Daten zu Seitenaufrufen.'
         - title: Datenspeicherung
-          text: Anfragen werden im geschützten Cloud-Speicher Vercel Blob gespeichert. Nur unser Team hat Zugriff darauf. Sie können jederzeit die Löschung Ihrer Daten beantragen, indem Sie uns auf Telegram schreiben.
+          text: Anfragen werden in einer geschützten Datenbank auf unserem Server gespeichert. Nur unser Team hat Zugriff darauf. Sie können jederzeit die Löschung Ihrer Daten beantragen, indem Sie uns auf Telegram schreiben.
         - title: Cookies
           text: Die Website verwendet technische Cookies, ohne die sie nicht funktioniert, sowie Analyse-Cookies. Sie können diese über den Link "Cookie-Einstellungen" unten auf der Website ablehnen. Ihre Auswahl wird im Browser gespeichert. Yandex.Metrica zeichnet Sitzungen auf, darunter Mausbewegungen, Scrollen und Klicks. Das Anfrageformular haben wir von der Aufzeichnung ausgeschlossen, seine Inhalte werden nicht erfasst. Wenn Sie über eine Anzeige auf die Website gelangt sind und der Analyse nicht widersprochen haben, speichert die Website diese Information (Quelle und Kampagne) 30 Tage lang, damit wir sehen können, welche Werbung zu Anfragen führt. Solange Sie nicht widersprochen haben, speichert die Website eine zufällige, anonyme Browser-ID im Browserspeicher und in unserem eigenen Cookie visitor_id, damit der Klick auf einen Messenger und eine Anfrage desselben Besuchers nicht als separate Einträge erfasst werden. Nach Ihrem Widerspruch werden die ID und das Cookie gelöscht.
       contactTitle: Kontakt
@@ -503,4 +503,4 @@ translations:
       closingLine2: wonach Sie suchen,
       closingLine3: wir finden auch Ihr Auto
       closingText: Marke, Budget und ein paar Wünsche genügen. Wir antworten innerhalb von zwei Stunden und sagen Ihnen ehrlich, ob es für diesen Preis machbar ist.
-translatedFrom: fa7d9f9a32088681
+translatedFrom: e6c458378364c32f
