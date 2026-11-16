@@ -59,6 +59,7 @@ A=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa-101-1
 B=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-102-1
 C=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-103-2
 D=dddddddddddddddddddddddddddddddddddddddd-104-1
+E=eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee-105-1
 SITES_ROOT="$work/sites"
 LOG="$work/log"
 APP=detailing
@@ -123,14 +124,19 @@ expect 'a failed release says so' grep -q "rolled back to $B" "$work/stderr"
 expect 'a rollback brings back the env the previous release ran with' \
   grep -qx "RELEASE=$B" "$SITES_ROOT/$APP/running/.env"
 expect 'a rebuild of the live sha left the live release untouched' grep -qx "$B" "$SITES_ROOT/$APP/releases/$B/server/entry.mjs"
+refuse 'a release that never went live is removed' test -e "$SITES_ROOT/$APP/releases/$C"
 unset BROKEN
 
 ship "$D"
 sleep 1
 expect 'a fourth release deploys' run deploy-site.sh "$APP" "$D"
+expect 'a failed release does not count toward the three kept' released 3
+ship "$E"
+sleep 1
+expect 'a fifth release deploys' run deploy-site.sh "$APP" "$E"
 expect 'only the last three releases stay' released 3
 refuse 'the oldest release is pruned' test -e "$SITES_ROOT/$APP/releases/$A"
-expect 'the previous release stays for rollback' test -e "$SITES_ROOT/$APP/releases/$B"
+expect 'the previous release stays for rollback' test -e "$SITES_ROOT/$APP/releases/$D"
 
 sleep 1
 expect 'a redeploy of an older release succeeds' run deploy-site.sh "$APP" "$B"
@@ -147,6 +153,41 @@ refuse 'a broken first release fails the deploy' run deploy-site.sh "$APP" "$A"
 refuse 'a broken first release leaves no current link' test -L "$SITES_ROOT/$APP/current"
 refuse 'a broken first release leaves no running link' test -L "$SITES_ROOT/$APP/running"
 expect 'a broken first release stops its container' grep -q "docker compose rm -sf site-$APP" "$LOG"
+unset BROKEN
+
+fresh
+ship "$A"
+ship "$B"
+run deploy-site.sh "$APP" "$A"
+sleep 1
+run deploy-site.sh "$APP" "$B"
+for broken in "$C" "$D"; do
+  ship "$broken"
+  sleep 1
+  BROKEN=$broken
+  export BROKEN
+  run deploy-site.sh "$APP" "$broken" || true
+done
+unset BROKEN
+ship "$E"
+sleep 1
+expect 'a release after two failed ones deploys' run deploy-site.sh "$APP" "$E"
+expect 'failed releases never push the last good one out' test -e "$SITES_ROOT/$APP/releases/$B"
+expect 'releases that never went live are gone' released 3
+
+fresh
+ship "$A"
+run deploy-site.sh "$APP" "$A"
+rm "$SITES_ROOT/$APP/running"
+ship "$B"
+BROKEN=$B
+export BROKEN
+: >"$LOG"
+refuse 'a broken release on a host without a running link fails the deploy' run deploy-site.sh "$APP" "$B"
+expect 'a host without a running link rolls back to current' current "$A"
+expect 'the site is recreated on the current release' \
+  test "$(tail -n 1 "$LOG")" = "docker compose up -d --wait --wait-timeout 120 --no-deps --force-recreate site-$APP -> releases/$A (caddy releases/$A)"
+refuse 'a host without a running link never removes the container' grep -q "rm -sf" "$LOG"
 unset BROKEN
 
 fresh

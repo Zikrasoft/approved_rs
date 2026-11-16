@@ -28,7 +28,7 @@ release=releases/$name
   exit 1
 }
 
-previous=$(readlink "$site/running" 2>/dev/null || true)
+previous=$(readlink "$site/running" 2>/dev/null || readlink "$site/current" 2>/dev/null || true)
 chmod -R a+rX "$site/$release"
 chmod 600 "$site/$release/.env"
 touch "$site/$release"
@@ -54,6 +54,7 @@ if ! start; then
   else
     echo "site-$app failed its health check on $name, which was already live." >&2
   fi
+  [ "$previous" = "$release" ] || [ "$(readlink "$site/current" 2>/dev/null)" = "$release" ] || rm -rf "${site:?}/$release"
   exit 1
 fi
 point current "$release"
