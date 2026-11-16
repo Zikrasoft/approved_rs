@@ -4,9 +4,11 @@ import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import {
+  caddySiteConfig,
   createRedirectMatcher,
   unprefixedSectionRedirects,
   withVercelConfig,
+  writeCaddySiteConfig,
   writeVercelConfig,
   type Redirect,
 } from './redirects.ts';
@@ -149,5 +151,64 @@ describe('unprefixedSectionRedirects', () => {
 
   it('never redirects a file', () => {
     expect(createRedirectMatcher(redirects)('/llms.txt')).toBeNull();
+  });
+});
+
+describe('caddySiteConfig', () => {
+  it('sets every security header on every response and hides the server', () => {
+    expect(caddySiteConfig([])).toBe(
+      [
+        'header {',
+        '\tdefer',
+        '\tContent-Security-Policy "frame-ancestors \'self\'"',
+        `\tContent-Security-Policy-Report-Only ${JSON.stringify(SECURITY_HEADERS[0]!.headers[1]!.value)}`,
+        '\tX-Content-Type-Options "nosniff"',
+        '\tReferrer-Policy "strict-origin-when-cross-origin"',
+        '\tPermissions-Policy "camera=(), microphone=(), geolocation=()"',
+        '\tStrict-Transport-Security "max-age=63072000; includeSubDomains"',
+        '\t-Server',
+        '}',
+        '',
+      ].join('\n'),
+    );
+  });
+
+  it('redirects in rule order, permanent as 308, temporary as 307, keeping the query', () => {
+    expect(
+      caddySiteConfig([
+        rule('/a/', '/ru/a/'),
+        { source: '/b', destination: 'https://x.rs/b', permanent: false },
+      ]).split('}\n')[1],
+    ).toBe(
+      [
+        '@redirect0 path_regexp redirect0 `^\\/a\\/$`',
+        'redir @redirect0 /ru/a/{?query} 308',
+        '@redirect1 path_regexp redirect1 `^\\/b$`',
+        'redir @redirect1 https://x.rs/b{?query} 307',
+        '',
+      ].join('\n'),
+    );
+  });
+
+  it('carries every captured segment into the destination by position', () => {
+    expect(
+      caddySiteConfig([
+        rule('/:locale(ru|en)/old/:path*', '/:locale/new/:path*'),
+      ]),
+    ).toContain(
+      'redir @redirect0 /{re.redirect0.1}/new/{re.redirect0.2}{?query} 308',
+    );
+  });
+});
+
+describe('writeCaddySiteConfig', () => {
+  it('writes the site config to the file', () => {
+    const file = pathToFileURL(
+      join(mkdtempSync(join(tmpdir(), 'redirects-')), 'site.caddy'),
+    );
+    writeCaddySiteConfig(file, [rule('/a', '/b')]);
+    expect(readFileSync(file, 'utf8')).toBe(
+      caddySiteConfig([rule('/a', '/b')]),
+    );
   });
 });

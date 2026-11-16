@@ -80,9 +80,13 @@
 
 (site) {
 	encode zstd gzip
-	import security-headers.caddy
+	import sites/{args[0]}.caddy
 
 	root * /srv/sites/{args[0]}/current/client
+
+	handle /_image {
+		respond 404
+	}
 
 	@page file {path}/index.html
 	rewrite @page {file_match.relative}
@@ -99,7 +103,7 @@
 
 	handle {
 		reverse_proxy site-{args[0]}:4321 {
-			header_up X-Forwarded-For {remote_host}
+			header_up X-Request-Id {http.request.uuid}
 		}
 	}
 }

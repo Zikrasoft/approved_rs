@@ -78,6 +78,8 @@ for app in auto-service detailing approved-rs; do
     ".services[\"site-$app\"] | (.networks | keys) == [\"edge\"] and .volumes == [{\"type\": \"bind\", \"source\": \"/srv/sites\", \"target\": \"/srv/sites\", \"read_only\": true, \"bind\": {}}] and .user == \"node\" and .cap_drop == [\"ALL\"]"
   expect "site-$app reports healthy only once it answers /" \
     ".services[\"site-$app\"].healthcheck.test | join(\" \") | test(\"127.0.0.1:4321/\")"
+  expect "site-$app runs node under an init that passes SIGTERM on, so background work drains" \
+    ".services[\"site-$app\"].init == true"
 done
 expect 'caddy reads the site releases read-only' \
   '[.services.caddy.volumes[] | select(.target == "/srv/sites") | [.source, .read_only]] == [["/srv/sites", true]]'
@@ -92,7 +94,8 @@ docker network create "$net" >/dev/null
 docker run -d --name "$net-medusa" --network "$net" --network-alias medusa "$caddy_image" \
   caddy respond --listen :9000 '{http.request.body}' >/dev/null
 docker run -d --name "$net-site" --network "$net" --network-alias site-auto-service --network-alias site-detailing \
-  --network-alias site-approved-rs "$caddy_image" caddy respond --listen :4321 node >/dev/null
+  --network-alias site-approved-rs "$caddy_image" caddy respond --listen :4321 \
+  -H 'X-Upstream: {http.request.host} {http.request.header.X-Forwarded-Proto} {http.request.header.X-Forwarded-For} {http.request.header.X-Request-Id}' node >/dev/null
 for app in auto-service detailing approved-rs; do
   mkdir -p "$work/sites/$app/releases/r/client/ru" "$work/sites/$app/releases/r/client/_astro"
   echo "$app ru" >"$work/sites/$app/releases/r/client/ru/index.html"
@@ -223,7 +226,31 @@ secured 'a node response carries the site security headers'
 header 'caddy adds no cache to a node response' '' cache-control
 serves 'a path with no file goes to node' node carlab /ru/no-such-page/
 serves 'an API route goes to node' node details /api/leads -X POST
-serves 'an unprefixed section goes to node' node approved /cases/
+upstream() {
+  if grep -Eqi '^x-upstream: carlab.localhost https [0-9a-f.:]+ [0-9a-f-]{36}$' "$work/headers.clean" && ! grep -q 6.6.6.6 "$work/headers.clean"; then
+    echo "ok - $1"
+  else
+    echo "not ok - $1 ($(grep -i '^x-upstream' "$work/headers.clean"))"
+    failures=$((failures + 1))
+  fi
+}
+fetch carlab /no-such-page >/dev/null
+upstream 'a path no redirect names goes to node with the visitor host, https and a request id'
+fetch carlab /no-such-page -H 'X-Forwarded-For: 6.6.6.6' >/dev/null
+upstream 'a visitor cannot spoof the address node sees'
+fetch carlab '/services/brakes?utm=x' >/dev/null
+header "carlab.rs sends an unprefixed section to its primary locale" '/sr/services/brakes?utm=x' location
+fetch details /works >/dev/null
+header 'details.rs sends an unprefixed section to its primary locale' '/sr/works/' location
+fetch approved /cases/mercedes-c-2021-de/ >/dev/null
+header 'approved.rs answers a legacy URL from its redirect rules' '/ru/cases/vehicle-sourcing' location
+status_of() {
+  sed -n '1s/^HTTP[^ ]* \([0-9]*\).*/\1/p' "$work/headers.clean"
+}
+fetch approved /cases/ >/dev/null
+if [ "$(status_of)" = 308 ]; then echo 'ok - a redirect rule answers 308 like Vercel'; else echo "not ok - redirect status $(status_of)"; failures=$((failures + 1)); fi
+fetch carlab '/_image?href=/x.png' >/dev/null
+if [ "$(status_of)" = 404 ]; then echo 'ok - the unused image endpoint is closed'; else echo "not ok - /_image answered $(status_of)"; failures=$((failures + 1)); fi
 fetch www.carlab '/ru/?a=1' >/dev/null
 header 'www.carlab.rs redirects to the apex' 'https://carlab.localhost/ru/?a=1' location
 fetch www.details / >/dev/null

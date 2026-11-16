@@ -9,6 +9,7 @@ x-logging: &logging
 
 x-site: &site
   image: node:24.21.0-alpine
+  init: true
   restart: unless-stopped
   logging: *logging
   mem_limit: 160m
