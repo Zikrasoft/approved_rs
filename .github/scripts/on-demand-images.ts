@@ -6,16 +6,19 @@ import { join } from 'node:path';
 const PROBES: Record<string, Record<string, string>> = {
   'approved-rs': {
     'index.astro': '/',
+    '404.astro': '/ru/no-such-page/',
     'admin/case-photos.astro': '/admin/case-photos',
   },
   'auto-service': {
     'index.astro': '/',
+    '404.astro': '/ru/no-such-page/',
     '[locale]/parts/search.astro': '/ru/parts/search/',
     '[locale]/parts/prices.astro': '/ru/parts/prices/',
     'admin/work-draft.astro': '/admin/work-draft',
   },
   detailing: {
     'index.astro': '/',
+    '404.astro': '/sr/no-such-page/',
   },
 };
 
