@@ -20,8 +20,7 @@
     "./og": "./src/ogImage.ts",
     "./pagination": "./src/pagination.ts",
     "./list-search": "./src/listSearch.ts",
-    "./locale-middleware": "./src/localeMiddleware.ts",
-    "./security-headers": "./src/securityHeaders.ts"
+    "./locale-middleware": "./src/localeMiddleware.ts"
   },
   "scripts": {
     "test": "vitest run --coverage",
