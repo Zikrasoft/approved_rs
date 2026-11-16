@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { HONEYPOT_FIELD } from '@podbor/lead-crm/fields';
 import {
   createShopEvents,
@@ -18,23 +18,30 @@ const CHECKOUT = {
   reason: null,
 } as const;
 
+const kept = vi.hoisted((): Promise<unknown>[] => []);
+vi.mock('@podbor/lead-crm/background', () => ({
+  inBackground: (sending: Promise<unknown>) => kept.push(sending),
+}));
+
+beforeEach(() => {
+  kept.length = 0;
+});
+
 const setUp = (
   fetch: (url: string, init: RequestInit) => Promise<Response>,
   env: Record<string, string | undefined> = ENV,
 ) => {
-  const kept: Promise<unknown>[] = [];
   const fetchMock = vi.fn(fetch);
   const report = createShopEvents({
     fetch: fetchMock as never,
-    keepAlive: (sending) => kept.push(sending),
     env: () => env,
   });
-  return { report, fetchMock, kept };
+  return { report, fetchMock };
 };
 
 describe('createShopEvents', () => {
   it('posts the event with the bearer secret and the proxy request id, kept alive past the response', async () => {
-    const { report, fetchMock, kept } = setUp(
+    const { report, fetchMock } = setUp(
       async () => new Response(null, { status: 204 }),
     );
 
@@ -63,7 +70,7 @@ describe('createShopEvents', () => {
   });
 
   it('sends a null request id without a request or with a malformed one', async () => {
-    const { report, fetchMock, kept } = setUp(
+    const { report, fetchMock } = setUp(
       async () => new Response(null, { status: 204 }),
     );
 
@@ -90,11 +97,7 @@ describe('createShopEvents', () => {
     const fetchMock = vi.fn(
       async (_url: string) => new Response(null, { status: 204 }),
     );
-    const kept: Promise<unknown>[] = [];
-    createShopEvents({
-      fetch: fetchMock as never,
-      keepAlive: (sending) => kept.push(sending),
-    })(null, CHECKOUT);
+    createShopEvents({ fetch: fetchMock as never })(null, CHECKOUT);
     await Promise.all(kept);
     vi.unstubAllEnvs();
 
@@ -108,10 +111,7 @@ describe('createShopEvents', () => {
     ['no secret', { MEDUSA_BACKEND_URL: 'https://api.carlab.test' }],
     ['an empty secret', { ...ENV, SHOP_EVENTS_SECRET: '' }],
   ])('sends nothing with %s', (_, env) => {
-    const { report, fetchMock, kept } = setUp(
-      async () => new Response(null),
-      env,
-    );
+    const { report, fetchMock } = setUp(async () => new Response(null), env);
 
     report(null, CHECKOUT);
 
@@ -132,7 +132,7 @@ describe('createShopEvents', () => {
       },
     ],
   ])('never fails the caller on %s', async (_, fetch) => {
-    const { report, kept } = setUp(fetch as never);
+    const { report } = setUp(fetch as never);
 
     expect(() => report(null, CHECKOUT)).not.toThrow();
     await expect(Promise.all(kept)).resolves.toEqual([undefined]);
