@@ -7,7 +7,7 @@ cd "$(dirname -- "$0")"
   exit 0
 }
 
-docker compose exec -T site-approved-rs node -e "
+docker compose --profile site-approved-rs exec -T site-approved-rs node -e "
 fetch('http://127.0.0.1:4321/api/reminders', {
   headers: { authorization: 'Bearer ' + process.env.CRON_SECRET },
   signal: AbortSignal.timeout(240000),
