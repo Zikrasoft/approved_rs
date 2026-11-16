@@ -7,7 +7,7 @@ import {
   checkoutContactSchema,
 } from '@podbor/catalog-contract';
 import { fitComment } from '@podbor/catalog-contract/comment';
-import { inBackground } from '@podbor/site-kit/background';
+import { inBackground } from '@podbor/lead-crm/background';
 import {
   readForm,
   HONEYPOT_FIELD,

@@ -7,19 +7,15 @@ import {
   ORDER_OUTCOME_FIELD,
 } from '@podbor/lead-crm/fields';
 import { PARTS_ORDER_COPY } from '@podbor/lead-crm/parts-order-copy';
-import { recordBotApi } from '@podbor/lead-crm/testing';
+import { backgroundIdle } from '@podbor/lead-crm/background';
+import { recordBotApi, testLeadsRoute } from '@podbor/lead-crm/testing';
 import { content } from '@/i18n/content';
 import { DEMAND_PARTS_FIELD } from '@/utils/demand';
 
-const pending = vi.hoisted(() => [] as Promise<unknown>[]);
 const SHOP_LEAD_SECRET = vi.hoisted(() => {
   process.env.SHOP_LEAD_SECRET = 'shop-lead-secret';
   return process.env.SHOP_LEAD_SECRET;
 });
-
-vi.mock('@podbor/site-kit/background', () => ({
-  inBackground: (promise: Promise<unknown>) => pending.push(promise),
-}));
 
 const demand = vi.hoisted(() => ({ inquiries: [] as FormData[] }));
 vi.mock('@/lib/shopEvents', async (original) => ({
@@ -72,14 +68,13 @@ const post = (body: URLSearchParams, headers: Record<string, string> = {}) =>
 
 beforeEach(() => {
   api.reset();
-  pending.length = 0;
   demand.inquiries.length = 0;
 });
 
 describe('a placed parts order posted to /api/leads', () => {
   it('refuses an order Lead the shop did not prove it sent', async () => {
     const response = await post(orderForm());
-    await Promise.all(pending);
+    await backgroundIdle();
 
     expect(response.status).toBe(401);
     expect(await leadStore.readLeads()).toEqual([]);
@@ -87,7 +82,7 @@ describe('a placed parts order posted to /api/leads', () => {
 
   it('stores the order Lead and posts its card to the CRM group', async () => {
     const response = await post(orderForm(), shop);
-    await Promise.all(pending);
+    await backgroundIdle();
 
     expect(response.status).toBe(201);
     expect(await leadStore.readLeads()).toEqual([
@@ -113,7 +108,7 @@ describe('a placed parts order posted to /api/leads', () => {
 describe('a parts order cancelled in the shop admin', () => {
   it('marks the order Lead lost once the shop proves who it is', async () => {
     await post(orderForm(), shop);
-    await Promise.all(pending);
+    await backgroundIdle();
     const cancel = new URLSearchParams({
       [ORDER_ID_FIELD]: 'order_1',
       [ORDER_OUTCOME_FIELD]: ORDER_CANCELED,
@@ -204,3 +199,5 @@ describe('a lead the server cannot take', () => {
     );
   });
 });
+
+testLeadsRoute({ brand: 'CarLab', POST, readLeads: leadStore.readLeads });

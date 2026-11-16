@@ -276,7 +276,7 @@ carries it. `data` decoded:
 - `test_event_code` is added only while `META_CAPI_TEST_CODE` is set.
 - `v25.0` is the version Meta's own examples use; `META_GRAPH_VERSION` holds it.
 
-The call is fire-and-forget through `inBackground` (`@podbor/site-kit/background`), after the visitor's reply, with
+The call is fire-and-forget through `inBackground` (`@podbor/lead-crm/background`), after the visitor's reply, with
 a 5 s timeout; a refusal or a network failure is logged as `[meta-capi]` and
 never retried. Without `META_CAPI_TOKEN` or a pixel id the app logs
 `[meta-capi] off` once per server start and sends nothing. Whether Meta attributes

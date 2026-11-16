@@ -1,9 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { crmDatabase } from './database.ts';
-import { importLegacy, readLegacy, type LegacyBlobs } from './legacyImport.ts';
-import { createLeadStore } from './store.ts';
-import { createLedgerStore } from './ledgerStore.ts';
-import { leadComment } from './telegram/cards.ts';
+import { crmDatabase } from '../database.ts';
+import { importLegacy, readLegacy, type LegacyBlobs } from './import.ts';
+import { createLeadStore } from '../store.ts';
+import { createLedgerStore } from '../ledgerStore.ts';
+import { leadComment } from '../telegram/cards.ts';
 
 const store = createLeadStore({ database: crmDatabase });
 const ledger = createLedgerStore({ database: crmDatabase });
@@ -334,7 +334,7 @@ describe('importLegacy', () => {
       data: { note: 'исправлено' },
     });
     await crmDatabase().operationPrompt.updateMany({
-      data: { type: 'PAYOUT' },
+      data: { type: 'payout' },
     });
     const before = await store.readLeads();
 

@@ -1,29 +1,32 @@
 -- CreateEnum
-CREATE TYPE "lead_status" AS ENUM ('NEW', 'NEGOTIATIONS', 'IN_PROGRESS', 'WON', 'LOST', 'POSTPONED');
+CREATE TYPE "lead_status" AS ENUM ('new', 'negotiations', 'in_progress', 'won', 'lost', 'postponed');
 
 -- CreateEnum
-CREATE TYPE "operation_type" AS ENUM ('PAYOUT', 'SETTLEMENT');
+CREATE TYPE "operation_type" AS ENUM ('payout', 'settlement');
 
 -- CreateEnum
-CREATE TYPE "staff_role" AS ENUM ('OWNER', 'ADMIN');
+CREATE TYPE "staff_role" AS ENUM ('owner', 'admin');
 
 -- CreateEnum
-CREATE TYPE "digest_list" AS ENUM ('DUE', 'STALE');
+CREATE TYPE "digest_list" AS ENUM ('due', 'stale');
 
 -- CreateEnum
-CREATE TYPE "lead_kind" AS ENUM ('LEAD', 'CALL_CLICK');
+CREATE TYPE "lead_kind" AS ENUM ('lead', 'call_click');
 
 -- CreateEnum
-CREATE TYPE "order_outcome" AS ENUM ('WON', 'LOST');
+CREATE TYPE "order_outcome" AS ENUM ('won', 'lost');
 
 -- CreateEnum
-CREATE TYPE "referrer" AS ENUM ('APPROVED');
+CREATE TYPE "referrer" AS ENUM ('approved');
 
 -- CreateEnum
-CREATE TYPE "prompt_kind" AS ENUM ('POSTPONE', 'EDIT_NAME', 'EDIT_CONTACT', 'NOTE');
+CREATE TYPE "prompt_kind" AS ENUM ('postpone', 'edit_name', 'edit_contact', 'note');
 
 -- CreateEnum
-CREATE TYPE "capture_step" AS ENUM ('LOOKING_FOR', 'BUDGET', 'PHONE', 'CAR_ISSUE', 'CAR', 'SERVICE');
+CREATE TYPE "capture_step" AS ENUM ('looking_for', 'budget', 'phone', 'car_issue', 'car', 'service');
+
+-- CreateEnum
+CREATE TYPE "contact_channel" AS ENUM ('phone', 'telegram', 'whatsapp', 'viber');
 
 -- CreateTable
 CREATE TABLE "digests" (
@@ -56,14 +59,14 @@ CREATE TABLE "leads" (
     "contact" TEXT NOT NULL,
     "service" TEXT NOT NULL,
     "services" TEXT[],
-    "contact_channel" TEXT,
+    "contact_channel" "contact_channel",
     "comment" TEXT,
     "country" TEXT,
     "source_url" TEXT,
     "visitor_id" TEXT,
     "locale" TEXT NOT NULL,
     "kind" "lead_kind",
-    "status" "lead_status" NOT NULL DEFAULT 'NEW',
+    "status" "lead_status" NOT NULL DEFAULT 'new',
     "postponed_from" "lead_status",
     "remind_at" DATE,
     "status_changed_at" TIMESTAMPTZ(3) NOT NULL,

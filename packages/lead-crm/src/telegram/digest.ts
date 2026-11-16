@@ -18,7 +18,7 @@ export function renderDigest(
   hidden = 0,
 ): RenderedDigest {
   const lines = [`<b>${DIGEST_TITLE}</b>`];
-  const shown = { dueIds: [] as string[], staleIds: [] as string[] };
+  const shown: Omit<DigestRows, 'hidden'> = { dueIds: [], staleIds: [] };
   let room = MAX_LIST_ROWS;
   for (const [key, title] of DIGEST_SECTIONS) {
     const leads = digest[key];

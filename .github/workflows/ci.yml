@@ -33,8 +33,9 @@ jobs:
       - run: node --experimental-strip-types .github/scripts/yaml-content-valid.ts
       - run: node --experimental-strip-types --test .github/scripts/russian-copy-hygiene.test.ts
       - run: node --experimental-strip-types .github/scripts/russian-copy-hygiene.ts
-      - run: sh .github/scripts/shop-migrations-frozen.sh
-      - run: sh .github/scripts/shop-migrations-frozen.test.sh
+      - run: sh .github/scripts/migrations-frozen.sh apps/auto-service-shop 'src/modules/*/migrations/*.ts' 'src/migration-scripts/*.ts'
+      - run: sh .github/scripts/migrations-frozen.sh packages/lead-crm 'prisma/migrations/*/migration.sql'
+      - run: sh .github/scripts/migrations-frozen.test.sh
       - run: sh .github/scripts/check-base.test.sh
       - run: sh .github/scripts/pinned-deps.sh
       - run: sh .github/scripts/security-headers-drift.sh

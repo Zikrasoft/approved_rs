@@ -1,6 +1,7 @@
 import { logError } from './logError.ts';
 import {
   isClosed,
+  type LeadId,
   type LeadInput,
   type LeadSubmission,
   type StoredLead,
@@ -143,7 +144,7 @@ interface AfterStatusChangeOptions {
     Notifier,
     'editLeadDetailMessage' | 'sendStatusChange' | 'unpinLeadCard'
   >;
-  dropFromDigest: (leadId: string) => Promise<void>;
+  dropFromDigest: (leadId: LeadId) => Promise<void>;
   settleOrder: (lead: StoredLead) => Promise<void>;
 }
 
@@ -154,7 +155,7 @@ export function createDropFromDigest({
   store: Pick<LeadStore, 'takeFromDigest'>;
   notifier: Pick<Notifier, 'editDigest'>;
 }) {
-  return async function dropFromDigest(leadId: string): Promise<void> {
+  return async function dropFromDigest(leadId: LeadId): Promise<void> {
     const left = await store.takeFromDigest(leadId);
     if (!left) return;
     try {

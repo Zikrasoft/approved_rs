@@ -1,7 +1,7 @@
 import '@podbor/lead-crm/testing/database';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { APIContext } from 'astro';
-import { crmDatabase } from '@podbor/lead-crm';
+import { crmDatabase, leadIdSchema } from '@podbor/lead-crm';
 import { recordBotApi, seedLead } from '@podbor/lead-crm/testing';
 import type { StoredLead } from '@/lib/store';
 
@@ -23,7 +23,7 @@ const DAY_MS = 24 * HOUR_MS;
 const GROUP_ID = '-1009876543210';
 
 const L = (n: number) =>
-  `00000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
+  leadIdSchema.parse(`00000000-0000-4000-8000-${String(n).padStart(12, '0')}`);
 const numberOf = (id: string) => Number(id.slice(-12));
 
 async function seed(leads: StoredLead[]): Promise<void> {
@@ -43,8 +43,10 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     notes: [],
     locale: 'ru',
     status: 'postponed',
-    telegramChatId: CARD_CHAT_ID,
-    telegramMessageId: 500 + numberOf(overrides.id ?? L(9)),
+    telegramCard: {
+      chatId: CARD_CHAT_ID,
+      messageId: 500 + numberOf(overrides.id ?? L(9)),
+    },
     statusChangedAt: '2026-10-01T00:00:00.000Z',
     lastActivityAt: null,
     createdAt: '2026-10-01T00:00:00.000Z',
@@ -521,7 +523,7 @@ describe('GET /api/reminders', () => {
         id: L(11),
         status: 'new',
         remindAt: null,
-        telegramMessageId: 511,
+        telegramCard: { chatId: CARD_CHAT_ID, messageId: 511 },
       }),
     ]);
     await GET(makeCtx());

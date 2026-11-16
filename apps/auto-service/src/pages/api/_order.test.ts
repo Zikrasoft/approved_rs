@@ -15,7 +15,7 @@ vi.mock('@/lib/crm', () => ({
   notifyLead,
   leadStore: { failedCheckoutCapped },
 }));
-vi.mock('@podbor/site-kit/background', () => ({
+vi.mock('@podbor/lead-crm/background', () => ({
   inBackground: (promise: Promise<unknown>) => pending.push(promise),
 }));
 

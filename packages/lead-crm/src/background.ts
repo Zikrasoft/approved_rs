@@ -1,8 +1,12 @@
 const running = new Set<Promise<void>>();
 let listening = false;
 
-const drainThenTerminate = async () => {
+export async function backgroundIdle(): Promise<void> {
   while (running.size) await Promise.all(running);
+}
+
+const drainThenTerminate = async () => {
+  await backgroundIdle();
   if (process.listenerCount('SIGTERM') === 0)
     process.kill(process.pid, 'SIGTERM');
 };

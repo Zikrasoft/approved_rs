@@ -1,5 +1,9 @@
 import { z } from 'zod';
 import { cleanAdText } from './adText.ts';
+import { TRACKED_CONTACT_CHANNELS } from './contactChannel.ts';
+
+export const leadIdSchema = z.uuid().brand<'LeadId'>();
+export type LeadId = z.infer<typeof leadIdSchema>;
 
 export const LEAD_STATUSES = [
   'new',
@@ -9,14 +13,12 @@ export const LEAD_STATUSES = [
   'lost',
   'postponed',
 ] as const;
-const leadStatusSchema = z.enum(LEAD_STATUSES);
+export const leadStatusSchema = z.enum(LEAD_STATUSES);
 export type LeadStatus = z.infer<typeof leadStatusSchema>;
 
 const IN_WORK_STATUSES = ['new', 'negotiations', 'in_progress'] as const;
 export const inWorkStatusSchema = z.enum(IN_WORK_STATUSES);
 export type InWorkStatus = z.infer<typeof inWorkStatusSchema>;
-
-const storedStatusSchema = z.enum([...LEAD_STATUSES, 'open']);
 
 export const PROMPT_KINDS = [
   'postpone',
@@ -25,9 +27,13 @@ export const PROMPT_KINDS = [
   'note',
 ] as const;
 
-const pendingPromptSchema = z.object({
+const messageKeySchema = z.object({
   chatId: z.number().int(),
   messageId: z.number().int(),
+});
+export type MessageKey = z.infer<typeof messageKeySchema>;
+
+const pendingPromptSchema = messageKeySchema.extend({
   kind: z.enum(PROMPT_KINDS),
 });
 export type PendingPrompt = z.infer<typeof pendingPromptSchema>;
@@ -95,20 +101,18 @@ const leadNoteSchema = z.object({
 export type LeadNote = z.infer<typeof leadNoteSchema>;
 export type NewLeadNote = Omit<LeadNote, 'createdAt'>;
 
-export const LEGACY_BRAND = 'Approved.rs';
-
 export const REFERRERS = ['approved'] as const;
 
 export type Referrer = (typeof REFERRERS)[number];
 
-const baseStoredLeadSchema = z.object({
+export const storedLeadFieldsSchema = z.object({
   number: z.number().int().positive().nullable().default(null),
-  brand: z.string().default(LEGACY_BRAND),
+  brand: z.string(),
   name: z.string(),
   contact: z.string(),
   service: z.string(),
   services: z.array(z.string()).default([]),
-  contactChannel: z.string().nullable().optional(),
+  contactChannel: z.enum(TRACKED_CONTACT_CHANNELS).nullable().optional(),
   comment: z.string().nullable().optional(),
   notes: z.array(leadNoteSchema).default([]),
   country: z.string().nullable().optional(),
@@ -116,9 +120,8 @@ const baseStoredLeadSchema = z.object({
   visitorId: z.string().nullable().optional(),
   locale: z.string(),
   kind: z.enum(['lead', 'call_click']).optional(),
-  status: storedStatusSchema.default('new'),
-  telegramChatId: z.number().int().nullable().default(null),
-  telegramMessageId: z.number().int().nullable().default(null),
+  status: leadStatusSchema.default('new'),
+  telegramCard: messageKeySchema.nullable().default(null),
   statusChangedAt: z.string(),
   lastActivityAt: z.string().nullable().default(null),
   visitorActiveAt: z.string().optional(),
@@ -140,17 +143,15 @@ const baseStoredLeadSchema = z.object({
   orderSettled: z.enum(['won', 'lost']).optional().catch(undefined),
   orderConflict: z.enum(['won', 'lost']).optional().catch(undefined),
   orderStuck: z.enum(['won', 'lost']).optional().catch(undefined),
-  archived: z.boolean().optional(),
   remindAt: z.string().nullable().default(null),
   postponedFrom: inWorkStatusSchema.nullable().default(null).catch(null),
 });
 
-type StoredShape = z.infer<typeof baseStoredLeadSchema>;
+export const storedLeadSchema = storedLeadFieldsSchema.extend({
+  id: leadIdSchema,
+});
 
-export type StoredLead = Omit<StoredShape, 'archived' | 'status'> & {
-  id: string;
-  status: LeadStatus;
-};
+export type StoredLead = z.infer<typeof storedLeadSchema>;
 
 export function isClosed(lead: Pick<StoredLead, 'status'>): boolean {
   return lead.status === 'won' || lead.status === 'lost';
@@ -162,21 +163,6 @@ export function isInWork(lead: Pick<StoredLead, 'status'>): boolean {
 
 export function inWorkStatus(lead: Pick<StoredLead, 'status'>): InWorkStatus {
   return inWorkStatusSchema.parse(lead.status);
-}
-
-function withCurrentStatuses<Id>({
-  archived,
-  status,
-  ...lead
-}: StoredShape & { id: Id }): Omit<StoredLead, 'id'> & { id: Id } {
-  const advanced = status === 'negotiations' || status === 'in_progress';
-  const current = leadStatusSchema.catch('new').parse(status);
-  return {
-    ...lead,
-    status: archived && !isClosed({ status: current }) ? 'lost' : current,
-    lastActivityAt:
-      lead.lastActivityAt ?? (advanced ? lead.statusChangedAt : null),
-  };
 }
 
 export type LeadInput = Pick<
@@ -207,13 +193,3 @@ export type LeadInput = Pick<
   >;
 
 export type LeadSubmission = Omit<LeadInput, 'brand'>;
-
-export const storedLeadSchema: z.ZodType<StoredLead, unknown> =
-  baseStoredLeadSchema.extend({ id: z.uuid() }).transform(withCurrentStatuses);
-
-export type LegacyLead = Omit<StoredLead, 'id'> & { id: number };
-
-export const legacyLeadSchema: z.ZodType<LegacyLead, unknown> =
-  baseStoredLeadSchema
-    .extend({ id: z.number().int().positive() })
-    .transform(withCurrentStatuses);

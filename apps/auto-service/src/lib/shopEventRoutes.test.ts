@@ -25,7 +25,7 @@ const crm = {
   failedCheckoutCapped: vi.fn(async () => true),
 };
 
-vi.mock('@podbor/site-kit/background', () => ({
+vi.mock('@podbor/lead-crm/background', () => ({
   inBackground: (promise: Promise<unknown>) => pending.push(promise),
 }));
 vi.mock('@/utils/catalogueEnv', async (original) => ({

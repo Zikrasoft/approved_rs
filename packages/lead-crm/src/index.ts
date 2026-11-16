@@ -13,14 +13,15 @@ export {
 export type {
   CapturePrompt,
   CaptureStep,
+  LeadId,
   LeadInput,
   LeadSubmission,
   LeadStatus,
+  MessageKey,
   PendingPrompt,
   StoredLead,
 } from './schema.ts';
-export type { PromptKey } from './promptKey.ts';
-export { storedLeadSchema } from './schema.ts';
+export { leadIdSchema, storedLeadSchema } from './schema.ts';
 
 export { hasRealContact } from './leadMerge.ts';
 export {

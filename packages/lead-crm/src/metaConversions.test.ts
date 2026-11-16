@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { testLeadId } from './testing/seed.ts';
 import {
   createMetaLeadReporter,
   META_GRAPH_VERSION,
@@ -11,7 +12,7 @@ const SENT_AT = '2026-10-12T09:30:00.000Z';
 const PIXEL = '29229430643330595';
 
 const lead = {
-  id: '0196f8a0-0000-7000-8000-000000000042',
+  id: testLeadId(42),
   metaIds: { fbc: FBC, fbp: FBP },
   metaLeadSentAt: SENT_AT,
 };

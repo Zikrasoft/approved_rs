@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { crmDatabase } from './database.ts';
 import { leadData } from './leadRow.ts';
-import type { LeadInput, StoredLead } from './schema.ts';
+import type { LeadId, LeadInput, StoredLead } from './schema.ts';
 import { storedLeadSchema } from './schema.ts';
 import {
   createLeadStore,
@@ -16,7 +16,7 @@ import {
   type LeadStore,
 } from './store.ts';
 import { hasRealContact } from './leadMerge.ts';
-import { seedLead } from './testing/seed.ts';
+import { seedLead, testLeadId } from './testing/seed.ts';
 
 let store: LeadStore;
 
@@ -28,12 +28,12 @@ const baseData: LeadInput = {
   locale: 'ru',
 };
 
-async function forceComplete(id: string): Promise<void> {
+async function forceComplete(id: LeadId): Promise<void> {
   await store.setStatus(id, 'won');
 }
 
 async function patchLead(
-  id: string,
+  id: LeadId,
   fields: Partial<StoredLead>,
 ): Promise<void> {
   await crmDatabase().lead.update({ where: { id }, data: leadData(fields) });
@@ -97,7 +97,10 @@ describe('insertLead', () => {
 });
 
 describe('insertOrMergeLead', () => {
-  const clickData = (channel: string, visitorId = 'visitor-1'): LeadInput => ({
+  const clickData = (
+    channel: LeadInput['contactChannel'],
+    visitorId = 'visitor-1',
+  ): LeadInput => ({
     brand: 'Test',
     name: '',
     contact: '—',
@@ -1133,7 +1136,7 @@ describe('status patch builders', () => {
 
 describe('staff notes', () => {
   async function answerNote(
-    id: string,
+    id: LeadId,
     text: string,
     author: 'owner' | 'admin',
   ) {
@@ -1380,7 +1383,7 @@ describe('expireGhostLeads', () => {
   const NOW = new Date('2026-10-02T12:00:00.000Z');
   const DAY_MS = GHOST_LEAD_RETENTION_MS;
 
-  async function forceAge(id: string, ms: number): Promise<void> {
+  async function forceAge(id: LeadId, ms: number): Promise<void> {
     await patchLead(id, {
       createdAt: new Date(NOW.getTime() - ms).toISOString(),
     });
@@ -1634,7 +1637,7 @@ describe('deleteLead', () => {
 
   it('returns false for an id that does not exist', async () => {
     await store.insertLead(baseData);
-    const found = await store.deleteLead(randomUUID());
+    const found = await store.deleteLead(testLeadId(999));
     expect(found).toBe(false);
   });
 });
@@ -1695,7 +1698,7 @@ describe('searchLeads', () => {
 describe('getLead / findByPendingPrompt — not-found paths', () => {
   it('getLead returns undefined for an id that does not exist', async () => {
     await store.insertLead(baseData);
-    expect(await store.getLead(randomUUID())).toBeUndefined();
+    expect(await store.getLead(testLeadId(999))).toBeUndefined();
   });
 
   it('findByPendingPrompt returns undefined when no lead has a pending prompt at all', async () => {
@@ -1728,18 +1731,16 @@ describe('setTelegramMessage', () => {
     const updated = await store.setTelegramMessage(lead.id, -100, 999);
 
     expect(updated).toMatchObject({
-      telegramChatId: -100,
-      telegramMessageId: 999,
+      telegramCard: { chatId: -100, messageId: 999 },
     });
     expect(await store.getLead(lead.id)).toMatchObject({
-      telegramChatId: -100,
-      telegramMessageId: 999,
+      telegramCard: { chatId: -100, messageId: 999 },
     });
   });
 
   it('is a no-op for an id that is not in the store', async () => {
     await expect(
-      store.setTelegramMessage(randomUUID(), -100, 1),
+      store.setTelegramMessage(testLeadId(999), -100, 1),
     ).resolves.toBeUndefined();
   });
 });
@@ -2232,7 +2233,7 @@ describe('updateCapture', () => {
 
   it('returns undefined for an id that does not exist', async () => {
     expect(
-      await store.updateCapture(randomUUID(), { capturePrompt: null }),
+      await store.updateCapture(testLeadId(999), { capturePrompt: null }),
     ).toBeUndefined();
   });
 });

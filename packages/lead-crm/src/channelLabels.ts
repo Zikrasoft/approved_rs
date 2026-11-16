@@ -7,8 +7,6 @@ const LABELS: Record<TrackedContactChannel, string> = {
   phone: 'звонок',
 };
 
-export function channelLabel(channel: string): string {
-  return Object.hasOwn(LABELS, channel)
-    ? LABELS[channel as TrackedContactChannel]
-    : channel;
+export function channelLabel(channel: TrackedContactChannel): string {
+  return LABELS[channel];
 }

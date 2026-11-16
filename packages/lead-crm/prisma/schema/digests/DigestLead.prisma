@@ -13,8 +13,8 @@ model DigestLead {
 }
 
 enum DigestList {
-  DUE
-  STALE
+  due
+  stale
 
   @@map("digest_list")
 }

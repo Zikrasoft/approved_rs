@@ -628,9 +628,7 @@ is healthy. Brands are separated by the lead's `brand` field
    where the note ends, so it keeps that comment whole, notes and all, and
    counts it under `commentsKeptWhole`. Unsigned `Отложено до <date>` lines
    stay in the comment, since they never named an author. The Blob store is
-   only read. Order markers are not imported: nothing has read them since the
-   old shop went, and a Lead's unique `(brand, order_id)` is what keeps one
-   order to one Lead now.
+   only read.
 
 ### Cutover from Vercel
 
@@ -708,7 +706,11 @@ after it is lost.
    Jobs: disable it. The last Vercel deployment keeps calling its own
    Blob-backed `/api/reminders` otherwise.
 2. **First import.** Run `scripts/import-blob.ts` without `--dry-run`. The
-   sequence now continues at the highest imported number + 1000.
+   sequence now continues at the highest imported number + 1000. The
+   `shop-orders/*` markers stay in Blob (the run only counts them as
+   `orderMarkersSkipped`): nothing has read them since the old shop went, and
+   the unique `(brand, order_id)` on `leads` is what keeps one order to one
+   Lead now.
 3. **DNS, all three at once.** Point the apex and `www` A records of
    approved.rs, carlab.rs and details.rs at the reserved IP, and remove any
    AAAA record that still names Vercel.
@@ -759,8 +761,10 @@ broken migrator fails CI before it reaches the host.
 
 Any change under `packages/lead-crm` makes the shop a dependent in turbo's
 `...[tag]` filter, so a new CRM migration always ships with a shop deploy, and
-`deploy-site` waits for it. `crm-role.sh` and the migration are skipped while
-`CRM_DB_PASSWORD` is unset.
+`deploy-site` waits for it. `deploy.sh` refuses to start while
+`CRM_DB_PASSWORD` is unset, before it touches anything: the sites keep their
+Leads in `crm`, so a deploy that skipped its migrations would leave them
+reading a schema that is not there.
 
 **Every CRM migration is additive**, like the shop's: the running sites keep
 serving the previous build while the new schema lands, and a rollback brings
@@ -770,7 +774,9 @@ first the code that stops reading the old shape, then the migration. Generate
 one with `pnpm --filter @podbor/lead-crm exec prisma migrate dev --name <name>`
 against the local test database and commit it: Prisma applies the folders in
 name order, so every one, `20261116000000_init` included, starts with its
-timestamp.
+timestamp. The migration files are frozen by `packages/lead-crm/migrations.sha256`,
+which `.github/scripts/migrations-frozen.sh` checks in `check`, as the shop's
+are; append a new migration's line in the same commit.
 
 The nightly `backup.sh` dumps `crm` beside `carlab` (`crm-<stamp>.dump`, same
 retention and off-host copy) once `CRM_DB_PASSWORD` is set, which is why

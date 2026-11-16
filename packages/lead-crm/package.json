@@ -83,6 +83,7 @@
     "./submit": "./src/submitLeadForm.ts",
     "./lead-form": "./src/leadForm.ts",
     "./telegram-client": "./src/telegram/client.ts",
+    "./background": "./src/background.ts",
     "./testing": "./src/testing/index.ts",
     "./testing/database": "./src/testing/database.ts",
     "./testing/database-server": "./src/testing/databaseServer.ts"

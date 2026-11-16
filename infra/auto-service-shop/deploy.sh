@@ -20,6 +20,12 @@ esac
   exit 1
 }
 
+crm_password=$(sed -n 's/^CRM_DB_PASSWORD=//p' .env)
+[ -n "$crm_password" ] || {
+  echo "CRM_DB_PASSWORD is not set in .env: the sites keep their Leads in the crm database. Set it (openssl rand -hex 32) and deploy again." >&2
+  exit 1
+}
+
 mkdir .deploy.lock 2>/dev/null || {
   echo "A deploy or backup is already running (.deploy.lock present)." >&2
   exit 1
@@ -62,13 +68,10 @@ docker compose run --rm -T medusa \
 ./crawler-role.sh
 ./crm-role.sh
 
-crm_password=$(sed -n 's/^CRM_DB_PASSWORD=//p' .env)
-if [ -n "$crm_password" ]; then
-  echo "==> CRM migrations"
-  CRM_DATABASE_URL="postgres://crm:$crm_password@postgres:5432/crm" CHECKPOINT_DISABLE=1 \
-    docker compose run --rm -T -e CRM_DATABASE_URL -e CHECKPOINT_DISABLE \
-    -w /server/node_modules/@podbor/lead-crm medusa node_modules/.bin/prisma migrate deploy
-fi
+echo "==> CRM migrations"
+CRM_DATABASE_URL="postgres://crm:$crm_password@postgres:5432/crm" CHECKPOINT_DISABLE=1 \
+  docker compose run --rm -T -e CRM_DATABASE_URL -e CHECKPOINT_DISABLE \
+  -w /server/node_modules/@podbor/lead-crm medusa node_modules/.bin/prisma migrate deploy
 
 grep -v '^MEDUSA_TAG=' .env >.env.next
 echo "MEDUSA_TAG=$tag" >>.env.next

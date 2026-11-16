@@ -1,6 +1,5 @@
 export const prerender = false;
 
-import { inBackground } from '@podbor/site-kit/background';
 import { createLeadsRoute } from '@podbor/lead-crm';
 import { LOCALE_COOKIE } from '@podbor/site-kit';
 import { phoneLink, whatsappLink } from '@podbor/site-kit/contact-links';
@@ -21,7 +20,6 @@ const MISSING_FIELDS_MESSAGE: Record<Locale, string> = {
 
 export const POST = createLeadsRoute({
   notifyLead,
-  inBackground,
   isLocale,
   defaultLocale: PRIMARY_LOCALE,
   localeCookie: LOCALE_COOKIE,

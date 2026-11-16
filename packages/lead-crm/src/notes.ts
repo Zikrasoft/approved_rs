@@ -1,5 +1,6 @@
 import { businessDay } from './businessTime.ts';
 import { channelLabel } from './channelLabels.ts';
+import type { TrackedContactChannel } from './contactChannel.ts';
 import { formatDateRu } from './telegram/markup.ts';
 
 const DATED_NOTE = /^\d{2}\.\d{2}\.\d{4} · /;
@@ -14,7 +15,7 @@ export function isDatedNote(line: string): boolean {
 
 export function visitorNote(
   text: string,
-  channel: string | null | undefined,
+  channel: TrackedContactChannel | null | undefined,
   at = new Date(),
 ): string {
   const via = channel ? ` (${channelLabel(channel)})` : '';

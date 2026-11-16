@@ -31,9 +31,9 @@ import {
 } from './cards.ts';
 import { extraContactNote } from '../notes.ts';
 import { formatDateRu, leadDisplayName } from './markup.ts';
+import { testLeadId } from '../testing/seed.ts';
 
-const lid = (n: number) =>
-  `0196f8a0-0000-7000-8000-${String(n).padStart(12, '0')}`;
+const lid = testLeadId;
 
 const SERVICE_LABELS: Record<string, string> = {
   'vehicle-sourcing': 'Автоподбор',
@@ -90,8 +90,7 @@ function makeLead(overrides: Partial<StoredLead> = {}): StoredLead {
     source_url: '/ru/vehicle-sourcing/de/',
     locale: 'ru',
     status: 'new',
-    telegramChatId: null,
-    telegramMessageId: null,
+    telegramCard: null,
     statusChangedAt: '2026-01-01T00:00:00.000Z',
     lastActivityAt: null,
     createdAt: '2026-01-01T00:00:00.000Z',
@@ -478,7 +477,7 @@ describe('unpinLeadCard', () => {
 
   it('unpins the stored card', async () => {
     await unpinLeadCard(
-      makeLead({ telegramChatId: -1009876543210, telegramMessageId: 555 }),
+      makeLead({ telegramCard: { chatId: -1009876543210, messageId: 555 } }),
     );
     expect(api.callsTo('unpinChatMessage').map((c) => c.payload)).toEqual([
       { chat_id: -1009876543210, message_id: 555 },
@@ -494,7 +493,7 @@ describe('unpinLeadCard', () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     api.fail('unpinChatMessage', 'Bad Request: not enough rights');
     await expect(
-      unpinLeadCard(makeLead({ telegramChatId: -1, telegramMessageId: 1 })),
+      unpinLeadCard(makeLead({ telegramCard: { chatId: -1, messageId: 1 } })),
     ).resolves.toBeUndefined();
     expect(errorSpy).toHaveBeenCalled();
     errorSpy.mockRestore();
@@ -509,8 +508,7 @@ describe('refreshLeadCard', () => {
     const lead = makeLead({
       id: lid(42),
       status: 'won',
-      telegramChatId: -1009876543210,
-      telegramMessageId: 555,
+      telegramCard: { chatId: -1009876543210, messageId: 555 },
     });
     await expect(refreshLeadCard(lead)).resolves.toBe(true);
 
@@ -526,16 +524,14 @@ describe('refreshLeadCard', () => {
 
   it('reports no card when the lead has no Telegram message on file yet', async () => {
     await expect(
-      refreshLeadCard(
-        makeLead({ telegramChatId: null, telegramMessageId: null }),
-      ),
+      refreshLeadCard(makeLead({ telegramCard: null })),
     ).resolves.toBe(false);
     expect(mockFetch).not.toHaveBeenCalled();
   });
 
   it('edits by the stored chat id without matching it against the configured group', async () => {
     await expect(
-      refreshLeadCard(makeLead({ telegramChatId: -1, telegramMessageId: 1 })),
+      refreshLeadCard(makeLead({ telegramCard: { chatId: -1, messageId: 1 } })),
     ).resolves.toBe(true);
     expect(JSON.parse(mockFetch.mock.calls[0][1].body).chat_id).toBe(-1);
   });
@@ -547,7 +543,7 @@ describe('refreshLeadCard', () => {
     api.fail('editMessageText', description);
     await expect(
       refreshLeadCard(
-        makeLead({ telegramChatId: -1009876543210, telegramMessageId: 555 }),
+        makeLead({ telegramCard: { chatId: -1009876543210, messageId: 555 } }),
       ),
     ).resolves.toBe(false);
   });
@@ -559,7 +555,7 @@ describe('refreshLeadCard', () => {
     );
     await expect(
       refreshLeadCard(
-        makeLead({ telegramChatId: -1009876543210, telegramMessageId: 555 }),
+        makeLead({ telegramCard: { chatId: -1009876543210, messageId: 555 } }),
       ),
     ).resolves.toBe(true);
   });
@@ -568,7 +564,7 @@ describe('refreshLeadCard', () => {
     api.fail('editMessageText', 'Bad Request: chat not found');
     await expect(
       refreshLeadCard(
-        makeLead({ telegramChatId: -1009876543210, telegramMessageId: 555 }),
+        makeLead({ telegramCard: { chatId: -1009876543210, messageId: 555 } }),
       ),
     ).rejects.toThrow();
   });
@@ -1528,17 +1524,6 @@ describe('a lead that asked for several services at once', () => {
     expect(formatter.formatTeaser(click)).toContain('· — ·');
   });
 
-  it('prints a channel it has no label for as it is stored', () => {
-    const click = makeLead({
-      contact: '—',
-      service: '',
-      services: [],
-      kind: 'call_click',
-      contactChannel: 'signal',
-    });
-    expect(formatter.formatTeaser(click)).toContain('Клик: signal');
-  });
-
   it('renders an expired ghost as lost, keeping its channel line', () => {
     const ghost = makeLead({
       contact: '—',
@@ -1801,8 +1786,7 @@ describe('the VIN searches of the visitor behind a Lead', () => {
   });
   const lead = makeLead({
     visitorId: VISITOR,
-    telegramChatId: -1009876543210,
-    telegramMessageId: 555,
+    telegramCard: { chatId: -1009876543210, messageId: 555 },
   });
 
   beforeEach(() => {
