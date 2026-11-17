@@ -117,6 +117,7 @@ export interface LeadStoreOptions {
   database?: CrmDatabase;
   alertLeadCount?: (count: number) => Promise<void>;
   standaloneServices?: readonly string[];
+  partsServices?: readonly string[];
 }
 
 const HOUR_MS = 60 * 60 * 1000;
@@ -149,6 +150,7 @@ function mergeTarget(
   leads: StoredLead[],
   now: number,
   standaloneServices: readonly string[],
+  partsServices: readonly string[],
 ): MergeTarget {
   const isStandalone = (service: string) =>
     standaloneServices.includes(service);
@@ -175,8 +177,10 @@ function mergeTarget(
     : undefined;
   if (failed) return { kind: 'failed-checkout', lead: failed };
 
+  const isParts = (service: string) => partsServices.includes(service);
   const apart = (l: StoredLead) =>
-    [data.service, l.service].some(isStandalone) &&
+    ([data.service, l.service].some(isStandalone) ||
+      isParts(data.service) !== isParts(l.service)) &&
     !isPlaceholderContact(data.contact) &&
     !isPlaceholderContact(l.contact);
   const visited = data.visitorId
@@ -293,6 +297,7 @@ export function createLeadStore({
   database = crmDatabase,
   alertLeadCount,
   standaloneServices = [],
+  partsServices = [],
 }: LeadStoreOptions = {}) {
   function newStoredLead(
     data: LeadInput,
@@ -460,7 +465,13 @@ export function createLeadStore({
           })
         ).map(toStoredLead);
         const now = Date.now();
-        const target = mergeTarget(data, candidates, now, standaloneServices);
+        const target = mergeTarget(
+          data,
+          candidates,
+          now,
+          standaloneServices,
+          partsServices,
+        );
         if (target.kind === 'same-order') {
           const { lead } = target;
           return { outcome: { lead, merged: true, before: lead }, count: 0 };

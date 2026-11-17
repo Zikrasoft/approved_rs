@@ -5,6 +5,7 @@ import { createNotifyLead, type NotifyLeadOptions } from './notifyLead.ts';
 export interface BrandStoreOptions {
   brand: string;
   standaloneServices?: readonly string[];
+  partsServices?: readonly string[];
   getNotifier: () => Promise<{
     notifier: NotifyLeadOptions['notifier'] & {
       sendLeadCountAlert(count: number, brand: string): Promise<void>;
@@ -16,9 +17,11 @@ export function createBrandStore({
   brand,
   getNotifier,
   standaloneServices,
+  partsServices,
 }: BrandStoreOptions) {
   const leadStore = createLeadStore({
     standaloneServices,
+    partsServices,
     alertLeadCount: async (count) =>
       (await getNotifier()).notifier.sendLeadCountAlert(count, brand),
   });

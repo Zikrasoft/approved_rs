@@ -88,7 +88,10 @@ Questionnaire left on a stale Lead no longer takes answers. Owner activity
 counts so that a conversation the owner is working stays one Lead. A merge
 never drops a contact: when the visitor sends a different real contact, the
 Lead keeps the first and the new one lands as a dated note signed by the
-visitor («Клиент (WhatsApp): Доп. контакт: …»), a different name likewise.
+visitor («Клиент (WhatsApp): Доп. контакт: …»), a different name likewise. On
+carlab.rs a Parts sourcing Lead (a VIN inquiry or a parts order) and a service
+booking never merge, even from the same visitor within the hour: each is its
+own Lead with its own card.
 
 **Referral** — a Lead a sister brand's Capture bot received from the Approved
 bot's Partners screen. `referredBy: approved` is the only record of it — the

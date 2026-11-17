@@ -982,6 +982,52 @@ describe('insertOrMergeLead with standalone services', () => {
   });
 });
 
+describe('insertOrMergeLead with parts services', () => {
+  let store: ReturnType<typeof createLeadStore>;
+  const lead = (service: string, contact = '+381601111111'): LeadInput => ({
+    brand: 'Test',
+    name: 'Иван',
+    contact,
+    service,
+    visitorId: 'visitor-1',
+    locale: 'ru',
+  });
+
+  beforeEach(() => {
+    store = createLeadStore({ partsServices: ['vin-parts-inquiry'] });
+  });
+
+  it('keeps a parts inquiry apart from the service booking the same visitor sent before', async () => {
+    await store.insertOrMergeLead(lead(''));
+    const { merged } = await store.insertOrMergeLead(lead('vin-parts-inquiry'));
+
+    expect(merged).toBe(false);
+    expect(await store.readLeads()).toHaveLength(2);
+  });
+
+  it('keeps a service booking apart from the parts inquiry the same visitor sent before', async () => {
+    await store.insertOrMergeLead(lead('vin-parts-inquiry'));
+    const { merged } = await store.insertOrMergeLead(lead('brakes'));
+
+    expect(merged).toBe(false);
+    expect(await store.readLeads()).toHaveLength(2);
+  });
+
+  it('still merges a second parts inquiry of the same visitor', async () => {
+    await store.insertOrMergeLead(lead('vin-parts-inquiry'));
+    const { merged } = await store.insertOrMergeLead(lead('vin-parts-inquiry'));
+
+    expect(merged).toBe(true);
+  });
+
+  it('still lets a parts inquiry absorb the visitor click placeholder', async () => {
+    await store.insertOrMergeLead(lead('', '—'));
+    const { merged } = await store.insertOrMergeLead(lead('vin-parts-inquiry'));
+
+    expect(merged).toBe(true);
+  });
+});
+
 describe('isFreshLead', () => {
   const NOW = Date.parse('2026-10-11T12:00:00.000Z');
   const ago = (minutes: number) =>
