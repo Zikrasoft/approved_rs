@@ -64,12 +64,10 @@ describe('the make hub', () => {
     },
   );
 
-  it('links no Make page for a Make the exported list lacks', async () => {
+  it('links the Make page of a Make only the catalogue knows', async () => {
     const page = await hubOf({ slug: 'tesla', name: 'Tesla' });
 
-    expect(
-      page.querySelector('a[href^="/ru/cars/"]:not([href="/ru/cars/"])'),
-    ).toBeNull();
+    expect(page.querySelector('a[href="/ru/cars/tesla/"]')).not.toBeNull();
   });
 });
 

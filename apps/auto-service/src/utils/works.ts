@@ -83,12 +83,22 @@ export const sharedMakes = (works: Work[]) =>
 
 export const makesOf = (works: Work[]) => carried(works, 1);
 
+const withCatalogueMakes = (parts: MakePartsEntry[]) =>
+  [
+    ...new Map(
+      [...MAKES, ...parts.map(({ make }) => make)].map((make) => [
+        make.slug,
+        make,
+      ]),
+    ).values(),
+  ].toSorted((a, b) => a.slug.localeCompare(b.slug));
+
 export const workshopMakePages = (
   works: WorkEntry[],
   articles: Article[],
   parts: MakePartsEntry[],
 ) =>
-  makePages(MAKES, {
+  makePages(withCatalogueMakes(parts), {
     works: featuredWorks(works),
     articles: publishedEntries(articles),
     parts: parts.map((entry) => ({
