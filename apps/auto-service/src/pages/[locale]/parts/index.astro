@@ -1,64 +1,93 @@
 ---
 import { contactCta } from '@podbor/site-kit/contact-control';
-import { translated, type Category } from '@podbor/catalog-contract';
+import { translated } from '@podbor/catalog-contract';
+export const prerender = false;
+
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import VinInquiryCard from '@/components/VinInquiryCard.astro';
 import Icon from '@/components/Icon.astro';
 import CatalogueSearch from '@/components/CatalogueSearch.astro';
-import { PARTS_BROWSE_SOURCE_ATTRIBUTE } from '@/scripts/partsBrowse';
-import PartsBrowse from '@/components/PartsBrowse.astro';
+import CatalogueListing from '@/components/CatalogueListing.astro';
 import { byDemand, demandOf } from '@/utils/demand';
-import { localeFrom } from '@/i18n/config';
+import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import {
-  browseForBuild,
+  catalogueFor,
   categoryPagesForBuild,
   makeHubsForBuild,
   shopOpen,
 } from '@/utils/catalogueEnv';
+import { inquiryTopic } from '@/utils/catalogueSearch';
 import { paragraphs } from '@podbor/site-kit';
 import { TOP_MAKES, topMakes } from '@/utils/makeIndex';
-import { localePaths, PARTS_INQUIRY_ANCHOR, PathBuilder } from '@/utils/paths';
+import { chosenFilters, withFacetCopy } from '@/utils/partsSearch';
+import { planSearch } from '@/utils/searchPage';
+import {
+  PARTS_BROWSE_ANCHOR,
+  PARTS_INQUIRY_ANCHOR,
+  PathBuilder,
+} from '@/utils/paths';
 import { content } from '@/i18n/content';
 
-export async function getStaticPaths() {
-  const listed = await categoryPagesForBuild();
-  const categories = listed.map(({ pages, ...category }) => ({
-    ...category,
-    empty: pages.length === 0,
-    demand: demandOf(pages),
-  }));
-  const makes = topMakes(await makeHubsForBuild(), TOP_MAKES).map(
-    ({ make }) => make,
-  );
-  return localePaths().map((path) => ({
-    ...path,
-    props: { categories, makes },
-  }));
-}
-
 const locale = localeFrom(Astro.url.pathname);
+const params = Astro.url.searchParams;
+if (['q', 'category', 'make', 'model'].some((name) => params.has(name))) {
+  return Astro.redirect(
+    `${PathBuilder.partsSearch(locale)}${Astro.url.search}`,
+    302,
+  );
+}
+const plan = await planSearch({
+  params,
+  locale,
+  catalogue: catalogueFor(Astro.request),
+  path: PathBuilder.parts(locale),
+  anchor: PARTS_BROWSE_ANCHOR,
+});
+if ('redirect' in plan) {
+  return Astro.redirect(plan.redirect, plan.status);
+}
 const pages = content(locale).pages;
 const site = content(locale).site;
 const copy = pages.partsInquiry;
-const props = Astro.props as {
-  categories: (Category & { empty: boolean; demand: number })[];
-  makes: { slug: string; name: string }[];
-};
 const hubsCopy = content(locale).partsCar.hubs;
 const searchCopy = content(locale).partsSearch;
-const browse = await browseForBuild(locale);
-const categories = byDemand(props.categories, ({ demand }) => demand).map(
-  (category) => ({
-    slug: category.slug,
-    name: translated(category, 'name', locale),
-    lead: paragraphs(translated(category, 'text', locale))[0],
-    empty: category.empty,
-  }),
+const [listed, hubs] = await Promise.all([
+  categoryPagesForBuild().catch(() => []),
+  makeHubsForBuild().catch(() => []),
+]);
+const makes = topMakes(hubs, TOP_MAKES).map(({ make }) => make);
+const categories = byDemand(
+  listed.map(({ pages, ...category }) => ({
+    ...category,
+    empty: pages.length === 0,
+    demand: demandOf(pages),
+  })),
+  ({ demand }) => demand,
+).map((category) => ({
+  slug: category.slug,
+  name: translated(category, 'name', locale),
+  lead: paragraphs(translated(category, 'text', locale))[0],
+  empty: category.empty,
+}));
+const { view } = plan;
+const { found, chosen, ranges, offset, sort } = view;
+const facets = withFacetCopy(view.sheetFacets, searchCopy);
+const chips = chosenFilters(facets, chosen, ranges, searchCopy, (value) =>
+  value.toLocaleString(BCP47_BY_LOCALE[locale]),
 );
+const browsed = Boolean(
+  found && (found.results.length > 0 || chips.length > 0),
+);
+const narrowed = chosen.length > 0 || ranges.length > 0 || offset > 0 || sort;
+const action = `${PathBuilder.parts(locale)}#${PARTS_BROWSE_ANCHOR}`;
 ---
 
-<Shell title={copy.metaTitle} description={copy.metaDescription}>
+<Shell
+  title={copy.metaTitle}
+  description={copy.metaDescription}
+  noindex={Boolean(narrowed)}
+>
   <PageHero
     actions={false}
     desktopLead
@@ -75,18 +104,31 @@ const categories = byDemand(props.categories, ({ demand }) => demand).map(
   </PageHero>
 
   {
-    browse && (
+    found && browsed && (
       <parts-browse
-        class="wrap flex flex-col gap-4 pt-8 md:pt-10"
-        {...{
-          [PARTS_BROWSE_SOURCE_ATTRIBUTE]: PathBuilder.partsSearch(locale),
-        }}
+        id={PARTS_BROWSE_ANCHOR}
+        class="wrap flex scroll-mt-16 flex-col gap-4 pt-8 md:pt-10"
       >
         <h2 tabindex="-1" class="scroll-mt-24 text-section outline-none">
           {searchCopy.allHeading}
         </h2>
         <p class="sr-only" aria-live="polite" />
-        <PartsBrowse found={browse.found} prev={null} next={browse.next} />
+        <CatalogueListing
+          view={view}
+          found={found}
+          action={action}
+          hidden={sort ? { sort } : {}}
+          facets={facets}
+          chips={chips}
+          emptyMessage={
+            chips.length > 0
+              ? searchCopy.noFilteredResults
+              : copy.category.noParts
+          }
+          inquiryTopic={inquiryTopic({
+            filters: found.count === 0 ? chips.map(({ label }) => label) : [],
+          })}
+        />
       </parts-browse>
     )
   }
@@ -110,11 +152,11 @@ const categories = byDemand(props.categories, ({ demand }) => demand).map(
     </cart-badge>
 
     {
-      props.makes.length > 0 && (
+      makes.length > 0 && (
         <div class="flex flex-col gap-3">
           <h2 class="text-section">{hubsCopy.indexHeading}</h2>
           <ul class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-            {props.makes.map((make) => (
+            {makes.map((make) => (
               <li>
                 <a
                   href={PathBuilder.partsMake(locale, make.slug)}

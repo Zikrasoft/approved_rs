@@ -3,7 +3,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   definePartsBrowse,
   PARTS_BROWSE_ATTRIBUTE,
-  PARTS_BROWSE_SOURCE_ATTRIBUTE,
   PARTS_BROWSE_STATUS_ATTRIBUTE,
 } from './partsBrowse';
 
@@ -14,14 +13,14 @@ const block = (page: number, status = `page ${page}`) => `
   <div ${PARTS_BROWSE_ATTRIBUTE} ${PARTS_BROWSE_STATUS_ATTRIBUTE}="${status}">
     <ul><li><a href="/ru/parts/p${page}/">part ${page}</a></li></ul>
     <nav>
-      <a rel="prev" href="/ru/parts/search/">prev</a>
-      <a rel="next" href="/ru/parts/search/?offset=${page * 12}">next</a>
+      <a rel="prev" href="/ru/parts/?facets=brand%3Abosch#catalogue">prev</a>
+      <a rel="next" href="/ru/parts/?facets=brand%3Abosch&offset=${page * 12}#catalogue">next</a>
     </nav>
   </div>`;
 
 const mount = () => {
   document.body.innerHTML = `
-    <test-parts-browse ${PARTS_BROWSE_SOURCE_ATTRIBUTE}="/ru/parts/search/">
+    <test-parts-browse>
       <h2 tabindex="-1">All parts</h2>
       <p aria-live="polite"></p>
       ${block(1)}
@@ -56,7 +55,7 @@ afterEach(() => {
 });
 
 describe('the parts browse', () => {
-  it('swaps in the next page of the search page, announces it and moves focus to the heading', async () => {
+  it('swaps in the next page with its filters, announces it and moves focus to the heading', async () => {
     const fetch = answer(
       `<html><body><main>${block(2, 'Parts 13 to 24 of 30')}</main></body></html>`,
     );
@@ -68,7 +67,7 @@ describe('the parts browse', () => {
 
     expect(event.defaultPrevented).toBe(true);
     expect(fetch).toHaveBeenCalledWith(
-      'http://localhost:3000/ru/parts/search/?offset=12',
+      'http://localhost:3000/ru/parts/?facets=brand%3Abosch&offset=12#catalogue',
       { headers: { accept: 'text/html' } },
     );
     expect(element.querySelector('ul')!.textContent).toContain('part 2');
@@ -81,12 +80,16 @@ describe('the parts browse', () => {
     expect(document.activeElement).toBe(element.querySelector('h2'));
     expect(navigate).not.toHaveBeenCalled();
     expect(window.location.pathname + window.location.search).toBe(
-      '/ru/parts/?offset=12',
+      '/ru/parts/?facets=brand%3Abosch&offset=12',
     );
   });
 
   it('remembers the first page without an offset', async () => {
-    window.history.replaceState(null, '', '/ru/parts/?offset=12');
+    window.history.replaceState(
+      null,
+      '',
+      '/ru/parts/?facets=brand%3Abosch&offset=12',
+    );
     vi.stubGlobal('fetch', answer(block(1)));
     document.body.innerHTML = `<test-parts-browse>${block(2)}</test-parts-browse>`;
 
@@ -94,23 +97,19 @@ describe('the parts browse', () => {
     await settle();
 
     expect(window.location.pathname + window.location.search).toBe(
-      '/ru/parts/',
+      '/ru/parts/?facets=brand%3Abosch',
     );
   });
 
-  it('opens on the page the address remembers, without taking focus', async () => {
+  it('leaves the page the server rendered alone', async () => {
     window.history.replaceState(null, '', '/ru/parts/?offset=24');
-    const fetch = answer(block(3, 'Parts 25 to 30 of 30'));
+    const fetch = answer(block(3));
     vi.stubGlobal('fetch', fetch);
 
-    const element = mount();
+    mount();
     await settle();
 
-    expect(fetch).toHaveBeenCalledWith('/ru/parts/search/?offset=24', {
-      headers: { accept: 'text/html' },
-    });
-    expect(element.querySelector('ul')!.textContent).toContain('part 3');
-    expect(document.activeElement).not.toBe(element.querySelector('h2'));
+    expect(fetch).not.toHaveBeenCalled();
   });
 
   it('follows the history back and forth', async () => {
@@ -121,24 +120,29 @@ describe('the parts browse', () => {
     const fetch = answer(block(1));
     vi.stubGlobal('fetch', fetch);
 
+    element.querySelector('h2')!.blur();
     window.history.replaceState(null, '', '/ru/parts/');
     window.dispatchEvent(new PopStateEvent('popstate'));
     await settle();
 
-    expect(fetch).toHaveBeenCalledWith('/ru/parts/search/', {
+    expect(fetch).toHaveBeenCalledWith('http://localhost:3000/ru/parts/', {
       headers: { accept: 'text/html' },
     });
     expect(element.querySelector('ul')!.textContent).toContain('part 1');
+    expect(document.activeElement).not.toBe(element.querySelector('h2'));
   });
 
   it('opens the remembered page itself when it cannot be loaded in place', async () => {
-    window.history.replaceState(null, '', '/ru/parts/?offset=24');
     vi.stubGlobal('fetch', answer('', false));
-
     mount();
+
+    window.history.replaceState(null, '', '/ru/parts/?offset=24');
+    window.dispatchEvent(new PopStateEvent('popstate'));
     await settle();
 
-    expect(navigate).toHaveBeenCalledWith('/ru/parts/search/?offset=24');
+    expect(navigate).toHaveBeenCalledWith(
+      'http://localhost:3000/ru/parts/?offset=24',
+    );
   });
 
   it('stops following the history once it leaves the page', async () => {
@@ -146,6 +150,7 @@ describe('the parts browse', () => {
     vi.stubGlobal('fetch', fetch);
     mount().remove();
 
+    window.history.replaceState(null, '', '/ru/parts/?offset=12');
     window.dispatchEvent(new PopStateEvent('popstate'));
     await settle();
 
@@ -159,6 +164,7 @@ describe('the parts browse', () => {
     const parent = element.parentElement!;
     parent.append(element);
 
+    window.history.replaceState(null, '', '/ru/parts/?offset=12');
     window.dispatchEvent(new PopStateEvent('popstate'));
     await settle();
 
@@ -179,7 +185,7 @@ describe('the parts browse', () => {
     const fetch = answer(block(2));
     vi.stubGlobal('fetch', fetch);
     window.history.replaceState(null, '', '/ru/parts/?offset=12');
-    document.body.innerHTML = `<test-parts-browse ${PARTS_BROWSE_SOURCE_ATTRIBUTE}="/ru/parts/search/"></test-parts-browse>`;
+    document.body.innerHTML = `<test-parts-browse></test-parts-browse>`;
     await settle();
 
     expect(fetch).not.toHaveBeenCalled();
@@ -198,7 +204,7 @@ describe('the parts browse', () => {
     await settle();
 
     expect(fetch).toHaveBeenCalledWith(
-      'http://localhost:3000/ru/parts/search/?offset=24',
+      'http://localhost:3000/ru/parts/?facets=brand%3Abosch&offset=24#catalogue',
       expect.anything(),
     );
     expect(document.querySelector('ul')!.textContent).toContain('part 3');
@@ -219,7 +225,7 @@ describe('the parts browse', () => {
     await settle();
 
     expect(navigate).toHaveBeenCalledWith(
-      'http://localhost:3000/ru/parts/search/?offset=12',
+      'http://localhost:3000/ru/parts/?facets=brand%3Abosch&offset=12#catalogue',
     );
     expect(document.querySelector('ul')!.textContent).toContain('part 1');
   });

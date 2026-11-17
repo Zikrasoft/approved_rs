@@ -102,7 +102,7 @@ const showLabel =
     : count === 0
       ? copy.noneFound
       : copy.showResults.replace('{count}', String(count));
-const inquiry = `${action}#${PARTS_INQUIRY_ANCHOR}`;
+const inquiry = `${action.split('#')[0]}#${PARTS_INQUIRY_ANCHOR}`;
 const legend = (facet: SearchFacet) =>
   facet.unit ? `${facet.label}, ${facet.unit}` : facet.label;
 ---

@@ -110,10 +110,14 @@ export async function planSearch({
   params,
   locale,
   catalogue,
+  path = PathBuilder.partsSearch(locale),
+  anchor,
 }: {
   params: URLSearchParams;
   locale: Locale;
   catalogue: SearchCatalogue | null;
+  path?: string;
+  anchor?: string;
 }) {
   const typed = partsQuery(params.get('q') ?? '');
   const category = catalogKey(params.get('category'));
@@ -188,7 +192,7 @@ export async function planSearch({
       next.set('offset', String(nextOffset));
     }
     const query = String(next);
-    return `${PathBuilder.partsSearch(locale)}${query ? `?${query}` : ''}`;
+    return `${path}${query ? `?${query}` : ''}${anchor ? `#${anchor}` : ''}`;
   };
 
   const unfiltered =
@@ -292,3 +296,8 @@ export async function planSearch({
     },
   };
 }
+
+export type SearchView = Extract<
+  Awaited<ReturnType<typeof planSearch>>,
+  { view: unknown }
+>['view'];
