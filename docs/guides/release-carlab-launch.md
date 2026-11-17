@@ -130,7 +130,6 @@ one `terraform apply`: `infra/auto-service-shop/terraform/README.md`.
   | `API_HOST`, `ADMIN_HOST`, `STORE_CORS`, `ADMIN_CORS`, `AUTH_CORS`, `NODE_ENV`, `PORT`, `DATABASE_SSL`                       | keep the template's                                                                                 | `production.env.example`  |
   | `MEDUSA_TAG`                                                                                                                | leave empty; `deploy.sh` writes it                                                                  | deploy.md § `.env`        |
   | `POSTGRES_PASSWORD`, `TYPESENSE_API_KEY`, `JWT_SECRET`, `COOKIE_SECRET`, `CRAWLER_DB_PASSWORD`                              | `openssl rand -hex 32` each                                                                         | deploy.md § `.env`        |
-  | `ADMIN_BASIC_AUTH_USER`, `ADMIN_BASIC_AUTH_HASH`                                                                            | `caddy hash-password`; the hash in single quotes                                                    | deploy.md § `.env`        |
   | `OPENAI_API_KEY`, `IMPORT_CONCURRENCY`                                                                                      | the shop's own OpenAI key; keep the template's concurrency                                          | deploy.md § `.env`        |
   | `PUBLISH_DISPATCH_TOKEN`                                                                                                    | fine-grained token, `actions: write` on this repository, short expiry                               | deploy.md § `.env`        |
   | `STOREFRONT_ORIGIN`                                                                                                         | `https://carlab.rs`                                                                                 | § The first ship, step 10 |
@@ -247,7 +246,7 @@ code on this branch; they were not migrated to GitHub.
 ## 7. After the first shop deploy
 
 - [ ] Create an admin: `docker compose exec -T medusa node_modules/.bin/medusa user --invite`;
-      sign in at `https://admin.carlab.rs` (basic_auth first) (§ The first ship, step 9).
+      sign in at `https://admin.carlab.rs` (§ The first ship, step 9).
 - [ ] Settings → Publishable API Keys: create carlab.rs's key with the
       `CarLab parts shop` sales channel (§ The first ship, step 9).
 - [ ] Check the eight seeded Categories, «Аккумуляторы» fields, registration
@@ -389,7 +388,7 @@ carlab.rs:
 Shop:
 
 - [ ] `https://api.carlab.rs/health/ready` 200; `https://api.carlab.rs/admin`
-      404; `https://admin.carlab.rs` asks for basic_auth (deploy.md § `.env`).
+      404; `https://admin.carlab.rs` shows the Medusa sign-in (deploy.md § `.env`).
 - [ ] Grafana: `ssh -N -L 3000:127.0.0.1:3000 deploy@<server>`, open
       `http://localhost:3000`, sign in as `admin`; the **CarLab shop** dashboard
       has data after a search on carlab.rs; `curl -sI http://<server>:3000` from
