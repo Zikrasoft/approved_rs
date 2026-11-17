@@ -129,8 +129,6 @@ services:
       ADMIN_HOST: ${ADMIN_HOST:-admin.carlab.rs}
       MEDIA_HOST: ${MEDIA_HOST:-media.carlab.rs}
       MEDIA_ORIGIN: ${MEDIA_ORIGIN:?}
-      ADMIN_BASIC_AUTH_USER: ${ADMIN_BASIC_AUTH_USER:?}
-      ADMIN_BASIC_AUTH_HASH: ${ADMIN_BASIC_AUTH_HASH:?}
       CARLAB_HOST: ${CARLAB_HOST:-carlab.rs}
       DETAILS_HOST: ${DETAILS_HOST:-details.rs}
       APPROVED_HOST: ${APPROVED_HOST:-approved.rs}

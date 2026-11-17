@@ -256,7 +256,8 @@
     "spellingAdded": "Spelling {{spelling}} added.",
     "spellingRemoved": "Spelling {{spelling}} removed.",
     "confirmSpellingTitle": "Delete spelling {{spelling}}?",
-    "confirmSpellingBody": "The next import skips this supplier's articles with this brand spelling."
+    "confirmSpellingBody": "The next import skips this supplier's articles with this brand spelling.",
+    "everySupplier": "Every supplier"
   },
   "vehicles": {
     "heading": "Vehicles and reference data",
@@ -360,7 +361,8 @@
       "spellingAdded": "Spelling {{spelling}} added. The next import puts this supplier's cars spelled so under this make.",
       "spellingRemoved": "Spelling {{spelling}} removed.",
       "confirmSpellingTitle": "Delete spelling {{spelling}}?",
-      "confirmSpellingBody": "The next import matches this spelling by name again, and adds a new make if no make's name matches."
+      "confirmSpellingBody": "The next import matches this spelling by name again, and adds a new make if no make's name matches.",
+      "everySupplier": "Every supplier"
     },
     "merge": {
       "action": "Merge into another make",

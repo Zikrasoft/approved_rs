@@ -5,7 +5,6 @@ import {
   BUILD_CATALOGUE_TIMEOUT_MS,
   PREVIOUS_BUILD_URL,
   type CatalogueEnv,
-  browseForBuild,
   catalogueFromEnv,
   shopBackendUrl,
   categoriesForBuild,
@@ -1300,80 +1299,6 @@ describe('partPagesForBuild', () => {
   it('builds no Category pages when no backend is configured', async () => {
     expect(await categoryPagesForBuild({})).toEqual([]);
     expect(await categoriesForBuild({})).toEqual([]);
-  });
-});
-
-describe('browseForBuild', () => {
-  const SHOP = {
-    MEDUSA_BACKEND_URL: 'http://shop.test',
-    MEDUSA_PUBLISHABLE_KEY: 'pk_test',
-  };
-  const listed = (
-    count: number,
-    results = count
-      ? [
-          {
-            id: 'pi_mann',
-            type: 'manufacturer-number',
-            value: 'HU 816 x',
-            normalized_value: 'HU816X',
-            superseded: false,
-            brand: mann,
-            part: { id: 'part_oil', name: 'Масляный фильтр', category: null },
-            offers: [],
-            thumbnail: null,
-          },
-        ]
-      : [],
-  ) => ({
-    results,
-    facets: [],
-    category: null,
-    model: null,
-    count,
-    offset: 0,
-    limit: 12,
-  });
-
-  afterEach(() => {
-    vi.unstubAllGlobals();
-  });
-
-  it('shows no showcase when no backend is configured', async () => {
-    expect(await browseForBuild('ru', {})).toBeNull();
-  });
-
-  it('renders the first page of the browse the search page continues', async () => {
-    const fetch = vi.fn((_url: string) => respond(listed(30)));
-    vi.stubGlobal('fetch', fetch);
-
-    const browse = await browseForBuild('ru', SHOP);
-
-    expect(String(fetch.mock.calls[0]?.[0])).toBe(
-      'http://shop.test/store/search?locale=ru&limit=12',
-    );
-    expect(browse?.found.results.map(({ slug }) => slug)).toEqual([
-      'mann-filter-hu816x',
-    ]);
-    expect(browse?.next).toBe('/ru/parts/search/?offset=12');
-  });
-
-  it('offers no next page when the catalogue fits on one', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(() => respond(listed(12))),
-    );
-
-    expect((await browseForBuild('en', SHOP))?.next).toBeNull();
-  });
-
-  it.each([
-    ['the catalogue is empty', () => respond(listed(0))],
-    ['the shop fails', () => respond({}, false)],
-  ])('shows no showcase when %s', async (_, answer) => {
-    vi.stubGlobal('fetch', vi.fn(answer));
-
-    expect(await browseForBuild('ru', SHOP)).toBeNull();
   });
 });
 

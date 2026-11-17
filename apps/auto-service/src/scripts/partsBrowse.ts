@@ -1,9 +1,7 @@
 export const PARTS_BROWSE_ATTRIBUTE = 'data-parts-browse';
 export const PARTS_BROWSE_STATUS_ATTRIBUTE = 'data-parts-browse-status';
-export const PARTS_BROWSE_SOURCE_ATTRIBUTE = 'data-parts-browse-source';
 
 const PAGE_LINK = 'a[rel="prev"][href], a[rel="next"][href]';
-const OFFSET = 'offset';
 
 type Navigate = (href: string) => void;
 
@@ -23,11 +21,10 @@ const plainClick = (event: MouseEvent) =>
   !event.shiftKey &&
   !event.altKey;
 
-const offsetOf = (href: string) =>
-  new URL(href, window.location.href).searchParams.get(OFFSET);
-
-const withOffset = (path: string, offset: string | null) =>
-  offset ? `${path}?${new URLSearchParams({ [OFFSET]: offset })}` : path;
+const pageOf = (href: string) => {
+  const { pathname, search } = new URL(href, window.location.href);
+  return pathname + search;
+};
 
 export function definePartsBrowse(
   tagName = 'parts-browse',
@@ -38,6 +35,7 @@ export function definePartsBrowse(
     tagName,
     class extends HTMLElement {
       private controller?: AbortController;
+      private shown = '';
 
       constructor() {
         super();
@@ -45,11 +43,11 @@ export function definePartsBrowse(
       }
 
       connectedCallback() {
+        this.shown = pageOf(window.location.href);
         this.controller = new AbortController();
         window.addEventListener('popstate', () => void this.restore(), {
           signal: this.controller.signal,
         });
-        if (offsetOf(window.location.href)) void this.restore();
       }
 
       disconnectedCallback() {
@@ -58,9 +56,8 @@ export function definePartsBrowse(
       }
 
       private async restore() {
-        const source = this.getAttribute(PARTS_BROWSE_SOURCE_ATTRIBUTE);
-        if (!source) return;
-        const href = withOffset(source, offsetOf(window.location.href));
+        const href = window.location.href;
+        if (pageOf(href) === this.shown) return;
         if (!(await this.show(href, false))) navigate(href);
       }
 
@@ -76,11 +73,7 @@ export function definePartsBrowse(
           navigate(link.href);
           return;
         }
-        window.history.pushState(
-          null,
-          '',
-          withOffset(window.location.pathname, offsetOf(link.href)),
-        );
+        window.history.pushState(null, '', link.href);
       }
 
       private block() {
@@ -94,6 +87,7 @@ export function definePartsBrowse(
         const next = await browseBlockOf(href).catch(() => null);
         if (!next) return false;
         block.replaceWith(next);
+        this.shown = pageOf(href);
         const live = this.querySelector('[aria-live]');
         if (live) {
           live.textContent = next.getAttribute(PARTS_BROWSE_STATUS_ATTRIBUTE);

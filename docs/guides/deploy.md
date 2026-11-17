@@ -475,7 +475,7 @@ build keeps using, and an unset or invalid value falls back to `MEDUSA_BACKEND_U
 the bot marks a `parts-order` Lead ✅ it completes the Order, ❌ cancels it,
 through `POST /hooks/carlab-orders/:id/outcome` with
 `Authorization: Bearer $SHOP_ORDER_OUTCOME_SECRET`. That route is not under
-`/admin`, so Caddy's admin basic_auth never sees it, and the secret can do
+`/admin`, and the secret can do
 nothing but complete or cancel an Order. `SHOP_ORDER_OUTCOME_SECRET` is one
 value set twice, on approved.rs and in the shop's `.env`
 (`openssl rand -hex 32`); unset in the shop, the route answers 401 to
@@ -934,18 +934,18 @@ Droplet in Frankfurt (`fra1`, Ubuntu 24.04, Basic `s-2vcpu-4gb`: 2 vCPU, 4 GB,
 stay on AWS in `eu-north-1`: AWS would not enable a 4 GB Lightsail plan for the
 account. All of it is described in `infra/auto-service-shop/`:
 
-| File                                     | What it is                                                                                                                                                                                       |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `Dockerfile` + `Dockerfile.dockerignore` | the production image: `pnpm --filter @podbor/auto-service-shop build`, `pnpm deploy --legacy`; runtime from `.medusa/server` as `node`                                                           |
-| `docker-compose.yml`                     | postgres 16.15, typesense 30.2, medusa (the GHCR image by sha), caddy 2.11.4                                                                                                                     |
-| `caddy/Caddyfile`                        | `api.carlab.rs` and `admin.carlab.rs` → `medusa:9000`, TLS, security headers, body up to 1 MB on the API host and 25 MB on the admin host, payment webhooks closed, basic_auth on the admin host |
-| `production.env.example`                 | the template for `/srv/carlab/.env`                                                                                                                                                              |
-| `backup.env.example`                     | the template for `/srv/carlab/.env.backup`, the off-host backup bucket                                                                                                                           |
-| `deploy.sh`, `backup.sh`, `restore.sh`   | shipping, the nightly backup and its off-host copy (`backup.sh fetch` pulls one back), restore                                                                                                   |
-| `crawler-role.sh`                        | the crawler's Postgres role, run by `deploy.sh` and `restore.sh` after the migrations                                                                                                            |
-| `move-static-to-s3.sh`                   | once: copies the old `static` volume to the public bucket; stored image keys need no rewrite                                                                                                     |
-| `bootstrap-host.sh`, `harden-ssh.sh`     | first-time server setup (once, by hand)                                                                                                                                                          |
-| `test/*.test.sh`                         | the compose shape, the Caddy rules against a live Caddy, the crawler role against a live Postgres, the scripts' behaviour against a stubbed `docker`, run in `check`                             |
+| File                                     | What it is                                                                                                                                                           |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Dockerfile` + `Dockerfile.dockerignore` | the production image: `pnpm --filter @podbor/auto-service-shop build`, `pnpm deploy --legacy`; runtime from `.medusa/server` as `node`                               |
+| `docker-compose.yml`                     | postgres 16.15, typesense 30.2, medusa (the GHCR image by sha), caddy 2.11.4                                                                                         |
+| `caddy/Caddyfile`                        | `api.carlab.rs` and `admin.carlab.rs` → `medusa:9000`, TLS, security headers, body up to 1 MB on the API host and 25 MB on the admin host, payment webhooks closed   |
+| `production.env.example`                 | the template for `/srv/carlab/.env`                                                                                                                                  |
+| `backup.env.example`                     | the template for `/srv/carlab/.env.backup`, the off-host backup bucket                                                                                               |
+| `deploy.sh`, `backup.sh`, `restore.sh`   | shipping, the nightly backup and its off-host copy (`backup.sh fetch` pulls one back), restore                                                                       |
+| `crawler-role.sh`                        | the crawler's Postgres role, run by `deploy.sh` and `restore.sh` after the migrations                                                                                |
+| `move-static-to-s3.sh`                   | once: copies the old `static` volume to the public bucket; stored image keys need no rewrite                                                                         |
+| `bootstrap-host.sh`, `harden-ssh.sh`     | first-time server setup (once, by hand)                                                                                                                              |
+| `test/*.test.sh`                         | the compose shape, the Caddy rules against a live Caddy, the crawler role against a live Postgres, the scripts' behaviour against a stubbed `docker`, run in `check` |
 
 There is no Redis: one Medusa process runs the in-memory event bus, cache and
 workflow engine. A second Medusa instance would need Redis first.
@@ -1277,21 +1277,11 @@ number gets its CI value in that script. The non-obvious parts:
   Without the secret on both sides every shopper shares one bucket again. An answer's attributes that do not fit its Category are dropped one
   by one; a Part whose answer still misses a required field stays without a
   Category, and the report names the Category and the missing fields.
-- `ADMIN_BASIC_AUTH_USER` and `ADMIN_BASIC_AUTH_HASH` put HTTP basic_auth in
-  front of everything on `ADMIN_HOST`, before Medusa's own login, so staff
-  passwords cannot be guessed from the internet. The hash is bcrypt, made
-  without printing the password to the terminal history:
-  `docker run --rm -it caddy:2.11.4-alpine caddy hash-password` (it prompts).
-  Write it in **single quotes**, `ADMIN_BASIC_AUTH_HASH='$2a$14$...'`, or compose
-  substitutes its `$` signs. Both are required: compose refuses to start without
-  them. Three requests on the admin host pass with a `Bearer` token alone, since
-  the admin's own fetch replaces the browser's basic_auth header there:
-  `/auth/session` (sign-in), `/admin/invites/accept` and
-  `/auth/user/emailpass/update` (a password reset); each one is refused by Medusa
-  without a valid token, and staff sign-in itself (`/auth/user/emailpass`) is
-  not among them. The API host answers 404 on `/admin` and `/auth/user`, so
-  staff routes exist only behind the admin host's basic_auth; the storefront
-  calls only `/store/*` (and the `/health/ready` probe). Checked against a live Caddy by
+- The admin host has no basic_auth: Medusa's own sign-in is the only gate, and
+  Medusa does not limit sign-in attempts, so every staff account gets a long
+  random password. The API host answers 404 on `/admin` and `/auth/user`, so
+  staff routes exist only on the admin host; the storefront calls only
+  `/store/*` (and the `/health/ready` probe). Checked against a live Caddy by
   `infra/auto-service-shop/test/compose.test.sh`.
 - `CRAWLER_DB_PASSWORD` is the crawler's Postgres password, see
   [The crawler on the owner's Mac](#the-crawler-on-the-owners-mac).
@@ -1950,10 +1940,8 @@ Steps 1, 5 and 6 are one `terraform apply`: see `infra/auto-service-shop/terrafo
 3. **DNS.** A records for `api.carlab.rs` and `admin.carlab.rs` at the reserved IPv4.
    Done: `dig +short` returns it for both names.
 4. **`.env` on the server.** Copy `infra/auto-service-shop/production.env.example` to
-   `/srv/carlab/.env`, fill in every value (secrets with `openssl rand -hex 32`,
-   the admin's basic_auth hash as in [`.env`](#env)), then
-   `chmod 600 /srv/carlab/.env`. Give staff the basic_auth user and password
-   apart from their Medusa sign-in.
+   `/srv/carlab/.env`, fill in every value (secrets with `openssl rand -hex 32`),
+   then `chmod 600 /srv/carlab/.env`.
    Done: `ssh deploy@<IPv4> 'stat -c %a /srv/carlab/.env'` prints `600`.
 5. **Shop buckets.** Create the public and the private S3 bucket and the shop's
    IAM user as in [Files on S3](#files-on-s3), and put their values in

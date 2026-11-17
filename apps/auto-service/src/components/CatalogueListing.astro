@@ -1,0 +1,198 @@
+---
+import type { SearchFacet } from '@podbor/catalog-contract';
+import FacetFilters from './FacetFilters.astro';
+import ListingBar from './ListingBar.astro';
+import ListingSort from './ListingSort.astro';
+import FilterChips from './FilterChips.astro';
+import StatusNote from './StatusNote.astro';
+import PartAskRow from './PartAskRow.astro';
+import InquiryLink from './InquiryLink.astro';
+import PartsBrowse from './PartsBrowse.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import type { SearchOutcome } from '@/utils/catalogue';
+import type { SearchLink } from '@/utils/catalogueSearch';
+import type { chosenFilters } from '@/utils/partsSearch';
+import { PARTS_INQUIRY_ANCHOR } from '@/utils/paths';
+import type { SearchView } from '@/utils/searchPage';
+
+interface Props {
+  view: SearchView;
+  found: SearchOutcome;
+  action: string;
+  hidden: Record<string, string>;
+  facets: SearchFacet[];
+  chips: ReturnType<typeof chosenFilters>;
+  emptyMessage: string;
+  inquiryTopic: string;
+  cars?: SearchLink[];
+  looseNumbers?: boolean;
+  modelName?: string | null;
+}
+
+const {
+  view,
+  found,
+  action,
+  hidden,
+  facets,
+  chips,
+  emptyMessage,
+  inquiryTopic,
+  cars = [],
+  looseNumbers = false,
+  modelName,
+} = Astro.props;
+const {
+  q,
+  category,
+  chosen,
+  ranges,
+  offset,
+  dormant,
+  sort,
+  sortHrefs,
+  searchHref,
+  filtersHref,
+} = view;
+const copy = content(localeFrom(Astro.url.pathname)).partsSearch;
+---
+
+<div
+  class:list={[
+    'grid gap-6',
+    facets.length > 0 &&
+      'max-lg:gap-y-0 lg:grid-cols-[17rem_minmax(0,1fr)] lg:items-start lg:gap-10',
+  ]}
+>
+  {
+    facets.length > 0 && (
+      <FacetFilters
+        action={action}
+        hidden={hidden}
+        facets={facets}
+        dormant={dormant}
+        chosen={chosen}
+        ranges={ranges}
+        count={found.count}
+        resetHref={filtersHref([], [])}
+      />
+    )
+  }
+
+  <div class="flex min-w-0 flex-col gap-8 lg:gap-10">
+    {
+      cars.length > 0 && (
+        <section class="flex flex-col gap-3">
+          <h2 class="text-block font-semibold">{copy.carsGroup}</h2>
+          <ul class="flex flex-wrap gap-2">
+            {cars.map((car) => (
+              <li>
+                <a
+                  href={car.href}
+                  class="flex min-h-11 flex-col justify-center rounded-control border border-line bg-paper px-4 py-2 transition-colors duration-150 hover:border-ink motion-reduce:transition-none"
+                >
+                  <span class="line-clamp-3 text-sm font-semibold wrap-anywhere text-ink">
+                    {car.label}
+                  </span>
+                  {car.detail && (
+                    <span class="text-xs text-muted">{car.detail}</span>
+                  )}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+    <div class="flex flex-col gap-3">
+      {
+        cars.length > 0 && (
+          <h2 class="-mb-3 text-block font-semibold">{copy.partsGroup}</h2>
+        )
+      }
+      <ListingBar
+        count={looseNumbers ? null : found.count}
+        filters={facets.length > 0}
+        active={chips.length}
+      />
+
+      {
+        !q && (sort || found.results.some(({ demand }) => demand)) && (
+          <ListingSort current={sort} hrefs={sortHrefs} />
+        )
+      }
+
+      {
+        (chips.length > 0 || modelName) && (
+          <FilterChips
+            chips={[
+              ...(modelName
+                ? [
+                    {
+                      label: modelName,
+                      href: searchHref(chosen, ranges, 0, ''),
+                    },
+                  ]
+                : []),
+              ...chips.map((chip) => ({
+                label: chip.label,
+                href: filtersHref(chip.facets, chip.ranges),
+              })),
+            ]}
+            resetHref={chips.length > 0 ? filtersHref([], []) : undefined}
+          />
+        )
+      }
+
+      {
+        looseNumbers && (
+          <>
+            <StatusNote>
+              {copy.numberNotFound.replace('{q}', q)}{' '}
+              <a href={`#${PARTS_INQUIRY_ANCHOR}`} class="link font-semibold">
+                {copy.notFoundLink}
+              </a>
+            </StatusNote>
+            <h2 class="pt-1 text-block font-semibold">{copy.similarNumbers}</h2>
+          </>
+        )
+      }
+      {
+        found.results.length === 0 ? (
+          <StatusNote>{emptyMessage}</StatusNote>
+        ) : (
+          <PartsBrowse
+            found={found}
+            category={category}
+            prev={
+              offset > 0
+                ? searchHref(chosen, ranges, Math.max(0, offset - found.limit))
+                : null
+            }
+            next={
+              offset + found.limit < found.count
+                ? searchHref(chosen, ranges, offset + found.limit)
+                : null
+            }
+          />
+        )
+      }
+
+      {
+        found.results.length > 0 && !looseNumbers && (
+          <div class="flex flex-col gap-3 pt-2">
+            <PartAskRow
+              part={inquiryTopic}
+              question={copy.lookingFor.replace('{q}', '{part}')}
+              heading={copy.askManager}
+              class="sm:max-w-md"
+              lead="whatsapp"
+            />
+            <InquiryLink topic={inquiryTopic} />
+          </div>
+        )
+      }
+    </div>
+  </div>
+</div>

@@ -11,6 +11,7 @@ import { blogListed } from '@podbor/blog/article';
 import { sitemapFilter } from './src/utils/sitemap.ts';
 import { articleFiles } from './src/utils/articleFiles.ts';
 import { partPagesForBuild } from './src/utils/catalogueEnv.ts';
+import { partsHubPlugin } from './src/utils/partsHub.ts';
 
 const site = CARLAB.url;
 const partPages = await partPagesForBuild(process.env);
@@ -45,8 +46,15 @@ export default defineConfig({
     }),
   ],
   vite: {
-    plugins: [tailwindcss()],
-    ssr: { noExternal: true },
+    plugins: [
+      tailwindcss(),
+      partsHubPlugin(process.env),
+      {
+        name: 'bundle-server-dependencies',
+        apply: 'build',
+        config: () => ({ ssr: { noExternal: true } }),
+      },
+    ],
   },
   experimental: {
     incrementalBuild: true,

@@ -35,7 +35,13 @@ export default defineConfig({
     }),
   ],
   vite: {
-    plugins: [tailwindcss()],
-    ssr: { noExternal: true },
+    plugins: [
+      tailwindcss(),
+      {
+        name: 'bundle-server-dependencies',
+        apply: 'build',
+        config: () => ({ ssr: { noExternal: true } }),
+      },
+    ],
   },
 });
