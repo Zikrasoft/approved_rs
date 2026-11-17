@@ -76,13 +76,15 @@ const values = (facet: SearchFacet) =>
         checked: chosen.includes(filter),
       };
     });
-const groups = facets.map((facet, index) => {
+const visible = facets.filter(({ key }) => !dormant.includes(key));
+const groups = facets.map((facet) => {
   const all = values(facet);
+  const index = visible.indexOf(facet);
   const rest = all.slice(VISIBLE_VALUES);
   return {
     facet,
     open:
-      index < OPEN_GROUPS ||
+      (index >= 0 && index < OPEN_GROUPS) ||
       all.some(({ checked }) => checked) ||
       ranges.some(({ key }) => key === facet.key),
     pills:

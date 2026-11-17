@@ -80,6 +80,24 @@ describe('the facet filters', () => {
     expect(fieldset('polarity').hidden).toBe(true);
   });
 
+  it('counts only the visible groups toward the ones that start open', async () => {
+    const root = await filters({
+      facets: [
+        facet('polarity', [['direct', 2]]),
+        facet('brand', [['varta', 3]]),
+        facet('axle', [['front', 2]]),
+        facet('type', [['oil', 2]]),
+      ],
+      dormant: ['polarity'],
+    });
+    const open = (key: string) =>
+      root
+        .querySelector(`[data-facet-key="${key}"] > details`)!
+        .hasAttribute('open');
+
+    expect(['brand', 'axle', 'type'].map(open)).toEqual([true, true, false]);
+  });
+
   it('shows a few values as pills and a brand facet as a list', async () => {
     const root = await filters({
       facets: [
