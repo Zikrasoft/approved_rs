@@ -22,6 +22,7 @@ const directives: Record<string, string[]> = {
   'connect-src': [
     "'self'",
     'https://*.google-analytics.com',
+    'https://analytics.google.com',
     'https://*.analytics.google.com',
     GOOGLE_TAG_ORIGIN,
     YANDEX_METRIKA_ORIGIN,
