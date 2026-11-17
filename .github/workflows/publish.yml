@@ -3,28 +3,32 @@ name: Publish catalogue
 on:
   workflow_dispatch:
     inputs:
+      app:
+        description: Site to rebuild
+        type: choice
+        options: [auto-service, detailing, approved-rs]
+        default: auto-service
       ref:
-        description: Commit to build instead of the deployed one, for a storefront release CI cannot pass
+        description: Commit to build instead of the deployed one, for a release CI cannot pass
         required: false
-        default: refs/tags/deployed/auto-service
 
 concurrency:
-  group: publish-catalogue
+  group: publish-${{ inputs.app }}
   cancel-in-progress: true
 
 jobs:
-  rebuild-carlab:
+  rebuild:
     runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
-    environment: site-auto-service
+    environment: site-${{ inputs.app }}
     permissions:
       contents: read
     concurrency:
-      group: deploy-site-auto-service
+      group: deploy-site-${{ inputs.app }}
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.ref || 'refs/tags/deployed/auto-service' }}
+          ref: ${{ inputs.ref || format('refs/tags/deployed/{0}', inputs.app) }}
           persist-credentials: false
       - uses: actions/checkout@v4
         with:
@@ -34,9 +38,9 @@ jobs:
       - uses: ./.github/actions/setup-pnpm
       - uses: actions/cache@v4
         with:
-          path: apps/auto-service/node_modules/.astro
-          key: astro-carlab-${{ github.ref_name }}-${{ github.run_id }}-${{ github.run_attempt }}
-          restore-keys: astro-carlab-${{ github.ref_name }}-
+          path: apps/${{ inputs.app }}/node_modules/.astro
+          key: astro-${{ inputs.app }}-${{ github.ref_name }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: astro-${{ inputs.app }}-${{ github.ref_name }}-
       - name: Build and deploy
         env:
           SITE_SECRETS: >-
@@ -69,6 +73,7 @@ jobs:
           VPS_USER: ${{ secrets.AUTO_SERVICE_SHOP_VPS_USER }}
           VPS_SSH_KEY: ${{ secrets.AUTO_SERVICE_SHOP_VPS_SSH_KEY }}
           VPS_KNOWN_HOSTS: ${{ secrets.AUTO_SERVICE_SHOP_VPS_KNOWN_HOSTS }}
+          APP: ${{ inputs.app }}
         run: |
           sha=$(git rev-parse HEAD)
-          sh workflow/.github/scripts/upload-site.sh auto-service "$sha-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          sh workflow/.github/scripts/upload-site.sh "$APP" "$sha-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
