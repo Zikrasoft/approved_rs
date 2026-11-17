@@ -130,20 +130,21 @@ unset BROKEN
 ship "$D"
 sleep 1
 expect 'a fourth release deploys' run deploy-site.sh "$APP" "$D"
-expect 'a failed release does not count toward the three kept' released 3
+expect 'a failed release does not count toward the two kept' released 2
+refuse 'the release before the previous one is pruned' test -e "$SITES_ROOT/$APP/releases/$A"
 ship "$E"
 sleep 1
 expect 'a fifth release deploys' run deploy-site.sh "$APP" "$E"
-expect 'only the last three releases stay' released 3
-refuse 'the oldest release is pruned' test -e "$SITES_ROOT/$APP/releases/$A"
+expect 'only the live and the previous release stay' released 2
+refuse 'the oldest release is pruned' test -e "$SITES_ROOT/$APP/releases/$B"
 expect 'the previous release stays for rollback' test -e "$SITES_ROOT/$APP/releases/$D"
 
 sleep 1
-expect 'a redeploy of an older release succeeds' run deploy-site.sh "$APP" "$B"
-expect 'the redeployed release is current' current "$B"
-expect 'pruning never removes the release just made current' test -e "$SITES_ROOT/$APP/releases/$B"
-expect 'a redeploy of the live release is idempotent' run deploy-site.sh "$APP" "$B"
-expect 'the release survives an idempotent redeploy' current "$B"
+expect 'a rollback to the previous release succeeds' run deploy-site.sh "$APP" "$D"
+expect 'the rolled back release is current' current "$D"
+expect 'pruning never removes the release just made current' test -e "$SITES_ROOT/$APP/releases/$D"
+expect 'a redeploy of the live release is idempotent' run deploy-site.sh "$APP" "$D"
+expect 'the release survives an idempotent redeploy' current "$D"
 
 fresh
 ship "$A"
@@ -173,7 +174,7 @@ ship "$E"
 sleep 1
 expect 'a release after two failed ones deploys' run deploy-site.sh "$APP" "$E"
 expect 'failed releases never push the last good one out' test -e "$SITES_ROOT/$APP/releases/$B"
-expect 'releases that never went live are gone' released 3
+expect 'releases that never went live are gone' released 2
 
 fresh
 ship "$A"

@@ -1111,7 +1111,7 @@ is retried once its 10 minute lease runs out.
   before `running` existed its link). `deploy-site.sh <app> <name>` points
   `running` at the release, recreates the container, waits for it to answer
   `/`, and only then points `current` at it; on failure it points `running`
-  back and leaves `current` alone. It keeps the last three releases. Caddy serves a release's files itself
+  back and leaves `current` alone. It keeps the live release and the one before it. Caddy serves a release's files itself
   (`/_astro/*` for a year, everything else revalidated) and hands every other
   path to node, except `/_image`, which answers 404 (no sharp at runtime).
   Every redirect comes from node: each site's 404 is on demand, so middleware

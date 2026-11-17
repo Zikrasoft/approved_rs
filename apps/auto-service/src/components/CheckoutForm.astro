@@ -1,4 +1,5 @@
 ---
+import { renderId } from '@podbor/site-kit';
 import { contactCta } from '@podbor/site-kit/contact-control';
 import { METRIKA_MASK_CLASS } from '@podbor/site-kit/browser';
 import PickupDetails from './PickupDetails.astro';
@@ -16,7 +17,7 @@ import { content } from '@/i18n/content';
 const locale = localeFrom(Astro.url.pathname);
 const { site, shopCart: copy, pages } = content(locale);
 const inquiry = pages.partsInquiry;
-const uid = crypto.randomUUID().slice(0, 8);
+const uid = renderId(Astro.locals);
 const steps = {
   contact: `step-contact-${uid}`,
   pickup: `step-pickup-${uid}`,

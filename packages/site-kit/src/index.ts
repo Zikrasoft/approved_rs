@@ -36,6 +36,7 @@ export {
 } from './localeCookie.ts';
 export { isActiveNavPath, navCurrent, swapLocalePath } from './navPath.ts';
 export { VISITOR_ID_COOKIE } from './visitorId.ts';
+export { renderId } from './renderId.ts';
 export {
   STORAGE_KEY as CONSENT_STORAGE_KEY,
   parseConsent,
