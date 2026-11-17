@@ -45,7 +45,7 @@ check "$(base)" "$first" 'the oldest deployed commit is the base'
 git tag -a -m shop deployed/shop "$second"
 check "$(base)" "$first" 'an annotated tag is read as its commit'
 
-check "$(FORCE=true base)" '' 'a forced run checks everything'
+check "$(FORCE=true base)" "$first" 'a forced run checks only what changed'
 
 commit pnpm-lock.yaml changed >/dev/null
 check "$(base)" '' 'a lockfile change checks everything'

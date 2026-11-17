@@ -6,7 +6,6 @@ full() {
   exit 0
 }
 
-[ "${FORCE:-false}" = true ] && full 'forced from workflow_dispatch'
 
 deployed=$(git for-each-ref \
   --format='%(if)%(*objectname)%(then)%(*objectname)%(else)%(objectname)%(end)' \

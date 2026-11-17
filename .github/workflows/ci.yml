@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       force:
-        description: Deploy every app, whatever the tags say
+        description: Deploy every app, whatever the tags say (tests still run only for what changed)
         type: boolean
         default: false
 
