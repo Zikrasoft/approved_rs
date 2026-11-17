@@ -49,9 +49,19 @@ const inquiryEntry = onParts && !open;
 const links = [
   { href: PathBuilder.services(locale), label: site.nav.services, attrs: {} },
   { href: PathBuilder.parts(locale), label: site.nav.parts, attrs: {} },
+  {
+    href: PathBuilder.cars(locale),
+    label: content(locale).pages.cars.navLabel,
+    attrs: {},
+  },
   { href: PathBuilder.works(locale), label: site.nav.works, attrs: {} },
   { href: PathBuilder.about(locale), label: site.nav.about, attrs: {} },
-  { href: PathBuilder.contact(locale), label: site.nav.contact, attrs: {} },
+  {
+    href: PathBuilder.contact(locale),
+    label: site.nav.contact,
+    attrs: {},
+    mobileOnly: true,
+  },
 ].map((link) => ({ ...link, current: navCurrent(pathname, link.href) }));
 ---
 
@@ -80,21 +90,23 @@ const links = [
         aria-label={site.common.primaryNavLabel}
       >
         {
-          links.map((link) => (
-            <a
-              href={link.href}
-              aria-current={link.current}
-              {...link.attrs}
-              class:list={[
-                'relative text-sm font-medium transition-colors duration-150',
-                link.current
-                  ? 'text-panel-fg after:absolute after:inset-x-0 after:-bottom-1.5 after:h-0.5 after:bg-signal'
-                  : 'text-panel-ink hover:text-panel-fg',
-              ]}
-            >
-              {link.label}
-            </a>
-          ))
+          links
+            .filter((link) => !link.mobileOnly)
+            .map((link) => (
+              <a
+                href={link.href}
+                aria-current={link.current}
+                {...link.attrs}
+                class:list={[
+                  'relative text-sm font-medium transition-colors duration-150',
+                  link.current
+                    ? 'text-panel-fg after:absolute after:inset-x-0 after:-bottom-1.5 after:h-0.5 after:bg-signal'
+                    : 'text-panel-ink hover:text-panel-fg',
+                ]}
+              >
+                {link.label}
+              </a>
+            ))
         }
       </nav>
 
