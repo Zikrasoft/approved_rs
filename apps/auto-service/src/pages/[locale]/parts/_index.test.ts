@@ -8,19 +8,37 @@ import {
   respond,
   setShop,
 } from '@/components/renderAstro';
-import { categoryPagesForBuild, makeHubsForBuild } from '@/utils/catalogueEnv';
+import {
+  categoryPagesForBuild,
+  makeHubsForBuild,
+  partPagesForBuild,
+} from '@/utils/catalogueEnv';
 import type {
   CategoryPageEntry,
   MakeHubEntry,
 } from '@/utils/catalogueSnapshot';
 import { FILTERS_INQUIRY_ATTRIBUTE } from '@/scripts/filterSheet';
+import { partsHubOf, type PartsHub as HubData } from '@/utils/partsHub';
 import PartsHub from './index.astro';
 
-vi.mock('@/utils/catalogueEnv', async (original) => ({
-  ...(await original<typeof import('@/utils/catalogueEnv')>()),
-  categoryPagesForBuild: vi.fn(async () => []),
-  makeHubsForBuild: vi.fn(async () => []),
-}));
+const built = vi.hoisted(() => ({ makes: [], categories: [] }) as HubData);
+
+vi.mock('virtual:parts-hub', () => ({ default: built }));
+
+vi.mock('@/utils/catalogueEnv', async (original) => {
+  const snapshot = async () => {
+    throw new Error('the catalogue snapshot is read at request time');
+  };
+  const actual = await original<typeof import('@/utils/catalogueEnv')>();
+  return {
+    ...actual,
+    ...Object.fromEntries(
+      Object.keys(actual)
+        .filter((name) => name.endsWith('ForBuild'))
+        .map((name) => [name, vi.fn(snapshot)]),
+    ),
+  };
+});
 
 const copy = content('ru').pages.partsInquiry;
 
@@ -56,8 +74,7 @@ const hub = (
   makes: MakeHubEntry[] = [],
   path = '/ru/parts/',
 ) => {
-  vi.mocked(categoryPagesForBuild).mockResolvedValue(categories);
-  vi.mocked(makeHubsForBuild).mockResolvedValue(makes);
+  Object.assign(built, partsHubOf(categories, makes));
   return render(PartsHub, { path, params: { locale: 'ru' } });
 };
 
@@ -69,6 +86,18 @@ afterEach(() => {
 });
 
 describe('the parts hub', () => {
+  it('never reads the catalogue snapshot while it answers a visitor', async () => {
+    setShop(false);
+    const root = await hub();
+
+    expect(
+      root.querySelector('a[href="/ru/parts/c/batteries/"]'),
+    ).not.toBeNull();
+    expect(categoryPagesForBuild).not.toHaveBeenCalled();
+    expect(makeHubsForBuild).not.toHaveBeenCalled();
+    expect(partPagesForBuild).not.toHaveBeenCalled();
+  });
+
   it('opens an inquiry for a category with no parts yet and browses one with parts', async () => {
     setShop(false);
     const root = await hub();
@@ -238,6 +267,11 @@ describe('the parts hub', () => {
       expect(root?.querySelector('a[rel="prev"]')).toBeNull();
       expect(root?.querySelector('[aria-live]')).not.toBeNull();
       expect(page.querySelector('meta[name="robots"]')).toBeNull();
+      expect(
+        shop.mock.calls.filter(([url]) =>
+          String(url).includes('/store/catalogue-snapshot'),
+        ),
+      ).toEqual([]);
       expect(
         page.querySelector('link[rel="canonical"]')?.getAttribute('href'),
       ).toBe('https://carlab.rs/ru/parts/');

@@ -1,6 +1,5 @@
 ---
 import { contactCta } from '@podbor/site-kit/contact-control';
-import { translated } from '@podbor/catalog-contract';
 export const prerender = false;
 
 import Shell from '@/layouts/Shell.astro';
@@ -9,17 +8,10 @@ import VinInquiryCard from '@/components/VinInquiryCard.astro';
 import Icon from '@/components/Icon.astro';
 import CatalogueSearch from '@/components/CatalogueSearch.astro';
 import CatalogueListing from '@/components/CatalogueListing.astro';
-import { byDemand, demandOf } from '@/utils/demand';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
-import {
-  catalogueFor,
-  categoryPagesForBuild,
-  makeHubsForBuild,
-  shopOpen,
-} from '@/utils/catalogueEnv';
+import { catalogueFor, shopOpen } from '@/utils/catalogueEnv';
+import hub from 'virtual:parts-hub';
 import { inquiryTopic } from '@/utils/catalogueSearch';
-import { paragraphs } from '@podbor/site-kit';
-import { TOP_MAKES, topMakes } from '@/utils/makeIndex';
 import { chosenFilters, withFacetCopy } from '@/utils/partsSearch';
 import { planSearch } from '@/utils/searchPage';
 import {
@@ -52,23 +44,12 @@ const site = content(locale).site;
 const copy = pages.partsInquiry;
 const hubsCopy = content(locale).partsCar.hubs;
 const searchCopy = content(locale).partsSearch;
-const [listed, hubs] = await Promise.all([
-  categoryPagesForBuild().catch(() => []),
-  makeHubsForBuild().catch(() => []),
-]);
-const makes = topMakes(hubs, TOP_MAKES).map(({ make }) => make);
-const categories = byDemand(
-  listed.map(({ pages, ...category }) => ({
-    ...category,
-    empty: pages.length === 0,
-    demand: demandOf(pages),
-  })),
-  ({ demand }) => demand,
-).map((category) => ({
+const { makes } = hub;
+const categories = hub.categories.map((category) => ({
   slug: category.slug,
-  name: translated(category, 'name', locale),
-  lead: paragraphs(translated(category, 'text', locale))[0],
   empty: category.empty,
+  name: category.name[locale],
+  lead: category.lead[locale],
 }));
 const { view } = plan;
 const { found, chosen, ranges, offset, sort } = view;
