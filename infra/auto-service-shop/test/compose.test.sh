@@ -5,9 +5,9 @@ here="$(cd "$(dirname -- "$0")/.." && pwd)"
 work=$(mktemp -d)
 net=carlab-caddy-test-$$
 trap 'docker rm -f "$net-medusa" "$net-site" "$net-caddy" >/dev/null 2>&1; docker network rm "$net" >/dev/null 2>&1; rm -rf "$work"' EXIT
-printf 'POSTGRES_PASSWORD=x\nCRM_DB_PASSWORD=c0ffee\nTYPESENSE_API_KEY=y\nMEDUSA_TAG=%s\nADMIN_BASIC_AUTH_USER=staff\nADMIN_BASIC_AUTH_HASH=%s\nGRAFANA_ADMIN_PASSWORD=g\nMEDIA_ORIGIN=https://bucket.s3.eu-north-1.amazonaws.com\n' \
-  0000000000000000000000000000000000000000 "'\$2a\$14\$hash'" >"$work/.env"
-env -u MEDIA_ORIGIN -u POSTGRES_PASSWORD -u CRM_DB_PASSWORD -u TYPESENSE_API_KEY -u MEDUSA_TAG -u ADMIN_BASIC_AUTH_USER -u ADMIN_BASIC_AUTH_HASH -u GRAFANA_ADMIN_PASSWORD -u GRAFANA_PORT docker compose -f "$here/docker-compose.yml" --project-directory "$work" --profile "*" config --format json >"$work/config.json"
+printf 'POSTGRES_PASSWORD=x\nCRM_DB_PASSWORD=c0ffee\nTYPESENSE_API_KEY=y\nMEDUSA_TAG=%s\nGRAFANA_ADMIN_PASSWORD=g\nMEDIA_ORIGIN=https://bucket.s3.eu-north-1.amazonaws.com\n' \
+  0000000000000000000000000000000000000000 >"$work/.env"
+env -u MEDIA_ORIGIN -u POSTGRES_PASSWORD -u CRM_DB_PASSWORD -u TYPESENSE_API_KEY -u MEDUSA_TAG -u GRAFANA_ADMIN_PASSWORD -u GRAFANA_PORT docker compose -f "$here/docker-compose.yml" --project-directory "$work" --profile "*" config --format json >"$work/config.json"
 docker compose -f "$here/docker-compose.yml" --project-directory "$work" --profile "*" config --format json --no-env-resolution 2>/dev/null | jq .services >"$work/services.json"
 
 failures=0
@@ -60,8 +60,6 @@ expect 'caddy serves the admin on its own host' \
   '.services.caddy.environment.ADMIN_HOST == "admin.carlab.rs"'
 expect 'caddy serves media on its own host from the origin set in .env' \
   '.services.caddy.environment.MEDIA_HOST == "media.carlab.rs" and (.services.caddy.environment.MEDIA_ORIGIN | length > 0)'
-expect 'caddy gets the admin basic_auth credentials from .env, a bcrypt hash kept literal' \
-  '.services.caddy.environment.ADMIN_BASIC_AUTH_USER == "staff" and (.services.caddy.environment.ADMIN_BASIC_AUTH_HASH | test("^[$]{2}2a[$]{2}14[$]{2}hash$"))'
 expect 'every service restarts on its own' '[.services[] | .restart] | all(. == "unless-stopped")'
 expect 'every service has a memory limit, together under the 4 GB of the host' \
   '[.services[] | .mem_limit | tonumber] | (all(. > 0) and add < 4096 * 1024 * 1024)'
@@ -109,7 +107,6 @@ expect 'every image is pinned to an exact tag' \
   '[.services[] | .image] | all(test(":(v?[0-9]+\\.[0-9]+[.a-z0-9-]*|[0-9a-f]{40})$"))'
 
 caddy_image=$(jq -r .services.caddy.image "$work/config.json")
-hash=$(docker run --rm "$caddy_image" caddy hash-password --plaintext staff-pass)
 docker network create "$net" >/dev/null
 docker run -d --name "$net-medusa" --network "$net" --network-alias medusa "$caddy_image" \
   caddy respond --listen :9000 '{http.request.body}' >/dev/null
@@ -125,7 +122,6 @@ done
 docker run -d --name "$net-caddy" --network "$net" -p 127.0.0.1::443 \
   -e API_HOST=api.localhost -e ADMIN_HOST=admin.localhost \
   -e MEDIA_HOST=media.localhost -e MEDIA_ORIGIN=http://medusa:9000 \
-  -e ADMIN_BASIC_AUTH_USER=staff -e ADMIN_BASIC_AUTH_HASH="$hash" \
   -e CARLAB_HOST=carlab.localhost -e DETAILS_HOST=details.localhost -e APPROVED_HOST=approved.localhost -e CRM_HOST=crm.localhost \
   -v "$work/sites:/srv/sites:ro" \
   -v "$here/caddy:/etc/caddy:ro" "$caddy_image" >/dev/null
@@ -167,17 +163,10 @@ answers 'the API host closes the payment webhooks' 404 api /hooks/payment/stripe
 answers 'the API host still serves the shop hooks' 200 api /hooks/carlab-orders/x/outcome -X POST
 head -c 2000000 /dev/zero >"$work/big"
 answers 'the API host refuses a body over 1 MB' 413 api /store/carts -X POST --data-binary "@$work/big"
-answers 'the admin host takes a large upload' 200 admin /admin/uploads -u staff:staff-pass -X POST --data-binary "@$work/big"
+answers 'the admin host takes a large upload' 200 admin /admin/uploads -X POST --data-binary "@$work/big"
 answers 'the API host sends /app to the admin host' 302 api /app
-answers 'the admin host asks for basic_auth' 401 admin /app
-answers 'the admin host refuses a wrong password' 401 admin /app -u staff:wrong
-answers 'the admin host serves the admin with the password' 200 admin /app -u staff:staff-pass
-answers 'staff login needs basic_auth even with a bearer token' 401 admin /auth/user/emailpass -X POST -H 'Authorization: Bearer x'
-answers 'the admin API needs basic_auth even with a bearer token' 401 admin /admin/users -H 'Authorization: Bearer x'
-answers 'the session exchange passes with a bearer token alone' 200 admin /auth/session -X POST -H 'Authorization: Bearer x'
-answers 'an invite is accepted with a bearer token alone' 200 admin /admin/invites/accept -X POST -H 'Authorization: Bearer x'
-answers 'a password reset is set with a bearer token alone' 200 admin /auth/user/emailpass/update -X POST -H 'Authorization: Bearer x'
-answers 'the session exchange without a token needs basic_auth' 401 admin /auth/session -X POST
+answers 'the admin host serves the admin without basic_auth' 200 admin /app
+answers 'the admin host serves staff login' 200 admin /auth/user/emailpass -X POST
 answers 'the media host serves an image' 200 media /supplier-images/x
 answers 'the media host answers HEAD' 200 media /supplier-images/x -I
 answers 'the media host refuses writes' 405 media /supplier-images/x -X PUT

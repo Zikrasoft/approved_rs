@@ -7,7 +7,7 @@ project=carlab-logs-test-$$
 marker=$project-$(date +%s)
 port=$((20000 + $$ % 10000))
 cp -R "$here/docker-compose.yml" "$here/loki" "$here/alloy" "$here/grafana" "$here/logs-export.sh" "$work/"
-printf 'POSTGRES_PASSWORD=x\nTYPESENSE_API_KEY=y\nMEDUSA_TAG=%s\nADMIN_BASIC_AUTH_USER=staff\nADMIN_BASIC_AUTH_HASH=h\nGRAFANA_ADMIN_PASSWORD=grafana-test-pass\nGRAFANA_PORT=%s\n' \
+printf 'POSTGRES_PASSWORD=x\nTYPESENSE_API_KEY=y\nMEDUSA_TAG=%s\nGRAFANA_ADMIN_PASSWORD=grafana-test-pass\nGRAFANA_PORT=%s\n' \
   0000000000000000000000000000000000000000 "$port" >"$work/.env"
 compose() {
   docker compose -p "$project" -f "$work/docker-compose.yml" --project-directory "$work" "$@"
