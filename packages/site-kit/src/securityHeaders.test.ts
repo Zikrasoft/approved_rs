@@ -20,6 +20,10 @@ describe('the content security policy', () => {
     },
   );
 
+  it('lets GA4 send hits to the bare analytics.google.com, which no wildcard covers', () => {
+    expect(sources('connect-src')).toContain('https://analytics.google.com');
+  });
+
   it('sends violations to the site report route', () => {
     expect(sources('report-uri')).toEqual(['/api/csp-report']);
   });
