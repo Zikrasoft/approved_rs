@@ -46,8 +46,15 @@ export default defineConfig({
     }),
   ],
   vite: {
-    plugins: [tailwindcss(), partsHubPlugin(process.env)],
-    ssr: { noExternal: true },
+    plugins: [
+      tailwindcss(),
+      partsHubPlugin(process.env),
+      {
+        name: 'bundle-server-dependencies',
+        apply: 'build',
+        config: () => ({ ssr: { noExternal: true } }),
+      },
+    ],
   },
   experimental: {
     incrementalBuild: true,
