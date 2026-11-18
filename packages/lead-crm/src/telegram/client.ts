@@ -3,8 +3,6 @@ import type { UserFromGetMe } from 'grammy/types';
 import { z } from 'zod';
 import type { Keyboard } from './markup.ts';
 
-export const START_COMMAND = /^\/start(?:\s+(\S+))?$/;
-
 export type SendExtra = Parameters<Api['sendMessage']>[2];
 
 export function isMessageGone(err: unknown): boolean {

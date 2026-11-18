@@ -796,7 +796,7 @@ describe('POST /api/telegram-webhook', () => {
         (p) => p.chat_id === GROUP_ID && p.message_id === DIGEST_ID,
       );
     const link = (n: number) =>
-      `<a href="https://t.me/approved_test_bot?start=lead_${L(n)}">#${n}</a> Иван · Approved.rs`;
+      `<a href="https://t.me/crm_test_bot?start=lead_${L(n)}">#${n}</a> Иван · Approved.rs`;
 
     it('drops a Lead the admin closes from its card, and Leads closed meanwhile', async () => {
       await seedWithDigest(

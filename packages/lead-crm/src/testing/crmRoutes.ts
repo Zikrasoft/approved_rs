@@ -13,7 +13,7 @@ export const CARLAB_CAPTURE_TOKEN = '1003:test-carlab-capture-token';
 
 const CRM_ENV = {
   TELEGRAM_BOT_TOKEN: CRM_TOKEN,
-  TELEGRAM_BOT_USERNAME: 'approved_test_bot',
+  TELEGRAM_BOT_USERNAME: 'crm_test_bot',
   TELEGRAM_GROUP_ID: '-1009876543210',
   TELEGRAM_OWNER_ID: '111',
   TELEGRAM_ADMIN_ID: '222',

@@ -22,7 +22,8 @@ import {
   type PendingPrompt,
   type StoredLead,
 } from '../schema.ts';
-import { START_COMMAND, type TelegramClient } from '../telegram/client.ts';
+import type { TelegramClient } from '../telegram/client.ts';
+import { START_COMMAND } from '../telegram/startCommand.ts';
 import { formatDateRu, type Role } from '../telegram/markup.ts';
 import {
   buildDeleteConfirm,

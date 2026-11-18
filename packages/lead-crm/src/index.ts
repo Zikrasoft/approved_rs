@@ -39,7 +39,8 @@ export type { LedgerOperation, OperationType } from './ledgerStore.ts';
 export { parseOperationReply } from './operationReply.ts';
 export { BUSINESS_TIME_ZONE, businessDay } from './businessTime.ts';
 
-export { createTelegramClient, START_COMMAND } from './telegram/client.ts';
+export { createTelegramClient } from './telegram/client.ts';
+export { START_COMMAND } from './telegram/startCommand.ts';
 export type { TelegramClient } from './telegram/client.ts';
 
 export {
