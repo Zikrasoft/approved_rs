@@ -99,7 +99,7 @@ describe('the Make pages', () => {
     ]);
   });
 
-  it('exist for a Make with one published Part and nothing else, and not for a Make the list lacks', async () => {
+  it('exist for a Make with one published Part and nothing else, the exported list or not', async () => {
     withParts(
       {
         make: { slug: 'audi', name: 'Audi' },
@@ -119,7 +119,7 @@ describe('the Make pages', () => {
       (await getStaticPaths())
         .filter(({ params }) => params.locale === 'ru')
         .map(({ params }) => params.make),
-    ).toEqual(['audi', 'bmw']);
+    ).toEqual(['audi', 'bmw', 'tesla']);
     const audi = await page('ru', 'audi');
 
     expect(audi.querySelector('h1')?.textContent).toContain('Audi');

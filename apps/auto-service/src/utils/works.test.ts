@@ -328,6 +328,32 @@ describe('servicePhoto', () => {
   });
 });
 
+describe('workshopMakePages', () => {
+  const fitted = (slug: string, name: string) => ({
+    make: { slug, name },
+    parts: 3,
+    hub: true,
+    categories: [],
+  });
+
+  it('gives a Make that only the catalogue knows its own page, in slug order', () => {
+    const pages = workshopMakePages(
+      [],
+      [],
+      [fitted('porsche', 'Porsche'), fitted('audi', 'Audi')],
+    );
+
+    expect(pages.map(({ make }) => make)).toEqual([
+      { slug: 'audi', name: 'Audi' },
+      { slug: 'porsche', name: 'Porsche' },
+    ]);
+  });
+
+  it('still gives no page to a Make with nothing to show', () => {
+    expect(workshopMakePages([], [], [])).toEqual([]);
+  });
+});
+
 describe('overviewConflicts', () => {
   it('names a Make with more than one overview and the one its page uses', () => {
     const pages = workshopMakePages(

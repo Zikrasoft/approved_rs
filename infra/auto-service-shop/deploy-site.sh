@@ -59,7 +59,7 @@ if ! start; then
 fi
 point current "$release"
 
-find "$site/releases" -mindepth 1 -maxdepth 1 -type d -exec ls -1dt {} + | tail -n +4 | while read -r old; do
+find "$site/releases" -mindepth 1 -maxdepth 1 -type d -exec ls -1dt {} + | tail -n +3 | while read -r old; do
   [ "$old" = "$site/$release" ] || rm -rf "$old"
 done
 echo "site-$app is live at $name."
