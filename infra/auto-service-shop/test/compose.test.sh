@@ -236,7 +236,7 @@ secured 'a node response carries the site security headers'
 header 'caddy adds no cache to a node response' '' cache-control
 serves 'a path with no file goes to node' node carlab /ru/no-such-page/
 serves 'an API route goes to node' node details /api/leads -X POST
-serves 'the CRM host passes the CRM bot webhook to approved.rs node' node crm /api/telegram-webhook -X POST
+serves 'the CRM host passes the CRM bot webhook to carlab.rs node' node crm /api/telegram-webhook -X POST
 serves 'the CRM host passes the approved.rs capture bot webhook to node' node crm /api/telegram-capture -X POST
 answers 'the CRM host closes the lead form route' 404 crm /api/leads -X POST
 answers 'the CRM host serves no pages' 404 crm /ru/

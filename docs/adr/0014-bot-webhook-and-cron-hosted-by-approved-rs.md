@@ -1,6 +1,8 @@
 ---
-status: accepted
+status: superseded
 ---
+
+**Superseded 2026-11-18: carlab.rs hosts them now.** The webhook and the cron are `createCrmWebhookRoute` and `createRemindersRoute` in `@podbor/lead-crm`, mounted only by `apps/auto-service`; `TELEGRAM_WEBHOOK_SECRET` and `CRON_SECRET` moved to `site-auto-service`. The webhook URL stayed `https://crm.carlab.rs/api/telegram-webhook`, which Caddy now hands to carlab.rs's node, and the host's `carlab-reminders` timer calls carlab.rs's `/api/reminders`. Taking approved.rs down no longer touches the bot.
 
 # The bot webhook and reminders cron are hosted by the approved.rs project
 

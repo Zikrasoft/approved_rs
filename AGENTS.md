@@ -135,8 +135,7 @@ Approved's trust/verification semantics.
   (`channelLabel` in `packages/lead-crm/src/channelLabels.ts`, after three
   byte-identical copies of it sat in the apps' `crmBot.ts`).
 - The app binds a package through a thin re-export file (`src/lib/store.ts`,
-  `src/lib/telegram/index.ts`, `src/i18n/config.ts`). That keeps the ~950 lines
-  of API-route call sites and ~190 `.astro` i18n call sites free of churn when
+  `src/lib/crmBot.ts`, `src/i18n/config.ts`). That keeps the API-route call sites and ~190 `.astro` i18n call sites free of churn when
   a package's internals move. Wire new packages the same way.
 - `packages/site-kit` is mechanics only, never visual. `safeMarkdown` is the
   XSS boundary for auto-translated content, `formatPhone` and the visitor id

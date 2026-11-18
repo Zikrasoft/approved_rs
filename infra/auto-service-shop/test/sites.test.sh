@@ -16,7 +16,7 @@ case "$*" in
   *"${BROKEN:-none}") exit 1 ;;
   esac
   ;;
-*'exec -T site-approved-rs'*) exit "${REMINDERS_EXIT:-0}" ;;
+*'exec -T site-auto-service'*) exit "${REMINDERS_EXIT:-0}" ;;
 esac
 STUB
 chmod +x "$work/bin/docker"
@@ -216,16 +216,16 @@ fresh
 ship "$A"
 expect 'a site with an uploaded release deploys without a list naming it' run deploy-site.sh "$APP" "$A"
 
-APP=approved-rs
+APP=auto-service
 fresh
-expect 'reminders before the first approved.rs release do nothing' run reminders.sh '' ''
+expect 'reminders before the first carlab.rs release do nothing' run reminders.sh '' ''
 refuse 'reminders without a release never reach docker' test -s "$LOG"
 ship "$A"
 run deploy-site.sh "$APP" "$A"
 : >"$LOG"
-expect 'reminders run once approved.rs is live' run reminders.sh '' ''
-expect 'reminders call the route inside the approved.rs container with its own CRON_SECRET, whatever COMPOSE_PROFILES says' \
-  called 'docker compose --profile site-approved-rs exec -T site-approved-rs node -e .*/api/reminders.*process.env.CRON_SECRET'
+expect 'reminders run once carlab.rs is live' run reminders.sh '' ''
+expect 'reminders call the route inside the carlab.rs container with its own CRON_SECRET, whatever COMPOSE_PROFILES says' \
+  called 'docker compose --profile site-auto-service exec -T site-auto-service node -e .*/api/reminders.*process.env.CRON_SECRET'
 REMINDERS_EXIT=1
 export REMINDERS_EXIT
 refuse 'a failed reminders run fails the unit' run reminders.sh '' ''
