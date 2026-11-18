@@ -6,6 +6,12 @@ import { content } from '@/i18n/content';
 
 const ruServices = content('ru').services;
 
+export const crmBot = createBrandBot({
+  store: leadStore,
+  serviceLabel: (slug) =>
+    isServiceSlug(slug) ? ruServices[slug].name : brandServiceLabel(slug),
+});
+
 export const {
   notifier,
   ensureLeadCard,
@@ -13,8 +19,4 @@ export const {
   touchLeadTopic,
   cancelOrderLead,
   groupId,
-} = createBrandBot({
-  store: leadStore,
-  serviceLabel: (slug) =>
-    isServiceSlug(slug) ? ruServices[slug].name : brandServiceLabel(slug),
-});
+} = crmBot;

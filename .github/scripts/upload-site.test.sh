@@ -108,6 +108,7 @@ check "$(grep -c -e MEDUSA -e OPENAI "$SHIPPED" || true)" 0 'approved-rs ships n
 deploy auto-service abc123-1-1
 check "$status" 0 'auto-service deploys while the shop backend answers'
 check "$(has 'curl .*https://api.test/health')" yes 'auto-service probes the shop backend'
+check "$(grep -c -e '^CRON_SECRET=' -e '^TELEGRAM_WEBHOOK_SECRET=' "$SHIPPED")" 2 'auto-service ships the CRM bot webhook and cron secrets'
 check "$(has 'build .* GUARD=true ')" yes 'the carlab production build guards the catalogue against shrinking'
 
 HEALTH_EXIT=7

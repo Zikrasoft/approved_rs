@@ -135,3 +135,5 @@ export function createBrandBot({ store, serviceLabel }: BrandBotOptions) {
     adminIds,
   };
 }
+
+export type BrandBot = ReturnType<typeof createBrandBot>;

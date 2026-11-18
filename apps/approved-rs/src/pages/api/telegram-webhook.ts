@@ -4,7 +4,7 @@ import type { APIContext } from 'astro';
 import { Composer, type Context } from 'grammy';
 import { z } from 'zod';
 import { parse, isValid, format } from 'date-fns';
-import { START_COMMAND } from '@podbor/site-kit/contact-links';
+import { START_COMMAND } from '@podbor/lead-crm';
 import { logError, readJson, requireEnv } from '@podbor/lead-crm';
 import { secretMatches } from '@podbor/lead-crm/verify-secret';
 import {

@@ -40,6 +40,8 @@ export default defineConfig(async (env) =>
         TELEGRAM_BOT_USERNAME: 'carlab_test_bot',
         TELEGRAM_CAPTURE_BOT_TOKEN: '1002:test-capture-bot-token',
         TELEGRAM_CAPTURE_WEBHOOK_SECRET: 'test-capture-webhook-secret',
+        TELEGRAM_WEBHOOK_SECRET: 'test-webhook-secret',
+        CRON_SECRET: 'test-cron-secret',
         META_CAPI_TOKEN: 'test-capi-token',
       },
     },
