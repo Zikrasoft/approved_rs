@@ -13,6 +13,6 @@ const store = createBrandStore({
   partsServices: [PARTS_ORDER_SERVICE, VIN_INQUIRY_SERVICE],
 });
 
-export const { leadStore } = store;
+export const { leadStore, ledgerStore } = store;
 
 export const notifyLead = reportedNotifyLead(store.notifyLead);

@@ -1,7 +1,7 @@
 export { createBrandStore } from './brandStore.ts';
 export type { BrandStoreOptions } from './brandStore.ts';
 export { createBrandBot } from './brandBot.ts';
-export type { BrandBotOptions } from './brandBot.ts';
+export type { BrandBot, BrandBotOptions } from './brandBot.ts';
 
 export { editedContact } from './editedContact.ts';
 export {
@@ -39,7 +39,7 @@ export type { LedgerOperation, OperationType } from './ledgerStore.ts';
 export { parseOperationReply } from './operationReply.ts';
 export { BUSINESS_TIME_ZONE, businessDay } from './businessTime.ts';
 
-export { createTelegramClient } from './telegram/client.ts';
+export { createTelegramClient, START_COMMAND } from './telegram/client.ts';
 export type { TelegramClient } from './telegram/client.ts';
 
 export {
@@ -89,6 +89,8 @@ export {
 } from './form.ts';
 
 export { createLeadsRoute } from './routes/leads.ts';
+export { createCrmWebhookRoute } from './routes/crmWebhook.ts';
+export { createRemindersRoute } from './routes/reminders.ts';
 export {
   createShopOrdersRoute,
   orderLeadSubmission,

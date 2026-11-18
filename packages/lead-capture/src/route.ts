@@ -2,7 +2,6 @@ import type { Bot } from 'grammy';
 import { z } from 'zod';
 import {
   readStartVisitor,
-  START_COMMAND,
   START_PAYLOAD_LIMIT,
 } from '@podbor/site-kit/contact-links';
 import {
@@ -10,6 +9,7 @@ import {
   isPhoneContact,
   isTelegramIdContact,
   logError,
+  START_COMMAND,
   readJson,
   secretMatches,
   isFreshLead,
