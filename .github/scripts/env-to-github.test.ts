@@ -49,7 +49,6 @@ const projects: Record<string, Record<string, string>> = {
     TELEGRAM_BOT_USERNAME: 'val-crm-name',
     TELEGRAM_OWNER_ID: 'val-owner',
     PUBLIC_WHATSAPP_NUMBER: 'val-phone',
-    CRON_SECRET: 'val-cron',
     PUBLIC_THREADS_CHANNEL: 'val-threads',
     VERCEL_OIDC_TOKEN: 'val-oidc',
     BLOB_READ_WRITE_TOKEN: 'val-blob',
@@ -60,6 +59,7 @@ const projects: Record<string, Record<string, string>> = {
     TELEGRAM_OWNER_ID: 'val-owner',
     PUBLIC_PHONE_NUMBER: 'val-phone',
     MEDUSA_BACKEND_URL: 'val-medusa',
+    CRON_SECRET: 'val-cron',
     CRM_DATABASE_URL: 'val-db',
   },
   detailing: {
@@ -122,7 +122,7 @@ test('a run writes each manifest name where the manifest puts it, from stdin', (
     run.writes,
     [
       "secret --env=site-detailing KEYSTATIC_SECRET=val-it's",
-      'secret --env=site-approved-rs CRON_SECRET=val-cron',
+      'secret --env=site-auto-service CRON_SECRET=val-cron',
       'secret repo TELEGRAM_BOT_TOKEN=val-crm',
       'secret repo TELEGRAM_OWNER_ID=val-owner',
       'variable --env=site-approved-rs PUBLIC_THREADS_CHANNEL=val-threads',
@@ -165,7 +165,7 @@ test('the output names what moved, what stayed behind and what is missing, never
   const run = migrate([]);
   assert.doesNotMatch(run.output, /val-/);
   assert.match(run.output, /TELEGRAM_BOT_TOKEN -> repository secret/);
-  assert.match(run.output, /CRON_SECRET -> site-approved-rs secret/);
+  assert.match(run.output, /CRON_SECRET -> site-auto-service secret/);
   assert.match(run.output, /not migrated: LEGACY_THING \(approved-rs\)/);
   assert.match(run.output, /not migrated: META_CAPI_TOKEN \(detailing\)/);
   assert.match(run.output, /not migrated: CRM_DATABASE_URL \(auto-service\)/);

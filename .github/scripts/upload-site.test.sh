@@ -102,8 +102,8 @@ check "$(find "$work/tmp" -type f | wc -l | tr -d ' ')" 0 'the site env and the 
 
 deploy approved-rs abc123-1-1
 check "$status" 0 'approved-rs deploys with its own names'
-check "$(grep -c -e '^CRON_SECRET=' -e '^PUBLIC_THREADS_CHANNEL=' "$SHIPPED")" 2 'approved-rs ships its own names'
-check "$(grep -c -e MEDUSA -e OPENAI "$SHIPPED" || true)" 0 'approved-rs ships no other site names'
+check "$(grep -c -e '^PUBLIC_THREADS_CHANNEL=' "$SHIPPED")" 1 'approved-rs ships its own names'
+check "$(grep -c -e MEDUSA -e OPENAI -e CRON_SECRET -e TELEGRAM_WEBHOOK_SECRET "$SHIPPED" || true)" 0 'approved-rs ships no other site names'
 
 deploy auto-service abc123-1-1
 check "$status" 0 'auto-service deploys while the shop backend answers'

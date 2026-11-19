@@ -84,10 +84,10 @@ printf '30 3 * * * %s %s/backup.sh >>/var/log/carlab-backup.log 2>&1\n' "$DEPLOY
   >/etc/cron.d/carlab-backup
 chmod 0644 /etc/cron.d/carlab-backup
 
-echo "==> Daily approved.rs reminders"
+echo "==> Daily CRM reminders"
 cat >/etc/systemd/system/carlab-reminders.service <<UNIT
 [Unit]
-Description=approved.rs daily CRM reminders
+Description=carlab.rs daily CRM reminders
 After=docker.service
 
 [Service]
@@ -97,7 +97,7 @@ ExecStart=$DEPLOY_DIR/reminders.sh
 UNIT
 cat >/etc/systemd/system/carlab-reminders.timer <<'UNIT'
 [Unit]
-Description=approved.rs daily CRM reminders at 08:00 UTC
+Description=carlab.rs daily CRM reminders at 08:00 UTC
 
 [Timer]
 OnCalendar=*-*-* 08:00:00 UTC

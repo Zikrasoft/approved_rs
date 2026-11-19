@@ -70,9 +70,9 @@ in two components.
 
 ### Where the bot's infrastructure lives
 
-The webhook and the reminder cron for all three brands live in the approved.rs
-project. Raised by the owner on 2026-09-14, no decision yet. The options and a
-recommendation are in
+Closed: the webhook and the reminder cron for all three brands moved from
+approved.rs to carlab.rs, as route factories in `@podbor/lead-crm` that
+`apps/auto-service` mounts. See
 [ADR-0014](../adr/0014-bot-webhook-and-cron-hosted-by-approved-rs.md).
 
 ### Launching the CarLab shop

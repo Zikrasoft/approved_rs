@@ -13,11 +13,11 @@
 
 ## Three sites, one repository
 
-| App                 | Domain        | Brand                          | What it deploys                                                                                                             |
-| ------------------- | ------------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
-| `apps/approved-rs`  | `approved.rs` | Approved.rs — vehicle sourcing | the site plus `/api/leads`, `/api/contact-click`, `/api/telegram-capture`, `/api/telegram-webhook`, `/api/reminders` (cron) |
-| `apps/auto-service` | `carlab.rs`   | CarLab: auto service           | the site plus `/api/leads`, `/api/contact-click`, `/api/telegram-capture`, `/api/shop-orders`                               |
-| `apps/detailing`    | `details.rs`  | Details — detailing            | the site plus `/api/leads`, `/api/contact-click`, `/api/telegram-capture`                                                   |
+| App                 | Domain        | Brand                          | What it deploys                                                                                                                                 |
+| ------------------- | ------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/approved-rs`  | `approved.rs` | Approved.rs — vehicle sourcing | the site plus `/api/leads`, `/api/contact-click`, `/api/telegram-capture`                                                                       |
+| `apps/auto-service` | `carlab.rs`   | CarLab: auto service           | the site plus `/api/leads`, `/api/contact-click`, `/api/telegram-capture`, `/api/shop-orders`, `/api/telegram-webhook`, `/api/reminders` (cron) |
+| `apps/detailing`    | `details.rs`  | Details — detailing            | the site plus `/api/leads`, `/api/contact-click`, `/api/telegram-capture`                                                                       |
 
 Each app owns its own `astro.config.mjs`, `keystatic.config.ts` and `.env*`.
 
@@ -25,7 +25,7 @@ Each app owns its own `astro.config.mjs`, `keystatic.config.ts` and `.env*`.
 bot (cards, statuses, money, postpone and reminders), and it is the same bot
 in all three projects; Telegram allows exactly one webhook
 URL per bot, so `api/telegram-webhook.ts` and `api/reminders.ts` live only in
-`apps/approved-rs`. `@ApprovedRsBot`, `@CarLabRsBot` and `@DetailsRsBot` are
+`apps/auto-service`. `@ApprovedRsBot`, `@CarLabRsBot` and `@DetailsRsBot` are
 capture bots, one per brand: each one talks to visitors, writes a lead, and has
 its own `api/telegram-capture.ts` webhook in its own project
 ([ADR-0030](../adr/0030-a-capture-bot-per-brand-takes-the-telegram-contact.md)).
@@ -386,18 +386,18 @@ which is worse than a broken link because it goes unnoticed.
 Four bots, and the variables split along that line. The CRM bot `@SerbCRMBot` is
 one bot shared by the three projects; each brand's capture bot is its own.
 
-| Variable                             | approved.rs | carlab.rs | details.rs | Bot     | Without it                                                                     |
-| ------------------------------------ | ----------- | --------- | ---------- | ------- | ------------------------------------------------------------------------------ |
-| `TELEGRAM_BOT_TOKEN`                 | ✅          | ✅        | ✅         | CRM     | `/api/leads` and `/api/contact-click` answer 500                               |
-| `TELEGRAM_BOT_USERNAME`              | ✅          | ✅        | ✅         | CRM     | the same — 500                                                                 |
-| `TELEGRAM_GROUP_ID`                  | ✅          | ✅        | ✅         | CRM     | the same — 500                                                                 |
-| `TELEGRAM_OWNER_ID`                  | ✅          | ✅        | ✅         | CRM     | this brand's leads never reach the owner's DMs                                 |
-| `TELEGRAM_ADMIN_ID`                  | ✅          | ✅        | ✅         | CRM     | this brand's leads never reach the admin's DMs                                 |
-| `TELEGRAM_WEBHOOK_SECRET`            | ✅          | —         | —          | CRM     | `/api/telegram-webhook` answers 401 to everything — the bot's buttons are dead |
-| `TELEGRAM_CAPTURE_BOT_TOKEN`         | ✅          | ✅        | ✅         | capture | this brand's capture bot never answers a visitor and no lead is written        |
-| `TELEGRAM_CAPTURE_WEBHOOK_SECRET`    | ✅          | ✅        | ✅         | capture | `/api/telegram-capture` answers 401 to everything — the Telegram tile is dead  |
-| `TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB`  | optional    | —         | —          | capture | owner messages in a CarLab Topic are reported undelivered                      |
-| `TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS` | optional    | —         | —          | capture | owner messages in a Details Topic are reported undelivered                     |
+| Variable                              | approved.rs | carlab.rs | details.rs | Bot     | Without it                                                                     |
+| ------------------------------------- | ----------- | --------- | ---------- | ------- | ------------------------------------------------------------------------------ |
+| `TELEGRAM_BOT_TOKEN`                  | ✅          | ✅        | ✅         | CRM     | `/api/leads` and `/api/contact-click` answer 500                               |
+| `TELEGRAM_BOT_USERNAME`               | ✅          | ✅        | ✅         | CRM     | the same — 500                                                                 |
+| `TELEGRAM_GROUP_ID`                   | ✅          | ✅        | ✅         | CRM     | the same — 500                                                                 |
+| `TELEGRAM_OWNER_ID`                   | ✅          | ✅        | ✅         | CRM     | this brand's leads never reach the owner's DMs                                 |
+| `TELEGRAM_ADMIN_ID`                   | ✅          | ✅        | ✅         | CRM     | this brand's leads never reach the admin's DMs                                 |
+| `TELEGRAM_WEBHOOK_SECRET`             | —           | ✅        | —          | CRM     | `/api/telegram-webhook` answers 401 to everything — the bot's buttons are dead |
+| `TELEGRAM_CAPTURE_BOT_TOKEN`          | ✅          | ✅        | ✅         | capture | this brand's capture bot never answers a visitor and no lead is written        |
+| `TELEGRAM_CAPTURE_WEBHOOK_SECRET`     | ✅          | ✅        | ✅         | capture | `/api/telegram-capture` answers 401 to everything — the Telegram tile is dead  |
+| `TELEGRAM_CAPTURE_BOT_TOKEN_APPROVED` | —           | optional  | —          | capture | owner messages in an Approved.rs Topic are reported undelivered                |
+| `TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS`  | —           | optional  | —          | capture | owner messages in a Details Topic are reported undelivered                     |
 
 > **The main trap when setting up new projects.** All three `src/lib/crmBot.ts`
 > call `requireEnv('TELEGRAM_BOT_TOKEN')`, `requireEnv('TELEGRAM_BOT_USERNAME')` and
@@ -418,7 +418,7 @@ fail the route — it just means direct messages about this brand's leads go now
 
 The **CRM** bot is shared across brands: `TELEGRAM_BOT_TOKEN`,
 `TELEGRAM_BOT_USERNAME` and `TELEGRAM_GROUP_ID` are set once at repository
-level, and `TELEGRAM_WEBHOOK_SECRET` only in `site-approved-rs`, which hosts
+level, and `TELEGRAM_WEBHOOK_SECRET` only in `site-auto-service`, which hosts
 that one bot's webhook.
 
 The **capture** bots are not. `TELEGRAM_CAPTURE_BOT_TOKEN` is `@ApprovedRsBot`'s
@@ -426,10 +426,10 @@ on approved.rs, `@CarLabRsBot`'s on carlab.rs and `@DetailsRsBot`'s on
 details.rs — three different tokens from @BotFather, never copied between
 projects: which bot received the update is what tells the server the brand, so a
 shared token would hand a visitor the choice. `TELEGRAM_CAPTURE_WEBHOOK_SECRET`
-is per project too, and on approved.rs it is a **different** value from
+is per project too, and on carlab.rs it is a **different** value from
 `TELEGRAM_WEBHOOK_SECRET` — the two webhooks there belong to two different bots
-and do not share a secret. approved.rs additionally holds the other two capture
-tokens as `TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB` and `TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS`:
+and do not share a secret. carlab.rs additionally holds the other two capture
+tokens as `TELEGRAM_CAPTURE_BOT_TOKEN_APPROVED` and `TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS`:
 whatever the owner writes in a Lead's Topic lands on the CRM webhook there, and
 only the visitor's own brand's bot can deliver it, so the webhook picks the bot by
 the lead's `brand` ([ADR-0030](../adr/0030-a-capture-bot-per-brand-takes-the-telegram-contact.md)).
@@ -453,14 +453,14 @@ token. What fires and when: [analytics.md](analytics.md#the-server-lead-event-fr
 | Variable           | approved.rs | carlab.rs | details.rs | Without it                                              |
 | ------------------ | ----------- | --------- | ---------- | ------------------------------------------------------- |
 | `CRM_DATABASE_URL` | ✅          | ✅        | ✅         | leads are not stored and the routes fail                |
-| `CRON_SECRET`      | ✅          | no        | no         | `/api/reminders` answers 401, the digest never goes out |
+| `CRON_SECRET`      | no          | ✅        | no         | `/api/reminders` answers 401, the digest never goes out |
 
 ### Shop Orders (ADR-0053)
 
 | Variable                       | approved.rs | carlab.rs | details.rs | Without it                                                                                                 |
 | ------------------------------ | ----------- | --------- | ---------- | ---------------------------------------------------------------------------------------------------------- |
 | `SHOP_API_URL`                 | ✅          | ✅        | no         | ✅/❌ on a `parts-order` Lead never completes or cancels its shop Order; no «🔎 Искал» lines               |
-| `SHOP_ORDER_OUTCOME_SECRET`    | ✅ secret   | no        | no         | same                                                                                                       |
+| `SHOP_ORDER_OUTCOME_SECRET`    | no          | ✅ secret | no         | same                                                                                                       |
 | `SHOP_LEAD_SECRET`             | no          | ✅ secret | no         | `/api/shop-orders` answers 401 to the shop, a shop cancel never marks a Lead lost, «Сделать кейс» gets 401 |
 | `SHOP_VISITOR_SEARCHES_SECRET` | ✅ secret   | ✅ secret | no         | no «🔎 Искал» lines                                                                                        |
 | `SHOP_CLIENT_SECRET`           | no          | ✅ secret | no         | all shoppers share one store rate-limit bucket                                                             |
@@ -477,7 +477,7 @@ through `POST /hooks/carlab-orders/:id/outcome` with
 `Authorization: Bearer $SHOP_ORDER_OUTCOME_SECRET`. That route is not under
 `/admin`, and the secret can do
 nothing but complete or cancel an Order. `SHOP_ORDER_OUTCOME_SECRET` is one
-value set twice, on approved.rs and in the shop's `.env`
+value set twice, on carlab.rs and in the shop's `.env`
 (`openssl rand -hex 32`); unset in the shop, the route answers 401 to
 everyone. A call that fails stays pending on the Lead and `/api/reminders`
 retries it every day until the shop takes it.
@@ -494,7 +494,7 @@ token.
 The CRM bot uses `SHOP_API_URL` and `SHOP_VISITOR_SEARCHES_SECRET` to read
 `GET /hooks/visitors/:visitor_id/vin-lookups`, the last three VIN searches of a
 CarLab Lead's visitor, and lists them as «🔎 Искал» lines on the group card
-(sent by carlab.rs) and on the DM detail (built by approved.rs's webhook).
+(sent by carlab.rs) and on the DM detail (built by carlab.rs's CRM webhook).
 approved.rs and details.rs Leads never query the shop. The secret is one more
 value set twice, on carlab.rs and approved.rs and in the shop's `.env`, apart
 from `SHOP_LEAD_SECRET`, so approved.rs holds a key that can only read VIN
@@ -532,7 +532,7 @@ sends the current value.
    carlab.rs (no `_PREVIOUS` for `SHOP_CLIENT_SECRET` or `SHOP_EVENTS_SECRET`
    there, it only sends) and
    `/srv/carlab/.env`, for
-   `SHOP_ORDER_OUTCOME_SECRET` approved.rs (no `_PREVIOUS` there, it only sends)
+   `SHOP_ORDER_OUTCOME_SECRET` carlab.rs (no `_PREVIOUS` there, it only sends)
    and `/srv/carlab/.env`, for `SHOP_VISITOR_SEARCHES_SECRET` carlab.rs and
    approved.rs (no `_PREVIOUS` on either, they only send) and
    `/srv/carlab/.env`. Redeploy carlab.rs or approved.rs and restart the
@@ -571,7 +571,8 @@ optional variable per site).
   `process.env.SITE` (from the `.env.local` handed to `--env-file`), and it is
   the host the webhook is registered against — so point it at the `.env.local`
   of the project that hosts that bot's webhook, which for a capture bot is that
-  brand's own project, and `https://crm.carlab.rs` for approved.rs's two bots.
+  brand's own project, and `https://crm.carlab.rs` for the CRM bot and
+  approved.rs's capture bot.
 
 Changing the domain means editing `site:` in `astro.config.mjs` and the host
 Caddy serves it on (`APPROVED_HOST`, `CARLAB_HOST`, `DETAILS_HOST` in the
@@ -584,7 +585,7 @@ shop's compose), not a GitHub variable.
 Leads, digests and the Balance live in one Postgres database, `crm`, inside the
 shop's Postgres on the VPS (`infra/auto-service-shop`), next to but separate
 from the shop's own `carlab` database. The bot and the cron live only in
-approved.rs and have to see all three brands' leads, so **all three sites get
+carlab.rs and have to see all three brands' leads, so **all three sites get
 the same `CRM_DATABASE_URL`**:
 
 ```
@@ -1120,7 +1121,7 @@ is retried once its 10 minute lease runs out.
   `.github/scripts/security-headers-drift.sh` fails `check` when it drifts).
   Proxied requests keep the apex `Host`, carry `X-Forwarded-Proto: https` and an
   `X-Request-Id`, and `X-Forwarded-For` is Caddy's own view of the client. The `carlab-reminders`
-  systemd timer runs `reminders.sh` at 08:00 UTC, which calls approved.rs's
+  systemd timer runs `reminders.sh` at 08:00 UTC, which calls carlab.rs's
   `/api/reminders` inside its container with the container's own `CRON_SECRET`. The crawler runs on the owner's Mac, so it is not in the budget.
   Typesense holds its whole index in memory; measure it with
   `docker stats --no-stream` once the catalogue is at scale, and raise the limit
@@ -2079,21 +2080,22 @@ node --env-file=.env --experimental-strip-types scripts/translate-cases.ts
 
 ## The Telegram webhooks
 
-Two kinds, and only the CRM one is approved.rs-only.
+Two kinds, and only the CRM one is carlab.rs-only.
 
 - **`/api/telegram-webhook`** — `@SerbCRMBot`, the CRM bot. One bot, so one
-  webhook, and it lives in approved.rs; carlab.rs and details.rs have no such
-  route. Its `secret_token` is approved.rs's `TELEGRAM_WEBHOOK_SECRET`.
+  webhook, and it lives in carlab.rs; approved.rs and details.rs have no such
+  route. Its `secret_token` is carlab.rs's `TELEGRAM_WEBHOOK_SECRET`.
 - **`/api/telegram-capture`** — the brand's own capture bot, in **all three**
   projects. `@ApprovedRsBot` is registered against `crm.carlab.rs`, `@CarLabRsBot`
   against `carlab.rs`, `@DetailsRsBot` against `details.rs`, each with that
   project's `TELEGRAM_CAPTURE_WEBHOOK_SECRET`
   ([ADR-0030](../adr/0030-a-capture-bot-per-brand-takes-the-telegram-contact.md)).
 
-Each is registered once per bot, four registrations in total. approved.rs's
-two bots are registered on `crm.carlab.rs`, not on `approved.rs`: Caddy's
-`CRM_HOST` passes only these two paths to approved.rs's node and answers 404
-to anything else, so the bots follow the host rather than approved.rs's DNS.
+Each is registered once per bot, four registrations in total. The CRM bot
+and approved.rs's capture bot are registered on `crm.carlab.rs`: Caddy's
+`CRM_HOST` passes `/api/telegram-webhook` to carlab.rs's node,
+`/api/telegram-capture` to approved.rs's, and answers 404 to anything else, so
+both bots follow the host rather than approved.rs's DNS.
 
 ### The CRM bot
 
@@ -2141,7 +2143,7 @@ Messages from bots — the Capture bots' copies of the visitor —
 and from anyone who is neither owner nor admin are ignored, so the relay cannot
 loop.
 
-The webhook must carry a `secret_token` equal to the approved.rs project's
+The webhook must carry a `secret_token` equal to the carlab.rs project's
 `TELEGRAM_WEBHOOK_SECRET` — without a match the endpoint answers 401 to every
 request:
 
@@ -2165,7 +2167,7 @@ on the command line wins over the env file's:
 
 ```bash
 cd apps/approved-rs
-SITE=https://crm.carlab.rs node --env-file=.env.local --experimental-strip-types scripts/register-webhook.ts crm
+SITE=https://crm.carlab.rs node --env-file=../auto-service/.env.local --experimental-strip-types scripts/register-webhook.ts crm
 ```
 
 > Until 2026-09-13 the script registered a non-existent `${SITE}/api/telegram` and
@@ -2216,10 +2218,10 @@ cd apps/detailing && node --env-file=.env.local --experimental-strip-types scrip
 
 ---
 
-## The reminder cron (approved.rs only)
+## The reminder cron (carlab.rs only)
 
 Every day at 08:00 UTC the host's `carlab-reminders` timer calls
-`/api/reminders` inside the approved.rs container (see
+`/api/reminders` inside the carlab.rs container (see
 [The server](#the-server)) with
 `Authorization: Bearer $CRON_SECRET` — the route marks expired Ghost leads lost,
 closes every Topic nobody has written in a day after its Lead was created (once;
@@ -2235,7 +2237,7 @@ There is no monthly summary: the Balance is in the bot's menu. Without
 `CRON_SECRET` in the project the route answers 401 and the digest silently never
 arrives.
 
-The timer calls approved.rs alone, never the other two sites: otherwise the
+The timer calls carlab.rs alone, never the other two sites: otherwise the
 same reminders would go out several times over. Vercel's cron for the last deployment
 that carried one is disabled in the dashboard at the cutover
 ([Cutover from Vercel](#cutover-from-vercel)).
@@ -2305,10 +2307,13 @@ For each of the three domains:
 - [ ] `/keystatic` lets you in through GitHub and saves an edit to the repository
 - [ ] HTTPS and the custom domain are active
 
-Additionally for approved.rs:
+Additionally for carlab.rs:
 
 - [ ] The buttons in the bot's DM work (meaning the webhook and
       `TELEGRAM_WEBHOOK_SECRET` match)
 - [ ] All three brands' leads are visible to the bot (meaning all three sites really
       share one `CRM_DATABASE_URL`)
+
+Additionally for approved.rs:
+
 - [ ] The geo banner appears when arriving from DE/RS/ES (VPN)

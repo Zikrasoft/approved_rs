@@ -8,9 +8,10 @@ the bots' environment variables are in [deploy.md](deploy.md).
 **One CRM bot, one chat, one lead store, three brands — plus a capture bot
 each.** Telegram allows a single webhook URL per bot, so the CRM bot's
 `api/telegram-webhook.ts` and `api/reminders.ts` are deployed only by
-`apps/approved-rs`; the other two apps ship `/api/leads`, `/api/contact-click`
-and their own capture bot's `/api/telegram-capture`, and carlab.rs also
-`/api/shop-orders`, where the shop hands over its placed and canceled orders. All three write to the same `crm` Postgres database
+`apps/auto-service` (carlab.rs), as thin mounts of `createCrmWebhookRoute` and
+`createRemindersRoute` from `@podbor/lead-crm`; all three apps ship
+`/api/leads`, `/api/contact-click` and their own capture bot's
+`/api/telegram-capture`, and carlab.rs also `/api/shop-orders`, where the shop hands over its placed and canceled orders. All three write to the same `crm` Postgres database
 and are separated by the lead's `brand` field, which the
 app's `createBrandBot({ brand })` stamps on — a visitor can never set it.
 Give all three sites the same `CRM_DATABASE_URL`.
@@ -45,4 +46,4 @@ The binding is split in two on purpose: `src/lib/crm.ts` builds the store and ne
 
 ## grammY
 
-**grammY for every bot, no sessions**. Why: `docs/adr/0031-grammy-for-every-bot.md`. Callback dispatch is the `[pattern, requiredRole, handler]` table `CALLBACKS` in `apps/approved-rs/src/pages/api/telegram-webhook.ts`, each row registered as a grammY `callbackQuery` handler; a new callback is a row there. A prompt lives on the record it answers (`pendingPrompt` on a Lead, or a row in `operation_prompts` for ➕/➖), matched by chat id and message id, never in a grammY session and never by the replied-to text.
+**grammY for every bot, no sessions**. Why: `docs/adr/0031-grammy-for-every-bot.md`. Callback dispatch is the `[pattern, requiredRole, handler]` table `CALLBACKS` in `packages/lead-crm/src/routes/crmWebhook.ts`, each row registered as a grammY `callbackQuery` handler; a new callback is a row there. A prompt lives on the record it answers (`pendingPrompt` on a Lead, or a row in `operation_prompts` for ➕/➖), matched by chat id and message id, never in a grammY session and never by the replied-to text.
