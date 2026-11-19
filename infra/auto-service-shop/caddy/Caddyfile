@@ -70,6 +70,14 @@
 
 (site) {
 	encode zstd gzip
+
+	log {
+		output file /data/access.log {
+			roll_size 100MiB
+			roll_keep 20
+			roll_keep_for 168h
+		}
+	}
 	import security-headers.caddy
 
 	root * /srv/sites/{args[0]}/current/client
