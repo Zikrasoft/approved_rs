@@ -1692,6 +1692,10 @@ that would otherwise grow forever or hold personal data longer than needed:
   days, then reindexes every number with demand in the last 31 days so the
   «Популярные» sort follows the sliding 30-day score (ADR-0060). The rows hold
   identifiers, counts and redacted queries, nothing personal.
+- **Site access log, 7 days** (Caddy, `/data/access.log` in the `caddydata`
+  volume). Every request to the three sites, with the client IP and User-Agent,
+  to tell crawlers from people. Caddy rolls it at 100 MiB and deletes rolls
+  older than 7 days; Alloy never ships it to Loki.
 
 The crawl tables (`crawl_run`, `crawl_page`) belong to no Medusa module on
 purpose: only the crawler on the owner's Mac writes them, through raw SQL under
