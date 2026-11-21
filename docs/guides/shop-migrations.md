@@ -9,14 +9,9 @@ add a column nullable or with a default, add a table or an index. A rename or a
 drop ships in two deploys, first the code that stops reading the old shape,
 then the migration that removes it.
 
-The one sanctioned exception is the pre-launch squash of spec #404: until the
-shop opens (`SHOP_OPEN=true`), each module's history is folded into a single
-generated initial migration plus its single hand-written one, and schema changes
-are folded into them. The production database was dropped and recreated for
-the catalog and supplier refold, which is what makes this possible while the
-shop is closed; every fold recreates it again. From the day the shop opens,
-every schema change is a new additive migration beside the initial ones; never
-edit a migration a database holding real orders has run.
+Production holds the crawled catalogue, so no database is recreated any more:
+every schema change is a new generated migration beside the initial ones, and a
+migration a database has run is never edited, open shop or not.
 
 ## Generated and hand-written migrations
 
@@ -49,11 +44,7 @@ lists the sha256 of every file under `src/modules/*/migrations/*.ts` and
 in `check` fails when a listed file changes or disappears, or when a migration
 file is missing from the list. A new migration is appended to it in the same
 commit: `cd apps/auto-service-shop && sha256sum <file> >>migrations.sha256`.
-The manifest is frozen from the day the shop opens: after that, a failing check
-means a migration a database has run was edited, and the fix is to restore the
-file and add a new migration, never to rewrite the hash. Until then, a
-pre-launch fold into an initial migration rewrites its line
-(`sha256sum src/modules/*/migrations/*.ts src/migration-scripts/*.ts >migrations.sha256`),
-and every long-lived database (production, the demo, a staging copy) is
-recreated from scratch after the fold, because MikroORM skips a migration by name and never
-replays an edited one.
+A failing check means a migration a database has run was edited: restore the
+file and add a new migration, never rewrite the hash. On a push to `main` the
+check also compares the manifest with the previous `main` (`FROZEN_BASE`), so a
+listed line rewritten together with its file fails too.

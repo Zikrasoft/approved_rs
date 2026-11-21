@@ -1,4 +1,5 @@
 ---
+import { getCollection } from 'astro:content';
 import LinkRow from '@/components/LinkRow.astro';
 import Icon from '@/components/Icon.astro';
 import { withPlaceholder } from '@podbor/i18n';
@@ -12,15 +13,24 @@ import { makeHubsForBuild } from '@/utils/catalogueEnv';
 import { cacheKey } from '@/utils/cacheKey';
 import type { MakeHubEntry } from '@/utils/catalogueSnapshot';
 import { PathBuilder, withLocales } from '@/utils/paths';
+import { workshopMakePages } from '@/utils/works';
 
 export async function getStaticPaths() {
   const hubs = await makeHubsForBuild();
+  const workshop = new Set(
+    workshopMakePages(
+      await getCollection('works'),
+      await getCollection('articles'),
+      [],
+    ).map(({ make }) => make.slug),
+  );
   return withLocales(
     hubs.map((hub) => ({
       params: { make: hub.make.slug },
-      props: { hub },
+      props: { hub, workshop: workshop.has(hub.make.slug) },
       cacheKey: cacheKey({
         make: hub.make,
+        workshop: workshop.has(hub.make.slug),
         series: hub.series.map(({ series, categories }) => ({
           series,
           categories: categories.map(({ category }) => category),
@@ -30,7 +40,10 @@ export async function getStaticPaths() {
   );
 }
 
-const { hub } = Astro.props as { hub: MakeHubEntry };
+const { hub, workshop } = Astro.props as {
+  hub: MakeHubEntry;
+  workshop: boolean;
+};
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const copy = content(locale).partsCar.hubs.make;
@@ -73,18 +86,20 @@ const series = hub.series
         ))
       }
     </ul>
-    <a
-      href={PathBuilder.carsMake(locale, make.slug)}
-      class="link-underlined inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-semibold text-ink"
-    >
-      {
-        withPlaceholder(
-          content(locale).pages.make.headingTemplate,
-          'make',
-          make.name,
-        )
-      }
-      <Icon name="chevronRight" size={14} />
-    </a>
+    {
+      workshop && (
+        <a
+          href={PathBuilder.carsMake(locale, make.slug)}
+          class="link-underlined inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-semibold text-ink"
+        >
+          {withPlaceholder(
+            content(locale).pages.make.headingTemplate,
+            'make',
+            make.name,
+          )}
+          <Icon name="chevronRight" size={14} />
+        </a>
+      )
+    }
   </section>
 </Shell>

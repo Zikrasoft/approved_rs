@@ -1,4 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { CATALOGUE_TIMEOUT_MS, createCatalogue } from './catalogue';
 import {
   DEV_SNAPSHOT_FRESH_MS,
@@ -12,6 +16,7 @@ import {
   makeHubsForBuild,
   makePartsForBuild,
   partPagesForBuild,
+  writeCatalogueMakes,
 } from './catalogueEnv';
 import { categoryFacets } from './categoryFacets';
 import {
@@ -135,10 +140,11 @@ const backend = ({
   categories = [] as unknown[],
   fitments = [] as unknown[],
   vehicles = [] as unknown[],
+  makes = undefined as unknown[] | undefined,
 } = {}) =>
   vi.fn((url: string) => {
     if (url.endsWith('/store/catalogue-snapshot')) {
-      return respond({ pages, categories, fitments, vehicles });
+      return respond({ pages, categories, fitments, vehicles, makes });
     }
     if (url.endsWith('/store/categories')) {
       return respond({ categories });
@@ -1522,31 +1528,43 @@ describe('the deploy build', () => {
     ).rejects.toThrow('503');
   });
 
-  it('warns when a catalogue Make is missing from the exported list', async () => {
-    const audi = { slug: 'audi', name: 'Audi' };
-    const unknown = { slug: 'zastava', name: 'Zastava' };
-    const vehicleOf = (make: typeof audi) => ({
-      ...VEHICLE,
-      id: make.slug,
-      model: {
-        ...VEHICLE.model,
-        chassis: {
-          ...VEHICLE.model.chassis,
-          series: { ...VEHICLE.model.chassis.series, make },
-        },
-      },
+  describe('the Make list Keystatic and the content schemas read', () => {
+    const listFile = async () =>
+      pathToFileURL(
+        join(await mkdtemp(join(tmpdir(), 'makes-')), 'makes.json'),
+      );
+    const kept = '[{"slug":"bmw","name":"BMW"}]';
+
+    it('writes every catalogue Make the shop sends, by name, with its site flag', async () => {
+      deployed(
+        null,
+        backend({
+          makes: [
+            { slug: 'mini', name: 'MINI', show_on_site: true },
+            { slug: 'alfa-romeo', name: 'Alfa Romeo', show_on_site: false },
+          ],
+        }),
+      );
+      const file = await listFile();
+
+      await writeCatalogueMakes(file, shopEnv());
+
+      expect(JSON.parse(await readFile(file, 'utf8'))).toEqual([
+        { slug: 'alfa-romeo', name: 'Alfa Romeo', show_on_site: false },
+        { slug: 'mini', name: 'MINI', show_on_site: true },
+      ]);
     });
-    deployed(null, backend({ vehicles: [audi, unknown].map(vehicleOf) }));
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
-    await partPagesForBuild(shopEnv());
+    it('keeps the committed list for a shop that sends no Make list yet, or without a shop', async () => {
+      deployed(null, backend());
+      const file = await listFile();
+      await writeFile(file, kept);
 
-    expect(warn.mock.calls).toEqual([
-      [
-        'Make zastava (Zastava) is in the catalogue but not in src/content/makes.json',
-      ],
-    ]);
-    warn.mockRestore();
+      await writeCatalogueMakes(file, shopEnv());
+      await writeCatalogueMakes(file, {});
+
+      expect(await readFile(file, 'utf8')).toBe(kept);
+    });
   });
 });
 

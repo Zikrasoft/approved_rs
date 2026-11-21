@@ -56,7 +56,11 @@ const BAD_IDENTIFIER_FORMAT = {
   message: 'Does not match the format of its type',
 };
 
-const AdminMake = z.strictObject({ name: text, slug });
+const AdminMake = z.strictObject({
+  name: text,
+  slug,
+  show_on_site: z.boolean().optional(),
+});
 
 const AdminSeries = z.strictObject({
   make_id: text,

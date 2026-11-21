@@ -1,3 +1,4 @@
+import { writeFile } from 'node:fs/promises';
 import { z } from 'zod';
 import {
   shopOpenSchema,
@@ -5,7 +6,7 @@ import {
 } from '@podbor/catalog-contract/preview';
 import { requestIdSchema } from '@podbor/catalog-contract/events';
 import { secretMatches } from '@podbor/lead-crm/verify-secret';
-import type { Category } from '@podbor/catalog-contract';
+import { sortedMakes, type Category } from '@podbor/catalog-contract';
 import { CARLAB } from '@podbor/brands';
 import { VISITOR_ID_COOKIE } from '@podbor/site-kit';
 import { CATALOGUE_TIMEOUT_MS, createCatalogue } from './catalogue';
@@ -22,7 +23,6 @@ import {
   type MakePartsEntry,
   type PartPageEntry,
 } from './catalogueSnapshot';
-import { makeDrift } from './makes';
 
 const catalogueEnvKeys = [
   'MEDUSA_BACKEND_URL',
@@ -214,9 +214,6 @@ async function loadSnapshot(env: CatalogueEnv) {
       { cause: error },
     );
   });
-  makeDrift(
-    snapshot.vehicles.map((vehicle) => vehicle.model.chassis.series.make),
-  ).forEach((drift) => console.warn(drift));
   const built = snapshot.entries.length;
   const shrinkAllowed = env.CATALOGUE_SHRINK_ALLOWED === 'true';
   const shrunk = !shrinkAllowed && built < live * SHRINK_FLOOR;
@@ -306,4 +303,14 @@ export async function makePartsForBuild(
 ): Promise<MakePartsEntry[]> {
   const snapshot = await snapshotForBuild(env);
   return snapshot ? makePartsFrom(snapshot) : [];
+}
+
+export async function writeCatalogueMakes(
+  file: URL,
+  env = siteEnv(),
+): Promise<void> {
+  const makes = (await snapshotForBuild(env))?.makes;
+  if (makes) {
+    await writeFile(file, `${JSON.stringify(sortedMakes(makes), null, 2)}\n`);
+  }
 }

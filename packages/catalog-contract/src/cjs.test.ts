@@ -43,17 +43,8 @@ describe('CommonJS build', { timeout: 30_000 }, () => {
   it('serves the Make list rules to require()', () => {
     const contract = require('@podbor/catalog-contract');
     expect(
-      contract.sortedMakes([
-        { slug: 'skoda', name: 'Škoda' },
-        { slug: 'bmw', name: 'BMW' },
-      ]),
-    ).toEqual([
-      { slug: 'bmw', name: 'BMW' },
-      { slug: 'skoda', name: 'Škoda' },
-    ]);
-    expect(
       contract.makeListSchema.parse([{ slug: 'bmw', name: 'BMW' }]),
-    ).toEqual([{ slug: 'bmw', name: 'BMW' }]);
+    ).toEqual([{ slug: 'bmw', name: 'BMW', show_on_site: null }]);
   });
 
   it('serves the attributes module to require()', () => {

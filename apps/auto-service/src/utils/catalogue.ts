@@ -223,12 +223,15 @@ export function createCatalogue({
     const whole = catalogueSnapshotResponseSchema.parse(
       await request(CATALOGUE_SNAPSHOT_PATH),
     );
-    return assembleSnapshot(
-      whole.pages.map(unpriced),
-      whole.categories,
-      whole.fitments,
-      whole.vehicles,
-    );
+    return {
+      ...assembleSnapshot(
+        whole.pages.map(unpriced),
+        whole.categories,
+        whole.fitments,
+        whole.vehicles,
+      ),
+      makes: whole.makes,
+    };
   };
 
   return {

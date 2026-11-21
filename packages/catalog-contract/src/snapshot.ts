@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { categorySchema } from './categories.ts';
 import { fitmentSchema } from './fitment.ts';
+import { makeListSchema } from './makeList.ts';
 import { partPageSchema } from './partPages.ts';
 import { vehicleSchema } from './vehicle.ts';
 
@@ -11,6 +12,7 @@ export const catalogueSnapshotResponseSchema = z.object({
   pages: z.array(partPageSchema),
   fitments: z.array(fitmentSchema),
   vehicles: z.array(vehicleSchema),
+  makes: makeListSchema.nullable().default(null),
 });
 
 export type CatalogueSnapshotResponse = z.infer<

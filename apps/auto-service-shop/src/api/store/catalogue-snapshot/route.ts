@@ -6,6 +6,7 @@ import type { MedusaContainer } from '@medusajs/framework/types';
 import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
 import {
   categoriesResponseSchema,
+  makeListSchema,
   MAX_PAGE,
   partPageSchema,
   vehicleSchema,
@@ -87,6 +88,11 @@ async function* snapshotJson(scope: MedusaContainer, shown: boolean) {
       (row) => vehicleSchema.parse(row),
     ),
   );
+  const makes = await catalog.listMakes(
+    {},
+    { select: ['slug', 'name', 'show_on_site'], order: { slug: 'ASC' } },
+  );
+  yield `,"makes":${JSON.stringify(makeListSchema.parse(makes))}`;
   yield '}';
 }
 

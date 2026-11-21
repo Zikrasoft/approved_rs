@@ -72,6 +72,11 @@ medusaIntegrationTestRunner({
           ],
         });
 
+        await catalog.createMakes({
+          slug: 'mini',
+          name: 'MINI',
+          show_on_site: true,
+        });
         bmw = await createVehicleFixture(catalog);
         await createVehicleFixture(catalog, {
           make: { slug: 'mercedes-benz', name: 'Mercedes-Benz' },
@@ -166,6 +171,14 @@ medusaIntegrationTestRunner({
           max: 99,
           quantity: 1,
         });
+      });
+
+      it('lists every catalogue Make with its site flag, also one without vehicles', async () => {
+        expect((await snapshot()).makes).toEqual([
+          { slug: 'bmw', name: 'BMW', show_on_site: false },
+          { slug: 'mercedes-benz', name: 'Mercedes-Benz', show_on_site: false },
+          { slug: 'mini', name: 'MINI', show_on_site: true },
+        ]);
       });
 
       it('answers only a caller with the publishable key', async () => {

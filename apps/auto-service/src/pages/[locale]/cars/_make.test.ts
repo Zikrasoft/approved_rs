@@ -99,7 +99,7 @@ describe('the Make pages', () => {
     ]);
   });
 
-  it('exist for a Make with one published Part and nothing else, the exported list or not', async () => {
+  it('do not exist for a Make with Parts and nothing else', async () => {
     withParts(
       {
         make: { slug: 'audi', name: 'Audi' },
@@ -119,11 +119,7 @@ describe('the Make pages', () => {
       (await getStaticPaths())
         .filter(({ params }) => params.locale === 'ru')
         .map(({ params }) => params.make),
-    ).toEqual(['audi', 'bmw', 'tesla']);
-    const audi = await page('ru', 'audi');
-
-    expect(audi.querySelector('h1')?.textContent).toContain('Audi');
-    expect(audi.querySelector('a[href="/ru/works/?make=audi"]')).toBeNull();
+    ).toEqual(['bmw']);
   });
 });
 
