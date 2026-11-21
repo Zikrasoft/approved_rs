@@ -15,6 +15,8 @@ import type {
 
 const ROBOTS_AGENT = 'CarLabCatalogBot';
 const ROBOTS_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+const ROBOTS_ATTEMPTS = 5;
+const ROBOTS_RETRY_MS = 60 * 1000;
 const LEASE_MS = 10 * 60 * 1000;
 const IDLE_MS = 1000;
 const MAX_ATTEMPTS = 5;
@@ -149,7 +151,15 @@ async function crawlWith(
   const freshRobots = async (): Promise<PauseReason | null> => {
     if (robots && clock.now() - robotsAt < ROBOTS_MAX_AGE_MS) return null;
     const url = new URL('/robots.txt', site.origin).href;
-    const fetched = await request(http, url);
+    let fetched = await request(http, url);
+    for (
+      let attempt = 1;
+      fetched.kind === 'error' && attempt < ROBOTS_ATTEMPTS;
+      attempt++
+    ) {
+      await clock.sleep(ROBOTS_RETRY_MS * 2 ** attempt);
+      fetched = await request(http, url);
+    }
     if (fetched.kind === 'blocked') return 'blocked';
     if (
       fetched.kind === 'error' ||
