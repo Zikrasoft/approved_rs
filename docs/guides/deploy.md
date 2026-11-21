@@ -1059,6 +1059,11 @@ stopped mid-way (Ctrl+C, a sleeping Mac, a dropped tunnel) stays `running` and
 resumes from where it stopped the next time the worker starts; a page it held
 is retried once its 10 minute lease runs out.
 
+`pnpm --filter @podbor/auto-service-shop crawler:status` prints each site's run
+status, its pause reason and its page counts. A run paused by the worker (the
+worker logs `Crawl of <site> paused: <reason>`) waits for a new crawl queued in
+the admin.
+
 ### The server
 
 - `/srv/carlab/`: CI places `docker-compose.yml`, `caddy/Caddyfile`, the Loki,

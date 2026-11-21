@@ -60,6 +60,28 @@ echo new >"$work/shop/src/modules/catalog/migrations/Migration2.ts"
 verdict
 check "$status" 0 'an appended new migration passes'
 
+committed() {
+  stage
+  (cd "$work/shop" && git init -q && git add -A && git -c user.name=t -c user.email=t@t commit -qm base)
+}
+based() {
+  status=0
+  (cd "$work/shop" && FROZEN_BASE=HEAD sh "$script" . 'src/modules/*/migrations/*.ts' 'src/migration-scripts/*.ts') >/dev/null 2>"$work/stderr" || status=$?
+}
+
+committed
+echo two >"$work/shop/src/modules/catalog/migrations/Migration1.ts"
+(cd "$work/shop" && digest src/modules/catalog/migrations/Migration1.ts src/migration-scripts/order.ts >migrations.sha256)
+based
+check "$status" 1 'a migration edited together with its hash fails against the base'
+check "$(grep -c 'restore them' "$work/stderr")" 1 'a rewritten hash says why'
+
+committed
+echo new >"$work/shop/src/modules/catalog/migrations/Migration2.ts"
+(cd "$work/shop" && digest src/modules/catalog/migrations/Migration2.ts >>migrations.sha256)
+based
+check "$status" 0 'a migration appended after the base passes'
+
 stage
 status=0
 sh "$script" "$work/shop" >/dev/null 2>"$work/stderr" || status=$?
