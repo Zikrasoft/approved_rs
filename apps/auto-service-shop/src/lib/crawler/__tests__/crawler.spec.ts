@@ -565,7 +565,9 @@ medusaIntegrationTestRunner({
         const site = testSite('flaky');
         const web = fakeWeb({
           'https://flaky.test/robots.txt': [unreachable, unreachable, ok('')],
-          'https://flaky.test/sitemap.xml': ok(urlset('https://flaky.test/p/1')),
+          'https://flaky.test/sitemap.xml': ok(
+            urlset('https://flaky.test/p/1'),
+          ),
           'https://flaky.test/p/1': ok('one'),
         });
 
