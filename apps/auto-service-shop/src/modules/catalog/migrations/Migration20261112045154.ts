@@ -117,7 +117,7 @@ export class Migration20261112045154 extends Migration {
     );
 
     this.addSql(
-      `create table if not exists "make" ("id" text not null, "slug" text not null, "name" text not null, "show_on_site" boolean not null default false, "source" text not null default 'manual', "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "make_pkey" primary key ("id"));`,
+      `create table if not exists "make" ("id" text not null, "slug" text not null, "name" text not null, "source" text not null default 'manual', "created_by" text null, "updated_by" text null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "make_pkey" primary key ("id"));`,
     );
     this.addSql(
       `CREATE UNIQUE INDEX IF NOT EXISTS "IDX_make_slug_unique" ON "make" ("slug") WHERE deleted_at IS NULL;`,
