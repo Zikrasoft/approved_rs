@@ -20,6 +20,15 @@ if ! $sum -c --quiet migrations.sha256 >&2; then
   failed=1
 fi
 
+if [ -n "${FROZEN_BASE:-}" ] && base=$(git show "$FROZEN_BASE:./migrations.sha256" 2>/dev/null); then
+  rewritten=$(printf '%s\n' "$base" | grep -vxF -f migrations.sha256 || true)
+  if [ -n "$rewritten" ]; then
+    printf '%s\n' "$rewritten" >&2
+    echo "These lines of $PWD/migrations.sha256 at $FROZEN_BASE were rewritten or removed. A database may already have run those migrations: restore them and add a new additive migration instead." >&2
+    failed=1
+  fi
+fi
+
 for pattern in "$@"; do
   for file in $pattern; do
     [ -e "$file" ] || continue

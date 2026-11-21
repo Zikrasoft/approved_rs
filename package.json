@@ -25,6 +25,9 @@
     "**/package.json": [
       "sh .github/scripts/pinned-deps.sh"
     ],
+    "packages/site-kit/src/securityHeaders.ts": [
+      "sh .github/scripts/security-headers-drift.sh"
+    ],
     "apps/*/src/content/i18n/*.yaml": [
       "node --experimental-strip-types .github/scripts/yaml-content-valid.ts"
     ]
