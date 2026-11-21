@@ -70,7 +70,7 @@ const picture = (root: Element, make: string) =>
     ?.getAttribute('src');
 
 describe('the /cars/ list', () => {
-  it('lists exactly the Makes that have a page, Parts alone included', async () => {
+  it('lists exactly the Makes that have a page, never one with Parts alone', async () => {
     source(
       [
         work({ id: 'x3', make: 'bmw' }),
@@ -90,14 +90,10 @@ describe('the /cars/ list', () => {
 
     const root = await page();
 
-    expect(shown(root)).toEqual([
-      '/ru/cars/audi/',
-      '/ru/cars/bmw/',
-      '/ru/cars/seat/',
-    ]);
+    expect(shown(root)).toEqual(['/ru/cars/bmw/', '/ru/cars/seat/']);
     expect(
       cards(root).map((card) => card.querySelector('h2')?.textContent?.trim()),
-    ).toEqual(['Audi', 'BMW', 'SEAT']);
+    ).toEqual(['BMW', 'SEAT']);
   });
 
   it('builds a first page and one page per 24 Makes in every locale', async () => {

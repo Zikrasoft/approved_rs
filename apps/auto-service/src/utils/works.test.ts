@@ -336,21 +336,46 @@ describe('workshopMakePages', () => {
     categories: [],
   });
 
-  it('gives a Make that only the catalogue knows its own page, in slug order', () => {
+  const catalogue = [
+    { slug: 'alfa-romeo', name: 'Alfa Romeo', show_on_site: null },
+    { slug: 'audi', name: 'Audi', show_on_site: false },
+    { slug: 'daf', name: 'DAF', show_on_site: false },
+  ];
+  const mini = { slug: 'mini', name: 'MINI', show_on_site: true };
+  const activeSlugs = (...args: Parameters<typeof workshopMakePages>) =>
+    workshopMakePages(...args).map(({ make }) => make.slug);
+
+  it('gives a page to a Make with a published Work, and its Parts on it', () => {
     const pages = workshopMakePages(
+      [makeWork({ make: 'audi' })],
       [],
-      [],
-      [fitted('porsche', 'Porsche'), fitted('audi', 'Audi')],
+      [fitted('audi', 'Audi'), fitted('daf', 'DAF')],
+      catalogue,
     );
 
-    expect(pages.map(({ make }) => make)).toEqual([
-      { slug: 'audi', name: 'Audi' },
-      { slug: 'porsche', name: 'Porsche' },
-    ]);
+    expect(pages.map(({ make }) => make.slug)).toEqual(['audi']);
+    expect(pages[0].parts).toEqual([fitted('audi', 'Audi')]);
   });
 
-  it('still gives no page to a Make with nothing to show', () => {
-    expect(workshopMakePages([], [], [])).toEqual([]);
+  it('gives a page to a Make with only a published Article', () => {
+    expect(
+      activeSlugs([], [article({ make: 'alfa-romeo' })], [], catalogue),
+    ).toEqual(['alfa-romeo']);
+  });
+
+  it('gives a page to a Make flagged for the site with nothing else', () => {
+    expect(activeSlugs([], [], [], [...catalogue, mini])).toEqual(['mini']);
+  });
+
+  it('gives no page to a Make with only Parts, an unpublished Work or nothing', () => {
+    expect(
+      activeSlugs(
+        [makeWork({ make: 'audi', published: false })],
+        [],
+        [fitted('daf', 'DAF')],
+        catalogue,
+      ),
+    ).toEqual([]);
   });
 });
 

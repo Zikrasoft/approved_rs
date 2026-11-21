@@ -9,12 +9,19 @@ import { CARLAB } from '@podbor/brands';
 import { localeConfig } from './src/i18n/config.ts';
 import { blogListed } from '@podbor/blog/article';
 import { sitemapFilter } from './src/utils/sitemap.ts';
-import { articleFiles } from './src/utils/articleFiles.ts';
-import { partPagesForBuild } from './src/utils/catalogueEnv.ts';
+import {
+  partPagesForBuild,
+  writeCatalogueMakes,
+} from './src/utils/catalogueEnv.ts';
 import { partsHubPlugin } from './src/utils/partsHub.ts';
 
 const site = CARLAB.url;
 const partPages = await partPagesForBuild(process.env);
+await writeCatalogueMakes(
+  new URL('./src/content/makes.json', import.meta.url),
+  process.env,
+);
+const { articleFiles } = await import('./src/utils/articleFiles.ts');
 const blog = blogListed(
   await articleFiles(
     fileURLToPath(new URL('./src/content/articles/', import.meta.url)),

@@ -317,7 +317,8 @@
       "type": "Тип кода",
       "value": "Значение",
       "installation_price": "Цена установки, RSD",
-      "no_installation": "Без установки"
+      "no_installation": "Без установки",
+      "show_on_site": "Показывать на сайте"
     },
     "values": {
       "body_style": {

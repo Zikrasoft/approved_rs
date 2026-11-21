@@ -305,7 +305,8 @@
       "type": "Code type",
       "value": "Value",
       "installation_price": "Installation price, RSD",
-      "no_installation": "No installation"
+      "no_installation": "No installation",
+      "show_on_site": "Show on site"
     },
     "values": {
       "body_style": {

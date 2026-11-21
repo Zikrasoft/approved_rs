@@ -2,7 +2,10 @@ import type { ImageMetadata } from 'astro';
 import type { CollectionEntry } from 'astro:content';
 import { makeArticles } from '@podbor/blog/article';
 import { makePages } from '@podbor/blog/make-pages';
-import { normalizePartNumber } from '@podbor/catalog-contract';
+import {
+  normalizePartNumber,
+  type CatalogueMake,
+} from '@podbor/catalog-contract';
 import {
   localizedEntry,
   publishedByNewest,
@@ -83,29 +86,23 @@ export const sharedMakes = (works: Work[]) =>
 
 export const makesOf = (works: Work[]) => carried(works, 1);
 
-const withCatalogueMakes = (parts: MakePartsEntry[]) =>
-  [
-    ...new Map(
-      [...MAKES, ...parts.map(({ make }) => make)].map((make) => [
-        make.slug,
-        make,
-      ]),
-    ).values(),
-  ].toSorted((a, b) => a.slug.localeCompare(b.slug));
-
 export const workshopMakePages = (
   works: WorkEntry[],
   articles: Article[],
   parts: MakePartsEntry[],
+  makes: CatalogueMake[] = MAKES,
 ) =>
-  makePages(withCatalogueMakes(parts), {
+  makePages(makes, {
     works: featuredWorks(works),
     articles: publishedEntries(articles),
-    parts: parts.map((entry) => ({
-      ...entry,
-      data: { make: entry.make.slug },
-    })),
-  }).map((page) => ({ ...page, ...makeArticles(page.articles) }));
+    shown: makes
+      .filter(({ show_on_site }) => show_on_site)
+      .map(({ slug }) => ({ data: { make: slug } })),
+  }).map((page) => ({
+    ...page,
+    parts: parts.filter(({ make }) => make.slug === page.make.slug),
+    ...makeArticles(page.articles),
+  }));
 
 export type WorkshopMakePage = ReturnType<typeof workshopMakePages>[number];
 

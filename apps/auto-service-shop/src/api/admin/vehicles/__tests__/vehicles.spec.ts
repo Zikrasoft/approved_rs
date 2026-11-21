@@ -363,6 +363,23 @@ medusaIntegrationTestRunner({
         });
       });
 
+      it('creates a Make hidden from the site and lets the admin flag it shown', async () => {
+        const make = (
+          await post('/admin/makes', { slug: 'mini', name: 'MINI' })
+        ).data.make;
+        expect(make.show_on_site).toBe(false);
+
+        const shown = await post(`/admin/makes/${make.id}`, {
+          show_on_site: true,
+        });
+
+        expect(shown.data.make.show_on_site).toBe(true);
+        expect(
+          (await post(`/admin/makes/${make.id}`, { show_on_site: 'yes' }))
+            .status,
+        ).toBe(400);
+      });
+
       it('refuses a Make name past 200 characters', async () => {
         const response = await post('/admin/makes', {
           slug: 'long-make',
