@@ -175,7 +175,7 @@ export const PREVIOUS_BUILD_URL = `${CARLAB.url}/catalogue-build.json`;
 
 const SHRINK_FLOOR = 0.5;
 
-export const BUILD_CATALOGUE_TIMEOUT_MS = 300_000;
+export const BUILD_CATALOGUE_TIMEOUT_MS = 30 * 60_000;
 
 const previousBuildSchema = z.object({
   partPages: z.number().int().nonnegative(),
