@@ -2,11 +2,13 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 import {
+  CATALOGUE_SNAPSHOT_CONTENT_TYPE,
   CATALOGUE_SNAPSHOT_PATH,
-  catalogueSnapshotResponseSchema,
+  snapshotFitmentSchema,
   type Vehicle,
 } from '@podbor/catalog-contract';
 
+import { readSnapshot } from '../../../../../integration-tests/catalogueSnapshot';
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
@@ -116,10 +118,8 @@ medusaIntegrationTestRunner({
           .publishAll();
       });
 
-      const snapshot = async () =>
-        catalogueSnapshotResponseSchema.parse(
-          (await api.get(CATALOGUE_SNAPSHOT_PATH, storeHeaders)).data,
-        );
+      const snapshot = () =>
+        readSnapshot(api.get(CATALOGUE_SNAPSHOT_PATH, storeHeaders));
 
       const listed = async (path: string, key: string) => {
         const all: unknown[] = [];
@@ -143,7 +143,9 @@ medusaIntegrationTestRunner({
         );
         expect(whole.pages).toEqual(await listed('/store/part-pages', 'pages'));
         expect(whole.fitments).toEqual(
-          await listed('/store/fitments', 'fitments'),
+          (await listed('/store/fitments', 'fitments')).map((fitment) =>
+            snapshotFitmentSchema.parse(fitment),
+          ),
         );
         expect(requirementsById(whole.vehicles)).toEqual(
           requirementsById(
@@ -178,6 +180,27 @@ medusaIntegrationTestRunner({
           { slug: 'bmw', name: 'BMW', show_on_site: false },
           { slug: 'mercedes-benz', name: 'Mercedes-Benz', show_on_site: false },
           { slug: 'mini', name: 'MINI', show_on_site: true },
+        ]);
+      });
+
+      it('streams one batch per line', async () => {
+        const response = await api.get(CATALOGUE_SNAPSHOT_PATH, storeHeaders);
+
+        expect(response.headers['content-type']).toContain(
+          CATALOGUE_SNAPSHOT_CONTENT_TYPE,
+        );
+        expect(
+          response.data
+            .trim()
+            .split('\n')
+            .map((line: string) => Object.keys(JSON.parse(line))),
+        ).toEqual([
+          ['categories'],
+          ['pages'],
+          ['fitments'],
+          ['vehicles'],
+          ['makes'],
+          ['end'],
         ]);
       });
 

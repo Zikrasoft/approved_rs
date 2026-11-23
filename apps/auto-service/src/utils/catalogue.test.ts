@@ -28,6 +28,14 @@ import {
 import { fitGroups } from './fitGroups';
 import { catalogueLinks, PathBuilder } from './paths';
 import { seriesSlugOf } from '@podbor/catalog-contract/slug';
+import {
+  CATALOGUE_SNAPSHOT_CONTENT_TYPE,
+  compactFitment,
+  SNAPSHOT_END_LINE,
+  snapshotSectionLines,
+  type Fitment,
+  type SnapshotSection,
+} from '@podbor/catalog-contract';
 import { sitemapFilter } from './sitemap';
 import { GET as recordBuild } from '../pages/catalogue-build.json.ts';
 
@@ -667,15 +675,18 @@ describe('a part page groups its Fitments', () => {
     expect(
       fitGroups(page.fits).map(({ make, models }) => [
         make.slug,
-        models.map(({ model, fits }) => [model.slug, fits.map(({ id }) => id)]),
+        models.map(({ model, fits }) => [
+          model.slug,
+          fits.map(({ vehicle_id }) => vehicle_id),
+        ]),
       ]),
     ).toEqual([
-      ['audi', [['b9-a4', ['fit_a4']]]],
+      ['audi', [['b9-a4', ['veh_a4']]]],
       [
         'bmw',
         [
-          ['f30-320d', ['fit_f30', 'fit_f30b']],
-          ['g20-320d', ['fit_g20']],
+          ['f30-320d', ['veh_1', 'veh_1b']],
+          ['g20-320d', ['veh_g20']],
         ],
       ],
     ]);
@@ -1152,10 +1163,9 @@ describe('catalogue.makeHubs', () => {
     ).makeHubs();
 
     const [series] = hubs[0].series;
-    expect(series.categories[0].parts[0].fits.map(({ id }) => id)).toEqual([
-      'fit_veh_1_part_HU816X',
-      'fit_veh_2_part_HU816X',
-    ]);
+    expect(
+      series.categories[0].parts[0].fits.map(({ vehicle_id }) => vehicle_id),
+    ).toEqual(['veh_1', 'veh_2']);
   });
 
   it('assembles the hubs once per catalogue snapshot', async () => {
@@ -1613,6 +1623,80 @@ describe('catalogue.snapshot', () => {
     await expect(
       catalog(answer({ ...whole, vehicles: [{ id: 'veh_1' }] })).snapshot(),
     ).rejects.toThrow();
+  });
+
+  const fitment: Fitment = {
+    id: 'fit_1',
+    part_id: oilPart.id,
+    vehicle_id: VEHICLE.id,
+    quantity: 2,
+    axle: null,
+    side: null,
+    production_from: null,
+    production_to: null,
+    gearbox: null,
+    steering: null,
+    note: 'Только с\n«M-пакетом» 🚗',
+    translations: null,
+  };
+
+  const streamed = async (sections: [SnapshotSection, unknown[]][]) => {
+    let text = '';
+    for (const [section, rows] of sections) {
+      for await (const line of snapshotSectionLines(section, [rows])) {
+        text += line;
+      }
+    }
+    return vi.fn(
+      async () =>
+        new Response(text + SNAPSHOT_END_LINE, {
+          headers: {
+            'content-type': `${CATALOGUE_SNAPSHOT_CONTENT_TYPE}; charset=utf-8`,
+          },
+        }),
+    );
+  };
+
+  it('reads a streamed catalogue line by line, compact fitment rows included', async () => {
+    const fetch = await streamed([
+      ['categories', []],
+      ['pages', [oilFilterMann]],
+      ['fitments', [compactFitment(fitment)]],
+      ['vehicles', [VEHICLE]],
+      ['makes', [{ slug: 'bmw', name: 'BMW', show_on_site: true }]],
+    ]);
+
+    const snapshot = await catalog(fetch).snapshot();
+
+    expect(snapshot.entries[0].fits).toEqual([
+      expect.objectContaining({
+        part_id: oilPart.id,
+        quantity: 2,
+        note: fitment.note,
+        axle: null,
+        translations: null,
+        vehicle: expect.objectContaining({ id: VEHICLE.id }),
+      }),
+    ]);
+    expect(snapshot.makes).toEqual([
+      { slug: 'bmw', name: 'BMW', show_on_site: true },
+    ]);
+  });
+
+  it('reads an older shop that answers one JSON body', async () => {
+    const fetch = vi.fn(async () => Response.json(whole));
+
+    expect((await catalog(fetch).snapshot()).vehicles).toEqual([VEHICLE]);
+  });
+
+  it('fails the build on a stream missing a section', async () => {
+    const fetch = await streamed([
+      ['categories', []],
+      ['pages', []],
+      ['fitments', []],
+    ]);
+
+    await expect(catalog(fetch).snapshot()).rejects.toThrow('without vehicles');
   });
 });
 
