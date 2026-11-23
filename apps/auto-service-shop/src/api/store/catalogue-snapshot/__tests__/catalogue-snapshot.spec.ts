@@ -1,3 +1,5 @@
+import { gunzipSync } from 'node:zlib';
+
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
@@ -202,6 +204,26 @@ medusaIntegrationTestRunner({
           ['makes'],
           ['end'],
         ]);
+      });
+
+      it('gzips the stream for a caller that accepts gzip', async () => {
+        const raw = (encoding: string) =>
+          api.get(CATALOGUE_SNAPSHOT_PATH, {
+            headers: {
+              ...storeHeaders.headers,
+              'accept-encoding': encoding,
+            },
+            decompress: false,
+            responseType: 'arraybuffer',
+          });
+        const gzipped = await raw('gzip, deflate');
+        const plain = await raw('identity');
+
+        expect(gzipped.headers['content-encoding']).toBe('gzip');
+        expect(plain.headers['content-encoding']).toBeUndefined();
+        expect(gunzipSync(gzipped.data).toString()).toBe(
+          Buffer.from(plain.data).toString(),
+        );
       });
 
       it('answers only a caller with the publishable key', async () => {

@@ -1,5 +1,6 @@
 import { Readable } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
+import { createGzip } from 'node:zlib';
 
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 import type { MedusaContainer } from '@medusajs/framework/types';
@@ -96,11 +97,14 @@ export async function GET(
     'content-type',
     `${CATALOGUE_SNAPSHOT_CONTENT_TYPE}; charset=utf-8`,
   );
-  await pipeline(
-    Readable.from(snapshotLines(req.scope, pricesShown(req)), {
-      highWaterMark: 1,
-    }),
-    res,
+  res.setHeader('vary', 'accept-encoding');
+  const lines = Readable.from(snapshotLines(req.scope, pricesShown(req)), {
+    highWaterMark: 1,
+  });
+  const gzipped = /\bgzip\b/.test(req.headers['accept-encoding'] ?? '');
+  if (gzipped) res.setHeader('content-encoding', 'gzip');
+  await (
+    gzipped ? pipeline(lines, createGzip(), res) : pipeline(lines, res)
   ).catch((error: unknown) =>
     req.scope
       .resolve(ContainerRegistrationKeys.LOGGER)
