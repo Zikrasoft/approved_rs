@@ -10,8 +10,10 @@ import {
   type CheckoutContact,
   type CheckoutRefusal,
   type PartOffer,
+  CATALOGUE_SNAPSHOT_CONTENT_TYPE,
   CATALOGUE_SNAPSHOT_PATH,
   catalogueSnapshotResponseSchema,
+  readCatalogueSnapshot,
   categoriesResponseSchema,
   partPageSlug,
   identifierOffersResponseSchema,
@@ -157,7 +159,7 @@ export function createCatalogue({
       signal,
     });
 
-  const request = async (path: string, body?: unknown): Promise<unknown> => {
+  const answer = async (path: string, body?: unknown) => {
     const response = await send(
       path,
       body === undefined ? 'GET' : 'POST',
@@ -166,8 +168,11 @@ export function createCatalogue({
     if (!response.ok) {
       throw new Error(`Catalogue ${path} answered ${response.status}`);
     }
-    return response.json();
+    return response;
   };
+
+  const request = async (path: string, body?: unknown): Promise<unknown> =>
+    (await answer(path, body)).json();
 
   const segment = encodeURIComponent;
 
@@ -220,9 +225,14 @@ export function createCatalogue({
       .vehicles.find((vehicle) => vehicle.model.slug === slug)?.model ?? null;
 
   const snapshot = async () => {
-    const whole = catalogueSnapshotResponseSchema.parse(
-      await request(CATALOGUE_SNAPSHOT_PATH),
-    );
+    const response = await answer(CATALOGUE_SNAPSHOT_PATH);
+    const whole =
+      response.body &&
+      response.headers
+        .get('content-type')
+        ?.startsWith(CATALOGUE_SNAPSHOT_CONTENT_TYPE)
+        ? await readCatalogueSnapshot(response.body)
+        : catalogueSnapshotResponseSchema.parse(await response.json());
     return {
       ...assembleSnapshot(
         whole.pages.map(unpriced),

@@ -5,10 +5,14 @@ import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 import type { MedusaContainer } from '@medusajs/framework/types';
 import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
 import {
+  CATALOGUE_SNAPSHOT_CONTENT_TYPE,
   categoriesResponseSchema,
+  compactFitment,
   makeListSchema,
   MAX_PAGE,
   partPageSchema,
+  SNAPSHOT_END_LINE,
+  snapshotSectionLines,
   vehicleSchema,
 } from '@podbor/catalog-contract';
 
@@ -50,19 +54,7 @@ async function* rowBatches<T>(
   }
 }
 
-async function* jsonArray(name: string, batches: AsyncIterable<unknown[]>) {
-  yield `,${JSON.stringify(name)}:[`;
-  let separator = '';
-  for await (const batch of batches) {
-    if (batch.length) {
-      yield separator + batch.map((row) => JSON.stringify(row)).join(',');
-      separator = ',';
-    }
-  }
-  yield ']';
-}
-
-async function* snapshotJson(scope: MedusaContainer, shown: boolean) {
+async function* snapshotLines(scope: MedusaContainer, shown: boolean) {
   const catalog: CatalogModuleService = scope.resolve(CATALOG_MODULE);
   const { categories } = categoriesResponseSchema.parse({
     categories: (
@@ -72,16 +64,16 @@ async function* snapshotJson(scope: MedusaContainer, shown: boolean) {
       )
     ).map(shownCategory),
   });
-  yield `{"categories":${JSON.stringify(categories)}`;
-  yield* jsonArray('pages', partPageBatches(scope, shown));
-  yield* jsonArray(
+  yield* snapshotSectionLines('categories', [categories]);
+  yield* snapshotSectionLines('pages', partPageBatches(scope, shown));
+  yield* snapshotSectionLines(
     'fitments',
     rowBatches(
       (after, take) => catalog.snapshotFitments(after, take),
-      toFitmentResponse,
+      (row) => compactFitment(toFitmentResponse(row)),
     ),
   );
-  yield* jsonArray(
+  yield* snapshotSectionLines(
     'vehicles',
     rowBatches(
       (after, take) => catalog.snapshotVehicles(after, take),
@@ -92,17 +84,20 @@ async function* snapshotJson(scope: MedusaContainer, shown: boolean) {
     {},
     { select: ['slug', 'name', 'show_on_site'], order: { slug: 'ASC' } },
   );
-  yield `,"makes":${JSON.stringify(makeListSchema.parse(makes))}`;
-  yield '}';
+  yield* snapshotSectionLines('makes', [makeListSchema.parse(makes)]);
+  yield SNAPSHOT_END_LINE;
 }
 
 export async function GET(
   req: MedusaRequest,
   res: MedusaResponse,
 ): Promise<void> {
-  res.setHeader('content-type', 'application/json; charset=utf-8');
+  res.setHeader(
+    'content-type',
+    `${CATALOGUE_SNAPSHOT_CONTENT_TYPE}; charset=utf-8`,
+  );
   await pipeline(
-    Readable.from(snapshotJson(req.scope, pricesShown(req)), {
+    Readable.from(snapshotLines(req.scope, pricesShown(req)), {
       highWaterMark: 1,
     }),
     res,
