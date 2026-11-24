@@ -31,6 +31,15 @@ describe('CommonJS build', { timeout: 30_000 }, () => {
     expect(contract.CATALOGUE_SNAPSHOT_PATH).toBe('/store/catalogue-snapshot');
   });
 
+  it('serves the Part page request and answer to require()', () => {
+    const contract = require('@podbor/catalog-contract');
+    expect(contract.CATALOGUE_LOCALE_HEADER).toBe('x-catalogue-locale');
+    expect(contract.catalogueLocaleSchema.parse('en')).toBe('en');
+    expect(
+      contract.partPageResponseSchema.safeParse({ related: [] }).success,
+    ).toBe(false);
+  });
+
   it('serves the place page rules to require()', () => {
     const contract = require('@podbor/catalog-contract');
     expect(contract.MIN_PARTS_FOR_PAGE).toBe(3);
