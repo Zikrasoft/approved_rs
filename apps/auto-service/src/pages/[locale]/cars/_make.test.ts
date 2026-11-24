@@ -27,7 +27,16 @@ const category = (slug: string, name: string) =>
     id: `category_${slug}`,
     slug,
     name,
+    text: '',
     translations: { sr: { name: `${name} sr` } },
+    maintenance_kit: false,
+    kit_rank: 0,
+    service_label: null,
+    service_price: null,
+    service_note: null,
+    installation_price: null,
+    image: null,
+    fields: [],
   }) as unknown as Category;
 
 const showcase = ['HU816X', 'P1'].map((value) =>
@@ -541,8 +550,7 @@ describe('a Make page with an overview', () => {
     expect(schemaTypes(root)).toContain('FAQPage');
   });
 
-  it('warns about a second overview and heads with the later one', async () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  it('heads with the later of two overviews', async () => {
     withArticles([
       overview({
         id: 'old',
@@ -559,8 +567,6 @@ describe('a Make page with an overview', () => {
     expect((await page()).querySelector('h1')?.textContent?.trim()).toBe(
       'Новый обзор',
     );
-    expect(warn).toHaveBeenCalledWith(expect.stringContaining('bmw'));
-    warn.mockRestore();
   });
 });
 

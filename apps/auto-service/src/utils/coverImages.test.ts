@@ -77,6 +77,7 @@ describe('builtCover', () => {
   });
 
   it('keeps one cover per set of widths', async () => {
+    vi.stubEnv('DEV', false);
     const images = Promise.resolve({
       [coverKey(cover, MAKE_COVER_WIDTHS)]: built,
     });

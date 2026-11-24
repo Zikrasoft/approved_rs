@@ -1,5 +1,5 @@
 import { getCollection } from 'astro:content';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import facade from '@/assets/workshop-facade.jpg';
 import tall from '@/assets/mechanic-engine-teardown-tall.jpg';
 import bay from '@/assets/workshop-bay-open-hood.jpg';
@@ -10,6 +10,7 @@ import {
   orangeIn,
   parseHtml,
   respond,
+  stubShop,
 } from '@/components/renderAstro';
 import { work } from '@/components/workFixture';
 import { article } from '@/components/articleFixture';
@@ -31,6 +32,11 @@ const source = (works: Work[], articles: Article[] = []) =>
 
 const worksOn = (count: number) =>
   MAKES.slice(0, count).map(({ slug }) => work({ id: slug, make: slug }));
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
+});
 
 beforeEach(() => {
   source([]);
@@ -109,6 +115,7 @@ describe('the /cars/ list', () => {
 
   it('answers 404 for page 1, a leading zero and a word instead of a number', async () => {
     source(worksOn(25));
+    stubShop(() => new Response(null, { status: 404 }));
     const status = async (make: string) =>
       (
         await respond(
