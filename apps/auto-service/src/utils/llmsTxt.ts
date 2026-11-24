@@ -13,8 +13,7 @@ import { SERVICE_SLUGS } from '@/utils/services';
 import { translated } from '@podbor/catalog-contract';
 import {
   categoriesForBuild,
-  makeHubsForBuild,
-  makePartsForBuild,
+  pageListForBuild,
   shopOpen,
 } from '@/utils/catalogueEnv';
 import { categoryAddon } from '@/utils/categoryAddon';
@@ -49,8 +48,8 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
   const articles = blogArticles(articleEntries);
   const blog = content(locale).blog;
   const categories = await categoriesForBuild();
-  const makes = await makeHubsForBuild();
-  const makeParts = await makePartsForBuild();
+  const { makes } = await pageListForBuild();
+  const hubs = makes.filter(({ hub }) => hub);
 
   return renderBrandLlmsTxt({
     site: { name: SITE_NAME, url: SITE_URL, summary: home.meta.description },
@@ -125,7 +124,7 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
                 .join(' '),
             };
           }),
-          ...(makes.length > 0
+          ...(hubs.length > 0
             ? [
                 {
                   label: content(locale).partsCar.hubs.makes.heading,
@@ -153,14 +152,16 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
           label: pages.cars.heading,
           href: url(PathBuilder.cars(locale)),
         },
-        entries: workshopMakePages(workEntries, articleEntries, makeParts).map(
-          ({ make, overview }) => ({
-            label: overview
-              ? localizedArticle(overview, locale).title
-              : withPlaceholder(pages.make.headingTemplate, 'make', make.name),
-            href: url(PathBuilder.carsMake(locale, make.slug)),
-          }),
-        ),
+        entries: workshopMakePages(
+          workEntries,
+          articleEntries,
+          makes.map(({ slug, name }) => ({ make: { slug, name } })),
+        ).map(({ make, overview }) => ({
+          label: overview
+            ? localizedArticle(overview, locale).title
+            : withPlaceholder(pages.make.headingTemplate, 'make', make.name),
+          href: url(PathBuilder.carsMake(locale, make.slug)),
+        })),
       },
       ...(blogListed(articleEntries)
         ? [
