@@ -40,6 +40,16 @@ describe('CommonJS build', { timeout: 30_000 }, () => {
     ).toBe(false);
   });
 
+  it('serves the Series page requests and answers to require()', () => {
+    const contract = require('@podbor/catalog-contract');
+    expect(contract.seriesPagePath('bmw', '3-series')).toBe(
+      '/store/catalogue-pages/series/bmw/3-series',
+    );
+    expect(
+      contract.seriesCategoryPageResponseSchema.safeParse({}).success,
+    ).toBe(false);
+  });
+
   it('serves the place page rules to require()', () => {
     const contract = require('@podbor/catalog-contract');
     expect(contract.MIN_PARTS_FOR_PAGE).toBe(3);

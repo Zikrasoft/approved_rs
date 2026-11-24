@@ -16,8 +16,8 @@ import { CATALOG_MODULE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
 import { PUBLISH_MODULE } from '../modules/publish';
 import type PublishModuleService from '../modules/publish/service';
-import { everyRequirementFit } from './requirement-fit';
-import { seriesRequirementFits } from './series-pages';
+import { everyRequirementFit, vehicleRequirementFits } from './requirement-fit';
+import { vehiclesOfSeries } from './series-vehicles';
 
 const NO_PARTS = { parts: 0, required: 0 };
 
@@ -56,7 +56,8 @@ export async function makePageAt(
   if (!make) return null;
   const series = await catalog.listSeries({ make_id: make.id }, { take: null });
   const seriesIds = series.map(({ id }) => id);
-  const fits = await seriesRequirementFits(catalog, seriesIds);
+  const vehicles = await vehiclesOfSeries(catalog, seriesIds);
+  const fits = await vehicleRequirementFits(catalog, vehicles);
   const counts = new Map(
     (await publish.listedPartCounts(fits, seriesIds)).map((row) => [
       row.series_id,

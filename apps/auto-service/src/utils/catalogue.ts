@@ -47,7 +47,12 @@ import {
   partPageResponseSchema,
   type CategoryCarView,
   type SearchFacet,
+  seriesCategoryPagePath,
+  seriesCategoryPageResponseSchema,
+  seriesPagePath,
+  seriesPageResponseSchema,
   type RelatedPartPage,
+  type SeriesPartPage,
 } from '@podbor/catalog-contract';
 import {
   SHOP_CLIENT_HEADER,
@@ -64,11 +69,15 @@ import {
   makeHubsFrom,
   type CategoryPageEntry,
   type MakeHubEntry,
+  type ModelPart,
   type PartPageEntry,
+  type SeriesHubEntry,
+  type SeriesModel,
 } from './catalogueSnapshot';
 import type { CartOutcome, OffersOutcome } from './catalogueWire';
 import { latinBrands } from './brandAliases';
 import { placeKey, type CataloguePages } from './paths';
+import { byModelName } from './carName';
 
 export type { Vehicle, VinFacts };
 
@@ -129,6 +138,19 @@ export type CategoryPageData = {
   uniform: string[];
   demanded: boolean;
   cars: CategoryCarView[];
+};
+
+export type SeriesHubData = {
+  series: SeriesHubEntry['series'];
+  models: SeriesModel[];
+  categories: Category[];
+  popular: PartPageEntry[];
+};
+
+export type SeriesCategoryData = {
+  series: SeriesHubEntry['series'];
+  category: Category;
+  parts: ModelPart[];
 };
 
 export type CheckoutOutcome =
@@ -239,6 +261,9 @@ export function createCatalogue({
     };
   };
 
+  const seriesEntry = (page: SeriesPartPage, category: Category | null) =>
+    partEntry({ ...page, category });
+
   const viewCart = (cartId: string): Promise<CartOutcome> =>
     cartOutcome(
       send(`/store/offer-carts/${segment(cartId)}/reprice`, 'POST', {}),
@@ -340,6 +365,56 @@ export function createCatalogue({
           ),
           categories: new Set(),
         },
+      };
+    },
+
+    async seriesPage(
+      make: string,
+      series: string,
+      locale: CatalogLocale,
+    ): Promise<SeriesHubData | null> {
+      const found = await cataloguePage(
+        seriesPagePath(make, series),
+        locale,
+        seriesPageResponseSchema,
+      );
+      if (!found) return null;
+      return {
+        series: found.series,
+        models: found.models
+          .map(({ vehicles }) => ({ model: vehicles[0].model, vehicles }))
+          .toSorted(byModelName),
+        categories: found.categories,
+        popular: found.popular.map((page) =>
+          seriesEntry(
+            page,
+            found.categories.find(({ id }) => id === page.part.category_id) ??
+              null,
+          ),
+        ),
+      };
+    },
+
+    async seriesCategoryPage(
+      make: string,
+      series: string,
+      category: string,
+      locale: CatalogLocale,
+    ): Promise<SeriesCategoryData | null> {
+      const found = await cataloguePage(
+        seriesCategoryPagePath(make, series, category),
+        locale,
+        seriesCategoryPageResponseSchema,
+      );
+      if (!found) return null;
+      return {
+        series: found.series,
+        category: found.category,
+        parts: found.parts.map(({ pages, fits }) => ({
+          part: pages[0].part,
+          pages: pages.map((page) => seriesEntry(page, found.category)),
+          fits,
+        })),
       };
     },
 

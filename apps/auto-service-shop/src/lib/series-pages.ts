@@ -3,32 +3,12 @@ import { seriesHasPage } from '@podbor/catalog-contract';
 import type CatalogModuleService from '../modules/catalog/service';
 import type PublishModuleService from '../modules/publish/service';
 import { vehicleRequirementFits } from './requirement-fit';
-import { listVehicleResponses } from './store-response';
+import { vehiclesOfSeries } from './series-vehicles';
 
 export type SeriesModules = {
   catalog: CatalogModuleService;
   publish: PublishModuleService;
 };
-
-export async function seriesRequirementFits(
-  catalog: CatalogModuleService,
-  seriesIds: string[],
-) {
-  const chassis = await catalog.listChassis(
-    { series_id: seriesIds },
-    { select: ['id'], take: null },
-  );
-  const models = await catalog.listVehicleModels(
-    { chassis_id: chassis.map(({ id }) => id) },
-    { select: ['id'], take: null },
-  );
-  const vehicles = models.length
-    ? await listVehicleResponses(catalog, {
-        model_id: models.map(({ id }) => id),
-      })
-    : [];
-  return vehicleRequirementFits(catalog, vehicles);
-}
 
 export async function pagedSeries(
   { catalog, publish }: SeriesModules,
@@ -36,7 +16,10 @@ export async function pagedSeries(
 ) {
   if (!seriesIds.length) return [];
   const counts = await publish.listedPartCounts(
-    await seriesRequirementFits(catalog, seriesIds),
+    await vehicleRequirementFits(
+      catalog,
+      await vehiclesOfSeries(catalog, seriesIds),
+    ),
     seriesIds,
   );
   const series = await catalog.listSeries(
