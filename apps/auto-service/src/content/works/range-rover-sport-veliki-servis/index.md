@@ -20,7 +20,7 @@ published: true
 featured: true
 translations:
   sr:
-    title: 'Range Rover Sport PHEV 2.0 Ingenium: veliki servis i servisiranje sistema razvoda'
+    title: "Range Rover Sport PHEV 2.0 Ingenium: veliki servis i servisiranje sistema razvoda"
     body: |-
       **Range Rover Sport PHEV iz 2019. godine** sa benzinskim motorom **2.0 Ingenium** stigao je na veliki servis i servisiranje sistema razvoda. U pitanju je plug-in hibrid: pored benzinskog motora, ima i elektromotor i visokonaponsku bateriju, što utiče na redosled radova.
 
@@ -39,7 +39,7 @@ translations:
       Nakon servisa vratili smo hibridni sistem u uobičajeni režim rada i obavili **kontrolnu dijagnostiku** vozila.
     car: Range Rover Sport
   en:
-    title: 'Range Rover Sport PHEV 2.0 Ingenium: major service and timing system work'
+    title: "Range Rover Sport PHEV 2.0 Ingenium: major service and timing system work"
     body: |-
       **This 2019 Range Rover Sport PHEV** with a **2.0 Ingenium** petrol engine came in for a major service (**veliki servis**) and timing system work. It's a plug-in hybrid, with an electric motor and high-voltage battery in addition to the petrol engine, so the work has to be carried out in a specific order.
 

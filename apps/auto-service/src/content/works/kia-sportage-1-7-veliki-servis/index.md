@@ -19,7 +19,7 @@ published: true
 featured: false
 translations:
   sr:
-    title: 'Kia Sportage 1.7: veliki servis, kvačilo i kočnice'
+    title: "Kia Sportage 1.7: veliki servis, kvačilo i kočnice"
     body: |-
       **Kia Sportage iz 2019. godine** dovezli su nam na nekoliko radova:
 
@@ -31,7 +31,7 @@ translations:
       Korejske automobile, Hyundai i Kia, servisiramo kao i evropske i japanske: od redovnog servisa do popravke motora, menjača, trapa i kočnica.
     car: Kia Sportage
   en:
-    title: 'Kia Sportage 1.7: major service, clutch and brakes'
+    title: "Kia Sportage 1.7: major service, clutch and brakes"
     body: |-
       **A 2019 Kia Sportage** with a **1.7** engine came in for a range of work:
 

@@ -202,7 +202,6 @@ translations:
     car: Toyoya Yaris Cross
 translatedFrom: 7ee5945ecc6f03ff
 ---
-
 # Обслуживание Toyota Yaris Cross в Белграде: плановое ТО, замена тормозных дисков и масла в МКПП
 
 **Toyota Yaris Cross на обслуживании в автосервисе CarLab в Белграде!**\
