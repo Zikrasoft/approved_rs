@@ -113,14 +113,12 @@ medusaIntegrationTestRunner({
       };
 
       const slugs = (page: Awaited<ReturnType<typeof answer>>) =>
-        page.categories.flatMap(({ parts }) =>
-          parts.flatMap((pages) => pages.map(({ slug }) => slug)),
-        );
+        page.showcase.map(({ slug }) => slug);
 
       it('answers the Categories of the Make with the published Parts only', async () => {
         const page = await answer('bmw');
 
-        expect(page.categories.map(({ category }) => category.slug)).toEqual([
+        expect(page.categories.map(({ slug }) => slug)).toEqual([
           'oil-filters',
         ]);
         expect(slugs(page)).toEqual(
@@ -137,9 +135,63 @@ medusaIntegrationTestRunner({
       it('picks the translation the locale header names', async () => {
         const page = await answer('bmw', { [CATALOGUE_LOCALE_HEADER]: 'sr' });
 
-        expect(page.categories[0].category.translations).toMatchObject({
+        expect(page.categories[0].translations).toMatchObject({
           sr: { name: 'Filteri ulja' },
         });
+      });
+
+      it('ranks every Part of a Category before it caps the showcase', async () => {
+        const container = getContainer();
+        const catalog: CatalogModuleService = container.resolve(CATALOG_MODULE);
+        const suppliers: SupplierModuleService =
+          container.resolve(SUPPLIER_MODULE);
+        const publish: PublishModuleService = container.resolve(PUBLISH_MODULE);
+        const [mann] = await catalog.listBrands({ slug: 'mann-filter' });
+        const [belts] = await catalog.listCategories({ slug: 'oil-filters' });
+        const queued = await createVehicleFixture(catalog, {
+          make: { slug: 'queue', name: 'Queue' },
+          typeCode: 'Q1',
+          seriesName: 'Queue series',
+          modelSlug: 'queue-1',
+          chassisCode: 'Q1C',
+          engineCode: 'Q1E',
+        });
+        const ids: string[] = [];
+        for (let index = 0; index < 14; index += 1) {
+          ids.push(
+            await catalog.createPartWithIdentifiers({
+              name: `Queue ${index}`,
+              category_id: belts.id,
+              identifiers: [
+                {
+                  type: 'manufacturer-number',
+                  brand_id: mann.id,
+                  value: `QQ ${100 + index}`,
+                },
+              ],
+            }),
+          );
+        }
+        await catalog.createFitments(
+          ids.map((part_id) => ({ part_id, vehicle_id: queued.vehicle.id })),
+        );
+        const [last] = await catalog.listPartIdentifiers({
+          normalized_value: 'QQ113',
+        });
+        const [supplier] = await suppliers.listSuppliers({
+          key: 'demo-intercars',
+        });
+        await suppliers.createSupplierOffers({
+          supplier_id: supplier.id,
+          supplier_article_id: 'S-QQ113',
+          cost_price: 1000,
+          stock_quantity: 4,
+          lead_time_days: 1,
+          part_identifier_id: last.id,
+        });
+        await publish.publishAll();
+
+        expect(slugs(await answer('queue'))).toContain('mann-filter-qq113');
       });
 
       it('answers 404 for a Make with nothing listed and for an unknown Make', async () => {
@@ -149,9 +201,9 @@ medusaIntegrationTestRunner({
       it('shows prices only with the preview header while the shop is closed', async () => {
         process.env.SHOP_OPEN = 'false';
         const prices = async (headers?: Record<string, string>) =>
-          (await answer('bmw', headers)).categories
-            .flatMap(({ parts }) => parts.flat())
-            .flatMap(({ offers }) => offers.map(({ price }) => price));
+          (await answer('bmw', headers)).showcase.flatMap(({ offers }) =>
+            offers.map(({ price }) => price),
+          );
         const anonymous = await prices();
         const previewed = await prices({
           [SHOP_PREVIEW_HEADER]: process.env.SHOP_PREVIEW_TOKEN!,
