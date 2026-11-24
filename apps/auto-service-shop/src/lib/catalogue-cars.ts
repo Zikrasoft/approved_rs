@@ -59,12 +59,12 @@ export async function carMakePageAt(
     { id: [...byCategory.keys()] },
     { relations: CATEGORY_RELATIONS, order: { slug: 'ASC' }, take: null },
   );
-  const top = categories
-    .toSorted((a, b) => byCategory.get(b.id)!.size - byCategory.get(a.id)!.size)
+  const top = [...categories]
+    .sort((a, b) => byCategory.get(b.id)!.size - byCategory.get(a.id)!.size)
     .slice(0, MAKE_TOP_CATEGORIES);
   const queues = await Promise.all(
     top.map(async (category) => {
-      const partIds = [...byCategory.get(category.id)!].toSorted();
+      const partIds = [...byCategory.get(category.id)!].sort();
       const pages = await pagesOfParts({ catalog, publish, scope }, partIds, {
         locale,
         shown,
