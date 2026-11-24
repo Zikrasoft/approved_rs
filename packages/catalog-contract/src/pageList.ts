@@ -20,6 +20,7 @@ export const cataloguePageListSchema = z.object({
   categories: z.array(
     named.extend({
       listed: z.number().int().nonnegative().nullable().default(null),
+      demand: z.number().int().nonnegative().nullable().default(null),
     }),
   ),
   catalogue_makes: makeListSchema.nullable().default(null),

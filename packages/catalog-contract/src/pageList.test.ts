@@ -8,7 +8,7 @@ const list = {
   series: [
     { make: 'bmw', slug: '3-series', name: '3 Series', categories: ['brakes'] },
   ],
-  categories: [{ slug: 'brakes', name: 'Brakes', listed: 4 }],
+  categories: [{ slug: 'brakes', name: 'Brakes', listed: 4, demand: 12 }],
   catalogue_makes: [{ slug: 'bmw', name: 'BMW', show_on_site: true }],
 };
 
@@ -28,6 +28,14 @@ describe('cataloguePageListSchema', () => {
     expect(
       cataloguePageListSchema.parse({ ...list, categories: [older] })
         .categories[0].listed,
+    ).toBeNull();
+  });
+
+  it('reads a Category without the demand an older shop leaves out as null', () => {
+    const { demand: _demand, ...older } = list.categories[0];
+    expect(
+      cataloguePageListSchema.parse({ ...list, categories: [older] })
+        .categories[0].demand,
     ).toBeNull();
   });
 
