@@ -10,12 +10,14 @@ carlab.rs prerendered every catalogue page from one shop snapshot. After the bil
 
 ## Consequences
 
-The cache is Souin's `simplefs` (v0.0.20, the last that builds against Caddy 2.11.4), in a Caddy image CI builds and pushes to GHCR beside the shop image, under a 256 MB limit. Two of its limits are accepted rather than worked around with another storage:
+The cache is Souin's `simplefs` (v0.0.20, the last that builds against Caddy 2.11.4), in a Caddy image CI builds and pushes to GHCR beside the shop image, under Caddy's 128 MB limit. Two of its limits are accepted:
 
 - **No stale copy after a day.** `simplefs` drops a page when its `s-maxage` runs out, so `stale-while-revalidate` and `stale-if-error` never apply. While the shop is down, a page cached within the last 24 hours is a hit; any other page is a 503.
 - **A restart empties it.** The index lives in Caddy's memory, so every Caddy restart, every reload with a changed Caddyfile and every shop deploy starts the cache cold.
 
-Measured since: each page the size cap evicts leaks memory, and a crawl of more pages than the cap holds ends with the kernel killing Caddy, which restarts with an empty cache (`docs/guides/deploy.md`, carlab.rs catalogue page cache).
+Surrogate keys are off (`disable_surrogate_key`). Souin kept one surrogate-key entry listing every URL it had stored and rewrote it on every store, so memory grew with each new page until the kernel killed Caddy partway through a crawl of the sitemap's 99,663 catalogue URLs. Nothing here purges by surrogate key; the purge empties the whole cache.
+
+Badger also builds on Caddy 2.11.4 and, with surrogate keys off, keeps stale copies and survives a restart. It was killed at 176 MB by eight parallel requests on cached pages and needed 256 MB, which the 4 GB host budget has no room for beside Medusa's 1536 MB, so these two limits stay. Nuts and Otter were tried only before the surrogate-key cause was found: Nuts filled 1 GB of disk within a few thousand pages, and Otter holds the bodies in memory. The numbers are in `docs/guides/deploy.md` (carlab.rs catalogue page cache).
 
 ## Considered options
 

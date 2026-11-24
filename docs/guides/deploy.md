@@ -1109,8 +1109,8 @@ Keys) and put it with the admin URL in `apps/auto-service-shop/.env.admin`
   `fd00:ca7:1ab::/64`) and `userland-proxy` is disabled in `daemon.json`. Never turn
   the userland proxy back on, or every IPv6 client becomes the docker gateway's
   address.
-- Memory limits for 4 GB: medusa 1408m (a 1024 MB Node heap), typesense 768m,
-  postgres 512m, caddy 256m (the page cache, below), the three sites 160m each (a 112 MB Node heap),
+- Memory limits for 4 GB: medusa 1536m (a 1024 MB Node heap), typesense 768m,
+  postgres 512m, caddy 128m (with the page cache, below), the three sites 160m each (a 112 MB Node heap),
   loki 192m, alloy 160m: 3776 MB for what always runs, under 3.75 GB, and
   grafana's 256m on demand only, 4032 MB with it, under the 4 GB of the host
   (both checked by the compose test), with the 2 GB swap `bootstrap-host.sh`
@@ -1163,40 +1163,48 @@ Keys) and put it with the admin URL in `apps/auto-service-shop/.env.admin`
   - **Storage.** Souin `simplefs` keeps the bodies, lz4-compressed, in the
     `caddycache` volume at `/cache`. The index stays in Caddy's memory, so a
     restart or a reload with a changed Caddyfile empties the cache: every
-    shop deploy and every OOM kill starts it cold. This is accepted, not a
-    bug to fix with another storage (ADR-0065). The old
+    shop deploy starts it cold. This is accepted (ADR-0065). The old
     files stay on the volume and are overwritten when the same page is stored
     again. To remove them, run
     `docker compose stop caddy && docker run --rm -v carlab_caddycache:/cache alpine find /cache -mindepth 1 -delete && docker compose up -d caddy`.
-  - **Cap: 40,000 index entries, in a 256 MB Caddy.** A page takes three
-    entries, so the cache holds about 13,300 pages. Once it is full, the
-    least recently used page goes first. The binding limit is Caddy's memory,
-    not the disk. Measured on 2026-11-24 with this image, a stub node
-    answering `public, s-maxage=86400`, and `docker stats` plus
-    `go_memstats_heap_inuse_bytes` from the admin `/metrics` every 10,000
-    requests:
+  - **Cap: 40,000 index entries.** A page takes three entries, so the cache
+    holds about 13,300 pages. Once it is full, the least recently used page
+    goes first. On disk, 30 random catalogue pages from the live sitemap
+    averaged 118 KB raw and 29 KB stored, so a full cache holds about 390 MB.
+  - **Surrogate keys are off** (`disable_surrogate_key`). With them on, Souin
+    kept one entry listing every URL it had stored and rewrote it on every
+    store, so memory grew with each new page: Caddy was OOM-killed after
+    about 80,000 new pages at 128 MB and 120,000 at 256 MB, while the live
+    sitemap lists 99,663 catalogue URLs. Nothing purges by surrogate key.
+    `test/compose.test.sh` checks the list stays empty.
+  - **Memory, measured on 2026-11-24.** This image under its 128 MB, a stub
+    node serving a real 85 KB catalogue page with `public, s-maxage=86400`,
+    eight requests in parallel, sampled every 10,000 requests from the
+    cgroup (`anon` in `memory.stat`) and `/proc/1/status`. Caddy sets its Go
+    memory limit to 90% of the container's, so it collects harder as it
+    nears the limit rather than failing, and anonymous memory rises with the
+    limit. What sets 128 MB is the 96 MB run: it peaked at 69 MiB, 54% of
+    128 MB, the headroom #488 kept (71 of 128 MiB, 55%).
 
-    | Setting                | Load                                      | Container memory | Heap in use  |
-    | ---------------------- | ----------------------------------------- | ---------------- | ------------ |
-    | 20,000 entries, 128 MB | 30,000 new pages (the #488 run, repeated) | 41 to 93 MiB     | 37 to 89 MB  |
-    | 40,000 entries, 256 MB | 13,000 pages, then 7 more rounds of hits  | 83 to 125 MiB    | 52 to 80 MB  |
-    | 40,000 entries, 256 MB | 13,000 pages, `s-maxage=2`, 12 rounds     | 92 to 136 MiB    | 47 to 113 MB |
-    | 40,000 entries, 256 MB | 60,000 new pages                          | 78 to 189 MiB    | 56 to 117 MB |
+    | Load                                         | Limit  | Anonymous memory | Result   |
+    | -------------------------------------------- | ------ | ---------------- | -------- |
+    | 100,000 new pages, past the cap 86,700 times | 128 MB | 78 to 101 MiB    | survived |
+    | 13,000 pages, then 3 more rounds of hits     | 128 MB | 32 to 88 MiB     | survived |
+    | 13,000 pages, `s-maxage=2`, 4 rounds         | 128 MB | 68 to 93 MiB     | survived |
+    | 100,000 new pages                            | 96 MB  | 46 to 69 MiB     | survived |
 
-    A full cache serving hits or re-storing expired pages peaks at 136 of
-    256 MiB, 53%, the headroom #488 kept (71 of 128 MiB settled, 55%). On
-    disk, 30 random catalogue pages from the live sitemap averaged 118 KB raw
-    and 29 KB stored, so a full cache holds about 390 MB. Raise the cap only
-    after measuring the memory again.
+    Raise the cap only after measuring the memory again.
 
-  - **Eviction grows memory until Caddy is OOM-killed.** Measured the same
-    way, every page the cap pushes out leaks: with 40,000 entries in 256 MB,
-    new pages past the cap took the heap from 117 MB at 60,000 requests to
-    275 MB at 110,000, and the kernel killed Caddy before 120,000. The old
-    20,000 entries in 128 MB died before 80,000. Expiry does not leak, only
-    eviction does. The live sitemap lists 99,663 catalogue URLs, so one full
-    crawl is enough to kill it. Compose restarts Caddy in seconds with an
-    empty cache, and all three sites and the API are down for those seconds.
+  - **Other storages tried.** Badger v0.0.20, with surrogate keys off,
+    `stale 24h` and 8 MB memtables and caches, served a stale page with node
+    stopped past `s-maxage`, kept its pages across a restart, and its disk
+    followed the live pages (2.1 GB for 100,000). But
+    eight parallel requests over 13,000 cached pages got it OOM-killed at
+    176 MB, sequential new pages at 128 MB, and it needed 256 MB (anonymous
+    memory up to 173 MiB), which does not fit beside Medusa's 1536 MB.
+    Nuts and Otter were tried only with surrogate keys still on: Nuts wrote
+    1 GB to disk within a few thousand pages, and Otter, which keeps the
+    bodies in memory, was OOM-killed at 256 MB before 40,000 pages.
   - **Stale copies.** While node is down, a page still within its
     `s-maxage` is served from the cache as a hit. `simplefs` v0.0.20 drops a
     body when its `s-maxage` runs out, so `stale-while-revalidate` and
