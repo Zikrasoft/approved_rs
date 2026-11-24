@@ -194,4 +194,15 @@ describe('CommonJS build', { timeout: 30_000 }, () => {
       }).success,
     ).toBe(true);
   });
+
+  it('serves the Category page request and answer to require()', () => {
+    const contract = require('@podbor/catalog-contract');
+    expect(contract.categoryPagePath('brakes', 2)).toBe(
+      '/store/catalogue-pages/categories/brakes?page=2',
+    );
+    expect(contract.CATEGORY_PAGE_SIZE).toBe(48);
+    expect(contract.categoryPageResponseSchema.safeParse({}).success).toBe(
+      false,
+    );
+  });
 });
