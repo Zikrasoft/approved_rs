@@ -74,6 +74,7 @@ const hub = (
           slug: own.slug,
           name: own.name,
           listed,
+          demand: null,
         })),
         catalogue_makes: null,
       },
