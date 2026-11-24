@@ -89,6 +89,12 @@
 	}
 }
 
+(node) {
+	reverse_proxy site-{args[0]}:4321 {
+		header_up X-Request-Id {http.request.uuid}
+	}
+}
+
 (site) {
 	encode zstd gzip
 
@@ -121,9 +127,7 @@
 	}
 
 	handle {
-		reverse_proxy site-{args[0]}:4321 {
-			header_up X-Request-Id {http.request.uuid}
-		}
+		import node {args[0]}
 	}
 }
 
@@ -139,13 +143,11 @@
 		method GET HEAD
 		path_regexp ^/[a-z]{2}/(parts/.+|cars/.*)$
 		not path_regexp ^/[a-z]{2}/parts/(search|cart|prices)/?$
-		not header_regexp Cookie (^|;\s*)auto_service_shop_preview=
+		not header_regexp Cookie (^|;\s*)auto_service_shop_preview={$SHOP_PREVIEW_TOKEN:^}(;|$)
 	}
 	handle @catalogue {
 		cache
-		reverse_proxy site-auto-service:4321 {
-			header_up X-Request-Id {http.request.uuid}
-		}
+		import node auto-service
 	}
 }
 
@@ -173,15 +175,11 @@ www.{$APPROVED_HOST} {
 	import security-headers.caddy
 
 	handle /api/telegram-webhook {
-		reverse_proxy site-auto-service:4321 {
-			header_up X-Request-Id {http.request.uuid}
-		}
+		import node auto-service
 	}
 
 	handle /api/telegram-capture {
-		reverse_proxy site-approved-rs:4321 {
-			header_up X-Request-Id {http.request.uuid}
-		}
+		import node approved-rs
 	}
 
 	handle {
