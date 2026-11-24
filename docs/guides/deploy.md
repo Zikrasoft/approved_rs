@@ -1064,6 +1064,16 @@ status, its pause reason and its page counts. A run paused by the worker (the
 worker logs `Crawl of <site> paused: <reason>`) waits for a new crawl queued in
 the admin.
 
+### Admin runs from a terminal
+
+`pnpm --filter @podbor/auto-service-shop admin publish|import <supplier_id>|status [<supplier_id>]`
+starts a Publish or an Import, or prints the latest run, as one JSON line;
+`--wait` polls once a minute until the run leaves `running` and exits 1 when it
+failed. It signs in with a Medusa secret API key, not a session, so a shop
+restart does not log it out. Create the key in the admin (Settings → Secret API
+Keys) and put it with the admin URL in `apps/auto-service-shop/.env.admin`
+(see `.env.admin.example`).
+
 ### The server
 
 - `/srv/carlab/`: CI places `docker-compose.yml`, `caddy/Caddyfile`, the Loki,
