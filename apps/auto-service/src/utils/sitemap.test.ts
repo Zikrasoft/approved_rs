@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { sitemapFilter } from './sitemap';
+import { catalogueUrls, sitemapFilter } from './sitemap';
 
 const SITE = 'https://carlab.rs';
 
@@ -37,5 +37,50 @@ describe('sitemapFilter', () => {
     const keep = sitemapFilter(SITE);
     expect(keep(`${SITE}/`)).toBe(false);
     expect(keep(`${SITE}/sr/thanks/`)).toBe(false);
+  });
+});
+
+describe('catalogueUrls', () => {
+  const urls = catalogueUrls(SITE, {
+    parts: [
+      { slug: 'bmw-1', indexable: true },
+      { slug: 'bmw-2', indexable: false },
+    ],
+    makes: [
+      { slug: 'bmw', name: 'BMW', hub: true },
+      { slug: 'tiny', name: 'Tiny', hub: false },
+    ],
+    series: [
+      { make: 'bmw', slug: '3-series', name: '3', categories: ['brakes'] },
+    ],
+    categories: [
+      { slug: 'brakes', name: 'Brakes', listed: 100 },
+      { slug: 'empty', name: 'Empty', listed: null },
+    ],
+  });
+
+  it('lists every page of the list in every locale, Parts only when indexable', () => {
+    expect(urls).toEqual(
+      expect.arrayContaining([
+        `${SITE}/sr/parts/bmw/`,
+        `${SITE}/ru/parts/bmw/3-series/`,
+        `${SITE}/en/parts/bmw/3-series/brakes/`,
+        `${SITE}/sr/parts/p/bmw-1/`,
+      ]),
+    );
+    expect(urls).not.toContain(`${SITE}/sr/parts/tiny/`);
+    expect(urls).not.toContain(`${SITE}/sr/parts/p/bmw-2/`);
+  });
+
+  it('lists each page of a Category listing and one for an empty Category', () => {
+    expect(urls).toEqual(
+      expect.arrayContaining([
+        `${SITE}/sr/parts/c/brakes/`,
+        `${SITE}/sr/parts/c/brakes/2/`,
+        `${SITE}/sr/parts/c/brakes/3/`,
+        `${SITE}/sr/parts/c/empty/`,
+      ]),
+    );
+    expect(urls).not.toContain(`${SITE}/sr/parts/c/brakes/4/`);
   });
 });

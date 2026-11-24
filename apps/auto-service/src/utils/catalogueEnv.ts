@@ -6,7 +6,11 @@ import {
 } from '@podbor/catalog-contract/preview';
 import { requestIdSchema } from '@podbor/catalog-contract/events';
 import { secretMatches } from '@podbor/lead-crm/verify-secret';
-import { sortedMakes, type Category } from '@podbor/catalog-contract';
+import {
+  sortedMakes,
+  type CataloguePageList,
+  type Category,
+} from '@podbor/catalog-contract';
 import { CARLAB } from '@podbor/brands';
 import { VISITOR_ID_COOKIE } from '@podbor/site-kit';
 import { CATALOGUE_TIMEOUT_MS, createCatalogue } from './catalogue';
@@ -194,27 +198,46 @@ async function livePartPages(): Promise<number> {
   return previousBuildSchema.parse(await response.json()).partPages;
 }
 
+const refusedWithoutBackend = (live: number) => {
+  if (live > 0) {
+    throw new Error(
+      `MEDUSA_BACKEND_URL is not set, but ${CARLAB.url} serves ${live} part pages`,
+    );
+  }
+  return null;
+};
+
+const unreadable = (env: CatalogueEnv, error: unknown) =>
+  new Error(
+    `Could not read the catalogue from MEDUSA_BACKEND_URL (${env.MEDUSA_BACKEND_URL}): ${error instanceof Error ? error.message : String(error)}`,
+    { cause: error },
+  );
+
 async function loadSnapshot(env: CatalogueEnv) {
+  const catalogue = catalogueFromEnv(env, {
+    timeoutMs: BUILD_CATALOGUE_TIMEOUT_MS,
+  });
+  if (!catalogue) {
+    return null;
+  }
+  return catalogue.snapshot().catch((error: unknown) => {
+    throw unreadable(env, error);
+  });
+}
+
+async function loadPageList(env: CatalogueEnv) {
   const live =
     env.CATALOGUE_SHRINK_GUARD === 'true' ? await livePartPages() : 0;
   const catalogue = catalogueFromEnv(env, {
     timeoutMs: BUILD_CATALOGUE_TIMEOUT_MS,
   });
   if (!catalogue) {
-    if (live > 0) {
-      throw new Error(
-        `MEDUSA_BACKEND_URL is not set, but ${CARLAB.url} serves ${live} part pages`,
-      );
-    }
-    return null;
+    return refusedWithoutBackend(live);
   }
-  const snapshot = await catalogue.snapshot().catch((error: unknown) => {
-    throw new Error(
-      `Could not read the catalogue from MEDUSA_BACKEND_URL (${env.MEDUSA_BACKEND_URL}): ${error instanceof Error ? error.message : String(error)}`,
-      { cause: error },
-    );
+  const list = await catalogue.pageList().catch((error: unknown) => {
+    throw unreadable(env, error);
   });
-  const built = snapshot.entries.length;
+  const built = list.parts.length;
   const shrinkAllowed = env.CATALOGUE_SHRINK_ALLOWED === 'true';
   const shrunk = !shrinkAllowed && built < live * SHRINK_FLOOR;
   if (live > 0 && (built === 0 || shrunk)) {
@@ -222,47 +245,69 @@ async function loadSnapshot(env: CatalogueEnv) {
       `The shop gives ${built} part pages, but ${CARLAB.url} serves ${live}; set CATALOGUE_SHRINK_ALLOWED=true for one build if that is intended`,
     );
   }
-  return snapshot;
+  return list;
 }
 
 const BUILD_SNAPSHOTS = Symbol.for('carlab.buildSnapshots');
 
 export const DEV_SNAPSHOT_FRESH_MS = 30_000;
 
-type SnapshotMemo = Map<
-  string,
-  { loading: ReturnType<typeof loadSnapshot>; loadedAt?: number }
->;
+type BuildMemo = Map<string, { loading: Promise<unknown>; loadedAt?: number }>;
 
-function snapshotForBuild(env: CatalogueEnv) {
-  const holder = globalThis as { [BUILD_SNAPSHOTS]?: SnapshotMemo };
-  const memo = (holder[BUILD_SNAPSHOTS] ??= new Map());
-  const key = JSON.stringify(catalogueEnvKeys.map((name) => env[name]));
-  const cached = memo.get(key);
-  const stale =
-    cached?.loadedAt !== undefined &&
-    import.meta.env?.MODE === 'development' &&
-    Date.now() - cached.loadedAt >= DEV_SNAPSHOT_FRESH_MS;
-  if (cached && !stale) {
-    return cached.loading;
-  }
-  const loading: ReturnType<typeof loadSnapshot> = loadSnapshot(env).then(
-    (snapshot) => {
-      const entry = memo.get(key);
-      if (entry?.loading === loading) {
-        entry.loadedAt = Date.now();
-      }
-      return snapshot;
-    },
-    (error: unknown) => {
-      if (memo.get(key)?.loading === loading) {
-        memo.delete(key);
-      }
-      throw error;
-    },
-  );
-  memo.set(key, { loading });
-  return loading;
+function memoizedForBuild<T>(
+  name: string,
+  load: (env: CatalogueEnv) => Promise<T>,
+) {
+  return (env: CatalogueEnv): Promise<T> => {
+    const holder = globalThis as { [BUILD_SNAPSHOTS]?: BuildMemo };
+    const memo = (holder[BUILD_SNAPSHOTS] ??= new Map());
+    const key = JSON.stringify([
+      name,
+      ...catalogueEnvKeys.map((envKey) => env[envKey]),
+    ]);
+    const cached = memo.get(key);
+    const stale =
+      cached?.loadedAt !== undefined &&
+      import.meta.env?.MODE === 'development' &&
+      Date.now() - cached.loadedAt >= DEV_SNAPSHOT_FRESH_MS;
+    if (cached && !stale) {
+      return cached.loading as Promise<T>;
+    }
+    const loading: Promise<T> = load(env).then(
+      (loaded) => {
+        const entry = memo.get(key);
+        if (entry?.loading === loading) {
+          entry.loadedAt = Date.now();
+        }
+        return loaded;
+      },
+      (error: unknown) => {
+        if (memo.get(key)?.loading === loading) {
+          memo.delete(key);
+        }
+        throw error;
+      },
+    );
+    memo.set(key, { loading });
+    return loading;
+  };
+}
+
+const snapshotForBuild = memoizedForBuild('snapshot', loadSnapshot);
+
+const pageListMemo = memoizedForBuild('pageList', loadPageList);
+
+const EMPTY_PAGE_LIST: CataloguePageList = {
+  parts: [],
+  makes: [],
+  series: [],
+  categories: [],
+};
+
+export async function pageListForBuild(
+  env = siteEnv(),
+): Promise<CataloguePageList> {
+  return (await pageListMemo(env)) ?? EMPTY_PAGE_LIST;
 }
 
 export async function partPagesForBuild(
@@ -271,8 +316,19 @@ export async function partPagesForBuild(
   return (await snapshotForBuild(env))?.entries ?? [];
 }
 
+const categoriesMemo = memoizedForBuild('categories', async (env) => {
+  const catalogue = catalogueFromEnv(env, {
+    timeoutMs: BUILD_CATALOGUE_TIMEOUT_MS,
+  });
+  return catalogue
+    ? catalogue.categories().catch((error: unknown) => {
+        throw unreadable(env, error);
+      })
+    : [];
+});
+
 export async function categoriesForBuild(env = siteEnv()): Promise<Category[]> {
-  return (await snapshotForBuild(env))?.categories ?? [];
+  return categoriesMemo(env);
 }
 
 export async function categoryPagesForBuild(

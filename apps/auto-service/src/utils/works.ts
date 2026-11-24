@@ -13,7 +13,7 @@ import {
 } from '@podbor/i18n';
 import type { Locale } from '@/i18n/config';
 import type { Article } from './blog';
-import type { MakePartsEntry, PartPageEntry } from './catalogueSnapshot';
+import type { PartPageEntry } from './catalogueSnapshot';
 import { MAKES } from './makes';
 import type { ServiceSlug } from './services';
 
@@ -86,10 +86,10 @@ export const sharedMakes = (works: Work[]) =>
 
 export const makesOf = (works: Work[]) => carried(works, 1);
 
-export const workshopMakePages = (
+export const workshopMakePages = <P extends { make: { slug: string } }>(
   works: WorkEntry[],
   articles: Article[],
-  parts: MakePartsEntry[],
+  parts: P[],
   makes: CatalogueMake[] = MAKES,
 ) =>
   makePages(makes, {
