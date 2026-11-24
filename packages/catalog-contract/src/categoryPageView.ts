@@ -3,7 +3,8 @@ import { bestOffer } from './availability.ts';
 import { ofKnownFieldTypes } from './attributes.ts';
 import { categorySchema, type CategoryField } from './categories.ts';
 import type { PartOffer } from './cart-wire.ts';
-import { partPageSchema, type PartDemand } from './partPages.ts';
+import { sluggedPartPageSchema, type PartDemand } from './partPages.ts';
+import { makeSchema } from './makeList.ts';
 import { CATALOGUE_PAGES_PATH } from './partPageView.ts';
 import {
   describeFacet,
@@ -96,12 +97,8 @@ export function categoryFacets(
   return usefulFacets([...universal, ...own], items.length, []);
 }
 
-export const categoryPageEntrySchema = partPageSchema.extend({
-  slug: z.string().min(1),
-});
-
 export const categoryCarSchema = z.object({
-  make: z.object({ slug: z.string().min(1), name: z.string() }),
+  make: makeSchema,
   series: z.array(
     z.object({
       slug: z.string().min(1),
@@ -116,8 +113,8 @@ export const categoryPageResponseSchema = z.object({
   page: z.number().int().positive(),
   pages: z.number().int().positive(),
   count: z.number().int().nonnegative(),
-  entries: z.array(categoryPageEntrySchema),
-  popular: z.array(categoryPageEntrySchema).default([]),
+  entries: z.array(sluggedPartPageSchema),
+  popular: z.array(sluggedPartPageSchema).default([]),
   facets: ofKnownFieldTypes(searchFacetSchema).default([]),
   ranges: z
     .array(z.object({ key: z.string(), min: z.number(), max: z.number() }))
@@ -127,6 +124,5 @@ export const categoryPageResponseSchema = z.object({
   cars: z.array(categoryCarSchema).default([]),
 });
 
-export type CategoryPageEntryView = z.infer<typeof categoryPageEntrySchema>;
 export type CategoryCarView = z.infer<typeof categoryCarSchema>;
 export type CategoryPageResponse = z.infer<typeof categoryPageResponseSchema>;

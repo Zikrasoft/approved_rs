@@ -1,15 +1,11 @@
 import { z } from 'zod';
+import { makeSchema } from './makeList.ts';
 import { CATALOGUE_PAGES_PATH } from './partPageView.ts';
 
 export const MAKES_PAGE_PATH = `${CATALOGUE_PAGES_PATH}/makes`;
 
 export const makePagePath = (slug: string): string =>
   `${MAKES_PAGE_PATH}/${encodeURIComponent(slug)}`;
-
-const makeSchema = z.object({
-  slug: z.string().min(1),
-  name: z.string().min(1),
-});
 
 export const makesPageResponseSchema = z.object({
   makes: z.array(makeSchema),

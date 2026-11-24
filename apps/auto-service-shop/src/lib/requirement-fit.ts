@@ -1,22 +1,17 @@
 import {
-  attributeValuesSchema,
+  type AttributeValues,
   requirementMatches,
   type Vehicle,
 } from '@podbor/catalog-contract';
-import { z } from 'zod';
 
-import { keysetPages } from '../modules/_shared/keyset-pages';
 import type CatalogModuleService from '../modules/catalog/service';
-import type { PartFit } from '../modules/publish/service';
 import { listVehicleResponses } from './store-response';
 
-const partSchema = z.object({
-  id: z.string(),
-  category_id: z.string().nullable(),
-  attributes: attributeValuesSchema,
-});
-
-export type FitPart = z.infer<typeof partSchema>;
+export type FitPart = {
+  id: string;
+  category_id: string | null;
+  attributes: AttributeValues;
+};
 
 export type RequirementFit = {
   part_id: string;
@@ -30,19 +25,17 @@ const distinct = (values: (string | null)[]) => [
 
 async function vehiclesRequiring(
   catalog: CatalogModuleService,
-  categoryIds?: string[],
+  categoryIds: string[],
 ): Promise<Vehicle[]> {
-  const fieldIds =
-    categoryIds &&
-    (
-      await catalog.listCategoryFields(
-        { category_id: categoryIds },
-        { select: ['id'], take: null },
-      )
-    ).map(({ id }) => id);
-  if (fieldIds?.length === 0) return [];
+  const fieldIds = (
+    await catalog.listCategoryFields(
+      { category_id: categoryIds },
+      { select: ['id'], take: null },
+    )
+  ).map(({ id }) => id);
+  if (fieldIds.length === 0) return [];
   const requirements = await catalog.listRequirements(
-    fieldIds ? { field_id: fieldIds } : {},
+    { field_id: fieldIds },
     { select: ['vehicle_id', 'engine_id', 'chassis_id'], take: null },
   );
   const chassisIds = distinct(requirements.map(({ chassis_id }) => chassis_id));
@@ -93,45 +86,4 @@ export async function requirementFits(
   return categoryIds.length
     ? fitsOf(await vehiclesRequiring(catalog, categoryIds), parts)
     : [];
-}
-
-export async function vehicleRequirementFits(
-  catalog: CatalogModuleService,
-  vehicles: Vehicle[],
-): Promise<PartFit[]> {
-  const categoryIds = distinct(
-    vehicles.flatMap(({ requirements }) =>
-      requirements.map(({ category_id }) => category_id),
-    ),
-  );
-  if (!categoryIds.length) return [];
-  // TODO: the pairs ride to LISTED_PART_COUNTS as bound arrays; past about a million, persist them at Publish instead
-  const fits: PartFit[] = [];
-  for await (const rows of keysetPages((after, take) =>
-    catalog.listParts(
-      { category_id: categoryIds, ...(after && { id: { $gt: after } }) },
-      {
-        select: ['id', 'category_id', 'attributes'],
-        order: { id: 'ASC' },
-        take,
-      },
-    ),
-  )) {
-    fits.push(
-      ...fitsOf(vehicles, z.array(partSchema).parse(rows)).map(
-        ({ part_id, category_id, vehicle }) => ({
-          part_id,
-          category_id,
-          vehicle_id: vehicle.id,
-        }),
-      ),
-    );
-  }
-  return fits;
-}
-
-export async function everyRequirementFit(
-  catalog: CatalogModuleService,
-): Promise<PartFit[]> {
-  return vehicleRequirementFits(catalog, await vehiclesRequiring(catalog));
 }

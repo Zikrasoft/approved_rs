@@ -1,6 +1,5 @@
 import type { MedusaContainer } from '@medusajs/framework/types';
 import {
-  attributeValuesSchema,
   enrichmentGaps,
   generationOf,
   partPageSchema,
@@ -9,6 +8,7 @@ import {
   requirementMatches,
   translated,
   type CatalogLocale,
+  type Fitment,
   type LinkedSeries,
   type PartPage,
   type PartPageResponse,
@@ -16,18 +16,16 @@ import {
 } from '@podbor/catalog-contract';
 import { seriesSlugOf } from '@podbor/catalog-contract/slug';
 
-import { CATALOG_MODULE } from '../modules/catalog';
-import type CatalogModuleService from '../modules/catalog/service';
-import { PUBLISH_MODULE } from '../modules/publish';
-import type PublishModuleService from '../modules/publish/service';
 import { CATEGORY_RELATIONS, shownCategory } from './categories';
 import { loadPartDemand } from './part-demand';
 import { partPagesOf } from './part-pages';
 import { requirementFits } from './requirement-fit';
-import { pagedSeries } from './series-pages';
+import {
+  type CatalogueModules,
+  catalogueModules,
+  pagedSeries,
+} from './series-pages';
 import { listVehicleResponses, toFitmentResponse } from './store-response';
-
-type Modules = { catalog: CatalogModuleService; publish: PublishModuleService };
 
 const distinct = <T>(values: T[]) => [...new Set(values)];
 
@@ -43,6 +41,12 @@ const slugAddress = (slug: string): [string, string] | null => {
 
 export const slugOf = (page: PartPage) =>
   partPageSlug(page.brand.slug, page.normalized_value);
+
+export const localizedFit = (fit: Fitment, locale: CatalogLocale) => ({
+  ...fit,
+  note: fit.note && translated({ ...fit, note: fit.note }, 'note', locale),
+  translations: null,
+});
 
 export const localized = (page: PartPage, locale: CatalogLocale): PartPage => {
   const { part } = page;
@@ -69,7 +73,7 @@ export const localized = (page: PartPage, locale: CatalogLocale): PartPage => {
 };
 
 async function seriesLinks(
-  modules: Modules,
+  modules: CatalogueModules,
   vehicleIds: string[],
 ): Promise<LinkedSeries[]> {
   const { catalog } = modules;
@@ -85,15 +89,12 @@ async function seriesLinks(
 }
 
 async function kitCars(
-  { catalog, publish }: Modules,
+  { catalog, publish }: CatalogueModules,
   part: PartPage['part'] & { category_id: string },
   fitted: Vehicle[],
   required: Vehicle[],
 ): Promise<Vehicle[]> {
-  const listed = (await publish.listedPartsIn(part.category_id)).map((row) => ({
-    ...row,
-    attributes: attributeValuesSchema.parse(row.attributes),
-  }));
+  const listed = await publish.listedPartsIn(part.category_id);
   const seeds = byId([...fitted, ...required]);
   const models = await catalog.listVehicleModels(
     { slug: distinct(seeds.map(({ model }) => model.slug)) },
@@ -154,10 +155,7 @@ export async function partPageAt(
   { locale, shown }: { locale: CatalogLocale; shown: boolean },
 ): Promise<PartPageResponse | null> {
   const address = slugAddress(slug);
-  const modules: Modules = {
-    catalog: scope.resolve(CATALOG_MODULE),
-    publish: scope.resolve(PUBLISH_MODULE),
-  };
+  const modules = catalogueModules(scope);
   const { catalog, publish } = modules;
   const own = address && (await publish.publishedBySlug(...address));
   if (!own) return null;
@@ -218,10 +216,10 @@ export async function partPageAt(
   const vehicleById = new Map(
     fitVehicles.map((vehicle) => [vehicle.id, vehicle]),
   );
-  const fits = fitments.flatMap((row) => {
-    const vehicle = vehicleById.get(row.vehicle_id);
-    return vehicle ? [{ ...toFitmentResponse(row), vehicle }] : [];
-  });
+  const fits = fitments
+    .map(toFitmentResponse)
+    .filter(({ vehicle_id }) => vehicleById.has(vehicle_id))
+    .map((fit) => localizedFit(fit, locale));
 
   const requirementCars = retired
     ? []
@@ -252,14 +250,15 @@ export async function partPageAt(
           equivalents: page.equivalents.length,
         }).length === 0,
       fits,
-      requirement_cars: requirementCars,
-      kit_cars: kit,
+      requirement_cars: requirementCars.map(({ id }) => id),
+      kit_cars: kit.map(({ id }) => id),
     },
     related: related.map((other) => ({
       ...localized(other, locale),
       slug: slugOf(other),
       category: categoryOf(other),
     })),
+    vehicles: byId([...fitVehicles, ...requirementCars, ...kit]),
     linked_series: await seriesLinks(
       modules,
       distinct(

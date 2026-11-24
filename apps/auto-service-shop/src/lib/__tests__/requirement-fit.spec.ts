@@ -3,8 +3,7 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { createVehicleFixture } from '../../../integration-tests/vehicleFixture';
 import { CATALOG_MODULE } from '../../modules/catalog';
 import type CatalogModuleService from '../../modules/catalog/service';
-import { KEYSET_PAGE } from '../../modules/_shared/keyset-pages';
-import { everyRequirementFit, requirementFits } from '../requirement-fit';
+import { requirementFits } from '../requirement-fit';
 
 medusaIntegrationTestRunner({
   moduleName: 'requirement_fit',
@@ -58,7 +57,6 @@ medusaIntegrationTestRunner({
         fits.map(({ part_id, vehicle }) => `${part_id}@${vehicle.id}`).sort();
 
       it('fits nothing while no car has a Requirement', async () => {
-        expect(await everyRequirementFit(catalog)).toEqual([]);
         expect(await requirementFits(catalog, [oil('p', '5w-30')])).toEqual([]);
       });
 
@@ -118,30 +116,6 @@ medusaIntegrationTestRunner({
           fits.find(({ vehicle }) => vehicle.id === sibling.vehicle.id)?.vehicle
             .model.slug,
         ).toBe('rf-chassis');
-      });
-
-      it('pages through every Part of a required Category', async () => {
-        const car = await createVehicleFixture(catalog, {
-          typeCode: 'RF05',
-          modelSlug: 'rf-paged',
-        });
-        await require({ vehicle_id: car.vehicle.id }, '0w-20');
-        const created = await catalog.createParts(
-          Array.from({ length: KEYSET_PAGE + 1 }, (_, index) => ({
-            name: `Масло ${index}`,
-            category_id: oilsId,
-            attributes: { viscosity: '0w-20' },
-          })),
-        );
-
-        const fits = await everyRequirementFit(catalog);
-
-        expect(fits.map(({ part_id }) => part_id).sort()).toEqual(
-          created.map(({ id }) => id).sort(),
-        );
-        expect(new Set(fits.map(({ vehicle_id }) => vehicle_id))).toEqual(
-          new Set([car.vehicle.id]),
-        );
       });
     });
   },

@@ -50,7 +50,8 @@ import {
   seriesPagePath,
   seriesPageResponseSchema,
   type RelatedPartPage,
-  type SeriesPartPage,
+  type SiteFitment,
+  type SluggedPartPage,
 } from '@podbor/catalog-contract';
 import {
   SHOP_CLIENT_HEADER,
@@ -73,6 +74,18 @@ import { placeKey, type CataloguePages } from './paths';
 import { byModelName } from './carName';
 
 export type { Vehicle, VinFacts };
+
+const carsById = (vehicles: Vehicle[]) => {
+  const byId = new Map(vehicles.map((vehicle) => [vehicle.id, vehicle]));
+  return {
+    fits: (fits: SiteFitment[]) =>
+      fits.flatMap((fit) => {
+        const vehicle = byId.get(fit.vehicle_id);
+        return vehicle ? [{ ...fit, vehicle }] : [];
+      }),
+    cars: (ids: string[]) => ids.flatMap((id) => byId.get(id) ?? []),
+  };
+};
 
 export const CATALOGUE_TIMEOUT_MS = 10_000;
 export const ORDER_TIMEOUT_MS = 15_000;
@@ -260,7 +273,7 @@ export function createCatalogue({
     };
   };
 
-  const seriesEntry = (page: SeriesPartPage, category: Category | null) =>
+  const seriesEntry = (page: SluggedPartPage, category: Category | null) =>
     partEntry({ ...page, category });
 
   const viewCart = (cartId: string): Promise<CartOutcome> =>
@@ -331,8 +344,15 @@ export function createCatalogue({
         kit_cars: kitCars,
         ...page
       } = found.page;
+      const known = carsById(found.vehicles);
       return {
-        page: { ...partEntry(page), indexable, fits, requirementCars, kitCars },
+        page: {
+          ...partEntry(page),
+          indexable,
+          fits: known.fits(fits),
+          requirementCars: known.cars(requirementCars),
+          kitCars: known.cars(kitCars),
+        },
         related: found.related.map(partEntry),
         places: {
           makes: new Set(),
@@ -385,13 +405,14 @@ export function createCatalogue({
         seriesCategoryPageResponseSchema,
       );
       if (!found) return null;
+      const known = carsById(found.vehicles);
       return {
         series: found.series,
         category: found.category,
         parts: found.parts.map(({ pages, fits }) => ({
           part: pages[0].part,
           pages: pages.map((page) => seriesEntry(page, found.category)),
-          fits,
+          fits: known.fits(fits),
         })),
       };
     },

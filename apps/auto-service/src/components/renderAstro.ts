@@ -45,14 +45,28 @@ export const stubShop = (
 
 export const wirePart = ({
   priceOnRequest: _priceOnRequest,
+  fits,
   requirementCars,
   kitCars,
   ...page
 }: PartPageEntry) => ({
   ...page,
-  requirement_cars: requirementCars,
-  kit_cars: kitCars,
+  fits: fits.map(({ vehicle: _vehicle, ...fit }) => fit),
+  requirement_cars: requirementCars.map(({ id }) => id),
+  kit_cars: kitCars.map(({ id }) => id),
 });
+
+export const wireVehicles = ({
+  fits,
+  requirementCars,
+  kitCars,
+}: PartPageEntry) => [
+  ...new Map(
+    [...fits.map(({ vehicle }) => vehicle), ...requirementCars, ...kitCars].map(
+      (vehicle) => [vehicle.id, vehicle],
+    ),
+  ).values(),
+];
 
 export async function render(
   component: Component,

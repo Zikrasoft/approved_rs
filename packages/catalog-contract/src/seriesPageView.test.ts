@@ -83,13 +83,13 @@ const fit = {
   side: null,
   gearbox: null,
   steering: null,
-  vehicle,
 };
 
 const categoryPage = {
   series,
   category,
   parts: [{ pages: [page], fits: [fit] }],
+  vehicles: [vehicle],
 };
 
 describe('seriesPageResponseSchema', () => {
@@ -143,6 +143,14 @@ describe('seriesCategoryPageResponseSchema', () => {
 
     expect(parsed.parts[0].fits[0].axle).toBe('front');
     expect(parsed.parts[0].fits[0].quantity).toBe(1);
+    expect(parsed.parts[0].fits[0].vehicle_id).toBe('veh_1');
+    expect(parsed.vehicles[0].id).toBe('veh_1');
+  });
+
+  it('reads a shop that sends no vehicles as none', () => {
+    const { vehicles: _vehicles, ...older } = categoryPage;
+
+    expect(seriesCategoryPageResponseSchema.parse(older).vehicles).toEqual([]);
   });
 
   it('reads a part without fits as fitting nothing', () => {

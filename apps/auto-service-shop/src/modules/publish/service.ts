@@ -6,19 +6,23 @@ import {
   MedusaService,
 } from '@medusajs/framework/utils';
 
-import { MIN_REQUIREMENT_MATCHES_FOR_PAGE } from '@podbor/catalog-contract';
+import {
+  attributeValuesSchema,
+  MIN_REQUIREMENT_MATCHES_FOR_PAGE,
+  type AttributeValues,
+} from '@podbor/catalog-contract';
 
 import CatalogueRun from './models/catalogue-run';
 import PublishedNumber from './models/published-number';
 import { runBoundSql } from '../_shared/bound-sql';
 import {
+  LISTED_CATEGORY_PARTS,
   LISTED_NUMBERS_IN_CATEGORY,
   LISTED_MAKE_PART_COUNTS,
-  LISTED_PART_COUNTS,
   LISTED_PARTS_IN_CATEGORY,
   LISTED_PER_CATEGORY,
   LISTED_SERIES_CATEGORY_COUNTS,
-  LISTED_SERIES_PARTS,
+  LISTED_VEHICLE_PARTS,
   PUBLISH_ALL,
   PUBLISHED_NUMBER_BY_SLUG,
   PUBLISHED_NUMBERS,
@@ -38,11 +42,26 @@ export type MakePartCount = { make_slug: string; parts: number };
 
 export type SeriesCategoryCount = {
   series_id: string;
-  category_id: string;
+  category_id: string | null;
   parts: number;
+  fitted: number;
+  required: number;
 };
 
-export type SeriesPart = { category_id: string | null; part_id: string };
+export type CategoryPart = {
+  category_id: string;
+  part_id: string;
+  first_fitment_id: string | null;
+};
+
+export type VehiclePart = {
+  vehicle_id: string;
+  part_id: string;
+  category_id: string | null;
+  fitted: boolean;
+};
+
+export type PlaceScope = { series?: string[]; category?: string };
 
 export type PublishedPartSlug = {
   brand_slug: string;
@@ -55,7 +74,7 @@ export type PublishedNumber = { id: string; listed: boolean | null };
 export type ListedPart = {
   id: string;
   category_id: string;
-  attributes: Record<string, unknown>;
+  attributes: AttributeValues;
 };
 
 export type ListedNumber = {
@@ -64,14 +83,34 @@ export type ListedNumber = {
   brand_name: string;
   normalized_value: string;
   part_id: string;
+  category_id: string;
   attributes: Record<string, unknown>;
 };
 
-export type PartFit = {
-  vehicle_id: string;
-  part_id: string;
-  category_id: string;
+export const seriesCountsOf = (
+  rows: SeriesCategoryCount[],
+): ListedPartCount[] => {
+  const counts = new Map<string, ListedPartCount>();
+  for (const { series_id, parts, fitted, required } of rows) {
+    const known = counts.get(series_id) ?? { series_id, parts: 0, required: 0 };
+    counts.set(series_id, {
+      series_id,
+      parts:
+        known.parts +
+        (required >= MIN_REQUIREMENT_MATCHES_FOR_PAGE ? parts : fitted),
+      required: Math.max(known.required, required),
+    });
+  }
+  return [...counts.values()];
 };
+
+const placeBindings = ({
+  series = null,
+  category = null,
+}: {
+  series?: string[] | null;
+  category?: string | null;
+}) => [series, series, category, category, category, category];
 
 const PRUNE_RUNS_BEFORE = `
   delete from catalogue_run r
@@ -166,50 +205,38 @@ class PublishModuleService extends MedusaService({
       LISTED_PARTS_IN_CATEGORY,
       [categoryId],
     );
-    return rows;
+    return rows.map((row: ListedPart) => ({
+      ...row,
+      attributes: attributeValuesSchema.parse(row.attributes),
+    }));
   }
 
   @InjectManager()
   async listedNumbersIn(
-    categoryId: string,
+    categoryId: string | null,
     @MedusaContext() sharedContext: Context = {},
   ): Promise<ListedNumber[]> {
     const { rows } = await runBoundSql(
       sharedContext,
       LISTED_NUMBERS_IN_CATEGORY,
-      [categoryId],
+      [categoryId, categoryId],
     );
     return rows;
   }
 
-  @InjectManager()
-  async listedPartCounts(
-    requirementFits: PartFit[],
-    seriesIds: string[] | null = null,
-    @MedusaContext() sharedContext: Context = {},
-  ): Promise<ListedPartCount[]> {
-    const { rows } = await runBoundSql(sharedContext, LISTED_PART_COUNTS, [
-      requirementFits.map(({ vehicle_id }) => vehicle_id),
-      requirementFits.map(({ part_id }) => part_id),
-      requirementFits.map(({ category_id }) => category_id),
-      MIN_REQUIREMENT_MATCHES_FOR_PAGE,
-      seriesIds,
-      seriesIds,
-    ]);
-    return rows;
+  async listedPartCounts({ series }: Pick<PlaceScope, 'series'> = {}): Promise<
+    ListedPartCount[]
+  > {
+    return seriesCountsOf(await this.listedSeriesCategoryCounts({ series }));
   }
 
   @InjectManager()
   async listedMakePartCounts(
-    requirementFits: PartFit[],
     seriesIds: string[],
     @MedusaContext() sharedContext: Context = {},
   ): Promise<MakePartCount[]> {
     const { rows } = await runBoundSql(sharedContext, LISTED_MAKE_PART_COUNTS, [
-      requirementFits.map(({ vehicle_id }) => vehicle_id),
-      requirementFits.map(({ part_id }) => part_id),
-      requirementFits.map(({ category_id }) => category_id),
-      seriesIds,
+      ...placeBindings({ series: seriesIds }),
       MIN_REQUIREMENT_MATCHES_FOR_PAGE,
       MIN_REQUIREMENT_MATCHES_FOR_PAGE,
     ]);
@@ -218,33 +245,40 @@ class PublishModuleService extends MedusaService({
 
   @InjectManager()
   async listedSeriesCategoryCounts(
-    requirementFits: PartFit[],
+    scope: PlaceScope = {},
     @MedusaContext() sharedContext: Context = {},
   ): Promise<SeriesCategoryCount[]> {
     const { rows } = await runBoundSql(
       sharedContext,
       LISTED_SERIES_CATEGORY_COUNTS,
-      [
-        requirementFits.map(({ vehicle_id }) => vehicle_id),
-        requirementFits.map(({ part_id }) => part_id),
-        requirementFits.map(({ category_id }) => category_id),
-      ],
+      placeBindings(scope),
     );
     return rows;
   }
 
   @InjectManager()
-  async listedSeriesParts(
-    requirementFits: PartFit[],
+  async listedCategoryParts(
+    seriesIds: string[],
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<CategoryPart[]> {
+    const { rows } = await runBoundSql(
+      sharedContext,
+      LISTED_CATEGORY_PARTS,
+      placeBindings({ series: seriesIds }),
+    );
+    return rows;
+  }
+
+  @InjectManager()
+  async listedVehicleParts(
     seriesId: string,
     @MedusaContext() sharedContext: Context = {},
-  ): Promise<SeriesPart[]> {
-    const { rows } = await runBoundSql(sharedContext, LISTED_SERIES_PARTS, [
-      requirementFits.map(({ vehicle_id }) => vehicle_id),
-      requirementFits.map(({ part_id }) => part_id),
-      requirementFits.map(({ category_id }) => category_id),
-      seriesId,
-    ]);
+  ): Promise<VehiclePart[]> {
+    const { rows } = await runBoundSql(
+      sharedContext,
+      LISTED_VEHICLE_PARTS,
+      placeBindings({ series: [seriesId] }),
+    );
     return rows;
   }
 

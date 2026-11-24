@@ -85,6 +85,10 @@ export const partPageSchema = picturedBrandNumberSchema.extend({
   demand: demandField,
 });
 
+export const sluggedPartPageSchema = partPageSchema.extend({
+  slug: z.string().min(1),
+});
+
 export const partPagesResponseSchema = z.object({
   pages: z.array(partPageSchema),
   ...pageFields,
@@ -96,4 +100,5 @@ export type StagedDataKind = (typeof STAGED_DATA_KINDS)[number];
 export type SupplierData = z.infer<typeof supplierDataSchema>;
 export type PartDemand = z.infer<typeof partDemandSchema>;
 export type PartPage = z.infer<typeof partPageSchema>;
+export type SluggedPartPage = z.infer<typeof sluggedPartPageSchema>;
 export type PartPagesResponse = z.infer<typeof partPagesResponseSchema>;

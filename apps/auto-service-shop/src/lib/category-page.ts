@@ -4,7 +4,8 @@ import {
   CATEGORY_PAGE_SIZE,
   attributeValuesSchema,
   categoryFacets,
-  categoryPageEntrySchema,
+  seriesHasPage,
+  sluggedPartPageSchema,
   partPageSchema,
   partPageSlug,
   popularPicks,
@@ -14,46 +15,46 @@ import {
 } from '@podbor/catalog-contract';
 import { seriesSlugOf } from '@podbor/catalog-contract/slug';
 
-import { CATALOG_MODULE } from '../modules/catalog';
-import type CatalogModuleService from '../modules/catalog/service';
-import { PUBLISH_MODULE } from '../modules/publish';
-import type PublishModuleService from '../modules/publish/service';
 import { SUPPLIER_MODULE } from '../modules/supplier';
 import type SupplierModuleService from '../modules/supplier/service';
 import { CATEGORY_RELATIONS, shownCategory } from './categories';
 import { loadPartDemand } from './part-demand';
 import { localized, slugOf } from './part-page';
 import { partPagesOf } from './part-pages';
-import { requirementFits } from './requirement-fit';
-import { pagedSeries } from './series-pages';
+import {
+  type CatalogueModules,
+  catalogueModules,
+  pagedSeries,
+} from './series-pages';
 
 const byName = new Intl.Collator('en', { numeric: true }).compare;
 
-const distinct = <T>(values: T[]) => [...new Set(values)];
-
 async function carsOf(
-  modules: { catalog: CatalogModuleService; publish: PublishModuleService },
+  modules: CatalogueModules,
   categoryId: string,
 ): Promise<CategoryPageResponse['cars']> {
-  const { catalog, publish } = modules;
-  const parts = (await publish.listedPartsIn(categoryId)).map((row) => ({
-    ...row,
-    attributes: attributeValuesSchema.parse(row.attributes),
-  }));
-  const fits = (await requirementFits(catalog, parts)).map(
-    ({ part_id, category_id, vehicle }) => ({
-      part_id,
-      category_id,
-      vehicle_id: vehicle.id,
-    }),
+  const held = (
+    await modules.publish.listedSeriesCategoryCounts({ category: categoryId })
+  ).filter((row) => seriesCategoryHasPage(row.parts));
+  const pagedByCategory = new Set(
+    held.filter(({ fitted, required }) =>
+      seriesHasPage({ parts: fitted, required }),
+    ),
   );
-  const held = (await publish.listedSeriesCategoryCounts(fits)).filter(
-    (row) => row.category_id === categoryId && seriesCategoryHasPage(row.parts),
-  );
-  const series = await pagedSeries(
-    modules,
-    distinct(held.map(({ series_id }) => series_id)),
-  );
+  const series = [
+    ...(pagedByCategory.size
+      ? await modules.catalog.listSeries(
+          { id: [...pagedByCategory].map(({ series_id }) => series_id) },
+          { relations: ['make'], take: null },
+        )
+      : []),
+    ...(await pagedSeries(
+      modules,
+      held
+        .filter((row) => !pagedByCategory.has(row))
+        .map(({ series_id }) => series_id),
+    )),
+  ];
   const makes = new Map<
     string,
     { make: { slug: string; name: string }; series: typeof series }
@@ -87,8 +88,8 @@ export async function categoryPageAt(
     page,
   }: { locale: CatalogLocale; shown: boolean; page: number },
 ): Promise<CategoryPageResponse | null> {
-  const catalog: CatalogModuleService = scope.resolve(CATALOG_MODULE);
-  const publish: PublishModuleService = scope.resolve(PUBLISH_MODULE);
+  const modules = catalogueModules(scope);
+  const { catalog, publish } = modules;
   const suppliers: SupplierModuleService = scope.resolve(SUPPLIER_MODULE);
   const [row] = await catalog.listCategories(
     { slug },
@@ -155,7 +156,7 @@ export async function categoryPageAt(
       const entry = partPageSchema.parse(raw);
       return [
         entry.id,
-        categoryPageEntrySchema.parse({
+        sluggedPartPageSchema.parse({
           ...localized(entry, locale),
           slug: slugOf(entry),
         }),
@@ -175,6 +176,6 @@ export async function categoryPageAt(
     ranges,
     uniform,
     demanded: items.some(({ demand: own }) => (own?.score ?? 0) > 0),
-    cars: await carsOf({ catalog, publish }, category.id),
+    cars: await carsOf(modules, category.id),
   };
 }

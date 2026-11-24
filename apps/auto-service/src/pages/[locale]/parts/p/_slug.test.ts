@@ -11,6 +11,7 @@ import {
   SHOP_PREVIEW_TOKEN,
   stubShop,
   wirePart,
+  wireVehicles,
 } from '@/components/renderAstro';
 import type { PartPageEntry } from '@/utils/partEntry';
 import { PathBuilder } from '@/utils/paths';
@@ -65,6 +66,7 @@ const partPageAnswer = (
 ) => ({
   page: wirePart(page),
   related: related.map(wirePart),
+  vehicles: wireVehicles(page),
   linked_series: linked,
 });
 

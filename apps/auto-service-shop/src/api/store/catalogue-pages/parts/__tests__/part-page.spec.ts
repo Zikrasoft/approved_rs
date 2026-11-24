@@ -184,7 +184,7 @@ medusaIntegrationTestRunner({
           '11 42 8575211',
         ]);
         expect(related.map(({ slug }) => slug)).toEqual(['bmw-11428575211']);
-        expect(page.fits.map(({ vehicle }) => vehicle.id).sort()).toEqual(
+        expect(page.fits.map(({ vehicle_id }) => vehicle_id).sort()).toEqual(
           [vehicles.big, vehicles.small].sort(),
         );
       });
@@ -204,13 +204,14 @@ medusaIntegrationTestRunner({
       });
 
       it('lists the cars it fits by requirement and the cars whose service kit it is', async () => {
-        const { page } = await partPage('mann-filter-hu816x');
+        const { page, vehicles: cars } = await partPage('mann-filter-hu816x');
 
-        expect(page.requirement_cars.map(({ id }) => id)).toEqual([
-          vehicles.required,
-        ]);
-        expect(page.kit_cars.map(({ id }) => id).sort()).toEqual(
+        expect(page.requirement_cars).toEqual([vehicles.required]);
+        expect([...page.kit_cars].sort()).toEqual(
           [vehicles.small, vehicles.required].sort(),
+        );
+        expect(cars.map(({ id }) => id).sort()).toEqual(
+          [vehicles.big, vehicles.small, vehicles.required].sort(),
         );
       });
 

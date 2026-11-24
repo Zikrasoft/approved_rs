@@ -1,24 +1,22 @@
 import { z } from 'zod';
-import { makeListSchema } from './makeList.ts';
-
-const named = z.object({ slug: z.string().min(1), name: z.string().min(1) });
+import { makeListSchema, makeSchema } from './makeList.ts';
 
 export const cataloguePageListSchema = z.object({
   parts: z.array(z.object({ slug: z.string().min(1), indexable: z.boolean() })),
   makes: z.array(
-    named.extend({
+    makeSchema.extend({
       hub: z.boolean(),
       parts: z.number().int().nonnegative().nullable().default(null),
     }),
   ),
   series: z.array(
-    named.extend({
+    makeSchema.extend({
       make: z.string().min(1),
       categories: z.array(z.string().min(1)),
     }),
   ),
   categories: z.array(
-    named.extend({
+    makeSchema.extend({
       listed: z.number().int().nonnegative().nullable().default(null),
       demand: z.number().int().nonnegative().nullable().default(null),
     }),

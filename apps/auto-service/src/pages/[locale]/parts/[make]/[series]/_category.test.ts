@@ -63,6 +63,25 @@ const numbers = [
   }),
 ];
 
+const g20 = {
+  id: 'vehicle_g20',
+  slug: null,
+  power_kw: 110,
+  drive: null,
+  market: null,
+  year_from: 2018,
+  year_to: null,
+  steering: null,
+  model: {
+    slug: 'g20-318d',
+    name: '318d',
+    chassis: { code: 'G20', body_style: null, series },
+  },
+  engine: null,
+  identifiers: [],
+  requirements: [],
+};
+
 const seriesCategoryResponse = (
   { path = '/ru/parts/bmw/3-series/oil-filters/', headers = {} } = {} as {
     path?: string;
@@ -78,9 +97,13 @@ const seriesCategoryResponse = (
           pages: numbers.map(({ category: _category, ...page }) =>
             wirePart({ ...page, category: null }),
           ),
-          fits: [],
+          fits: [
+            { part_id: numbers[0].part.id, vehicle_id: g20.id },
+            { part_id: numbers[0].part.id, vehicle_id: 'vehicle_gone' },
+          ],
         },
       ],
+      vehicles: [g20],
     }),
   );
   const [, locale, , make, seriesSlug, category] = new URL(
@@ -120,6 +143,13 @@ describe('the Series category page', () => {
     expect(
       page.querySelector('a[href="/ru/parts/bmw/3-series/"]'),
     ).not.toBeNull();
+  });
+
+  it('names each car a part fits from the cars the shop sends once', async () => {
+    const page = await seriesCategory();
+
+    expect(page.querySelectorAll('li > ul.border-t > li')).toHaveLength(1);
+    expect(page.textContent).toContain('318d');
   });
 
   it('counts the current numbers and says so', async () => {

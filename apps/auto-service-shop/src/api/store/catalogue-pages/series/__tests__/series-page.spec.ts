@@ -103,6 +103,10 @@ medusaIntegrationTestRunner({
           ...[oilFilter, ...others, pad].map((part_id) => ({
             part_id,
             vehicle_id: big.vehicle.id,
+            ...(part_id === oilFilter && {
+              note: 'Только рестайлинг',
+              translations: { sr: { note: 'Samo fejslift' } },
+            }),
           })),
           { part_id: oilFilter, vehicle_id: small.vehicle.id },
         ]);
@@ -198,9 +202,10 @@ medusaIntegrationTestRunner({
           'bmw-11428575211',
           'mann-filter-hu816x',
         ]);
-        expect(filterPart.fits.map(({ vehicle }) => vehicle.id)).toEqual([
+        expect(filterPart.fits.map(({ vehicle_id }) => vehicle_id)).toEqual([
           bigVehicle,
         ]);
+        expect(page.vehicles.map(({ id }) => id)).toContain(bigVehicle);
         expect(
           page.parts.flatMap(({ pages }) => pages.map(({ slug }) => slug)),
         ).not.toContain('mann-filter-hu9');
@@ -212,6 +217,9 @@ medusaIntegrationTestRunner({
         expect(
           page.parts.flatMap(({ pages }) => pages.map(({ part }) => part.name)),
         ).toContain('Filter ulja');
+        expect(
+          page.parts.flatMap(({ fits }) => fits).map(({ note }) => note),
+        ).toContain('Samo fejslift');
       });
 
       it('shows prices only with the preview header while the shop is closed', async () => {

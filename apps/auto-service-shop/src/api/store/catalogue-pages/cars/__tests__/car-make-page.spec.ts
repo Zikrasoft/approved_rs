@@ -194,6 +194,50 @@ medusaIntegrationTestRunner({
         expect(slugs(await answer('queue'))).toContain('mann-filter-qq113');
       });
 
+      it('breaks a tie between Categories by the one fitted first, as the static site did', async () => {
+        const container = getContainer();
+        const catalog: CatalogModuleService = container.resolve(CATALOG_MODULE);
+        const [mann] = await catalog.listBrands({ slug: 'mann-filter' });
+        const car = await createVehicleFixture(catalog, {
+          make: { slug: 'tie', name: 'Tie' },
+          typeCode: 'TB1',
+          seriesName: 'Tie series',
+          modelSlug: 'tie-1',
+          chassisCode: 'TB1C',
+          engineCode: 'TB1E',
+        });
+        const partsIn = async (slug: string) => {
+          const category = await catalog.createCategories({ slug, name: slug });
+          return Promise.all(
+            [1, 2, 3].map((index) =>
+              catalog.createPartWithIdentifiers({
+                name: `${slug} ${index}`,
+                category_id: category.id,
+                identifiers: [
+                  {
+                    type: 'manufacturer-number',
+                    brand_id: mann.id,
+                    value: `${slug} ${index}`,
+                  },
+                ],
+              }),
+            ),
+          );
+        };
+        const early = await partsIn('z-fitted-first');
+        const late = await partsIn('a-fitted-later');
+        for (const part_id of [...early, ...late]) {
+          await catalog.createFitments({ part_id, vehicle_id: car.vehicle.id });
+        }
+        await container
+          .resolve<PublishModuleService>(PUBLISH_MODULE)
+          .publishAll();
+
+        expect(
+          (await answer('tie')).categories.map(({ slug }) => slug),
+        ).toEqual(['z-fitted-first', 'a-fitted-later']);
+      });
+
       it('answers 404 for a Make with nothing listed and for an unknown Make', async () => {
         expect((await get(carMakePagePath('nothing'))).status).toBe(404);
       });

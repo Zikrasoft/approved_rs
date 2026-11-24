@@ -18,10 +18,7 @@ import {
   readCarHit,
   seriesKey,
 } from '../lib/car-pages';
-import { everyRequirementFit } from '../lib/requirement-fit';
 import { serbianScripts } from '../lib/serbian';
-import { CATALOG_MODULE } from '../modules/catalog';
-import type CatalogModuleService from '../modules/catalog/service';
 import { PUBLISH_MODULE } from '../modules/publish';
 import type PublishModuleService from '../modules/publish/service';
 import type { ListedPartCount } from '../modules/publish/service';
@@ -223,12 +220,9 @@ async function* seed({
   }
   const [{ data: vehicles }, counts] = await Promise.all([
     query.graph({ entity: 'vehicle', fields: VEHICLE_FIELDS }),
-    everyRequirementFit(container.resolve<CatalogModuleService>(CATALOG_MODULE))
-      .then((fits) =>
-        container
-          .resolve<PublishModuleService>(PUBLISH_MODULE)
-          .listedPartCounts(fits),
-      )
+    container
+      .resolve<PublishModuleService>(PUBLISH_MODULE)
+      .listedPartCounts()
       .then(partCountsOf),
   ]);
   const documents = carDocuments(vehicles as VehicleRow[], counts);

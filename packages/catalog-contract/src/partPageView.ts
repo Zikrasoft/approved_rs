@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { categorySchema } from './categories.ts';
-import { partPageSchema } from './partPages.ts';
+import { sluggedPartPageSchema } from './partPages.ts';
 import { CATALOG_LOCALES } from './search.ts';
 import { siteFitmentSchema } from './fitment.ts';
 import { vehicleSchema } from './vehicle.ts';
@@ -14,18 +14,17 @@ export const CATALOGUE_PAGES_PATH = '/store/catalogue-pages';
 export const partPagePath = (slug: string): string =>
   `${CATALOGUE_PAGES_PATH}/parts/${encodeURIComponent(slug)}`;
 
-const cars = z.array(vehicleSchema).default([]);
+const vehicleIds = z.array(z.string()).default([]);
 
-export const relatedPartPageSchema = partPageSchema.extend({
-  slug: z.string().min(1),
+export const relatedPartPageSchema = sluggedPartPageSchema.extend({
   category: categorySchema.nullable(),
 });
 
 export const partPageViewSchema = relatedPartPageSchema.extend({
   indexable: z.boolean(),
-  fits: z.array(siteFitmentSchema.extend({ vehicle: vehicleSchema })),
-  requirement_cars: cars,
-  kit_cars: cars,
+  fits: z.array(siteFitmentSchema),
+  requirement_cars: vehicleIds,
+  kit_cars: vehicleIds,
 });
 
 export const linkedSeriesSchema = z.object({
@@ -36,6 +35,7 @@ export const linkedSeriesSchema = z.object({
 export const partPageResponseSchema = z.object({
   page: partPageViewSchema,
   related: z.array(relatedPartPageSchema),
+  vehicles: z.array(vehicleSchema).default([]),
   linked_series: z.array(linkedSeriesSchema).default([]),
 });
 
