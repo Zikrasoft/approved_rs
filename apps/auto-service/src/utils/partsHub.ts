@@ -34,8 +34,8 @@ export const partsHubOf = (
   categories: Category[],
   list: CataloguePageList,
 ): PartsHub => {
-  const listed = new Map(list.categories.map((own) => [own.slug, own.listed]));
-  const count = ({ slug }: Category) => listed.get(slug) ?? 0;
+  const own = new Map(list.categories.map((entry) => [entry.slug, entry]));
+  const demand = ({ slug }: Category) => own.get(slug)?.demand ?? 0;
   const hubs = list.makes
     .filter(({ hub }) => hub)
     .map(({ slug, name, parts }) => ({
@@ -44,9 +44,9 @@ export const partsHubOf = (
     }));
   return {
     makes: topMakes(hubs, TOP_MAKES).map(({ make }) => make),
-    categories: byDemand(categories, count).map((category) => ({
+    categories: byDemand(categories, demand).map((category) => ({
       slug: category.slug,
-      empty: listed.get(category.slug) === 0,
+      empty: own.get(category.slug)?.listed === 0,
       name: perLocale((locale) => translated(category, 'name', locale)),
       lead: perLocale(
         (locale) => paragraphs(translated(category, 'text', locale))[0] ?? null,
