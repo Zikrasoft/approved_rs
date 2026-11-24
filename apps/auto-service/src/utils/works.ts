@@ -13,7 +13,7 @@ import {
 } from '@podbor/i18n';
 import type { Locale } from '@/i18n/config';
 import type { Article } from './blog';
-import type { PartPageEntry } from './catalogueSnapshot';
+import type { MakePartsEntry, PartPageEntry } from './catalogueSnapshot';
 import { MAKES } from './makes';
 import type { ServiceSlug } from './services';
 
@@ -104,7 +104,9 @@ export const workshopMakePages = <P extends { make: { slug: string } }>(
     ...makeArticles(page.articles),
   }));
 
-export type WorkshopMakePage = ReturnType<typeof workshopMakePages>[number];
+export type WorkshopMakePage = ReturnType<
+  typeof workshopMakePages<MakePartsEntry>
+>[number];
 
 export const overviewConflicts = (pages: WorkshopMakePage[]) =>
   pages.flatMap(({ make, overview, ignoredOverviews }) =>
