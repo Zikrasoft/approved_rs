@@ -15,8 +15,14 @@ import {
 import type { PartPageEntry } from '@/utils/catalogueSnapshot';
 import { PathBuilder } from '@/utils/paths';
 import { getCollection } from 'astro:content';
-import { work } from '@/components/workFixture';
+import { BUILT_COVER, work } from '@/components/workFixture';
 import PartPage from './[slug].astro';
+
+vi.mock('@/utils/coverImages', (original) =>
+  import('@/components/workFixture').then(({ withBuiltCover }) =>
+    withBuiltCover(original),
+  ),
+);
 
 vi.mock('astro:content', () => ({
   getCollection: vi.fn().mockResolvedValue([]),
@@ -445,14 +451,16 @@ describe('the Part page rendered on demand', () => {
     expect(hrefs).not.toContain('/ru/parts/bmw/bare/');
   });
 
-  it('shows the Works that sourced the Part without the /_image endpoint the cache split leaves out', async () => {
+  it('shows the Works that sourced the Part with the covers the build optimized, as no /_image endpoint runs', async () => {
     setShop(false);
     vi.mocked(getCollection).mockResolvedValueOnce([
       work({ parts: [{ brand: 'Bosch', number: '0 986 494 524' }] }),
     ] as never);
     const root = await partPageHtml([partPage()]);
 
-    expect(root.querySelector('#works img')).not.toBeNull();
+    expect(root.querySelector('#works img')?.getAttribute('srcset')).toBe(
+      BUILT_COVER.srcset,
+    );
     expect(root.innerHTML).not.toContain('/_image');
   });
 });

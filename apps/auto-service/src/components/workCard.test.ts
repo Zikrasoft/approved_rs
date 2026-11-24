@@ -1,9 +1,16 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import cover from '@/assets/mechanic-engine-teardown-wide.jpg';
 import tall from '@/assets/mechanic-engine-teardown-tall.jpg';
 import type { Work } from '@/utils/works';
 import WorkCard from './WorkCard.astro';
 import { render } from './renderAstro';
+import { BUILT_COVER } from './workFixture';
+
+vi.mock('@/utils/coverImages', (original) =>
+  import('./workFixture').then(({ withBuiltCover }) =>
+    withBuiltCover(original),
+  ),
+);
 
 const work = (title: string, year?: number): Work =>
   ({
@@ -73,12 +80,11 @@ describe('WorkCard', () => {
     expect(sizes).toBe('calc(78vw * 1.5)');
   });
 
-  it('serves the original cover file on a page rendered on demand, where no /_image endpoint runs', async () => {
-    const root = await card({ work: work('x'), original: true });
-    const image = root.querySelector('img')!;
+  it('serves the cover the build optimized on a page rendered on demand, where no /_image endpoint runs', async () => {
+    const image = (await card({ work: work('x') })).querySelector('img')!;
 
-    expect(image.getAttribute('src')).toBe(cover.src);
-    expect(image.hasAttribute('srcset')).toBe(false);
-    expect(root.innerHTML).not.toContain('/_image');
+    expect(image.getAttribute('src')).toBe(BUILT_COVER.src);
+    expect(image.getAttribute('srcset')).toBe(BUILT_COVER.srcset);
+    expect(image.getAttribute('width')).toBe('1080');
   });
 });
