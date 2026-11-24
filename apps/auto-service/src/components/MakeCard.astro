@@ -1,7 +1,11 @@
 ---
 import type { ImageMetadata } from 'astro';
-import { Image } from 'astro:assets';
 import { coverScale, coverSizes } from '@/utils/coverSizes';
+import {
+  builtCover,
+  MAKE_COVER_WIDTHS,
+  optimizedCover,
+} from '@/utils/coverImages';
 
 interface Props {
   name?: string;
@@ -13,6 +17,12 @@ interface Props {
 
 const { name, href, cover, eager = false, template = false } = Astro.props;
 const picture = 'aspect-[3/2] w-full object-cover';
+const built = cover
+  ? await (Astro.isPrerendered ? optimizedCover : builtCover)(
+      cover,
+      MAKE_COVER_WIDTHS,
+    )
+  : undefined;
 ---
 
 <a href={href} data-make-card data-search-href class="tile group">
@@ -22,16 +32,18 @@ const picture = 'aspect-[3/2] w-full object-cover';
     )
   }
   {
-    cover && (
-      <Image
-        src={cover}
+    cover && built && (
+      <img
+        src={built.src}
+        srcset={built.srcset}
         alt=""
-        widths={[240, 360, 560]}
+        width={built.width}
+        height={built.height}
+        decoding="async"
         sizes={coverSizes(
           '(min-width: 1024px) 25vw, (min-width: 640px) 33vw, calc(50vw - 1.5rem)',
           coverScale(cover, 3 / 2),
         )}
-        quality={68}
         loading={eager ? 'eager' : 'lazy'}
         class={picture}
       />

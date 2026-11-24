@@ -1,28 +1,26 @@
 import { getCollection } from 'astro:content';
 import { withPlaceholder } from '@podbor/i18n';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { content } from '@/i18n/content';
 import type { Locale } from '@/i18n/config';
 import {
   orangeIn,
+  parseHtml,
   partPage,
-  render,
+  respond,
   heroPartsSearch,
+  stubShop,
+  wirePart,
 } from '@/components/renderAstro';
 import { work } from '@/components/workFixture';
-import { makePartsForBuild } from '@/utils/catalogueEnv';
 import type { MakePartsEntry } from '@/utils/catalogueSnapshot';
 import type { Category } from '@podbor/catalog-contract';
 import { article } from '@/components/articleFixture';
 import { SITE_NAME } from '@/utils/constants';
 import type { Article } from '@/utils/blog';
-import MakePage, { getStaticPaths } from './[make].astro';
+import MakePage from './[make].astro';
 
 vi.mock('astro:content', () => ({ getCollection: vi.fn() }));
-vi.mock('@/utils/catalogueEnv', async (original) => ({
-  ...(await original<typeof import('@/utils/catalogueEnv')>()),
-  makePartsForBuild: vi.fn(async () => []),
-}));
 
 const category = (slug: string, name: string) =>
   ({
@@ -52,8 +50,33 @@ const bmwParts = (hub = true, shown = showcase): MakePartsEntry => ({
   ].map((slug) => category(slug, slug.toUpperCase())),
 });
 
-const withParts = (...entries: MakePartsEntry[]) =>
-  vi.mocked(makePartsForBuild).mockResolvedValue(entries);
+let held: MakePartsEntry[] = [];
+
+const withParts = (...entries: MakePartsEntry[]) => {
+  held = entries;
+};
+
+const PUBLIC_PAGE =
+  'public, s-maxage=86400, stale-while-revalidate=86400, stale-if-error=86400';
+
+const shop = stubShopOf(() => held);
+
+function stubShopOf(entries: () => MakePartsEntry[]) {
+  return (make: string) => {
+    const found = entries().find((entry) => entry.make.slug === make);
+    return found
+      ? Response.json({
+          hub: found.hub,
+          categories: found.categories.map((category, index) => ({
+            category,
+            parts: found.showcase[index]
+              ? [[wirePart(found.showcase[index])]]
+              : [],
+          })),
+        })
+      : new Response(null, { status: 404 });
+  };
+}
 
 const bmwWorks = Array.from({ length: 7 }, (_, i) =>
   work({ id: `bmw-${i}`, make: 'bmw' }),
@@ -87,51 +110,96 @@ beforeEach(() => {
   withParts();
 });
 
-const page = async (locale: Locale = 'ru', make = 'bmw') => {
-  const [path] = (await getStaticPaths()).filter(
-    ({ params }) => params.locale === locale && params.make === make,
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
+});
+
+const answer = (locale: Locale = 'ru', make = 'bmw', headers = {}) => {
+  stubShop((url) => shop(url.pathname.split('/').pop()!));
+  return respond(
+    MakePage,
+    new Request(new URL(`/${locale}/cars/${make}/`, 'https://carlab.rs'), {
+      headers,
+    }),
+    { params: { locale, make } },
   );
-  return render(MakePage as never, {
-    path: `/${locale}/cars/${make}/`,
-    params: path.params,
-    props: path.props,
-  });
 };
+
+const page = async (locale: Locale = 'ru', make = 'bmw') =>
+  parseHtml(await (await answer(locale, make)).text());
 const classes = (element: Element | null) =>
   element ? element.className.split(/\s+/) : [];
 
+const status = async (locale: Locale, make: string) =>
+  (await answer(locale, make)).status;
+
 describe('the Make pages', () => {
   it('exist in every locale for a Make with a published Work and for no other', async () => {
-    expect((await getStaticPaths()).map(({ params }) => params)).toEqual([
-      { locale: 'ru', make: 'bmw' },
-      { locale: 'sr', make: 'bmw' },
-      { locale: 'en', make: 'bmw' },
-    ]);
+    expect(
+      await Promise.all(
+        (['ru', 'sr', 'en'] as const).map((locale) => status(locale, 'bmw')),
+      ),
+    ).toEqual([200, 200, 200]);
+    expect(await status('ru', 'volkswagen')).toBe(404);
+    expect(await status('ru', 'tesla')).toBe(404);
   });
 
   it('do not exist for a Make with Parts and nothing else', async () => {
-    withParts(
-      {
-        make: { slug: 'audi', name: 'Audi' },
-        parts: 1,
-        hub: false,
-        categories: [],
-        showcase: [],
-      },
-      {
-        make: { slug: 'tesla', name: 'Tesla' },
-        parts: 4,
-        hub: true,
-        categories: [],
-        showcase: [],
-      },
+    withParts({
+      make: { slug: 'audi', name: 'Audi' },
+      parts: 1,
+      hub: false,
+      categories: [],
+      showcase: [],
+    });
+
+    expect(await status('ru', 'audi')).toBe(404);
+  });
+
+  it('answer a page the cache may keep, without a cookie', async () => {
+    const response = await answer();
+
+    expect(response.headers.get('cache-control')).toBe(PUBLIC_PAGE);
+    expect(response.headers.get('set-cookie')).toBeNull();
+    expect((await answer('ru', 'tesla')).headers.get('cache-control')).toBe(
+      PUBLIC_PAGE,
+    );
+  });
+
+  it('ask the shop for the Make in the locale of the path', async () => {
+    const calls = stubShop(() => new Response(null, { status: 404 }));
+    await respond(
+      MakePage,
+      new Request(new URL('/sr/cars/bmw/', 'https://carlab.rs')),
+      { params: { locale: 'sr', make: 'bmw' } },
+    );
+    const [url, init] = calls.mock.calls[0];
+
+    expect(String(url)).toBe('http://shop.test/store/catalogue-pages/cars/bmw');
+    expect(new Headers(init?.headers).get('x-catalogue-locale')).toBe('sr');
+  });
+
+  it('answer 503 with Retry-After when the shop fails', async () => {
+    stubShop(() => new Response(null, { status: 500 }));
+    const response = await respond(
+      MakePage,
+      new Request(new URL('/ru/cars/bmw/', 'https://carlab.rs')),
+      { params: { locale: 'ru', make: 'bmw' } },
     );
 
-    expect(
-      (await getStaticPaths())
-        .filter(({ params }) => params.locale === 'ru')
-        .map(({ params }) => params.make),
-    ).toEqual(['bmw']);
+    expect(response.status).toBe(503);
+    expect(response.headers.get('retry-after')).toBe('60');
+  });
+
+  it('answer the numbered list page for a number instead of a Make', async () => {
+    const response = await respond(
+      MakePage,
+      new Request(new URL('/ru/cars/2/', 'https://carlab.rs')),
+      { params: { locale: 'ru', make: '2' } },
+    );
+
+    expect(response.status).toBe(404);
   });
 });
 
@@ -283,19 +351,13 @@ describe('the Make pages with Articles', () => {
   it('exist for a Make with an Article and no Work', async () => {
     withArticles([article({ id: 'audi-oil', make: 'audi' })]);
 
-    expect(
-      (await getStaticPaths())
-        .filter(({ params }) => params.locale === 'ru')
-        .map(({ params }) => params.make),
-    ).toEqual(['audi', 'bmw']);
+    expect(await status('ru', 'audi')).toBe(200);
   });
 
   it('leave out a Make whose only Article is unpublished', async () => {
     withArticles([article({ make: 'audi', published: false })]);
 
-    expect(
-      (await getStaticPaths()).map(({ params }) => params.make),
-    ).not.toContain('audi');
+    expect(await status('ru', 'audi')).toBe(404);
   });
 });
 

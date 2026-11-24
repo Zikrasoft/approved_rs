@@ -1,4 +1,5 @@
 import type { ImageMetadata } from 'astro';
+import { paginate } from '@podbor/site-kit/pagination';
 import type { CollectionEntry } from 'astro:content';
 import { makeArticles } from '@podbor/blog/article';
 import { makePages } from '@podbor/blog/make-pages';
@@ -14,7 +15,7 @@ import {
 import type { Locale } from '@/i18n/config';
 import type { Article } from './blog';
 import type { MakePartsEntry, PartPageEntry } from './catalogueSnapshot';
-import { MAKES } from './makes';
+import { MAKES, type Make } from './makes';
 import type { ServiceSlug } from './services';
 
 type WorkEntry = CollectionEntry<'works'>;
@@ -104,8 +105,10 @@ export const workshopMakePages = <P extends { make: { slug: string } }>(
     ...makeArticles(page.articles),
   }));
 
+export type MakeParts = Omit<MakePartsEntry, 'parts'>;
+
 export type WorkshopMakePage = ReturnType<
-  typeof workshopMakePages<MakePartsEntry>
+  typeof workshopMakePages<MakeParts>
 >[number];
 
 export const overviewConflicts = (pages: WorkshopMakePage[]) =>
@@ -121,6 +124,24 @@ export const makeCover = ({ overview, works }: WorkshopMakePage) =>
   overview?.data.image ?? publishedByNewest(works)[0]?.data.image;
 
 export const CARS_PAGE_SIZE = 24;
+
+export const CARS_PAGE_NUMBER = /^[2-9]\d*$/;
+
+export type MakeTile = { make: Make; cover: ImageMetadata | undefined };
+
+export const makeTiles = (works: WorkEntry[], articles: Article[]) =>
+  workshopMakePages<MakeParts>(works, articles, []).map((page): MakeTile => ({
+    make: page.make,
+    cover: makeCover(page),
+  }));
+
+export const carsListing = (tiles: MakeTile[], page?: string) => {
+  const listings = paginate(tiles, CARS_PAGE_SIZE);
+  if (page === undefined) return listings[0];
+  return CARS_PAGE_NUMBER.test(page)
+    ? (listings[Number(page) - 1] ?? null)
+    : null;
+};
 
 const WORKSHOP = 'workshop';
 

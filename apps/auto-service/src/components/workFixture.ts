@@ -26,7 +26,8 @@ export const work = ({ id = 'bmw-x3', body = '', ...data }: Over = {}) =>
 
 export const BUILT_COVER = {
   src: '/_astro/cover_360.webp',
-  srcset: '/_astro/cover_360.webp 360w, /_astro/cover_1080.webp 1080w',
+  srcset:
+    '/_astro/cover_360.webp 360w, /_astro/cover_560.webp 560w, /_astro/cover_1080.webp 1080w',
   width: 1080,
   height: 810,
 };
@@ -37,7 +38,11 @@ export const withBuiltCover = async (
   const actual = await original();
   return {
     ...actual,
-    builtCover: (image: ImageMetadata) =>
-      actual.builtCover(image, Promise.resolve({ [wide.src]: BUILT_COVER })),
+    builtCover: (image: ImageMetadata, widths = actual.COVER_WIDTHS) =>
+      actual.builtCover(
+        image,
+        widths,
+        Promise.resolve({ [actual.coverKey(wide, widths)]: BUILT_COVER }),
+      ),
   };
 };

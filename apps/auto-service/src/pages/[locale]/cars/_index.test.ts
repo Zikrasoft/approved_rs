@@ -5,21 +5,21 @@ import tall from '@/assets/mechanic-engine-teardown-tall.jpg';
 import bay from '@/assets/workshop-bay-open-hood.jpg';
 import { content } from '@/i18n/content';
 import type { Locale } from '@/i18n/config';
-import { orangeIn, render, heroPartsSearch } from '@/components/renderAstro';
+import {
+  heroPartsSearch,
+  orangeIn,
+  parseHtml,
+  respond,
+} from '@/components/renderAstro';
 import { work } from '@/components/workFixture';
 import { article } from '@/components/articleFixture';
-import { makePartsForBuild } from '@/utils/catalogueEnv';
-import type { MakePartsEntry } from '@/utils/catalogueSnapshot';
 import { MAKES } from '@/utils/makes';
 import type { Article } from '@/utils/blog';
 import type { Work } from '@/utils/works';
-import CarsIndex, { getStaticPaths } from './[...page].astro';
+import CarsIndex from './index.astro';
+import CarsPage from './[make].astro';
 
 vi.mock('astro:content', () => ({ getCollection: vi.fn() }));
-vi.mock('@/utils/catalogueEnv', async (original) => ({
-  ...(await original<typeof import('@/utils/catalogueEnv')>()),
-  makePartsForBuild: vi.fn(async () => []),
-}));
 
 const { cars } = content('ru').pages;
 
@@ -34,21 +34,25 @@ const worksOn = (count: number) =>
 
 beforeEach(() => {
   source([]);
-  vi.mocked(makePartsForBuild).mockResolvedValue([]);
 });
 
-const page = async ({ locale = 'ru' as Locale, number = 1 } = {}) => {
-  const path = (await getStaticPaths()).find(
-    ({ params }) =>
-      params.locale === locale &&
-      params.page === (number > 1 ? String(number) : undefined),
-  )!;
-  return render(CarsIndex as never, {
-    path: `/${locale}/cars/${number > 1 ? `${number}/` : ''}`,
-    params: path.params,
-    props: path.props,
-  });
-};
+const PUBLIC_PAGE =
+  'public, s-maxage=86400, stale-while-revalidate=86400, stale-if-error=86400';
+
+const answer = ({ locale = 'ru' as Locale, number = 1 } = {}) =>
+  respond(
+    number > 1 ? CarsPage : CarsIndex,
+    new Request(
+      new URL(
+        `/${locale}/cars/${number > 1 ? `${number}/` : ''}`,
+        'https://carlab.rs',
+      ),
+    ),
+    { params: { locale, ...(number > 1 ? { make: String(number) } : {}) } },
+  );
+
+const page = async (options = {}) =>
+  parseHtml(await (await answer(options)).text());
 
 const cards = (root: Element) => [
   ...root.querySelectorAll<HTMLElement>('[data-make-card]'),
@@ -70,7 +74,7 @@ const picture = (root: Element, make: string) =>
     ?.getAttribute('src');
 
 describe('the /cars/ list', () => {
-  it('lists exactly the Makes that have a page, never one with Parts alone', async () => {
+  it('lists exactly the Makes that have a page', async () => {
     source(
       [
         work({ id: 'x3', make: 'bmw' }),
@@ -79,16 +83,6 @@ describe('the /cars/ list', () => {
       ],
       [article({ id: 'dsg', make: 'seat' })],
     );
-    vi.mocked(makePartsForBuild).mockResolvedValue([
-      {
-        make: { slug: 'audi', name: 'Audi' },
-        parts: 3,
-        hub: true,
-        categories: [],
-        showcase: [],
-      } as MakePartsEntry,
-    ]);
-
     const root = await page();
 
     expect(shown(root)).toEqual(['/ru/cars/bmw/', '/ru/cars/seat/']);
@@ -97,22 +91,48 @@ describe('the /cars/ list', () => {
     ).toEqual(['BMW', 'SEAT']);
   });
 
-  it('builds a first page and one page per 24 Makes in every locale', async () => {
+  it('answers a first page and one page per 24 Makes in every locale, and 404 past the last', async () => {
     source(worksOn(25));
-
-    const built = await getStaticPaths();
+    const status = async (locale: Locale, number: number) =>
+      (await answer({ locale, number })).status;
 
     expect(
-      built
-        .filter(({ params }) => params.locale === 'en')
-        .map(({ params, props }) => [params.page, props.listing.number]),
-    ).toEqual([
-      [undefined, 1],
-      ['2', 2],
+      await Promise.all(
+        (['ru', 'sr', 'en'] as const).flatMap((locale) => [
+          status(locale, 1),
+          status(locale, 2),
+          status(locale, 3),
+        ]),
+      ),
+    ).toEqual([200, 200, 404, 200, 200, 404, 200, 200, 404]);
+  });
+
+  it('answers 404 for page 1, a leading zero and a word instead of a number', async () => {
+    source(worksOn(25));
+    const status = async (make: string) =>
+      (
+        await respond(
+          CarsPage,
+          new Request(new URL(`/ru/cars/${make}/`, 'https://carlab.rs')),
+          { params: { locale: 'ru', make } },
+        )
+      ).status;
+
+    expect(await Promise.all(['1', '02', 'nothing'].map(status))).toEqual([
+      404, 404, 404,
     ]);
-    expect(new Set(built.map(({ params }) => params.locale))).toEqual(
-      new Set(['ru', 'sr', 'en']),
-    );
+  });
+
+  it('answers a page the cache may keep, with no cookie and no shop', async () => {
+    source(worksOn(2));
+    const fetch = vi.fn();
+    vi.stubGlobal('fetch', fetch);
+    const response = await answer();
+    vi.unstubAllGlobals();
+
+    expect(response.headers.get('cache-control')).toBe(PUBLIC_PAGE);
+    expect(response.headers.get('set-cookie')).toBeNull();
+    expect(fetch).not.toHaveBeenCalled();
   });
 
   it('shows the page its own Makes and links the pages to each other', async () => {

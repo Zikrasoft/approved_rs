@@ -38,6 +38,8 @@ import {
   CATALOGUE_LOCALE_HEADER,
   MAX_OFFER_IDS,
   MAKES_PAGE_PATH,
+  carMakePagePath,
+  carMakePageResponseSchema,
   makePagePath,
   makePageResponseSchema,
   makesPageResponseSchema,
@@ -63,6 +65,7 @@ import {
   assembleSnapshot,
   categoryPagesFrom,
   makeHubsFrom,
+  showcaseOf,
   type CategoryPageEntry,
   type MakeHubEntry,
   type ModelPart,
@@ -120,6 +123,12 @@ export type PartPageData = {
   page: PartPageEntry;
   related: PartPageEntry[];
   places: CataloguePages;
+};
+
+export type CarMakeParts = {
+  hub: boolean;
+  categories: Category[];
+  showcase: PartPageEntry[];
 };
 
 export type SeriesHubData = {
@@ -407,6 +416,27 @@ export function createCatalogue({
         makesPageResponseSchema,
       );
       return found?.makes ?? [];
+    },
+
+    async carMakeParts(
+      slug: string,
+      locale: CatalogLocale,
+    ): Promise<CarMakeParts | null> {
+      const found = await cataloguePage(
+        carMakePagePath(slug),
+        locale,
+        carMakePageResponseSchema,
+      );
+      if (!found) return null;
+      return {
+        hub: found.hub,
+        categories: found.categories.map(({ category }) => category),
+        showcase: showcaseOf(
+          found.categories.map(({ parts }) =>
+            parts.map((pages) => pages.map(partEntry)),
+          ),
+        ),
+      };
     },
 
     makeHub: (slug: string, locale: CatalogLocale) =>
