@@ -19,10 +19,8 @@ import {
   partPagesForBuild,
   writeCatalogueMakes,
 } from './catalogueEnv';
-import { categoryFacets } from './categoryFacets';
 import {
   cataloguePagesFrom,
-  categoryListings,
   makeHubsFrom,
   makePartsFrom,
 } from './catalogueSnapshot';
@@ -355,96 +353,6 @@ describe('catalogue categories', () => {
     expect(oil.pages.map((page) => page.slug)).toEqual(['mann-filter-hu816']);
   });
 
-  it('offers the filter values the Category pages carry, counted per brand-number', async () => {
-    const numbered = (normalized_value: string, attributes: object) => ({
-      ...classified,
-      id: `pi_${normalized_value}`,
-      normalized_value,
-      part: { ...classified.part, id: `part_${normalized_value}`, attributes },
-    });
-    const [oil, cabin] = await catalogueWith(
-      withCategories([
-        numbered('TALL1', { height: 100 }),
-        classified,
-        numbered('TWIN1', { height: 79 }),
-        numbered('BARE1', {}),
-      ]),
-    ).categoryPages();
-
-    expect(categoryFacets(oil, 'ru')).toEqual([
-      {
-        key: 'height',
-        type: 'number',
-        label: 'Высота',
-        unit: 'mm',
-        values: [
-          { value: '79', label: '79', count: 2 },
-          { value: '100', label: '100', count: 1 },
-        ],
-      },
-    ]);
-    expect(categoryFacets(cabin, 'ru')).toEqual([]);
-  });
-
-  it('adds brand, availability and best price, and hides a value every page shares', async () => {
-    const offer = (price: number, stock_quantity: number) => ({
-      id: `offer_${price}`,
-      price,
-      currency: 'RSD',
-      stock_quantity,
-      lead_time_days: 1,
-    });
-    const numbered = (
-      normalized_value: string,
-      brand: { name: string; slug: string },
-      offers: unknown[],
-    ) => ({
-      ...classified,
-      id: `pi_${normalized_value}`,
-      normalized_value,
-      brand,
-      offers,
-      part: { ...classified.part, id: `part_${normalized_value}` },
-    });
-    const [oil] = await catalogueWith(
-      withCategories([
-        numbered('A1', mann, [offer(1200, 4), offer(900, 0)]),
-        numbered('B1', bmw, [offer(2400, 0)]),
-        numbered('C1', bmw, []),
-      ]),
-    ).categoryPages();
-
-    expect(categoryFacets(oil, 'ru')).toEqual([
-      {
-        key: 'brand',
-        type: 'single-select',
-        label: 'brand',
-        unit: null,
-        values: [
-          { value: 'bmw', label: 'BMW', count: 2 },
-          { value: 'mann-filter', label: 'Mann-Filter', count: 1 },
-        ],
-      },
-      {
-        key: 'in-stock',
-        type: 'boolean',
-        label: 'in-stock',
-        unit: null,
-        values: [{ value: 'true', label: 'true', count: 1 }],
-      },
-      {
-        key: 'price',
-        type: 'number',
-        label: 'price',
-        unit: 'RSD',
-        values: [
-          { value: '1200', label: '1200', count: 2 },
-          { value: '2400', label: '2400', count: 2 },
-        ],
-      },
-    ]);
-  });
-
   it('fails the build on a Category that breaks the contract', async () => {
     const fetch = vi.fn(() => respond({ categories: [{ id: 'x' }] }));
 
@@ -588,46 +496,6 @@ describe('enriched part pages', () => {
 });
 
 describe('Category listing pages', () => {
-  const numbers = (count: number) =>
-    Array.from({ length: count }, (_, index) =>
-      brandNumber('mann-filter', `HU${String(index).padStart(3, '0')}`, {
-        id: `part_${index}`,
-        name: 'Масляный фильтр',
-        category_id: oilFilters.id,
-      }),
-    );
-  const listingsOf = async (count: number) => {
-    const [category] = await catalogueWith(
-      backend({ pages: numbers(count), categories: [oilFilters] }),
-    ).categoryPages();
-    return categoryListings(category).map(({ number, count, pages }) => ({
-      number,
-      count,
-      first: pages[0]?.value,
-      size: pages.length,
-    }));
-  };
-
-  it('splits a Category into pages of 48 brand-numbers', async () => {
-    expect(await listingsOf(97)).toEqual([
-      { number: 1, count: 3, first: 'HU000', size: 48 },
-      { number: 2, count: 3, first: 'HU048', size: 48 },
-      { number: 3, count: 3, first: 'HU096', size: 1 },
-    ]);
-  });
-
-  it('keeps one page for a Category of 48', async () => {
-    expect(await listingsOf(48)).toEqual([
-      { number: 1, count: 1, first: 'HU000', size: 48 },
-    ]);
-  });
-
-  it('keeps the first page for an empty Category', async () => {
-    expect(await listingsOf(0)).toEqual([
-      { number: 1, count: 1, first: undefined, size: 0 },
-    ]);
-  });
-
   it('lists every page of a Category in the sitemap', () => {
     const keep = sitemapFilter(SITE);
     expect(

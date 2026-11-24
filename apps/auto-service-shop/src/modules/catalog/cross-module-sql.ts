@@ -136,6 +136,16 @@ export const LISTED_PER_CATEGORY = `
   where pn.deleted_at is null and pn.listed and p.category_id is not null
   group by p.category_id`;
 
+export const LISTED_NUMBERS_IN_CATEGORY = `
+  select pn.id, b.slug as brand_slug, b.name as brand_name,
+    pi.normalized_value, p.id as part_id, p.attributes
+  from published_number pn
+  join part_identifier pi on pi.id = pn.id and pi.deleted_at is null
+  join brand b on b.id = pi.brand_id and b.deleted_at is null
+  join part p on p.id = pi.part_id and p.deleted_at is null
+  where pn.deleted_at is null and pn.listed and p.category_id = ?
+  order by pn.id`;
+
 export const UNRESOLVED_VIN_CODES = `
   with hits as (
     select l.make_key, l.code, h.source, h.created_at, h.visitor_id,

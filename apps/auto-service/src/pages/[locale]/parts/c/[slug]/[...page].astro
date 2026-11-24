@@ -1,4 +1,6 @@
 ---
+export const prerender = false;
+
 import { localizedUnit, translated } from '@podbor/catalog-contract';
 import { withPlaceholder } from '@podbor/i18n';
 import Shell from '@/layouts/Shell.astro';
@@ -13,79 +15,63 @@ import ListingBar from '@/components/ListingBar.astro';
 import ListingSort from '@/components/ListingSort.astro';
 import PopularParts from '@/components/PopularParts.astro';
 import { popularListingHref } from '@/utils/searchPage';
-import { demandOf } from '@/utils/demand';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
-import { categoryPagesForBuild, makeHubsForBuild } from '@/utils/catalogueEnv';
-import { categoryCars, type CategoryCar } from '@/utils/categoryCars';
-import { cacheKey } from '@/utils/cacheKey';
-import {
-  categoryListings,
-  type CategoryListing,
-  type CategoryPageEntry,
-} from '@/utils/catalogueSnapshot';
+import { loadCataloguePage } from '@/utils/cataloguePage';
 import { keySpecs } from '@/utils/attributeRows';
-import { categoryFacets } from '@/utils/categoryFacets';
 import { paragraphs } from '@podbor/site-kit';
-import { PARTS_INQUIRY_ANCHOR, PathBuilder, withLocales } from '@/utils/paths';
+import { PARTS_INQUIRY_ANCHOR, PathBuilder } from '@/utils/paths';
 import { partThumbnail } from '@/utils/partImages';
 import { partSuccessor } from '@/utils/partSuccessor';
 import { rangeText, withFacetCopy } from '@/utils/partsSearch';
 import { listingHeading, neighbours } from '@/utils/listing';
 
-export async function getStaticPaths() {
-  const categories = await categoryPagesForBuild();
-  const hubs = await makeHubsForBuild();
-  return withLocales(
-    categories.flatMap((category) => {
-      const cars = categoryCars(hubs, category.slug);
-      return categoryListings(category).map((listing) => ({
-        params: {
-          slug: category.slug,
-          page: listing.number > 1 ? String(listing.number) : undefined,
-        },
-        props: { category, listing, cars },
-        cacheKey: cacheKey({ category, listing, cars }),
-      }));
-    }),
-  );
-}
-
+const { slug = '', page: pageParam } = Astro.params;
+const requested = pageParam === undefined ? 1 : Number(pageParam);
+const listed =
+  pageParam === undefined || (/^[1-9]\d*$/.test(pageParam) && requested > 1);
+const loaded = await loadCataloguePage(Astro, (catalogue, catalogueLocale) =>
+  listed
+    ? catalogue.categoryPage(slug, requested, catalogueLocale)
+    : Promise.resolve(null),
+);
+if (loaded instanceof Response) return loaded;
 const {
   category,
-  listing,
-  cars = [],
-} = Astro.props as {
-  category: CategoryPageEntry;
-  listing: CategoryListing;
-  cars?: CategoryCar[];
-};
+  page: number,
+  pages: pageCount,
+  count,
+  entries,
+  popular,
+  facets: wireFacets,
+  ranges,
+  uniform,
+  demanded,
+  cars,
+} = loaded;
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const inquiry = content(locale).pages.partsInquiry;
 const copy = inquiry.category;
 const name = translated(category, 'name', locale);
 const [lead, ...body] = paragraphs(translated(category, 'text', locale));
-const empty = category.pages.length === 0;
-const categoryAttributes = category.pages.map(({ part }) => part.attributes);
-const firstPage = listing.number === 1;
-const pageHref = (number: number) =>
-  PathBuilder.partsCategory(locale, category.slug, number);
+const empty = count === 0;
+const firstPage = number === 1;
+const listing = { number, count: pageCount };
+const pageHref = (target: number) =>
+  PathBuilder.partsCategory(locale, category.slug, target);
 const { prev, next } = neighbours(listing, pageHref);
-const pageTitle = listingHeading(listing.number, {
+const pageTitle = listingHeading(number, {
   heading: name,
   pageName: withPlaceholder(copy.pageName, 'name', name),
 });
-const bySlug = new Map(category.pages.map((page) => [page.slug, page]));
+const bySlug = new Map(entries.map((page) => [page.slug, page]));
 const searchCopy = content(locale).partsSearch;
-const facets = withFacetCopy(categoryFacets(category, locale), searchCopy);
+const facets = withFacetCopy(wireFacets, searchCopy);
 const filtered = !empty && facets.length > 0;
 const fields = category.fields
   .map((field) => {
-    const numbers = category.pages
-      .flatMap(({ part }) => [part.attributes[field.key] ?? []].flat())
-      .map(Number)
-      .filter(Number.isFinite);
+    const range = ranges.find(({ key }) => key === field.key);
     return {
       key: field.key,
       label: [
@@ -96,9 +82,9 @@ const fields = category.fields
         .join(', '),
       values:
         field.type === 'number'
-          ? numbers.length
+          ? range
             ? rangeText(
-                { min: Math.min(...numbers), max: Math.max(...numbers) },
+                { min: range.min, max: range.max },
                 null,
                 searchCopy,
                 (value) => value.toLocaleString(BCP47_BY_LOCALE[locale]),
@@ -157,7 +143,7 @@ const fields = category.fields
           action={PathBuilder.partsSearch(locale)}
           hidden={{ category: category.slug }}
           facets={facets}
-          count={category.pages.length}
+          count={count}
           class="lg:col-start-1 lg:row-span-2 lg:row-start-1"
         />
       )
@@ -169,18 +155,18 @@ const fields = category.fields
         filtered && 'lg:col-start-2',
       ]}
     >
-      {firstPage && <PopularParts pages={category.pages} />}
+      {firstPage && <PopularParts pages={popular} />}
 
       {
         !empty && (
           <div class="flex flex-col gap-3">
             <h2 class="text-section max-sm:sr-only">{copy.partsHeading}</h2>
-            <ListingBar count={category.pages.length} filters={filtered} />
-            {demandOf(category.pages) > 0 && (
+            <ListingBar count={count} filters={filtered} />
+            {demanded && (
               <ListingSort
                 current={null}
                 hrefs={{
-                  default: pageHref(listing.number),
+                  default: pageHref(number),
                   popular: popularListingHref(locale, {
                     category: category.slug,
                   }),
@@ -188,7 +174,7 @@ const fields = category.fields
               />
             )}
             <ul class="card divide-y divide-line">
-              {listing.pages.map((page) => (
+              {entries.map((page) => (
                 <PartRow
                   thumb={partThumbnail(page, category)}
                   slug={page.slug}
@@ -199,7 +185,8 @@ const fields = category.fields
                     category,
                     page.part.attributes,
                     locale,
-                    categoryAttributes,
+                    [],
+                    uniform,
                   )}
                   superseded={page.superseded}
                   current={partSuccessor(page, bySlug)}

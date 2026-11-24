@@ -20,4 +20,5 @@ export * from './snapshot.ts';
 export * from './carPageView.ts';
 export * from './makePageView.ts';
 export * from './partPageView.ts';
+export * from './categoryPageView.ts';
 export * from './seriesPageView.ts';

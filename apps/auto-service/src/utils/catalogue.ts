@@ -43,8 +43,12 @@ import {
   makePagePath,
   makePageResponseSchema,
   makesPageResponseSchema,
+  categoryPagePath,
+  categoryPageResponseSchema,
   partPagePath,
   partPageResponseSchema,
+  type CategoryCarView,
+  type SearchFacet,
   seriesCategoryPagePath,
   seriesCategoryPageResponseSchema,
   seriesPagePath,
@@ -129,6 +133,20 @@ export type CarMakeParts = {
   hub: boolean;
   categories: Category[];
   showcase: PartPageEntry[];
+};
+
+export type CategoryPageData = {
+  category: Category;
+  page: number;
+  pages: number;
+  count: number;
+  entries: PartPageEntry[];
+  popular: PartPageEntry[];
+  facets: SearchFacet[];
+  ranges: { key: string; min: number; max: number }[];
+  uniform: string[];
+  demanded: boolean;
+  cars: CategoryCarView[];
 };
 
 export type SeriesHubData = {
@@ -441,6 +459,28 @@ export function createCatalogue({
 
     makeHub: (slug: string, locale: CatalogLocale) =>
       cataloguePage(makePagePath(slug), locale, makePageResponseSchema),
+
+    async categoryPage(
+      slug: string,
+      page: number,
+      locale: CatalogLocale,
+    ): Promise<CategoryPageData | null> {
+      const found = await cataloguePage(
+        categoryPagePath(slug, page),
+        locale,
+        categoryPageResponseSchema,
+      );
+      if (!found) return null;
+      const { category, entries, popular, ...rest } = found;
+      const own = (entry: (typeof entries)[number]) =>
+        partEntry({ ...entry, category });
+      return {
+        ...rest,
+        category,
+        entries: entries.map(own),
+        popular: popular.map(own),
+      };
+    },
 
     async pageList() {
       return cataloguePageListSchema.parse(

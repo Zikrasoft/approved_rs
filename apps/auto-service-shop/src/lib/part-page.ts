@@ -7,7 +7,6 @@ import {
   partPageSlug,
   positionGroups,
   requirementMatches,
-  seriesHasPage,
   translated,
   type CatalogLocale,
   type LinkedSeries,
@@ -24,8 +23,8 @@ import type PublishModuleService from '../modules/publish/service';
 import { CATEGORY_RELATIONS, shownCategory } from './categories';
 import { loadPartDemand } from './part-demand';
 import { partPagesOf } from './part-pages';
-import { requirementFits, vehicleRequirementFits } from './requirement-fit';
-import { vehiclesOfSeries } from './series-vehicles';
+import { requirementFits } from './requirement-fit';
+import { pagedSeries } from './series-pages';
 import { listVehicleResponses, toFitmentResponse } from './store-response';
 
 type Modules = { catalog: CatalogModuleService; publish: PublishModuleService };
@@ -42,7 +41,7 @@ const slugAddress = (slug: string): [string, string] | null => {
   return at > 0 ? [slug.slice(0, at), slug.slice(at + 1).toUpperCase()] : null;
 };
 
-const slugOf = (page: PartPage) =>
+export const slugOf = (page: PartPage) =>
   partPageSlug(page.brand.slug, page.normalized_value);
 
 export const localized = (page: PartPage, locale: CatalogLocale): PartPage => {
@@ -70,33 +69,17 @@ export const localized = (page: PartPage, locale: CatalogLocale): PartPage => {
 };
 
 async function seriesLinks(
-  { catalog, publish }: Modules,
+  modules: Modules,
   vehicleIds: string[],
 ): Promise<LinkedSeries[]> {
+  const { catalog } = modules;
   if (!vehicleIds.length) return [];
   const rows = await catalog.listVehicles(
     { id: vehicleIds },
     { relations: ['model', 'model.chassis'], take: null },
   );
   const seriesIds = distinct(rows.map(({ model }) => model.chassis.series_id));
-  const vehicles = await vehiclesOfSeries(catalog, seriesIds);
-  const counts = await publish.listedPartCounts(
-    await vehicleRequirementFits(catalog, vehicles),
-    seriesIds,
-  );
-  const series = await catalog.listSeries(
-    { id: seriesIds },
-    { relations: ['make'], take: null },
-  );
-  return series
-    .filter(({ id }) =>
-      seriesHasPage(
-        counts.find(({ series_id }) => series_id === id) ?? {
-          parts: 0,
-          required: 0,
-        },
-      ),
-    )
+  return (await pagedSeries(modules, seriesIds))
     .map(({ name, make }) => ({ make: make.slug, slug: seriesSlugOf(name) }))
     .sort((a, b) => `${a.make}/${a.slug}`.localeCompare(`${b.make}/${b.slug}`));
 }
