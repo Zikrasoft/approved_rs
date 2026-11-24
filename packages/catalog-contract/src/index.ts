@@ -18,6 +18,7 @@ export * from './makeList.ts';
 export * from './pageList.ts';
 export * from './snapshot.ts';
 export * from './carPageView.ts';
+export * from './showcase.ts';
 export * from './makePageView.ts';
 export * from './partPageView.ts';
 export * from './categoryPageView.ts';

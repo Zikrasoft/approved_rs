@@ -7,14 +7,8 @@ export const carMakePagePath = (make: string): string =>
 
 export const carMakePageResponseSchema = z.object({
   hub: z.boolean().default(false),
-  categories: z
-    .array(
-      z.object({
-        category: categorySchema,
-        parts: z.array(z.array(relatedPartPageSchema)),
-      }),
-    )
-    .default([]),
+  categories: z.array(categorySchema).default([]),
+  showcase: z.array(relatedPartPageSchema).default([]),
 });
 
 export type CarMakePageResponse = z.infer<typeof carMakePageResponseSchema>;
