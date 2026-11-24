@@ -32,6 +32,29 @@ export const PUBLISHED_PAGE = `
   order by pn.id
   limit ?`;
 
+export const PUBLISHED_NUMBER_BY_SLUG = `
+  select pn.id, pn.listed from published_number pn
+  join part_identifier pi on pi.id = pn.id and pi.deleted_at is null
+  join brand b on b.id = pi.brand_id and b.deleted_at is null
+  where pn.deleted_at is null and b.slug = ? and pi.normalized_value = ?
+  order by pn.id
+  limit 1`;
+
+export const PUBLISHED_NUMBERS = `
+  select pn.id, pn.listed from published_number pn
+  join part_identifier pi on pi.id = pn.id and pi.deleted_at is null
+  where pn.deleted_at is null and pn.id = any(?::text[])
+  order by pn.id`;
+
+export const LISTED_PARTS_IN_CATEGORY = `
+  select p.id, p.category_id, p.attributes from part p
+  join part_identifier pi on pi.part_id = p.id and pi.deleted_at is null
+  join published_number pn on pn.id = pi.id and pn.deleted_at is null
+  where p.deleted_at is null and p.category_id = ?
+  group by p.id
+  having bool_or(pn.listed)
+  order by min(pn.id)`;
+
 const LISTED_PLACES = `
   with listed as (
     select distinct pi.part_id from part_identifier pi
@@ -65,6 +88,7 @@ export const LISTED_PART_COUNTS = `${LISTED_PLACES}, series_matches as (
   from places p
   left join series_matches m on not p.fitted
     and m.series_id = p.series_id and m.category_id = p.category_id
+  where ?::text[] is null or p.series_id = any(?::text[])
   group by p.series_id`;
 
 export const LISTED_SERIES_CATEGORY_COUNTS = `${LISTED_PLACES}
