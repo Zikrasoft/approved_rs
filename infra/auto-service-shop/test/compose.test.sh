@@ -103,8 +103,8 @@ expect 'caddy serves the three sites on their own domains' \
   '.services.caddy.environment | .CARLAB_HOST == "carlab.rs" and .DETAILS_HOST == "details.rs" and .APPROVED_HOST == "approved.rs"'
 expect 'caddy serves the CRM bot webhooks on a host of their own' \
   '.services.caddy.environment.CRM_HOST == "crm.carlab.rs"'
-expect 'caddy runs the image built here with the page cache, inside its 128 MB' \
-  '.services.caddy | (.build.context | endswith("/caddy-image")) and .mem_limit == "134217728"'
+expect 'caddy pulls the page cache image CI built for the same commit as medusa, inside its 128 MB' \
+  '.services.caddy | .image == "ghcr.io/zikrasoft/podbor-carlab-caddy:0000000000000000000000000000000000000000" and .build == null and .mem_limit == "134217728"'
 expect 'caddy keeps its page cache on a volume' \
   '[.services.caddy.volumes[] | select(.target == "/cache") | [.type, .source]] == [["volume", "caddycache"]]'
 expect 'every image is pinned to an exact tag' \
@@ -323,6 +323,8 @@ serves 'the public host lists no cache keys' node carlab '/ru/parts/p/a/?x=/soui
 cached 'a purge from outside the docker network leaves the cache alone' '; hit;' carlab /ru/parts/p/a/
 if [ -n "$purge" ] && docker exec "$net-caddy" sh -c "$purge" >/dev/null; then echo "ok - deploy-site.sh's purge runs inside caddy"; else echo "not ok - deploy-site.sh's purge ($purge)"; failures=$((failures + 1)); fi
 cached 'after the purge the next request is a miss' 'fwd=uri-miss; stored' carlab /ru/parts/p/a/
+surrogates=$(docker exec "$net-caddy" curl -fsS http://127.0.0.1:2019/souin-api/souin/surrogate_keys)
+if [ "$surrogates" = '{}' ] || [ "$surrogates" = null ]; then echo 'ok - the cache keeps no surrogate-key index, which grew with every page it stored'; else echo "not ok - surrogate keys are stored ($surrogates)"; failures=$((failures + 1)); fi
 docker stop "$net-site" >/dev/null
 cached 'a stopped upstream still gets the cached page' '; hit;' carlab /ru/parts/p/a/
 serves 'the cached page answers while node is down' node carlab /ru/parts/p/a/
