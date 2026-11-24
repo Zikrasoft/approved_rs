@@ -44,7 +44,7 @@ const slugAddress = (slug: string): [string, string] | null => {
 const slugOf = (page: PartPage) =>
   partPageSlug(page.brand.slug, page.normalized_value);
 
-const localized = (page: PartPage, locale: CatalogLocale): PartPage => {
+export const localized = (page: PartPage, locale: CatalogLocale): PartPage => {
   const { part } = page;
   return {
     ...page,
