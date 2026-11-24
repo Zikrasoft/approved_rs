@@ -1,8 +1,12 @@
 import type { PartDemand } from '@podbor/catalog-contract';
 
+export {
+  POPULAR_BLOCK_MIN,
+  POPULAR_BLOCK_SIZE,
+  popularPicks,
+} from '@podbor/catalog-contract';
+
 export const DEMAND_PARTS_FIELD = 'demand_parts';
-export const POPULAR_BLOCK_MIN = 2;
-export const POPULAR_BLOCK_SIZE = 6;
 
 type Demanded = { demand: PartDemand | null };
 
@@ -16,16 +20,3 @@ export const isTopDemand = (pages: Demanded[]): boolean =>
 
 export const byDemand = <T>(items: T[], score: (item: T) => number): T[] =>
   [...items].sort((a, b) => score(b) - score(a));
-
-export function popularPicks<T extends Demanded & { part?: { id: string } }>(
-  pages: T[],
-): T[] {
-  const seen = new Set<string>();
-  const picks = byDemand(
-    pages.filter(({ demand }) => demand?.popular),
-    scoreOf,
-  ).filter(({ part }) => !part || (!seen.has(part.id) && seen.add(part.id)));
-  return picks.length >= POPULAR_BLOCK_MIN
-    ? picks.slice(0, POPULAR_BLOCK_SIZE)
-    : [];
-}

@@ -1,5 +1,5 @@
-import { paginate } from '@podbor/site-kit/pagination';
 import {
+  CATEGORY_PAGE_SIZE,
   enrichmentGaps,
   generationOf,
   maintenanceKit,
@@ -571,22 +571,4 @@ export const cataloguePagesFrom = oncePerSnapshot(
   },
 );
 
-export const CATEGORY_PAGE_SIZE = 48;
-
-export type CategoryListing = {
-  number: number;
-  count: number;
-  pages: PartPageEntry[];
-};
-
-export function categoryListings({
-  pages,
-}: CategoryPageEntry): CategoryListing[] {
-  return paginate(pages, CATEGORY_PAGE_SIZE).map(
-    ({ number, count, items }) => ({
-      number,
-      count,
-      pages: items,
-    }),
-  );
-}
+export { CATEGORY_PAGE_SIZE };

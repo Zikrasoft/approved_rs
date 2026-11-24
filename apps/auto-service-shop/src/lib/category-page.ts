@@ -5,6 +5,7 @@ import {
   attributeValuesSchema,
   categoryFacets,
   categoryPageEntrySchema,
+  partPageSchema,
   partPageSlug,
   popularPicks,
   seriesCategoryHasPage,
@@ -150,13 +151,16 @@ export async function categoryPageAt(
         [...shownIds].map((id) => ({ id, listed: true })),
         { shown, demand },
       )
-    ).map((entry) => [
-      entry.id,
-      categoryPageEntrySchema.parse({
-        ...localized(entry, locale),
-        slug: slugOf(entry),
-      }),
-    ]),
+    ).map((raw) => {
+      const entry = partPageSchema.parse(raw);
+      return [
+        entry.id,
+        categoryPageEntrySchema.parse({
+          ...localized(entry, locale),
+          slug: slugOf(entry),
+        }),
+      ];
+    }),
   );
   const entryOf = (id: string) => entries.get(id)!;
 

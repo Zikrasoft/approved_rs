@@ -2,13 +2,12 @@
 import SelectField from './SelectField.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
-import { translated } from '@podbor/catalog-contract';
-import type { CategoryCar } from '@/utils/categoryCars';
+import { translated, type CategoryCarView } from '@podbor/catalog-contract';
 import { PathBuilder } from '@/utils/paths';
 
 interface Props {
   category: string;
-  cars: CategoryCar[];
+  cars: CategoryCarView[];
   class?: string;
 }
 
