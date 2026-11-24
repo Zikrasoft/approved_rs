@@ -19,7 +19,6 @@ import {
   type SteeringSide,
   type VEHICLE_DRIVES,
   requirementErrors,
-  SUPPLIER_VEHICLE_ID,
   validateAttributes,
 } from '@podbor/catalog-contract';
 
@@ -60,7 +59,6 @@ import {
   sourcedRowsOf,
 } from './by-source';
 import { mergeMakes, type MergeSteps } from './merge';
-import { SNAPSHOT_FITMENTS, SNAPSHOT_VEHICLES } from './snapshot-sql';
 import {
   identifierStatusRows,
   type IdentifierStatusFilters,
@@ -1220,33 +1218,6 @@ class CatalogModuleService extends CatalogModuleBase {
       unreadableUrls.length === 0,
       unreadableUrls,
     ]);
-  }
-
-  @InjectManager()
-  async snapshotFitments(
-    after: string,
-    limit: number,
-    @MedusaContext() sharedContext: Context = {},
-  ): Promise<{ id: string }[]> {
-    const { rows } = await runBoundSql(sharedContext, SNAPSHOT_FITMENTS, [
-      after,
-      limit,
-    ]);
-    return rows;
-  }
-
-  @InjectManager()
-  async snapshotVehicles(
-    after: string,
-    limit: number,
-    @MedusaContext() sharedContext: Context = {},
-  ): Promise<{ id: string }[]> {
-    const { rows } = await runBoundSql(sharedContext, SNAPSHOT_VEHICLES, [
-      SUPPLIER_VEHICLE_ID,
-      after,
-      limit,
-    ]);
-    return rows;
   }
 
   @InjectManager()

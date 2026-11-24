@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { categorySchema } from './categories.ts';
 import { partPageSchema } from './partPages.ts';
 import { CATALOG_LOCALES } from './search.ts';
-import { snapshotFitmentSchema } from './snapshot.ts';
+import { siteFitmentSchema } from './fitment.ts';
 import { vehicleSchema } from './vehicle.ts';
 
 export const CATALOGUE_LOCALE_HEADER = 'x-catalogue-locale';
@@ -23,7 +23,7 @@ export const relatedPartPageSchema = partPageSchema.extend({
 
 export const partPageViewSchema = relatedPartPageSchema.extend({
   indexable: z.boolean(),
-  fits: z.array(snapshotFitmentSchema.extend({ vehicle: vehicleSchema })),
+  fits: z.array(siteFitmentSchema.extend({ vehicle: vehicleSchema })),
   requirement_cars: cars,
   kit_cars: cars,
 });

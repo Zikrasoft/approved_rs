@@ -14,7 +14,6 @@ export const PUBLIC_ROUTES = [
   'GET /store/catalogue-pages/parts/:slug',
   'GET /store/catalogue-pages/series/:make/:series',
   'GET /store/catalogue-pages/series/:make/:series/:category',
-  'GET /store/catalogue-snapshot',
   'GET /store/categories',
   'GET /store/fitments',
   'GET /store/offers',
