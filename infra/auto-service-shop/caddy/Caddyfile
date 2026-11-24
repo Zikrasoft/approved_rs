@@ -6,7 +6,7 @@
 		simplefs {
 			configuration {
 				path /cache
-				size 20000
+				size 40000
 			}
 		}
 		key {

@@ -103,8 +103,8 @@ expect 'caddy serves the three sites on their own domains' \
   '.services.caddy.environment | .CARLAB_HOST == "carlab.rs" and .DETAILS_HOST == "details.rs" and .APPROVED_HOST == "approved.rs"'
 expect 'caddy serves the CRM bot webhooks on a host of their own' \
   '.services.caddy.environment.CRM_HOST == "crm.carlab.rs"'
-expect 'caddy runs the image built here with the page cache, inside its 128 MB' \
-  '.services.caddy | (.build.context | endswith("/caddy-image")) and .mem_limit == "134217728"'
+expect 'caddy pulls the page cache image CI built for the same commit as medusa, inside its 256 MB' \
+  '.services.caddy | .image == "ghcr.io/zikrasoft/podbor-carlab-caddy:0000000000000000000000000000000000000000" and .build == null and .mem_limit == "268435456"'
 expect 'caddy keeps its page cache on a volume' \
   '[.services.caddy.volumes[] | select(.target == "/cache") | [.type, .source]] == [["volume", "caddycache"]]'
 expect 'every image is pinned to an exact tag' \
@@ -138,7 +138,7 @@ for app in $sites; do
   ln -s releases/r "$work/sites/$app/current"
 done
 docker run -d --name "$net-caddy" --network "$net" -p 127.0.0.1::443 \
-  --memory 128m --cap-drop ALL --cap-add NET_BIND_SERVICE --security-opt no-new-privileges:true -v "$net-cache:/cache" \
+  --memory 256m --cap-drop ALL --cap-add NET_BIND_SERVICE --security-opt no-new-privileges:true -v "$net-cache:/cache" \
   -e API_HOST=api.localhost -e ADMIN_HOST=admin.localhost \
   -e MEDIA_HOST=media.localhost -e MEDIA_ORIGIN=http://medusa:9000 \
   -e CARLAB_HOST=carlab.localhost -e DETAILS_HOST=details.localhost -e APPROVED_HOST=approved.localhost -e CRM_HOST=crm.localhost \
