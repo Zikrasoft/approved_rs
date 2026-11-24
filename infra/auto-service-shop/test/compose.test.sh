@@ -4,7 +4,7 @@ set -eu
 here="$(cd "$(dirname -- "$0")/.." && pwd)"
 work=$(mktemp -d)
 net=carlab-caddy-test-$$
-trap 'docker rm -f "$net-medusa" "$net-site" "$net-caddy" >/dev/null 2>&1; docker network rm "$net" >/dev/null 2>&1; rm -rf "$work"' EXIT
+trap 'docker rm -f "$net-medusa" "$net-site" "$net-caddy" >/dev/null 2>&1; docker network rm "$net" >/dev/null 2>&1; docker volume rm "$net-cache" >/dev/null 2>&1; rm -rf "$work"' EXIT
 printf 'POSTGRES_PASSWORD=x\nCRM_DB_PASSWORD=c0ffee\nTYPESENSE_API_KEY=y\nMEDUSA_TAG=%s\nGRAFANA_ADMIN_PASSWORD=g\nMEDIA_ORIGIN=https://bucket.s3.eu-north-1.amazonaws.com\n' \
   0000000000000000000000000000000000000000 >"$work/.env"
 env -u MEDIA_ORIGIN -u POSTGRES_PASSWORD -u CRM_DB_PASSWORD -u TYPESENSE_API_KEY -u MEDUSA_TAG -u GRAFANA_ADMIN_PASSWORD -u GRAFANA_PORT docker compose -f "$here/docker-compose.yml" --project-directory "$work" --profile "*" config --format json >"$work/config.json"
@@ -103,16 +103,34 @@ expect 'caddy serves the three sites on their own domains' \
   '.services.caddy.environment | .CARLAB_HOST == "carlab.rs" and .DETAILS_HOST == "details.rs" and .APPROVED_HOST == "approved.rs"'
 expect 'caddy serves the CRM bot webhooks on a host of their own' \
   '.services.caddy.environment.CRM_HOST == "crm.carlab.rs"'
+expect 'caddy runs the image built here with the page cache, inside its 128 MB' \
+  '.services.caddy | (.build.context | endswith("/caddy-image")) and .mem_limit == "134217728"'
+expect 'caddy keeps its page cache on a volume' \
+  '[.services.caddy.volumes[] | select(.target == "/cache") | [.type, .source]] == [["volume", "caddycache"]]'
 expect 'every image is pinned to an exact tag' \
   '[.services[] | .image] | all(test(":(v?[0-9]+\\.[0-9]+[.a-z0-9-]*|[0-9a-f]{40})$"))'
 
 caddy_image=$(jq -r .services.caddy.image "$work/config.json")
+docker build -q -t "$caddy_image" "$here/caddy-image" >/dev/null
+mkdir "$work/stub"
+cat >"$work/stub/Caddyfile" <<'STUB'
+:4321 {
+	header X-Upstream "{http.request.host} {http.request.header.X-Forwarded-Proto} {http.request.header.X-Forwarded-For} {http.request.header.X-Request-Id}"
+	@private path /ru/parts/p/private/
+	@public {
+		path /ru/parts/* /ru/cars/*
+		not path /ru/parts/p/private/
+	}
+	header @private Cache-Control "private, no-store"
+	header @public Cache-Control "public, s-maxage=86400, stale-while-revalidate=86400, stale-if-error=86400"
+	respond node
+}
+STUB
 docker network create "$net" >/dev/null
 docker run -d --name "$net-medusa" --network "$net" --network-alias medusa "$caddy_image" \
   caddy respond --listen :9000 '{http.request.body}' >/dev/null
 docker run -d --name "$net-site" --network "$net" --network-alias site-auto-service --network-alias site-detailing \
-  --network-alias site-approved-rs "$caddy_image" caddy respond --listen :4321 \
-  -H 'X-Upstream: {http.request.host} {http.request.header.X-Forwarded-Proto} {http.request.header.X-Forwarded-For} {http.request.header.X-Request-Id}' node >/dev/null
+  --network-alias site-approved-rs -v "$work/stub:/etc/caddy:ro" "$caddy_image" >/dev/null
 for app in $sites; do
   mkdir -p "$work/sites/$app/releases/r/client/ru" "$work/sites/$app/releases/r/client/_astro"
   echo "$app ru" >"$work/sites/$app/releases/r/client/ru/index.html"
@@ -120,6 +138,7 @@ for app in $sites; do
   ln -s releases/r "$work/sites/$app/current"
 done
 docker run -d --name "$net-caddy" --network "$net" -p 127.0.0.1::443 \
+  --memory 128m --cap-drop ALL --cap-add NET_BIND_SERVICE --security-opt no-new-privileges:true -v "$net-cache:/cache" \
   -e API_HOST=api.localhost -e ADMIN_HOST=admin.localhost \
   -e MEDIA_HOST=media.localhost -e MEDIA_ORIGIN=http://medusa:9000 \
   -e CARLAB_HOST=carlab.localhost -e DETAILS_HOST=details.localhost -e APPROVED_HOST=approved.localhost -e CRM_HOST=crm.localhost \
@@ -266,5 +285,47 @@ fetch www.details / >/dev/null
 header 'www.details.rs redirects to the apex' 'https://details.localhost/' location
 fetch www.approved / >/dev/null
 header 'www.approved.rs redirects to the apex' 'https://approved.localhost/' location
+
+cache_status() {
+  fetch "$@" >/dev/null
+  sed -n 's/^cache-status: //Ip' "$work/headers.clean"
+}
+cached() {
+  name=$1
+  want=$2
+  shift 2
+  got=$(cache_status "$@")
+  if printf '%s\n' "$got" | grep -Eq "$want"; then
+    echo "ok - $name"
+  else
+    echo "not ok - $name (cache-status '$got', want /$want/)"
+    failures=$((failures + 1))
+  fi
+}
+purge=$(sed -n 's/.*docker compose exec -T caddy \(curl .*flush\);.*/\1/p' "$here/deploy-site.sh")
+cached 'a first catalogue request goes to node and is stored' 'fwd=uri-miss; stored' carlab /ru/parts/p/a/
+cached 'a second catalogue request is a hit' '; hit;' carlab /ru/parts/p/a/
+cached 'an ad click shares the bare path entry' '; hit;' carlab '/ru/parts/p/a/?utm_source=x&gclid=y'
+cached 'a visitor cannot force a render past the cache' '; hit;' carlab /ru/parts/p/a/ -H 'Cache-Control: no-cache' -H 'Pragma: no-cache'
+cached 'a /cars page is cached too' 'fwd=uri-miss; stored' carlab /ru/cars/bmw/
+cached 'the preview cookie bypasses the cache' '^$' carlab /ru/parts/p/a/ -H 'Cookie: lang=ru; auto_service_shop_preview=token'
+cached 'the preview flag cookie alone does not' '; hit;' carlab /ru/parts/p/a/ -H 'Cookie: auto_service_shop_preview_on=1'
+cache_status carlab /ru/parts/p/private/ >/dev/null
+cached 'a private, no-store response is never stored' 'fwd=uri-miss; detail=NO-STORE-DIRECTIVE' carlab /ru/parts/p/private/
+for path in /ru/parts/ /ru/parts/search/ /ru/parts/cart/ /ru/parts/prices/ /ru/services/ /ru/; do
+  cached "$path stays out of the cache" '^$' carlab "$path"
+done
+cached 'details.rs has no page cache' '^$' details /ru/parts/p/a/
+cached 'approved.rs has no page cache' '^$' approved /ru/cars/bmw/
+serves 'a purge on the public host goes to node, not to the cache' node carlab /souin-api/souin/flush -X PURGE
+serves 'a purge hidden in a catalogue query goes to node' node carlab '/ru/parts/p/a/?x=/souin-api/souin/flush' -X PURGE
+serves 'the public host lists no cache keys' node carlab '/ru/parts/p/a/?x=/souin-api/souin'
+cached 'a purge from outside the docker network leaves the cache alone' '; hit;' carlab /ru/parts/p/a/
+if [ -n "$purge" ] && docker exec "$net-caddy" sh -c "$purge" >/dev/null; then echo "ok - deploy-site.sh's purge runs inside caddy"; else echo "not ok - deploy-site.sh's purge ($purge)"; failures=$((failures + 1)); fi
+cached 'after the purge the next request is a miss' 'fwd=uri-miss; stored' carlab /ru/parts/p/a/
+docker stop "$net-site" >/dev/null
+cached 'a stopped upstream still gets the cached page' '; hit;' carlab /ru/parts/p/a/
+serves 'the cached page answers while node is down' node carlab /ru/parts/p/a/
+answers 'an uncached page fails while node is down' 502 carlab /ru/parts/p/b/
 
 [ "$failures" -eq 0 ]
