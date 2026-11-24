@@ -114,6 +114,39 @@ describe('SiteHeader', () => {
     expect(labels.map(([, href]) => href)).not.toContain('/ru/#process');
   });
 
+  it('puts the make list in the desktop nav and keeps contacts in the mobile menu', async () => {
+    setShop(false);
+    const root = await header('/ru/services/');
+    const hrefs = (label: string) =>
+      [...root.querySelectorAll(`nav[aria-label="${label}"] a`)].map((link) =>
+        link.getAttribute('href'),
+      );
+    const cars = content('ru').pages.cars.navLabel;
+
+    expect(hrefs(site.common.primaryNavLabel)).toEqual([
+      '/ru/services/',
+      '/ru/parts/',
+      '/ru/cars/',
+      '/ru/works/',
+      '/ru/about/',
+    ]);
+    expect(hrefs(site.common.mobileNavLabel)).toEqual([
+      '/ru/services/',
+      '/ru/parts/',
+      '/ru/cars/',
+      '/ru/works/',
+      '/ru/about/',
+      '/ru/contact/',
+    ]);
+    expect(
+      root
+        .querySelector(
+          `nav[aria-label="${site.common.primaryNavLabel}"] a[href="/ru/cars/"]`,
+        )
+        ?.textContent?.trim(),
+    ).toBe(cars);
+  });
+
   it('links the Make list from the desktop and the mobile nav under the footer label', async () => {
     setShop(false);
     const root = await header('/ru/cars/bmw/');
@@ -198,39 +231,6 @@ describe('SiteHeader', () => {
       ).toEqual(['ru', 'sr', 'en']);
       expect(menu.querySelector('[popover]')).toBeNull();
     });
-  });
-
-  it('puts the make list in the desktop nav and keeps contacts in the mobile menu', async () => {
-    setShop(false);
-    const root = await header('/ru/services/');
-    const hrefs = (label: string) =>
-      [...root.querySelectorAll(`nav[aria-label="${label}"] a`)].map((link) =>
-        link.getAttribute('href'),
-      );
-    const cars = content('ru').pages.cars.navLabel;
-
-    expect(hrefs(site.common.primaryNavLabel)).toEqual([
-      '/ru/services/',
-      '/ru/parts/',
-      '/ru/cars/',
-      '/ru/works/',
-      '/ru/about/',
-    ]);
-    expect(hrefs(site.common.mobileNavLabel)).toEqual([
-      '/ru/services/',
-      '/ru/parts/',
-      '/ru/cars/',
-      '/ru/works/',
-      '/ru/about/',
-      '/ru/contact/',
-    ]);
-    expect(
-      root
-        .querySelector(
-          `nav[aria-label="${site.common.primaryNavLabel}"] a[href="/ru/cars/"]`,
-        )
-        ?.textContent?.trim(),
-    ).toBe(cars);
   });
 
   it.each(['/ru/', '/ru/services/', '/ru/parts/'])(
