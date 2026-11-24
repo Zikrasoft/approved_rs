@@ -285,9 +285,11 @@ _Avoid_: spec, recommendation
 _Avoid_: substitute, cross-reference
 
 **Publish**: the one staff action that puts catalogue changes on carlab.rs:
-it translates new texts, rebuilds and deploys the site and refreshes search.
-Admin edits and Imports are saved at once but reach the site only on the next
-Publish; there is no scheduled run.
+it translates new texts, decides which Parts are published, refreshes search,
+and rebuilds the site, which empties the cache of catalogue pages. A new Part
+reaches the site only on the next Publish; an edit to a published Part reaches
+it by itself within a day, when its cached page expires. There is no scheduled
+run.
 _Avoid_: deploy, sync, nightly import
 
 **Demand**: how much visitors want a Brand-number over the last 30 days,
