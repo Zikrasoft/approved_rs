@@ -6,3 +6,4 @@ RUN xcaddy build v2.11.4 \
 FROM caddy:2.11.4-alpine
 RUN apk add --no-cache curl
 COPY --from=build /usr/bin/caddy /usr/bin/caddy
+CMD ["sh", "-c", "find /cache -mindepth 1 -delete; exec caddy run --config /etc/caddy/Caddyfile --adapter caddyfile"]

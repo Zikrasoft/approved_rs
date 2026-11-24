@@ -2,7 +2,7 @@
 title: 'BMW X3: масло в двигателе и АКПП'
 translations:
   en:
-    title: 'BMW X3: engine and automatic transmission oil'
+    title: "BMW X3: engine and automatic transmission oil"
     body: |-
       Today we serviced a BMW X3 at our garage in Belgrade. This was the second minor service we've carried out on this car.
 
@@ -15,7 +15,7 @@ translations:
       We also checked the intake swirl flaps. There's nothing urgent at the moment, but we advised the customer to remove and clean them at the next minor service.
     car: BMW X3
   sr:
-    title: 'BMW X3: ulje u motoru i automatskom menjaču'
+    title: "BMW X3: ulje u motoru i automatskom menjaču"
     body: |-
       Danas smo u našem auto servisu u Beogradu servisirali BMW X3. Ovo je već drugi mali servis koji radimo na ovom automobilu.
 
@@ -43,7 +43,6 @@ published: true
 featured: true
 translatedFrom: 3f6cfa720ee11181
 ---
-
 Сегодня в нашем автосервисе в Белграде обслуживали BMW X3. Это уже второе малое ТО, которое мы делаем на этой машине.
 
 В этот раз клиент попросил, кроме обычной замены масла и фильтров, заменить масло в 8-ступенчатом автомате **ZF**.

@@ -87,6 +87,7 @@ jobs:
           PUBLIC_WHATSAPP_NUMBER: '381000000000'
           PUBLIC_VIBER_NUMBER: '381000000000'
           PUBLIC_THREADS_CHANNEL: check
+          MEDUSA_PUBLISHABLE_KEY: pk_check
           SITES: ${{ steps.affected.outputs.sites }}
         run: |
           read -ra sites <<<"$SITES"

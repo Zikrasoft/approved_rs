@@ -14,7 +14,7 @@ date: 2026-10-01
 published: true
 translations:
   sr:
-    title: 'Peugeot 208 1.2 PureTech: veliki servis sa zamenom zupčastog kaiša'
+    title: "Peugeot 208 1.2 PureTech: veliki servis sa zamenom zupčastog kaiša"
     body: |-
       **Peugeot 208 1.2 PureTech. Veliki servis, mali servis i zamena ulja u menjaču u Beogradu**\
       Peugeot 208 sa benzinskim motorom 1.2 PureTech stigao je kod nas u auto servis na Zvezdari. Automobilu je bilo potrebno kompletno održavanje, pa smo uradili veliki servis, mali servis i zamenili ulje u menjaču.\
@@ -24,7 +24,7 @@ translations:
       Dodatno smo uradili mali servis sa zamenom motornog ulja i filtera, a potpuno smo zamenili i ulje u menjaču, koristeći Valvoline ulje.
     car: Peugeot 208
   en:
-    title: 'Peugeot 208 1.2 PureTech: major service and timing belt replacement'
+    title: "Peugeot 208 1.2 PureTech: major service and timing belt replacement"
     body: |-
       **Peugeot 208 1.2 PureTech: major and minor services, plus a gearbox oil change in Belgrade**\
       A Peugeot 208 with a 1.2 PureTech petrol engine came to our garage in Zvezdara for comprehensive maintenance. We carried out a major service (veliki servis), a minor service (mali servis) and a gearbox oil change.\
@@ -35,7 +35,6 @@ translations:
     car: Peugeot 208
 translatedFrom: 9970318876275db7
 ---
-
 **Peugeot 208 1.2 PureTech. Большое ТО, малое ТО и замена масла в коробке передач в Белграде**\
 К нам в автосервис на Звездаре приехал Peugeot 208 с бензиновым двигателем 1.2 PureTech. Автомобилю требовалось комплексное техническое обслуживание, поэтому мы выполнили большое ТО (veliki servis), малое ТО (mali servis) и замену масла в коробке передач.\
 В рамках большого ТО заменили ремень ГРМ и необходимые комплектующие, а также водяную помпу. На двигателе 1.2 PureTech помпа не приводится ремнем ГРМ, но мы рекомендуем менять ее во время большого обслуживания. Если вы решили оставить старую помпу, обязательно рекомендуем заменить хотя бы отдельный маленький ремень, который приводит ее в движение.\

@@ -116,7 +116,7 @@ services:
         restart: true
 
   caddy:
-    image: ghcr.io/zikrasoft/podbor-carlab-caddy:${MEDUSA_TAG:?}
+    image: ghcr.io/zikrasoft/podbor-carlab-caddy:${CADDY_TAG:-${MEDUSA_TAG:?}}
     restart: unless-stopped
     logging: *logging
     mem_limit: 128m
@@ -133,6 +133,7 @@ services:
       DETAILS_HOST: ${DETAILS_HOST:-details.rs}
       APPROVED_HOST: ${APPROVED_HOST:-approved.rs}
       CRM_HOST: ${CRM_HOST:-crm.carlab.rs}
+      SHOP_PREVIEW_TOKEN: ${SHOP_PREVIEW_TOKEN:-^}
     ports:
       - '${HTTP_PORT:-80}:80'
       - '${HTTPS_PORT:-443}:443'

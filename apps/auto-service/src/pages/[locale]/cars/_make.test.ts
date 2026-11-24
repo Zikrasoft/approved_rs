@@ -8,6 +8,7 @@ import {
   parseHtml,
   partPage,
   respond,
+  SHOP_PREVIEW_TOKEN,
   heroPartsSearch,
   stubShop,
   wirePart,
@@ -167,6 +168,14 @@ describe('the Make pages', () => {
     expect((await answer('ru', 'tesla')).headers.get('cache-control')).toBe(
       PUBLIC_PAGE,
     );
+  });
+
+  it('keep a preview visitor out of the cache', async () => {
+    const response = await answer('ru', 'bmw', {
+      cookie: `auto_service_shop_preview=${SHOP_PREVIEW_TOKEN}`,
+    });
+
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
   });
 
   it('ask the shop for the Make in the locale of the path', async () => {

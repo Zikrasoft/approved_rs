@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   brokenAnswer,
+  cachedNotFound,
   caddyServes,
   linksCaddy404,
   shadowedRedirects,
@@ -53,4 +54,14 @@ test('a catalogue page without its shop asks to retry, which is not a broken pag
   assert.equal(brokenAnswer(503), false);
   assert.equal(brokenAnswer(500), true);
   assert.equal(brokenAnswer(404), false);
+});
+
+test('an unknown slug is a 404 page the cache may keep, never a bare or private one', () => {
+  const kept = 'public, s-maxage=86400, stale-while-revalidate=86400';
+  const page = '<main data-site-body></main>';
+  assert.equal(cachedNotFound(404, kept, page), true);
+  assert.equal(cachedNotFound(404, null, page), false);
+  assert.equal(cachedNotFound(404, 'private, no-store', page), false);
+  assert.equal(cachedNotFound(404, kept, ''), false);
+  assert.equal(cachedNotFound(200, kept, page), false);
 });

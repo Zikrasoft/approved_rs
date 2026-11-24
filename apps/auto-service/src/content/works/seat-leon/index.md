@@ -2,7 +2,7 @@
 title: 'Большой сервис Seat Leon: ГРМ, помпа и DSG DQ250'
 translations:
   en:
-    title: 'Major service for a Seat Leon: timing belt, water pump and DSG DQ250'
+    title: "Major service for a Seat Leon: timing belt, water pump and DSG DQ250"
     body: |-
       This Seat Leon came to our Russian-speaking garage in Belgrade for a major scheduled service at **190,000 km**.
 
@@ -21,7 +21,7 @@ translations:
       A note on the **DQ250**: it's a six-speed dual-clutch transmission with wet clutches. The transmission oil needs to be changed according to the service schedule. That's what keeps the gearbox running properly.
     car: Seat Leon
   sr:
-    title: 'Veliki servis za Seat Leon: zupčasti kaiš, pumpa i DSG DQ250'
+    title: "Veliki servis za Seat Leon: zupčasti kaiš, pumpa i DSG DQ250"
     body: |-
       Seat Leon sa **190.000 km** na satu dovezli su nam u ruski auto servis u Beogradu na veliki servis.
 

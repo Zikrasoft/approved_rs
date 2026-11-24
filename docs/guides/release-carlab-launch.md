@@ -464,31 +464,23 @@ Content, from `TODO:` markers in `apps/auto-service`:
 - [ ] Larger photo originals: raised in this session; not tracked in the
       repository.
 
-## 14. Catalogue build size and time
+## 14. Catalogue rendering and cache
 
-carlab.rs is static: every Part has a page in each of its three locales (ru, sr,
-en), plus Model, Vehicle, Model x Category, Category and Make pages. The catalogue
-is read from the shop in pages, and `experimental.incrementalBuild` copies a page
-whose data did not change from the cache (ADR-0055). The catalogue's real size is
-not recorded anywhere in the repository; measure it before trusting a number.
+carlab.rs renders every catalogue route (`/parts/**`, `/cars/**`) on request, and
+Caddy caches the HTML on the VPS for 24 hours (ADR-0065). The rest of the site is
+prerendered. A Publish rebuilds the site with a light URL list from the shop, not
+the Parts' pages. The real size of the catalogue is not recorded in the
+repository; measure it before trusting a number.
 
-- [ ] After the first full Import, count the Parts and the part pages
+- [ ] After the first full Import, count the Parts and the catalogue URLs
       (`https://carlab.rs/catalogue-build.json` after the first Publish, deploy.md
-      § How it ships, step 5). The estimate is Parts x 3 plus the hubs.
-- [ ] First Publish: note the wall-clock time of the `rebuild-carlab` job in
-      `publish.yml`, the page count and the size of the `astro-carlab-*` cache
-      (`gh cache list`). This run has an empty cache and is the slowest.
-- [ ] Second Publish after a small change: its log shows `(restored)` pages and
-      the time drops (ADR-0055; issue #380).
+      § How it ships, step 5).
+- [ ] After a deploy, open a Part, a Category and a Make page twice: the second
+      answer is a cache hit (`Cache-Status` header) and the first one finishes
+      inside the site's 10 second limit. The first page of a cold cache is the
+      slowest; the real-data timings are in the parity check of issue #487.
+- [ ] Watch the site container's memory (160 MB) and Medusa's pool while a crawler
+      walks the sitemap; a heavy page answers 2 to 4 MB of JSON.
 - [ ] The admin's Publish chain stops waiting after 90 minutes and then does not
       reindex search (deploy.md § `.env`). The workflow itself keeps running, so a
       build near that limit needs a manual reindex or a longer limit.
-- [ ] Not verified, check before the catalogue is large: GitHub Actions' cache
-      size limit per repository against the size of `node_modules/.astro`, and
-      how long the rsync of 100 000 or more output files to the VPS takes.
-- [ ] If the build is too slow, the options in rising cost: publish only part of
-      the Parts (the `listed` flag already exists on published numbers,
-      `src/modules/catalog/cross-module-sql.ts`; how it affects the build has not
-      been checked); build Part pages in fewer locales; raise the 90 minute wait;
-      render the long tail on request instead of at build time. The last one
-      reverses ADR-0020, which declined ISR as paid, so it needs an owner decision.
