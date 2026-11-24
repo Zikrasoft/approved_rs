@@ -62,6 +62,7 @@ describe('catalogueUrls', () => {
   it('lists every page of the list in every locale, Parts only when indexable', () => {
     expect(urls).toEqual(
       expect.arrayContaining([
+        `${SITE}/sr/parts/makes/`,
         `${SITE}/sr/parts/bmw/`,
         `${SITE}/ru/parts/bmw/3-series/`,
         `${SITE}/en/parts/bmw/3-series/brakes/`,

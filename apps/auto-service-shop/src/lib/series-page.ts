@@ -23,7 +23,8 @@ import { loadPartDemand } from './part-demand';
 import { localized } from './part-page';
 import { partPagesOf } from './part-pages';
 import { vehicleRequirementFits } from './requirement-fit';
-import { listVehicleResponses, toFitmentResponse } from './store-response';
+import { vehiclesOfSeries } from './series-vehicles';
+import { toFitmentResponse } from './store-response';
 
 type Options = { locale: CatalogLocale; shown: boolean };
 
@@ -42,21 +43,7 @@ async function placeOf(
     await catalog.listSeries({ make_id: make.id }, { take: null })
   ).find(({ name }) => seriesSlugOf(name) === seriesSlug);
   if (!named) return null;
-  const chassis = await catalog.listChassis(
-    { series_id: named.id },
-    { select: ['id'], take: null },
-  );
-  const models = chassis.length
-    ? await catalog.listVehicleModels(
-        { chassis_id: chassis.map(({ id }) => id) },
-        { select: ['id'], take: null },
-      )
-    : [];
-  const vehicles = models.length
-    ? await listVehicleResponses(catalog, {
-        model_id: models.map(({ id }) => id),
-      })
-    : [];
+  const vehicles = await vehiclesOfSeries(catalog, [named.id]);
   const fits = await vehicleRequirementFits(catalog, vehicles);
   const [counts] = await publish.listedPartCounts(fits, [named.id]);
   if (!seriesHasPage(counts ?? { parts: 0, required: 0 })) return null;
