@@ -458,7 +458,7 @@ const pictureRank = (page: PartPageEntry) => {
   return picture ? Number(picture.illustration) : 2;
 };
 
-const showcaseOf = (queues: PartPageEntry[][][]) => {
+export const showcaseOf = (queues: PartPageEntry[][][]) => {
   const picks = queues
     .flatMap((queue, column) =>
       queue

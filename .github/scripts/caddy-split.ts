@@ -23,6 +23,8 @@ const PROBES: Record<string, Record<string, string>> = {
   'auto-service': {
     'index.astro': '/',
     '404.astro': '/ru/no-such-page/',
+    '[locale]/cars/index.astro': '/ru/cars/',
+    '[locale]/cars/[make].astro': '/ru/cars/bmw/',
     '[locale]/parts/index.astro': '/ru/parts/',
     '[locale]/parts/search.astro': '/ru/parts/search/',
     '[locale]/parts/prices.astro': '/ru/parts/prices/',

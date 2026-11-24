@@ -1,8 +1,6 @@
 ---
 import type { ImageMetadata } from 'astro';
-import { getImage } from 'astro:assets';
-import { getCollection } from 'astro:content';
-import { paginate, type Page } from '@podbor/site-kit/pagination';
+import type { Page } from '@podbor/site-kit/pagination';
 import Shell from '@/layouts/Shell.astro';
 import Icon from '@/components/Icon.astro';
 import MakeCard from '@/components/MakeCard.astro';
@@ -11,29 +9,10 @@ import ListingPager from '@/components/ListingPager.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
-import { makePartsForBuild } from '@/utils/catalogueEnv';
+import { builtCover, coverUrl, MAKE_COVER_WIDTHS } from '@/utils/coverImages';
 import { listingHeading, listingTitle } from '@/utils/listing';
-import type { Make } from '@/utils/makes';
-import { PathBuilder, withLocales } from '@/utils/paths';
-import { CARS_PAGE_SIZE, makeCover, workshopMakePages } from '@/utils/works';
-
-type MakeTile = { make: Make; cover: ImageMetadata | undefined };
-
-export async function getStaticPaths() {
-  const cards: MakeTile[] = workshopMakePages(
-    await getCollection('works'),
-    await getCollection('articles'),
-    await makePartsForBuild(),
-  ).map((page) => ({ make: page.make, cover: makeCover(page) }));
-  return withLocales(
-    paginate(cards, CARS_PAGE_SIZE).map((listing) => ({
-      params: {
-        page: listing.number > 1 ? String(listing.number) : undefined,
-      },
-      props: { listing, cards },
-    })),
-  );
-}
+import { PathBuilder } from '@/utils/paths';
+import type { MakeTile } from '@/utils/works';
 
 interface Props {
   listing: Page<MakeTile>;
@@ -53,7 +32,7 @@ const searchIndex = await Promise.all(
     name: make.name,
     href: PathBuilder.carsMake(locale, make.slug),
     picture: cover
-      ? (await getImage({ src: cover, width: 560, quality: 68 })).src
+      ? (coverUrl(await builtCover(cover, MAKE_COVER_WIDTHS), 560) ?? null)
       : null,
   })),
 );

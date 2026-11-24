@@ -128,8 +128,8 @@ const modelsWithParts = async ({
   });
 };
 
-const pagesOfParts = async (
-  { catalog, publish, scope }: Place,
+export const pagesOfParts = async (
+  { catalog, publish, scope }: Pick<Place, 'catalog' | 'publish' | 'scope'>,
   partIds: string[],
   { locale, shown }: Options,
   only?: (identifierId: string) => boolean,

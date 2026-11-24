@@ -22,14 +22,30 @@ const unavailable = (locale: Locale) =>
     },
   });
 
+const cacheControlOf = (request: Request) =>
+  previewRequested(request) ? PREVIEW_PAGE_CACHE : PUBLIC_PAGE_CACHE;
+
+export function answerPage<T>(
+  { request, response }: Pick<AstroGlobal, 'request' | 'response'>,
+  found: T | null,
+): T | Response {
+  const cacheControl = cacheControlOf(request);
+  if (found === null) {
+    return new Response(null, {
+      status: 404,
+      headers: { 'cache-control': cacheControl },
+    });
+  }
+  response.headers.set('cache-control', cacheControl);
+  return found;
+}
+
 export async function loadCataloguePage<T>(
-  { request, url, response }: Pick<AstroGlobal, 'request' | 'url' | 'response'>,
+  astro: Pick<AstroGlobal, 'request' | 'url' | 'response'>,
   load: (catalogue: Catalogue, locale: Locale) => Promise<T | null>,
 ): Promise<T | Response> {
+  const { request, url } = astro;
   const locale = localeFrom(url.pathname);
-  const cacheControl = previewRequested(request)
-    ? PREVIEW_PAGE_CACHE
-    : PUBLIC_PAGE_CACHE;
   const catalogue = catalogueFor(request);
   if (!catalogue) return unavailable(locale);
   let found: T | null;
@@ -42,12 +58,5 @@ export async function loadCataloguePage<T>(
     );
     return unavailable(locale);
   }
-  if (found === null) {
-    return new Response(null, {
-      status: 404,
-      headers: { 'cache-control': cacheControl },
-    });
-  }
-  response.headers.set('cache-control', cacheControl);
-  return found;
+  return answerPage(astro, found);
 }
