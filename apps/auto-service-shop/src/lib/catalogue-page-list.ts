@@ -77,7 +77,7 @@ export async function cataloguePageList(scope: MedusaContainer) {
       make: make.slug,
       slug: seriesSlugOf(name),
       name,
-      categories: (categoriesOf.get(id) ?? []).toSorted(),
+      categories: [...(categoriesOf.get(id) ?? [])].sort(),
     })),
     categories: categories.map(({ id, slug, name }) => ({
       slug,
