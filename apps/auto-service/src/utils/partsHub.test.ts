@@ -29,10 +29,15 @@ const make = (slug: string, parts: number | null, hub = true) => ({
   parts,
 });
 
-const counted = (slug: string, listed: number | null) => ({
+const counted = (
+  slug: string,
+  listed: number | null,
+  demand: number | null = null,
+) => ({
   slug,
   name: slug,
   listed,
+  demand,
 });
 
 describe('the parts hub data', () => {
@@ -41,7 +46,7 @@ describe('the parts hub data', () => {
       [category('wipers'), category('brakes')],
       listOf(
         [make('audi', 1), make('bmw', 9), make('lada', 99, false)],
-        [counted('wipers', 0), counted('brakes', 5)],
+        [counted('brakes', 50, 0), counted('wipers', 2, 7)],
       ),
     );
 
@@ -51,17 +56,29 @@ describe('the parts hub data', () => {
     ]);
     expect(hub.categories).toEqual([
       {
+        slug: 'wipers',
+        empty: false,
+        name: { ru: 'wipers ru', sr: 'wipers sr', en: 'wipers ru' },
+        lead: { ru: 'wipers lead.', sr: 'wipers sr lead.', en: 'wipers lead.' },
+      },
+      {
         slug: 'brakes',
         empty: false,
         name: { ru: 'brakes ru', sr: 'brakes sr', en: 'brakes ru' },
         lead: { ru: 'brakes lead.', sr: 'brakes sr lead.', en: 'brakes lead.' },
       },
-      {
-        slug: 'wipers',
-        empty: true,
-        name: { ru: 'wipers ru', sr: 'wipers sr', en: 'wipers ru' },
-        lead: { ru: 'wipers lead.', sr: 'wipers sr lead.', en: 'wipers lead.' },
-      },
+    ]);
+  });
+
+  it('marks a Category with nothing listed as empty and keeps the list order without demand', () => {
+    const hub = partsHubOf(
+      [category('wipers'), category('brakes')],
+      listOf([], [counted('wipers', 0), counted('brakes', 5)]),
+    );
+
+    expect(hub.categories.map(({ slug, empty }) => [slug, empty])).toEqual([
+      ['wipers', true],
+      ['brakes', false],
     ]);
   });
 

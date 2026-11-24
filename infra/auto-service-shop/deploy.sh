@@ -39,7 +39,7 @@ image=${image:-ghcr.io/zikrasoft/podbor-auto-service-shop}
 export MEDUSA_TAG="$tag"
 
 echo "==> Image $tag"
-docker compose pull --policy missing medusa
+docker compose pull --policy missing medusa caddy
 
 backups=${BACKUP_DIR:-/var/backups/carlab}
 dump="$backups/db-$(date -u +%Y-%m-%dT%H-%M-%SZ)-pre-deploy.dump"
@@ -100,9 +100,11 @@ if curl -fsS -o /dev/null --max-time 10 --retry 12 --retry-delay 5 --retry-all-e
   "https://${api_host:-api.carlab.rs}/health/ready"; then
   echo "Live at $tag."
   keep=$(cat .previous-tag 2>/dev/null || echo "$tag")
-  docker image ls "$image" --format '{{.Tag}}' | grep -vx -e "$tag" -e "$keep" -e '<none>' -e '' | while read -r old; do
-    docker image rm "$image:$old" >/dev/null || echo "Could not remove $image:$old." >&2
-  done || true
+  for repo in "$image" ghcr.io/zikrasoft/podbor-carlab-caddy; do
+    docker image ls "$repo" --format '{{.Tag}}' | grep -vx -e "$tag" -e "$keep" -e '<none>' -e '' | while read -r old; do
+      docker image rm "$repo:$old" >/dev/null || echo "Could not remove $repo:$old." >&2
+    done || true
+  done
 else
   echo "The stack is up but the public health check failed." >&2
   exit 1

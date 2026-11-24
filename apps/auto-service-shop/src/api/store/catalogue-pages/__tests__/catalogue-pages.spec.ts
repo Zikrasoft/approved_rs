@@ -147,7 +147,7 @@ medusaIntegrationTestRunner({
         const { categories } = await list();
 
         expect(categories).toEqual([
-          { slug: 'filters', name: 'Filters', listed: 5 },
+          { slug: 'filters', name: 'Filters', listed: 5, demand: 0 },
         ]);
       });
     });

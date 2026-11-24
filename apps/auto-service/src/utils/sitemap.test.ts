@@ -54,8 +54,8 @@ describe('catalogueUrls', () => {
       { make: 'bmw', slug: '3-series', name: '3', categories: ['brakes'] },
     ],
     categories: [
-      { slug: 'brakes', name: 'Brakes', listed: 100 },
-      { slug: 'empty', name: 'Empty', listed: null },
+      { slug: 'brakes', name: 'Brakes', listed: 100, demand: null },
+      { slug: 'empty', name: 'Empty', listed: null, demand: null },
     ],
     catalogue_makes: null,
   });

@@ -137,7 +137,7 @@ has() {
 stage
 expect 'a deploy succeeds' run deploy.sh "$NEW"
 expect 'pull, migrate, check the schema, seed, up, reload and health run in order on the new tag' logged \
-  "docker[$NEW] compose pull --policy missing medusa" \
+  "docker[$NEW] compose pull --policy missing medusa caddy" \
   "docker[$NEW] compose up -d --wait postgres" \
   "docker[$NEW] compose exec -T postgres pg_dump -U carlab -d carlab --format=custom" \
   "docker[$NEW] compose run --rm -T medusa node_modules/.bin/medusa db:migrate --execute-safe-links --all-or-nothing" \
@@ -149,7 +149,8 @@ expect 'pull, migrate, check the schema, seed, up, reload and health run in orde
   "docker[$NEW] compose up -d --wait --wait-timeout 300 --remove-orphans" \
   "docker[$NEW] compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile" \
   'curl -fsS -o /dev/null --max-time 10 --retry 12 --retry-delay 5 --retry-all-errors https://api.test/health/ready' \
-  "docker[$NEW] image ls ghcr.io/zikrasoft/podbor-auto-service-shop --format {{.Tag}}"
+  "docker[$NEW] image ls ghcr.io/zikrasoft/podbor-auto-service-shop --format {{.Tag}}" \
+  "docker[$NEW] image ls ghcr.io/zikrasoft/podbor-carlab-caddy --format {{.Tag}}"
 expect '.env names the new tag' has "MEDUSA_TAG=$NEW" "$work/host/.env"
 expect '.env keeps every other line' has 'POSTGRES_PASSWORD=x' "$work/host/.env"
 expect 'the old tag is kept for rollback' has "$OLD" "$work/host/.previous-tag"
@@ -194,6 +195,7 @@ expect 'a deploy with old images on the host succeeds' run deploy.sh "$NEW"
 expect 'an image older than the previous one is removed' grep -qxF "docker[$NEW] image rm ghcr.io/zikrasoft/podbor-auto-service-shop:$OLDER" "$LOG"
 refuse 'the live and the previous image are kept' grep -Eq "image rm .*($NEW|$OLD)" "$LOG"
 refuse 'an untagged image is not addressed by tag' grep -q 'image rm .*<none>' "$LOG"
+expect 'a caddy image older than the previous one is removed too' grep -qxF "docker[$NEW] image rm ghcr.io/zikrasoft/podbor-carlab-caddy:$OLDER" "$LOG"
 
 stage
 printf 'API_HOST=api.test\nMEDUSA_IMAGE=registry.test/medusa\nMEDUSA_TAG=%s\nPOSTGRES_PASSWORD=x\nCRM_DB_PASSWORD=feedfacefeed\n' "$OLD" >"$work/host/.env"

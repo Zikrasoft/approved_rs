@@ -6,7 +6,7 @@
 		simplefs {
 			configuration {
 				path /cache
-				size 20000
+				size 40000
 			}
 		}
 		key {
@@ -15,6 +15,7 @@
 		}
 		mode bypass_request
 		default_cache_control no-store
+		disable_surrogate_key
 	}
 }
 

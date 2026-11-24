@@ -116,8 +116,7 @@ services:
         restart: true
 
   caddy:
-    image: carlab-caddy:2.11.4-cache-handler-0.17.0
-    build: ./caddy-image
+    image: ghcr.io/zikrasoft/podbor-carlab-caddy:${MEDUSA_TAG:?}
     restart: unless-stopped
     logging: *logging
     mem_limit: 128m
