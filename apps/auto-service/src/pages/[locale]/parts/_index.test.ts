@@ -3,20 +3,12 @@ import { content } from '@/i18n/content';
 import {
   isOrange,
   orangeIn,
-  partPage,
   render,
   respond,
   setShop,
 } from '@/components/renderAstro';
-import {
-  categoryPagesForBuild,
-  makeHubsForBuild,
-  partPagesForBuild,
-} from '@/utils/catalogueEnv';
-import type {
-  CategoryPageEntry,
-  MakeHubEntry,
-} from '@/utils/catalogueSnapshot';
+import { categoriesForBuild, pageListForBuild } from '@/utils/catalogueEnv';
+import type { Category } from '@podbor/catalog-contract';
 import { FILTERS_INQUIRY_ATTRIBUTE } from '@/scripts/filterSheet';
 import { partsHubOf, type PartsHub as HubData } from '@/utils/partsHub';
 import PartsHub from './index.astro';
@@ -27,7 +19,7 @@ vi.mock('virtual:parts-hub', () => ({ default: built }));
 
 vi.mock('@/utils/catalogueEnv', async (original) => {
   const snapshot = async () => {
-    throw new Error('the catalogue snapshot is read at request time');
+    throw new Error('the catalogue is read at request time');
   };
   const actual = await original<typeof import('@/utils/catalogueEnv')>();
   return {
@@ -42,39 +34,51 @@ vi.mock('@/utils/catalogueEnv', async (original) => {
 
 const copy = content('ru').pages.partsInquiry;
 
-const category = (
-  slug: string,
-  empty: boolean,
-  demand = 0,
-): CategoryPageEntry => ({
-  id: `category_${slug}`,
-  slug,
-  name: slug,
-  text: `${slug} lead.`,
-  translations: null,
-  maintenance_kit: false,
-  kit_rank: 0,
-  service_label: null,
-  service_price: null,
-  service_note: null,
-  installation_price: null,
-  image: null,
-  fields: [],
-  pages: empty
-    ? []
-    : [
-        partPage({
-          demand: demand ? { score: demand, popular: false, top: false } : null,
-        }),
-      ],
+type Entry = { category: Category; listed: number };
+
+const category = (slug: string, empty: boolean, listed = 1): Entry => ({
+  category: {
+    id: `category_${slug}`,
+    slug,
+    name: slug,
+    text: `${slug} lead.`,
+    translations: null,
+    maintenance_kit: false,
+    kit_rank: 0,
+    service_label: null,
+    service_price: null,
+    service_note: null,
+    installation_price: null,
+    image: null,
+    fields: [],
+  },
+  listed: empty ? 0 : listed,
 });
 
+type HubMake = { slug: string; name: string; hub: boolean; parts: number };
+
 const hub = (
-  categories = [category('batteries', false), category('wipers', true)],
-  makes: MakeHubEntry[] = [],
+  entries = [category('batteries', false), category('wipers', true)],
+  makes: HubMake[] = [],
   path = '/ru/parts/',
 ) => {
-  Object.assign(built, partsHubOf(categories, makes));
+  Object.assign(
+    built,
+    partsHubOf(
+      entries.map((entry) => entry.category),
+      {
+        parts: [],
+        makes,
+        series: [],
+        categories: entries.map(({ category: own, listed }) => ({
+          slug: own.slug,
+          name: own.name,
+          listed,
+        })),
+        catalogue_makes: null,
+      },
+    ),
+  );
   return render(PartsHub, { path, params: { locale: 'ru' } });
 };
 
@@ -86,16 +90,15 @@ afterEach(() => {
 });
 
 describe('the parts hub', () => {
-  it('never reads the catalogue snapshot while it answers a visitor', async () => {
+  it('never reads the catalogue at build time while it answers a visitor', async () => {
     setShop(false);
     const root = await hub();
 
     expect(
       root.querySelector('a[href="/ru/parts/c/batteries/"]'),
     ).not.toBeNull();
-    expect(categoryPagesForBuild).not.toHaveBeenCalled();
-    expect(makeHubsForBuild).not.toHaveBeenCalled();
-    expect(partPagesForBuild).not.toHaveBeenCalled();
+    expect(categoriesForBuild).not.toHaveBeenCalled();
+    expect(pageListForBuild).not.toHaveBeenCalled();
   });
 
   it('opens an inquiry for a category with no parts yet and browses one with parts', async () => {
@@ -120,7 +123,7 @@ describe('the parts hub', () => {
   it('keeps its links in ink so the inquiry stays the one orange action', async () => {
     setShop(false);
     const root = await hub(undefined, [
-      { make: { slug: 'bmw', name: 'BMW' }, series: [], parts: 3 },
+      { slug: 'bmw', name: 'BMW', hub: true, parts: 3 },
     ]);
     const links = [
       ...root.querySelectorAll('a.card'),
@@ -156,7 +159,7 @@ describe('the parts hub', () => {
     ).toBe(false);
   });
 
-  it('lists the most demanded categories first', async () => {
+  it('lists the categories with the most listed parts first', async () => {
     setShop(false);
     const root = await hub([
       category('batteries', false, 3),
@@ -167,10 +170,10 @@ describe('the parts hub', () => {
     expect(tileOrder(root)).toEqual(['brakes', 'batteries', 'wipers']);
   });
 
-  it('keeps the categories in their own order while nothing is demanded', async () => {
+  it('keeps the categories in their own order while their counts are equal', async () => {
     setShop(false);
     const root = await hub([
-      category('wipers', true),
+      category('wipers', false),
       category('batteries', false),
       category('brakes', false),
     ]);

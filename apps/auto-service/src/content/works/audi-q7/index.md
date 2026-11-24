@@ -14,7 +14,7 @@ date: 2026-09-15
 published: true
 translations:
   sr:
-    title: "Audi Q7 2008: trap, kočnice i curenje ulja"
+    title: 'Audi Q7 2008: trap, kočnice i curenje ulja'
     body: |-
       U CarLab nam je stigao Audi Q7 iz 2008. godine sa podužim spiskom kvarova. Automobilu je bila potrebna ozbiljna popravka trapa i motora.
 
@@ -32,7 +32,7 @@ translations:
       Audi Q7 prve generacije zahteva stručno održavanje, naročito kada je reč o starijim automobilima sa velikom kilometražom. Važno je utvrditi uzrok kvara i otkloniti ga, a ne samo ugraditi novi deo.
     car: Audi Q7
   en:
-    title: "Audi Q7 2008: suspension, brakes and an oil leak"
+    title: 'Audi Q7 2008: suspension, brakes and an oil leak'
     body: |-
       A 2008 Audi Q7 came in with a long list of issues. It needed significant work on both the suspension and the engine.
 
@@ -51,6 +51,7 @@ translations:
     car: Audi Q7
 translatedFrom: b51e5c674f457a99
 ---
+
 К нам приехала Audi Q7 2008 года с внушительным списком неисправностей. Автомобиль требовал серьезного внимания как по ходовой части, так и по двигателю.
 
 Что было сделано:

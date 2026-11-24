@@ -10,11 +10,7 @@ import {
   type CheckoutContact,
   type CheckoutRefusal,
   type PartOffer,
-  CATALOGUE_SNAPSHOT_CONTENT_TYPE,
-  CATALOGUE_SNAPSHOT_PATH,
-  catalogueSnapshotResponseSchema,
   cataloguePageListSchema,
-  readCatalogueSnapshot,
   categoriesResponseSchema,
   partPageSlug,
   identifierOffersResponseSchema,
@@ -65,18 +61,12 @@ import {
   REQUEST_ID_HEADER,
   VISITOR_ID_HEADER,
 } from '@podbor/catalog-contract/events';
-import {
-  assembleSnapshot,
-  categoryPagesFrom,
-  makeHubsFrom,
-  showcaseOf,
-  type CategoryPageEntry,
-  type MakeHubEntry,
-  type ModelPart,
-  type PartPageEntry,
-  type SeriesHubEntry,
-  type SeriesModel,
-} from './catalogueSnapshot';
+import type {
+  ModelPart,
+  PartPageEntry,
+  SeriesHub,
+  SeriesModel,
+} from './partEntry';
 import type { CartOutcome, OffersOutcome } from './catalogueWire';
 import { latinBrands } from './brandAliases';
 import { placeKey, type CataloguePages } from './paths';
@@ -150,14 +140,14 @@ export type CategoryPageData = {
 };
 
 export type SeriesHubData = {
-  series: SeriesHubEntry['series'];
+  series: SeriesHub;
   models: SeriesModel[];
   categories: Category[];
   popular: PartPageEntry[];
 };
 
 export type SeriesCategoryData = {
-  series: SeriesHubEntry['series'];
+  series: SeriesHub;
   category: Category;
   parts: ModelPart[];
 };
@@ -321,29 +311,8 @@ export function createCatalogue({
       )
       .vehicles.find((vehicle) => vehicle.model.slug === slug)?.model ?? null;
 
-  const snapshot = async () => {
-    const response = await answer(CATALOGUE_SNAPSHOT_PATH);
-    const whole =
-      response.body &&
-      response.headers
-        .get('content-type')
-        ?.startsWith(CATALOGUE_SNAPSHOT_CONTENT_TYPE)
-        ? await readCatalogueSnapshot(response.body)
-        : catalogueSnapshotResponseSchema.parse(await response.json());
-    return {
-      ...assembleSnapshot(
-        whole.pages.map(unpriced),
-        whole.categories,
-        whole.fitments,
-        whole.vehicles,
-      ),
-      makes: whole.makes,
-    };
-  };
-
   return {
     categories,
-    snapshot,
 
     async partPage(
       slug: string,
@@ -448,12 +417,8 @@ export function createCatalogue({
       if (!found) return null;
       return {
         hub: found.hub,
-        categories: found.categories.map(({ category }) => category),
-        showcase: showcaseOf(
-          found.categories.map(({ parts }) =>
-            parts.map((pages) => pages.map(partEntry)),
-          ),
-        ),
+        categories: found.categories,
+        showcase: found.showcase.map(partEntry),
       };
     },
 
@@ -486,18 +451,6 @@ export function createCatalogue({
       return cataloguePageListSchema.parse(
         await request('/store/catalogue-pages'),
       );
-    },
-
-    async partPages(): Promise<PartPageEntry[]> {
-      return (await snapshot()).entries;
-    },
-
-    async categoryPages(): Promise<CategoryPageEntry[]> {
-      return categoryPagesFrom(await snapshot());
-    },
-
-    async makeHubs(): Promise<MakeHubEntry[]> {
-      return makeHubsFrom(await snapshot());
     },
 
     async search(query: SearchQuery): Promise<SearchOutcome | null> {

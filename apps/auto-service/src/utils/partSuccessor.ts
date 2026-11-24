@@ -3,7 +3,7 @@ import {
   bestOffer,
   compareOffers,
 } from '@podbor/catalog-contract/availability';
-import type { PartPageEntry } from './catalogueSnapshot';
+import type { PartPageEntry } from './partEntry';
 
 const slugOf = (number: BrandNumber) =>
   partPageSlug(number.brand.slug, number.normalized_value);

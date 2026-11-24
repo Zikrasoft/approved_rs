@@ -1563,8 +1563,11 @@ moves forward again.
    workflow runs the same probe but fails instead (`::error::`), so the admin
    shows the Publish as failed rather than as done.
 
-   The build reads the catalogue once (pages, sitemap and llms.txt share it)
-   and records how many part pages it serves at
+   The build never reads `/store/catalogue-snapshot`: every catalogue page is
+   rendered on demand (ADR-0065). It reads the light page list
+   (`/store/catalogue-pages`, once per build: sitemap, `llms.txt`, the parts
+   hub, the Make list for Keystatic and the shrink guard share it) and
+   `/store/categories`, and records how many part pages it serves at
    `https://carlab.rs/catalogue-build.json`. A production build (`upload-site.sh` sets
    `CATALOGUE_SHRINK_GUARD=true`) reads that record from the live site first, and once it counts
    any part pages the catalogue is live: the build then fails without

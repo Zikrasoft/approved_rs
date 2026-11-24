@@ -13,7 +13,7 @@ date: 2026-09-20
 published: true
 translations:
   sr:
-    title: "BMW 116d: antifriz, nosač motora i EGR klapna"
+    title: 'BMW 116d: antifriz, nosač motora i EGR klapna'
     body: |-
       **BMW 116d u našem auto servisu u Beogradu.**
 
@@ -27,7 +27,7 @@ translations:
       4. **Utvrđeno je da treba zameniti prigušivač torzionih oscilacija.** Tokom servisa utvrdili smo i da će biti potrebna zamena prigušivača torzionih oscilacija radilice. Ovaj deo prigušuje oscilacije i omogućava stabilan rad remenskog pogona pomoćnih uređaja. Ne preporučujemo odlaganje zamene dotrajalog prigušivača, jer njegovo oštećenje može da izazove dodatne kvarove i skupe popravke.
     car: BMW 116d
   en:
-    title: "BMW 116d: coolant, engine mount and EGR valve"
+    title: 'BMW 116d: coolant, engine mount and EGR valve'
     body: |-
       **BMW 116d at our garage in Belgrade.**
 
@@ -42,6 +42,7 @@ translations:
     car: BMW 116d
 translatedFrom: 1f3baa78a27a10dd
 ---
+
 **BMW 116d в нашем автосервисе в Белграде.**
 
 В этот раз к нам приехал BMW 116d, которому требовалось комплексное техническое обслуживание и устранение нескольких неисправностей. На BMW важно разбираться в особенностях моторов и внимательно смотреть на каждую деталь: мы не просто меняем запчасти, а ищем причину, из-за которой они выходят из строя.

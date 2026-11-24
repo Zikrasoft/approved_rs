@@ -58,6 +58,7 @@ describe('CommonJS build', { timeout: 30_000 }, () => {
     expect(contract.carMakePageResponseSchema.parse({})).toEqual({
       hub: false,
       categories: [],
+      showcase: [],
     });
   });
 

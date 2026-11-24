@@ -41,7 +41,7 @@ translations:
       Ako Vaš automobil počne da vibrira, čuju se neobični zvuci ili se pojave greške na instrument tabli, dođite na dijagnostiku. Pronaći ćemo uzrok kvara i obaviti potrebnu popravku.\
       **CarLab, Beograd, Jovana Ćirilova 23A.**\
       Zakažite dijagnostiku, mali servis, veliki servis ili popravku automobila!
-    car: "BMW X1 "
+    car: 'BMW X1 '
   en:
     title: BMW X1
     body: |-
@@ -68,9 +68,10 @@ translations:
       If your car has started vibrating, is making unusual noises or has warning lights on the dashboard, bring it in for diagnostics. We'll find the cause and carry out the necessary repairs.\
       **CarLab, Belgrade, Jovana Ćirilova 23A.**\
       Book diagnostics, a minor service, a major service or a car repair!
-    car: "BMW X1 "
+    car: 'BMW X1 '
 translatedFrom: 4be0f0d3634bd512
 ---
+
 **BMW X1 2019 года с дизельным двигателем B47 в автосервисе CarLab в Белграде!**\
 К нам приехал BMW X1 2019 года выпуска. Владельца беспокоили вибрации двигателя, а также ошибка системы экстренного вызова SOS на приборной панели.\
 В ходе диагностики выявили износ опор двигателя, а также необходимость замены аккумулятора системы экстренного реагирования SOS.\

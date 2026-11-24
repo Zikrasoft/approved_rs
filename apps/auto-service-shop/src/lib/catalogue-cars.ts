@@ -1,9 +1,11 @@
 import type { MedusaContainer } from '@medusajs/framework/types';
 import {
   carMakePageResponseSchema,
+  MAKE_TOP_CATEGORIES,
   makeHasPage,
   partPageSlug,
   seriesHasPage,
+  showcaseOf,
   type CarMakePageResponse,
   type CatalogLocale,
 } from '@podbor/catalog-contract';
@@ -16,9 +18,6 @@ import { CATEGORY_RELATIONS, shownCategory } from './categories';
 import { vehicleRequirementFits } from './requirement-fit';
 import { pagesOfParts } from './series-page';
 import { vehiclesOfSeries } from './series-vehicles';
-
-export const CAR_MAKE_TOP_CATEGORIES = 6;
-export const CAR_MAKE_PARTS_PER_CATEGORY = 12;
 
 const NO_PARTS = { parts: 0, required: 0 };
 
@@ -62,34 +61,31 @@ export async function carMakePageAt(
   );
   const top = categories
     .toSorted((a, b) => byCategory.get(b.id)!.size - byCategory.get(a.id)!.size)
-    .slice(0, CAR_MAKE_TOP_CATEGORIES);
+    .slice(0, MAKE_TOP_CATEGORIES);
+  const queues = await Promise.all(
+    top.map(async (category) => {
+      const partIds = [...byCategory.get(category.id)!].toSorted();
+      const pages = await pagesOfParts({ catalog, publish, scope }, partIds, {
+        locale,
+        shown,
+      });
+      const shownOne = shownCategory(category);
+      return partIds
+        .map((id) =>
+          pages
+            .filter(({ part }) => part.id === id)
+            .map((page) => ({
+              ...page,
+              slug: partPageSlug(page.brand.slug, page.normalized_value),
+              category: shownOne,
+            })),
+        )
+        .filter((own) => own.length > 0);
+    }),
+  );
   return carMakePageResponseSchema.parse({
     hub,
-    categories: await Promise.all(
-      top.map(async (category) => {
-        const partIds = [...byCategory.get(category.id)!]
-          .toSorted()
-          .slice(0, CAR_MAKE_PARTS_PER_CATEGORY);
-        const pages = await pagesOfParts({ catalog, publish, scope }, partIds, {
-          locale,
-          shown,
-        });
-        const shownOne = shownCategory(category);
-        return {
-          category: shownOne,
-          parts: partIds
-            .map((id) =>
-              pages
-                .filter(({ part }) => part.id === id)
-                .map((page) => ({
-                  ...page,
-                  slug: partPageSlug(page.brand.slug, page.normalized_value),
-                  category: shownOne,
-                })),
-            )
-            .filter((own) => own.length > 0),
-        };
-      }),
-    ),
+    categories: top.map(shownCategory),
+    showcase: showcaseOf(queues),
   });
 }

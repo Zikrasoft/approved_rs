@@ -12,6 +12,7 @@ describe('the Car Make page contract', () => {
     expect(carMakePageResponseSchema.parse({ extra: 1 })).toEqual({
       hub: false,
       categories: [],
+      showcase: [],
     });
   });
 });
