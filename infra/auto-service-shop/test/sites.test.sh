@@ -17,6 +17,7 @@ case "$*" in
   esac
   ;;
 *'exec -T site-auto-service'*) exit "${REMINDERS_EXIT:-0}" ;;
+*'exec -T caddy'*) exit "${PURGE_EXIT:-0}" ;;
 esac
 STUB
 chmod +x "$work/bin/docker"
@@ -215,6 +216,26 @@ APP=new-brand
 fresh
 ship "$A"
 expect 'a site with an uploaded release deploys without a list naming it' run deploy-site.sh "$APP" "$A"
+
+APP=auto-service
+fresh
+ship "$A"
+expect 'a carlab.rs release deploys' run deploy-site.sh "$APP" "$A"
+expect 'a carlab.rs release empties the page cache once caddy serves it' \
+  test "$(tail -n 1 "$LOG")" = "docker compose exec -T caddy curl -fsS -X PURGE http://127.0.0.1:2019/souin-api/souin/flush -> releases/$A (caddy releases/$A)"
+ship "$B"
+PURGE_EXIT=7
+export PURGE_EXIT
+refuse 'a failed purge fails the deploy' run deploy-site.sh "$APP" "$B"
+expect 'a failed purge says so' grep -q 'page cache' "$work/stderr"
+expect 'a failed purge leaves the healthy release live' current "$B"
+unset PURGE_EXIT
+
+APP=detailing
+fresh
+ship "$A"
+run deploy-site.sh "$APP" "$A"
+refuse 'the other sites never purge the carlab.rs page cache' grep -q 'exec -T caddy' "$LOG"
 
 APP=auto-service
 fresh

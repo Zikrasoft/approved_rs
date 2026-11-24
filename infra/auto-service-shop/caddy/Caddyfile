@@ -1,3 +1,23 @@
+{
+	cache {
+		api {
+			souin
+		}
+		simplefs {
+			configuration {
+				path /cache
+				size 20000
+			}
+		}
+		key {
+			disable_body
+			disable_query
+		}
+		mode bypass_request
+		default_cache_control no-store
+	}
+}
+
 (common) {
 	encode zstd gzip
 
@@ -113,6 +133,19 @@
 
 {$CARLAB_HOST} {
 	import site auto-service
+
+	@catalogue {
+		method GET HEAD
+		path_regexp ^/[a-z]{2}/(parts/.+|cars/.*)$
+		not path_regexp ^/[a-z]{2}/parts/(search|cart|prices)/?$
+		not header_regexp Cookie (^|;\s*)auto_service_shop_preview=
+	}
+	handle @catalogue {
+		cache
+		reverse_proxy site-auto-service:4321 {
+			header_up X-Request-Id {http.request.uuid}
+		}
+	}
 }
 
 www.{$CARLAB_HOST} {

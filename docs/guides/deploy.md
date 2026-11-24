@@ -939,6 +939,7 @@ account. All of it is described in `infra/auto-service-shop/`:
 | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Dockerfile` + `Dockerfile.dockerignore` | the production image: `pnpm --filter @podbor/auto-service-shop build`, `pnpm deploy --legacy`; runtime from `.medusa/server` as `node`                               |
 | `docker-compose.yml`                     | postgres 16.15, typesense 30.2, medusa (the GHCR image by sha), caddy 2.11.4                                                                                         |
+| `caddy-image/Dockerfile`                 | Caddy 2.11.4 built with `cache-handler` v0.17.0 and Souin's `simplefs` storage v0.0.20, plus `curl` for the purge; built on the host by `docker compose up`          |
 | `caddy/Caddyfile`                        | `api.carlab.rs` and `admin.carlab.rs` → `medusa:9000`, TLS, security headers, body up to 1 MB on the API host and 25 MB on the admin host, payment webhooks closed   |
 | `production.env.example`                 | the template for `/srv/carlab/.env`                                                                                                                                  |
 | `backup.env.example`                     | the template for `/srv/carlab/.env.backup`, the off-host backup bucket                                                                                               |
@@ -1141,6 +1142,57 @@ Keys) and put it with the admin URL in `apps/auto-service-shop/.env.admin`
   Typesense holds its whole index in memory; measure it with
   `docker stats --no-stream` once the catalogue is at scale, and raise the limit
   before the index outgrows it.
+- **carlab.rs catalogue page cache** (ADR-0065). Caddy caches what node
+  renders for `/<locale>/parts/...` and `/<locale>/cars/...`, on GET and HEAD
+  only. `/<locale>/parts/` itself, `search`, `cart` and `prices` are not cached,
+  and neither are the other paths or the other two sites. The response's
+  `Cache-Control` decides what is stored. Without one, nothing is stored
+  (`default_cache_control no-store`). `private` and `no-store` are never
+  stored. A request's own `Cache-Control` or `Pragma` cannot force a render
+  (`mode bypass_request`). The key is the method, host and path. The query
+  string is not part of it, so `?utm_source=x` gets the bare path's entry. A
+  request with the `auto_service_shop_preview` cookie skips the cache. The
+  `auto_service_shop_preview_on` flag cookie alone does not.
+  - **Image.** `carlab-caddy:2.11.4-cache-handler-0.17.0` comes from
+    `caddy-image/Dockerfile`. `deploy.sh`'s `docker compose up` builds it on
+    the host the first time, with xcaddy compiling Caddy in Go for a few
+    minutes. A new tag in `docker-compose.yml` builds the next version.
+  - **Storage.** Souin `simplefs` keeps the bodies, lz4-compressed, in the
+    `caddycache` volume at `/cache`. The index stays in Caddy's memory, so a
+    restart or a reload with a changed Caddyfile empties the cache. The old
+    files stay on the volume and are overwritten when the same page is stored
+    again. To remove them, run
+    `docker compose stop caddy && docker run --rm -v carlab_caddycache:/cache alpine find /cache -mindepth 1 -delete && docker compose up -d caddy`.
+  - **Cap: 20,000 index entries.** A page takes three entries, so the cache
+    holds about 6,700 pages. Once it is full, the least recently used page
+    goes first. The binding limit is Caddy's 128 MB, not the disk. Measured
+    on 2026-11-24 with this image under a 128 MB limit: 20,000 tiny pages
+    reached 118 MiB, and with the cap set, 30,000 requests settled at 6,666
+    pages, 71 MiB and a 33 MB heap. On disk, 30 random catalogue pages from
+    the live sitemap averaged 118 KB raw and 29 KB stored, so a full cache
+    holds about 190 MB. Raise the cap only after measuring the memory again.
+  - **Stale copies.** While node is down, a page still within its
+    `s-maxage` is served from the cache as a hit. `simplefs` v0.0.20 drops a
+    body when its `s-maxage` runs out, so `stale-while-revalidate` and
+    `stale-if-error` never apply after that day. An expired or never-cached
+    page then gets what node gives, a 502 if node is down.
+  - **Purge.** `deploy-site.sh auto-service <release>` empties the whole
+    cache right after `current` points at the new release:
+    `docker compose exec -T caddy curl -fsS -X PURGE http://127.0.0.1:2019/souin-api/souin/flush`.
+    Every Publish and every code release goes through it. The Souin API sits
+    on Caddy's admin endpoint, which listens on the container's loopback and
+    has no published port. The public hosts hand `/souin-api/...` to node like
+    any other path. If the purge fails, the deploy fails and the healthy
+    release stays live. Run the same command by hand to empty the cache.
+  - **Checking a hit.** `curl -sI https://carlab.rs/ru/parts/makes/ | grep -i cache-status`.
+    `Souin; hit; ttl=...` came from the cache. `Souin; fwd=uri-miss; stored`
+    went to node and was stored. `detail=NO-STORE-DIRECTIVE` went to node and
+    was not stored. No `Cache-Status` at all means the request did not go
+    through the cache.
+  - `test/compose.test.sh` builds the image and checks all of this against a
+    live Caddy in front of a stub node: hit, miss after the purge, the query,
+    the preview cookie, `private, no-store`, the paths and sites left out, a
+    purge from the public host, and a hit while node is stopped.
 
 ### Files on S3
 

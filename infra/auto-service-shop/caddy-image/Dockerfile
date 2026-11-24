@@ -1,0 +1,8 @@
+FROM caddy:2.11.4-builder-alpine AS build
+RUN xcaddy build v2.11.4 \
+  --with github.com/caddyserver/cache-handler@v0.17.0 \
+  --with github.com/darkweak/storages/simplefs/caddy@v0.0.20
+
+FROM caddy:2.11.4-alpine
+RUN apk add --no-cache curl
+COPY --from=build /usr/bin/caddy /usr/bin/caddy
