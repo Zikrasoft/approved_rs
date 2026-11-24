@@ -25,6 +25,7 @@ import { CATEGORY_RELATIONS, shownCategory } from './categories';
 import { loadPartDemand } from './part-demand';
 import { partPagesOf } from './part-pages';
 import { requirementFits, vehicleRequirementFits } from './requirement-fit';
+import { vehiclesOfSeries } from './series-vehicles';
 import { listVehicleResponses, toFitmentResponse } from './store-response';
 
 type Modules = { catalog: CatalogModuleService; publish: PublishModuleService };
@@ -44,7 +45,7 @@ const slugAddress = (slug: string): [string, string] | null => {
 const slugOf = (page: PartPage) =>
   partPageSlug(page.brand.slug, page.normalized_value);
 
-const localized = (page: PartPage, locale: CatalogLocale): PartPage => {
+export const localized = (page: PartPage, locale: CatalogLocale): PartPage => {
   const { part } = page;
   return {
     ...page,
@@ -78,17 +79,7 @@ async function seriesLinks(
     { relations: ['model', 'model.chassis'], take: null },
   );
   const seriesIds = distinct(rows.map(({ model }) => model.chassis.series_id));
-  const chassis = await catalog.listChassis(
-    { series_id: seriesIds },
-    { select: ['id'], take: null },
-  );
-  const models = await catalog.listVehicleModels(
-    { chassis_id: chassis.map(({ id }) => id) },
-    { select: ['id'], take: null },
-  );
-  const vehicles = await listVehicleResponses(catalog, {
-    model_id: models.map(({ id }) => id),
-  });
+  const vehicles = await vehiclesOfSeries(catalog, seriesIds);
   const counts = await publish.listedPartCounts(
     await vehicleRequirementFits(catalog, vehicles),
     seriesIds,

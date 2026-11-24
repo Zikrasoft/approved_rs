@@ -96,6 +96,12 @@ export const LISTED_SERIES_CATEGORY_COUNTS = `${LISTED_PLACES}
   from places where category_id is not null
   group by series_id, category_id`;
 
+export const LISTED_SERIES_PARTS = `${LISTED_PLACES}
+  select category_id, part_id from places
+  where series_id = ?
+  group by category_id, part_id
+  order by category_id, part_id`;
+
 export const PUBLISHED_PART_SLUGS = `
   select b.slug as brand_slug, pi.normalized_value,
     (
