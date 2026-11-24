@@ -1,5 +1,7 @@
 # carlab.rs renders only the catalogue pages whose data changed
 
+Superseded for the catalogue routes by [ADR-0065](0065-carlab-catalogue-renders-on-demand-behind-a-caddy-cache.md).
+
 carlab.rs builds a page for every Part, Model, Vehicle, Model x Category, Category listing and Make, in five locales, and a Publish after a small catalogue change rebuilt all of them. carlab.rs now turns on Astro's `experimental.incrementalBuild` (Astro 7.2): each of those routes returns a `cacheKey` from `getStaticPaths`, and a page whose key and module graph both match the previous build is copied from the cache instead of rendered. Every other page has no key and renders on every build, as before.
 
 ## How a stale page is avoided
