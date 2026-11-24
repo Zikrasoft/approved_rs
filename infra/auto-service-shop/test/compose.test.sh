@@ -4,10 +4,11 @@ set -eu
 here="$(cd "$(dirname -- "$0")/.." && pwd)"
 work=$(mktemp -d)
 net=carlab-caddy-test-$$
+preview_token=preview-$$-0123456789abcdef0123456789
 trap 'docker rm -f "$net-medusa" "$net-site" "$net-caddy" >/dev/null 2>&1; docker network rm "$net" >/dev/null 2>&1; docker volume rm "$net-cache" >/dev/null 2>&1; rm -rf "$work"' EXIT
-printf 'POSTGRES_PASSWORD=x\nCRM_DB_PASSWORD=c0ffee\nTYPESENSE_API_KEY=y\nMEDUSA_TAG=%s\nGRAFANA_ADMIN_PASSWORD=g\nMEDIA_ORIGIN=https://bucket.s3.eu-north-1.amazonaws.com\n' \
-  0000000000000000000000000000000000000000 >"$work/.env"
-env -u MEDIA_ORIGIN -u POSTGRES_PASSWORD -u CRM_DB_PASSWORD -u TYPESENSE_API_KEY -u MEDUSA_TAG -u GRAFANA_ADMIN_PASSWORD -u GRAFANA_PORT docker compose -f "$here/docker-compose.yml" --project-directory "$work" --profile "*" config --format json >"$work/config.json"
+printf 'POSTGRES_PASSWORD=x\nCRM_DB_PASSWORD=c0ffee\nTYPESENSE_API_KEY=y\nMEDUSA_TAG=%s\nGRAFANA_ADMIN_PASSWORD=g\nMEDIA_ORIGIN=https://bucket.s3.eu-north-1.amazonaws.com\nSHOP_PREVIEW_TOKEN=%s\n' \
+  0000000000000000000000000000000000000000 "$preview_token" >"$work/.env"
+env -u MEDIA_ORIGIN -u POSTGRES_PASSWORD -u CRM_DB_PASSWORD -u TYPESENSE_API_KEY -u MEDUSA_TAG -u CADDY_TAG -u SHOP_PREVIEW_TOKEN -u GRAFANA_ADMIN_PASSWORD -u GRAFANA_PORT docker compose -f "$here/docker-compose.yml" --project-directory "$work" --profile "*" config --format json >"$work/config.json"
 docker compose -f "$here/docker-compose.yml" --project-directory "$work" --profile "*" config --format json --no-env-resolution 2>/dev/null | jq .services >"$work/services.json"
 
 failures=0
@@ -105,6 +106,12 @@ expect 'caddy serves the CRM bot webhooks on a host of their own' \
   '.services.caddy.environment.CRM_HOST == "crm.carlab.rs"'
 expect 'caddy pulls the page cache image CI built for the same commit as medusa, inside its 128 MB' \
   '.services.caddy | .image == "ghcr.io/zikrasoft/podbor-carlab-caddy:0000000000000000000000000000000000000000" and .build == null and .mem_limit == "134217728"'
+expect 'caddy takes the preview token from .env to verify the preview cookie' \
+  ".services.caddy.environment.SHOP_PREVIEW_TOKEN == \"$preview_token\""
+expect 'the caddy image tag follows the shop tag unless CADDY_TAG names its own' \
+  '.services.caddy.image | endswith(":0000000000000000000000000000000000000000")'
+caddy_tag=$(CADDY_TAG=1111111111111111111111111111111111111111 env -u MEDUSA_TAG docker compose -f "$here/docker-compose.yml" --project-directory "$work" --profile "*" config --format json 2>/dev/null | jq -r .services.caddy.image)
+if [ "$caddy_tag" = ghcr.io/zikrasoft/podbor-carlab-caddy:1111111111111111111111111111111111111111 ]; then echo 'ok - CADDY_TAG overrides the caddy image tag alone'; else echo "not ok - CADDY_TAG ($caddy_tag)"; failures=$((failures + 1)); fi
 expect 'caddy keeps its page cache on a volume' \
   '[.services.caddy.volumes[] | select(.target == "/cache") | [.type, .source]] == [["volume", "caddycache"]]'
 expect 'every image is pinned to an exact tag' \
@@ -140,7 +147,7 @@ done
 docker run -d --name "$net-caddy" --network "$net" -p 127.0.0.1::443 \
   --memory 128m --cap-drop ALL --cap-add NET_BIND_SERVICE --security-opt no-new-privileges:true -v "$net-cache:/cache" \
   -e API_HOST=api.localhost -e ADMIN_HOST=admin.localhost \
-  -e MEDIA_HOST=media.localhost -e MEDIA_ORIGIN=http://medusa:9000 \
+  -e MEDIA_HOST=media.localhost -e MEDIA_ORIGIN=http://medusa:9000 -e SHOP_PREVIEW_TOKEN="$preview_token" \
   -e CARLAB_HOST=carlab.localhost -e DETAILS_HOST=details.localhost -e APPROVED_HOST=approved.localhost -e CRM_HOST=crm.localhost \
   -v "$work/sites:/srv/sites:ro" \
   -v "$here/caddy:/etc/caddy:ro" "$caddy_image" >/dev/null
@@ -308,7 +315,10 @@ cached 'a second catalogue request is a hit' '; hit;' carlab /ru/parts/p/a/
 cached 'an ad click shares the bare path entry' '; hit;' carlab '/ru/parts/p/a/?utm_source=x&gclid=y'
 cached 'a visitor cannot force a render past the cache' '; hit;' carlab /ru/parts/p/a/ -H 'Cache-Control: no-cache' -H 'Pragma: no-cache'
 cached 'a /cars page is cached too' 'fwd=uri-miss; stored' carlab /ru/cars/bmw/
-cached 'the preview cookie bypasses the cache' '^$' carlab /ru/parts/p/a/ -H 'Cookie: lang=ru; auto_service_shop_preview=token'
+cached 'the preview cookie holding the token bypasses the cache' '^$' carlab /ru/parts/p/a/ -H "Cookie: lang=ru; auto_service_shop_preview=$preview_token; theme=dark"
+cached 'a junk preview cookie stays on the cache' '; hit;' carlab /ru/parts/p/a/ -H 'Cookie: auto_service_shop_preview=junk'
+cached 'an empty preview cookie stays on the cache' '; hit;' carlab /ru/parts/p/a/ -H 'Cookie: auto_service_shop_preview='
+cached 'a cookie that only starts with the token stays on the cache' '; hit;' carlab /ru/parts/p/a/ -H "Cookie: auto_service_shop_preview=${preview_token}x"
 cached 'the preview flag cookie alone does not' '; hit;' carlab /ru/parts/p/a/ -H 'Cookie: auto_service_shop_preview_on=1'
 cache_status carlab /ru/parts/p/private/ >/dev/null
 cached 'a private, no-store response is never stored' 'fwd=uri-miss; detail=NO-STORE-DIRECTIVE' carlab /ru/parts/p/private/
@@ -325,6 +335,17 @@ if [ -n "$purge" ] && docker exec "$net-caddy" sh -c "$purge" >/dev/null; then e
 cached 'after the purge the next request is a miss' 'fwd=uri-miss; stored' carlab /ru/parts/p/a/
 surrogates=$(docker exec "$net-caddy" curl -fsS http://127.0.0.1:2019/souin-api/souin/surrogate_keys)
 if [ "$surrogates" = '{}' ] || [ "$surrogates" = null ]; then echo 'ok - the cache keeps no surrogate-key index, which grew with every page it stored'; else echo "not ok - surrogate keys are stored ($surrogates)"; failures=$((failures + 1)); fi
+docker exec "$net-caddy" sh -c 'echo stale >/cache/leftover'
+docker restart "$net-caddy" >/dev/null
+port=$(docker port "$net-caddy" 443/tcp | sed -n '1s/.*://p')
+tries=0
+until [ "$(status api /health)" = 200 ] || [ "$tries" -ge 30 ]; do
+  tries=$((tries + 1))
+  sleep 1
+done
+leftover=$(docker exec "$net-caddy" sh -c 'find /cache -mindepth 1 | wc -l' | tr -d ' ')
+if [ "$leftover" = 0 ]; then echo 'ok - a restart empties the cache volume, so its disk stays bounded'; else echo "not ok - $leftover files stay on the cache volume after a restart"; failures=$((failures + 1)); fi
+cached 'after the restart the cache starts cold' 'fwd=uri-miss; stored' carlab /ru/parts/p/a/
 docker stop "$net-site" >/dev/null
 cached 'a stopped upstream still gets the cached page' '; hit;' carlab /ru/parts/p/a/
 serves 'the cached page answers while node is down' node carlab /ru/parts/p/a/

@@ -16,7 +16,7 @@ published: true
 featured: true
 translations:
   sr:
-    title: 'Audi S4 3.0 TFSI: zamena lanaca razvoda i servis S tronic menjača'
+    title: "Audi S4 3.0 TFSI: zamena lanaca razvoda i servis S tronic menjača"
     body: |-
       U **CarLab** nam je stigao **Audi S4 iz 2012. godine** sa benzinskim motorom **3.0 TFSI**. Uradili smo veliki servis, zamenili sva četiri lanca razvoda i servisirali automatizovani **S tronic** menjač (DSG).
 
@@ -35,7 +35,7 @@ translations:
       S tronic menjač smo servisirali tečnostima prema specifikaciji proizvođača. Redovan servis pomaže da menjač menja brzine glatko i smanjuje njegovo habanje. Motor i menjač smo sredili tokom jedne posete.
     car: Audi S4
   en:
-    title: 'Audi S4 3.0 TFSI: timing chain replacement and S tronic service'
+    title: "Audi S4 3.0 TFSI: timing chain replacement and S tronic service"
     body: |-
       A **2012 Audi S4** with a **3.0 TFSI** petrol engine came to **CarLab** for a major service (**veliki servis**), including replacement of all four timing chains and servicing of the **S tronic** (DSG) transmission.
 

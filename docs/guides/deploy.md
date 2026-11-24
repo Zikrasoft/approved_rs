@@ -1151,22 +1151,24 @@ Keys) and put it with the admin URL in `apps/auto-service-shop/.env.admin`
   stored. A request's own `Cache-Control` or `Pragma` cannot force a render
   (`mode bypass_request`). The key is the method, host and path. The query
   string is not part of it, so `?utm_source=x` gets the bare path's entry. A
-  request with the `auto_service_shop_preview` cookie skips the cache. The
+  request whose `auto_service_shop_preview` cookie holds exactly
+  `SHOP_PREVIEW_TOKEN` skips the cache (Caddy reads the token from the same
+  `.env`, so changing it needs `docker compose up -d caddy`); a junk or empty
+  value stays on the cache, and with no token set nothing bypasses. The
   `auto_service_shop_preview_on` flag cookie alone does not.
   - **Image.** `shop-image` in CI builds `caddy-image/Dockerfile` for amd64
     and pushes it as `ghcr.io/zikrasoft/podbor-carlab-caddy:<sha>`, the same
-    sha as the shop image. `docker-compose.yml` names it by `MEDUSA_TAG`, and
-    `deploy.sh` pulls it with the shop image, so the host never compiles
+    sha as the shop image. `docker-compose.yml` names it by `CADDY_TAG`, which defaults
+    to `MEDUSA_TAG` (leave it unset), and `deploy.sh` pulls it with the shop image, so the host never compiles
     Caddy and a rollback brings back the Caddy of that sha. A sha shipped
     before this image existed has no Caddy image: a rollback to it fails at
     the pull and changes nothing.
   - **Storage.** Souin `simplefs` keeps the bodies, lz4-compressed, in the
     `caddycache` volume at `/cache`. The index stays in Caddy's memory, so a
     restart or a reload with a changed Caddyfile empties the cache: every
-    shop deploy starts it cold. This is accepted (ADR-0065). The old
-    files stay on the volume and are overwritten when the same page is stored
-    again. To remove them, run
-    `docker compose stop caddy && docker run --rm -v carlab_caddycache:/cache alpine find /cache -mindepth 1 -delete && docker compose up -d caddy`.
+    shop deploy starts it cold. This is accepted (ADR-0065). The image
+    command empties `/cache` before Caddy starts, so a restart leaves no
+    orphaned files and the disk stays bounded by the entries of one run.
   - **Cap: 40,000 index entries.** A page takes three entries, so the cache
     holds about 13,300 pages. Once it is full, the least recently used page
     goes first. On disk, 30 random catalogue pages from the live sitemap
