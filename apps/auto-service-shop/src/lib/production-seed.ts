@@ -27,7 +27,14 @@ import { CRAWLED_SITES } from './crawler/sites';
 import { errorMessage } from './errors';
 import { storeImage } from './images';
 
-export const CATEGORIES = [
+type SeededCategory = {
+  slug: string;
+  formerly?: string;
+  name: string;
+  text: string;
+};
+
+export const CATEGORIES: SeededCategory[] = [
   {
     slug: 'maintenance-consumables',
     name: 'ТО и расходники',
@@ -39,14 +46,36 @@ export const CATEGORIES = [
     text: 'Колодки, диски и все, что с ними связано. Подбираем точно под модель и год выпуска.',
   },
   {
-    slug: 'suspension',
-    name: 'Подвеска и рулевое',
-    text: 'От стука в подвеске до замены рулевых наконечников. Подберем деталь под ваш автомобиль.',
+    slug: 'timing-belts',
+    name: 'Ремни и комплекты ГРМ',
+    text: 'Ремни ГРМ и комплекты с роликами, в том числе с помпой. Подбираем по VIN, чтобы число зубьев и ширина совпали с вашим мотором.',
   },
   {
-    slug: 'engine-parts',
-    name: 'Двигатель',
-    text: 'Запчасти для ремонта и обслуживания двигателя, от прокладок до турбины.',
+    slug: 'poly-v-belts',
+    formerly: 'engine-parts',
+    name: 'Поликлиновые ремни',
+    text: 'Ремни привода навесного оборудования и комплекты с роликами. Подберем по числу ручьев и длине под ваш автомобиль.',
+  },
+  {
+    slug: 'control-arms',
+    formerly: 'suspension',
+    name: 'Рычаги подвески',
+    text: 'Верхние и нижние рычаги, в том числе с шаровой опорой. Подберем по VIN под нужную ось и сторону.',
+  },
+  {
+    slug: 'bushings',
+    name: 'Сайлентблоки и втулки',
+    text: 'Сайлентблоки рычагов и втулки стабилизатора. Подберем по VIN, чтобы размеры совпали.',
+  },
+  {
+    slug: 'tie-rods',
+    name: 'Рулевые тяги',
+    text: 'Рулевые тяги для левой и правой стороны. Подберем по VIN под ваш автомобиль.',
+  },
+  {
+    slug: 'shock-absorbers',
+    name: 'Амортизаторы',
+    text: 'Газовые и масляные амортизаторы передней и задней оси. Подберем по VIN под ваш автомобиль.',
   },
   {
     slug: 'electrics',
@@ -75,6 +104,8 @@ export const BATTERY_CATEGORY = {
     'На BMW и Mercedes-Benz после замены аккумулятор нужно зарегистрировать в блоке управления, иначе генератор будет заряжать его неправильно.',
 };
 
+const SEEDED_CATEGORIES: SeededCategory[] = [...CATEGORIES, BATTERY_CATEGORY];
+
 export type FieldDefinition = {
   key: string;
   type: CategoryFieldType;
@@ -88,7 +119,7 @@ export type FieldDefinition = {
 export const number = (
   key: string,
   label: string,
-  unit: string,
+  unit: string | null,
   facet = false,
   required = false,
 ): FieldDefinition => ({
@@ -129,6 +160,16 @@ export const select = (
   facet,
   required,
   options,
+});
+
+const text = (key: string, label: string, facet: boolean): FieldDefinition => ({
+  key,
+  type: 'text',
+  label,
+  unit: null,
+  facet,
+  required: false,
+  options: [],
 });
 
 export const START_STOP = {
@@ -228,24 +269,18 @@ export const OIL_FILTER_FIELDS: FieldDefinition[] = [
   number('height', 'Высота', 'мм', true),
   number('outer-diameter', 'Наружный диаметр', 'мм', true),
   number('inner-diameter', 'Внутренний диаметр', 'мм', true),
-  {
-    key: 'thread',
-    type: 'text',
-    label: 'Резьба',
-    unit: null,
-    facet: true,
-    required: false,
-    options: [],
-  },
+  text('thread', 'Резьба', true),
   yesNo('gasket-included', 'Уплотнение в комплекте', true),
   yesNo('bypass-valve', 'Перепускной клапан', true),
 ];
 
+const AXLE_OPTIONS: [string, string][] = [
+  ['front', 'Передняя'],
+  ['rear', 'Задняя'],
+];
+
 export const BRAKE_PAD_FIELDS: FieldDefinition[] = [
-  select('axle', 'Ось', true, true, [
-    ['front', 'Передняя'],
-    ['rear', 'Задняя'],
-  ]),
+  select('axle', 'Ось', true, true, AXLE_OPTIONS),
   number('thickness', 'Толщина', 'мм', true),
   number('width', 'Ширина', 'мм', true),
   number('height', 'Высота', 'мм', true),
@@ -264,6 +299,14 @@ export const BRAKE_PAD_FIELDS: FieldDefinition[] = [
   ]),
 ];
 
+const axle = select('axle', 'Ось', true, false, AXLE_OPTIONS);
+
+const side = select('side', 'Сторона', true, false, [
+  ['left', 'Левая'],
+  ['right', 'Правая'],
+  ['both', 'Обе стороны'],
+]);
+
 const optional = (fields: FieldDefinition[]) =>
   fields.map((field) => ({ ...field, required: false }));
 
@@ -278,6 +321,62 @@ export const CATEGORY_FIELDS: Record<string, FieldDefinition[]> = {
     ...BRAKE_PAD_FIELDS,
     number('diameter', 'Диаметр', 'мм', true),
   ]),
+  'timing-belts': [
+    select('type', 'Тип', true, false, [
+      ['belt', 'Ремень'],
+      ['kit', 'Комплект'],
+      ['kit-water-pump', 'Комплект с помпой'],
+    ]),
+    number('teeth', 'Число зубьев', null, true),
+    number('width', 'Ширина', 'мм', true),
+    number('length', 'Длина', 'мм'),
+  ],
+  'poly-v-belts': [
+    number('ribs', 'Число ручьев', null, true),
+    number('length', 'Длина', 'мм', true),
+    select('type', 'Тип', true, false, [
+      ['belt', 'Ремень'],
+      ['kit', 'Комплект с роликами'],
+    ]),
+  ],
+  'control-arms': [
+    axle,
+    side,
+    select('position', 'Расположение', true, false, [
+      ['upper', 'Верхний'],
+      ['lower', 'Нижний'],
+    ]),
+    yesNo('ball-joint', 'С шаровой опорой', true),
+    select('material', 'Материал', false, false, [
+      ['steel', 'Сталь'],
+      ['aluminium', 'Алюминий'],
+    ]),
+  ],
+  bushings: [
+    select('kind', 'Тип', true, false, [
+      ['arm-bushing', 'Сайлентблок рычага'],
+      ['stabilizer-bushing', 'Втулка стабилизатора'],
+    ]),
+    axle,
+    number('inner-diameter', 'Внутренний диаметр', 'мм', true),
+    number('outer-diameter', 'Наружный диаметр', 'мм'),
+    number('width', 'Ширина', 'мм'),
+  ],
+  'tie-rods': [
+    side,
+    number('length', 'Длина', 'мм'),
+    text('thread', 'Резьба', false),
+  ],
+  'shock-absorbers': [
+    axle,
+    side,
+    select('type', 'Тип', true, false, [
+      ['gas', 'Газовый'],
+      ['oil', 'Масляный'],
+    ]),
+    number('min-length', 'Минимальная длина', 'мм'),
+    number('max-length', 'Максимальная длина', 'мм'),
+  ],
 };
 
 const IMAGES = join(process.cwd(), 'assets/categories');
@@ -379,7 +478,7 @@ const AIR_FILTER: PartType = [MAINTENANCE_SLUG, 'Воздушный фильтр
 const FUEL_FILTER: PartType = [MAINTENANCE_SLUG, 'Топливный фильтр'];
 const CABIN_FILTER: PartType = [MAINTENANCE_SLUG, 'Салонный фильтр'];
 const SECONDARY_ELEMENT: PartType = [MAINTENANCE_SLUG, null];
-const TRANSMISSION_FILTER: PartType = ['transmission', 'Фильтр АКПП'];
+const TRANSMISSION_FILTER: PartType = [MAINTENANCE_SLUG, 'Фильтр АКПП'];
 
 const CRAWLED_CATALOGUES: Record<CrawledSupplierKey, CrawledCatalogue> = {
   'mann-filter': {
@@ -394,7 +493,7 @@ const CRAWLED_CATALOGUES: Record<CrawledSupplierKey, CrawledCatalogue> = {
       'Cabin Air Filter | Activated carbon': CABIN_FILTER,
       'Cabin Air Filter | Biofunctional': CABIN_FILTER,
       'Secondary Element': SECONDARY_ELEMENT,
-      Ventilator: ['engine-parts', null],
+      Ventilator: [MAINTENANCE_SLUG, null],
       'Hydraulic Transmission Filter': TRANSMISSION_FILTER,
       'Cooling Liquid Filter': [
         MAINTENANCE_SLUG,
@@ -433,18 +532,18 @@ const CRAWLED_CATALOGUES: Record<CrawledSupplierKey, CrawledCatalogue> = {
       'kočiono crevo': ['brakes', 'Тормозной шланг'],
       'doboš kočnice': ['brakes', 'Тормозной барабан'],
       'sajla ručne kočnice': ['brakes', 'Трос стояночного тормоза'],
-      amortizer: ['suspension', 'Амортизатор'],
-      rame: ['suspension', 'Рычаг подвески'],
-      'nosač ramena': ['suspension', 'Сайлентблок рычага'],
-      'nosač stabilizatora': ['suspension', 'Втулка стабилизатора'],
-      'aksijalni zglob': ['suspension', 'Рулевая тяга'],
+      amortizer: ['shock-absorbers', 'Амортизатор'],
+      rame: ['control-arms', 'Рычаг подвески'],
+      'nosač ramena': ['bushings', 'Сайлентблок рычага'],
+      'nosač stabilizatora': ['bushings', 'Втулка стабилизатора'],
+      'aksijalni zglob': ['tie-rods', 'Рулевая тяга'],
       'uljni filter': OIL_FILTER,
       'vazdušni filter': AIR_FILTER,
       'filter goriva': FUEL_FILTER,
       'filter kabine': CABIN_FILTER,
-      'kanalni kaiš': ['engine-parts', 'Поликлиновой ремень'],
-      'garnitura zupčastih kaiševa': ['engine-parts', 'Комплект ремня ГРМ'],
-      'zupčasti kaiš': ['engine-parts', 'Зубчатый ремень'],
+      'kanalni kaiš': ['poly-v-belts', 'Поликлиновой ремень'],
+      'garnitura zupčastih kaiševa': ['timing-belts', 'Комплект ремня ГРМ'],
+      'zupčasti kaiš': ['timing-belts', 'Зубчатый ремень'],
       'kočioni cilindar točka': ['brakes', 'Колесный тормозной цилиндр'],
       'kontakt istrošenosti': ['brakes', 'Датчик износа тормозных колодок'],
     },
@@ -569,15 +668,17 @@ async function seedSpellings<
 
 async function seededCategoryBySlug(catalog: CatalogModuleService) {
   const live = await catalog.listCategories({}, { take: null });
-  const retired = await catalog.listSlugRedirects(
-    { kind: 'category' },
-    { select: ['from_id', 'from_slug'], take: null },
-  );
-  return (slug: string) =>
-    live.find((row) => row.slug === slug) ??
-    live.find(({ id }) =>
-      retired.some((row) => row.from_slug === slug && row.from_id === id),
+  const bySlug = (slug: string) => live.find((row) => row.slug === slug);
+  const byName = (name: string) =>
+    live.find((row) => nameKey(row.name) === nameKey(name));
+  return (slug: string) => {
+    const seeded = SEEDED_CATEGORIES.find((row) => row.slug === slug);
+    return (
+      bySlug(slug) ??
+      (seeded?.formerly ? bySlug(seeded.formerly) : undefined) ??
+      (seeded ? byName(seeded.name) : undefined)
     );
+  };
 }
 
 async function seedCrawledCatalogues(container: MedusaContainer) {
@@ -704,12 +805,16 @@ export async function seedProductionCatalogue(
 
   const catalog: CatalogModuleService = container.resolve(CATALOG_MODULE);
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER);
-  const categories = [...CATEGORIES, BATTERY_CATEGORY];
   const existing = await seededCategoryBySlug(catalog);
   const photos = readdirSync(IMAGES);
-  for (const category of categories) {
+  for (const { formerly, ...category } of SEEDED_CATEGORIES) {
     const row =
       existing(category.slug) ?? (await catalog.createCategories(category));
+    if (formerly && row.slug === formerly) {
+      await catalog.renameSlug('category', row.id, category.slug, {
+        updated_by: row.updated_by,
+      });
+    }
     const fields = CATEGORY_FIELDS[category.slug];
     if (fields) await seedCategoryFields(catalog, row.id, fields, logger);
     if (row.updated_by) continue;

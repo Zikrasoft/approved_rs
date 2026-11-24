@@ -15,6 +15,7 @@ import {
   KEYSTATIC_AUTH_COOKIE,
 } from '@podbor/site-kit/github-contents';
 import { catalogueIdSchema } from '@/utils/catalogue';
+import { shopBackendUrl } from '@/utils/catalogueEnv';
 import { PARTS_SOURCING } from '@/utils/works';
 
 const SHOP_TIMEOUT_MS = 15_000;
@@ -78,7 +79,7 @@ export async function POST({
   const shop = await fetch(
     new URL(
       `/hooks/carlab-orders/${order.data}/case-summary`,
-      import.meta.env.MEDUSA_BACKEND_URL,
+      shopBackendUrl(import.meta.env.MEDUSA_BACKEND_URL),
     ),
     {
       headers: { authorization: `Bearer ${requireEnv('SHOP_LEAD_SECRET')}` },

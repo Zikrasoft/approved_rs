@@ -12,23 +12,23 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-0",
-            "part_38:mann-filter-hu38:fit_38_1 part_43:mann-filter-hu43: part_99:mann-filter-hu99:",
+            "part_38:mann-filter-hu38:veh_2 part_43:mann-filter-hu43: part_99:mann-filter-hu99:",
           ],
           [
             "category-18",
-            "part_4:mann-filter-hu4:fit_4_4 part_9:mann-filter-hu9:fit_9_13+fit_9_14 part_34:mann-filter-hu34:fit_34_9",
+            "part_4:mann-filter-hu4:veh_2 part_9:mann-filter-hu9:veh_2+veh_3 part_34:mann-filter-hu34:veh_2",
           ],
           [
             "category-21",
-            "part_18:mann-filter-hu18:fit_18_17+fit_18_18 part_32:mann-filter-hu32:fit_32_6 part_115:mann-filter-hu115:fit_115_1",
+            "part_18:mann-filter-hu18:veh_2+veh_3 part_32:mann-filter-hu32:veh_3 part_115:mann-filter-hu115:veh_2",
           ],
           [
             "category-23",
-            "part_30:mann-filter-hu30:fit_30_0+fit_30_1 part_53:mann-filter-hu53:fit_53_18 part_59:mann-filter-hu59:fit_59_13",
+            "part_30:mann-filter-hu30:veh_2+veh_3 part_53:mann-filter-hu53:veh_2 part_59:mann-filter-hu59:veh_2",
           ],
           [
             "category-25",
-            "part_67:mann-filter-hu67:fit_67_8 part_71:mann-filter-hu71:fit_71_11 part_104:mann-filter-hu104:fit_104_2 part_112:mann-filter-hu112+bosch-f112:fit_112_0",
+            "part_67:mann-filter-hu67:veh_3 part_71:mann-filter-hu71:veh_2 part_104:mann-filter-hu104:veh_3 part_112:mann-filter-hu112+bosch-f112:veh_2",
           ],
         ],
       ],
@@ -38,15 +38,15 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-18",
-            "part_4:mann-filter-hu4:fit_4_12 part_34:mann-filter-hu34:fit_34_17 part_64:mann-filter-hu64:fit_64_5",
+            "part_4:mann-filter-hu4:veh_18 part_34:mann-filter-hu34:veh_18 part_64:mann-filter-hu64:veh_18",
           ],
           [
             "category-23",
-            "part_30:mann-filter-hu30:fit_30_16+fit_30_17 part_110:mann-filter-hu110:fit_110_3 part_118:mann-filter-hu118:fit_118_1",
+            "part_30:mann-filter-hu30:veh_18+veh_19 part_110:mann-filter-hu110:veh_19 part_118:mann-filter-hu118:veh_18",
           ],
           [
             "category-25",
-            "part_67:mann-filter-hu67:fit_67_16 part_104:mann-filter-hu104:fit_104_7 part_112:mann-filter-hu112+bosch-f112:fit_112_8",
+            "part_67:mann-filter-hu67:veh_19 part_104:mann-filter-hu104:veh_18 part_112:mann-filter-hu112+bosch-f112:veh_18",
           ],
         ],
       ],
@@ -56,23 +56,23 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-1",
-            "part_19:mann-filter-hu19:fit_19_2 part_28:mann-filter-hu28+bosch-f28:fit_28_12 part_113:mann-filter-hu113:fit_113_17",
+            "part_19:mann-filter-hu19:veh_34 part_28:mann-filter-hu28+bosch-f28:veh_34 part_113:mann-filter-hu113:veh_35",
           ],
           [
             "category-5",
-            "part_1:mann-filter-hu1:fit_1_7 part_46:mann-filter-hu46:fit_46_17 part_108:mann-filter-hu108:fit_108_13+fit_108_14",
+            "part_1:mann-filter-hu1:veh_34 part_46:mann-filter-hu46:veh_34 part_108:mann-filter-hu108:veh_34+veh_35",
           ],
           [
             "category-11",
-            "part_3:mann-filter-hu3:fit_3_0+fit_3_1 part_11:mann-filter-hu11:fit_11_4 part_49:mann-filter-hu49+bosch-f49:fit_49_4 part_70:mann-filter-hu70+bosch-f70:fit_70_6",
+            "part_3:mann-filter-hu3:veh_34+veh_35 part_11:mann-filter-hu11:veh_34 part_49:mann-filter-hu49+bosch-f49:veh_34 part_70:mann-filter-hu70+bosch-f70:veh_34",
           ],
           [
             "category-23",
-            "part_42:mann-filter-hu42+bosch-f42:fit_42_7+fit_42_8 part_53:mann-filter-hu53:fit_53_1 part_110:mann-filter-hu110:fit_110_8 part_118:mann-filter-hu118:fit_118_9",
+            "part_42:mann-filter-hu42+bosch-f42:veh_34+veh_35 part_53:mann-filter-hu53:veh_35 part_110:mann-filter-hu110:veh_34 part_118:mann-filter-hu118:veh_34",
           ],
           [
             "category-24",
-            "part_52:mann-filter-hu52:fit_52_7 part_55:mann-filter-hu55:fit_55_5 part_80:mann-filter-hu80:fit_80_5 part_102:mann-filter-hu102:fit_102_4+fit_102_5",
+            "part_52:mann-filter-hu52:veh_34 part_55:mann-filter-hu55:veh_34 part_80:mann-filter-hu80:veh_35 part_102:mann-filter-hu102:veh_34+veh_35",
           ],
         ],
       ],
@@ -82,27 +82,27 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-0",
-            "part_38:mann-filter-hu38:fit_38_17 part_43:mann-filter-hu43:fit_43_10 part_99:mann-filter-hu99:fit_99_4+fit_99_5",
+            "part_38:mann-filter-hu38:veh_50 part_43:mann-filter-hu43:veh_50 part_99:mann-filter-hu99:veh_50+veh_51",
           ],
           [
             "category-8",
-            "part_47:mann-filter-hu47:fit_47_6 part_51:mann-filter-hu51:fit_51_10+fit_51_11 part_103:mann-filter-hu103:fit_103_18",
+            "part_47:mann-filter-hu47:veh_51 part_51:mann-filter-hu51:veh_50+veh_51 part_103:mann-filter-hu103:veh_51",
           ],
           [
             "category-11",
-            "part_3:mann-filter-hu3:fit_3_16+fit_3_17 part_49:mann-filter-hu49+bosch-f49:fit_49_12 part_50:mann-filter-hu50:fit_50_17 part_70:mann-filter-hu70+bosch-f70:fit_70_14",
+            "part_3:mann-filter-hu3:veh_50+veh_51 part_49:mann-filter-hu49+bosch-f49:veh_50 part_50:mann-filter-hu50:veh_51 part_70:mann-filter-hu70+bosch-f70:veh_50",
           ],
           [
             "category-15",
-            "part_83:mann-filter-hu83:fit_83_15 part_88:mann-filter-hu88:fit_88_12 part_92:mann-filter-hu92:fit_92_16",
+            "part_83:mann-filter-hu83:veh_51 part_88:mann-filter-hu88:veh_51 part_92:mann-filter-hu92:veh_50",
           ],
           [
             "category-23",
-            "part_36:mann-filter-hu36:fit_36_8+fit_36_9 part_53:mann-filter-hu53:fit_53_6 part_59:mann-filter-hu59:fit_59_1 part_118:mann-filter-hu118:fit_118_17",
+            "part_36:mann-filter-hu36:veh_50+veh_51 part_53:mann-filter-hu53:veh_50 part_59:mann-filter-hu59:veh_50 part_118:mann-filter-hu118:veh_50",
           ],
           [
             "category-24",
-            "part_52:mann-filter-hu52:fit_52_15 part_55:mann-filter-hu55:fit_55_13 part_80:mann-filter-hu80:fit_80_10",
+            "part_52:mann-filter-hu52:veh_50 part_55:mann-filter-hu55:veh_50 part_80:mann-filter-hu80:veh_50",
           ],
         ],
       ],
@@ -112,11 +112,11 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-0",
-            "part_43:mann-filter-hu43:fit_43_18 part_69:mann-filter-hu69:fit_69_13+fit_69_14 part_38:mann-filter-hu38:",
+            "part_43:mann-filter-hu43:veh_66 part_69:mann-filter-hu69:veh_66+veh_67 part_38:mann-filter-hu38:",
           ],
           [
             "category-28",
-            "part_27:mann-filter-hu27:fit_27_14+fit_27_15 part_31:mann-filter-hu31:fit_31_1 part_79:mann-filter-hu79:fit_79_11",
+            "part_27:mann-filter-hu27:veh_66+veh_67 part_31:mann-filter-hu31:veh_66 part_79:mann-filter-hu79:veh_67",
           ],
         ],
       ],
@@ -126,7 +126,7 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-18",
-            "part_4:mann-filter-hu4:fit_4_2 part_9:mann-filter-hu9:fit_9_9+fit_9_10 part_34:mann-filter-hu34:fit_34_7",
+            "part_4:mann-filter-hu4:veh_82 part_9:mann-filter-hu9:veh_82+veh_83 part_34:mann-filter-hu34:veh_82",
           ],
         ],
       ],
@@ -142,15 +142,15 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-18",
-            "part_4:mann-filter-hu4:fit_4_3 part_9:mann-filter-hu9:fit_9_11+fit_9_12 part_34:mann-filter-hu34:fit_34_8",
+            "part_4:mann-filter-hu4:veh_0 part_9:mann-filter-hu9:veh_0+veh_1 part_34:mann-filter-hu34:veh_0",
           ],
           [
             "category-21",
-            "part_18:mann-filter-hu18:fit_18_15+fit_18_16 part_32:mann-filter-hu32:fit_32_5 part_115:mann-filter-hu115:fit_115_0",
+            "part_18:mann-filter-hu18:veh_0+veh_1 part_32:mann-filter-hu32:veh_0 part_115:mann-filter-hu115:veh_0",
           ],
           [
             "category-32",
-            "part_33:mann-filter-hu33:fit_33_0+fit_33_1 part_40:mann-filter-hu40:fit_40_6 part_77:mann-filter-hu77+bosch-f77:fit_77_14",
+            "part_33:mann-filter-hu33:veh_0+veh_1 part_40:mann-filter-hu40:veh_0 part_77:mann-filter-hu77+bosch-f77:veh_1",
           ],
         ],
       ],
@@ -160,19 +160,19 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-18",
-            "part_4:mann-filter-hu4:fit_4_11 part_34:mann-filter-hu34:fit_34_16 part_64:mann-filter-hu64:fit_64_4",
+            "part_4:mann-filter-hu4:veh_16 part_34:mann-filter-hu34:veh_16 part_64:mann-filter-hu64:veh_16",
           ],
           [
             "category-23",
-            "part_30:mann-filter-hu30:fit_30_14+fit_30_15 part_59:mann-filter-hu59:fit_59_18 part_110:mann-filter-hu110:fit_110_2 part_118:mann-filter-hu118:fit_118_0",
+            "part_30:mann-filter-hu30:veh_16+veh_17 part_59:mann-filter-hu59:veh_17 part_110:mann-filter-hu110:veh_16 part_118:mann-filter-hu118:veh_16",
           ],
           [
             "category-25",
-            "part_67:mann-filter-hu67:fit_67_15 part_71:mann-filter-hu71:fit_71_16 part_112:mann-filter-hu112+bosch-f112:fit_112_7",
+            "part_67:mann-filter-hu67:veh_17 part_71:mann-filter-hu71:veh_17 part_112:mann-filter-hu112+bosch-f112:veh_16",
           ],
           [
             "category-32",
-            "part_33:mann-filter-hu33:fit_33_16+fit_33_17 part_40:mann-filter-hu40:fit_40_14 part_77:mann-filter-hu77+bosch-f77:fit_77_19",
+            "part_33:mann-filter-hu33:veh_16+veh_17 part_40:mann-filter-hu40:veh_16 part_77:mann-filter-hu77+bosch-f77:veh_16",
           ],
         ],
       ],
@@ -182,35 +182,35 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-1",
-            "part_19:mann-filter-hu19:fit_19_1 part_28:mann-filter-hu28+bosch-f28:fit_28_11 part_113:mann-filter-hu113:fit_113_16",
+            "part_19:mann-filter-hu19:veh_32 part_28:mann-filter-hu28+bosch-f28:veh_32 part_113:mann-filter-hu113:veh_32",
           ],
           [
             "category-5",
-            "part_1:mann-filter-hu1:fit_1_6 part_46:mann-filter-hu46:fit_46_16 part_108:mann-filter-hu108:fit_108_11+fit_108_12",
+            "part_1:mann-filter-hu1:veh_32 part_46:mann-filter-hu46:veh_32 part_108:mann-filter-hu108:veh_32+veh_33",
           ],
           [
             "category-11",
-            "part_49:mann-filter-hu49+bosch-f49:fit_49_3 part_50:mann-filter-hu50:fit_50_11 part_70:mann-filter-hu70+bosch-f70:fit_70_5",
+            "part_49:mann-filter-hu49+bosch-f49:veh_32 part_50:mann-filter-hu50:veh_33 part_70:mann-filter-hu70+bosch-f70:veh_32",
           ],
           [
             "category-15",
-            "part_83:mann-filter-hu83:fit_83_9 part_88:mann-filter-hu88:fit_88_3 part_92:mann-filter-hu92:fit_92_10",
+            "part_83:mann-filter-hu83:veh_33 part_88:mann-filter-hu88:veh_33 part_92:mann-filter-hu92:veh_32",
           ],
           [
             "category-18",
-            "part_4:mann-filter-hu4:fit_4_19 part_61:mann-filter-hu61:fit_61_0 part_64:mann-filter-hu64:fit_64_12",
+            "part_4:mann-filter-hu4:veh_32 part_61:mann-filter-hu61:veh_32 part_64:mann-filter-hu64:veh_32",
           ],
           [
             "category-23",
-            "part_42:mann-filter-hu42+bosch-f42:fit_42_5+fit_42_6 part_53:mann-filter-hu53:fit_53_0 part_118:mann-filter-hu118:fit_118_8",
+            "part_42:mann-filter-hu42+bosch-f42:veh_32+veh_33 part_53:mann-filter-hu53:veh_32 part_118:mann-filter-hu118:veh_32",
           ],
           [
             "category-24",
-            "part_52:mann-filter-hu52:fit_52_6 part_55:mann-filter-hu55:fit_55_4 part_80:mann-filter-hu80:fit_80_4 part_102:mann-filter-hu102:fit_102_2+fit_102_3",
+            "part_52:mann-filter-hu52:veh_32 part_55:mann-filter-hu55:veh_32 part_80:mann-filter-hu80:veh_32 part_102:mann-filter-hu102:veh_32+veh_33",
           ],
           [
             "category-25",
-            "part_48:mann-filter-hu48:fit_48_5+fit_48_6 part_104:mann-filter-hu104:fit_104_12 part_112:mann-filter-hu112+bosch-f112:fit_112_15",
+            "part_48:mann-filter-hu48:veh_32+veh_33 part_104:mann-filter-hu104:veh_33 part_112:mann-filter-hu112+bosch-f112:veh_32",
           ],
         ],
       ],
@@ -220,27 +220,27 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-1",
-            "part_19:mann-filter-hu19:fit_19_9 part_28:mann-filter-hu28+bosch-f28:fit_28_19 part_60:mann-filter-hu60:fit_60_8+fit_60_9",
+            "part_19:mann-filter-hu19:veh_48 part_28:mann-filter-hu28+bosch-f28:veh_48 part_60:mann-filter-hu60:veh_48+veh_49",
           ],
           [
             "category-8",
-            "part_47:mann-filter-hu47:fit_47_5 part_51:mann-filter-hu51:fit_51_8+fit_51_9 part_103:mann-filter-hu103:fit_103_17",
+            "part_47:mann-filter-hu47:veh_48 part_51:mann-filter-hu51:veh_48+veh_49 part_103:mann-filter-hu103:veh_49",
           ],
           [
             "category-11",
-            "part_3:mann-filter-hu3:fit_3_14+fit_3_15 part_11:mann-filter-hu11:fit_11_9 part_49:mann-filter-hu49+bosch-f49:fit_49_11 part_50:mann-filter-hu50:fit_50_16 part_70:mann-filter-hu70+bosch-f70:fit_70_13",
+            "part_3:mann-filter-hu3:veh_48+veh_49 part_11:mann-filter-hu11:veh_49 part_49:mann-filter-hu49+bosch-f49:veh_48 part_50:mann-filter-hu50:veh_48 part_70:mann-filter-hu70+bosch-f70:veh_48",
           ],
           [
             "category-23",
-            "part_36:mann-filter-hu36:fit_36_6+fit_36_7 part_110:mann-filter-hu110:fit_110_13 part_118:mann-filter-hu118:fit_118_16",
+            "part_36:mann-filter-hu36:veh_48+veh_49 part_110:mann-filter-hu110:veh_49 part_118:mann-filter-hu118:veh_48",
           ],
           [
             "category-24",
-            "part_52:mann-filter-hu52:fit_52_14 part_55:mann-filter-hu55:fit_55_12 part_86:mann-filter-hu86:fit_86_2 part_102:mann-filter-hu102:fit_102_18+fit_102_19",
+            "part_52:mann-filter-hu52:veh_48 part_55:mann-filter-hu55:veh_48 part_86:mann-filter-hu86:veh_49 part_102:mann-filter-hu102:veh_48+veh_49",
           ],
           [
             "category-32",
-            "part_7:mann-filter-hu7+bosch-f7:fit_7_14 part_75:mann-filter-hu75:fit_75_8+fit_75_9 part_77:mann-filter-hu77+bosch-f77:fit_77_2",
+            "part_7:mann-filter-hu7+bosch-f7:veh_49 part_75:mann-filter-hu75:veh_48+veh_49 part_77:mann-filter-hu77+bosch-f77:veh_49",
           ],
         ],
       ],
@@ -250,15 +250,15 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-0",
-            "part_43:mann-filter-hu43:fit_43_17 part_69:mann-filter-hu69:fit_69_11+fit_69_12 part_99:mann-filter-hu99:fit_99_18+fit_99_19",
+            "part_43:mann-filter-hu43:veh_64 part_69:mann-filter-hu69:veh_64+veh_65 part_99:mann-filter-hu99:veh_64+veh_65",
           ],
           [
             "category-23",
-            "part_53:mann-filter-hu53:fit_53_11 part_59:mann-filter-hu59:fit_59_6 part_110:mann-filter-hu110:fit_110_18",
+            "part_53:mann-filter-hu53:veh_65 part_59:mann-filter-hu59:veh_65 part_110:mann-filter-hu110:veh_64",
           ],
           [
             "category-28",
-            "part_27:mann-filter-hu27:fit_27_12+fit_27_13 part_31:mann-filter-hu31:fit_31_0 part_79:mann-filter-hu79:fit_79_10",
+            "part_27:mann-filter-hu27:veh_64+veh_65 part_31:mann-filter-hu31:veh_64 part_79:mann-filter-hu79:veh_65",
           ],
         ],
       ],
@@ -268,11 +268,11 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-18",
-            "part_4:mann-filter-hu4:fit_4_1 part_9:mann-filter-hu9:fit_9_7+fit_9_8 part_34:mann-filter-hu34:fit_34_6",
+            "part_4:mann-filter-hu4:veh_80 part_9:mann-filter-hu9:veh_80+veh_81 part_34:mann-filter-hu34:veh_80",
           ],
           [
             "category-25",
-            "part_67:mann-filter-hu67:fit_67_5 part_71:mann-filter-hu71:fit_71_9 part_104:mann-filter-hu104:fit_104_0",
+            "part_67:mann-filter-hu67:veh_81 part_71:mann-filter-hu71:veh_80 part_104:mann-filter-hu104:veh_81",
           ],
         ],
       ],
@@ -288,23 +288,23 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-18",
-            "part_4:mann-filter-hu4:fit_4_8 part_34:mann-filter-hu34:fit_34_13 part_64:mann-filter-hu64:fit_64_1",
+            "part_4:mann-filter-hu4:veh_10 part_34:mann-filter-hu34:veh_10 part_64:mann-filter-hu64:veh_10",
           ],
           [
             "category-23",
-            "part_30:mann-filter-hu30:fit_30_8+fit_30_9 part_59:mann-filter-hu59:fit_59_16 part_110:mann-filter-hu110:fit_110_0",
+            "part_30:mann-filter-hu30:veh_10+veh_11 part_59:mann-filter-hu59:veh_11 part_110:mann-filter-hu110:veh_10",
           ],
           [
             "category-25",
-            "part_67:mann-filter-hu67:fit_67_12 part_71:mann-filter-hu71:fit_71_14 part_112:mann-filter-hu112+bosch-f112:fit_112_4",
+            "part_67:mann-filter-hu67:veh_11 part_71:mann-filter-hu71:veh_11 part_112:mann-filter-hu112+bosch-f112:veh_10",
           ],
           [
             "category-32",
-            "part_33:mann-filter-hu33:fit_33_10+fit_33_11 part_40:mann-filter-hu40:fit_40_11 part_77:mann-filter-hu77+bosch-f77:fit_77_17",
+            "part_33:mann-filter-hu33:veh_10+veh_11 part_40:mann-filter-hu40:veh_10 part_77:mann-filter-hu77+bosch-f77:veh_10",
           ],
           [
             "category-35",
-            "part_6:mann-filter-hu6:fit_6_17+fit_6_18 part_91:mann-filter-hu91+bosch-f91:fit_91_2 part_114:mann-filter-hu114:fit_114_19",
+            "part_6:mann-filter-hu6:veh_10+veh_11 part_91:mann-filter-hu91+bosch-f91:veh_10 part_114:mann-filter-hu114:veh_10",
           ],
         ],
       ],
@@ -314,23 +314,23 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-5",
-            "part_1:mann-filter-hu1:fit_1_3 part_46:mann-filter-hu46:fit_46_13 part_108:mann-filter-hu108:fit_108_5+fit_108_6",
+            "part_1:mann-filter-hu1:veh_26 part_46:mann-filter-hu46:veh_26 part_108:mann-filter-hu108:veh_26+veh_27",
           ],
           [
             "category-11",
-            "part_49:mann-filter-hu49+bosch-f49:fit_49_0 part_50:mann-filter-hu50:fit_50_9 part_70:mann-filter-hu70+bosch-f70:fit_70_2",
+            "part_49:mann-filter-hu49+bosch-f49:veh_26 part_50:mann-filter-hu50:veh_27 part_70:mann-filter-hu70+bosch-f70:veh_26",
           ],
           [
             "category-15",
-            "part_83:mann-filter-hu83:fit_83_7 part_88:mann-filter-hu88:fit_88_0 part_92:mann-filter-hu92:fit_92_8",
+            "part_83:mann-filter-hu83:veh_27 part_88:mann-filter-hu88:veh_27 part_92:mann-filter-hu92:veh_26",
           ],
           [
             "category-24",
-            "part_52:mann-filter-hu52:fit_52_3 part_55:mann-filter-hu55:fit_55_1 part_80:mann-filter-hu80:fit_80_2",
+            "part_52:mann-filter-hu52:veh_26 part_55:mann-filter-hu55:veh_26 part_80:mann-filter-hu80:veh_26",
           ],
           [
             "category-25",
-            "part_48:mann-filter-hu48:fit_48_0 part_71:mann-filter-hu71:fit_71_19 part_104:mann-filter-hu104:fit_104_10 part_112:mann-filter-hu112+bosch-f112:fit_112_12",
+            "part_48:mann-filter-hu48:veh_27 part_71:mann-filter-hu71:veh_26 part_104:mann-filter-hu104:veh_27 part_112:mann-filter-hu112+bosch-f112:veh_26",
           ],
         ],
       ],
@@ -340,27 +340,27 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-1",
-            "part_19:mann-filter-hu19:fit_19_6 part_28:mann-filter-hu28+bosch-f28:fit_28_16 part_60:mann-filter-hu60:fit_60_2+fit_60_3",
+            "part_19:mann-filter-hu19:veh_42 part_28:mann-filter-hu28+bosch-f28:veh_42 part_60:mann-filter-hu60:veh_42+veh_43",
           ],
           [
             "category-8",
-            "part_47:mann-filter-hu47:fit_47_3 part_51:mann-filter-hu51:fit_51_2+fit_51_3 part_103:mann-filter-hu103:fit_103_14",
+            "part_47:mann-filter-hu47:veh_42 part_51:mann-filter-hu51:veh_42+veh_43 part_103:mann-filter-hu103:veh_43",
           ],
           [
             "category-11",
-            "part_3:mann-filter-hu3:fit_3_8+fit_3_9 part_11:mann-filter-hu11:fit_11_7 part_49:mann-filter-hu49+bosch-f49:fit_49_8 part_50:mann-filter-hu50:fit_50_14 part_70:mann-filter-hu70+bosch-f70:fit_70_10",
+            "part_3:mann-filter-hu3:veh_42+veh_43 part_11:mann-filter-hu11:veh_43 part_49:mann-filter-hu49+bosch-f49:veh_42 part_50:mann-filter-hu50:veh_42 part_70:mann-filter-hu70+bosch-f70:veh_42",
           ],
           [
             "category-23",
-            "part_36:mann-filter-hu36:fit_36_0+fit_36_1 part_42:mann-filter-hu42+bosch-f42:fit_42_15+fit_42_16 part_110:mann-filter-hu110:fit_110_11 part_118:mann-filter-hu118:fit_118_13",
+            "part_36:mann-filter-hu36:veh_42+veh_43 part_42:mann-filter-hu42+bosch-f42:veh_42+veh_43 part_110:mann-filter-hu110:veh_43 part_118:mann-filter-hu118:veh_42",
           ],
           [
             "category-24",
-            "part_52:mann-filter-hu52:fit_52_11 part_55:mann-filter-hu55:fit_55_9 part_86:mann-filter-hu86:fit_86_0 part_102:mann-filter-hu102:fit_102_12+fit_102_13",
+            "part_52:mann-filter-hu52:veh_42 part_55:mann-filter-hu55:veh_42 part_86:mann-filter-hu86:veh_43 part_102:mann-filter-hu102:veh_42+veh_43",
           ],
           [
             "category-32",
-            "part_7:mann-filter-hu7+bosch-f7:fit_7_11 part_75:mann-filter-hu75:fit_75_2+fit_75_3 part_77:mann-filter-hu77+bosch-f77:fit_77_0",
+            "part_7:mann-filter-hu7+bosch-f7:veh_43 part_75:mann-filter-hu75:veh_42+veh_43 part_77:mann-filter-hu77+bosch-f77:veh_43",
           ],
         ],
       ],
@@ -370,27 +370,27 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-0",
-            "part_43:mann-filter-hu43:fit_43_14 part_69:mann-filter-hu69:fit_69_5+fit_69_6 part_99:mann-filter-hu99:fit_99_12+fit_99_13",
+            "part_43:mann-filter-hu43:veh_58 part_69:mann-filter-hu69:veh_58+veh_59 part_99:mann-filter-hu99:veh_58+veh_59",
           ],
           [
             "category-11",
-            "part_11:mann-filter-hu11:fit_11_12 part_49:mann-filter-hu49+bosch-f49:fit_49_16 part_70:mann-filter-hu70+bosch-f70:fit_70_18",
+            "part_11:mann-filter-hu11:veh_58 part_49:mann-filter-hu49+bosch-f49:veh_58 part_70:mann-filter-hu70+bosch-f70:veh_58",
           ],
           [
             "category-15",
-            "part_15:mann-filter-hu15:fit_15_0 part_88:mann-filter-hu88:fit_88_16 part_92:mann-filter-hu92:fit_92_19",
+            "part_15:mann-filter-hu15:veh_59 part_88:mann-filter-hu88:veh_59 part_92:mann-filter-hu92:veh_59",
           ],
           [
             "category-23",
-            "part_36:mann-filter-hu36:fit_36_16+fit_36_17 part_53:mann-filter-hu53:fit_53_9 part_59:mann-filter-hu59:fit_59_4 part_110:mann-filter-hu110:fit_110_16",
+            "part_36:mann-filter-hu36:veh_58+veh_59 part_53:mann-filter-hu53:veh_59 part_59:mann-filter-hu59:veh_59 part_110:mann-filter-hu110:veh_58",
           ],
           [
             "category-24",
-            "part_52:mann-filter-hu52:fit_52_19 part_55:mann-filter-hu55:fit_55_17 part_80:mann-filter-hu80:fit_80_13 part_86:mann-filter-hu86:fit_86_5",
+            "part_52:mann-filter-hu52:veh_58 part_55:mann-filter-hu55:veh_58 part_80:mann-filter-hu80:veh_59 part_86:mann-filter-hu86:veh_58",
           ],
           [
             "category-32",
-            "part_7:mann-filter-hu7+bosch-f7:fit_7_19 part_75:mann-filter-hu75:fit_75_18+fit_75_19 part_77:mann-filter-hu77+bosch-f77:fit_77_5",
+            "part_7:mann-filter-hu7+bosch-f7:veh_59 part_75:mann-filter-hu75:veh_58+veh_59 part_77:mann-filter-hu77+bosch-f77:veh_58",
           ],
         ],
       ],
@@ -400,7 +400,7 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-21",
-            "part_18:mann-filter-hu18:fit_18_5+fit_18_6 part_32:mann-filter-hu32:fit_32_2 part_84:mann-filter-hu84+bosch-f84:fit_84_18+fit_84_19",
+            "part_18:mann-filter-hu18:veh_74+veh_75 part_32:mann-filter-hu32:veh_75 part_84:mann-filter-hu84+bosch-f84:veh_74+veh_75",
           ],
         ],
       ],
@@ -416,11 +416,11 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-18",
-            "part_4:mann-filter-hu4:fit_4_10 part_34:mann-filter-hu34:fit_34_15 part_64:mann-filter-hu64:fit_64_3",
+            "part_4:mann-filter-hu4:veh_14 part_34:mann-filter-hu34:veh_14 part_64:mann-filter-hu64:veh_14",
           ],
           [
             "category-25",
-            "part_67:mann-filter-hu67:fit_67_14 part_71:mann-filter-hu71:fit_71_15 part_104:mann-filter-hu104:fit_104_6 part_112:mann-filter-hu112+bosch-f112:fit_112_6",
+            "part_67:mann-filter-hu67:veh_15 part_71:mann-filter-hu71:veh_14 part_104:mann-filter-hu104:veh_15 part_112:mann-filter-hu112+bosch-f112:veh_14",
           ],
         ],
       ],
@@ -430,23 +430,23 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-5",
-            "part_1:mann-filter-hu1:fit_1_5 part_46:mann-filter-hu46:fit_46_15 part_108:mann-filter-hu108:fit_108_9+fit_108_10",
+            "part_1:mann-filter-hu1:veh_30 part_46:mann-filter-hu46:veh_30 part_108:mann-filter-hu108:veh_30+veh_31",
           ],
           [
             "category-11",
-            "part_11:mann-filter-hu11:fit_11_3 part_49:mann-filter-hu49+bosch-f49:fit_49_2 part_50:mann-filter-hu50:fit_50_10 part_70:mann-filter-hu70+bosch-f70:fit_70_4",
+            "part_11:mann-filter-hu11:veh_31 part_49:mann-filter-hu49+bosch-f49:veh_30 part_50:mann-filter-hu50:veh_30 part_70:mann-filter-hu70+bosch-f70:veh_30",
           ],
           [
             "category-23",
-            "part_42:mann-filter-hu42+bosch-f42:fit_42_3+fit_42_4 part_110:mann-filter-hu110:fit_110_7 part_118:mann-filter-hu118:fit_118_7",
+            "part_42:mann-filter-hu42+bosch-f42:veh_30+veh_31 part_110:mann-filter-hu110:veh_31 part_118:mann-filter-hu118:veh_30",
           ],
           [
             "category-24",
-            "part_52:mann-filter-hu52:fit_52_5 part_55:mann-filter-hu55:fit_55_3 part_102:mann-filter-hu102:fit_102_0+fit_102_1",
+            "part_52:mann-filter-hu52:veh_30 part_55:mann-filter-hu55:veh_30 part_102:mann-filter-hu102:veh_30+veh_31",
           ],
           [
             "category-25",
-            "part_48:mann-filter-hu48:fit_48_3+fit_48_4 part_104:mann-filter-hu104:fit_104_11 part_112:mann-filter-hu112+bosch-f112:fit_112_14",
+            "part_48:mann-filter-hu48:veh_30+veh_31 part_104:mann-filter-hu104:veh_30 part_112:mann-filter-hu112+bosch-f112:veh_30",
           ],
         ],
       ],
@@ -456,27 +456,27 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-0",
-            "part_38:mann-filter-hu38:fit_38_16 part_43:mann-filter-hu43:fit_43_8 part_99:mann-filter-hu99:fit_99_0+fit_99_1",
+            "part_38:mann-filter-hu38:veh_47 part_43:mann-filter-hu43:veh_46 part_99:mann-filter-hu99:veh_46+veh_47",
           ],
           [
             "category-1",
-            "part_19:mann-filter-hu19:fit_19_8 part_28:mann-filter-hu28+bosch-f28:fit_28_18 part_60:mann-filter-hu60:fit_60_6+fit_60_7",
+            "part_19:mann-filter-hu19:veh_46 part_28:mann-filter-hu28+bosch-f28:veh_46 part_60:mann-filter-hu60:veh_46+veh_47",
           ],
           [
             "category-11",
-            "part_3:mann-filter-hu3:fit_3_12+fit_3_13 part_11:mann-filter-hu11:fit_11_8 part_49:mann-filter-hu49+bosch-f49:fit_49_10 part_70:mann-filter-hu70+bosch-f70:fit_70_12",
+            "part_3:mann-filter-hu3:veh_46+veh_47 part_11:mann-filter-hu11:veh_46 part_49:mann-filter-hu49+bosch-f49:veh_46 part_70:mann-filter-hu70+bosch-f70:veh_46",
           ],
           [
             "category-23",
-            "part_36:mann-filter-hu36:fit_36_4+fit_36_5 part_42:mann-filter-hu42+bosch-f42:fit_42_19 part_53:mann-filter-hu53:fit_53_5 part_59:mann-filter-hu59:fit_59_0 part_110:mann-filter-hu110:fit_110_12 part_118:mann-filter-hu118:fit_118_15",
+            "part_36:mann-filter-hu36:veh_46+veh_47 part_42:mann-filter-hu42+bosch-f42:veh_46 part_53:mann-filter-hu53:veh_47 part_59:mann-filter-hu59:veh_47 part_110:mann-filter-hu110:veh_46 part_118:mann-filter-hu118:veh_46",
           ],
           [
             "category-24",
-            "part_52:mann-filter-hu52:fit_52_13 part_55:mann-filter-hu55:fit_55_11 part_80:mann-filter-hu80:fit_80_9 part_86:mann-filter-hu86:fit_86_1 part_102:mann-filter-hu102:fit_102_16+fit_102_17",
+            "part_52:mann-filter-hu52:veh_46 part_55:mann-filter-hu55:veh_46 part_80:mann-filter-hu80:veh_47 part_86:mann-filter-hu86:veh_46 part_102:mann-filter-hu102:veh_46+veh_47",
           ],
           [
             "category-32",
-            "part_7:mann-filter-hu7+bosch-f7:fit_7_13 part_75:mann-filter-hu75:fit_75_6+fit_75_7 part_77:mann-filter-hu77+bosch-f77:fit_77_1",
+            "part_7:mann-filter-hu7+bosch-f7:veh_47 part_75:mann-filter-hu75:veh_46+veh_47 part_77:mann-filter-hu77+bosch-f77:veh_46",
           ],
         ],
       ],
@@ -486,11 +486,11 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-0",
-            "part_43:mann-filter-hu43:fit_43_16 part_69:mann-filter-hu69:fit_69_9+fit_69_10 part_99:mann-filter-hu99:fit_99_16+fit_99_17",
+            "part_43:mann-filter-hu43:veh_62 part_69:mann-filter-hu69:veh_62+veh_63 part_99:mann-filter-hu99:veh_62+veh_63",
           ],
           [
             "category-15",
-            "part_15:mann-filter-hu15:fit_15_3+fit_15_4 part_83:mann-filter-hu83:fit_83_19 part_88:mann-filter-hu88:fit_88_18",
+            "part_15:mann-filter-hu15:veh_62+veh_63 part_83:mann-filter-hu83:veh_63 part_88:mann-filter-hu88:veh_63",
           ],
         ],
       ],
@@ -500,7 +500,7 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-18",
-            "part_4:mann-filter-hu4:fit_4_0 part_9:mann-filter-hu9:fit_9_5+fit_9_6 part_34:mann-filter-hu34:fit_34_5",
+            "part_4:mann-filter-hu4:veh_78 part_9:mann-filter-hu9:veh_78+veh_79 part_34:mann-filter-hu34:veh_78",
           ],
         ],
       ],
@@ -516,19 +516,19 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-18",
-            "part_4:mann-filter-hu4:fit_4_6 part_9:mann-filter-hu9:fit_9_17+fit_9_18 part_34:mann-filter-hu34:fit_34_11",
+            "part_4:mann-filter-hu4:veh_6 part_9:mann-filter-hu9:veh_6+veh_7 part_34:mann-filter-hu34:veh_6",
           ],
           [
             "category-25",
-            "part_67:mann-filter-hu67:fit_67_10 part_104:mann-filter-hu104:fit_104_3 part_112:mann-filter-hu112+bosch-f112:fit_112_2",
+            "part_67:mann-filter-hu67:veh_7 part_104:mann-filter-hu104:veh_6 part_112:mann-filter-hu112+bosch-f112:veh_6",
           ],
           [
             "category-32",
-            "part_33:mann-filter-hu33:fit_33_6+fit_33_7 part_40:mann-filter-hu40:fit_40_9 part_77:mann-filter-hu77+bosch-f77:fit_77_16",
+            "part_33:mann-filter-hu33:veh_6+veh_7 part_40:mann-filter-hu40:veh_6 part_77:mann-filter-hu77+bosch-f77:veh_7",
           ],
           [
             "category-35",
-            "part_6:mann-filter-hu6:fit_6_13+fit_6_14 part_91:mann-filter-hu91+bosch-f91:fit_91_0 part_114:mann-filter-hu114:fit_114_15+fit_114_16",
+            "part_6:mann-filter-hu6:veh_6+veh_7 part_91:mann-filter-hu91+bosch-f91:veh_6 part_114:mann-filter-hu114:veh_6+veh_7",
           ],
         ],
       ],
@@ -538,15 +538,15 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-5",
-            "part_1:mann-filter-hu1:fit_1_1 part_46:mann-filter-hu46:fit_46_11 part_108:mann-filter-hu108:fit_108_1+fit_108_2",
+            "part_1:mann-filter-hu1:veh_22 part_46:mann-filter-hu46:veh_22 part_108:mann-filter-hu108:veh_22+veh_23",
           ],
           [
             "category-18",
-            "part_4:mann-filter-hu4:fit_4_14 part_34:mann-filter-hu34:fit_34_19 part_64:mann-filter-hu64:fit_64_7",
+            "part_4:mann-filter-hu4:veh_22 part_34:mann-filter-hu34:veh_22 part_64:mann-filter-hu64:veh_22",
           ],
           [
             "category-25",
-            "part_67:mann-filter-hu67:fit_67_18 part_71:mann-filter-hu71:fit_71_18 part_112:mann-filter-hu112+bosch-f112:fit_112_10",
+            "part_67:mann-filter-hu67:veh_23 part_71:mann-filter-hu71:veh_23 part_112:mann-filter-hu112+bosch-f112:veh_22",
           ],
         ],
       ],
@@ -556,31 +556,31 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-1",
-            "part_19:mann-filter-hu19:fit_19_4 part_28:mann-filter-hu28+bosch-f28:fit_28_14 part_113:mann-filter-hu113:fit_113_18",
+            "part_19:mann-filter-hu19:veh_38 part_28:mann-filter-hu28+bosch-f28:veh_38 part_113:mann-filter-hu113:veh_38",
           ],
           [
             "category-5",
-            "part_1:mann-filter-hu1:fit_1_9 part_46:mann-filter-hu46:fit_46_19 part_108:mann-filter-hu108:fit_108_17+fit_108_18",
+            "part_1:mann-filter-hu1:veh_38 part_46:mann-filter-hu46:veh_38 part_108:mann-filter-hu108:veh_38+veh_39",
           ],
           [
             "category-11",
-            "part_3:mann-filter-hu3:fit_3_4+fit_3_5 part_49:mann-filter-hu49+bosch-f49:fit_49_6 part_50:mann-filter-hu50:fit_50_13 part_70:mann-filter-hu70+bosch-f70:fit_70_8",
+            "part_3:mann-filter-hu3:veh_38+veh_39 part_49:mann-filter-hu49+bosch-f49:veh_38 part_50:mann-filter-hu50:veh_39 part_70:mann-filter-hu70+bosch-f70:veh_38",
           ],
           [
             "category-15",
-            "part_83:mann-filter-hu83:fit_83_11 part_88:mann-filter-hu88:fit_88_6 part_92:mann-filter-hu92:fit_92_12",
+            "part_83:mann-filter-hu83:veh_39 part_88:mann-filter-hu88:veh_39 part_92:mann-filter-hu92:veh_38",
           ],
           [
             "category-23",
-            "part_42:mann-filter-hu42+bosch-f42:fit_42_11+fit_42_12 part_53:mann-filter-hu53:fit_53_2 part_118:mann-filter-hu118:fit_118_11",
+            "part_42:mann-filter-hu42+bosch-f42:veh_38+veh_39 part_53:mann-filter-hu53:veh_38 part_118:mann-filter-hu118:veh_38",
           ],
           [
             "category-24",
-            "part_52:mann-filter-hu52:fit_52_9 part_55:mann-filter-hu55:fit_55_7 part_80:mann-filter-hu80:fit_80_6 part_102:mann-filter-hu102:fit_102_8+fit_102_9",
+            "part_52:mann-filter-hu52:veh_38 part_55:mann-filter-hu55:veh_38 part_80:mann-filter-hu80:veh_38 part_102:mann-filter-hu102:veh_38+veh_39",
           ],
           [
             "category-25",
-            "part_48:mann-filter-hu48:fit_48_11+fit_48_12 part_104:mann-filter-hu104:fit_104_14 part_112:mann-filter-hu112+bosch-f112:fit_112_18",
+            "part_48:mann-filter-hu48:veh_38+veh_39 part_104:mann-filter-hu104:veh_39 part_112:mann-filter-hu112+bosch-f112:veh_38",
           ],
         ],
       ],
@@ -590,27 +590,27 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-0",
-            "part_43:mann-filter-hu43:fit_43_12 part_69:mann-filter-hu69:fit_69_1+fit_69_2 part_99:mann-filter-hu99:fit_99_8+fit_99_9",
+            "part_43:mann-filter-hu43:veh_54 part_69:mann-filter-hu69:veh_54+veh_55 part_99:mann-filter-hu99:veh_54+veh_55",
           ],
           [
             "category-8",
-            "part_45:mann-filter-hu45:fit_45_0 part_47:mann-filter-hu47:fit_47_7 part_51:mann-filter-hu51:fit_51_14+fit_51_15",
+            "part_45:mann-filter-hu45:veh_55 part_47:mann-filter-hu47:veh_54 part_51:mann-filter-hu51:veh_54+veh_55",
           ],
           [
             "category-11",
-            "part_11:mann-filter-hu11:fit_11_11 part_49:mann-filter-hu49+bosch-f49:fit_49_14 part_50:mann-filter-hu50:fit_50_18 part_70:mann-filter-hu70+bosch-f70:fit_70_16",
+            "part_11:mann-filter-hu11:veh_55 part_49:mann-filter-hu49+bosch-f49:veh_54 part_50:mann-filter-hu50:veh_54 part_70:mann-filter-hu70+bosch-f70:veh_54",
           ],
           [
             "category-23",
-            "part_36:mann-filter-hu36:fit_36_12+fit_36_13 part_110:mann-filter-hu110:fit_110_15 part_118:mann-filter-hu118:fit_118_19",
+            "part_36:mann-filter-hu36:veh_54+veh_55 part_110:mann-filter-hu110:veh_55 part_118:mann-filter-hu118:veh_54",
           ],
           [
             "category-24",
-            "part_52:mann-filter-hu52:fit_52_17 part_55:mann-filter-hu55:fit_55_15 part_86:mann-filter-hu86:fit_86_4",
+            "part_52:mann-filter-hu52:veh_54 part_55:mann-filter-hu55:veh_54 part_86:mann-filter-hu86:veh_55",
           ],
           [
             "category-32",
-            "part_7:mann-filter-hu7+bosch-f7:fit_7_17 part_75:mann-filter-hu75:fit_75_14+fit_75_15 part_77:mann-filter-hu77+bosch-f77:fit_77_4",
+            "part_7:mann-filter-hu7+bosch-f7:veh_55 part_75:mann-filter-hu75:veh_54+veh_55 part_77:mann-filter-hu77+bosch-f77:veh_55",
           ],
         ],
       ],
@@ -620,7 +620,7 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-28",
-            "part_27:mann-filter-hu27:fit_27_18+fit_27_19 part_31:mann-filter-hu31:fit_31_3 part_79:mann-filter-hu79:fit_79_13",
+            "part_27:mann-filter-hu27:veh_70+veh_71 part_31:mann-filter-hu31:veh_70 part_79:mann-filter-hu79:veh_71",
           ],
         ],
       ],
@@ -636,19 +636,19 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-18",
-            "part_4:mann-filter-hu4:fit_4_5 part_9:mann-filter-hu9:fit_9_15+fit_9_16 part_34:mann-filter-hu34:fit_34_10",
+            "part_4:mann-filter-hu4:veh_4 part_9:mann-filter-hu9:veh_4+veh_5 part_34:mann-filter-hu34:veh_4",
           ],
           [
             "category-23",
-            "part_30:mann-filter-hu30:fit_30_2+fit_30_3 part_53:mann-filter-hu53:fit_53_19 part_59:mann-filter-hu59:fit_59_14",
+            "part_30:mann-filter-hu30:veh_4+veh_5 part_53:mann-filter-hu53:veh_5 part_59:mann-filter-hu59:veh_5",
           ],
           [
             "category-25",
-            "part_67:mann-filter-hu67:fit_67_9 part_71:mann-filter-hu71:fit_71_12 part_112:mann-filter-hu112+bosch-f112:fit_112_1",
+            "part_67:mann-filter-hu67:veh_5 part_71:mann-filter-hu71:veh_5 part_112:mann-filter-hu112+bosch-f112:veh_4",
           ],
           [
             "category-32",
-            "part_33:mann-filter-hu33:fit_33_4+fit_33_5 part_40:mann-filter-hu40:fit_40_8 part_77:mann-filter-hu77+bosch-f77:fit_77_15",
+            "part_33:mann-filter-hu33:veh_4+veh_5 part_40:mann-filter-hu40:veh_4 part_77:mann-filter-hu77+bosch-f77:veh_4",
           ],
         ],
       ],
@@ -658,19 +658,19 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-5",
-            "part_1:mann-filter-hu1:fit_1_0 part_46:mann-filter-hu46:fit_46_10 part_108:mann-filter-hu108:fit_108_0",
+            "part_1:mann-filter-hu1:veh_20 part_46:mann-filter-hu46:veh_20 part_108:mann-filter-hu108:veh_21",
           ],
           [
             "category-18",
-            "part_4:mann-filter-hu4:fit_4_13 part_34:mann-filter-hu34:fit_34_18 part_64:mann-filter-hu64:fit_64_6",
+            "part_4:mann-filter-hu4:veh_20 part_34:mann-filter-hu34:veh_20 part_64:mann-filter-hu64:veh_20",
           ],
           [
             "category-23",
-            "part_30:mann-filter-hu30:fit_30_18+fit_30_19 part_59:mann-filter-hu59:fit_59_19 part_118:mann-filter-hu118:fit_118_2",
+            "part_30:mann-filter-hu30:veh_20+veh_21 part_59:mann-filter-hu59:veh_20 part_118:mann-filter-hu118:veh_20",
           ],
           [
             "category-25",
-            "part_67:mann-filter-hu67:fit_67_17 part_71:mann-filter-hu71:fit_71_17 part_104:mann-filter-hu104:fit_104_8 part_112:mann-filter-hu112+bosch-f112:fit_112_9",
+            "part_67:mann-filter-hu67:veh_21 part_71:mann-filter-hu71:veh_20 part_104:mann-filter-hu104:veh_21 part_112:mann-filter-hu112+bosch-f112:veh_20",
           ],
         ],
       ],
@@ -680,23 +680,23 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-5",
-            "part_1:mann-filter-hu1:fit_1_8 part_46:mann-filter-hu46:fit_46_18 part_108:mann-filter-hu108:fit_108_15+fit_108_16",
+            "part_1:mann-filter-hu1:veh_36 part_46:mann-filter-hu46:veh_36 part_108:mann-filter-hu108:veh_36+veh_37",
           ],
           [
             "category-11",
-            "part_3:mann-filter-hu3:fit_3_2+fit_3_3 part_11:mann-filter-hu11:fit_11_5 part_49:mann-filter-hu49+bosch-f49:fit_49_5 part_50:mann-filter-hu50:fit_50_12 part_70:mann-filter-hu70+bosch-f70:fit_70_7",
+            "part_3:mann-filter-hu3:veh_36+veh_37 part_11:mann-filter-hu11:veh_37 part_49:mann-filter-hu49+bosch-f49:veh_36 part_50:mann-filter-hu50:veh_36 part_70:mann-filter-hu70+bosch-f70:veh_36",
           ],
           [
             "category-23",
-            "part_42:mann-filter-hu42+bosch-f42:fit_42_9+fit_42_10 part_110:mann-filter-hu110:fit_110_9 part_118:mann-filter-hu118:fit_118_10",
+            "part_42:mann-filter-hu42+bosch-f42:veh_36+veh_37 part_110:mann-filter-hu110:veh_37 part_118:mann-filter-hu118:veh_36",
           ],
           [
             "category-24",
-            "part_52:mann-filter-hu52:fit_52_8 part_55:mann-filter-hu55:fit_55_6 part_102:mann-filter-hu102:fit_102_6+fit_102_7",
+            "part_52:mann-filter-hu52:veh_36 part_55:mann-filter-hu55:veh_36 part_102:mann-filter-hu102:veh_36+veh_37",
           ],
           [
             "category-25",
-            "part_48:mann-filter-hu48:fit_48_9+fit_48_10 part_104:mann-filter-hu104:fit_104_13 part_112:mann-filter-hu112+bosch-f112:fit_112_17",
+            "part_48:mann-filter-hu48:veh_36+veh_37 part_104:mann-filter-hu104:veh_36 part_112:mann-filter-hu112+bosch-f112:veh_36",
           ],
         ],
       ],
@@ -706,27 +706,27 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-0",
-            "part_38:mann-filter-hu38:fit_38_18 part_43:mann-filter-hu43:fit_43_11 part_69:mann-filter-hu69:fit_69_0 part_99:mann-filter-hu99:fit_99_6+fit_99_7",
+            "part_38:mann-filter-hu38:veh_53 part_43:mann-filter-hu43:veh_52 part_69:mann-filter-hu69:veh_53 part_99:mann-filter-hu99:veh_52+veh_53",
           ],
           [
             "category-1",
-            "part_19:mann-filter-hu19:fit_19_11 part_60:mann-filter-hu60:fit_60_12+fit_60_13 part_28:mann-filter-hu28+bosch-f28:",
+            "part_19:mann-filter-hu19:veh_52 part_60:mann-filter-hu60:veh_52+veh_53 part_28:mann-filter-hu28+bosch-f28:",
           ],
           [
             "category-11",
-            "part_3:mann-filter-hu3:fit_3_18+fit_3_19 part_11:mann-filter-hu11:fit_11_10 part_49:mann-filter-hu49+bosch-f49:fit_49_13 part_70:mann-filter-hu70+bosch-f70:fit_70_15",
+            "part_3:mann-filter-hu3:veh_52+veh_53 part_11:mann-filter-hu11:veh_52 part_49:mann-filter-hu49+bosch-f49:veh_52 part_70:mann-filter-hu70+bosch-f70:veh_52",
           ],
           [
             "category-23",
-            "part_36:mann-filter-hu36:fit_36_10+fit_36_11 part_53:mann-filter-hu53:fit_53_7 part_59:mann-filter-hu59:fit_59_2 part_110:mann-filter-hu110:fit_110_14 part_118:mann-filter-hu118:fit_118_18",
+            "part_36:mann-filter-hu36:veh_52+veh_53 part_53:mann-filter-hu53:veh_53 part_59:mann-filter-hu59:veh_53 part_110:mann-filter-hu110:veh_52 part_118:mann-filter-hu118:veh_52",
           ],
           [
             "category-24",
-            "part_52:mann-filter-hu52:fit_52_16 part_55:mann-filter-hu55:fit_55_14 part_80:mann-filter-hu80:fit_80_11 part_86:mann-filter-hu86:fit_86_3",
+            "part_52:mann-filter-hu52:veh_52 part_55:mann-filter-hu55:veh_52 part_80:mann-filter-hu80:veh_53 part_86:mann-filter-hu86:veh_52",
           ],
           [
             "category-32",
-            "part_7:mann-filter-hu7+bosch-f7:fit_7_16 part_75:mann-filter-hu75:fit_75_12+fit_75_13 part_77:mann-filter-hu77+bosch-f77:fit_77_3",
+            "part_7:mann-filter-hu7+bosch-f7:veh_53 part_75:mann-filter-hu75:veh_52+veh_53 part_77:mann-filter-hu77+bosch-f77:veh_52",
           ],
         ],
       ],
@@ -736,11 +736,11 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-21",
-            "part_18:mann-filter-hu18:fit_18_0 part_32:mann-filter-hu32:fit_32_0 part_84:mann-filter-hu84+bosch-f84:fit_84_12+fit_84_13",
+            "part_18:mann-filter-hu18:veh_69 part_32:mann-filter-hu32:veh_69 part_84:mann-filter-hu84+bosch-f84:veh_68+veh_69",
           ],
           [
             "category-28",
-            "part_27:mann-filter-hu27:fit_27_16+fit_27_17 part_31:mann-filter-hu31:fit_31_2 part_79:mann-filter-hu79:fit_79_12",
+            "part_27:mann-filter-hu27:veh_68+veh_69 part_31:mann-filter-hu31:veh_68 part_79:mann-filter-hu79:veh_69",
           ],
         ],
       ],
@@ -756,15 +756,15 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-18",
-            "part_4:mann-filter-hu4:fit_4_7 part_9:mann-filter-hu9:fit_9_19 part_34:mann-filter-hu34:fit_34_12 part_64:mann-filter-hu64:fit_64_0",
+            "part_4:mann-filter-hu4:veh_8 part_9:mann-filter-hu9:veh_8 part_34:mann-filter-hu34:veh_8 part_64:mann-filter-hu64:veh_8",
           ],
           [
             "category-25",
-            "part_67:mann-filter-hu67:fit_67_11 part_71:mann-filter-hu71:fit_71_13 part_104:mann-filter-hu104:fit_104_4 part_112:mann-filter-hu112+bosch-f112:fit_112_3",
+            "part_67:mann-filter-hu67:veh_9 part_71:mann-filter-hu71:veh_8 part_104:mann-filter-hu104:veh_9 part_112:mann-filter-hu112+bosch-f112:veh_8",
           ],
           [
             "category-35",
-            "part_6:mann-filter-hu6:fit_6_15+fit_6_16 part_91:mann-filter-hu91+bosch-f91:fit_91_1 part_114:mann-filter-hu114:fit_114_17+fit_114_18",
+            "part_6:mann-filter-hu6:veh_8+veh_9 part_91:mann-filter-hu91+bosch-f91:veh_8 part_114:mann-filter-hu114:veh_8+veh_9",
           ],
         ],
       ],
@@ -774,15 +774,15 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-5",
-            "part_1:mann-filter-hu1:fit_1_2 part_46:mann-filter-hu46:fit_46_12 part_108:mann-filter-hu108:fit_108_3+fit_108_4",
+            "part_1:mann-filter-hu1:veh_24 part_46:mann-filter-hu46:veh_24 part_108:mann-filter-hu108:veh_24+veh_25",
           ],
           [
             "category-11",
-            "part_11:mann-filter-hu11:fit_11_1 part_50:mann-filter-hu50:fit_50_8 part_70:mann-filter-hu70+bosch-f70:fit_70_1",
+            "part_11:mann-filter-hu11:veh_25 part_50:mann-filter-hu50:veh_24 part_70:mann-filter-hu70+bosch-f70:veh_24",
           ],
           [
             "category-25",
-            "part_67:mann-filter-hu67:fit_67_19 part_104:mann-filter-hu104:fit_104_9 part_112:mann-filter-hu112+bosch-f112:fit_112_11",
+            "part_67:mann-filter-hu67:veh_25 part_104:mann-filter-hu104:veh_24 part_112:mann-filter-hu112+bosch-f112:veh_24",
           ],
         ],
       ],
@@ -792,19 +792,19 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-1",
-            "part_19:mann-filter-hu19:fit_19_5 part_28:mann-filter-hu28+bosch-f28:fit_28_15 part_60:mann-filter-hu60:fit_60_0+fit_60_1 part_113:mann-filter-hu113:fit_113_19",
+            "part_19:mann-filter-hu19:veh_40 part_28:mann-filter-hu28+bosch-f28:veh_40 part_60:mann-filter-hu60:veh_40+veh_41 part_113:mann-filter-hu113:veh_41",
           ],
           [
             "category-11",
-            "part_3:mann-filter-hu3:fit_3_6+fit_3_7 part_11:mann-filter-hu11:fit_11_6 part_49:mann-filter-hu49+bosch-f49:fit_49_7 part_70:mann-filter-hu70+bosch-f70:fit_70_9",
+            "part_3:mann-filter-hu3:veh_40+veh_41 part_11:mann-filter-hu11:veh_40 part_49:mann-filter-hu49+bosch-f49:veh_40 part_70:mann-filter-hu70+bosch-f70:veh_40",
           ],
           [
             "category-23",
-            "part_42:mann-filter-hu42+bosch-f42:fit_42_13+fit_42_14 part_53:mann-filter-hu53:fit_53_3 part_110:mann-filter-hu110:fit_110_10 part_118:mann-filter-hu118:fit_118_12",
+            "part_42:mann-filter-hu42+bosch-f42:veh_40+veh_41 part_53:mann-filter-hu53:veh_41 part_110:mann-filter-hu110:veh_40 part_118:mann-filter-hu118:veh_40",
           ],
           [
             "category-24",
-            "part_52:mann-filter-hu52:fit_52_10 part_55:mann-filter-hu55:fit_55_8 part_80:mann-filter-hu80:fit_80_7 part_102:mann-filter-hu102:fit_102_10+fit_102_11",
+            "part_52:mann-filter-hu52:veh_40 part_55:mann-filter-hu55:veh_40 part_80:mann-filter-hu80:veh_41 part_102:mann-filter-hu102:veh_40+veh_41",
           ],
         ],
       ],
@@ -814,27 +814,27 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-0",
-            "part_38:mann-filter-hu38:fit_38_19 part_43:mann-filter-hu43:fit_43_13 part_69:mann-filter-hu69:fit_69_3+fit_69_4 part_99:mann-filter-hu99:fit_99_10+fit_99_11",
+            "part_38:mann-filter-hu38:veh_56 part_43:mann-filter-hu43:veh_56 part_69:mann-filter-hu69:veh_56+veh_57 part_99:mann-filter-hu99:veh_56+veh_57",
           ],
           [
             "category-8",
-            "part_45:mann-filter-hu45:fit_45_1+fit_45_2 part_47:mann-filter-hu47:fit_47_8 part_51:mann-filter-hu51:fit_51_16+fit_51_17",
+            "part_45:mann-filter-hu45:veh_56+veh_57 part_47:mann-filter-hu47:veh_57 part_51:mann-filter-hu51:veh_56+veh_57",
           ],
           [
             "category-11",
-            "part_49:mann-filter-hu49+bosch-f49:fit_49_15 part_50:mann-filter-hu50:fit_50_19 part_70:mann-filter-hu70+bosch-f70:fit_70_17",
+            "part_49:mann-filter-hu49+bosch-f49:veh_56 part_50:mann-filter-hu50:veh_57 part_70:mann-filter-hu70+bosch-f70:veh_56",
           ],
           [
             "category-15",
-            "part_83:mann-filter-hu83:fit_83_17 part_88:mann-filter-hu88:fit_88_15 part_92:mann-filter-hu92:fit_92_18",
+            "part_83:mann-filter-hu83:veh_57 part_88:mann-filter-hu88:veh_57 part_92:mann-filter-hu92:veh_56",
           ],
           [
             "category-23",
-            "part_36:mann-filter-hu36:fit_36_14+fit_36_15 part_53:mann-filter-hu53:fit_53_8 part_59:mann-filter-hu59:fit_59_3",
+            "part_36:mann-filter-hu36:veh_56+veh_57 part_53:mann-filter-hu53:veh_56 part_59:mann-filter-hu59:veh_56",
           ],
           [
             "category-24",
-            "part_52:mann-filter-hu52:fit_52_18 part_55:mann-filter-hu55:fit_55_16 part_80:mann-filter-hu80:fit_80_12",
+            "part_52:mann-filter-hu52:veh_56 part_55:mann-filter-hu55:veh_56 part_80:mann-filter-hu80:veh_56",
           ],
         ],
       ],
@@ -844,7 +844,7 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-21",
-            "part_18:mann-filter-hu18:fit_18_3+fit_18_4 part_32:mann-filter-hu32:fit_32_1 part_84:mann-filter-hu84+bosch-f84:fit_84_16+fit_84_17",
+            "part_18:mann-filter-hu18:veh_72+veh_73 part_32:mann-filter-hu32:veh_72 part_84:mann-filter-hu84+bosch-f84:veh_72+veh_73",
           ],
         ],
       ],
@@ -860,15 +860,15 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-18",
-            "part_4:mann-filter-hu4:fit_4_9 part_34:mann-filter-hu34:fit_34_14 part_64:mann-filter-hu64:fit_64_2",
+            "part_4:mann-filter-hu4:veh_12 part_34:mann-filter-hu34:veh_12 part_64:mann-filter-hu64:veh_12",
           ],
           [
             "category-25",
-            "part_67:mann-filter-hu67:fit_67_13 part_104:mann-filter-hu104:fit_104_5 part_112:mann-filter-hu112+bosch-f112:fit_112_5",
+            "part_67:mann-filter-hu67:veh_13 part_104:mann-filter-hu104:veh_12 part_112:mann-filter-hu112+bosch-f112:veh_12",
           ],
           [
             "category-32",
-            "part_33:mann-filter-hu33:fit_33_12+fit_33_13 part_40:mann-filter-hu40:fit_40_12 part_77:mann-filter-hu77+bosch-f77:fit_77_18",
+            "part_33:mann-filter-hu33:veh_12+veh_13 part_40:mann-filter-hu40:veh_12 part_77:mann-filter-hu77+bosch-f77:veh_13",
           ],
         ],
       ],
@@ -878,23 +878,23 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-5",
-            "part_1:mann-filter-hu1:fit_1_4 part_46:mann-filter-hu46:fit_46_14 part_108:mann-filter-hu108:fit_108_7+fit_108_8",
+            "part_1:mann-filter-hu1:veh_28 part_46:mann-filter-hu46:veh_28 part_108:mann-filter-hu108:veh_28+veh_29",
           ],
           [
             "category-11",
-            "part_11:mann-filter-hu11:fit_11_2 part_49:mann-filter-hu49+bosch-f49:fit_49_1 part_70:mann-filter-hu70+bosch-f70:fit_70_3",
+            "part_11:mann-filter-hu11:veh_28 part_49:mann-filter-hu49+bosch-f49:veh_28 part_70:mann-filter-hu70+bosch-f70:veh_28",
           ],
           [
             "category-17",
-            "part_13:mann-filter-hu13:fit_13_0 part_35:mann-filter-hu35+bosch-f35:fit_35_19 part_105:mann-filter-hu105+bosch-f105:fit_105_10+fit_105_11",
+            "part_13:mann-filter-hu13:veh_29 part_35:mann-filter-hu35+bosch-f35:veh_29 part_105:mann-filter-hu105+bosch-f105:veh_28+veh_29",
           ],
           [
             "category-23",
-            "part_42:mann-filter-hu42+bosch-f42:fit_42_1+fit_42_2 part_110:mann-filter-hu110:fit_110_6 part_118:mann-filter-hu118:fit_118_6",
+            "part_42:mann-filter-hu42+bosch-f42:veh_28+veh_29 part_110:mann-filter-hu110:veh_28 part_118:mann-filter-hu118:veh_28",
           ],
           [
             "category-24",
-            "part_52:mann-filter-hu52:fit_52_4 part_55:mann-filter-hu55:fit_55_2 part_80:mann-filter-hu80:fit_80_3",
+            "part_52:mann-filter-hu52:veh_28 part_55:mann-filter-hu55:veh_28 part_80:mann-filter-hu80:veh_29",
           ],
         ],
       ],
@@ -904,31 +904,31 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-0",
-            "part_38:mann-filter-hu38:fit_38_15 part_43:mann-filter-hu43:fit_43_7 part_69:mann-filter-hu69:",
+            "part_38:mann-filter-hu38:veh_44 part_43:mann-filter-hu43:veh_44 part_69:mann-filter-hu69:",
           ],
           [
             "category-1",
-            "part_19:mann-filter-hu19:fit_19_7 part_28:mann-filter-hu28+bosch-f28:fit_28_17 part_60:mann-filter-hu60:fit_60_4+fit_60_5",
+            "part_19:mann-filter-hu19:veh_44 part_28:mann-filter-hu28+bosch-f28:veh_44 part_60:mann-filter-hu60:veh_44+veh_45",
           ],
           [
             "category-8",
-            "part_47:mann-filter-hu47:fit_47_4 part_51:mann-filter-hu51:fit_51_4+fit_51_5 part_103:mann-filter-hu103:fit_103_15",
+            "part_47:mann-filter-hu47:veh_45 part_51:mann-filter-hu51:veh_44+veh_45 part_103:mann-filter-hu103:veh_45",
           ],
           [
             "category-11",
-            "part_3:mann-filter-hu3:fit_3_10+fit_3_11 part_49:mann-filter-hu49+bosch-f49:fit_49_9 part_50:mann-filter-hu50:fit_50_15 part_70:mann-filter-hu70+bosch-f70:fit_70_11",
+            "part_3:mann-filter-hu3:veh_44+veh_45 part_49:mann-filter-hu49+bosch-f49:veh_44 part_50:mann-filter-hu50:veh_45 part_70:mann-filter-hu70+bosch-f70:veh_44",
           ],
           [
             "category-15",
-            "part_83:mann-filter-hu83:fit_83_13 part_88:mann-filter-hu88:fit_88_9 part_92:mann-filter-hu92:fit_92_14",
+            "part_83:mann-filter-hu83:veh_45 part_88:mann-filter-hu88:veh_45 part_92:mann-filter-hu92:veh_44",
           ],
           [
             "category-23",
-            "part_36:mann-filter-hu36:fit_36_2+fit_36_3 part_42:mann-filter-hu42+bosch-f42:fit_42_17+fit_42_18 part_53:mann-filter-hu53:fit_53_4 part_118:mann-filter-hu118:fit_118_14",
+            "part_36:mann-filter-hu36:veh_44+veh_45 part_42:mann-filter-hu42+bosch-f42:veh_44+veh_45 part_53:mann-filter-hu53:veh_44 part_118:mann-filter-hu118:veh_44",
           ],
           [
             "category-24",
-            "part_52:mann-filter-hu52:fit_52_12 part_55:mann-filter-hu55:fit_55_10 part_80:mann-filter-hu80:fit_80_8 part_102:mann-filter-hu102:fit_102_14+fit_102_15",
+            "part_52:mann-filter-hu52:veh_44 part_55:mann-filter-hu55:veh_44 part_80:mann-filter-hu80:veh_44 part_102:mann-filter-hu102:veh_44+veh_45",
           ],
         ],
       ],
@@ -938,15 +938,15 @@ exports[`makeHubsFrom > groups Parts by Series and Category, fitted before requi
         [
           [
             "category-0",
-            "part_43:mann-filter-hu43:fit_43_15 part_69:mann-filter-hu69:fit_69_7+fit_69_8 part_99:mann-filter-hu99:fit_99_14+fit_99_15",
+            "part_43:mann-filter-hu43:veh_60 part_69:mann-filter-hu69:veh_60+veh_61 part_99:mann-filter-hu99:veh_60+veh_61",
           ],
           [
             "category-11",
-            "part_11:mann-filter-hu11:fit_11_13 part_49:mann-filter-hu49+bosch-f49:fit_49_17 part_70:mann-filter-hu70+bosch-f70:fit_70_19",
+            "part_11:mann-filter-hu11:veh_61 part_49:mann-filter-hu49+bosch-f49:veh_60 part_70:mann-filter-hu70+bosch-f70:veh_60",
           ],
           [
             "category-15",
-            "part_15:mann-filter-hu15:fit_15_1+fit_15_2 part_83:mann-filter-hu83:fit_83_18 part_88:mann-filter-hu88:fit_88_17",
+            "part_15:mann-filter-hu15:veh_60+veh_61 part_83:mann-filter-hu83:veh_60 part_88:mann-filter-hu88:veh_61",
           ],
         ],
       ],

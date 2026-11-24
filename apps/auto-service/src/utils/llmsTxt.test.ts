@@ -170,7 +170,7 @@ describe('generateLlmsTxt', () => {
 
   it('states the Google rating as a key fact', async () => {
     expect(await generateLlmsTxt('ru')).toContain(
-      '- 5.0 в Google · 22 отзыва\n',
+      '- 5.0 в Google · 23 отзыва\n',
     );
   });
 
@@ -309,6 +309,14 @@ describe('generateLlmsTxt', () => {
         ],
       },
     };
+    const listed = (path: string, key: string) =>
+      (answers[path] as Record<string, unknown>)[key];
+    answers['/store/catalogue-snapshot'] = {
+      pages: listed('/store/part-pages', 'pages'),
+      categories: listed('/store/categories', 'categories'),
+      fitments: listed('/store/fitments', 'fitments'),
+      vehicles: listed('/store/vehicles', 'vehicles'),
+    };
     (globalThis as { [key: symbol]: Map<string, unknown> | undefined })[
       Symbol.for('carlab.buildSnapshots')
     ]?.clear();
@@ -323,7 +331,6 @@ describe('generateLlmsTxt', () => {
           answers[new URL(url).pathname] ?? {
             pages: [],
             fitments: [],
-            redirects: [],
             count: 0,
             offset: 0,
             limit: 1000,
@@ -422,6 +429,12 @@ describe('generateLlmsTxt', () => {
   it('describes the one catalogue search and how to query it', async () => {
     expect(await generateLlmsTxt('ru')).toContain(
       '[Поиск запчастей](https://carlab.rs/ru/parts/search/): Один поиск по всему каталогу: VIN, номер запчасти в любом написании, название, марка, модель, код кузова или двигателя, в том числе вместе, например «масляный фильтр bmw x3». Запрос передается в параметре q: https://carlab.rs/ru/parts/search/?q=HU+816+x',
+    );
+  });
+
+  it('says how to page through the whole catalogue', async () => {
+    expect(await generateLlmsTxt('ru')).toContain(
+      '[Все запчасти каталога](https://carlab.rs/ru/parts/search/): Без запроса поиск показывает весь каталог, по 12 запчастей на странице; следующая страница задается параметром offset: https://carlab.rs/ru/parts/search/?offset=12',
     );
   });
 

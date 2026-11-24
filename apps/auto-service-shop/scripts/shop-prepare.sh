@@ -29,18 +29,30 @@ EOF
 fi
 sed -i.bak 's|^LEAD_ROUTE_URL=.*|STOREFRONT_ORIGIN=http://127.0.0.1:4321|' .env && rm .env.bak
 
-[ -f "$STOREFRONT_ENV" ] || cp ../auto-service/.env.example "$STOREFRONT_ENV"
-for pair in TELEGRAM_BOT_TOKEN=1:fake TELEGRAM_BOT_USERNAME=demo_crm_bot \
-  TELEGRAM_GROUP_ID=-1 TELEGRAM_OWNER_ID=1 TELEGRAM_ADMIN_ID=2 SHOP_OPEN=true; do
-  key=${pair%%=*}
-  if grep -q "^$key=$" "$STOREFRONT_ENV"; then
-    sed -i.bak "s|^$key=\$|$pair|" "$STOREFRONT_ENV" && rm "$STOREFRONT_ENV.bak"
-  elif ! grep -q "^$key=" "$STOREFRONT_ENV"; then
-    echo "$pair" >> "$STOREFRONT_ENV"
-  fi
-done
+fill() {
+  file=$1
+  shift
+  [ -z "$(tail -c1 "$file")" ] || echo >> "$file"
+  for pair in "$@"; do
+    key=${pair%%=*}
+    if grep -q "^$key=$" "$file"; then
+      sed -i.bak "s|^$key=\$|$pair|" "$file" && rm "$file.bak"
+    elif ! grep -q "^$key=" "$file"; then
+      echo "$pair" >> "$file"
+    fi
+  done
+}
 
-for name in carlab-demo-pg carlab-demo-ts; do
+fill .env S3_ENDPOINT=http://127.0.0.1:59444 S3_REGION=us-east-1 \
+  S3_ACCESS_KEY_ID=carlab-demo S3_SECRET_ACCESS_KEY=carlab-demo-secret \
+  S3_PUBLIC_BUCKET=carlab-public S3_PRIVATE_BUCKET=carlab-private \
+  FILE_URL=http://127.0.0.1:59444/carlab-public
+
+[ -f "$STOREFRONT_ENV" ] || cp ../auto-service/.env.example "$STOREFRONT_ENV"
+fill "$STOREFRONT_ENV" TELEGRAM_BOT_TOKEN=1:fake TELEGRAM_BOT_USERNAME=demo_crm_bot \
+  TELEGRAM_GROUP_ID=-1 TELEGRAM_OWNER_ID=1 TELEGRAM_ADMIN_ID=2 SHOP_OPEN=true
+
+for name in carlab-demo-pg carlab-demo-ts carlab-demo-s3; do
   project=$(docker inspect -f '{{index .Config.Labels "com.docker.compose.project"}}' "$name" 2>/dev/null || true)
   if docker inspect "$name" >/dev/null 2>&1 && [ "$project" != carlab-demo ]; then
     docker rm -f "$name" >/dev/null
@@ -58,4 +70,4 @@ fi
 pnpm db:migrate
 pnpm seed:demo
 pnpm import:local
-pnpm publish:local
+OPENAI_API_KEY= pnpm publish:local

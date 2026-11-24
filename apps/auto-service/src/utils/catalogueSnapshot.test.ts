@@ -169,7 +169,7 @@ const outline = (hubs: MakeHubEntry[]) =>
           .map(
             ({ part, pages, fits }) =>
               `${part.id}:${pages.map(({ slug }) => slug).join('+')}:${fits
-                .map(({ id }) => id)
+                .map(({ vehicle_id }) => vehicle_id)
                 .join('+')}`,
           )
           .join(' '),

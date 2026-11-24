@@ -219,6 +219,7 @@ medusaIntegrationTestRunner({
         }
         Object.assign(shopAi, {
           name: null,
+          usage: undefined,
           attributes: {},
           description: null,
           articlesAsked: [],
@@ -501,6 +502,9 @@ medusaIntegrationTestRunner({
           images_failed: 0,
           unanswered: [],
           failed: [],
+          ai_answers: 0,
+          ai_input_tokens: 0,
+          ai_output_tokens: 0,
         };
         expect(response.data.imports).toEqual([
           {
@@ -567,6 +571,9 @@ medusaIntegrationTestRunner({
           images_failed: 0,
           unanswered: [],
           failed: [],
+          ai_answers: 1,
+          ai_input_tokens: 0,
+          ai_output_tokens: 0,
         });
         expect(await page('W6103')).toBeDefined();
       });
@@ -888,6 +895,146 @@ medusaIntegrationTestRunner({
             category: null,
           }),
         ]);
+      });
+
+      describe('when a supplier code is mapped to another Category', () => {
+        let moved: { id: string };
+        let fromId: string;
+        let toId: string;
+
+        beforeEach(async () => {
+          const suppliers: SupplierModuleService =
+            getContainer().resolve(SUPPLIER_MODULE);
+          const tag = `${Date.now()}`;
+          const [from, to] = await catalog.createCategories([
+            { slug: `remap-from-${tag}`, name: `Было ${tag}` },
+            { slug: `remap-to-${tag}`, name: `Стало ${tag}` },
+          ]);
+          fromId = from.id;
+          toId = to.id;
+          await catalog.createCategoryFields([
+            {
+              category_id: from.id,
+              key: 'viscosity',
+              type: 'text',
+              label: 'Вязкость',
+              required: false,
+            },
+            {
+              category_id: to.id,
+              key: 'length',
+              type: 'number',
+              unit: 'мм',
+              label: 'Длина',
+              required: false,
+            },
+          ]);
+          moved = await suppliers.createSupplierCategories({
+            supplier_id: intercarsId,
+            code: `IC-MOVE-${tag}`,
+            category_id: from.id,
+          });
+          intercars.articles.push({
+            article_id: `IC-MOVE-${tag}`,
+            brand: 'MANN-FILTER',
+            number: `MV ${tag}`,
+            name: 'Kaiš',
+            category: `IC-MOVE-${tag}`,
+            specs: { Dužina: '100 mm' },
+          });
+          shopAi.attributes = { viscosity: '5W-30', length: 100 };
+          await runImport();
+        });
+
+        const remap = (category_id: string | null) =>
+          getContainer()
+            .resolve<SupplierModuleService>(SUPPLIER_MODULE)
+            .updateSupplierCategories({ id: moved.id, category_id });
+
+        const movedPart = async () =>
+          (await page(intercars.articles[0].number.replace(' ', '')))!.part;
+
+        it('re-files the Part there with only the attributes the AI reads for the new Category', async () => {
+          expect(await movedPart()).toMatchObject({
+            category_id: fromId,
+            attributes: { viscosity: '5W-30' },
+          });
+          await remap(toId);
+
+          await runImport();
+
+          expect(await movedPart()).toMatchObject({
+            category_id: toId,
+            attributes: { length: 100 },
+          });
+          expect(
+            shopAi.articlesAsked.map(({ category }) => category?.id),
+          ).toEqual([fromId, toId]);
+        });
+
+        it('keeps a Part where staff filed it', async () => {
+          const part = await movedPart();
+          await api.post(
+            `/admin/parts/${part.id}`,
+            { category_id: fromId },
+            adminHeaders,
+          );
+          await remap(toId);
+
+          await runImport();
+
+          expect(await movedPart()).toMatchObject({
+            category_id: fromId,
+            attributes: { viscosity: '5W-30' },
+          });
+        });
+
+        it('keeps the Category of a Part whose code is now excluded', async () => {
+          await remap(null);
+
+          await runImport();
+
+          expect((await movedPart()).category_id).toBe(fromId);
+        });
+      });
+
+      it('stops after IMPORT_AI_LIMIT answers, keeps the offers past that point and sums the tokens', async () => {
+        offerHu816x(
+          intercars,
+          { article_id: 'IC-LIMIT', brand: 'MANN-FILTER', category: 'IC-OIL' },
+          { cost_price: 1000, quantity: 1, lead_time_days: 0 },
+        );
+        await runImport();
+        const offered = intercars.articles.splice(0);
+        intercars.articles.push(
+          ...['LIM 1', 'LIM 2', 'LIM 3'].map((number) => ({
+            article_id: `IC-${number}`,
+            brand: 'MANN-FILTER',
+            number,
+            name: `Filter ${number}`,
+            category: 'IC-OIL',
+          })),
+          ...offered,
+        );
+        intercars.pageSize = 1;
+        shopAi.questions = 0;
+        shopAi.usage = { input: 1200, output: 300 };
+        process.env.IMPORT_AI_LIMIT = '2';
+        try {
+          const response = await runImport();
+
+          expect(response.data.imports[0]).toMatchObject({
+            created: 2,
+            ai_answers: 2,
+            ai_input_tokens: 2400,
+            ai_output_tokens: 600,
+          });
+        } finally {
+          delete process.env.IMPORT_AI_LIMIT;
+        }
+        expect(shopAi.questions).toBe(2);
+        expect(await page('LIM3')).toBeUndefined();
+        expect((await page('HU816X'))?.offers).toHaveLength(1);
       });
 
       it('files a battery with the attributes that fit its Category and drops only the ones that do not', async () => {

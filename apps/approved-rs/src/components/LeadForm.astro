@@ -1,4 +1,5 @@
 ---
+import { renderId } from '@podbor/site-kit';
 import { CONTACT_INPUT_FIELDS } from '@podbor/lead-crm/fields';
 import { METRIKA_MASK_CLASS } from '@podbor/site-kit/browser';
 import FormField from './FormField.astro';
@@ -47,7 +48,7 @@ const countryOptions = phoneCountryOptions(displayLocale).filter(
     shortlist.has(country.iso) || country.iso === defaultPhoneCountry,
 );
 
-const uid = crypto.randomUUID().slice(0, 8);
+const uid = renderId(Astro.locals);
 const panelIds = {
   telegram: `contact-panel-telegram-${uid}`,
   phone: `contact-panel-phone-${uid}`,

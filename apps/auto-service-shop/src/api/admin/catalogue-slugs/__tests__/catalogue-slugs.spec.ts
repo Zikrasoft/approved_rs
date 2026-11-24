@@ -1,5 +1,3 @@
-import type { IApiKeyModuleService } from '@medusajs/framework/types';
-import { Modules } from '@medusajs/framework/utils';
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
 import { createAdminAuth } from '../../../../../integration-tests/adminAuth';
@@ -11,23 +9,12 @@ import {
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 
-const place = (fields: Record<string, string>) => ({
-  brand: null,
-  make: null,
-  model: null,
-  vehicle: null,
-  category: null,
-  part: null,
-  ...fields,
-});
-
 medusaIntegrationTestRunner({
   moduleName: 'catalogue-slugs',
   dbName: 'medusa-catalogue-slugs-integration',
   testSuite: ({ api, getContainer }) => {
-    describe('catalogue slugs and redirects', () => {
+    describe('catalogue slugs', () => {
       let adminHeaders: { headers: { authorization: string } };
-      let storeHeaders: { headers: Record<string, string> };
       let catalog: CatalogModuleService;
 
       beforeAll(async () => {
@@ -39,15 +26,6 @@ medusaIntegrationTestRunner({
           'admin@catalogue-slugs.local',
           'supersecret',
         );
-        const apiKeys: IApiKeyModuleService = container.resolve(
-          Modules.API_KEY,
-        );
-        const key = await apiKeys.createApiKeys({
-          title: 'catalogue-slugs',
-          type: 'publishable',
-          created_by: 'test',
-        });
-        storeHeaders = { headers: { 'x-publishable-api-key': key.token } };
       });
 
       const rename = (kind: string, id: string, slug: string) =>
@@ -55,11 +33,7 @@ medusaIntegrationTestRunner({
           .post('/admin/catalogue-slugs', { kind, id, slug }, adminHeaders)
           .catch(({ response }) => response);
 
-      const redirects = async () =>
-        (await api.get('/store/catalogue-redirects', storeHeaders)).data
-          .redirects;
-
-      it('renames a Make, Model and Category slug, redirects each old one and never gives it out again', async () => {
+      it('renames a Make, Model and Category slug, frees the old one and refuses a live one', async () => {
         const { make, model } = await createVehicleFixture(catalog);
         const category = await catalog.createCategories({
           slug: 'oil',
@@ -74,129 +48,29 @@ medusaIntegrationTestRunner({
           (await rename('category', category.id, 'oil-filters')).status,
         ).toBe(200);
 
-        expect(await redirects()).toEqual(
-          expect.arrayContaining([
-            {
-              from: place({ make: 'bmw' }),
-              to: place({ make: 'bayerische' }),
-            },
-            {
-              from: place({ make: 'bayerische', model: 'f30-320d' }),
-              to: place({ make: 'bayerische', model: '3-series-f30-320d' }),
-            },
-            {
-              from: place({ category: 'oil' }),
-              to: place({ category: 'oil-filters' }),
-            },
-          ]),
+        expect((await catalog.retrieveMake(make.id)).slug).toBe('bayerische');
+        expect((await catalog.retrieveVehicleModel(model.id)).slug).toBe(
+          '3-series-f30-320d',
         );
-        const reused = await rename('category', category.id, 'oil');
-        expect(reused.status).toBe(409);
-        expect(reused.data.code).toBe('SLUG_TAKEN');
-        const created = await api
-          .post(
-            '/admin/makes',
-            { name: 'BMW Alpina', slug: 'bmw' },
-            adminHeaders,
-          )
-          .catch(({ response }) => response);
-        expect(created.data.code).toBe('SLUG_TAKEN');
-      });
-
-      it('points a deleted Part at its Category and a deleted Vehicle at its Model', async () => {
-        const { vehicle } = await createVehicleFixture(catalog);
-        const category = await catalog.createCategories({
-          slug: 'oil-filters',
-          name: 'Масляные фильтры',
-        });
-        const brand = await catalog.createBrands({
-          name: 'Mann-Filter',
-          slug: 'mann-filter',
-        });
-        const partId = await catalog.createPartWithIdentifiers({
-          name: 'Масляный фильтр',
-          category_id: category.id,
-          identifiers: [
-            {
-              type: 'manufacturer-number',
-              brand_id: brand.id,
-              value: 'HU 816 x',
-            },
-          ],
-        });
-
-        expect(
-          (await api.delete(`/admin/parts/${partId}`, adminHeaders)).status,
-        ).toBe(200);
-        expect(
-          (await api.delete(`/admin/vehicles/${vehicle.id}`, adminHeaders))
-            .status,
-        ).toBe(200);
-
-        expect(await redirects()).toEqual(
-          expect.arrayContaining([
-            {
-              from: place({ part: 'mann-filter-hu816x' }),
-              to: place({ category: 'oil-filters' }),
-            },
-            {
-              from: place({
-                make: 'bmw',
-                model: 'f30-320d',
-                vehicle: vehicle.slug,
-              }),
-              to: place({ make: 'bmw', model: 'f30-320d' }),
-            },
-          ]),
+        expect((await catalog.retrieveCategory(category.id)).slug).toBe(
+          'oil-filters',
         );
-      });
-
-      it('keeps one redirect from a Part page deleted again after a re-import, pointing where the last deletion sent it', async () => {
-        const brand = await catalog.createBrands({
-          name: 'Bosch',
-          slug: 'bosch',
+        const other = await catalog.createCategories({
+          slug: 'air-filters',
+          name: 'Воздушные фильтры',
         });
-        const deletePartIn = async (slug: string) => {
-          const category = await catalog.createCategories({
-            slug,
-            name: slug,
-          });
-          const partId = await catalog.createPartWithIdentifiers({
-            name: 'Свеча зажигания',
-            category_id: category.id,
-            identifiers: [
-              {
-                type: 'manufacturer-number',
-                brand_id: brand.id,
-                value: 'FR7DC',
-              },
-            ],
-          });
-          expect(
-            (await api.delete(`/admin/parts/${partId}`, adminHeaders)).status,
-          ).toBe(200);
-        };
-
-        await deletePartIn('spark-plugs');
-        await deletePartIn('ignition');
-
-        expect(
-          await catalog.listSlugRedirects({
-            kind: 'part',
-            from_slug: 'bosch-fr7dc',
-          }),
-        ).toHaveLength(1);
-        expect(
-          (await redirects()).filter(({ from }) => from.part === 'bosch-fr7dc'),
-        ).toEqual([
-          {
-            from: place({ part: 'bosch-fr7dc' }),
-            to: place({ category: 'ignition' }),
-          },
-        ]);
+        const taken = await rename('category', other.id, 'oil-filters');
+        expect([taken.status, taken.data.code]).toEqual([409, 'SLUG_TAKEN']);
+        expect((await rename('category', other.id, 'oil')).status).toBe(200);
+        const created = await api.post(
+          '/admin/makes',
+          { name: 'BMW Alpina', slug: 'bmw' },
+          adminHeaders,
+        );
+        expect(created.data.make.slug).toBe('bmw');
       });
 
-      it('merges a duplicate Make into another, moving its Series and redirecting its pages', async () => {
+      it('merges a duplicate Make into another, moving its Series', async () => {
         const vw = await createVehicleFixture(catalog, {
           make: { slug: 'vw', name: 'VW' },
           modelSlug: 'golf-5k1-1-4-tsi',
@@ -220,11 +94,6 @@ medusaIntegrationTestRunner({
         expect(await catalog.listMakes({ id: vw.make.id })).toEqual([]);
         const [series] = await catalog.listSeries({ id: vw.series.id });
         expect(series.make_id).toBe(volkswagen.id);
-        expect(await redirects()).toEqual(
-          expect.arrayContaining([
-            { from: place({ make: 'vw' }), to: place({ make: 'volkswagen' }) },
-          ]),
-        );
         const self = await api
           .post(
             `/admin/makes/${volkswagen.id}/merge`,
@@ -271,30 +140,9 @@ medusaIntegrationTestRunner({
         const moved = model.vehicles.find(({ id }) => id === vw.vehicle.id);
         expect(moved?.slug).not.toBe(vw.vehicle.slug);
         expect(await catalog.listSeries({ make_id: vw.make.id })).toEqual([]);
-        expect(await redirects()).toEqual(
-          expect.arrayContaining([
-            { from: place({ make: 'vw' }), to: place({ make: 'volkswagen' }) },
-            {
-              from: place({ make: 'volkswagen', model: 'vw-golf' }),
-              to: place({ make: 'volkswagen', model: 'volkswagen-golf' }),
-            },
-            {
-              from: place({
-                make: 'volkswagen',
-                model: 'vw-golf',
-                vehicle: vw.vehicle.slug,
-              }),
-              to: place({
-                make: 'volkswagen',
-                model: 'volkswagen-golf',
-                vehicle: moved?.slug ?? '',
-              }),
-            },
-          ]),
-        );
       });
 
-      it('moves a Series to another Make, keeping each old Model URL answering', async () => {
+      it('moves a Series to another Make, giving a clashing Model a free slug', async () => {
         const seatMake = await catalog.createMakes({
           name: 'Seat Move',
           slug: 'seat-move',
@@ -326,51 +174,10 @@ medusaIntegrationTestRunner({
         const [moved] = await catalog.listVehicleModels({ id: seatModel.id });
         expect(moved.make_id).toBe(cupra.make.id);
         expect(moved.slug).not.toBe('leon-moved');
-        expect(await redirects()).toEqual(
-          expect.arrayContaining([
-            {
-              from: place({ make: 'seat-move', model: 'leon-moved' }),
-              to: place({ make: 'cupra-move', model: moved.slug }),
-            },
-          ]),
-        );
         const [untouched] = await catalog.listVehicleModels({
           id: cupra.model.id,
         });
         expect(untouched).toMatchObject({ slug: 'leon-moved' });
-      });
-
-      it('records who merged a Make on the redirects it leaves', async () => {
-        const vw = await createVehicleFixture(catalog, {
-          make: { slug: 'vw-actor', name: 'VW Actor' },
-          modelSlug: 'actor-golf',
-          chassisCode: '5K1',
-          engineCode: 'CAXA',
-          engineFamily: 'EA111',
-          typeCode: '1K13',
-        });
-        const target = await catalog.createMakes({
-          name: 'Volkswagen Actor',
-          slug: 'volkswagen-actor',
-        });
-        const [admin] = await getContainer()
-          .resolve(Modules.USER)
-          .listUsers({ email: 'admin@catalogue-slugs.local' });
-
-        await api.post(
-          `/admin/makes/${vw.make.id}/merge`,
-          { into: target.id },
-          adminHeaders,
-        );
-
-        const [left] = await catalog.listSlugRedirects({
-          kind: 'make',
-          from_id: vw.make.id,
-        });
-        expect(left).toMatchObject({
-          created_by: admin.id,
-          updated_by: admin.id,
-        });
       });
 
       it('refuses a merge and a slug rename while another catalogue writer runs', async () => {

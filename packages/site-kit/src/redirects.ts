@@ -1,11 +1,8 @@
-import { readFileSync, writeFileSync } from 'node:fs';
 import { compile, pathToRegexp, type Key } from 'path-to-regexp';
-import { SECURITY_HEADERS } from './securityHeaders.ts';
 
 export interface Redirect {
   source: string;
   destination: string;
-  permanent: boolean;
 }
 
 const ORIGIN = /^https?:\/\/[^/]+/;
@@ -43,62 +40,4 @@ export function createRedirectMatcher(
     }
     return null;
   };
-}
-
-export function withVercelConfig(
-  vercelJson: string,
-  redirects: readonly Redirect[],
-): string {
-  const config = {
-    ...JSON.parse(vercelJson),
-    redirects,
-    headers: SECURITY_HEADERS,
-  };
-  return `${JSON.stringify(config, null, 2)}\n`;
-}
-
-export function writeVercelConfig(
-  vercelJson: URL,
-  redirects: readonly Redirect[],
-): void {
-  writeFileSync(
-    vercelJson,
-    withVercelConfig(readFileSync(vercelJson, 'utf8'), redirects),
-  );
-}
-
-type PathBuilders<L extends string> = Record<
-  string,
-  { build(locale: L, ...params: string[]): string }['build']
->;
-
-export function unprefixedSectionRedirects<L extends string>(
-  paths: PathBuilders<L>,
-  locale: L,
-): Redirect[] {
-  const nestedBySection = new Map<string, boolean>();
-  for (const build of Object.values(paths)) {
-    const [, , section, ...rest] = build(locale, '_', '_', '_').split('/');
-    if (section && !section.includes('.')) {
-      nestedBySection.set(
-        section,
-        Boolean(nestedBySection.get(section)) || rest.some(Boolean),
-      );
-    }
-  }
-  return [...nestedBySection].flatMap(([section, nested]) =>
-    nested
-      ? [
-          {
-            source: `/${section}/:path*`,
-            destination: `/${locale}/${section}/:path*`,
-            permanent: true,
-          },
-        ]
-      : [`/${section}`, `/${section}/`].map((source) => ({
-          source,
-          destination: `/${locale}/${section}/`,
-          permanent: true,
-        })),
-  );
 }

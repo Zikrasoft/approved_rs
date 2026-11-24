@@ -55,6 +55,18 @@ describe('parseEnv', () => {
     expect(() => parseEnv({ ...VALID_ENV, IMPORT_CONCURRENCY: '0' })).toThrow();
   });
 
+  it('sets no limit on Import AI answers unless a number is set', () => {
+    expect(parseEnv(VALID_ENV).IMPORT_AI_LIMIT).toBeUndefined();
+    expect(
+      parseEnv({ ...VALID_ENV, IMPORT_AI_LIMIT: '' }).IMPORT_AI_LIMIT,
+    ).toBeUndefined();
+    expect(
+      parseEnv({ ...VALID_ENV, IMPORT_AI_LIMIT: '50' }).IMPORT_AI_LIMIT,
+    ).toBe(50);
+    expect(() => parseEnv({ ...VALID_ENV, IMPORT_AI_LIMIT: '0' })).toThrow();
+    expect(() => parseEnv({ ...VALID_ENV, IMPORT_AI_LIMIT: 'all' })).toThrow();
+  });
+
   it('takes 1200 storefront events a minute unless another limit is set', () => {
     expect(parseEnv(VALID_ENV).STOREFRONT_EVENTS_PER_MINUTE).toBe(1200);
     expect(

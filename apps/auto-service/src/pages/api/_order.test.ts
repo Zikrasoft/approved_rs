@@ -15,8 +15,8 @@ vi.mock('@/lib/crm', () => ({
   notifyLead,
   leadStore: { failedCheckoutCapped },
 }));
-vi.mock('@vercel/functions', () => ({
-  waitUntil: (promise: Promise<unknown>) => pending.push(promise),
+vi.mock('@podbor/lead-crm/background', () => ({
+  inBackground: (promise: Promise<unknown>) => pending.push(promise),
 }));
 
 import { POST } from './order';

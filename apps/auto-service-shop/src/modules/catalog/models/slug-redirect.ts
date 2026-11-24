@@ -13,6 +13,7 @@ export const SLUG_KINDS = [
 
 export type SlugKind = (typeof SLUG_KINDS)[number];
 
+// TODO: nothing reads or writes slug_redirect any more; drop this model and its table in the next deploy.
 const SlugRedirect = model
   .define('slug_redirect', {
     id: model.id().primaryKey(),

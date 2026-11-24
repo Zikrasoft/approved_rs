@@ -26,9 +26,6 @@ export const LEDGER_COPY = {
   expired: '⌛ Этот запрос уже закрыт — нажмите ➕ или ➖ ещё раз.',
   badAmount: '⚠️ Нужна сумма числом.',
   amountLimits: `⚠️ Сумма — от 0,01 до ${formatMoney(MAX_OPERATION_AMOUNT)}, не больше двух знаков после запятой.`,
-  balanceUnavailable: 'недоступен',
-  unavailable:
-    '⚠️ Баланс сейчас недоступен: файл учёта не читается. Админ уже знает.',
 } as const;
 
 const BALANCE_LABELS: Record<Role, string> = {
@@ -41,12 +38,8 @@ export const LEDGER_ROW: Btn[] = [
   { text: LEDGER_COPY.debit, callback_data: 'ledger:settlement' },
 ];
 
-export function balanceLine(role: Role, balance: number | undefined): string {
-  const amount =
-    balance === undefined
-      ? LEDGER_COPY.balanceUnavailable
-      : formatMoney(balance);
-  return `<b>${BALANCE_LABELS[role]}: ${amount}</b>`;
+export function balanceLine(role: Role, balance: number): string {
+  return `<b>${BALANCE_LABELS[role]}: ${formatMoney(balance)}</b>`;
 }
 
 export function buildBalance(
@@ -103,12 +96,4 @@ export function operationNoticeText(
     ...(operation.note ? [escapeHtml(operation.note)] : []),
     `баланс ${formatMoney(balance)}`,
   ].join(' · ');
-}
-
-export function unreadableLedgerText(path: string, brand: string): string {
-  return [
-    `⚠️ Файл учёта ${escapeHtml(path)} не читается`,
-    ``,
-    `Заметил сайт ${escapeHtml(brand)}. Баланс и операции недоступны, файл не трогал — поправить можно только руками.`,
-  ].join('\n');
 }

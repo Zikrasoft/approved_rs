@@ -38,8 +38,6 @@ export const captureBotLink = (
 
 export const START_PAYLOAD_LIMIT = 64;
 
-export const START_COMMAND = /^\/start(?:\s+(\S+))?$/;
-
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const VISITOR_SEGMENT =
   /_([0-9a-f]{8})([0-9a-f]{4})([0-9a-f]{4})([0-9a-f]{4})([0-9a-f]{12})$/;

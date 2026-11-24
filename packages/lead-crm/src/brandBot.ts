@@ -107,9 +107,7 @@ export function createBrandBot({ store, serviceLabel }: BrandBotOptions) {
   });
 
   async function cancelOrderLead(orderId: string): Promise<CancelOrderResult> {
-    const before = (await store.readLeads()).find(
-      (lead) => lead.orderId === orderId,
-    );
+    const before = await store.findByOrderId(orderId);
     if (!before) return 'missing';
     const lost = await store.loseOrderLead(orderId);
     if (!lost) {
@@ -137,3 +135,5 @@ export function createBrandBot({ store, serviceLabel }: BrandBotOptions) {
     adminIds,
   };
 }
+
+export type BrandBot = ReturnType<typeof createBrandBot>;

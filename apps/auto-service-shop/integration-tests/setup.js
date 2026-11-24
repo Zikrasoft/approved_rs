@@ -1,6 +1,19 @@
+const { configManager } = require('@medusajs/framework/config');
 const { MetadataStorage } = require('@medusajs/framework/mikro-orm/core');
 
+const { DATABASE_POOL } = require('../src/lib/database-pool');
+
 MetadataStorage.clear();
+
+const loadConfig = configManager.loadConfig.bind(configManager);
+configManager.loadConfig = (options) => {
+  const config = options.projectConfig.projectConfig;
+  config.databaseDriverOptions = {
+    ...config.databaseDriverOptions,
+    pool: DATABASE_POOL,
+  };
+  return loadConfig(options);
+};
 
 process.env.PORT ??= '9219';
 process.env.DB_HOST ??= 'localhost';

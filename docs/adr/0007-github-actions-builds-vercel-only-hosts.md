@@ -1,5 +1,7 @@
 # GitHub Actions builds and deploys; Vercel only hosts
 
+Superseded: the sites deploy to the VPS and Vercel hosts nothing (docs/guides/deploy.md). The `git.deploymentEnabled: false` files stay until the Vercel projects are deleted.
+
 `git.deploymentEnabled: false` turns off Vercel's git integration, and the `deploy` / `deploy-brand-site` jobs in `.github/workflows/ci.yml` run `vercel pull` → `vercel build --prod` → `vercel deploy --prebuilt --prod` from inside each `apps/<app>`. The Vercel project only stores env vars and the domain and is the deploy target.
 
 ## Considered Options

@@ -2,6 +2,7 @@ import { defineRouteConfig } from '@medusajs/admin-sdk';
 import { TruckFast } from '@medusajs/icons';
 import {
   Button,
+  Checkbox,
   Container,
   Drawer,
   FocusModal,
@@ -76,7 +77,7 @@ type Row = z.infer<typeof rowSchema>;
 type Listing = { rows: Row[]; count: number };
 
 type Field =
-  | { key: string; kind: 'text' | 'number' }
+  | { key: string; kind: 'text' | 'number' | 'boolean' }
   | { key: string; kind: 'enum'; values: readonly string[] }
   | { key: string; kind: 'ref'; collection: string; ownName?: boolean };
 
@@ -135,6 +136,7 @@ const ENTITIES: Entity[] = [
     fields: [
       { key: 'name', kind: 'text' },
       { key: 'slug', kind: 'text' },
+      { key: 'show_on_site', kind: 'boolean' },
     ],
   },
   {
@@ -238,6 +240,7 @@ const toBody = (fields: Field[], draft: Record<string, string>) =>
     fields
       .filter(({ key }) => draft[key] !== undefined)
       .map(({ key, kind }) => {
+        if (kind === 'boolean') return [key, draft[key] === 'true'];
         const value = draft[key].trim();
         if (!value) return [key, null];
         return [key, kind === 'number' ? Number(value) : value];
@@ -273,6 +276,7 @@ const EntityTable = ({
 
   const cell = (field: Field, row: Row): string => {
     const value = row[field.key];
+    if (field.kind === 'boolean') return value === true ? '✓' : '-';
     if (value == null || value === '') return '-';
     if (field.kind === 'text' || field.kind === 'number') return String(value);
     if (field.kind === 'enum') return enumLabel(t, field, value);
@@ -475,7 +479,15 @@ const EntityForm = ({
             <Label size="small" weight="plus" htmlFor={id}>
               {t(`vehicles.fields.${field.key}`)}
             </Label>
-            {field.kind === 'text' || field.kind === 'number' ? (
+            {field.kind === 'boolean' ? (
+              <Checkbox
+                id={id}
+                checked={draft[field.key] === 'true'}
+                onCheckedChange={(checked) =>
+                  setDraft({ ...draft, [field.key]: String(checked === true) })
+                }
+              />
+            ) : field.kind === 'text' || field.kind === 'number' ? (
               <Input
                 id={id}
                 type={field.kind}

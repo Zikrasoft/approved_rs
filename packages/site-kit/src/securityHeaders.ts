@@ -22,6 +22,7 @@ const directives: Record<string, string[]> = {
   'connect-src': [
     "'self'",
     'https://*.google-analytics.com',
+    'https://analytics.google.com',
     'https://*.analytics.google.com',
     GOOGLE_TAG_ORIGIN,
     YANDEX_METRIKA_ORIGIN,
@@ -56,24 +57,32 @@ export const CONTENT_SECURITY_POLICY = Object.entries(directives)
   .join('; ');
 
 export const SECURITY_HEADERS = [
+  { key: 'Content-Security-Policy', value: "frame-ancestors 'self'" },
   {
-    source: '/(.*)',
-    headers: [
-      { key: 'Content-Security-Policy', value: "frame-ancestors 'self'" },
-      {
-        key: 'Content-Security-Policy-Report-Only',
-        value: CONTENT_SECURITY_POLICY,
-      },
-      { key: 'X-Content-Type-Options', value: 'nosniff' },
-      { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-      {
-        key: 'Permissions-Policy',
-        value: 'camera=(), microphone=(), geolocation=()',
-      },
-      {
-        key: 'Strict-Transport-Security',
-        value: 'max-age=63072000; includeSubDomains',
-      },
-    ],
+    key: 'Content-Security-Policy-Report-Only',
+    value: CONTENT_SECURITY_POLICY,
+  },
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  {
+    key: 'Permissions-Policy',
+    value: 'camera=(), microphone=(), geolocation=()',
+  },
+  {
+    key: 'Strict-Transport-Security',
+    value: 'max-age=63072000; includeSubDomains',
   },
 ];
+
+export function caddySecurityHeaders(): string {
+  return [
+    'header {',
+    '\tdefer',
+    ...SECURITY_HEADERS.map(
+      ({ key, value }) => `\t${key} ${JSON.stringify(value)}`,
+    ),
+    '\t-Server',
+    '}',
+    '',
+  ].join('\n');
+}

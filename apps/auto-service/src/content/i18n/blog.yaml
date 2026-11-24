@@ -10,4 +10,31 @@ makeLink: 'Ремонт {make} в CarLab'
 faqHeading: Частые вопросы
 ctaHeading: Есть вопрос о вашей машине?
 ctaBody: Опишите, что с машиной, и мы скажем, с чего начать и сколько это займет.
-translatedFrom: pending
+translatedFrom: 0274e1675812d384
+translations:
+  sr:
+    navLabel: Blog
+    metaTitle: Blog auto servisa CarLab u Beogradu
+    metaDescription: 'Članci majstora CarLaba o popravci i održavanju automobila u Beogradu: kada menjati ulje, šta proveriti pre kupovine i tipični kvarovi različitih marki.'
+    heading: Članci o popravci i održavanju
+    lead: Pišemo o problemima zbog kojih nam automobili dolaze u servis i o tome kako da izbegnete skupe popravke.
+    pageName: Blog, stranica {page}
+    pagination: Stranice bloga
+    empty: Još nema članaka. Ako imate pitanje o svom automobilu, pišite nam i odgovorićemo Vam.
+    makeLink: Popravka vozila marke {make} u CarLabu
+    faqHeading: Česta pitanja
+    ctaHeading: Imate pitanje o svom automobilu?
+    ctaBody: Opišite nam problem sa automobilom, pa ćemo Vam reći odakle da počnete i koliko će to trajati.
+  en:
+    navLabel: Blog
+    metaTitle: CarLab Auto Repair Blog in Belgrade
+    metaDescription: 'CarLab mechanics share advice on car repairs and servicing in Belgrade: when to change your oil, what to check before buying and common issues by make.'
+    heading: Car repair and servicing articles
+    lead: We write about the issues cars come to our workshop with and how to avoid costly repairs.
+    pageName: Blog, page {page}
+    pagination: Blog pages
+    empty: No articles yet. If you have a question about your car, get in touch and we'll be happy to help.
+    makeLink: '{make} repairs at CarLab'
+    faqHeading: Frequently asked questions
+    ctaHeading: Got a question about your car?
+    ctaBody: Tell us what's going on with your car, and we'll suggest where to start and how long it will take.

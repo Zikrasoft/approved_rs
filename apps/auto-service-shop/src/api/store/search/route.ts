@@ -391,7 +391,7 @@ export async function GET(
     );
   };
 
-  if (!filters.q && !found && !cars.keys.length && !scopeModelKey) {
+  if (q && !filters.q && !found && !cars.keys.length && !scopeModelKey) {
     nothing();
     return;
   }

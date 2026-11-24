@@ -1,9 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { createRedirectMatcher } from '@podbor/site-kit/redirects';
-import { EDGE_REDIRECTS, REDIRECTS } from './redirects';
+import { REDIRECTS } from './redirects';
 
 const redirectFor = createRedirectMatcher(REDIRECTS);
-const edgeRedirectFor = createRedirectMatcher(EDGE_REDIRECTS);
 
 describe('REDIRECTS', () => {
   it.each([
@@ -58,20 +57,5 @@ describe('REDIRECTS', () => {
     '/llms.txt',
   ])('leaves %s alone', (path) => {
     expect(redirectFor(path)).toBeNull();
-  });
-});
-
-describe('EDGE_REDIRECTS', () => {
-  it.each([
-    ['/vehicle-sourcing/rs/', '/ru/vehicle-sourcing/rs'],
-    ['/contacts', '/ru/contacts/'],
-    ['/thanks/', '/ru/thanks/'],
-    ['/cases/bmw-x3', '/ru/cases/bmw-x3'],
-  ])('prefixes the unprefixed %s with the primary locale', (path, target) => {
-    expect(edgeRedirectFor(path)).toBe(target);
-  });
-
-  it('leaves /llms.txt alone', () => {
-    expect(edgeRedirectFor('/llms.txt')).toBeNull();
   });
 });

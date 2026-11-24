@@ -561,6 +561,38 @@ medusaIntegrationTestRunner({
         expect(web.requests).toHaveLength(1);
       });
 
+      it('retries robots.txt through a dropped connection', async () => {
+        const site = testSite('flaky');
+        const web = fakeWeb({
+          'https://flaky.test/robots.txt': [unreachable, unreachable, ok('')],
+          'https://flaky.test/sitemap.xml': ok(
+            urlset('https://flaky.test/p/1'),
+          ),
+          'https://flaky.test/p/1': ok('one'),
+        });
+
+        const progress = await crawl(site, web);
+
+        expect(progress.run?.status).toBe('done');
+        expect(progress.pages).toMatchObject({ done: 1 });
+      });
+
+      it('pauses when robots.txt stays unreachable for every retry', async () => {
+        const site = testSite('offline');
+        const web = fakeWeb({
+          'https://offline.test/robots.txt': unreachable,
+        });
+
+        const progress = await crawl(site, web);
+
+        expect(progress.run).toMatchObject({
+          status: 'paused',
+          paused_reason: 'robots_unavailable',
+        });
+        expect(web.requests).toHaveLength(5);
+        expect(web.clock.time - START).toBeGreaterThanOrEqual(15 * 60 * 1000);
+      });
+
       it('reads a missing robots.txt as allowing everything', async () => {
         const site = testSite('missing');
         const web = fakeWeb({

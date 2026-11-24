@@ -5,6 +5,7 @@ import type {
   CategoryChoice,
   QuoteReading,
   ShopAi,
+  TokenUsage,
 } from '../src/lib/ai';
 
 export type FakeShopAi = {
@@ -15,6 +16,7 @@ export type FakeShopAi = {
   name: string | null;
   attributes: AttributeValues;
   description: string | null;
+  usage: TokenUsage | undefined;
   articlesAsked: { article: ArticleFacts; category: CategoryChoice | null }[];
   failure: Error | null;
   questions: number;
@@ -31,6 +33,7 @@ export const createFakeShopAi = (): FakeShopAi => {
     name: null,
     attributes: {},
     description: null,
+    usage: undefined,
     articlesAsked: [],
     failure: null,
     questions: 0,
@@ -65,6 +68,7 @@ export const createFakeShopAi = (): FakeShopAi => {
             name: fake.name ?? article.name,
             attributes: fake.attributes,
             description: fake.description,
+            usage: fake.usage,
           };
         } finally {
           fake.inFlight -= 1;

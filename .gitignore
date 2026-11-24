@@ -50,3 +50,6 @@ test-results
 infra/auto-service-shop/terraform/.terraform/
 infra/auto-service-shop/terraform/*.tfstate*
 infra/auto-service-shop/terraform/rendered/
+
+# Prisma client
+packages/lead-crm/src/generated/

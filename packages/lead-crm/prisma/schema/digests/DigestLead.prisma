@@ -1,0 +1,20 @@
+model DigestLead {
+  digestId String     @map("digest_id") @db.Uuid
+  leadId   String     @map("lead_id") @db.Uuid
+  list     DigestList
+  position Int
+
+  digest Digest @relation(fields: [digestId], references: [id], onDelete: Cascade)
+  lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@id([digestId, leadId])
+  @@index([leadId])
+  @@map("digest_leads")
+}
+
+enum DigestList {
+  due
+  stale
+
+  @@map("digest_list")
+}

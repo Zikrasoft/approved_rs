@@ -207,12 +207,32 @@ describe('OpenAI shop AI', () => {
   it('answers an article in one call on the one model, with the most likely answer', async () => {
     globalThis.fetch = answering(reply);
 
-    await expect(answerOf()).resolves.toEqual(answer);
+    await expect(answerOf()).resolves.toEqual({
+      ...answer,
+      usage: { input: 0, output: 0 },
+    });
 
     expect(globalThis.fetch).toHaveBeenCalledTimes(1);
     expect(sentBody(globalThis.fetch)).toMatchObject({ model: 'gpt-6-luna' });
     expect(sentBody(globalThis.fetch).temperature).toBeUndefined();
     expect(shopAi().articleQuestion(article, OIL).model).toBe('gpt-6-luna');
+  });
+
+  it('passes on the tokens the answer took', async () => {
+    globalThis.fetch = jest.fn(
+      async () =>
+        new Response(
+          JSON.stringify({
+            choices: [{ message: { content: JSON.stringify(reply) } }],
+            usage: { prompt_tokens: 1200, completion_tokens: 300 },
+          }),
+          { status: 200, headers: { 'Content-Type': 'application/json' } },
+        ),
+    );
+
+    await expect(answerOf()).resolves.toMatchObject({
+      usage: { input: 1200, output: 300 },
+    });
   });
 
   it('sends the article as JSON and only the Category it is filed under in the prompt', async () => {
@@ -314,7 +334,10 @@ describe('OpenAI shop AI', () => {
     'asks again once for an answer with %s, then refuses it',
     async (_, mixed) => {
       globalThis.fetch = answeringInTurn({ ...reply, ...mixed }, reply);
-      await expect(answerOf()).resolves.toEqual(answer);
+      await expect(answerOf()).resolves.toEqual({
+        ...answer,
+        usage: { input: 0, output: 0 },
+      });
       expect(globalThis.fetch).toHaveBeenCalledTimes(2);
 
       globalThis.fetch = answering({ ...reply, ...mixed });

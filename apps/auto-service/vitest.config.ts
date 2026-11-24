@@ -12,9 +12,24 @@ export default defineConfig(async (env) =>
       },
     },
     test: {
+      testTimeout: 30_000,
       environment: 'node',
+      globalSetup: [
+        fileURLToPath(
+          import.meta.resolve('@podbor/lead-crm/testing/database-server'),
+        ),
+      ],
       include: ['src/**/*.test.ts'],
-      coverage: { provider: 'v8', include: ['src/**/*.{ts,astro}'] },
+      coverage: {
+        provider: 'v8',
+        include: ['src/**/*.{ts,astro}'],
+        thresholds: {
+          statements: 93,
+          branches: 92,
+          functions: 95,
+          lines: 93,
+        },
+      },
       env: {
         PUBLIC_PHONE_NUMBER: '381677210533',
         PUBLIC_TG_MANAGER: 'carlabrs',
@@ -25,6 +40,8 @@ export default defineConfig(async (env) =>
         TELEGRAM_BOT_USERNAME: 'carlab_test_bot',
         TELEGRAM_CAPTURE_BOT_TOKEN: '1002:test-capture-bot-token',
         TELEGRAM_CAPTURE_WEBHOOK_SECRET: 'test-capture-webhook-secret',
+        TELEGRAM_WEBHOOK_SECRET: 'test-webhook-secret',
+        CRON_SECRET: 'test-cron-secret',
         META_CAPI_TOKEN: 'test-capi-token',
       },
     },

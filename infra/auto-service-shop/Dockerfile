@@ -28,7 +28,9 @@ COPY --from=builder --chown=node:node /repo/apps/auto-service-shop/.medusa/serve
 COPY --from=builder --chown=node:node /repo/apps/auto-service-shop/assets ./assets
 
 RUN node -e "require('typesense'); require('zod'); require('@sentry/node')" \
-  && ! node -e "require.resolve('ts-node')" 2>/dev/null
+  && ! node -e "require.resolve('ts-node')" 2>/dev/null \
+  && test -f node_modules/@podbor/lead-crm/prisma/migrations/migration_lock.toml \
+  && test -x node_modules/@podbor/lead-crm/node_modules/.bin/prisma
 
 USER node
 EXPOSE 9000

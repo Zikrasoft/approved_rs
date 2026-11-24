@@ -117,6 +117,27 @@ describe('translateCatalogue', () => {
     });
   });
 
+  it('keeps a hundred requests in flight at once', async () => {
+    openAi();
+    const answer = globalThis.fetch;
+    let inFlight = 0;
+    let most = 0;
+    globalThis.fetch = (async (...args: Parameters<typeof fetch>) => {
+      most = Math.max(most, ++inFlight);
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      inFlight--;
+      return answer(...args);
+    }) as typeof fetch;
+    const long = 'Аккумулятор для запуска двигателя. '.repeat(90);
+    const parts = Array.from({ length: 150 }, (_, index) => part(index, long));
+    const { catalog, updated } = catalogueOf(parts);
+
+    await translateCatalogue(catalog, 'key');
+
+    expect(most).toBe(100);
+    expect(new Set(updated.map(({ id }) => id)).size).toBe(150);
+  });
+
   it('asks again only for what a different prompt or model translated', async () => {
     const requests = openAi();
     const first = catalogueOf([part(1, null)]);

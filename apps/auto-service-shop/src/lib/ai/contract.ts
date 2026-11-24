@@ -131,6 +131,8 @@ export type ArticleQuestion = {
   user: string;
 };
 
+export type TokenUsage = { input: number; output: number };
+
 export type ShopAi = {
   readQuote: (
     pdf: Buffer,
@@ -141,5 +143,7 @@ export type ShopAi = {
     article: ArticleFacts,
     category: CategoryChoice | null,
   ) => ArticleQuestion;
-  answerArticle: (question: ArticleQuestion) => Promise<ArticleAnswer>;
+  answerArticle: (
+    question: ArticleQuestion,
+  ) => Promise<ArticleAnswer & { usage?: TokenUsage }>;
 };

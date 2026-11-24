@@ -1637,6 +1637,22 @@
           "enumItems": [],
           "mappedType": "text"
         },
+        "show_on_site": {
+          "name": "show_on_site",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "false",
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "boolean"
+        },
         "source": {
           "name": "source",
           "type": "text",

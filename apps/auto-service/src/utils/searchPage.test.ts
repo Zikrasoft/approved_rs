@@ -1,6 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { CarHit } from '@podbor/catalog-contract';
-import { planSearch, type SearchCatalogue } from './searchPage';
+import {
+  BROWSE_PAGE_SIZE,
+  browseHref,
+  planSearch,
+  type SearchCatalogue,
+} from './searchPage';
 
 const VIN = 'WBA35BG070N074158';
 const make = { slug: 'bmw', name: 'BMW' };
@@ -381,6 +386,75 @@ describe('planSearch', () => {
     ).toEqual({
       redirect: '/ru/parts/search/?category=batteries&make=bmw&model=f30-320d',
       status: 302,
+    });
+  });
+
+  describe('without a query or a scope', () => {
+    it('browses the whole catalogue a page of twelve at a time', async () => {
+      const catalogue = fakeCatalogue();
+
+      const outcome = await plan('', catalogue);
+      if (!('view' in outcome)) throw new Error('expected a view');
+
+      expect(outcome.view).toMatchObject({ browse: true, searchable: true });
+      expect(catalogue.search).toHaveBeenCalledWith(
+        expect.objectContaining({ q: '', offset: 0, limit: BROWSE_PAGE_SIZE }),
+      );
+    });
+
+    it('treats an empty query as the browse', async () => {
+      const outcome = await plan('q=');
+      if (!('view' in outcome)) throw new Error('expected a view');
+
+      expect(outcome.view.browse).toBe(true);
+    });
+
+    it('pages the browse on the links the showcase uses', async () => {
+      const catalogue = fakeCatalogue({
+        search: vi.fn(async () => ({ ...found(30), limit: BROWSE_PAGE_SIZE })),
+      });
+
+      const outcome = await plan('offset=12', catalogue);
+      if (!('view' in outcome)) throw new Error('expected a view');
+
+      expect(catalogue.search).toHaveBeenCalledWith(
+        expect.objectContaining({ offset: 12, limit: BROWSE_PAGE_SIZE }),
+      );
+      expect(outcome.view.searchHref([], [], 24)).toBe(browseHref('ru', 24));
+      expect(browseHref('ru', 24)).toBe('/ru/parts/search/?offset=24');
+      expect(browseHref('ru')).toBe('/ru/parts/search/');
+      expect(outcome.view.searchHref([], [], 0)).toBe(browseHref('ru'));
+    });
+
+    it('sends an offset past the last browse page back to it', async () => {
+      const catalogue = fakeCatalogue({
+        search: vi.fn(async () => ({ ...found(30), limit: BROWSE_PAGE_SIZE })),
+      });
+
+      expect(await plan('offset=48', catalogue)).toEqual({
+        redirect: browseHref('ru', 24),
+        status: 302,
+      });
+    });
+
+    it('keeps an unsearchable query out of the browse', async () => {
+      const catalogue = fakeCatalogue();
+
+      const outcome = await plan('q=%25', catalogue);
+      if (!('view' in outcome)) throw new Error('expected a view');
+
+      expect(outcome.view).toMatchObject({ browse: false, searchable: false });
+      expect(catalogue.search).not.toHaveBeenCalled();
+    });
+
+    it('asks for the shop default page size inside a scope', async () => {
+      const catalogue = fakeCatalogue();
+
+      await plan('category=batteries', catalogue);
+
+      expect(catalogue.search).toHaveBeenCalledWith(
+        expect.not.objectContaining({ limit: expect.anything() }),
+      );
     });
   });
 

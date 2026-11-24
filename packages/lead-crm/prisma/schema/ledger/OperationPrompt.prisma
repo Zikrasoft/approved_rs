@@ -1,0 +1,11 @@
+model OperationPrompt {
+  id        String        @id @default(uuid(7)) @db.Uuid
+  chatId    BigInt        @map("chat_id")
+  messageId Int           @map("message_id")
+  type      OperationType
+  createdAt DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@unique([chatId, messageId])
+  @@index([createdAt])
+  @@map("operation_prompts")
+}
