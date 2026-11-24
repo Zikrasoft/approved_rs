@@ -72,4 +72,13 @@ describe('WorkCard', () => {
 
     expect(sizes).toBe('calc(78vw * 1.5)');
   });
+
+  it('serves the original cover file on a page rendered on demand, where no /_image endpoint runs', async () => {
+    const root = await card({ work: work('x'), original: true });
+    const image = root.querySelector('img')!;
+
+    expect(image.getAttribute('src')).toBe(cover.src);
+    expect(image.hasAttribute('srcset')).toBe(false);
+    expect(root.innerHTML).not.toContain('/_image');
+  });
 });

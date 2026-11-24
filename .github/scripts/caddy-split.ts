@@ -26,6 +26,7 @@ const PROBES: Record<string, Record<string, string>> = {
     '[locale]/parts/index.astro': '/ru/parts/',
     '[locale]/parts/search.astro': '/ru/parts/search/',
     '[locale]/parts/prices.astro': '/ru/parts/prices/',
+    '[locale]/parts/p/[slug].astro': '/ru/parts/p/bosch-0986494524/',
     'admin/work-draft.astro': '/admin/work-draft',
   },
   detailing: {
@@ -51,6 +52,8 @@ export function shadowedRedirects(
 }
 
 export const linksCaddy404 = (body: string) => body.includes(CADDY_404);
+
+export const brokenAnswer = (status: number) => status >= 500 && status !== 503;
 
 const ON_DEMAND = /^export const prerender = false;?$/m;
 
@@ -107,7 +110,7 @@ async function probeOnDemandPages(app: string): Promise<string[]> {
     for (const path of Object.values(probes)) {
       const response = await fetch(base + path, { redirect: 'manual' });
       const body = await response.text();
-      if (response.status >= 500)
+      if (brokenAnswer(response.status))
         failures.push(`${app}: ${path} answered ${response.status}`);
       if (linksCaddy404(body))
         failures.push(

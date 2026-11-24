@@ -35,7 +35,11 @@ import {
   type Vehicle,
   type VinFacts,
   CATALOGUE_ID_PATTERN,
+  CATALOGUE_LOCALE_HEADER,
   MAX_OFFER_IDS,
+  partPagePath,
+  partPageResponseSchema,
+  type RelatedPartPage,
 } from '@podbor/catalog-contract';
 import {
   SHOP_CLIENT_HEADER,
@@ -56,6 +60,7 @@ import {
 } from './catalogueSnapshot';
 import type { CartOutcome, OffersOutcome } from './catalogueWire';
 import { latinBrands } from './brandAliases';
+import { placeKey, type CataloguePages } from './paths';
 
 export type { Vehicle, VinFacts };
 
@@ -97,6 +102,12 @@ export type VinOutcome =
       place: CarHit | null;
     }
   | { kind: 'inquiry'; vin: string; place: CarHit | null };
+
+export type PartPageData = {
+  page: PartPageEntry;
+  related: PartPageEntry[];
+  places: CataloguePages;
+};
 
 export type CheckoutOutcome =
   | { kind: 'order'; order: { id: string; display_id: number } }
@@ -141,10 +152,12 @@ export function createCatalogue({
     method = 'GET',
     body?: unknown,
     signal = AbortSignal.timeout(timeoutMs),
+    extraHeaders: Record<string, string> = {},
   ) =>
     fetch(`${backendUrl}${path}`, {
       method,
       headers: {
+        ...extraHeaders,
         'x-publishable-api-key': publishableKey,
         ...((preview || shopOpen) &&
           previewToken && { [SHOP_PREVIEW_HEADER]: previewToken }),
@@ -176,6 +189,33 @@ export function createCatalogue({
     (await answer(path, body)).json();
 
   const segment = encodeURIComponent;
+
+  const cataloguePage = async <T>(
+    path: string,
+    locale: CatalogLocale,
+    schema: z.ZodType<T>,
+  ): Promise<T | null> => {
+    const response = await send(path, 'GET', undefined, undefined, {
+      [CATALOGUE_LOCALE_HEADER]: locale,
+    });
+    if (response.status === 404) return null;
+    if (!response.ok) {
+      throw new Error(`Catalogue ${path} answered ${response.status}`);
+    }
+    return schema.parse(await response.json());
+  };
+
+  const partEntry = (wire: RelatedPartPage): PartPageEntry => {
+    const page = unpriced(wire);
+    return {
+      ...page,
+      indexable: true,
+      priceOnRequest: page.offers.length === 0,
+      fits: [],
+      requirementCars: [],
+      kitCars: [],
+    };
+  };
 
   const viewCart = (cartId: string): Promise<CartOutcome> =>
     cartOutcome(
@@ -248,6 +288,38 @@ export function createCatalogue({
   return {
     categories,
     snapshot,
+
+    async partPage(
+      slug: string,
+      locale: CatalogLocale,
+    ): Promise<PartPageData | null> {
+      const found = await cataloguePage(
+        partPagePath(slug),
+        locale,
+        partPageResponseSchema,
+      );
+      if (!found) return null;
+      const {
+        indexable,
+        fits,
+        requirement_cars: requirementCars,
+        kit_cars: kitCars,
+        ...page
+      } = found.page;
+      return {
+        page: { ...partEntry(page), indexable, fits, requirementCars, kitCars },
+        related: found.related.map(partEntry),
+        places: {
+          makes: new Set(),
+          series: new Set(
+            found.linked_series.map(({ make, slug: series }) =>
+              placeKey(make, series),
+            ),
+          ),
+          categories: new Set(),
+        },
+      };
+    },
 
     async pageList() {
       return cataloguePageListSchema.parse(
