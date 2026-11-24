@@ -1,5 +1,6 @@
 import { spawn } from 'node:child_process';
 import { readFileSync, readdirSync } from 'node:fs';
+import { createServer as createHttpServer } from 'node:http';
 import { createServer } from 'node:net';
 import { join, relative, sep } from 'node:path';
 import {
@@ -61,6 +62,27 @@ export function shadowedRedirects(
 
 export const linksCaddy404 = (body: string) => body.includes(CADDY_404);
 
+const UNKNOWN_SLUGS: Record<string, readonly string[]> = {
+  'auto-service': [
+    '/ru/parts/p/no-such-part/',
+    '/ru/parts/no-such-make/',
+    '/ru/parts/c/no-such-category/',
+    '/ru/parts/bmw/no-such-series/',
+    '/ru/cars/no-such-make/',
+  ],
+};
+
+const PUBLIC_CACHE = /^public, s-maxage=\d+/;
+
+export const cachedNotFound = (
+  status: number,
+  cacheControl: string | null,
+  body: string,
+) =>
+  status === 404 &&
+  PUBLIC_CACHE.test(cacheControl ?? '') &&
+  body.includes('data-site-body');
+
 export const brokenAnswer = (status: number) => status >= 500 && status !== 503;
 
 const ON_DEMAND = /^export const prerender = false;?$/m;
@@ -102,6 +124,53 @@ async function waitFor(base: string) {
   throw new Error(`${base} never answered`);
 }
 
+async function probeUnknownSlugs(app: string): Promise<string[]> {
+  const paths = UNKNOWN_SLUGS[app] ?? [];
+  if (paths.length === 0) return [];
+  const shop = createHttpServer((_, response) => {
+    response.writeHead(404, { 'content-type': 'application/json' });
+    response.end('{}');
+  });
+  await new Promise<void>((resolve) => shop.listen(0, '127.0.0.1', resolve));
+  const shopAddress = shop.address();
+  const shopUrl = `http://127.0.0.1:${typeof shopAddress === 'object' && shopAddress ? shopAddress.port : 0}`;
+  const port = await freePort();
+  const server = spawn('node', [`apps/${app}/dist/server/entry.mjs`], {
+    env: {
+      ...process.env,
+      HOST: '127.0.0.1',
+      PORT: String(port),
+      SHOP_INTERNAL_URL: shopUrl,
+      MEDUSA_BACKEND_URL: shopUrl,
+      MEDUSA_PUBLISHABLE_KEY: 'pk_probe',
+    },
+    stdio: 'ignore',
+  });
+  const failures: string[] = [];
+  try {
+    const base = `http://127.0.0.1:${port}`;
+    await waitFor(base);
+    for (const path of paths) {
+      const response = await fetch(base + path, { redirect: 'manual' });
+      const body = await response.text();
+      if (
+        !cachedNotFound(
+          response.status,
+          response.headers.get('cache-control'),
+          body,
+        )
+      )
+        failures.push(
+          `${app}: ${path} answered ${response.status} with cache-control '${response.headers.get('cache-control')}', want the 404 page the cache may keep`,
+        );
+    }
+  } finally {
+    server.kill();
+    shop.close();
+  }
+  return failures;
+}
+
 async function probeOnDemandPages(app: string): Promise<string[]> {
   const probes = PROBES[app] ?? {};
   const failures = onDemandPages(`apps/${app}/src/pages`)
@@ -128,7 +197,7 @@ async function probeOnDemandPages(app: string): Promise<string[]> {
   } finally {
     server.kill();
   }
-  return failures;
+  return [...failures, ...(await probeUnknownSlugs(app))];
 }
 
 async function check(app: string): Promise<string[]> {

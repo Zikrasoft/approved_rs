@@ -10,6 +10,7 @@ import {
   orangeIn,
   parseHtml,
   respond,
+  SHOP_PREVIEW_TOKEN,
   stubShop,
 } from '@/components/renderAstro';
 import { work } from '@/components/workFixture';
@@ -140,6 +141,22 @@ describe('the /cars/ list', () => {
     expect(response.headers.get('cache-control')).toBe(PUBLIC_PAGE);
     expect(response.headers.get('set-cookie')).toBeNull();
     expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('keeps a preview visitor out of the cache', async () => {
+    source(worksOn(2));
+    vi.stubEnv('SHOP_PREVIEW_TOKEN', SHOP_PREVIEW_TOKEN);
+    const response = await respond(
+      CarsIndex,
+      new Request('https://carlab.rs/ru/cars/', {
+        headers: {
+          cookie: `auto_service_shop_preview=${SHOP_PREVIEW_TOKEN}`,
+        },
+      }),
+      { params: { locale: 'ru' } },
+    );
+
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
   });
 
   it('shows the page its own Makes and links the pages to each other', async () => {
