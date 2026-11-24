@@ -1,29 +1,10 @@
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
-import { MedusaError } from '@medusajs/framework/utils';
-import {
-  CATALOGUE_LOCALE_HEADER,
-  catalogueLocaleSchema,
-  seriesPageResponseSchema,
-} from '@podbor/catalog-contract';
+import { seriesPageResponseSchema } from '@podbor/catalog-contract';
 
+import { answerCataloguePage } from '../../../../../../lib/catalogue-answer';
 import { seriesPageAt } from '../../../../../../lib/series-page';
-import { pricesShown } from '../../../../../../lib/shop-gate';
 
-export async function GET(
-  req: MedusaRequest,
-  res: MedusaResponse,
-): Promise<void> {
-  const page = await seriesPageAt(
-    req.scope,
-    req.params.make,
-    req.params.series,
-    {
-      locale: catalogueLocaleSchema.parse(req.headers[CATALOGUE_LOCALE_HEADER]),
-      shown: pricesShown(req),
-    },
+export const GET = (req: MedusaRequest, res: MedusaResponse) =>
+  answerCataloguePage(req, res, seriesPageResponseSchema, 'Series', (page) =>
+    seriesPageAt(req.scope, req.params.make, req.params.series, page),
   );
-  if (!page) {
-    throw new MedusaError(MedusaError.Types.NOT_FOUND, 'No such Series page');
-  }
-  res.json(seriesPageResponseSchema.parse(page));
-}
