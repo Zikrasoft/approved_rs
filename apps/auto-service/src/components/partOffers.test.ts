@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { BCP47_BY_LOCALE } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
-import type { Fit } from '@/utils/catalogueSnapshot';
+import type { Fit } from '@/utils/partEntry';
 import { formatMoney } from '@/utils/money';
 import PartOffers from './PartOffers.astro';
 import PartOrderPanel from './PartOrderPanel.astro';

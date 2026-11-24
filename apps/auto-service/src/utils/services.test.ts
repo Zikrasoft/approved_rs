@@ -27,9 +27,9 @@ describe('installationService', () => {
 
 describe('partsCategoryFor', () => {
   const categories = [
-    { slug: 'brakes', pages: [] },
-    { slug: 'brake-pads', pages: [{}] },
-    { slug: 'engine-oil', pages: [{}] },
+    { slug: 'brakes', listed: 0 },
+    { slug: 'brake-pads', listed: 4 },
+    { slug: 'engine-oil', listed: 2 },
   ];
 
   it('points a service at the first stocked Category its parts are fitted under', () => {
@@ -42,10 +42,16 @@ describe('partsCategoryFor', () => {
     expect(partsCategoryFor('servicing', categories)).toBe('engine-oil');
     expect(
       partsCategoryFor('servicing', [
-        { slug: 'oil-filters', pages: [{}] },
+        { slug: 'oil-filters', listed: 1 },
         ...categories,
       ]),
     ).toBe('oil-filters');
+  });
+
+  it('does not count a Category the shop sent no count for', () => {
+    expect(
+      partsCategoryFor('servicing', [{ slug: 'oil-filters', listed: null }]),
+    ).toBeNull();
   });
 
   it('points nowhere when no stocked Category maps to the service', () => {

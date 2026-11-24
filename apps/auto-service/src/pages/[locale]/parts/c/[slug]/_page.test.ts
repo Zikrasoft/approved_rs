@@ -10,7 +10,7 @@ import {
   wirePart,
 } from '@/components/renderAstro';
 import { content } from '@/i18n/content';
-import type { PartPageEntry } from '@/utils/catalogueSnapshot';
+import type { PartPageEntry } from '@/utils/partEntry';
 import CategoryPage from './[...page].astro';
 
 afterEach(() => {

@@ -1,6 +1,6 @@
 import type { Vehicle } from '@podbor/catalog-contract';
 import { byModelName } from './carName';
-import type { Fit } from './catalogueSnapshot';
+import type { Fit } from './partEntry';
 
 type Make = Vehicle['model']['chassis']['series']['make'];
 

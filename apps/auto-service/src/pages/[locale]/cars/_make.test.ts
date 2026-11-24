@@ -13,7 +13,7 @@ import {
   wirePart,
 } from '@/components/renderAstro';
 import { work } from '@/components/workFixture';
-import type { MakePartsEntry } from '@/utils/catalogueSnapshot';
+import type { MakeParts } from '@/utils/works';
 import type { Category } from '@podbor/catalog-contract';
 import { article } from '@/components/articleFixture';
 import { SITE_NAME } from '@/utils/constants';
@@ -43,9 +43,8 @@ const showcase = ['HU816X', 'P1'].map((value) =>
   partPage({ slug: `mann-${value.toLowerCase()}`, value }),
 );
 
-const bmwParts = (hub = true, shown = showcase): MakePartsEntry => ({
+const bmwParts = (hub = true, shown = showcase): MakeParts => ({
   make: { slug: 'bmw', name: 'BMW' },
-  parts: 12,
   hub,
   showcase: shown,
   categories: [
@@ -55,13 +54,12 @@ const bmwParts = (hub = true, shown = showcase): MakePartsEntry => ({
     'spark-plugs',
     'wipers',
     'bulbs',
-    'belts',
   ].map((slug) => category(slug, slug.toUpperCase())),
 });
 
-let held: MakePartsEntry[] = [];
+let held: MakeParts[] = [];
 
-const withParts = (...entries: MakePartsEntry[]) => {
+const withParts = (...entries: MakeParts[]) => {
   held = entries;
 };
 
@@ -70,18 +68,14 @@ const PUBLIC_PAGE =
 
 const shop = stubShopOf(() => held);
 
-function stubShopOf(entries: () => MakePartsEntry[]) {
+function stubShopOf(entries: () => MakeParts[]) {
   return (make: string) => {
     const found = entries().find((entry) => entry.make.slug === make);
     return found
       ? Response.json({
           hub: found.hub,
-          categories: found.categories.map((category, index) => ({
-            category,
-            parts: found.showcase[index]
-              ? [[wirePart(found.showcase[index])]]
-              : [],
-          })),
+          categories: found.categories,
+          showcase: found.showcase.map(wirePart),
         })
       : new Response(null, { status: 404 });
   };
@@ -157,7 +151,6 @@ describe('the Make pages', () => {
   it('do not exist for a Make with Parts and nothing else', async () => {
     withParts({
       make: { slug: 'audi', name: 'Audi' },
-      parts: 1,
       hub: false,
       categories: [],
       showcase: [],
@@ -259,7 +252,7 @@ describe('the Parts block of a Make page', () => {
     ['ru', 'OIL-FILTERS'],
     ['sr', 'OIL-FILTERS sr'],
   ] as const)(
-    'links the top six Categories of the Make in %s',
+    'links the Categories the shop names for the Make in %s',
     async (locale, first) => {
       withParts(bmwParts());
       const block = partsHeading(await page(locale), locale)!.closest(

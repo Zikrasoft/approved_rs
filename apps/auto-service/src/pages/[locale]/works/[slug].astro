@@ -16,7 +16,7 @@ import {
   PARTS_SOURCING,
   workLeadService,
 } from '@/utils/works';
-import { partPagesForBuild } from '@/utils/catalogueEnv';
+import { pageListForBuild } from '@/utils/catalogueEnv';
 import { safeMarkdown, relatedEntries } from '@podbor/site-kit';
 import { workSchema } from '@/utils/schema';
 import {
@@ -27,14 +27,18 @@ import { content } from '@/i18n/content';
 
 export async function getStaticPaths() {
   const works = featuredWorks(await getCollection('works'));
-  const pages = await partPagesForBuild().catch(() => []);
+  const slugs = new Set(
+    (await pageListForBuild().catch(() => ({ parts: [] }))).parts.map(
+      ({ slug }) => slug,
+    ),
+  );
   return withLocales(
     works.map((work) => ({
       params: { slug: work.id },
       props: {
         work,
         related: relatedEntries(works, work),
-        parts: sourcedParts(work, pages),
+        parts: sourcedParts(work, slugs),
       },
     })),
   );

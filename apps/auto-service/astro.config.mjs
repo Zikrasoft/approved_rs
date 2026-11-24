@@ -27,14 +27,19 @@ const articles = await articleFiles(
 );
 const blog = blogListed(articles);
 const { workFiles } = await import('./src/utils/workFiles.ts');
-const { workshopMakePages } = await import('./src/utils/works.ts');
-const workshopMakes = workshopMakePages(
+const { overviewConflicts, workshopMakePages } =
+  await import('./src/utils/works.ts');
+const workshopPages = workshopMakePages(
   await workFiles(
     fileURLToPath(new URL('./src/content/works/', import.meta.url)),
   ),
   articles,
   [],
-).map(({ make }) => make.slug);
+);
+for (const conflict of overviewConflicts(workshopPages)) {
+  console.warn(conflict);
+}
+const workshopMakes = workshopPages.map(({ make }) => make.slug);
 
 export default defineConfig({
   site,
@@ -74,8 +79,5 @@ export default defineConfig({
         config: () => ({ ssr: { noExternal: true } }),
       },
     ],
-  },
-  experimental: {
-    incrementalBuild: true,
   },
 });

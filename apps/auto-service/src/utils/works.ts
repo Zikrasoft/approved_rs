@@ -5,6 +5,8 @@ import { makeArticles } from '@podbor/blog/article';
 import { makePages } from '@podbor/blog/make-pages';
 import {
   normalizePartNumber,
+  partPageSlug,
+  slugOf,
   type CatalogueMake,
 } from '@podbor/catalog-contract';
 import {
@@ -14,7 +16,8 @@ import {
 } from '@podbor/i18n';
 import type { Locale } from '@/i18n/config';
 import type { Article } from './blog';
-import type { MakePartsEntry, PartPageEntry } from './catalogueSnapshot';
+import type { CarMakeParts } from './catalogue';
+import type { PartPageEntry } from './partEntry';
 import { MAKES, type Make } from './makes';
 import type { ServiceSlug } from './services';
 
@@ -55,11 +58,16 @@ const sourcedBy = (page: PartPageEntry, { brand, number }: WorkPart) => {
   );
 };
 
-export const sourcedParts = (work: Work, pages: PartPageEntry[]) =>
-  work.data.parts.map((part) => ({
-    ...part,
-    slug: pages.find((page) => sourcedBy(page, part))?.slug ?? null,
-  }));
+const pageSlugOf = ({ brand, number }: WorkPart): string | null => {
+  const normalized = normalizePartNumber(number);
+  return normalized && partPageSlug(slugOf(brand), normalized);
+};
+
+export const sourcedParts = (work: Work, slugs: Set<string>) =>
+  work.data.parts.map((part) => {
+    const slug = pageSlugOf(part);
+    return { ...part, slug: slug && slugs.has(slug) ? slug : null };
+  });
 
 export const sourcingWorks = (
   works: WorkEntry[],
@@ -105,7 +113,7 @@ export const workshopMakePages = <P extends { make: { slug: string } }>(
     ...makeArticles(page.articles),
   }));
 
-export type MakeParts = Omit<MakePartsEntry, 'parts'>;
+export type MakeParts = CarMakeParts & { make: Make };
 
 export type WorkshopMakePage = ReturnType<
   typeof workshopMakePages<MakeParts>

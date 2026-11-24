@@ -21,7 +21,7 @@ import {
   SERVICE_SLUGS,
   VIN_INQUIRY_SERVICE,
 } from '@/utils/services';
-import { categoryPagesForBuild } from '@/utils/catalogueEnv';
+import { pageListForBuild } from '@/utils/catalogueEnv';
 import { safeMarkdown } from '@podbor/site-kit';
 import { servicePageSchema } from '@/utils/schema';
 import { content } from '@/i18n/content';
@@ -47,7 +47,10 @@ const image = servicePhoto(slug, works, {
 });
 const photo = image && (await panelPhoto(image));
 
-const partsCategory = partsCategoryFor(slug, await categoryPagesForBuild());
+const partsCategory = partsCategoryFor(
+  slug,
+  (await pageListForBuild()).categories,
+);
 const partsHref = partsCategory
   ? PathBuilder.partsCategory(locale, partsCategory)
   : slug === 'servicing' && PathBuilder.parts(locale);

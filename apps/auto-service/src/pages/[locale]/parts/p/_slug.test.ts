@@ -12,7 +12,7 @@ import {
   stubShop,
   wirePart,
 } from '@/components/renderAstro';
-import type { PartPageEntry } from '@/utils/catalogueSnapshot';
+import type { PartPageEntry } from '@/utils/partEntry';
 import { PathBuilder } from '@/utils/paths';
 import { getCollection } from 'astro:content';
 import { BUILT_COVER, work } from '@/components/workFixture';

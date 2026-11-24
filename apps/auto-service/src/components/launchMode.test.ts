@@ -11,7 +11,7 @@ import {
   vi,
 } from 'vitest';
 import { builtinEnvironments } from 'vitest/environments';
-import type { PartPageEntry } from '@/utils/catalogueSnapshot';
+import type { PartPageEntry } from '@/utils/partEntry';
 import { respond, stubShop, wirePart } from './renderAstro';
 import CategoryPage from '../pages/[locale]/parts/c/[slug]/[...page].astro';
 import ThanksPage from '../pages/[locale]/thanks/[...variant].astro';

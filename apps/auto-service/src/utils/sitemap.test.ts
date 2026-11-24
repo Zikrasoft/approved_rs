@@ -47,8 +47,8 @@ describe('catalogueUrls', () => {
       { slug: 'bmw-2', indexable: false },
     ],
     makes: [
-      { slug: 'bmw', name: 'BMW', hub: true },
-      { slug: 'tiny', name: 'Tiny', hub: false },
+      { slug: 'bmw', name: 'BMW', hub: true, parts: 9 },
+      { slug: 'tiny', name: 'Tiny', hub: false, parts: null },
     ],
     series: [
       { make: 'bmw', slug: '3-series', name: '3', categories: ['brakes'] },
@@ -57,6 +57,7 @@ describe('catalogueUrls', () => {
       { slug: 'brakes', name: 'Brakes', listed: 100 },
       { slug: 'empty', name: 'Empty', listed: null },
     ],
+    catalogue_makes: null,
   });
 
   it('lists every page of the list in every locale, Parts only when indexable', () => {

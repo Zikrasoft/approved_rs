@@ -2,7 +2,7 @@ import { experimental_AstroContainer as AstroContainer } from 'astro/container';
 import { JSDOM } from 'jsdom';
 import { vi } from 'vitest';
 import { CARLAB } from '@podbor/brands';
-import type { PartPageEntry } from '@/utils/catalogueSnapshot';
+import type { PartPageEntry } from '@/utils/partEntry';
 
 type Component = Parameters<AstroContainer['renderToString']>[0];
 

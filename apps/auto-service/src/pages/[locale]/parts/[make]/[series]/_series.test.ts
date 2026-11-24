@@ -10,7 +10,7 @@ import {
   stubShop,
   wirePart,
 } from '@/components/renderAstro';
-import type { PartPageEntry } from '@/utils/catalogueSnapshot';
+import type { PartPageEntry } from '@/utils/partEntry';
 import SeriesPage from './index.astro';
 
 const copy = content('ru').partsSearch;

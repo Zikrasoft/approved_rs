@@ -33,11 +33,11 @@ const INSTALLATION_SERVICE_BY_CATEGORY = new Map<string, ServiceSlug>([
 
 export const partsCategoryFor = (
   service: ServiceSlug,
-  categories: { slug: string; pages: unknown[] }[],
+  categories: { slug: string; listed: number | null }[],
 ): string | null =>
   categories.find(
-    ({ slug, pages }) =>
-      pages.length > 0 &&
+    ({ slug, listed }) =>
+      (listed ?? 0) > 0 &&
       INSTALLATION_SERVICE_BY_CATEGORY.get(slug) === service,
   )?.slug ?? null;
 
