@@ -217,14 +217,14 @@ describe('the Parts block of a Make page', () => {
         ),
     );
 
-  it('is absent without a catalogue snapshot', async () => {
+  it('is absent without a catalogue', async () => {
     const root = await page();
 
     expect(partsHeading(root)).toBeUndefined();
     expect(root.querySelector('a[href="/ru/parts/bmw/"]')).toBeNull();
   });
 
-  it('is absent when the snapshot holds no Parts for the Make', async () => {
+  it('is absent when the shop holds no Parts for the Make', async () => {
     withParts({ ...bmwParts(), make: { slug: 'audi', name: 'Audi' } });
 
     expect(partsHeading(await page())).toBeUndefined();

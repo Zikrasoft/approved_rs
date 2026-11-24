@@ -15,6 +15,7 @@ import {
   pageListForBuild,
   writeCatalogueMakes,
 } from './catalogueEnv';
+import { partsHubPlugin } from './partsHub';
 import { GET as recordBuild } from '../pages/catalogue-build.json.ts';
 
 const BACKEND_URL = 'http://localhost:9009';
@@ -176,6 +177,40 @@ describe('the deploy build', () => {
     expect(reads('/store/catalogue-pages')).toBe(1);
     expect(reads('/store/categories')).toBe(1);
     expect(reads('/store/catalogue-snapshot')).toBe(0);
+  });
+
+  it('builds every build-time input from a shop whose snapshot path fails', async () => {
+    const snapshot = '/store/catalogue-snapshot';
+    const shop = backend({
+      list: {
+        ...listOf(2),
+        catalogue_makes: [{ slug: 'bmw', name: 'BMW', show_on_site: true }],
+      },
+      categories: [oilFilters],
+    });
+    deployed(
+      2,
+      vi.fn((url: string) =>
+        url.endsWith(snapshot) ? respond({}, false) : shop(url),
+      ),
+    );
+    const env = shopEnv({ CATALOGUE_SHRINK_GUARD: 'true' });
+    const file = pathToFileURL(
+      join(await mkdtemp(join(tmpdir(), 'makes-')), 'makes.json'),
+    );
+
+    const hub = await partsHubPlugin(env).load('\0virtual:parts-hub');
+    await writeCatalogueMakes(file, env);
+
+    expect(
+      JSON.parse(hub!.replace('export default ', '').slice(0, -1)),
+    ).toMatchObject({ categories: [{ slug: 'oil-filters' }] });
+    expect(JSON.parse(await readFile(file, 'utf8'))).toHaveLength(1);
+    expect(
+      vi
+        .mocked(globalThis.fetch)
+        .mock.calls.some(([url]) => String(url).endsWith(snapshot)),
+    ).toBe(false);
   });
 
   it('reads the page list once for a burst of dev pages, and again once it went stale', async () => {

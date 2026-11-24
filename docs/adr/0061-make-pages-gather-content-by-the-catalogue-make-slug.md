@@ -30,7 +30,7 @@ Decided 2026-11-06 with the owner, who wants a page per car make that people fin
 
 ## Consequences
 
-- The list of Makes is a derived file, not a second place Makes are created. A build with a catalogue rewrites it from the snapshot's Make list; without one, or against a shop that does not send the list yet, the committed copy stays, so dev works offline.
+- The list of Makes is a derived file, not a second place Makes are created. A build with a catalogue rewrites it from the Make list of the shop's page list (`catalogue_makes`); without one, or against a shop that does not send the list yet, the committed copy stays, so dev works offline.
 - The Works already written get their Make chosen once, and the `/works/` chips group by that choice, so a Work's Make is decided in one way.
 - A Make with one Work or Article, or the site flag, gets a page and is indexed, since the owner chose a threshold of 1. If Search Console shows thin pages being dropped, a `noindex` rule for them is the next step.
 - The pages can be built before the shop is live, on Works and Articles alone.
