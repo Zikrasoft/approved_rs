@@ -36,6 +36,7 @@ export function catalogueUrls(
   const hubs = makes.filter(({ hub }) => hub);
   return SUPPORTED_LOCALES.flatMap((locale) =>
     [
+      PathBuilder.partsMakes(locale),
       ...hubs.map(({ slug }) => PathBuilder.partsMake(locale, slug)),
       ...series.flatMap((entry) => [
         PathBuilder.partsSeries(locale, entry.make, entry.slug),
