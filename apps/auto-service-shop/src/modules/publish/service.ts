@@ -12,6 +12,7 @@ import CatalogueRun from './models/catalogue-run';
 import PublishedNumber from './models/published-number';
 import { runBoundSql } from '../_shared/bound-sql';
 import {
+  LISTED_NUMBERS_IN_CATEGORY,
   LISTED_PART_COUNTS,
   LISTED_PARTS_IN_CATEGORY,
   LISTED_PER_CATEGORY,
@@ -48,6 +49,15 @@ export type PublishedNumber = { id: string; listed: boolean | null };
 export type ListedPart = {
   id: string;
   category_id: string;
+  attributes: Record<string, unknown>;
+};
+
+export type ListedNumber = {
+  id: string;
+  brand_slug: string;
+  brand_name: string;
+  normalized_value: string;
+  part_id: string;
   attributes: Record<string, unknown>;
 };
 
@@ -148,6 +158,19 @@ class PublishModuleService extends MedusaService({
     const { rows } = await runBoundSql(
       sharedContext,
       LISTED_PARTS_IN_CATEGORY,
+      [categoryId],
+    );
+    return rows;
+  }
+
+  @InjectManager()
+  async listedNumbersIn(
+    categoryId: string,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<ListedNumber[]> {
+    const { rows } = await runBoundSql(
+      sharedContext,
+      LISTED_NUMBERS_IN_CATEGORY,
       [categoryId],
     );
     return rows;

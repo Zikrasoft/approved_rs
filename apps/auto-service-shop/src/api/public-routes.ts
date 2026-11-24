@@ -7,6 +7,7 @@ export const PUBLIC_ROUTE_PREFIXES = ['/store', '/auth'] as const;
 
 export const PUBLIC_ROUTES = [
   'GET /store/catalogue-pages',
+  'GET /store/catalogue-pages/categories/:slug',
   'GET /store/catalogue-pages/parts/:slug',
   'GET /store/catalogue-snapshot',
   'GET /store/categories',
