@@ -17,4 +17,5 @@ export * from './slug.ts';
 export * from './makeList.ts';
 export * from './pageList.ts';
 export * from './snapshot.ts';
+export * from './makePageView.ts';
 export * from './partPageView.ts';

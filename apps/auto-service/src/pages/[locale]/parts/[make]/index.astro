@@ -1,57 +1,36 @@
 ---
+export const prerender = false;
+
 import { getCollection } from 'astro:content';
 import LinkRow from '@/components/LinkRow.astro';
 import Icon from '@/components/Icon.astro';
 import { withPlaceholder } from '@podbor/i18n';
-import { translated } from '@podbor/catalog-contract';
 import { seriesName } from '@/utils/carName';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
-import { makeHubsForBuild } from '@/utils/catalogueEnv';
-import { cacheKey } from '@/utils/cacheKey';
-import type { MakeHubEntry } from '@/utils/catalogueSnapshot';
-import { PathBuilder, withLocales } from '@/utils/paths';
+import { loadCataloguePage } from '@/utils/cataloguePage';
+import { PathBuilder } from '@/utils/paths';
 import { workshopMakePages } from '@/utils/works';
 
-export async function getStaticPaths() {
-  const hubs = await makeHubsForBuild();
-  const workshop = new Set(
-    workshopMakePages(
-      await getCollection('works'),
-      await getCollection('articles'),
-      [],
-    ).map(({ make }) => make.slug),
-  );
-  return withLocales(
-    hubs.map((hub) => ({
-      params: { make: hub.make.slug },
-      props: { hub, workshop: workshop.has(hub.make.slug) },
-      cacheKey: cacheKey({
-        make: hub.make,
-        workshop: workshop.has(hub.make.slug),
-        series: hub.series.map(({ series, categories }) => ({
-          series,
-          categories: categories.map(({ category }) => category),
-        })),
-      }),
-    })),
-  );
-}
-
-const { hub, workshop } = Astro.props as {
-  hub: MakeHubEntry;
-  workshop: boolean;
-};
+const loaded = await loadCataloguePage(Astro, (catalogue, catalogueLocale) =>
+  catalogue.makeHub(Astro.params.make ?? '', catalogueLocale),
+);
+if (loaded instanceof Response) return loaded;
+const { make } = loaded;
+const workshop = workshopMakePages(
+  await getCollection('works'),
+  await getCollection('articles'),
+  [],
+).some(({ make: workshopMake }) => workshopMake.slug === make.slug);
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const copy = content(locale).partsCar.hubs.make;
-const { make } = hub;
-const series = hub.series
+const series = loaded.series
   .map((entry) => ({
     ...entry,
-    label: seriesName(entry.series, make, locale),
+    label: seriesName({ name: entry.name, translations: null }, make, locale),
   }))
   .toSorted((a, b) => a.label.localeCompare(b.label, 'en', { numeric: true }));
 ---
@@ -75,13 +54,11 @@ const series = hub.series
     <h2 class="text-section">{copy.modelsHeading}</h2>
     <ul class="card divide-y divide-line">
       {
-        series.map(({ series: entry, label, categories }) => (
+        series.map(({ slug, label, categories }) => (
           <LinkRow
-            href={PathBuilder.partsSeries(locale, make.slug, entry.slug)}
+            href={PathBuilder.partsSeries(locale, make.slug, slug)}
             label={label}
-            detail={categories
-              .map(({ category }) => translated(category, 'name', locale))
-              .join(', ')}
+            detail={categories.join(', ')}
           />
         ))
       }
