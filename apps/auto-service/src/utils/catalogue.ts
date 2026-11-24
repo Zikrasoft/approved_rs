@@ -37,6 +37,10 @@ import {
   CATALOGUE_ID_PATTERN,
   CATALOGUE_LOCALE_HEADER,
   MAX_OFFER_IDS,
+  MAKES_PAGE_PATH,
+  makePagePath,
+  makePageResponseSchema,
+  makesPageResponseSchema,
   partPagePath,
   partPageResponseSchema,
   type RelatedPartPage,
@@ -320,6 +324,18 @@ export function createCatalogue({
         },
       };
     },
+
+    async makesList(locale: CatalogLocale) {
+      const found = await cataloguePage(
+        MAKES_PAGE_PATH,
+        locale,
+        makesPageResponseSchema,
+      );
+      return found?.makes ?? [];
+    },
+
+    makeHub: (slug: string, locale: CatalogLocale) =>
+      cataloguePage(makePagePath(slug), locale, makePageResponseSchema),
 
     async pageList() {
       return cataloguePageListSchema.parse(

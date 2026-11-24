@@ -1,25 +1,23 @@
 ---
-import { Image } from 'astro:assets';
 import { localeFrom } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
 import { localizedWork, titleNamesCar, type Work } from '@/utils/works';
 import { isServiceSlug } from '@/utils/services';
 import { coverScale, coverSizes } from '@/utils/coverSizes';
 import { content } from '@/i18n/content';
+import { builtCover, optimizedCover } from '@/utils/coverImages';
 
 interface Props {
   work: Work;
   eager?: boolean;
   tags?: boolean;
   sizes?: string;
-  original?: boolean;
 }
 
 const {
   work,
   eager = false,
   tags = true,
-  original = false,
   sizes = '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, calc(100vw - 2.5rem)',
 } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
@@ -28,34 +26,23 @@ const services = content(locale).services;
 const applied = (tags ? work.data.servicesApplied : [])
   .filter(isServiceSlug)
   .map((slug) => services[slug].name);
-// TODO: original serves the full-size cover file; prebuild cover variants at build time if on-demand pages with Works draw traffic
-const COVER_CLASS = 'aspect-[4/3] w-full object-cover object-[50%_40%]';
+const cover = await (Astro.isPrerendered ? optimizedCover : builtCover)(
+  work.data.image,
+);
 ---
 
 <a href={PathBuilder.work(locale, work.id)} class="tile group">
-  {
-    original ? (
-      <img
-        src={work.data.image.src}
-        width={work.data.image.width}
-        height={work.data.image.height}
-        alt={title}
-        loading={eager ? 'eager' : 'lazy'}
-        decoding="async"
-        class={COVER_CLASS}
-      />
-    ) : (
-      <Image
-        src={work.data.image}
-        alt={title}
-        widths={[360, 560, 760, 1080]}
-        sizes={coverSizes(sizes, coverScale(work.data.image, 4 / 3))}
-        quality={68}
-        loading={eager ? 'eager' : 'lazy'}
-        class={COVER_CLASS}
-      />
-    )
-  }
+  <img
+    src={cover.src}
+    srcset={cover.srcset}
+    sizes={coverSizes(sizes, coverScale(work.data.image, 4 / 3))}
+    width={cover.width}
+    height={cover.height}
+    alt={title}
+    loading={eager ? 'eager' : 'lazy'}
+    decoding="async"
+    class="aspect-[4/3] w-full object-cover object-[50%_40%]"
+  />
   <div class="flex flex-1 flex-col gap-2 border-t border-line p-4">
     <h3 class="font-semibold text-ink">{title}</h3>
     {

@@ -10,11 +10,10 @@ export type SeriesModules = {
   publish: PublishModuleService;
 };
 
-export async function pagedSeries(
-  { catalog, publish }: SeriesModules,
+export async function seriesRequirementFits(
+  catalog: CatalogModuleService,
   seriesIds: string[],
 ) {
-  if (!seriesIds.length) return [];
   const chassis = await catalog.listChassis(
     { series_id: seriesIds },
     { select: ['id'], take: null },
@@ -23,11 +22,21 @@ export async function pagedSeries(
     { chassis_id: chassis.map(({ id }) => id) },
     { select: ['id'], take: null },
   );
-  const vehicles = await listVehicleResponses(catalog, {
-    model_id: models.map(({ id }) => id),
-  });
+  const vehicles = models.length
+    ? await listVehicleResponses(catalog, {
+        model_id: models.map(({ id }) => id),
+      })
+    : [];
+  return vehicleRequirementFits(catalog, vehicles);
+}
+
+export async function pagedSeries(
+  { catalog, publish }: SeriesModules,
+  seriesIds: string[],
+) {
+  if (!seriesIds.length) return [];
   const counts = await publish.listedPartCounts(
-    await vehicleRequirementFits(catalog, vehicles),
+    await seriesRequirementFits(catalog, seriesIds),
     seriesIds,
   );
   const series = await catalog.listSeries(

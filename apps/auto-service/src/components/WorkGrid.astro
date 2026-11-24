@@ -6,22 +6,16 @@ interface Props {
   works: Work[];
   eager?: number;
   class?: string;
-  original?: boolean;
 }
 
-const {
-  works,
-  eager = 0,
-  class: className = 'mt-8',
-  original = false,
-} = Astro.props;
+const { works, eager = 0, class: className = 'mt-8' } = Astro.props;
 ---
 
 <ul class={`${className} grid gap-4 md:grid-cols-2 lg:grid-cols-3`}>
   {
     works.map((work, i) => (
       <li data-filter-item data-group={makeGroup(work)}>
-        <WorkCard work={work} eager={i < eager} original={original} />
+        <WorkCard work={work} eager={i < eager} />
       </li>
     ))
   }
