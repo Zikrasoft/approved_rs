@@ -32,7 +32,7 @@ export const PUBLISHED_PAGE = `
   order by pn.id
   limit ?`;
 
-export const LISTED_PART_COUNTS = `
+const LISTED_PLACES = `
   with listed as (
     select distinct pi.part_id from part_identifier pi
     join published_number pn on pn.id = pi.id
@@ -41,8 +41,9 @@ export const LISTED_PART_COUNTS = `
   ), places as (
     select c.series_id, x.part_id, x.category_id, x.fitted
     from (
-      select vehicle_id, part_id, null::text as category_id, true as fitted
-      from fitment where deleted_at is null
+      select f.vehicle_id, f.part_id, pt.category_id, true as fitted
+      from fitment f left join part pt on pt.id = f.part_id
+      where f.deleted_at is null
       union all
       select vehicle_id, part_id, category_id, false
       from unnest(?::text[], ?::text[], ?::text[])
@@ -52,7 +53,9 @@ export const LISTED_PART_COUNTS = `
     join vehicle v on v.id = x.vehicle_id and v.deleted_at is null
     join vehicle_model m on m.id = v.model_id and m.deleted_at is null
     join chassis c on c.id = m.chassis_id and c.deleted_at is null
-  ), series_matches as (
+  )`;
+
+export const LISTED_PART_COUNTS = `${LISTED_PLACES}, series_matches as (
     select series_id, category_id, count(distinct part_id) as matches
     from places where not fitted group by series_id, category_id
   )
@@ -63,6 +66,45 @@ export const LISTED_PART_COUNTS = `
   left join series_matches m on not p.fitted
     and m.series_id = p.series_id and m.category_id = p.category_id
   group by p.series_id`;
+
+export const LISTED_SERIES_CATEGORY_COUNTS = `${LISTED_PLACES}
+  select series_id, category_id, count(distinct part_id)::int as parts
+  from places where category_id is not null
+  group by series_id, category_id`;
+
+export const PUBLISHED_PART_SLUGS = `
+  select b.slug as brand_slug, pi.normalized_value,
+    (
+      nullif(btrim(coalesce(p.description, '')), '') is not null
+      or exists (
+        select 1 from jsonb_each(coalesce(p.attributes, '{}'::jsonb)) a
+        where not (jsonb_typeof(a.value) in ('string', 'array')
+          and a.value in ('""'::jsonb, '[]'::jsonb))
+      )
+      or exists (
+        select 1 from fitment f
+        join vehicle v on v.id = f.vehicle_id and v.deleted_at is null
+        where f.part_id = p.id and f.deleted_at is null
+      )
+      or exists (
+        select 1 from part_identifier o
+        where o.part_id = p.id and o.id <> pi.id and o.deleted_at is null
+      )
+    ) as indexable
+  from published_number pn
+  join part_identifier pi on pi.id = pn.id and pi.deleted_at is null
+  join brand b on b.id = pi.brand_id and b.deleted_at is null
+  join part p on p.id = pi.part_id and p.deleted_at is null
+  where pn.deleted_at is null
+  order by pn.id`;
+
+export const LISTED_PER_CATEGORY = `
+  select p.category_id, count(*)::int as listed
+  from published_number pn
+  join part_identifier pi on pi.id = pn.id and pi.deleted_at is null
+  join part p on p.id = pi.part_id and p.deleted_at is null
+  where pn.deleted_at is null and pn.listed and p.category_id is not null
+  group by p.category_id`;
 
 export const UNRESOLVED_VIN_CODES = `
   with hits as (

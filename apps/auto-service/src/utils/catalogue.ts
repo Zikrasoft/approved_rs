@@ -13,6 +13,7 @@ import {
   CATALOGUE_SNAPSHOT_CONTENT_TYPE,
   CATALOGUE_SNAPSHOT_PATH,
   catalogueSnapshotResponseSchema,
+  cataloguePageListSchema,
   readCatalogueSnapshot,
   categoriesResponseSchema,
   partPageSlug,
@@ -247,6 +248,12 @@ export function createCatalogue({
   return {
     categories,
     snapshot,
+
+    async pageList() {
+      return cataloguePageListSchema.parse(
+        await request('/store/catalogue-pages'),
+      );
+    },
 
     async partPages(): Promise<PartPageEntry[]> {
       return (await snapshot()).entries;

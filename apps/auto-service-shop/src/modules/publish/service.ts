@@ -13,8 +13,11 @@ import PublishedNumber from './models/published-number';
 import { runBoundSql } from '../_shared/bound-sql';
 import {
   LISTED_PART_COUNTS,
+  LISTED_PER_CATEGORY,
+  LISTED_SERIES_CATEGORY_COUNTS,
   PUBLISH_ALL,
   PUBLISHED_PAGE,
+  PUBLISHED_PART_SLUGS,
   REFRESH_LISTED,
 } from '../catalog/cross-module-sql';
 import { INTERRUPTED_BY_RESTART } from '../_shared/run-errors';
@@ -23,6 +26,18 @@ export type ListedPartCount = {
   series_id: string;
   parts: number;
   required: number;
+};
+
+export type SeriesCategoryCount = {
+  series_id: string;
+  category_id: string;
+  parts: number;
+};
+
+export type PublishedPartSlug = {
+  brand_slug: string;
+  normalized_value: string;
+  indexable: boolean;
 };
 
 export type PartFit = {
@@ -101,6 +116,39 @@ class PublishModuleService extends MedusaService({
       requirementFits.map(({ category_id }) => category_id),
       MIN_REQUIREMENT_MATCHES_FOR_PAGE,
     ]);
+    return rows;
+  }
+
+  @InjectManager()
+  async listedSeriesCategoryCounts(
+    requirementFits: PartFit[],
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<SeriesCategoryCount[]> {
+    const { rows } = await runBoundSql(
+      sharedContext,
+      LISTED_SERIES_CATEGORY_COUNTS,
+      [
+        requirementFits.map(({ vehicle_id }) => vehicle_id),
+        requirementFits.map(({ part_id }) => part_id),
+        requirementFits.map(({ category_id }) => category_id),
+      ],
+    );
+    return rows;
+  }
+
+  @InjectManager()
+  async publishedPartSlugs(
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<PublishedPartSlug[]> {
+    const { rows } = await runBoundSql(sharedContext, PUBLISHED_PART_SLUGS);
+    return rows;
+  }
+
+  @InjectManager()
+  async listedPerCategory(
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<{ category_id: string; listed: number }[]> {
+    const { rows } = await runBoundSql(sharedContext, LISTED_PER_CATEGORY);
     return rows;
   }
 

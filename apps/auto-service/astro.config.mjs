@@ -8,15 +8,15 @@ import tailwindcss from '@tailwindcss/vite';
 import { CARLAB } from '@podbor/brands';
 import { localeConfig } from './src/i18n/config.ts';
 import { blogListed } from '@podbor/blog/article';
-import { sitemapFilter } from './src/utils/sitemap.ts';
+import { catalogueUrls, sitemapFilter } from './src/utils/sitemap.ts';
 import {
-  partPagesForBuild,
+  pageListForBuild,
   writeCatalogueMakes,
 } from './src/utils/catalogueEnv.ts';
 import { partsHubPlugin } from './src/utils/partsHub.ts';
 
 const site = CARLAB.url;
-const partPages = await partPagesForBuild(process.env);
+const pageList = await pageListForBuild(process.env);
 await writeCatalogueMakes(
   new URL('./src/content/makes.json', import.meta.url),
   process.env,
@@ -45,7 +45,8 @@ export default defineConfig({
     react(),
     keystatic(),
     sitemap({
-      filter: sitemapFilter(site, partPages, blog),
+      filter: sitemapFilter(site, pageList.parts, blog),
+      customPages: catalogueUrls(site, pageList),
       i18n: {
         defaultLocale: localeConfig.primaryLocale,
         locales: Object.fromEntries(localeConfig.locales.map((l) => [l, l])),

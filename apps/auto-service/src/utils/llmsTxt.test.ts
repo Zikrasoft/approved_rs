@@ -311,6 +311,15 @@ describe('generateLlmsTxt', () => {
     };
     const listed = (path: string, key: string) =>
       (answers[path] as Record<string, unknown>)[key];
+    answers['/store/catalogue-pages'] = {
+      parts: numbers.map((number) => ({
+        slug: `mann-filter-${number.toLowerCase()}`,
+        indexable: true,
+      })),
+      makes: fitted.length ? [{ slug: 'bmw', name: 'BMW', hub: true }] : [],
+      series: [],
+      categories: [],
+    };
     answers['/store/catalogue-snapshot'] = {
       pages: listed('/store/part-pages', 'pages'),
       categories: listed('/store/categories', 'categories'),

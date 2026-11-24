@@ -15,6 +15,7 @@ import {
   categoryPagesForBuild,
   makeHubsForBuild,
   makePartsForBuild,
+  pageListForBuild,
   partPagesForBuild,
   writeCatalogueMakes,
 } from './catalogueEnv';
@@ -149,10 +150,16 @@ const backend = ({
   fitments = [] as unknown[],
   vehicles = [] as unknown[],
   makes = undefined as unknown[] | undefined,
+  list = undefined as unknown,
 } = {}) =>
   vi.fn((url: string) => {
     if (url.endsWith('/store/catalogue-snapshot')) {
       return respond({ pages, categories, fitments, vehicles, makes });
+    }
+    if (url.endsWith('/store/catalogue-pages')) {
+      return respond(
+        list ?? { parts: [], makes: [], series: [], categories: [] },
+      );
     }
     if (url.endsWith('/store/categories')) {
       return respond({ categories });
@@ -1416,6 +1423,15 @@ describe('the deploy build', () => {
       id: `pi_${index}`,
       normalized_value: `HU${index}`,
     }));
+  const listOf = (count: number) => ({
+    parts: Array.from({ length: count }, (_, index) => ({
+      slug: `mann-filter-hu${index}`,
+      indexable: true,
+    })),
+    makes: [],
+    series: [],
+    categories: [],
+  });
   const deployed = (
     previous: number | null,
     shop: ReturnType<typeof backend> = backend(),
@@ -1452,7 +1468,6 @@ describe('the deploy build', () => {
     const env = shopEnv({ CATALOGUE_SHRINK_GUARD: 'true' });
 
     await partPagesForBuild(env);
-    await categoriesForBuild(env);
     await categoryPagesForBuild(env);
     await makeHubsForBuild(env);
 
@@ -1460,6 +1475,23 @@ describe('the deploy build', () => {
       shop.mock.calls.filter(([url]) => url.includes(path)).length;
     expect(reads('/store/catalogue-snapshot')).toBe(1);
     expect(reads('/store/categories')).toBe(0);
+  });
+
+  it('reads the light page list and the Categories once, never the snapshot', async () => {
+    const shop = backend({ list: listOf(2), categories: [] });
+    deployed(2, shop);
+    const env = shopEnv({ CATALOGUE_SHRINK_GUARD: 'true' });
+
+    await pageListForBuild(env);
+    await pageListForBuild(env);
+    await categoriesForBuild(env);
+    await categoriesForBuild(env);
+
+    const reads = (path: string) =>
+      shop.mock.calls.filter(([url]) => url.endsWith(path)).length;
+    expect(reads('/store/catalogue-pages')).toBe(1);
+    expect(reads('/store/categories')).toBe(1);
+    expect(reads('/store/catalogue-snapshot')).toBe(0);
   });
 
   it('reads the catalogue once for a burst of dev pages, and again once it went stale', async () => {
@@ -1526,23 +1558,23 @@ describe('the deploy build', () => {
     deployed(120);
 
     await expect(
-      partPagesForBuild({ CATALOGUE_SHRINK_GUARD: 'true' }),
+      pageListForBuild({ CATALOGUE_SHRINK_GUARD: 'true' }),
     ).rejects.toThrow('MEDUSA_BACKEND_URL');
   });
 
   it('builds without a catalogue while the live site has none', async () => {
     deployed(null);
 
-    expect(await partPagesForBuild({ CATALOGUE_SHRINK_GUARD: 'true' })).toEqual(
-      [],
-    );
+    expect(
+      (await pageListForBuild({ CATALOGUE_SHRINK_GUARD: 'true' })).parts,
+    ).toEqual([]);
   });
 
   it('fails on a shop with no part pages once the catalogue is live, even when shrinking is allowed', async () => {
     deployed(120, backend());
 
     await expect(
-      partPagesForBuild(
+      pageListForBuild(
         shopEnv({
           CATALOGUE_SHRINK_GUARD: 'true',
           CATALOGUE_SHRINK_ALLOWED: 'true',
@@ -1552,31 +1584,34 @@ describe('the deploy build', () => {
   });
 
   it('fails on far fewer part pages than the live site has', async () => {
-    deployed(10, backend({ pages: partPages(4) }));
+    deployed(10, backend({ list: listOf(4) }));
 
     await expect(
-      partPagesForBuild(shopEnv({ CATALOGUE_SHRINK_GUARD: 'true' })),
+      pageListForBuild(shopEnv({ CATALOGUE_SHRINK_GUARD: 'true' })),
     ).rejects.toThrow('4 part pages');
   });
 
   it('builds a catalogue that shrank by less than half', async () => {
-    deployed(10, backend({ pages: partPages(6) }));
+    deployed(10, backend({ list: listOf(6) }));
 
     expect(
-      await partPagesForBuild(shopEnv({ CATALOGUE_SHRINK_GUARD: 'true' })),
+      (await pageListForBuild(shopEnv({ CATALOGUE_SHRINK_GUARD: 'true' })))
+        .parts,
     ).toHaveLength(6);
   });
 
   it('builds a shrunken catalogue the owner allowed', async () => {
-    deployed(10, backend({ pages: partPages(4) }));
+    deployed(10, backend({ list: listOf(4) }));
 
     expect(
-      await partPagesForBuild(
-        shopEnv({
-          CATALOGUE_SHRINK_GUARD: 'true',
-          CATALOGUE_SHRINK_ALLOWED: 'true',
-        }),
-      ),
+      (
+        await pageListForBuild(
+          shopEnv({
+            CATALOGUE_SHRINK_GUARD: 'true',
+            CATALOGUE_SHRINK_ALLOWED: 'true',
+          }),
+        )
+      ).parts,
     ).toHaveLength(4);
   });
 
@@ -1584,7 +1619,7 @@ describe('the deploy build', () => {
     const shop = backend();
     deployed(120, shop);
 
-    expect(await partPagesForBuild(shopEnv())).toEqual([]);
+    expect((await pageListForBuild(shopEnv())).parts).toEqual([]);
     expect(shop).toHaveBeenCalled();
     expect(globalThis.fetch).not.toHaveBeenCalledWith(
       PREVIOUS_BUILD_URL,
@@ -1600,7 +1635,7 @@ describe('the deploy build', () => {
     );
     const env = shopEnv();
 
-    const failure = await partPagesForBuild(env).catch((error) => error);
+    const failure = await pageListForBuild(env).catch((error) => error);
 
     expect(failure.message).toContain('MEDUSA_BACKEND_URL');
     expect(failure.message).toContain(env.MEDUSA_BACKEND_URL);
@@ -1615,7 +1650,7 @@ describe('the deploy build', () => {
     );
 
     await expect(
-      partPagesForBuild(shopEnv({ CATALOGUE_SHRINK_GUARD: 'true' })),
+      pageListForBuild(shopEnv({ CATALOGUE_SHRINK_GUARD: 'true' })),
     ).rejects.toThrow('503');
   });
 
