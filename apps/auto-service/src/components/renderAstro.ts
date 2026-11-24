@@ -2,7 +2,7 @@ import { experimental_AstroContainer as AstroContainer } from 'astro/container';
 import { JSDOM } from 'jsdom';
 import { vi } from 'vitest';
 import { CARLAB } from '@podbor/brands';
-import type { PartPageEntry } from '@/utils/catalogueSnapshot';
+import type { PartPageEntry } from '@/utils/partEntry';
 
 type Component = Parameters<AstroContainer['renderToString']>[0];
 
@@ -19,8 +19,40 @@ export const setShop = (open: boolean) =>
 export const parseHtml = (html: string) =>
   JSDOM.fragment(`<div>${html}</div>`).firstElementChild!;
 
-export const respond = async (component: Component, request: Request) =>
-  (await astro()).renderToResponse(component, { request });
+export const respond = async (
+  component: Component,
+  request: Request,
+  { params }: { params?: Record<string, string> } = {},
+) => (await astro()).renderToResponse(component, { request, params });
+
+export const SHOP_URL = 'http://shop.test';
+
+export const SHOP_PREVIEW_TOKEN = 'preview-token-0123456789abcdef0123';
+
+export const stubShop = (
+  answer: (url: URL, headers: Headers) => Response | Promise<Response>,
+) => {
+  vi.stubEnv('MEDUSA_BACKEND_URL', SHOP_URL);
+  vi.stubEnv('MEDUSA_PUBLISHABLE_KEY', 'pk_test');
+  vi.stubEnv('SHOP_PREVIEW_TOKEN', SHOP_PREVIEW_TOKEN);
+  const fetch = vi.fn(
+    async (input: string | URL | Request, init: RequestInit = {}) =>
+      answer(new URL(String(input)), new Headers(init.headers)),
+  );
+  vi.stubGlobal('fetch', fetch);
+  return fetch;
+};
+
+export const wirePart = ({
+  priceOnRequest: _priceOnRequest,
+  requirementCars,
+  kitCars,
+  ...page
+}: PartPageEntry) => ({
+  ...page,
+  requirement_cars: requirementCars,
+  kit_cars: kitCars,
+});
 
 export async function render(
   component: Component,

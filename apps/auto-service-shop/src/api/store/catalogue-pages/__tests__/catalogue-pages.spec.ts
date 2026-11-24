@@ -122,8 +122,23 @@ medusaIntegrationTestRunner({
         ]);
         expect(makes).toEqual(
           expect.arrayContaining([
-            { slug: 'bmw', name: 'BMW', hub: true },
-            { slug: 'tiny', name: 'Tiny', hub: false },
+            { slug: 'bmw', name: 'BMW', hub: true, parts: expect.any(Number) },
+            {
+              slug: 'tiny',
+              name: 'Tiny',
+              hub: false,
+              parts: expect.any(Number),
+            },
+          ]),
+        );
+      });
+
+      it('sends the whole Make list with its site flag', async () => {
+        const { catalogue_makes: makes } = await list();
+
+        expect(makes).toEqual(
+          expect.arrayContaining([
+            { slug: 'bmw', name: 'BMW', show_on_site: expect.any(Boolean) },
           ]),
         );
       });
@@ -132,7 +147,7 @@ medusaIntegrationTestRunner({
         const { categories } = await list();
 
         expect(categories).toEqual([
-          { slug: 'filters', name: 'Filters', listed: 5 },
+          { slug: 'filters', name: 'Filters', listed: 5, demand: 0 },
         ]);
       });
     });

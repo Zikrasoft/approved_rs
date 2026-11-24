@@ -26,11 +26,10 @@ const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const searchCopy = content(locale).partsSearch;
 const pathname = Astro.url.pathname;
-const inLocale = (code: Locale) =>
-  `${swapLocale(pathname, code)}${Astro.url.search}`;
-
 const pageHasSearch =
   navCurrent(pathname, PathBuilder.partsSearch(locale)) === 'page';
+const inLocale = (code: Locale) =>
+  `${swapLocale(pathname, code)}${pageHasSearch ? Astro.url.search : ''}`;
 const onParts = pathname.startsWith(PathBuilder.parts(locale));
 const open = shopOpen();
 const basket = open

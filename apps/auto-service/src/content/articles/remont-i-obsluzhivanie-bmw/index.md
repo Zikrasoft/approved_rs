@@ -30,6 +30,7 @@ translations:
     lead: We know the common issues with the N47, N20 and N55, from timing chain problems to EGR valve faults. We use genuine ISTA diagnostic equipment, not an adapter from AliExpress.
 translatedFrom: 5e2cbfe1b272a62d
 ---
+
 ## Почему к нам, а не в дилерский центр
 
 - Диагностика на ISTA/ISTA+: видим то же, что видит дилер, без дилерской наценки

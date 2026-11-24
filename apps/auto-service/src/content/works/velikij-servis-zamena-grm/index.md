@@ -15,7 +15,7 @@ published: true
 featured: true
 translations:
   en:
-    title: "Major service on a Skoda Octavia 2.0 TDI: timing belt replacement"
+    title: 'Major service on a Skoda Octavia 2.0 TDI: timing belt replacement'
     body: |-
       We carried out a major service on a **Skoda Octavia 2.0 TDI** at our garage in Belgrade. In Serbia, this type of service is called *veliki servis*.
 
@@ -32,7 +32,7 @@ translations:
       This service is often needed after buying a used car when there is no reliable record of when the belt, water pump, and pulleys were last replaced.
     car: Skoda Octavia
   sr:
-    title: "Veliki servis za Skodu Octaviju 2.0 TDI: zamena zupčastog kaiša"
+    title: 'Veliki servis za Skodu Octaviju 2.0 TDI: zamena zupčastog kaiša'
     body: |-
       U našem auto servisu u Beogradu uradili smo veliki servis na vozilu **Skoda Octavia 2.0 TDI**. U Srbiji se ovaj set radova zove *veliki servis*.
 
@@ -51,7 +51,7 @@ translations:
 translatedFrom: e8442372f6e62da7
 ---
 
-В нашем автосервисе в Белграде сделали большое ТО на **Skoda Octavia 2.0 TDI**. В Сербии такой набор работ называют *veliki servis*.
+В нашем автосервисе в Белграде сделали большое ТО на **Skoda Octavia 2.0 TDI**. В Сербии такой набор работ называют _veliki servis_.
 
 На этом дизеле стоит зубчатый ремень ГРМ, и менять его надо по регламенту. Пропущенная замена ремня или других элементов привода заканчивается серьезной поломкой двигателя и дорогим ремонтом.
 

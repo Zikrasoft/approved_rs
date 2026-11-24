@@ -8,7 +8,10 @@ import type {
 import { CATALOG_MODULE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
 import { PUBLISH_MODULE } from '../modules/publish';
-import type PublishModuleService from '../modules/publish/service';
+import type {
+  default as PublishModuleService,
+  PublishedNumber,
+} from '../modules/publish/service';
 import { SUPPLIER_MODULE } from '../modules/supplier';
 import { releasedSupplierData } from '../modules/supplier/released';
 import type SupplierModuleService from '../modules/supplier/service';
@@ -73,24 +76,24 @@ const replacement = ({
     : null;
 };
 
+type PageOptions = { shown: boolean; demand: Map<string, PartDemand> };
+
 export async function partPagesAfter(
   scope: MedusaContainer,
-  {
-    after,
-    limit,
-    shown,
-    demand,
-  }: {
-    after?: string;
-    limit: number;
-    shown: boolean;
-    demand: Map<string, PartDemand>;
-  },
+  { after, limit, ...options }: PageOptions & { after?: string; limit: number },
 ) {
-  const catalog: CatalogModuleService = scope.resolve(CATALOG_MODULE);
   const published = await scope
     .resolve<PublishModuleService>(PUBLISH_MODULE)
     .publishedPage({ after, limit });
+  return { pages: await partPagesOf(scope, published, options), published };
+}
+
+export async function partPagesOf(
+  scope: MedusaContainer,
+  published: PublishedNumber[],
+  { shown, demand }: PageOptions,
+) {
+  const catalog: CatalogModuleService = scope.resolve(CATALOG_MODULE);
   const pageIds = published.map(({ id }) => id);
   const listedById = new Map(published.map(({ id, listed }) => [id, listed]));
   const identifiers = pageIds.length
@@ -129,7 +132,7 @@ export async function partPagesAfter(
     : new Map<string, PartOffer[]>();
   const supplierData = await releasedSupplierData(suppliers, identifierIds);
 
-  const pages = identifiers.map((identifier) => ({
+  return identifiers.map((identifier) => ({
     ...picturedBrandNumber(identifier),
     listed: listedById.get(identifier.id),
     part: {
@@ -152,5 +155,4 @@ export async function partPagesAfter(
     supplier_data: publicSupplierData(supplierData(identifier.id)),
     demand: demand.get(identifier.id) ?? null,
   }));
-  return { pages, published };
 }

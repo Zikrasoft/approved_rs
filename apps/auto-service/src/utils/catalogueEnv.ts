@@ -14,19 +14,8 @@ import {
 import { CARLAB } from '@podbor/brands';
 import { VISITOR_ID_COOKIE } from '@podbor/site-kit';
 import { CATALOGUE_TIMEOUT_MS, createCatalogue } from './catalogue';
-import type { CataloguePages } from './paths';
 import { isBotAgent } from './botAgent';
 import { PREVIEW_COOKIE } from './shopPreview';
-import {
-  cataloguePagesFrom,
-  categoryPagesFrom,
-  makeHubsFrom,
-  makePartsFrom,
-  type CategoryPageEntry,
-  type MakeHubEntry,
-  type MakePartsEntry,
-  type PartPageEntry,
-} from './catalogueSnapshot';
 
 const catalogueEnvKeys = [
   'MEDUSA_BACKEND_URL',
@@ -213,18 +202,6 @@ const unreadable = (env: CatalogueEnv, error: unknown) =>
     { cause: error },
   );
 
-async function loadSnapshot(env: CatalogueEnv) {
-  const catalogue = catalogueFromEnv(env, {
-    timeoutMs: BUILD_CATALOGUE_TIMEOUT_MS,
-  });
-  if (!catalogue) {
-    return null;
-  }
-  return catalogue.snapshot().catch((error: unknown) => {
-    throw unreadable(env, error);
-  });
-}
-
 async function loadPageList(env: CatalogueEnv) {
   const live =
     env.CATALOGUE_SHRINK_GUARD === 'true' ? await livePartPages() : 0;
@@ -248,9 +225,9 @@ async function loadPageList(env: CatalogueEnv) {
   return list;
 }
 
-const BUILD_SNAPSHOTS = Symbol.for('carlab.buildSnapshots');
+const BUILD_MEMO = Symbol.for('carlab.buildMemo');
 
-export const DEV_SNAPSHOT_FRESH_MS = 30_000;
+export const DEV_BUILD_FRESH_MS = 30_000;
 
 type BuildMemo = Map<string, { loading: Promise<unknown>; loadedAt?: number }>;
 
@@ -259,8 +236,8 @@ function memoizedForBuild<T>(
   load: (env: CatalogueEnv) => Promise<T>,
 ) {
   return (env: CatalogueEnv): Promise<T> => {
-    const holder = globalThis as { [BUILD_SNAPSHOTS]?: BuildMemo };
-    const memo = (holder[BUILD_SNAPSHOTS] ??= new Map());
+    const holder = globalThis as { [BUILD_MEMO]?: BuildMemo };
+    const memo = (holder[BUILD_MEMO] ??= new Map());
     const key = JSON.stringify([
       name,
       ...catalogueEnvKeys.map((envKey) => env[envKey]),
@@ -269,7 +246,7 @@ function memoizedForBuild<T>(
     const stale =
       cached?.loadedAt !== undefined &&
       import.meta.env?.MODE === 'development' &&
-      Date.now() - cached.loadedAt >= DEV_SNAPSHOT_FRESH_MS;
+      Date.now() - cached.loadedAt >= DEV_BUILD_FRESH_MS;
     if (cached && !stale) {
       return cached.loading as Promise<T>;
     }
@@ -293,8 +270,6 @@ function memoizedForBuild<T>(
   };
 }
 
-const snapshotForBuild = memoizedForBuild('snapshot', loadSnapshot);
-
 const pageListMemo = memoizedForBuild('pageList', loadPageList);
 
 const EMPTY_PAGE_LIST: CataloguePageList = {
@@ -302,18 +277,13 @@ const EMPTY_PAGE_LIST: CataloguePageList = {
   makes: [],
   series: [],
   categories: [],
+  catalogue_makes: null,
 };
 
 export async function pageListForBuild(
   env = siteEnv(),
 ): Promise<CataloguePageList> {
   return (await pageListMemo(env)) ?? EMPTY_PAGE_LIST;
-}
-
-export async function partPagesForBuild(
-  env = siteEnv(),
-): Promise<PartPageEntry[]> {
-  return (await snapshotForBuild(env))?.entries ?? [];
 }
 
 const categoriesMemo = memoizedForBuild('categories', async (env) => {
@@ -331,41 +301,11 @@ export async function categoriesForBuild(env = siteEnv()): Promise<Category[]> {
   return categoriesMemo(env);
 }
 
-export async function categoryPagesForBuild(
-  env = siteEnv(),
-): Promise<CategoryPageEntry[]> {
-  const snapshot = await snapshotForBuild(env);
-  return snapshot ? categoryPagesFrom(snapshot) : [];
-}
-
-export async function cataloguePagesForBuild(
-  env = siteEnv(),
-): Promise<CataloguePages> {
-  const snapshot = await snapshotForBuild(env);
-  return snapshot
-    ? cataloguePagesFrom(snapshot)
-    : { makes: new Set(), series: new Set(), categories: new Set() };
-}
-
-export async function makeHubsForBuild(
-  env = siteEnv(),
-): Promise<MakeHubEntry[]> {
-  const snapshot = await snapshotForBuild(env);
-  return snapshot ? makeHubsFrom(snapshot) : [];
-}
-
-export async function makePartsForBuild(
-  env = siteEnv(),
-): Promise<MakePartsEntry[]> {
-  const snapshot = await snapshotForBuild(env);
-  return snapshot ? makePartsFrom(snapshot) : [];
-}
-
 export async function writeCatalogueMakes(
   file: URL,
   env = siteEnv(),
 ): Promise<void> {
-  const makes = (await snapshotForBuild(env))?.makes;
+  const makes = (await pageListForBuild(env)).catalogue_makes;
   if (makes) {
     await writeFile(file, `${JSON.stringify(sortedMakes(makes), null, 2)}\n`);
   }

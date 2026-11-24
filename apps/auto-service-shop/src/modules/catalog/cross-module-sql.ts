@@ -32,6 +32,29 @@ export const PUBLISHED_PAGE = `
   order by pn.id
   limit ?`;
 
+export const PUBLISHED_NUMBER_BY_SLUG = `
+  select pn.id, pn.listed from published_number pn
+  join part_identifier pi on pi.id = pn.id and pi.deleted_at is null
+  join brand b on b.id = pi.brand_id and b.deleted_at is null
+  where pn.deleted_at is null and b.slug = ? and pi.normalized_value = ?
+  order by pn.id
+  limit 1`;
+
+export const PUBLISHED_NUMBERS = `
+  select pn.id, pn.listed from published_number pn
+  join part_identifier pi on pi.id = pn.id and pi.deleted_at is null
+  where pn.deleted_at is null and pn.id = any(?::text[])
+  order by pn.id`;
+
+export const LISTED_PARTS_IN_CATEGORY = `
+  select p.id, p.category_id, p.attributes from part p
+  join part_identifier pi on pi.part_id = p.id and pi.deleted_at is null
+  join published_number pn on pn.id = pi.id and pn.deleted_at is null
+  where p.deleted_at is null and p.category_id = ?
+  group by p.id
+  having bool_or(pn.listed)
+  order by min(pn.id)`;
+
 const LISTED_PLACES = `
   with listed as (
     select distinct pi.part_id from part_identifier pi
@@ -39,7 +62,7 @@ const LISTED_PLACES = `
       and pn.deleted_at is null and pn.listed
     where pi.deleted_at is null
   ), places as (
-    select c.series_id, x.part_id, x.category_id, x.fitted
+    select c.series_id, m.id as model_id, x.part_id, x.category_id, x.fitted
     from (
       select f.vehicle_id, f.part_id, pt.category_id, true as fitted
       from fitment f left join part pt on pt.id = f.part_id
@@ -65,12 +88,51 @@ export const LISTED_PART_COUNTS = `${LISTED_PLACES}, series_matches as (
   from places p
   left join series_matches m on not p.fitted
     and m.series_id = p.series_id and m.category_id = p.category_id
+  where ?::text[] is null or p.series_id = any(?::text[])
   group by p.series_id`;
+
+export const LISTED_MAKE_PART_COUNTS = `${LISTED_PLACES}, scoped as (
+    select p.model_id, p.part_id, p.category_id, p.fitted, s.make_id
+    from places p
+    join series s on s.id = p.series_id and s.deleted_at is null
+    where p.series_id = any(?::text[])
+  ), model_matches as (
+    select model_id, category_id, count(distinct part_id) as matches
+    from scoped where not fitted group by model_id, category_id
+  ), kept as (
+    select sc.model_id
+    from scoped sc
+    left join model_matches mm on not sc.fitted
+      and mm.model_id = sc.model_id and mm.category_id = sc.category_id
+    group by sc.model_id
+    having count(distinct sc.part_id)
+      filter (where sc.fitted or mm.matches >= ?) > 0
+  ), make_matches as (
+    select make_id, category_id, count(distinct part_id) as matches
+    from scoped
+    where not fitted and model_id in (select model_id from kept)
+    group by make_id, category_id
+  )
+  select mk.slug as make_slug,
+    (count(distinct sc.part_id)
+      filter (where sc.fitted or mm.matches >= ?))::int as parts
+  from scoped sc
+  join kept k on k.model_id = sc.model_id
+  join make mk on mk.id = sc.make_id
+  left join make_matches mm on not sc.fitted
+    and mm.make_id = sc.make_id and mm.category_id = sc.category_id
+  group by mk.slug`;
 
 export const LISTED_SERIES_CATEGORY_COUNTS = `${LISTED_PLACES}
   select series_id, category_id, count(distinct part_id)::int as parts
   from places where category_id is not null
   group by series_id, category_id`;
+
+export const LISTED_SERIES_PARTS = `${LISTED_PLACES}
+  select category_id, part_id from places
+  where series_id = ?
+  group by category_id, part_id
+  order by category_id, part_id`;
 
 export const PUBLISHED_PART_SLUGS = `
   select b.slug as brand_slug, pi.normalized_value,
@@ -105,6 +167,16 @@ export const LISTED_PER_CATEGORY = `
   join part p on p.id = pi.part_id and p.deleted_at is null
   where pn.deleted_at is null and pn.listed and p.category_id is not null
   group by p.category_id`;
+
+export const LISTED_NUMBERS_IN_CATEGORY = `
+  select pn.id, b.slug as brand_slug, b.name as brand_name,
+    pi.normalized_value, p.id as part_id, p.attributes
+  from published_number pn
+  join part_identifier pi on pi.id = pn.id and pi.deleted_at is null
+  join brand b on b.id = pi.brand_id and b.deleted_at is null
+  join part p on p.id = pi.part_id and p.deleted_at is null
+  where pn.deleted_at is null and pn.listed and p.category_id = ?
+  order by pn.id`;
 
 export const UNRESOLVED_VIN_CODES = `
   with hits as (

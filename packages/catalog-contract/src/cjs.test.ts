@@ -31,6 +31,37 @@ describe('CommonJS build', { timeout: 30_000 }, () => {
     expect(contract.CATALOGUE_SNAPSHOT_PATH).toBe('/store/catalogue-snapshot');
   });
 
+  it('serves the Part page request and answer to require()', () => {
+    const contract = require('@podbor/catalog-contract');
+    expect(contract.CATALOGUE_LOCALE_HEADER).toBe('x-catalogue-locale');
+    expect(contract.catalogueLocaleSchema.parse('en')).toBe('en');
+    expect(
+      contract.partPageResponseSchema.safeParse({ related: [] }).success,
+    ).toBe(false);
+  });
+
+  it('serves the Series page requests and answers to require()', () => {
+    const contract = require('@podbor/catalog-contract');
+    expect(contract.seriesPagePath('bmw', '3-series')).toBe(
+      '/store/catalogue-pages/series/bmw/3-series',
+    );
+    expect(
+      contract.seriesCategoryPageResponseSchema.safeParse({}).success,
+    ).toBe(false);
+  });
+
+  it('serves the Car Make page request and answer to require()', () => {
+    const contract = require('@podbor/catalog-contract');
+    expect(contract.carMakePagePath('bmw')).toBe(
+      '/store/catalogue-pages/cars/bmw',
+    );
+    expect(contract.carMakePageResponseSchema.parse({})).toEqual({
+      hub: false,
+      categories: [],
+      showcase: [],
+    });
+  });
+
   it('serves the place page rules to require()', () => {
     const contract = require('@podbor/catalog-contract');
     expect(contract.MIN_PARTS_FOR_PAGE).toBe(3);
@@ -174,5 +205,16 @@ describe('CommonJS build', { timeout: 30_000 }, () => {
         code: null,
       }).success,
     ).toBe(true);
+  });
+
+  it('serves the Category page request and answer to require()', () => {
+    const contract = require('@podbor/catalog-contract');
+    expect(contract.categoryPagePath('brakes', 2)).toBe(
+      '/store/catalogue-pages/categories/brakes?page=2',
+    );
+    expect(contract.CATEGORY_PAGE_SIZE).toBe(48);
+    expect(contract.categoryPageResponseSchema.safeParse({}).success).toBe(
+      false,
+    );
   });
 });

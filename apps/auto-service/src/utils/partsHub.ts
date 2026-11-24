@@ -1,13 +1,16 @@
-import { translated } from '@podbor/catalog-contract';
+import {
+  translated,
+  type CataloguePageList,
+  type Category,
+} from '@podbor/catalog-contract';
 import { paragraphs } from '@podbor/site-kit';
 import { localeConfig, type Locale } from '../i18n/config.ts';
 import {
   type CatalogueEnv,
-  categoryPagesForBuild,
-  makeHubsForBuild,
+  categoriesForBuild,
+  pageListForBuild,
 } from './catalogueEnv.ts';
-import type { CategoryPageEntry, MakeHubEntry } from './catalogueSnapshot.ts';
-import { byDemand, demandOf } from './demand.ts';
+import { byDemand } from './demand.ts';
 import { TOP_MAKES, topMakes } from './makeIndex.ts';
 
 export type PartsHub = {
@@ -28,24 +31,29 @@ const perLocale = <T>(read: (locale: Locale) => T) =>
   ) as Record<Locale, T>;
 
 export const partsHubOf = (
-  categories: CategoryPageEntry[],
-  makes: MakeHubEntry[],
-): PartsHub => ({
-  makes: topMakes(makes, TOP_MAKES).map(({ make }) => ({
-    slug: make.slug,
-    name: make.name,
-  })),
-  categories: byDemand(categories, ({ pages }) => demandOf(pages)).map(
-    (category) => ({
+  categories: Category[],
+  list: CataloguePageList,
+): PartsHub => {
+  const own = new Map(list.categories.map((entry) => [entry.slug, entry]));
+  const demand = ({ slug }: Category) => own.get(slug)?.demand ?? 0;
+  const hubs = list.makes
+    .filter(({ hub }) => hub)
+    .map(({ slug, name, parts }) => ({
+      make: { slug, name },
+      parts: parts ?? 0,
+    }));
+  return {
+    makes: topMakes(hubs, TOP_MAKES).map(({ make }) => make),
+    categories: byDemand(categories, demand).map((category) => ({
       slug: category.slug,
-      empty: category.pages.length === 0,
+      empty: own.get(category.slug)?.listed === 0,
       name: perLocale((locale) => translated(category, 'name', locale)),
       lead: perLocale(
         (locale) => paragraphs(translated(category, 'text', locale))[0] ?? null,
       ),
-    }),
-  ),
-});
+    })),
+  };
+};
 
 export function partsHubPlugin(env: CatalogueEnv) {
   const resolved = `\0${PARTS_HUB_MODULE}`;
@@ -54,11 +62,11 @@ export function partsHubPlugin(env: CatalogueEnv) {
     resolveId: (id: string) => (id === PARTS_HUB_MODULE ? resolved : null),
     async load(id: string) {
       if (id !== resolved) return null;
-      const [categories, makes] = await Promise.all([
-        categoryPagesForBuild(env),
-        makeHubsForBuild(env),
+      const [categories, list] = await Promise.all([
+        categoriesForBuild(env),
+        pageListForBuild(env),
       ]);
-      return `export default ${JSON.stringify(partsHubOf(categories, makes))};`;
+      return `export default ${JSON.stringify(partsHubOf(categories, list))};`;
     },
   };
 }

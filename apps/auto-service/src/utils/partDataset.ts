@@ -1,6 +1,6 @@
 import { translated } from '@podbor/catalog-contract';
 import { addonDataset } from './categoryAddon';
-import type { PartPageEntry } from './catalogueSnapshot';
+import type { PartPageEntry } from './partEntry';
 
 export const partDataset = (page: PartPageEntry, locale: string) => ({
   'data-slug': page.slug,

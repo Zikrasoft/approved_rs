@@ -1,11 +1,11 @@
 ---
-import { Image } from 'astro:assets';
 import { localizedArticle } from '@podbor/blog/article';
 import { localeFrom } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
 import type { Article } from '@/utils/blog';
 import ArticleDate from './ArticleDate.astro';
 import { coverScale, coverSizes } from '@/utils/coverSizes';
+import { builtCover, optimizedCover } from '@/utils/coverImages';
 
 interface Props {
   article: Article;
@@ -16,6 +16,9 @@ interface Props {
 const { article, eager = false, heading: Heading = 'h2' } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const { title, lead } = localizedArticle(article, locale);
+const cover = await (Astro.isPrerendered ? optimizedCover : builtCover)(
+  article.data.image,
+);
 ---
 
 <a
@@ -23,15 +26,17 @@ const { title, lead } = localizedArticle(article, locale);
   data-article-card
   class="tile group"
 >
-  <Image
-    src={article.data.image}
+  <img
+    src={cover.src}
+    srcset={cover.srcset}
     alt=""
-    widths={[360, 560, 760, 1080]}
+    width={cover.width}
+    height={cover.height}
+    decoding="async"
     sizes={coverSizes(
       '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, calc(100vw - 2.5rem)',
       coverScale(article.data.image, 3 / 2),
     )}
-    quality={68}
     loading={eager ? 'eager' : 'lazy'}
     class="aspect-[3/2] w-full object-cover"
   />

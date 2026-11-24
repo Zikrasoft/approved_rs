@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { catalogueUrls, sitemapFilter } from './sitemap';
+import { carsUrls, catalogueUrls, sitemapFilter } from './sitemap';
 
 const SITE = 'https://carlab.rs';
 
@@ -47,21 +47,23 @@ describe('catalogueUrls', () => {
       { slug: 'bmw-2', indexable: false },
     ],
     makes: [
-      { slug: 'bmw', name: 'BMW', hub: true },
-      { slug: 'tiny', name: 'Tiny', hub: false },
+      { slug: 'bmw', name: 'BMW', hub: true, parts: 9 },
+      { slug: 'tiny', name: 'Tiny', hub: false, parts: null },
     ],
     series: [
       { make: 'bmw', slug: '3-series', name: '3', categories: ['brakes'] },
     ],
     categories: [
-      { slug: 'brakes', name: 'Brakes', listed: 100 },
-      { slug: 'empty', name: 'Empty', listed: null },
+      { slug: 'brakes', name: 'Brakes', listed: 100, demand: null },
+      { slug: 'empty', name: 'Empty', listed: null, demand: null },
     ],
+    catalogue_makes: null,
   });
 
   it('lists every page of the list in every locale, Parts only when indexable', () => {
     expect(urls).toEqual(
       expect.arrayContaining([
+        `${SITE}/sr/parts/makes/`,
         `${SITE}/sr/parts/bmw/`,
         `${SITE}/ru/parts/bmw/3-series/`,
         `${SITE}/en/parts/bmw/3-series/brakes/`,
@@ -82,5 +84,27 @@ describe('catalogueUrls', () => {
       ]),
     );
     expect(urls).not.toContain(`${SITE}/sr/parts/c/brakes/4/`);
+  });
+});
+
+describe('carsUrls', () => {
+  it('lists /cars/ and each Make in every locale', () => {
+    expect(
+      carsUrls(SITE, ['audi', 'bmw']).filter((url) => url.includes('/sr/')),
+    ).toEqual([
+      `${SITE}/sr/cars/`,
+      `${SITE}/sr/cars/audi/`,
+      `${SITE}/sr/cars/bmw/`,
+    ]);
+    expect(carsUrls(SITE, [])).toContain(`${SITE}/en/cars/`);
+  });
+
+  it('adds a numbered page for every 24 Makes', () => {
+    const makes = Array.from({ length: 25 }, (_, index) => `make-${index}`);
+
+    expect(carsUrls(SITE, makes)).toContain(`${SITE}/ru/cars/2/`);
+    expect(carsUrls(SITE, makes.slice(0, 24))).not.toContain(
+      `${SITE}/ru/cars/2/`,
+    );
   });
 });

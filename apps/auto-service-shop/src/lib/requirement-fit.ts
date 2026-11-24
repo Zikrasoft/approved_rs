@@ -95,10 +95,10 @@ export async function requirementFits(
     : [];
 }
 
-export async function everyRequirementFit(
+export async function vehicleRequirementFits(
   catalog: CatalogModuleService,
+  vehicles: Vehicle[],
 ): Promise<PartFit[]> {
-  const vehicles = await vehiclesRequiring(catalog);
   const categoryIds = distinct(
     vehicles.flatMap(({ requirements }) =>
       requirements.map(({ category_id }) => category_id),
@@ -128,4 +128,10 @@ export async function everyRequirementFit(
     );
   }
   return fits;
+}
+
+export async function everyRequirementFit(
+  catalog: CatalogModuleService,
+): Promise<PartFit[]> {
+  return vehicleRequirementFits(catalog, await vehiclesRequiring(catalog));
 }

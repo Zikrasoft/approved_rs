@@ -54,6 +54,8 @@ const page = {
   supplier_data: { cross_references: [], applicability: [], images: [] },
 };
 
+const SLUG = 'bmw-61218381715';
+
 const found = {
   results: [
     {
@@ -103,12 +105,16 @@ const respond = (body: unknown) =>
 
 const backend = () =>
   vi.fn((url: string) => {
-    if (url.endsWith('/store/catalogue-snapshot')) {
+    if (url.includes('/store/catalogue-pages/parts/')) {
       return respond({
-        pages: [page],
-        categories: [battery],
-        fitments: [],
-        vehicles: [],
+        page: {
+          ...page,
+          slug: SLUG,
+          category: battery,
+          indexable: true,
+          fits: [],
+        },
+        related: [],
       });
     }
     if (url.endsWith('/store/categories')) {
@@ -134,7 +140,7 @@ const closed = (fetch: ReturnType<typeof vi.fn>, preview = false) =>
 
 describe('a closed shop', () => {
   it('builds part pages with no Part price and with the workshop prices', async () => {
-    const [built] = await closed(backend()).partPages();
+    const { page: built } = (await closed(backend()).partPage(SLUG, 'ru'))!;
 
     expect(built.offers).toEqual([]);
     expect(built.priceOnRequest).toBe(true);
@@ -179,7 +185,7 @@ describe('a closed shop', () => {
       kind: 'offers',
       offers: OFFERS,
     });
-    expect((await preview.partPages())[0].offers).toEqual(OFFERS);
+    expect((await preview.partPage(SLUG, 'ru'))!.page.offers).toEqual(OFFERS);
     expect(fetch).toHaveBeenCalledWith(
       `${BACKEND_URL}/store/part-identifiers/pi_bmw/offers`,
       expect.objectContaining({

@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  brokenAnswer,
   caddyServes,
   linksCaddy404,
   shadowedRedirects,
@@ -46,4 +47,10 @@ test('passes files no rule matches', () => {
 test('flags a page that links /_image, which Caddy answers 404', () => {
   assert.equal(linksCaddy404('<img src="/_image?href=x">'), true);
   assert.equal(linksCaddy404('<img src="/_astro/a.webp">'), false);
+});
+
+test('a catalogue page without its shop asks to retry, which is not a broken page', () => {
+  assert.equal(brokenAnswer(503), false);
+  assert.equal(brokenAnswer(500), true);
+  assert.equal(brokenAnswer(404), false);
 });

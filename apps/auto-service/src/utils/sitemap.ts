@@ -1,6 +1,9 @@
-import type { CataloguePageList } from '@podbor/catalog-contract';
+import {
+  CATEGORY_PAGE_SIZE,
+  type CataloguePageList,
+} from '@podbor/catalog-contract';
 import { SUPPORTED_LOCALES } from '../i18n/config.ts';
-import { CATEGORY_PAGE_SIZE } from './catalogueSnapshot';
+import { CARS_PAGE_SIZE } from './works';
 import { PathBuilder } from './paths';
 
 const PART_PAGE_SEGMENT = '/parts/p/';
@@ -36,6 +39,7 @@ export function catalogueUrls(
   const hubs = makes.filter(({ hub }) => hub);
   return SUPPORTED_LOCALES.flatMap((locale) =>
     [
+      PathBuilder.partsMakes(locale),
       ...hubs.map(({ slug }) => PathBuilder.partsMake(locale, slug)),
       ...series.flatMap((entry) => [
         PathBuilder.partsSeries(locale, entry.make, entry.slug),
@@ -59,6 +63,18 @@ export function catalogueUrls(
       ...parts
         .filter(({ indexable }) => indexable)
         .map(({ slug }) => PathBuilder.partNumber(locale, slug)),
+    ].map((path) => `${site}${path}`),
+  );
+}
+
+export function carsUrls(site: string, makes: string[]): string[] {
+  return SUPPORTED_LOCALES.flatMap((locale) =>
+    [
+      ...Array.from(
+        { length: Math.max(1, Math.ceil(makes.length / CARS_PAGE_SIZE)) },
+        (_, index) => PathBuilder.cars(locale, index + 1),
+      ),
+      ...makes.map((slug) => PathBuilder.carsMake(locale, slug)),
     ].map((path) => `${site}${path}`),
   );
 }

@@ -11,7 +11,8 @@ import {
   vi,
 } from 'vitest';
 import { builtinEnvironments } from 'vitest/environments';
-import type { PartPageEntry } from '@/utils/catalogueSnapshot';
+import type { PartPageEntry } from '@/utils/partEntry';
+import { respond, stubShop, wirePart } from './renderAstro';
 import CategoryPage from '../pages/[locale]/parts/c/[slug]/[...page].astro';
 import ThanksPage from '../pages/[locale]/thanks/[...variant].astro';
 import FitLine from './FitLine.astro';
@@ -32,7 +33,10 @@ beforeAll(async () => {
 
 afterAll(() => jsdom.teardown(globalThis));
 
-afterEach(() => vi.unstubAllEnvs());
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
+});
 
 const render = async (
   component: AstroComponentFactory,
@@ -284,19 +288,27 @@ describe('a category page', () => {
     installation_price: null,
     image: null,
     fields: [],
-    pages: [],
   };
 
   const offer = 'Пришлите VIN или номер, и мы назовем цену и срок.';
   const categoryPage = async (pages: PartPageEntry[]) => {
-    const doc = await render(
+    stubShop(() =>
+      Response.json({
+        category,
+        page: 1,
+        pages: pages.length ? 2 : 1,
+        count: pages.length,
+        entries: pages.map(wirePart),
+      }),
+    );
+    const response = await respond(
       CategoryPage,
-      {
-        category: { ...category, pages },
-        listing: { number: 1, count: pages.length ? 2 : 1, pages },
-      },
-      '/ru/parts/c/suspension/',
-      { locale: 'ru', slug: 'suspension' },
+      new Request('https://carlab.rs/ru/parts/c/suspension/'),
+      { params: { locale: 'ru', slug: 'suspension' } },
+    );
+    const doc = new DOMParser().parseFromString(
+      await response.text(),
+      'text/html',
     );
     return { doc, copy: [...doc.querySelectorAll('main p')].map(text) };
   };
