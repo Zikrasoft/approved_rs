@@ -1,0 +1,24 @@
+enum LeadStatus {
+  new
+  negotiations
+  in_progress
+  won
+  lost
+  postponed
+
+  @@map("lead_status")
+}
+
+enum OperationType {
+  payout
+  settlement
+
+  @@map("operation_type")
+}
+
+enum StaffRole {
+  owner
+  admin
+
+  @@map("staff_role")
+}

@@ -41,16 +41,6 @@
 
 	redir / /app
 
-	@guarded {
-		not {
-			path /auth/session /admin/invites/accept /auth/user/emailpass/update
-			header Authorization "Bearer *"
-		}
-	}
-	basic_auth @guarded {
-		{$ADMIN_BASIC_AUTH_USER} {$ADMIN_BASIC_AUTH_HASH}
-	}
-
 	handle {
 		reverse_proxy medusa:9000 {
 			header_up X-Forwarded-For {remote_host}
@@ -75,5 +65,92 @@
 
 	handle {
 		respond 405
+	}
+}
+
+(site) {
+	encode zstd gzip
+
+	log {
+		output file /data/access.log {
+			roll_size 100MiB
+			roll_keep 20
+			roll_keep_for 168h
+		}
+	}
+	import security-headers.caddy
+
+	root * /srv/sites/{args[0]}/current/client
+
+	handle /_image {
+		respond 404
+	}
+
+	@page file {path}/index.html
+	rewrite @page {file_match.relative}
+
+	@file {
+		file {path}
+		not path */
+	}
+	handle @file {
+		header /_astro/* Cache-Control "public, max-age=31536000, immutable"
+		header ?Cache-Control "public, max-age=0, must-revalidate"
+		file_server
+	}
+
+	handle {
+		reverse_proxy site-{args[0]}:4321 {
+			header_up X-Request-Id {http.request.uuid}
+		}
+	}
+}
+
+(www) {
+	import security-headers.caddy
+	redir https://{args[0]}{uri} permanent
+}
+
+{$CARLAB_HOST} {
+	import site auto-service
+}
+
+www.{$CARLAB_HOST} {
+	import www {$CARLAB_HOST}
+}
+
+{$DETAILS_HOST} {
+	import site detailing
+}
+
+www.{$DETAILS_HOST} {
+	import www {$DETAILS_HOST}
+}
+
+{$APPROVED_HOST} {
+	import site approved-rs
+}
+
+www.{$APPROVED_HOST} {
+	import www {$APPROVED_HOST}
+}
+
+{$CRM_HOST} {
+	import security-headers.caddy
+
+	handle /api/telegram-webhook {
+		reverse_proxy site-auto-service:4321 {
+			header_up X-Request-Id {http.request.uuid}
+		}
+	}
+
+	handle /api/telegram-capture {
+		reverse_proxy site-approved-rs:4321 {
+			header_up X-Request-Id {http.request.uuid}
+		}
+	}
+
+	handle {
+		respond 404
 	}
 }

@@ -29,6 +29,7 @@ const BUSINESS_DESCRIPTION = `${CARLAB.name}, a car service in Belgrade, Serbia,
 const ROWS_PER_REQUEST = 50;
 const ROWS_PER_PAGE = 2_000;
 const CHARS_PER_REQUEST = 4_000;
+const REQUESTS_AT_ONCE = 100;
 
 const localeSchema = z.enum(CATALOG_TRANSLATION_LOCALES);
 const nestedSchema = z
@@ -271,7 +272,7 @@ async function translateLocale(
   const stale = items.filter(
     (item) => item.translatedFrom[locale] !== item.hash[locale],
   );
-  for (const chunk of requestBatches(stale, locale)) {
+  const translateChunk = async (chunk: Item[]) => {
     const fields = Object.fromEntries(
       chunk.flatMap((item) => pendingFields(item, locale)),
     );
@@ -312,7 +313,13 @@ async function translateLocale(
         };
       }),
     );
-  }
+  };
+  const chunks = requestBatches(stale, locale).values();
+  await Promise.all(
+    Array.from({ length: REQUESTS_AT_ONCE }, async () => {
+      for (const chunk of chunks) await translateChunk(chunk);
+    }),
+  );
 }
 
 export async function translateCatalogue(

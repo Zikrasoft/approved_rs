@@ -1,0 +1,11 @@
+model Digest {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  day       DateTime @unique @db.Date
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  messageId Int?     @map("message_id")
+  hidden    Int?
+
+  leads DigestLead[]
+
+  @@map("digests")
+}

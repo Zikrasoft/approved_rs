@@ -1,4 +1,4 @@
-import { waitUntil } from '@vercel/functions';
+import { inBackground } from '@podbor/lead-crm/background';
 import {
   eventCodeSchema,
   STOREFRONT_EVENTS_PATH,
@@ -8,7 +8,7 @@ import {
 import { HONEYPOT_FIELD } from '@podbor/lead-crm/fields';
 import type { NotifyLead } from '@podbor/lead-crm';
 import { z } from 'zod';
-import { requestIdOf } from '@/utils/catalogueEnv';
+import { requestIdOf, shopBackendUrl } from '@/utils/catalogueEnv';
 import { DEMAND_PARTS_FIELD } from '@/utils/demand';
 
 export const SHOP_EVENT_TIMEOUT_MS = 2000;
@@ -28,19 +28,17 @@ type EventsEnv = Partial<Record<keyof z.infer<typeof eventsEnvSchema>, string>>;
 
 type ShopEventsOptions = {
   fetch?: typeof globalThis.fetch;
-  keepAlive?: (sending: Promise<unknown>) => void;
   env?: () => EventsEnv;
 };
 
 const siteEventsEnv = (): EventsEnv => ({
-  MEDUSA_BACKEND_URL: import.meta.env.MEDUSA_BACKEND_URL,
+  MEDUSA_BACKEND_URL: shopBackendUrl(import.meta.env.MEDUSA_BACKEND_URL),
   SHOP_EVENTS_SECRET: process.env.SHOP_EVENTS_SECRET,
 });
 
 export const createShopEvents =
   ({
     fetch = (input, init) => globalThis.fetch(input, init),
-    keepAlive = waitUntil,
     env = siteEventsEnv,
   }: ShopEventsOptions = {}) =>
   (request: Request | null, event: ShopEvent): void => {
@@ -67,7 +65,7 @@ export const createShopEvents =
         () => undefined,
       )
       .catch(() => undefined);
-    keepAlive(sending);
+    inBackground(sending);
   };
 
 export const reportShopEvent = createShopEvents();

@@ -24,20 +24,17 @@ half of the rollback.
 
 ## 1. Back up the lead store
 
+On the host, as the deploy user:
+
 ```bash
-cd apps/approved-rs
-vercel env pull .env.local            # only if BLOB_READ_WRITE_TOKEN is stale
-node --env-file=.env.local --experimental-strip-types scripts/backup-leads.ts
+/srv/carlab/backup.sh
+docker compose -f /srv/carlab/docker-compose.yml exec -T postgres psql -U carlab -d crm -Atc 'select count(*) from leads'
 ```
 
-It reads `data/leads.json` through the same Vercel Blob storage the app uses,
-writes it to `apps/approved-rs/.local/leads-<timestamp>.json` (gitignored) and
-prints the path and the record count. It never writes to the blob.
-
-Note the record count — it is what you compare against if anything later looks
-wrong. Run this before the release deploys, not only before the bot switch: the
-first Lead write after it drops the old money fields from every record, and
-this file is the only copy of them.
+`backup.sh` dumps the `crm` database as `crm-<stamp>.dump` beside the shop's
+`db-<stamp>.dump`, whose path it prints, and copies both off the host like the
+nightly run; the second line prints the Lead count and nothing else. Note both: the
+count is what you compare against if anything later looks wrong.
 
 In the old bot, open «🔴 Мне должны» as the admin and write the total down —
 step 8 compares the Balance against it.
@@ -52,10 +49,11 @@ curl "https://api.telegram.org/bot<OLD_TELEGRAM_BOT_TOKEN>/deleteWebhook?drop_pe
 
 From here until step 5 the CRM buttons do nothing. That is expected.
 
-## 3. Change the Vercel values
+## 3. Change the GitHub values
 
-Two variables, in **all three** projects (`approved-rs`, `auto-service`,
-`detailing`) — all three send lead cards with the CRM bot:
+Two variables, shared by **all three** sites and so set once at repository
+level (Settings → Secrets and variables → Actions), since all three send lead cards
+with the CRM bot; the token is a secret, the username a variable:
 
 | Variable                | New value                               |
 | ----------------------- | --------------------------------------- |
@@ -71,10 +69,9 @@ from there.
 
 ## 4. Redeploy all three projects
 
-A Vercel environment variable only reaches the functions on the next build.
-Redeploy `approved-rs`, `auto-service` and `detailing` from the dashboard, or
-push an empty commit and let CI ship them. Until this lands, the deployed
-functions still hold the old token.
+The sites take the env GitHub holds only on their next deploy. Run
+CI with **Deploy every app** so `approved-rs`, `auto-service` and `detailing`
+ship again. Until this lands, the running sites still hold the old token.
 
 ## 5. Register the new bot's webhook
 
@@ -100,7 +97,7 @@ fresh card on demand with working buttons — every open lead is reachable that
 way immediately. And the first action you take on a lead heals its teaser:
 `ensureLeadCard` tries the edit, Telegram refuses it, the code falls through and
 posts a new teaser as `@SerbCRMBot`, rewriting `telegramChatId` /
-`telegramMessageId` through the store's normal compare-and-swap write.
+`telegramMessageId` through the store's normal locked row update.
 
 What you are left with until then is cosmetic: the frozen teasers stay in the
 group, and a lead you act on gains a second, live one beside its dead twin.
@@ -148,8 +145,7 @@ In the leads group and in a DM with `@SerbCRMBot`:
       proves the `auto-service` project picked up the new token too.
 - [ ] A lead submitted on details.rs produces a card — same proof for the third
       project.
-- [ ] **The Balance opened** — after the first Lead write, `data/ledger.json`
-      exists in the Blob store, and «💶 Мне должны» in `@SerbCRMBot` equals the
+- [ ] **The Balance opened**: «💶 Мне должны» in `@SerbCRMBot` equals the
       total noted in step 1.
 - [ ] **The first digest** — the next morning's group digest lists every open
       Lead untouched for 7 days or more, the backlog included. A tap on one of
@@ -168,7 +164,8 @@ Discard the old token once every box above is ticked.
 Two values, the two from step 3:
 
 1. Put `TELEGRAM_BOT_TOKEN` and `TELEGRAM_BOT_USERNAME` back to `@ApprovedRsBot`'s
-   in all three Vercel projects and redeploy.
+   at repository level in GitHub, where the sites' shared env lives, and redeploy them
+   (CI with **Deploy every app**).
 2. Re-register the webhook against the old token:
 
    ```bash
@@ -179,15 +176,12 @@ Nothing else changed. Leads written during the switch keep working — but any
 teaser posted as `@SerbCRMBot` becomes the frozen one, and heals the same way in
 reverse the first time you act on that lead.
 
-If the lead store itself looks wrong, the step 1 backup is the restore source:
+If the lead store itself looks wrong, the step 1 dump is the restore source
+(see [deploy.md](deploy.md#crm-migrations)):
 
 ```bash
-cd apps/approved-rs
-node --env-file=.env.local --experimental-strip-types scripts/restore-leads.ts .local/leads-<timestamp>.json
-node --env-file=.env.local --experimental-strip-types scripts/restore-leads.ts .local/leads-<timestamp>.json --apply
+docker compose -f /srv/carlab/docker-compose.yml exec -T postgres pg_restore -U carlab -d crm --clean --if-exists --no-owner --role=crm --single-transaction <crm-<stamp>.dump
 ```
 
-The first form is a dry run: it prints the backup's record count against the
-live blob's and writes nothing. `--apply` overwrites `data/leads.json` with the
-backup, so anything written since the backup is lost — read both counts before
-you type it.
+It replaces the whole `crm` database with the dump, so anything written since
+is lost: compare the Lead count against the one you noted before you run it.

@@ -18,6 +18,7 @@ import {
   shopOpen,
 } from '@/utils/catalogueEnv';
 import { categoryAddon } from '@/utils/categoryAddon';
+import { BROWSE_PAGE_SIZE, browseHref } from '@/utils/searchPage';
 import { formatMoney, PRICE_CURRENCY } from '@/utils/money';
 import { paragraphs } from '@podbor/site-kit';
 import {
@@ -93,6 +94,14 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
             note: content(locale).partsSearch.llmsSearch.replace(
               '{example}',
               `${url(PathBuilder.partsSearch(locale))}?${new URLSearchParams({ q: 'HU 816 x' })}`,
+            ),
+          },
+          {
+            label: content(locale).partsSearch.allHeading,
+            href: url(PathBuilder.partsSearch(locale)),
+            note: content(locale).partsSearch.llmsAll.replace(
+              '{example}',
+              url(browseHref(locale, BROWSE_PAGE_SIZE)),
             ),
           },
           ...categories.map((category) => {

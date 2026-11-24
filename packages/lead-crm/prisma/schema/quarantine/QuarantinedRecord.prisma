@@ -1,0 +1,9 @@
+model QuarantinedRecord {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  source      String
+  payloadHash String   @unique @map("payload_hash")
+  payload     Json
+  importedAt  DateTime @default(now()) @map("imported_at") @db.Timestamptz(3)
+
+  @@map("quarantined_records")
+}

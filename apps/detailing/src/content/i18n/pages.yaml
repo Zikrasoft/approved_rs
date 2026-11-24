@@ -129,7 +129,7 @@ translations:
         - title: Koliko dugo ih čuvamo
           text: Do dve godine od poslednjeg kontakta. Na vaš zahtev možemo ih obrisati i ranije.
         - title: Kolačići
-          text: Sajt koristi tehnički kolačić za izabrani jezik interfejsa i analitičke alate (Google Analytics i Yandex Metrica). Analitika se pokreće pri prvom učitavanju stranice. Možete je odbiti u baneru na dnu ekrana, nakon čega se neće pokretati pri sledećem učitavanju. Yandex Metrica beleži sesije (kretanje kursora, pomeranje stranice i klikove). Obrazac za upit je izuzet iz snimanja, tako da se njegov sadržaj ne beleži. Sajt ne koristi reklamne kolačiće koji vas prate na drugim sajtovima. Ako ste došli preko oglasa i niste odbili analitiku, sajt 30 dana pamti izvor i kampanju kako bismo videli koji oglasi donose upite. Anonimni identifikator pregledača čuva se u memoriji pregledača i u našem kolačiću visitor_id. Ako odbijete analitiku u baneru, identifikator i kolačić se brišu.
+          text: Sajt koristi tehnički kolačić za izabrani jezik interfejsa i analitičke alate (Google Analytics i Yandex Metrica). Analitika se pokreće pri prvom učitavanju stranice. Možete je isključiti putem linka "Podešavanja kolačića" na dnu sajta, nakon čega se neće pokretati od sledećeg učitavanja. Yandex Metrica snima sesije (pokrete kursora, pomeranje stranice i klikove). Obrazac za upit izuzeli smo iz snimanja, tako da se njegov sadržaj ne beleži. Ovde nema reklamnih kolačića koji vas prate na drugim sajtovima. Ako ste došli putem oglasa i niste isključili analitiku, sajt pamti taj podatak (izvor i kampanju) 30 dana, kako bismo videli koji oglasi donose upite. Anonimni identifikator pregledača čuva se u memoriji pregledača i u našem kolačiću visitor_id. Ako isključite analitiku, identifikator i kolačić se brišu.
         - title: Vaša prava
           text: Možete da zatražite kopiju svojih podataka, njihovu ispravku ili brisanje. Dovoljno je da nam pišete putem bilo kog mesindžera ili da nas pozovete.
       contactTitle: Pitanja o podacima
@@ -207,7 +207,7 @@ translations:
         - title: How long we keep it
           text: For up to two years from our last contact. We'll delete it sooner if you ask.
         - title: Cookies
-          text: The site uses a technical cookie to remember your selected language, as well as analytics tools (Google Analytics and Yandex Metrica). Analytics starts when the page first loads. You can opt out using the banner at the bottom of the screen; if you do, analytics won't run from your next page load. Yandex Metrica records sessions (cursor movement, scrolling and clicks). We've excluded the request form from these recordings, so its contents aren't captured. We don't use advertising cookies that track you across other sites. If you arrived through an ad and haven't opted out of analytics, the site remembers the source and campaign for 30 days so we can see which ads bring in requests. The anonymous browser identifier is stored in your browser's memory and in our own visitor_id cookie. If you opt out using the banner, the identifier and cookie are deleted.
+          text: The site uses a technical cookie to remember your selected interface language, as well as analytics tools (Google Analytics and Yandex Metrica). Analytics starts when the page first loads. You can opt out using the "Cookie settings" link at the bottom of the site; analytics will then be disabled from your next page load. Yandex Metrica records sessions, including cursor movement, scrolling and clicks. We exclude the enquiry form from these recordings, so its contents are never captured. We don't use advertising cookies that track you across other sites. If you arrived via an ad and haven't opted out of analytics, the site remembers this for 30 days (the source and campaign) so we can see which ads generate enquiries. An anonymous browser identifier is stored in browser memory and in our first-party visitor_id cookie. If you opt out, the identifier and cookie are deleted.
         - title: Your rights
           text: You can request a copy of your data, ask us to correct it or ask us to delete it. Just message us on any of our messaging apps or give us a call.
       contactTitle: Questions about your data
@@ -232,4 +232,4 @@ translations:
       heading: This page doesn't exist
       body: The link may be outdated or the address may contain a typo. Visit our homepage or browse our work.
       cta: Back to home
-translatedFrom: 4d98f519d76ed035
+translatedFrom: 2db09c5fb5d6f7b3

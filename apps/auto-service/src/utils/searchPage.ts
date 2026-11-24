@@ -32,6 +32,11 @@ export type SearchCatalogue = Pick<
 
 const SHOP_MAX_OFFSET = 10_000;
 
+export const BROWSE_PAGE_SIZE = 12;
+
+export const browseHref = (locale: Locale, offset = 0) =>
+  `${PathBuilder.partsSearch(locale)}${offset ? `?${new URLSearchParams({ offset: String(offset) })}` : ''}`;
+
 const catalogKey = (raw: string | null) => {
   const key = raw?.toLowerCase();
   return key && CATALOG_KEY_PATTERN.test(key) ? key : undefined;
@@ -105,10 +110,14 @@ export async function planSearch({
   params,
   locale,
   catalogue,
+  path = PathBuilder.partsSearch(locale),
+  anchor,
 }: {
   params: URLSearchParams;
   locale: Locale;
   catalogue: SearchCatalogue | null;
+  path?: string;
+  anchor?: string;
 }) {
   const typed = partsQuery(params.get('q') ?? '');
   const category = catalogKey(params.get('category'));
@@ -137,9 +146,11 @@ export async function planSearch({
     return redirectTo(destination, 303);
   }
 
+  const browse = !typed && !category && !model && !misspeltCategory;
   const searchable =
     !vin &&
-    (searchableQuery(typed) ||
+    (browse ||
+      searchableQuery(typed) ||
       Boolean(category) ||
       Boolean(model) ||
       misspeltCategory);
@@ -153,6 +164,7 @@ export async function planSearch({
           ranges: capped.ranges,
           offset,
           sort,
+          ...(browse ? { limit: BROWSE_PAGE_SIZE } : {}),
         })
       : null,
   );
@@ -179,7 +191,8 @@ export async function planSearch({
     if (nextOffset) {
       next.set('offset', String(nextOffset));
     }
-    return `${PathBuilder.partsSearch(locale)}?${next}`;
+    const query = String(next);
+    return `${path}${query ? `?${query}` : ''}${anchor ? `#${anchor}` : ''}`;
   };
 
   const unfiltered =
@@ -265,6 +278,7 @@ export async function planSearch({
       ranges,
       offset,
       vin,
+      browse,
       vinTypo: !vin && nearVin(typed) ? vinText(typed) : null,
       vinOutcome,
       searchable,
@@ -282,3 +296,8 @@ export async function planSearch({
     },
   };
 }
+
+export type SearchView = Extract<
+  Awaited<ReturnType<typeof planSearch>>,
+  { view: unknown }
+>['view'];

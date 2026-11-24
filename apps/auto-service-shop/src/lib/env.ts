@@ -73,6 +73,9 @@ const envFields = z.object({
   IMPORT_CONCURRENCY: optionalValue
     .transform((articles) => Number(articles ?? 4))
     .pipe(z.number().int().positive()),
+  IMPORT_AI_LIMIT: optionalValue
+    .transform((answers) => answers && Number(answers))
+    .pipe(z.number().int().positive().optional()),
   STORE_WRITES_PER_MINUTE: optionalValue
     .transform((count) => Number(count ?? 120))
     .pipe(z.number().int().positive()),

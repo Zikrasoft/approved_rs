@@ -225,6 +225,17 @@ const composedName = (
   return type && `${type} ${article.brand} ${article.number}`;
 };
 
+const tallied = (ai: ShopAi, summary: ImportSummary): ShopAi => ({
+  ...ai,
+  answerArticle: async (question) => {
+    summary.ai_answers += 1;
+    const answer = await ai.answerArticle(question);
+    summary.ai_input_tokens += answer.usage?.input ?? 0;
+    summary.ai_output_tokens += answer.usage?.output ?? 0;
+    return answer;
+  },
+});
+
 function classificationOf(
   context: Context,
   article: Article,
@@ -353,8 +364,9 @@ async function matchArticle(
     await catalog.updateParts({ id: part.id, source_url: article.source_url });
   }
   const edited = new Set(part.edited_fields);
-  const fileable = !part.category_id && !edited.has('category_id');
-  const classifiedUnder = part.category_id ?? (fileable ? categoryId : null);
+  const fileable =
+    part.category_id !== categoryId && !edited.has('category_id');
+  const classifiedUnder = fileable ? categoryId : part.category_id;
   const answer = lazily(() => answerOf(context, article, classifiedUnder));
   const refreshable =
     Boolean(part.category_id) &&
@@ -550,7 +562,7 @@ export async function importSupplier(
 ): Promise<ImportSummary> {
   const catalog: CatalogModuleService = scope.resolve(CATALOG_MODULE);
   const suppliers: SupplierModuleService = scope.resolve(SUPPLIER_MODULE);
-  const { IMPORT_CONCURRENCY } = parseEnv(process.env);
+  const { IMPORT_CONCURRENCY, IMPORT_AI_LIMIT } = parseEnv(process.env);
   const supplier = await suppliers.supplierByKey(adapter.key);
   if (!supplier) {
     throw new Error(`No Supplier has the key ${adapter.key}`);
@@ -563,7 +575,7 @@ export async function importSupplier(
     supplierId: supplier.id,
     catalog,
     suppliers,
-    ai: shopAi(scope),
+    ai: tallied(shopAi(scope), summary),
     categories: await categoryChoices(catalog),
     logger: scope.resolve(ContainerRegistrationKeys.LOGGER),
     matched: new Set(),
@@ -617,6 +629,8 @@ export async function importSupplier(
   const report = () =>
     (reported = reported.then(() => onProgress?.(structuredClone(summary))));
   let handled = 0;
+  const stopped = () =>
+    IMPORT_AI_LIMIT !== undefined && summary.ai_answers >= IMPORT_AI_LIMIT;
 
   for (let cursor: string | null = null; ;) {
     const page = cataloguePageSchema.parse(await adapter.listCatalogue(cursor));
@@ -653,6 +667,7 @@ export async function importSupplier(
     const quotes = new Map(quoted.map((quote) => [quote.article_id, quote]));
     tally.skip('currency', refused);
     const importOne = async (article: Article) => {
+      if (stopped()) return;
       try {
         await importArticle(
           context,
@@ -683,13 +698,18 @@ export async function importSupplier(
       },
     );
     await report();
-    if (!page.next) {
+    if (!page.next || stopped()) {
       break;
     }
     cursor = page.next;
   }
 
-  if (!complete) {
+  if (stopped()) {
+    complete = false;
+    context.logger.warn(
+      `${adapter.key}: stopped after ${summary.ai_answers} AI answers (IMPORT_AI_LIMIT), kept the offers and flags of unlisted articles`,
+    );
+  } else if (!complete) {
     context.logger.warn(
       `${adapter.key}: kept the offers and flags of unlisted articles, its catalogue is still being crawled`,
     );

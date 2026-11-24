@@ -248,7 +248,7 @@ translations:
         - title: Koliko dugo ih čuvamo
           text: Do tri godine od poslednje posete, jer servisna istorija pomaže pri sledećoj popravci. Na Vaš zahtev ćemo ih obrisati ranije. Broj šasije koji unesete u pretragu auto delova i potpune podatke o automobilu dobijene na osnovu njega čuvamo 90 dana od poslednje pretrage. Zatim brišemo broj šasije i te podatke, a zadržavamo samo kod proizvođača (prva tri znaka broja šasije), marku i model automobila. Anonimni identifikator pregledača čuvamo uz pretragu po broju šasije još 90 dana, a zatim ga brišemo.
         - title: Kolačići
-          text: Sajt koristi tehnički kolačić za izabrani jezik, analitičke kolačiće (Google Analytics i Yandex Metrica) i reklamni kolačić (Meta Pixel). Analitika i piksel se pokreću pri prvom učitavanju stranice. Možete ih odbiti u baneru pri dnu ekrana, pa se neće pokretati od sledećeg učitavanja. Yandex Metrica snima sesije (kretanje kursora, pomeranje stranice i klikove). Obrazac za upit smo izuzeli iz snimanja, tako da se njegov sadržaj ne beleži. Piksel obaveštava Metu o pregledanju stranice i o tome da ste poslali upit, pisali nam ili napravili porudžbinu. Tako vidimo koji oglasi na Facebooku i Instagramu dovode klijente. Sadržaj obrasca mu se ne prosleđuje. Ako nakon posete sajtu nastavite u našem Telegram botu i pošaljete upit, naš server će Meti poslati samo informaciju da je upit poslat, bez sadržaja upita i Vaših kontakt podataka. Korpa se čuva u memoriji pregledača (localStorage) i ne šalje se automatski na naš server. Anonimni identifikator čuva se u memoriji pregledača i u našem kolačiću visitor_id. Taj kolačić se šalje na naš server kada tražite auto delove pomoću broja šasije. Pomoću njega povezujemo Vaše upite u našem CRM sistemu sa automobilima koje ste tražili po broju šasije, kako bi saradnik odmah video o kom automobilu je reč. Ako odbijete kolačiće u baneru, identifikator i kolačić će biti obrisani.
+          text: Sajt postavlja tehnički kolačić sa izabranim jezikom, analitičke kolačiće (Google Analytics i Yandex Metrika) i reklamni kolačić (Meta piksel). Analitika i piksel pokreću se pri prvom učitavanju stranice. Možete da ih isključite putem linka "Podešavanja kolačića" pri dnu sajta, nakon čega se neće pokretati pri sledećem učitavanju. Yandex Metrika snima sesije (kretanje kursora, pomeranje stranice i klikove). Obrazac za upit smo izuzeli iz snimanja, tako da se njegov sadržaj ne beleži. Piksel obaveštava Meta o pregledima stranice i o tome da ste poslali upit, pisali nam ili napravili porudžbinu. Tako vidimo koji oglasi na Facebooku i Instagramu dovode klijente. Sadržaj obrasca se ne prosleđuje pikselu. Ako nakon posete sajtu nastavite razgovor u našem Telegram botu i tamo pošaljete upit, naš server će obavestiti Meta samo da je upit poslat, bez njegovog sadržaja i Vaših kontakt podataka. Korpa se čuva u memoriji pregledača (localStorage) i sama po sebi se ne šalje na naš server. Anonimni identifikator čuva se u memoriji pregledača i u našem kolačiću visitor_id, a sa njim se šalje na naš server kada pretražujete auto delove po broju šasije. Pomoću njega povezujemo Vaše upite u našem CRM-u sa automobilima koje ste pretraživali po broju šasije, kako bi saradnik odmah video Vaš automobil. Ako ih isključite, identifikator i kolačić se brišu.
         - title: Vaša prava
           text: Možete da zatražite kopiju svojih podataka, njihovu ispravku ili brisanje. Dovoljno je da nas pozovete ili nam pišete u bilo kojoj aplikaciji za razmenu poruka.
       contactTitle: Pitanja o podacima
@@ -328,6 +328,35 @@ translations:
           model: Model
           modelPlaceholder: Izaberite model
           submit: Prikažite auto delove
+    make:
+      metaTitleTemplate: Popravka i servis vozila {make} u Beogradu | CarLab
+      metaDescriptionTemplate: 'Dijagnostika, servis i popravka vozila {make} u auto servisu CarLab u Beogradu: konkretni radovi na vozilima {make}, zakazivanje telefonom ili onlajn.'
+      headingTemplate: Popravka i servis vozila {make} u Beogradu
+      leadTemplate: 'Radimo dijagnostiku, servis i popravku vozila {make}: od zamene ulja do motora i menjača. Reći ćemo Vam šta treba uraditi i koliko košta pre početka radova.'
+      servicesHeadingTemplate: Šta radimo na vozilima {make}
+      partsHeadingTemplate: Auto delovi za vozila {make}
+      partsHubTemplate: Svi auto delovi za vozila {make}
+      worksHeadingTemplate: Naši radovi na vozilima {make}
+      worksAllTemplate: Svi radovi na vozilima {make}
+      faqHeadingTemplate: Česta pitanja o popravci vozila {make}
+      articlesHeadingTemplate: Članci o vozilima {make}
+      ctaHeadingTemplate: Zakažite servis za vozilo {make}
+      ctaBody: 'Model, godište i šta Vas muči: reći ćemo Vam okvirno odakle da počnemo i koliko košta dijagnostika.'
+      ctaCommentPlaceholder: Model, godište i šta Vas brine
+    cars:
+      navLabel: Vozila
+      metaTitle: Popravka vozila po markama u Beogradu | CarLab
+      metaDescription: 'Marke vozila koje servisira i popravlja auto servis CarLab u Beogradu: naši radovi, članci i auto delovi za svaku marku.'
+      heading: Marke vozila koje servisiramo
+      lead: Izaberite marku da pogledate naše radove, članke i auto delove za tu marku.
+      pageName: Vozila, stranica {page}
+      pagination: Stranice sa spiskom marki
+      searchLabel: Pronađite marku
+      searchPlaceholder: Marka latinicom, na primer Skoda
+      noMatch: Te marke nema na spisku. Pišite nam, verovatno radimo i tu marku.
+      empty: Stranice sa markama još nisu dostupne. Napišite nam koji automobil vozite i reći ćemo Vam da li možemo da ga servisiramo.
+      ctaHeading: Niste pronašli svoju marku?
+      ctaBody: 'Marka, model i šta Vas muči: reći ćemo Vam da li možemo da servisiramo Vaš automobil i koliko košta dijagnostika.'
   en:
     works:
       metaTitle: CarLab workshop jobs in Belgrade | CarLab
@@ -398,7 +427,7 @@ translations:
         - title: How long we keep it
           text: For up to three years after your last visit, because your service history can help with future repairs. You can ask us to delete it sooner. We keep the VIN you enter when searching for parts, along with the full vehicle details decoded from it, for 90 days after your last search. After that, we delete the VIN and decoded details, keeping only the manufacturer's code (the first three VIN characters), the car's make and model. The anonymous browser ID is stored with the VIN search for the same 90 days, then deleted.
         - title: Cookies
-          text: The site uses a technical cookie to remember your chosen language, analytics cookies (Google Analytics and Yandex Metrica) and an advertising cookie (Meta Pixel). Analytics and the pixel run when the page first loads. You can opt out using the banner at the bottom of the screen; if you do, they won't run from your next page load. Yandex Metrica records sessions, including cursor movements, scrolling and clicks. We exclude the enquiry form from these recordings, so its contents aren't captured. Meta Pixel tells Meta when you view a page, send an enquiry, message us or place an order. This helps us see which Facebook and Instagram ads bring in customers. Form contents are not shared with it. If you continue to our Telegram bot after visiting the site and submit an enquiry there, our server tells Meta only that an enquiry was made, without its contents or your contact details. Your cart is stored in your browser's memory (localStorage) and is not sent to our server on its own. The anonymous ID is stored in your browser's memory and in our own visitor_id cookie. It is sent to our server when you search for parts by VIN. We use it to match your enquiries in our CRM with the cars you've searched for by VIN, so our team can see which car you mean straight away. If you opt out in the banner, the ID and cookie are deleted.
+          text: The site sets a technical cookie to remember your selected language, analytics cookies (Google Analytics and Yandex Metrica), and an advertising cookie (Meta Pixel). Analytics and the pixel start on the first page load. You can opt out using the "Cookie settings" link at the bottom of the site. If you do, they won't run from your next page load. Yandex Metrica records sessions, including cursor movement, scrolling and clicks. We exclude the enquiry form from these recordings, so its contents are never recorded. The pixel tells Meta when you view a page, send an enquiry, message us or place an order. This helps us see which Facebook and Instagram ads bring in customers. The form contents are not shared with the pixel. If you continue to our Telegram bot after visiting the site and send an enquiry there, our server tells Meta only that an enquiry was sent, not its contents or your contact details. Your cart is stored in your browser's memory (localStorage) and is not sent to our server on its own. An anonymous identifier is stored in your browser's memory and in our own visitor_id cookie. It is sent to our server when you search for parts by VIN. We use it to link your enquiries in our CRM to the cars you've searched for by VIN, so our manager can see which car you have straight away. If you opt out, the identifier and cookie are deleted.
         - title: Your rights
           text: You can ask for a copy of your data, or request that we correct or delete it. Just call or message us using any messenger app.
       contactTitle: Questions about your data
@@ -478,4 +507,33 @@ translations:
           model: Model
           modelPlaceholder: Select a model
           submit: Show parts
-translatedFrom: 23bbff05d65cb6b6
+    make:
+      metaTitleTemplate: '{make} servicing and repairs in Belgrade | CarLab'
+      metaDescriptionTemplate: Diagnostics, servicing and repairs for {make} at CarLab in Belgrade. See real work on {make}. Book by phone or online.
+      headingTemplate: '{make} servicing and repairs in Belgrade'
+      leadTemplate: We diagnose, service and repair {make}, from oil changes to engine and gearbox work. We'll tell you what's needed and how much it will cost before we start.
+      servicesHeadingTemplate: What we do for {make}
+      partsHeadingTemplate: Parts for {make}
+      partsHubTemplate: All parts for {make}
+      worksHeadingTemplate: Our work on {make}
+      worksAllTemplate: All work on {make}
+      faqHeadingTemplate: Frequently asked questions about {make} repairs
+      articlesHeadingTemplate: Articles about {make}
+      ctaHeadingTemplate: Book your {make} in for service
+      ctaBody: Tell us the model, year and what's wrong. We'll give you an idea of where to start and how much diagnostics will cost.
+      ctaCommentPlaceholder: Model, year and what's troubling you
+    cars:
+      navLabel: Cars
+      metaTitle: Car servicing by make in Belgrade | CarLab
+      metaDescription: Car makes serviced and repaired at CarLab in Belgrade. See our work, articles and parts for each make.
+      heading: Car makes we work on
+      lead: Choose your car make to see our work, articles and parts for it.
+      pageName: Cars, page {page}
+      pagination: Car make list pages
+      searchLabel: Find a car make
+      searchPlaceholder: Make in Latin letters, for example Skoda
+      noMatch: That make isn't on the list. Get in touch, as we probably work on it too.
+      empty: There are no car make pages yet. Tell us what you drive and we'll let you know if we can help.
+      ctaHeading: Can't find your car make?
+      ctaBody: Tell us the make, model and what's wrong. We'll let you know if we can help and how much diagnostics will cost.
+translatedFrom: f5cf33904faf1428

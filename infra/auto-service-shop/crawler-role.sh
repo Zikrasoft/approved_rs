@@ -21,5 +21,6 @@ select not exists (select from pg_roles where rolname = 'crawler') as missing \g
 create role crawler;
 \endif
 alter role crawler with login nosuperuser nocreatedb nocreaterole noinherit password '$password';
+grant connect on database carlab to crawler;
 grant select, insert, update on crawl_run, crawl_page to crawler;
 SQL

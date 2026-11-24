@@ -1,13 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
-import { SUPPORTED_LOCALES } from './i18n/config';
 
 vi.mock('astro:middleware', () => ({ defineMiddleware: (fn: unknown) => fn }));
-vi.mock('astro:i18n', () => ({
-  requestHasLocale: (context: { url: URL }) =>
-    (SUPPORTED_LOCALES as readonly string[]).includes(
-      context.url.pathname.split('/')[1],
-    ),
-}));
 
 const { onRequest } = await import('./middleware');
 
@@ -36,7 +29,6 @@ function makeContext(
       get: () => (cookie ? { value: cookie } : undefined),
     },
     redirect: vi.fn((path: string, status?: number) => ({ path, status })),
-    rewrite: vi.fn((path: string) => ({ path })),
   };
 }
 
@@ -44,12 +36,15 @@ const run = (context: unknown, next = vi.fn(() => 'next')) =>
   (onRequest as unknown as Handler)(context, next);
 
 describe('onRequest', () => {
-  it('passes an unlocalized path straight through', () => {
-    const context = makeContext('/api/leads');
-    const next = vi.fn(() => 'next');
-    expect(run(context, next)).toBe('next');
-    expect(context.redirect).not.toHaveBeenCalled();
-  });
+  it.each(['/api/leads', '/admin/case-photos', '/_astro/old.js', '/404'])(
+    'passes the unlocalized %s straight through',
+    (pathname) => {
+      const context = makeContext(pathname);
+      const next = vi.fn(() => 'next');
+      expect(run(context, next)).toBe('next');
+      expect(context.redirect).not.toHaveBeenCalled();
+    },
+  );
 
   it('serves a localized page without recording it as a language choice', () => {
     const context = makeContext('/en/vehicle-sourcing/de/');
@@ -58,19 +53,19 @@ describe('onRequest', () => {
     expect(context.redirect).not.toHaveBeenCalled();
   });
 
-  it('rewrites the bare root to the detected locale without pinning it', () => {
+  it('redirects the bare root to the detected locale for this visit only', () => {
     const context = makeContext('/?utm_source=ig', {
       acceptLanguage: 'en-US,en;q=0.9,ru;q=0.8',
     });
     run(context);
-    expect(context.rewrite).toHaveBeenCalledWith('/en/?utm_source=ig');
+    expect(context.redirect).toHaveBeenCalledWith('/en/?utm_source=ig', 302);
     expect(context.cookies.set).not.toHaveBeenCalled();
   });
 
   it('falls back to the primary locale for a language the site does not serve', () => {
     const context = makeContext('/', { acceptLanguage: 'zh-CN,zh;q=0.9' });
     run(context);
-    expect(context.rewrite).toHaveBeenCalledWith('/ru/');
+    expect(context.redirect).toHaveBeenCalledWith('/ru/', 302);
   });
 
   it('still prefers an existing cookie over Accept-Language', () => {
@@ -79,7 +74,7 @@ describe('onRequest', () => {
       cookie: 'sr',
     });
     run(context);
-    expect(context.rewrite).toHaveBeenCalledWith('/sr/');
+    expect(context.redirect).toHaveBeenCalledWith('/sr/', 302);
   });
 
   it('keeps the query string on the cross-brand 301', () => {
@@ -106,14 +101,14 @@ describe('onRequest', () => {
     );
   });
 
-  it('301s an unprefixed content path to the detected locale', () => {
+  it('sends an unprefixed content path to the detected locale with a temporary redirect', () => {
     const context = makeContext('/vehicle-sourcing/rs/', {
       acceptLanguage: 'sr-RS,sr;q=0.9',
     });
     run(context);
     expect(context.redirect).toHaveBeenCalledWith(
       '/sr/vehicle-sourcing/rs/',
-      301,
+      302,
     );
   });
 });

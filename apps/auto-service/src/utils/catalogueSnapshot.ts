@@ -11,8 +11,7 @@ import {
   seriesCategoryHasPage,
   seriesHasPage,
   type Category,
-  type CatalogueRedirect,
-  type Fitment,
+  type SnapshotFitment,
   type PartPage,
   type PlaceParts,
   type PositionGroup,
@@ -25,7 +24,7 @@ import { partPicture } from './partImages';
 import { partSuccessor } from './partSuccessor';
 import { placeKey, seriesKey, type CataloguePages } from './paths';
 
-export type Fit = Fitment & { vehicle: Vehicle };
+export type Fit = SnapshotFitment & { vehicle: Vehicle };
 
 export type PartPageEntry = PartPage & {
   slug: string;
@@ -121,9 +120,8 @@ const groupBy = <T>(items: T[], key: (item: T) => string): Map<string, T[]> => {
 export function assembleSnapshot(
   pages: PartPage[],
   allCategories: Category[],
-  fitments: Fitment[],
+  fitments: SnapshotFitment[],
   allVehicles: Vehicle[],
-  redirects: CatalogueRedirect[] = [],
 ) {
   const categoryById = new Map(
     allCategories.map((category) => [category.id, category]),
@@ -299,7 +297,6 @@ export function assembleSnapshot(
     matchesFor,
     placeParts,
     cars,
-    redirects,
   };
 }
 

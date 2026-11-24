@@ -1,1 +1,0 @@
-export { detectLocale } from './config';

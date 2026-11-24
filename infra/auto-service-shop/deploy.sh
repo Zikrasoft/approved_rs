@@ -20,6 +20,12 @@ esac
   exit 1
 }
 
+crm_password=$(sed -n 's/^CRM_DB_PASSWORD=//p' .env)
+[ -n "$crm_password" ] || {
+  echo "CRM_DB_PASSWORD is not set in .env: the sites keep their Leads in the crm database. Set it (openssl rand -hex 32) and deploy again." >&2
+  exit 1
+}
+
 mkdir .deploy.lock 2>/dev/null || {
   echo "A deploy or backup is already running (.deploy.lock present)." >&2
   exit 1
@@ -60,6 +66,12 @@ docker compose run --rm -T medusa \
   node_modules/.bin/medusa exec ./src/scripts/seed-production.js
 
 ./crawler-role.sh
+./crm-role.sh
+
+echo "==> CRM migrations"
+CRM_DATABASE_URL="postgres://crm:$crm_password@postgres:5432/crm" CHECKPOINT_DISABLE=1 \
+  docker compose run --rm -T -e CRM_DATABASE_URL -e CHECKPOINT_DISABLE \
+  -w /server/node_modules/@podbor/lead-crm medusa node_modules/.bin/prisma migrate deploy
 
 grep -v '^MEDUSA_TAG=' .env >.env.next
 echo "MEDUSA_TAG=$tag" >>.env.next
@@ -68,6 +80,16 @@ if [ -n "$previous" ] && [ "$previous" != "$tag" ]; then
   echo "$previous" >.previous-tag
 fi
 trap '[ $? -eq 0 ] || [ ! -s .previous-tag ] || echo "Roll back with: $0 $(cat .previous-tag)" >&2; rmdir .deploy.lock 2>/dev/null || true' EXIT
+
+sites=${SITES_ROOT:-/srv/sites}
+[ -d "$sites" ] || sudo install -d -m 0755 -o "$(id -u)" -g "$(id -g)" "$sites"
+COMPOSE_PROFILES=
+for site in "$sites"/*; do
+  [ -L "$site/current" ] || continue
+  [ -L "$site/running" ] || ln -s "$(readlink "$site/current")" "$site/running"
+  COMPOSE_PROFILES="${COMPOSE_PROFILES:+$COMPOSE_PROFILES,}site-${site##*/}"
+done
+export COMPOSE_PROFILES
 
 echo "==> Restarting"
 docker compose up -d --wait --wait-timeout 300 --remove-orphans

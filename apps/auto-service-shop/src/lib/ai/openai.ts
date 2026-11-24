@@ -12,6 +12,7 @@ import {
   type CategoryChoice,
   quoteReadingSchema,
   type ShopAi,
+  type TokenUsage,
 } from './contract';
 import { capitalized } from './description';
 import { OPENAI_MODEL } from '../openai-model';
@@ -186,7 +187,12 @@ type Ask<T> = {
   retries?: number;
 };
 
-const ask = async <T>({ retries = 0, ...question }: Ask<T>): Promise<T> => {
+type Asked<T> = { value: T; usage: TokenUsage };
+
+const ask = async <T>({
+  retries = 0,
+  ...question
+}: Ask<T>): Promise<Asked<T>> => {
   if (!question.apiKey) {
     throw adminError(
       MedusaError.Types.NOT_ALLOWED,
@@ -212,7 +218,7 @@ const askOnce = async <T>({
   schema,
   code,
   what,
-}: Omit<Ask<T>, 'retries'> & { apiKey: string }): Promise<T> => {
+}: Omit<Ask<T>, 'retries'> & { apiKey: string }): Promise<Asked<T>> => {
   const client = new OpenAI({
     apiKey,
     timeout: TIMEOUT_MS,
@@ -238,7 +244,13 @@ const askOnce = async <T>({
   if (!parsed.success) {
     throw unreadable(code, what, z.prettifyError(parsed.error), true);
   }
-  return parsed.data;
+  return {
+    value: parsed.data,
+    usage: {
+      input: response.usage?.prompt_tokens ?? 0,
+      output: response.usage?.completion_tokens ?? 0,
+    },
+  };
 };
 
 const inHouseStyle = (text: string) =>
@@ -246,7 +258,7 @@ const inHouseStyle = (text: string) =>
 
 export const openAiShopAi = (apiKey: string | undefined): ShopAi => ({
   readQuote: async (pdf, categories, brands) => {
-    const reading = await ask({
+    const { value: reading } = await ask({
       apiKey,
       model: OPENAI_MODEL,
       system: quotePrompt(categories, brands),
@@ -280,7 +292,7 @@ export const openAiShopAi = (apiKey: string | undefined): ShopAi => ({
     user: JSON.stringify({ ...article, glossary: glossaryFor(article.name) }),
   }),
   answerArticle: async (question) => {
-    const answer = await ask({
+    const { value: answer, usage } = await ask({
       apiKey,
       ...question,
       schema: articleAnswerSchema,
@@ -292,6 +304,7 @@ export const openAiShopAi = (apiKey: string | undefined): ShopAi => ({
       ...answer,
       name: capitalized(inHouseStyle(answer.name)),
       description: answer.description && inHouseStyle(answer.description),
+      usage,
     };
   },
 });

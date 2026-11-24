@@ -1,6 +1,5 @@
-// astro.config.mjs
 import { defineConfig } from 'astro/config';
-import vercel from '@astrojs/vercel';
+import node from '@astrojs/node';
 import react from '@astrojs/react';
 import keystatic from '@keystatic/astro';
 import sitemap from '@astrojs/sitemap';
@@ -10,12 +9,11 @@ import { BCP47_BY_LOCALE, localeConfig } from './src/i18n/config.ts';
 
 export default defineConfig({
   site: APPROVED.url,
-  // Static by default — the two API routes and the homepage (bare '/' is
-  // rewritten to it by middleware, which Astro only allows into an
-  // on-demand route) opt into SSR individually via `prerender = false`
-  // instead of every static page opting in via `prerender = true`.
   output: 'static',
-  adapter: vercel(),
+  adapter: node({ mode: 'standalone' }),
+  security: {
+    allowedDomains: [{ hostname: APPROVED.domain, protocol: 'https' }],
+  },
   prefetch: { prefetchAll: true, defaultStrategy: 'hover' },
   i18n: {
     locales: [...localeConfig.locales],
@@ -30,20 +28,17 @@ export default defineConfig({
         defaultLocale: localeConfig.primaryLocale,
         locales: BCP47_BY_LOCALE,
       },
-      // Internal admin tool (see pages/admin/case-photos.astro), not a public page.
       filter: (page) => !page.includes('/admin/case-photos'),
     }),
   ],
-  // Legacy-slug + locale-prefix redirects live in src/middleware.ts for
-  // requests that reach it — but on Vercel's static output, middleware only
-  // runs for paths matching a real Astro route (see src/pages/index.astro's
-  // comment for the same caveat re: '/'). Deleted old-slug pages have no
-  // route left to match, so those 301s are duplicated in vercel.json, which
-  // Vercel evaluates at the edge before routing — the only place they still
-  // fire once the page is gone. middleware.ts's copy stays for local dev
-  // (vercel.json redirects aren't read by `astro dev`) and as the source of
-  // truth `vercel.json` was hand-derived from.
   vite: {
-    plugins: [tailwindcss()],
+    plugins: [
+      tailwindcss(),
+      {
+        name: 'bundle-server-dependencies',
+        apply: 'build',
+        config: () => ({ ssr: { noExternal: true } }),
+      },
+    ],
   },
 });

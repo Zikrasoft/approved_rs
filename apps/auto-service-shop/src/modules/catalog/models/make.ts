@@ -10,6 +10,7 @@ const Make = model
     id: model.id().primaryKey(),
     slug: model.text().unique(),
     name: model.text(),
+    show_on_site: model.boolean().default(false),
     series: model.hasMany(() => Series, { mappedBy: 'make' }),
     models: model.hasMany(() => VehicleModel, { mappedBy: 'make' }),
     spellings: model.hasMany(() => MakeSpelling, { mappedBy: 'make' }),
