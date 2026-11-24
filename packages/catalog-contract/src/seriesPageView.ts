@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { categorySchema } from './categories.ts';
 import { partPageSchema } from './partPages.ts';
 import { CATALOGUE_PAGES_PATH } from './partPageView.ts';
-import { snapshotFitmentSchema } from './snapshot.ts';
+import { siteFitmentSchema } from './fitment.ts';
 import { vehicleSchema } from './vehicle.ts';
 
 export const seriesPagePath = (make: string, series: string): string =>
@@ -37,7 +37,7 @@ export const seriesCategoryPageResponseSchema = z.object({
     z.object({
       pages: z.array(seriesPartPageSchema),
       fits: z
-        .array(snapshotFitmentSchema.extend({ vehicle: vehicleSchema }))
+        .array(siteFitmentSchema.extend({ vehicle: vehicleSchema }))
         .default([]),
     }),
   ),

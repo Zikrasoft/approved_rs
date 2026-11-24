@@ -1,11 +1,11 @@
 import type {
   Category,
   PartPage,
-  SnapshotFitment,
+  SiteFitment,
   Vehicle,
 } from '@podbor/catalog-contract';
 
-export type Fit = SnapshotFitment & { vehicle: Vehicle };
+export type Fit = SiteFitment & { vehicle: Vehicle };
 
 export type PartPageEntry = PartPage & {
   slug: string;

@@ -1,5 +1,5 @@
 ---
-import type { SnapshotFitment } from '@podbor/catalog-contract';
+import type { SiteFitment } from '@podbor/catalog-contract';
 import { localeFrom } from '@/i18n/config';
 import { shopOpen } from '@/utils/catalogueEnv';
 import {
@@ -10,7 +10,7 @@ import {
 } from '@/utils/fitmentLabels';
 
 interface Props {
-  fit: SnapshotFitment;
+  fit: SiteFitment;
   car?: { href: string | null; label: string };
   quantity?: boolean;
 }
