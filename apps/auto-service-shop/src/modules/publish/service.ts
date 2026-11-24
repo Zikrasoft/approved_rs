@@ -13,9 +13,12 @@ import PublishedNumber from './models/published-number';
 import { runBoundSql } from '../_shared/bound-sql';
 import {
   LISTED_PART_COUNTS,
+  LISTED_PARTS_IN_CATEGORY,
   LISTED_PER_CATEGORY,
   LISTED_SERIES_CATEGORY_COUNTS,
   PUBLISH_ALL,
+  PUBLISHED_NUMBER_BY_SLUG,
+  PUBLISHED_NUMBERS,
   PUBLISHED_PAGE,
   PUBLISHED_PART_SLUGS,
   REFRESH_LISTED,
@@ -38,6 +41,14 @@ export type PublishedPartSlug = {
   brand_slug: string;
   normalized_value: string;
   indexable: boolean;
+};
+
+export type PublishedNumber = { id: string; listed: boolean | null };
+
+export type ListedPart = {
+  id: string;
+  category_id: string;
+  attributes: Record<string, unknown>;
 };
 
 export type PartFit = {
@@ -106,8 +117,46 @@ class PublishModuleService extends MedusaService({
   }
 
   @InjectManager()
+  async publishedBySlug(
+    brandSlug: string,
+    normalizedValue: string,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<PublishedNumber | null> {
+    const { rows } = await runBoundSql(
+      sharedContext,
+      PUBLISHED_NUMBER_BY_SLUG,
+      [brandSlug, normalizedValue],
+    );
+    return rows[0] ?? null;
+  }
+
+  @InjectManager()
+  async publishedNumbers(
+    ids: string[],
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<PublishedNumber[]> {
+    if (!ids.length) return [];
+    const { rows } = await runBoundSql(sharedContext, PUBLISHED_NUMBERS, [ids]);
+    return rows;
+  }
+
+  @InjectManager()
+  async listedPartsIn(
+    categoryId: string,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<ListedPart[]> {
+    const { rows } = await runBoundSql(
+      sharedContext,
+      LISTED_PARTS_IN_CATEGORY,
+      [categoryId],
+    );
+    return rows;
+  }
+
+  @InjectManager()
   async listedPartCounts(
     requirementFits: PartFit[],
+    seriesIds: string[] | null = null,
     @MedusaContext() sharedContext: Context = {},
   ): Promise<ListedPartCount[]> {
     const { rows } = await runBoundSql(sharedContext, LISTED_PART_COUNTS, [
@@ -115,6 +164,8 @@ class PublishModuleService extends MedusaService({
       requirementFits.map(({ part_id }) => part_id),
       requirementFits.map(({ category_id }) => category_id),
       MIN_REQUIREMENT_MATCHES_FOR_PAGE,
+      seriesIds,
+      seriesIds,
     ]);
     return rows;
   }
