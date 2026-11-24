@@ -1,23 +1,18 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import {
-  createMemoryStorage,
-  type MemoryStorage,
-} from './storage/memory.testing.ts';
-import { StorageConflictError } from './storage/types.ts';
-import {
   createLedgerStore,
-  LedgerUnreadableError,
   operationSums,
   type LedgerOperation,
   type LedgerStore,
   type OperationInput,
 } from './ledgerStore.ts';
 
-let storage: MemoryStorage;
 let ledger: LedgerStore;
 
 const NOW = '2026-10-10T12:00:00.000Z';
+const DAY = 24 * 60 * 60 * 1000;
 const PROMPT = { chatId: 111, messageId: 7 };
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
 const credit = (amount: number, note?: string): OperationInput => ({
   type: 'payout',
@@ -32,7 +27,7 @@ const debit = (amount: number): OperationInput => ({
 });
 
 function op(
-  id: number,
+  id: string,
   overrides: Partial<LedgerOperation> = {},
 ): LedgerOperation {
   return {
@@ -46,47 +41,52 @@ function op(
   };
 }
 
-function file() {
-  return storage.current() as {
-    operations: LedgerOperation[];
-    prompts: unknown[];
-  };
-}
-
 beforeEach(() => {
   vi.useFakeTimers({ toFake: ['Date'] });
   vi.setSystemTime(new Date(NOW));
-  storage = createMemoryStorage();
-  ledger = createLedgerStore({ storage });
+  ledger = createLedgerStore();
 });
 
 afterEach(() => vi.useRealTimers());
 
 describe('an empty ledger', () => {
-  it('reads as no operations and a zero Balance without writing', async () => {
+  it('reads as no operations and a zero Balance', async () => {
     expect(await ledger.readOperations()).toEqual([]);
     expect(await ledger.readBalance()).toBe(0);
-    expect(storage.writeAttempts()).toBe(0);
   });
 });
 
 describe('recordOperation', () => {
-  it('appends a Payout to its own file and answers the new Balance', async () => {
+  it('appends a Payout and answers the new Balance', async () => {
     const outcome = await ledger.recordOperation(credit(40, '  Иван сервис '));
-    const stored = op(1, { amount: 40, note: 'Иван сервис' });
-    expect(outcome).toEqual({ ok: true, operation: stored, balance: 40 });
-    expect(file()).toEqual({ operations: [stored], prompts: [] });
+    expect(outcome).toEqual({
+      ok: true,
+      operation: {
+        id: expect.stringMatching(UUID),
+        type: 'payout',
+        amount: 40,
+        note: 'Иван сервис',
+        createdAt: NOW,
+        createdBy: 'owner',
+      },
+      balance: 40,
+    });
+    expect(await ledger.readOperations()).toEqual([
+      (outcome as { operation: LedgerOperation }).operation,
+    ]);
   });
 
-  it('stores an empty note when none is given and numbers operations in order', async () => {
+  it('stores an empty note when none is given and keeps operations in order', async () => {
     await ledger.recordOperation(credit(40));
+    vi.setSystemTime(Date.parse(NOW) + 1000);
     await ledger.recordOperation(credit(0.1));
+    vi.setSystemTime(Date.parse(NOW) + 2000);
     await ledger.recordOperation(credit(0.2));
     const operations = await ledger.readOperations();
-    expect(operations.map((o) => [o.id, o.note])).toEqual([
-      [1, ''],
-      [2, ''],
-      [3, ''],
+    expect(operations.map((o) => [o.amount, o.note])).toEqual([
+      [40, ''],
+      [0.1, ''],
+      [0.2, ''],
     ]);
     expect(await ledger.readBalance()).toBe(40.3);
   });
@@ -104,13 +104,12 @@ describe('recordOperation', () => {
 
   it('refuses a Settlement above the Balance and writes nothing', async () => {
     await ledger.recordOperation(credit(30));
-    const writes = storage.writeAttempts();
     expect(await ledger.recordOperation(debit(30.01))).toEqual({
       ok: false,
       reason: 'insufficient',
       balance: 30,
     });
-    expect(storage.writeAttempts()).toBe(writes);
+    expect(await ledger.readOperations()).toHaveLength(1);
     expect(await ledger.readBalance()).toBe(30);
   });
 
@@ -122,86 +121,27 @@ describe('recordOperation', () => {
 
   it('checks the Balance inside the write, against what another writer stored first', async () => {
     await ledger.recordOperation(credit(50));
-    const before = file();
-    storage.failNextWrites(1, () =>
-      storage.seed({
-        ...before,
-        operations: [
-          ...before.operations,
-          op(2, { type: 'settlement', amount: 50 }),
-        ],
-      }),
-    );
-    expect(await ledger.recordOperation(debit(50))).toEqual({
-      ok: false,
-      reason: 'insufficient',
-      balance: 0,
-    });
-    expect(file().operations).toHaveLength(2);
+    const outcomes = await Promise.all([
+      ledger.recordOperation(debit(50)),
+      ledger.recordOperation(debit(50)),
+    ]);
+    expect(outcomes.filter((o) => o.ok)).toHaveLength(1);
+    expect(outcomes.filter((o) => !o.ok)).toEqual([
+      { ok: false, reason: 'insufficient', balance: 0 },
+    ]);
+    expect(await ledger.readOperations()).toHaveLength(2);
+    expect(await ledger.readBalance()).toBe(0);
   });
 
   it('loses neither of two concurrent writers', async () => {
-    storage.seed({ operations: [], prompts: [] });
     await Promise.all([
       ledger.recordOperation(credit(10)),
       ledger.recordOperation({ ...credit(20), by: 'admin' }),
     ]);
-    expect(
-      file()
-        .operations.map((o) => [o.id, o.amount])
-        .sort(),
-    ).toEqual([
-      [1, 10],
-      [2, 20],
-    ]);
+    expect((await ledger.readOperations()).map((o) => o.amount).sort()).toEqual(
+      [10, 20],
+    );
     expect(await ledger.readBalance()).toBe(30);
-  });
-
-  it('gives up after repeated conflicts', async () => {
-    storage.failNextWrites(6);
-    const error = await ledger.recordOperation(credit(10)).catch((e) => e);
-    expect(error).toBeInstanceOf(StorageConflictError);
-    expect(error.message).toBe('ledger: conflict retry limit exceeded');
-    expect(error.cause).toBeInstanceOf(StorageConflictError);
-    expect(storage.writeAttempts()).toBe(6);
-  });
-
-  it('does not retry an error that is not a conflict', async () => {
-    const broken = createLedgerStore({
-      storage: {
-        read: () => Promise.resolve({ raw: undefined, version: undefined }),
-        write: () => Promise.reject(new Error('blob down')),
-      },
-    });
-    await expect(broken.recordOperation(credit(10))).rejects.toThrow(
-      'blob down',
-    );
-  });
-
-  it('refuses to overwrite a file it cannot parse', async () => {
-    vi.spyOn(console, 'error').mockImplementation(() => {});
-    storage.seed([{ type: 'payout' }]);
-    await expect(ledger.recordOperation(credit(10))).rejects.toThrow(
-      'refusing to overwrite',
-    );
-    expect(storage.current()).toEqual([{ type: 'payout' }]);
-  });
-
-  it('alerts once per instance about an unreadable file and keeps throwing', async () => {
-    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
-    const onUnreadable = vi.fn().mockRejectedValue(new Error('telegram down'));
-    const watched = createLedgerStore({ storage, onUnreadable });
-    storage.seed({ operations: 'x' });
-    for (let i = 0; i < 2; i++)
-      await expect(watched.readBalance()).rejects.toBeInstanceOf(
-        LedgerUnreadableError,
-      );
-    expect(onUnreadable).toHaveBeenCalledOnce();
-    expect(error).toHaveBeenCalledWith(
-      '[lead-crm] could not tell the admin about the ledger',
-      expect.anything(),
-    );
-    expect(storage.current()).toEqual({ operations: 'x' });
   });
 });
 
@@ -267,7 +207,7 @@ describe('operation prompts', () => {
   it('finds a prompt older than a week as expired and takes no answer to it', async () => {
     await ledger.recordOperation(credit(50));
     await ledger.openOperationPrompt({ ...PROMPT, type: 'settlement' });
-    vi.setSystemTime(Date.parse(NOW) + 7 * 24 * 60 * 60 * 1000);
+    vi.setSystemTime(Date.parse(NOW) + 7 * DAY);
     expect(await ledger.findOperationPrompt(PROMPT)).toMatchObject({
       expired: true,
     });
@@ -282,7 +222,7 @@ describe('operation prompts', () => {
 
   it('keeps an expired prompt when a new one opens, and drops it after 90 days', async () => {
     await ledger.openOperationPrompt({ ...PROMPT, type: 'payout' });
-    vi.setSystemTime(Date.parse(NOW) + 89 * 24 * 60 * 60 * 1000);
+    vi.setSystemTime(Date.parse(NOW) + 89 * DAY);
     await ledger.openOperationPrompt({
       ...PROMPT,
       messageId: 8,
@@ -291,56 +231,38 @@ describe('operation prompts', () => {
     expect(await ledger.findOperationPrompt(PROMPT)).toMatchObject({
       expired: true,
     });
-    vi.setSystemTime(Date.parse(NOW) + 90 * 24 * 60 * 60 * 1000);
+    vi.setSystemTime(Date.parse(NOW) + 90 * DAY + 1);
     await ledger.openOperationPrompt({
       ...PROMPT,
       messageId: 9,
       type: 'payout',
     });
-    expect(file().prompts).toEqual([
-      expect.objectContaining({ messageId: 8 }),
-      expect.objectContaining({ messageId: 9 }),
-    ]);
-  });
-});
-
-describe('ledger file timestamps', () => {
-  it.each([
-    [
-      'an operation',
-      { operations: [op(1, { createdAt: 'yesterday' })], prompts: [] },
-    ],
-    [
-      'a prompt',
-      {
-        operations: [],
-        prompts: [{ ...PROMPT, type: 'payout', createdAt: '10.10.2026' }],
-      },
-    ],
-  ])('refuses %s whose createdAt is not an ISO datetime', async (_, raw) => {
-    const error = vi.spyOn(console, 'error').mockImplementation(() => {});
-    storage.seed(raw);
-    await expect(ledger.readOperations()).rejects.toThrow('does not parse');
-    error.mockRestore();
+    expect(await ledger.findOperationPrompt(PROMPT)).toBeUndefined();
+    expect(
+      await ledger.findOperationPrompt({ ...PROMPT, messageId: 8 }),
+    ).toBeDefined();
+    expect(
+      await ledger.findOperationPrompt({ ...PROMPT, messageId: 9 }),
+    ).toBeDefined();
   });
 });
 
 describe('operationSums', () => {
   it('sums credits and debits for the Belgrade month and for all time', () => {
     const operations = [
-      op(1, { amount: 100, createdAt: '2026-09-30T21:59:00.000Z' }),
-      op(2, { amount: 40, createdAt: '2026-09-30T22:00:00.000Z' }),
-      op(3, {
+      op('1', { amount: 100, createdAt: '2026-09-30T21:59:00.000Z' }),
+      op('2', { amount: 40, createdAt: '2026-09-30T22:00:00.000Z' }),
+      op('3', {
         type: 'settlement',
         amount: 0.1,
         createdAt: '2026-10-09T10:00:00.000Z',
       }),
-      op(4, {
+      op('4', {
         type: 'settlement',
         amount: 0.2,
         createdAt: '2026-10-09T11:00:00.000Z',
       }),
-      op(5, {
+      op('5', {
         type: 'settlement',
         amount: 50,
         createdAt: '2026-09-15T11:00:00.000Z',

@@ -2,6 +2,7 @@
 import type { PartDemand, PartOffer } from '@podbor/catalog-contract';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
+import { nameWithoutNumber } from '@/utils/partNumbers';
 import { PathBuilder } from '@/utils/paths';
 import Icon from './Icon.astro';
 import type { Thumbnail } from '@/utils/partImages';
@@ -60,7 +61,13 @@ const copy = content(locale).shopPart;
         <span class="font-semibold">{brand}</span>{' '}
         <span class="spec text-sm whitespace-nowrap">{value}</span>
       </a>
-      {name && <span class="text-sm text-ink-2">{name}</span>}
+      {
+        name && (
+          <span class="text-sm text-ink-2">
+            {nameWithoutNumber(name, brand, value)}
+          </span>
+        )
+      }
       {specs && <span class="spec text-xs text-muted">{specs}</span>}
       {detail && <span class="text-xs text-muted">{detail}</span>}
       <DemandBadge pages={[{ demand }]} />

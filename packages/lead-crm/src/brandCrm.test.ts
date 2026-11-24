@@ -1,13 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createBrandStore } from './brandStore.ts';
 import { createBrandBot } from './brandBot.ts';
-import { LEADS_PATH, QUARANTINE_PATH } from './quarantine.ts';
-import { LEDGER_PATH } from './ledgerStore.ts';
 import { recordBotApi } from './testing/botApi.ts';
-import {
-  createMemoryStorage,
-  type MemoryStorage,
-} from './storage/memory.testing.ts';
+import { crmDatabase } from './database.ts';
+import { leadData } from './leadRow.ts';
+import { seedLead, testLeadId } from './testing/seed.ts';
 
 const ENV = {
   TELEGRAM_BOT_TOKEN: '3001:token',
@@ -24,19 +21,14 @@ const submission = {
   locale: 'ru' as const,
 };
 
-let storages: Record<string, MemoryStorage>;
-const storageFor = (path: string) => (storages[path] ??= createMemoryStorage());
-
 function brandStore(getNotifier = vi.fn()) {
   return createBrandStore({
     brand: 'CarLab',
-    storageFor,
     getNotifier,
   });
 }
 
 beforeEach(() => {
-  storages = {};
   vi.spyOn(console, 'error').mockImplementation(() => {});
   vi.spyOn(console, 'log').mockImplementation(() => {});
   for (const name of Object.keys(ENV)) vi.stubEnv(name, '');
@@ -51,17 +43,11 @@ afterEach(() => {
 describe('createBrandStore', () => {
   it('builds without any Telegram env', () => {
     expect(() => brandStore()).not.toThrow();
-    expect(Object.keys(storages)).toEqual([
-      LEADS_PATH,
-      QUARANTINE_PATH,
-      LEDGER_PATH,
-    ]);
   });
 
   it('keeps a standalone service the app names in a Lead of its own', async () => {
     const { leadStore } = createBrandStore({
       brand: 'CarLab',
-      storageFor,
       getNotifier: vi.fn(),
       standaloneServices: ['parts-order'],
     });
@@ -80,21 +66,6 @@ describe('createBrandStore', () => {
     expect(merged).toBe(false);
   });
 
-  it('reaches the notifier only once a record is quarantined', async () => {
-    const send = vi.fn().mockResolvedValue(undefined);
-    const getNotifier = vi
-      .fn()
-      .mockResolvedValue({ notifier: { sendQuarantinedLeadsToAdmin: send } });
-    const { leadStore } = brandStore(getNotifier);
-    expect(getNotifier).not.toHaveBeenCalled();
-
-    storages[LEADS_PATH]!.seed([{ id: 7 }]);
-    await leadStore.insertLead({ ...submission, brand: 'CarLab' });
-
-    expect(storages[QUARANTINE_PATH]!.current()).toEqual([{ id: 7 }]);
-    expect(send).toHaveBeenCalledWith(1, QUARANTINE_PATH, 'CarLab');
-  });
-
   it(
     'alerts through the notifier once the stored Leads reach a threshold',
     { timeout: 30_000 },
@@ -103,18 +74,17 @@ describe('createBrandStore', () => {
       const { leadStore } = brandStore(
         vi.fn().mockResolvedValue({ notifier: { sendLeadCountAlert: send } }),
       );
-      const createdAt = new Date().toISOString();
-      storages[LEADS_PATH]!.seed(
-        Array.from({ length: 4999 }, (_, at) => ({
-          ...submission,
-          brand: 'CarLab',
-          contact: `@seed${at}`,
-          id: at + 1,
-          status: 'won',
-          createdAt,
-          statusChangedAt: createdAt,
-        })),
-      );
+      const seed = await seedLead({ brand: 'CarLab', status: 'won' });
+      await crmDatabase().lead.createMany({
+        data: Array.from({ length: 4998 }, (_, at) =>
+          leadData({
+            ...seed,
+            id: undefined,
+            number: null,
+            contact: `@seed${at}`,
+          }),
+        ),
+      });
 
       await leadStore.insertOrMergeLead({ ...submission, brand: 'CarLab' });
 
@@ -169,67 +139,6 @@ describe('createBrandStore', () => {
     await notifyLead(click, '[test]');
 
     expect(refreshLeadCard).toHaveBeenCalledOnce();
-  });
-
-  it('tells the admin once that the ledger does not parse', async () => {
-    const send = vi.fn().mockResolvedValue(undefined);
-    const { ledgerStore } = brandStore(
-      vi.fn().mockResolvedValue({
-        notifier: { sendUnreadableLedgerToAdmin: send },
-      }),
-    );
-    storages[LEDGER_PATH]!.seed('garbage');
-    await expect(ledgerStore.readBalance()).rejects.toThrow();
-    await expect(ledgerStore.readBalance()).rejects.toThrow();
-    expect(send).toHaveBeenCalledOnce();
-    expect(send).toHaveBeenCalledWith(LEDGER_PATH, 'CarLab');
-  });
-});
-
-describe('old money on stored Leads', () => {
-  const WON = '2026-01-01T00:00:00.000Z';
-  const OLD_FIELDS = {
-    commissionPercent: 10,
-    dealAmount: 1000,
-    paidAmount: 40,
-    payments: [{ amount: 40, at: WON }],
-    incomes: [{ id: 1, amount: 333, at: WON, paidAt: null }],
-    pendingCommissionClaim: null,
-  };
-  const oldLead = {
-    ...submission,
-    id: 1,
-    brand: 'CarLab',
-    status: 'won',
-    statusChangedAt: WON,
-    createdAt: WON,
-    ...OLD_FIELDS,
-  };
-
-  it('neither reaches the Balance nor survives a Lead write', async () => {
-    const { leadStore, ledgerStore } = brandStore();
-    storages[LEADS_PATH]!.seed([oldLead]);
-
-    await leadStore.insertLead({ ...submission, brand: 'CarLab' });
-
-    expect(await ledgerStore.readBalance()).toBe(0);
-    expect(storages[LEDGER_PATH]!.current()).toBeUndefined();
-    expect(storages[QUARANTINE_PATH]!.current()).toBeUndefined();
-    const stored = storages[LEADS_PATH]!.current() as object[];
-    expect(stored).toHaveLength(2);
-    for (const lead of stored)
-      for (const field of Object.keys(OLD_FIELDS))
-        expect(lead).not.toHaveProperty(field);
-  });
-
-  it('lets Lead writes through over a Balance file that does not parse', async () => {
-    const { leadStore } = brandStore();
-    storages[LEDGER_PATH]!.seed('{corrupt');
-
-    await leadStore.insertLead({ ...submission, brand: 'CarLab' });
-
-    expect(storages[LEADS_PATH]!.current()).toHaveLength(1);
-    expect(storages[LEDGER_PATH]!.current()).toBe('{corrupt');
   });
 });
 
@@ -379,7 +288,10 @@ describe('the Lead topic lifecycle', () => {
   });
 
   it('reopens a closed topic and stamps the activity', async () => {
-    vi.useFakeTimers({ now: new Date('2026-10-20T08:00:00.000Z') });
+    vi.useFakeTimers({
+      toFake: ['Date'],
+      now: new Date('2026-10-20T08:00:00.000Z'),
+    });
     const { leadStore, crm, lead } = await withTopic();
     const closed = await leadStore.closeTopic(lead.id);
 
@@ -430,7 +342,7 @@ describe('the Lead topic lifecycle', () => {
 
   it('hands back the Lead when its row is gone', async () => {
     const { crm, lead } = await withTopic();
-    const gone = { ...lead, id: 999 };
+    const gone = { ...lead, id: testLeadId(999) };
 
     await expect(crm.touchLeadTopic(gone)).resolves.toBe(gone);
   });

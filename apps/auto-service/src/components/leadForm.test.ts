@@ -20,6 +20,10 @@ const tabs = (root: Element) =>
   ]);
 
 describe('the lead form', () => {
+  it('renders the same markup on every build, so an unchanged page is not reuploaded', async () => {
+    expect((await leadForm()).outerHTML).toBe((await leadForm()).outerHTML);
+  });
+
   it('asks only how to reach the visitor, with the call tab first and chosen', async () => {
     const root = await leadForm();
 

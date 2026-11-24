@@ -15,7 +15,8 @@ const LOCALES: readonly string[] = ['ru', 'en', 'sr'];
 const RS_PHONE = '+381641234567';
 
 const notifyLead = vi.fn().mockResolvedValue(undefined);
-const waitUntil = vi.fn();
+const inBackground = vi.hoisted(() => vi.fn());
+vi.mock('../background.ts', () => ({ inBackground }));
 
 const refusalCopy = (locale: string) => ({
   brand: {
@@ -45,7 +46,6 @@ const refusalCopy = (locale: string) => ({
 
 const POST = createLeadsRoute<Locale>({
   notifyLead,
-  waitUntil,
   isLocale: (value): value is Locale => LOCALES.includes(value),
   defaultLocale: 'ru',
   localeCookie: 'lang',
@@ -88,7 +88,7 @@ const valid = (extra: Record<string, Field | Field[]> = {}) => ({
 describe('createLeadsRoute', () => {
   beforeEach(() => {
     notifyLead.mockReset().mockResolvedValue(undefined);
-    waitUntil.mockReset();
+    inBackground.mockReset();
   });
 
   it('redirects to the default locale thanks page on valid data', async () => {
@@ -101,7 +101,6 @@ describe('createLeadsRoute', () => {
     const thanksPath = vi.fn(() => '/ru/thanks/parts/');
     const route = createLeadsRoute<Locale>({
       notifyLead,
-      waitUntil,
       isLocale: (value): value is Locale => LOCALES.includes(value),
       defaultLocale: 'ru',
       localeCookie: 'lang',
@@ -124,7 +123,7 @@ describe('createLeadsRoute', () => {
       }),
     });
     expect(response.status).toBe(413);
-    expect(waitUntil).not.toHaveBeenCalled();
+    expect(inBackground).not.toHaveBeenCalled();
   });
 
   it('refuses a body that grows past the cap with no length declared', async () => {
@@ -303,7 +302,7 @@ describe('createLeadsRoute', () => {
   it('takes a Lead that carries no consent, the form only states the policy', async () => {
     const res = await POST(makeCtx({ contact: RS_PHONE }));
     expect(res.status).toBe(302);
-    expect(waitUntil).toHaveBeenCalledOnce();
+    expect(inBackground).toHaveBeenCalledOnce();
   });
 
   it('returns 400 without leaking the schema when the contact is not a phone', async () => {
@@ -410,7 +409,7 @@ describe('createLeadsRoute', () => {
     await POST(ctx);
 
     expect(ctx.redirect).toHaveBeenCalledWith('/ru/thanks/', 302);
-    expect(waitUntil).toHaveBeenCalledOnce();
+    expect(inBackground).toHaveBeenCalledOnce();
   });
 
   it.each(['641277123', '0641277124'])(
@@ -472,7 +471,7 @@ describe('createLeadsRoute', () => {
     await expect(res.text()).resolves.toContain('ru: missing contact');
   });
 
-  it('dispatches notifyLead via waitUntil with the parsed form fields', async () => {
+  it('dispatches notifyLead in the background with the parsed form fields', async () => {
     await POST(
       makeCtx({
         name: 'Иван',
@@ -495,7 +494,7 @@ describe('createLeadsRoute', () => {
         }),
       }),
     );
-    expect(waitUntil).toHaveBeenCalledTimes(1);
+    expect(inBackground).toHaveBeenCalledTimes(1);
     expect(notifyLead).toHaveBeenCalledWith(
       {
         name: 'Иван',
@@ -619,7 +618,6 @@ describe('a shop Order cancelled in the shop admin', () => {
   const cancelOrder = vi.fn();
   const cancelPOST = createLeadsRoute<Locale>({
     notifyLead,
-    waitUntil,
     isLocale: (value): value is Locale => LOCALES.includes(value),
     defaultLocale: 'ru',
     localeCookie: 'lang',
@@ -640,7 +638,7 @@ describe('a shop Order cancelled in the shop admin', () => {
   beforeEach(() => {
     cancelOrder.mockReset().mockResolvedValue('lost');
     notifyLead.mockReset();
-    waitUntil.mockReset();
+    inBackground.mockReset();
   });
 
   it('marks the Lead lost when the shop proves who it is', async () => {
@@ -691,7 +689,7 @@ describe('a shop Order cancelled in the shop admin', () => {
 
     expect(response.status).toBe(201);
     expect(ctx.redirect).not.toHaveBeenCalled();
-    expect(waitUntil).not.toHaveBeenCalled();
+    expect(inBackground).not.toHaveBeenCalled();
     expect(notifyLead).toHaveBeenCalledWith(
       expect.objectContaining({ orderId: 'order_01' }),
       '[leads]',

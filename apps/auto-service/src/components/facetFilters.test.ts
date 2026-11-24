@@ -80,6 +80,24 @@ describe('the facet filters', () => {
     expect(fieldset('polarity').hidden).toBe(true);
   });
 
+  it('counts only the visible groups toward the ones that start open', async () => {
+    const root = await filters({
+      facets: [
+        facet('polarity', [['direct', 2]]),
+        facet('brand', [['varta', 3]]),
+        facet('axle', [['front', 2]]),
+        facet('type', [['oil', 2]]),
+      ],
+      dormant: ['polarity'],
+    });
+    const open = (key: string) =>
+      root
+        .querySelector(`[data-facet-key="${key}"] > details`)!
+        .hasAttribute('open');
+
+    expect(['brand', 'axle', 'type'].map(open)).toEqual([true, true, false]);
+  });
+
   it('shows a few values as pills and a brand facet as a list', async () => {
     const root = await filters({
       facets: [
@@ -105,7 +123,8 @@ describe('the facet filters', () => {
     );
     const closed = await filters({ facets: [many] });
     const opened = await filters({ facets: [many], chosen: ['size:s7'] });
-    const more = (root: Element) => root.querySelector('fieldset details')!;
+    const more = (root: Element) =>
+      root.querySelector('fieldset details details')!;
 
     expect(more(closed).querySelectorAll('input')).toHaveLength(2);
     expect(more(closed).querySelector('summary')?.textContent?.trim()).toBe(
@@ -174,11 +193,52 @@ describe('the facet filters', () => {
     const min = root.querySelector<HTMLInputElement>('[name="min.capacity"]')!;
     const max = root.querySelector<HTMLInputElement>('[name="max.capacity"]')!;
 
-    expect(root.querySelector('legend')?.textContent).toBe('capacity, Ah');
+    expect(root.querySelector('fieldset summary')?.textContent?.trim()).toBe(
+      'capacity, Ah',
+    );
+    expect(root.querySelector('fieldset')?.getAttribute('aria-label')).toBe(
+      'capacity, Ah',
+    );
     expect(min.value).toBe('70');
     expect(max.hasAttribute('value')).toBe(false);
     expect(min.placeholder).toBe(copy.rangeFrom.replace('{min}', '60'));
     expect(max.placeholder).toBe(copy.rangeTo.replace('{max}', '95'));
+  });
+
+  it('folds each facet group under its heading, the first ones and the chosen ones open', async () => {
+    const root = await filters({
+      facets: [
+        facet('brand', [['varta', 3]]),
+        facet('axle', [['front', 2]]),
+        facet('type', [['oil', 2]]),
+        facet('voltage', [['12', 4]]),
+        facet('capacity', [['60', 2]], { type: 'number' }),
+      ],
+      chosen: ['voltage:12'],
+      ranges: [{ key: 'capacity', min: 50, max: null }],
+    });
+    const group = (key: string) =>
+      root.querySelector(`[data-facet-key="${key}"] > details`)!;
+
+    expect(group('brand').querySelector('summary')?.textContent?.trim()).toBe(
+      'brand',
+    );
+    expect(
+      ['brand', 'axle', 'type', 'voltage', 'capacity'].map((key) =>
+        group(key).hasAttribute('open'),
+      ),
+    ).toEqual([true, true, false, true, true]);
+    expect(
+      group('type').querySelector('input[value="type:oil"]'),
+    ).not.toBeNull();
+  });
+
+  it('lets the page scroll the panel instead of a box of its own', async () => {
+    const form = (
+      await filters({ facets: [facet('brand', [['varta', 3]])] })
+    ).querySelector('form')!;
+
+    expect(form.className).not.toMatch(/overflow|max-h|sticky/);
   });
 
   it('leaves a number facet with no numeric values without hints', async () => {

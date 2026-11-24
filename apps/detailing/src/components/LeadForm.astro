@@ -1,4 +1,5 @@
 ---
+import { renderId } from '@podbor/site-kit';
 import { CONTACT_INPUT_FIELDS } from '@podbor/lead-crm/fields';
 import { METRIKA_MASK_CLASS } from '@podbor/site-kit/browser';
 import Icon from './Icon.astro';
@@ -26,7 +27,7 @@ const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 
 const DEFAULT_COUNTRY = 'RS';
-const uid = `lf-${crypto.randomUUID().slice(0, 8)}`;
+const uid = `lf-${renderId(Astro.locals)}`;
 const errorId = {
   telegram: `${uid}-telegram`,
   phone: `${uid}-phone`,

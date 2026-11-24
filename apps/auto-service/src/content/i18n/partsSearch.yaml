@@ -65,7 +65,10 @@ suggestNone: 'Найдем «{q}» вручную: отправить запро
 openSearch: Поиск по каталогу
 closeSearch: Закрыть поиск
 llmsSearch: 'Один поиск по всему каталогу: VIN, номер запчасти в любом написании, название, марка, модель, код кузова или двигателя, в том числе вместе, например «масляный фильтр bmw x3». Запрос передается в параметре q: {example}'
-translatedFrom: 16574c1f83d98a2b
+allHeading: Все запчасти каталога
+shownRange: 'Запчасти с {from} по {to} из {count}'
+llmsAll: 'Без запроса поиск показывает весь каталог, по 12 запчастей на странице; следующая страница задается параметром offset: {example}'
+translatedFrom: 9443fd69ada218c2
 translations:
   sr:
     searchHeading: Pronađite auto deo
@@ -135,6 +138,9 @@ translations:
     openSearch: Pretraga kataloga
     closeSearch: Zatvorite pretragu
     llmsSearch: 'Pretražite ceo katalog: VIN, broj auto dela u bilo kom formatu, naziv, marka, model, oznaka karoserije ili motora, uključujući kombinacije, na primer „filter ulja bmw x3“. Upit se prosleđuje kroz parametar q: {example}'
+    allHeading: Svi auto delovi iz kataloga
+    shownRange: Auto delovi od {from} do {to} od ukupno {count}
+    llmsAll: 'Bez upita se prikazuje ceo katalog, po 12 auto delova na stranici; sledeća stranica određuje se parametrom offset: {example}'
   en:
     searchHeading: Find a part
     searchLead: Enter a VIN, part number in any format, part name, or car make and model.
@@ -203,3 +209,6 @@ translations:
     openSearch: Search the catalogue
     closeSearch: Close search
     llmsSearch: 'Search the entire catalogue by VIN, part number in any format, name, make, model, body code or engine code, or combine terms, for example "oil filter bmw x3". Pass the search in the q parameter: {example}'
+    allHeading: All parts in the catalog
+    shownRange: Parts {from} to {to} of {count}
+    llmsAll: 'With no search query, search shows the entire catalog, 12 parts per page. Set the offset parameter to view the next page: {example}'

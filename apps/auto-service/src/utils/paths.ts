@@ -47,6 +47,7 @@ export const PathBuilder = {
 };
 
 export const PARTS_INQUIRY_ANCHOR = 'inquiry';
+export const PARTS_BROWSE_ANCHOR = 'catalogue';
 
 export const WORKS_MAKE_PARAM = 'make';
 

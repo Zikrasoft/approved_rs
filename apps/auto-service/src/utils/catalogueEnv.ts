@@ -1,3 +1,4 @@
+import { writeFile } from 'node:fs/promises';
 import { z } from 'zod';
 import {
   shopOpenSchema,
@@ -5,7 +6,7 @@ import {
 } from '@podbor/catalog-contract/preview';
 import { requestIdSchema } from '@podbor/catalog-contract/events';
 import { secretMatches } from '@podbor/lead-crm/verify-secret';
-import type { CatalogueRedirect, Category } from '@podbor/catalog-contract';
+import { sortedMakes, type Category } from '@podbor/catalog-contract';
 import { CARLAB } from '@podbor/brands';
 import { VISITOR_ID_COOKIE } from '@podbor/site-kit';
 import { CATALOGUE_TIMEOUT_MS, createCatalogue } from './catalogue';
@@ -22,14 +23,13 @@ import {
   type MakePartsEntry,
   type PartPageEntry,
 } from './catalogueSnapshot';
-import { makeDrift } from './makes';
 
 const catalogueEnvKeys = [
   'MEDUSA_BACKEND_URL',
   'MEDUSA_PUBLISHABLE_KEY',
   'SHOP_OPEN',
   'SHOP_PREVIEW_TOKEN',
-  'VERCEL',
+  'CATALOGUE_SHRINK_GUARD',
   'CATALOGUE_SHRINK_ALLOWED',
 ] as const;
 
@@ -39,6 +39,13 @@ export type CatalogueEnv = Partial<
 
 const unsetWhenEmpty = <T extends z.ZodType>(schema: T) =>
   z.preprocess((value) => value || undefined, schema.optional());
+
+const internalUrlSchema = unsetWhenEmpty(z.url()).catch(undefined);
+
+export const shopBackendUrl = (
+  buildUrl: string | undefined,
+  internalUrl = process.env.SHOP_INTERNAL_URL,
+): string | undefined => internalUrlSchema.parse(internalUrl) ?? buildUrl;
 
 const catalogueEnvSchema = z
   .object({
@@ -103,15 +110,14 @@ const visitorAddressSchema = z.union([z.ipv4(), z.ipv6()]);
 
 export const visitorAddress = (request: Request): string | undefined =>
   visitorAddressSchema.safeParse(
-    request.headers.get('x-real-ip') ??
-      request.headers.get('x-forwarded-for')?.split(',')[0]?.trim(),
+    request.headers.get('x-forwarded-for')?.split(',')[0]?.trim(),
   ).data;
 
 const visitorIdOf = (request: Request): string | undefined =>
   z.uuid().safeParse(cookieOf(request, VISITOR_ID_COOKIE)).data;
 
 export const requestIdOf = (request: Request): string | undefined =>
-  requestIdSchema.safeParse(request.headers.get('x-vercel-id')).data;
+  requestIdSchema.safeParse(request.headers.get('x-request-id')).data;
 
 export function catalogueFromEnv(
   env: CatalogueEnv,
@@ -138,11 +144,16 @@ export function catalogueFromEnv(
   });
 }
 
-export const catalogueFor = (request: Request) =>
-  catalogueFromEnv(siteEnv(), {
-    preview: previewRequested(request),
-    visitor: request,
-  });
+export const catalogueFor = (request: Request) => {
+  const env = siteEnv();
+  return catalogueFromEnv(
+    { ...env, MEDUSA_BACKEND_URL: shopBackendUrl(env.MEDUSA_BACKEND_URL) },
+    {
+      preview: previewRequested(request),
+      visitor: request,
+    },
+  );
+};
 
 export const uncachedJson = (body: unknown, init?: ResponseInit) =>
   Response.json(body, {
@@ -156,7 +167,7 @@ export const siteEnv = (): CatalogueEnv => ({
   SHOP_OPEN: import.meta.env.SHOP_OPEN,
   SHOP_PREVIEW_TOKEN: process.env.SHOP_PREVIEW_TOKEN,
   SHOP_CLIENT_SECRET: process.env.SHOP_CLIENT_SECRET,
-  VERCEL: import.meta.env.VERCEL,
+  CATALOGUE_SHRINK_GUARD: import.meta.env.CATALOGUE_SHRINK_GUARD,
   CATALOGUE_SHRINK_ALLOWED: import.meta.env.CATALOGUE_SHRINK_ALLOWED,
 });
 
@@ -164,7 +175,7 @@ export const PREVIOUS_BUILD_URL = `${CARLAB.url}/catalogue-build.json`;
 
 const SHRINK_FLOOR = 0.5;
 
-export const BUILD_CATALOGUE_TIMEOUT_MS = 60_000;
+export const BUILD_CATALOGUE_TIMEOUT_MS = 30 * 60_000;
 
 const previousBuildSchema = z.object({
   partPages: z.number().int().nonnegative(),
@@ -184,7 +195,8 @@ async function livePartPages(): Promise<number> {
 }
 
 async function loadSnapshot(env: CatalogueEnv) {
-  const live = env.VERCEL === '1' ? await livePartPages() : 0;
+  const live =
+    env.CATALOGUE_SHRINK_GUARD === 'true' ? await livePartPages() : 0;
   const catalogue = catalogueFromEnv(env, {
     timeoutMs: BUILD_CATALOGUE_TIMEOUT_MS,
   });
@@ -196,10 +208,12 @@ async function loadSnapshot(env: CatalogueEnv) {
     }
     return null;
   }
-  const snapshot = await catalogue.snapshot();
-  makeDrift(
-    snapshot.vehicles.map((vehicle) => vehicle.model.chassis.series.make),
-  ).forEach((drift) => console.warn(drift));
+  const snapshot = await catalogue.snapshot().catch((error: unknown) => {
+    throw new Error(
+      `Could not read the catalogue from MEDUSA_BACKEND_URL (${env.MEDUSA_BACKEND_URL}): ${error instanceof Error ? error.message : String(error)}`,
+      { cause: error },
+    );
+  });
   const built = snapshot.entries.length;
   const shrinkAllowed = env.CATALOGUE_SHRINK_ALLOWED === 'true';
   const shrunk = !shrinkAllowed && built < live * SHRINK_FLOOR;
@@ -217,7 +231,7 @@ export const DEV_SNAPSHOT_FRESH_MS = 30_000;
 
 type SnapshotMemo = Map<
   string,
-  { loading: ReturnType<typeof loadSnapshot>; at: number }
+  { loading: ReturnType<typeof loadSnapshot>; loadedAt?: number }
 >;
 
 function snapshotForBuild(env: CatalogueEnv) {
@@ -226,13 +240,20 @@ function snapshotForBuild(env: CatalogueEnv) {
   const key = JSON.stringify(catalogueEnvKeys.map((name) => env[name]));
   const cached = memo.get(key);
   const stale =
-    cached &&
+    cached?.loadedAt !== undefined &&
     import.meta.env?.MODE === 'development' &&
-    Date.now() - cached.at >= DEV_SNAPSHOT_FRESH_MS;
+    Date.now() - cached.loadedAt >= DEV_SNAPSHOT_FRESH_MS;
   if (cached && !stale) {
     return cached.loading;
   }
-  const loading: ReturnType<typeof loadSnapshot> = loadSnapshot(env).catch(
+  const loading: ReturnType<typeof loadSnapshot> = loadSnapshot(env).then(
+    (snapshot) => {
+      const entry = memo.get(key);
+      if (entry?.loading === loading) {
+        entry.loadedAt = Date.now();
+      }
+      return snapshot;
+    },
     (error: unknown) => {
       if (memo.get(key)?.loading === loading) {
         memo.delete(key);
@@ -240,7 +261,7 @@ function snapshotForBuild(env: CatalogueEnv) {
       throw error;
     },
   );
-  memo.set(key, { loading, at: Date.now() });
+  memo.set(key, { loading });
   return loading;
 }
 
@@ -284,8 +305,12 @@ export async function makePartsForBuild(
   return snapshot ? makePartsFrom(snapshot) : [];
 }
 
-export async function redirectsForBuild(
+export async function writeCatalogueMakes(
+  file: URL,
   env = siteEnv(),
-): Promise<CatalogueRedirect[]> {
-  return (await snapshotForBuild(env))?.redirects ?? [];
+): Promise<void> {
+  const makes = (await snapshotForBuild(env))?.makes;
+  if (makes) {
+    await writeFile(file, `${JSON.stringify(sortedMakes(makes), null, 2)}\n`);
+  }
 }

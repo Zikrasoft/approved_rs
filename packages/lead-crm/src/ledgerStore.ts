@@ -1,12 +1,18 @@
-import { logError } from './logError.ts';
 import { z } from 'zod';
 import { roundMoney, toCents } from './money.ts';
 import { businessMonth, DAY_MS } from './businessTime.ts';
-import type { PromptKey } from './promptKey.ts';
-import { retryOnConflict } from './storage/retry.ts';
-import type { LeadStorage } from './storage/types.ts';
+import type { MessageKey } from './schema.ts';
+import {
+  crmDatabase,
+  lockKey,
+  type CrmDatabase,
+  type CrmTransaction,
+} from './database.ts';
+import type {
+  LedgerOperation as OperationRow,
+  OperationPrompt as PromptRow,
+} from './generated/prisma/client.ts';
 
-export const LEDGER_PATH = 'data/ledger.json';
 const MAX_OPERATION_NOTE = 500;
 const PROMPT_TTL_MS = 7 * DAY_MS;
 const PROMPT_KEPT_MS = 90 * DAY_MS;
@@ -17,36 +23,26 @@ export type LedgerAuthor = z.infer<typeof ledgerAuthorSchema>;
 const operationTypeSchema = z.enum(['payout', 'settlement']);
 export type OperationType = z.infer<typeof operationTypeSchema>;
 
-const operationSchema = z
+const newOperationSchema = z
   .object({
-    id: z.number().int().positive(),
     type: operationTypeSchema,
     amount: z.number().transform(roundMoney).pipe(z.number().positive()),
     note: z.string().max(MAX_OPERATION_NOTE),
-    createdAt: z.iso.datetime(),
     createdBy: ledgerAuthorSchema,
   })
   .strict();
-export type LedgerOperation = z.infer<typeof operationSchema>;
+export type LedgerOperation = z.infer<typeof newOperationSchema> & {
+  id: string;
+  createdAt: string;
+};
 
-const promptSchema = z
-  .object({
-    chatId: z.number().int(),
-    messageId: z.number().int(),
-    type: operationTypeSchema,
-    createdAt: z.iso.datetime(),
-  })
-  .strict();
-export type OperationPrompt = z.infer<typeof promptSchema>;
+export interface OperationPrompt {
+  chatId: number;
+  messageId: number;
+  type: OperationType;
+  createdAt: string;
+}
 export type FoundOperationPrompt = OperationPrompt & { expired: boolean };
-
-const ledgerFileSchema = z
-  .object({
-    operations: z.array(operationSchema),
-    prompts: z.array(promptSchema),
-  })
-  .strict();
-type LedgerFile = z.infer<typeof ledgerFileSchema>;
 
 export interface OperationInput {
   type: OperationType;
@@ -61,15 +57,7 @@ export type RecordOutcome =
   | { ok: false; reason: 'no_prompt' };
 
 export interface LedgerStoreOptions {
-  storage: LeadStorage;
-  onUnreadable?: () => Promise<void>;
-}
-
-export class LedgerUnreadableError extends Error {
-  constructor() {
-    super('[lead-crm] the ledger file does not parse — refusing to overwrite');
-    this.name = 'LedgerUnreadableError';
-  }
+  database?: CrmDatabase;
 }
 
 export interface FlowSums {
@@ -111,141 +99,142 @@ export function operationSums(
   };
 }
 
-const promptIs =
-  ({ chatId, messageId }: PromptKey) =>
-  (p: OperationPrompt) =>
-    p.chatId === chatId && p.messageId === messageId;
+const toOperation = (row: OperationRow): LedgerOperation => ({
+  id: row.id,
+  type: row.type,
+  amount: row.amount.toNumber(),
+  note: row.note,
+  createdAt: row.createdAt.toISOString(),
+  createdBy: row.createdBy,
+});
 
-const ageOf = (p: OperationPrompt, now: number) =>
-  now - Date.parse(p.createdAt);
+const toPrompt = (row: PromptRow): OperationPrompt => ({
+  chatId: Number(row.chatId),
+  messageId: row.messageId,
+  type: row.type,
+  createdAt: row.createdAt.toISOString(),
+});
+
+const promptKey = ({ chatId, messageId }: MessageKey) => ({
+  chatId_messageId: { chatId: BigInt(chatId), messageId },
+});
 
 const isLive = (p: OperationPrompt, now: number) =>
-  ageOf(p, now) < PROMPT_TTL_MS;
+  now - Date.parse(p.createdAt) < PROMPT_TTL_MS;
 
-const liveAt = (key: PromptKey, now: number) => (p: OperationPrompt) =>
-  promptIs(key)(p) && isLive(p, now);
-
-function appended(
-  file: LedgerFile,
-  { type, amount, note = '', by }: OperationInput,
-): { next?: LedgerFile; result: RecordOutcome } {
-  const balance = balanceOf(file.operations);
-  const operation = operationSchema.parse({
-    id: file.operations.reduce((max, op) => Math.max(max, op.id), 0) + 1,
-    type,
-    amount,
-    note: note.trim().slice(0, MAX_OPERATION_NOTE),
-    createdAt: new Date().toISOString(),
-    createdBy: by,
-  });
-  if (type === 'settlement' && toCents(operation.amount) > toCents(balance))
-    return { result: { ok: false, reason: 'insufficient', balance } };
-  const operations = [...file.operations, operation];
-  return {
-    next: { ...file, operations },
-    result: { ok: true, operation, balance: balanceOf(operations) },
-  };
-}
+const LEDGER_LOCK = 'crm.ledger';
 
 export function createLedgerStore({
-  storage,
-  onUnreadable,
-}: LedgerStoreOptions) {
-  let alerted = false;
-
-  async function alertOnce(): Promise<void> {
-    if (alerted) return;
-    alerted = true;
-    await onUnreadable?.().catch((error: unknown) => {
-      logError('[lead-crm] could not tell the admin about the ledger', error);
+  database = crmDatabase,
+}: LedgerStoreOptions = {}) {
+  async function readOperations(
+    client: CrmTransaction = database(),
+  ): Promise<LedgerOperation[]> {
+    const rows = await client.ledgerOperation.findMany({
+      orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
     });
+    return rows.map(toOperation);
   }
 
-  async function read(): Promise<{
-    file: LedgerFile;
-    version: string | undefined;
-  }> {
-    const { raw, version } = await storage.read();
-    if (raw === undefined)
-      return { file: { operations: [], prompts: [] }, version };
-    const parsed = ledgerFileSchema.safeParse(raw);
-    if (!parsed.success) {
-      console.error('[lead-crm] the ledger file does not parse', {
-        path: LEDGER_PATH,
-        issues: parsed.error.issues,
-      });
-      await alertOnce();
-      throw new LedgerUnreadableError();
-    }
-    return { file: parsed.data, version };
-  }
-
-  function update<T>(
-    mutate: (file: LedgerFile) => { next?: LedgerFile; result: T },
-  ): Promise<T> {
-    return retryOnConflict(async () => {
-      const { file, version } = await read();
-      const { next, result } = mutate(file);
-      if (next) await storage.write(next, version);
-      return result;
-    }, 'ledger: conflict retry limit exceeded');
-  }
-
-  async function readOperations(): Promise<LedgerOperation[]> {
-    return (await read()).file.operations;
+  async function append(
+    tx: CrmTransaction,
+    { type, amount, note = '', by }: OperationInput,
+  ): Promise<RecordOutcome> {
+    await lockKey(tx, LEDGER_LOCK);
+    const balance = balanceOf(await readOperations(tx));
+    const input = newOperationSchema.parse({
+      type,
+      amount,
+      note: note.trim().slice(0, MAX_OPERATION_NOTE),
+      createdBy: by,
+    });
+    if (type === 'settlement' && toCents(input.amount) > toCents(balance))
+      return { ok: false, reason: 'insufficient', balance };
+    const operation = toOperation(
+      await tx.ledgerOperation.create({
+        data: {
+          type: input.type,
+          amount: input.amount,
+          note: input.note,
+          createdBy: input.createdBy,
+          createdAt: new Date(),
+        },
+      }),
+    );
+    return {
+      ok: true,
+      operation,
+      balance: balanceOf(await readOperations(tx)),
+    };
   }
 
   return {
-    readOperations,
+    readOperations: () => readOperations(),
 
     async readBalance(): Promise<number> {
       return balanceOf(await readOperations());
     },
 
     recordOperation(input: OperationInput): Promise<RecordOutcome> {
-      return update((file) => appended(file, input));
+      return database().$transaction((tx) => append(tx, input));
     },
 
     openOperationPrompt(
-      prompt: PromptKey & { type: OperationType },
-      replacing?: PromptKey,
-    ) {
-      return update((file) => {
-        const now = Date.now();
-        const added = { ...prompt, createdAt: new Date(now).toISOString() };
-        const replaced = replacing ? promptIs(replacing) : () => false;
-        const fresh = file.prompts.filter(
-          (p) => ageOf(p, now) < PROMPT_KEPT_MS && !replaced(p),
+      prompt: MessageKey & { type: OperationType },
+      replacing?: MessageKey,
+    ): Promise<OperationPrompt> {
+      return database().$transaction(async (tx) => {
+        const createdAt = new Date();
+        await tx.operationPrompt.deleteMany({
+          where: {
+            OR: [
+              {
+                createdAt: {
+                  lte: new Date(createdAt.getTime() - PROMPT_KEPT_MS),
+                },
+              },
+              ...(replacing ? [promptKey(replacing).chatId_messageId] : []),
+            ],
+          },
+        });
+        const fields = { type: prompt.type, createdAt };
+        return toPrompt(
+          await tx.operationPrompt.upsert({
+            where: promptKey(prompt),
+            create: { ...promptKey(prompt).chatId_messageId, ...fields },
+            update: fields,
+          }),
         );
-        return {
-          next: { ...file, prompts: [...fresh, added] },
-          result: added,
-        };
       });
     },
 
     async findOperationPrompt(
-      key: PromptKey,
+      key: MessageKey,
     ): Promise<FoundOperationPrompt | undefined> {
-      const prompt = (await read()).file.prompts.find(promptIs(key));
-      return prompt && { ...prompt, expired: !isLive(prompt, Date.now()) };
+      const row = await database().operationPrompt.findUnique({
+        where: promptKey(key),
+      });
+      if (!row) return undefined;
+      const prompt = toPrompt(row);
+      return { ...prompt, expired: !isLive(prompt, Date.now()) };
     },
 
     answerOperationPrompt(
-      key: PromptKey,
+      key: MessageKey,
       answer: Omit<OperationInput, 'type'>,
     ): Promise<RecordOutcome> {
-      return update((file) => {
-        const prompt = file.prompts.find(liveAt(key, Date.now()));
-        if (!prompt)
-          return { result: { ok: false, reason: 'no_prompt' } as const };
-        const { next, result } = appended(file, {
-          ...answer,
-          type: prompt.type,
+      return database().$transaction(async (tx) => {
+        await lockKey(tx, LEDGER_LOCK);
+        const row = await tx.operationPrompt.findUnique({
+          where: promptKey(key),
         });
-        if (!next) return { result };
-        const prompts = next.prompts.filter((p) => p !== prompt);
-        return { next: { ...next, prompts }, result };
+        const prompt = row && toPrompt(row);
+        if (!prompt || !isLive(prompt, Date.now()))
+          return { ok: false, reason: 'no_prompt' } as const;
+        const result = await append(tx, { ...answer, type: prompt.type });
+        if (result.ok)
+          await tx.operationPrompt.delete({ where: promptKey(key) });
+        return result;
       });
     },
   };

@@ -5,16 +5,19 @@ export const makeSchema = z.object({
   name: z.string().min(1),
 });
 
-export const makeListSchema = z.array(makeSchema);
+export const catalogueMakeSchema = makeSchema.extend({
+  show_on_site: z.boolean().nullable().default(null),
+});
+
+export const makeListSchema = z.array(catalogueMakeSchema);
 
 export type Make = z.infer<typeof makeSchema>;
 
+export type CatalogueMake = z.infer<typeof catalogueMakeSchema>;
+
 const byName = new Intl.Collator('en', { sensitivity: 'base' }).compare;
 
-export const sameMakeName = (a: string, b: string): boolean =>
-  byName(a, b) === 0;
-
-export const sortedMakes = (makes: readonly Make[]): Make[] =>
+export const sortedMakes = (makes: readonly CatalogueMake[]): CatalogueMake[] =>
   makes
-    .map(({ slug, name }) => ({ slug, name }))
+    .map(({ slug, name, show_on_site }) => ({ slug, name, show_on_site }))
     .sort((a, b) => byName(a.name, b.name));

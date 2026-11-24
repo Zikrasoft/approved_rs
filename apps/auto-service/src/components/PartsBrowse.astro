@@ -1,0 +1,72 @@
+---
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import type { SearchOutcome } from '@/utils/catalogue';
+import { currentNumber } from '@/utils/partNumbers';
+import {
+  PARTS_BROWSE_ATTRIBUTE,
+  PARTS_BROWSE_STATUS_ATTRIBUTE,
+} from '@/scripts/partsBrowse';
+import Pagination from './Pagination.astro';
+import PartRow from './PartRow.astro';
+
+interface Props {
+  found: SearchOutcome;
+  category?: string;
+  prev: string | null;
+  next: string | null;
+}
+
+const { found, category, prev, next } = Astro.props;
+const copy = content(localeFrom(Astro.url.pathname)).partsSearch;
+const range = copy.shownRange
+  .replace('{from}', String(found.offset + 1))
+  .replace('{to}', String(found.offset + found.results.length))
+  .replace('{count}', String(found.count));
+const hooks = {
+  [PARTS_BROWSE_ATTRIBUTE]: '',
+  [PARTS_BROWSE_STATUS_ATTRIBUTE]: range,
+};
+---
+
+<div
+  class="flex flex-col gap-3 transition-opacity duration-150 aria-busy:opacity-60 motion-reduce:transition-none"
+  {...hooks}
+>
+  <ul class="card divide-y divide-line">
+    {
+      found.results.map((result) => (
+        <PartRow
+          thumb={
+            result.thumbnail
+              ? {
+                  src: result.thumbnail,
+                  illustration: result.thumbnail_illustration === true,
+                }
+              : null
+          }
+          slug={result.slug}
+          brand={result.brand.name}
+          value={result.value}
+          name={result.part.name}
+          specs={result.specs}
+          detail={category ? undefined : result.part.category?.name}
+          superseded={result.superseded}
+          current={currentNumber(result, found.results)}
+          priced={result}
+          demand={result.demand}
+        />
+      ))
+    }
+  </ul>
+  <div
+    class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
+  >
+    <p class="text-sm text-muted">{range}</p>
+    {
+      (prev || next) && (
+        <Pagination label={copy.pagination} prev={prev} next={next} />
+      )
+    }
+  </div>
+</div>

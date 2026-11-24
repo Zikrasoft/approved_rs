@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 
 vi.mock('astro:middleware', () => ({ defineMiddleware: (fn: unknown) => fn }));
 
-const { isUnlocalized, onRequest } = await import('./middleware');
+const { onRequest } = await import('./middleware');
 
 type Handler = (context: unknown, next: () => unknown) => unknown;
 
@@ -27,26 +27,22 @@ function makeContext(url: string, acceptLanguage = '', cookie?: string) {
 const run = (context: unknown, next = vi.fn(() => 'next')) =>
   (onRequest as unknown as Handler)(context, next);
 
-describe('isUnlocalized', () => {
+describe('onRequest', () => {
   it.each([
     '/api/leads',
     '/keystatic/collection/works',
     '/admin/work-draft',
-    '/_image?href=x',
+    '/_astro/old.js',
+    '/favicon.ico',
     '/robots.txt',
     '/llms.txt',
     '/404',
     '/sitemap-index.xml',
-  ])('leaves %s alone', (pathname) => {
-    expect(isUnlocalized(pathname)).toBe(true);
+  ])('leaves %s to its route', (pathname) => {
+    const context = makeContext(pathname);
+    expect(run(context)).toBe('next');
+    expect(context.redirect).not.toHaveBeenCalled();
   });
-
-  it.each(['/', '/ru/', '/services/', '/sr/works/bmw-x5/', '/contact'])(
-    'routes %s through locale handling',
-    (pathname) => {
-      expect(isUnlocalized(pathname)).toBe(false);
-    },
-  );
 });
 
 describe('onRequest', () => {
@@ -116,33 +112,6 @@ describe('onRequest', () => {
     const context = makeContext('/en/contact/');
     run(context);
     expect(context.redirect).not.toHaveBeenCalled();
-  });
-
-  it.each([
-    ['/ru/parts/c/batteries/1/', '/ru/parts/c/batteries/'],
-    ['/sr/parts/c/oil-filters/1', '/sr/parts/c/oil-filters/'],
-    ['/en/parts/brakes/', '/en/parts/c/brakes/'],
-    ['/ru/shop/cart/', '/ru/parts/cart/'],
-  ])(
-    'answers the edge redirect for %s itself, so dev and production agree',
-    (from, to) => {
-      const context = makeContext(`${from}?facets=brand%3Abosch`);
-      run(context);
-      expect(context.redirect).toHaveBeenCalledWith(
-        `${to}?facets=brand%3Abosch`,
-        301,
-      );
-    },
-  );
-
-  it.each([
-    ['/ru/parts/c/BATTERIES/', '/ru/parts/c/batteries/'],
-    ['/sr/parts/c/Oil-Filters', '/sr/parts/c/oil-filters'],
-    ['/en/parts/c/Batteries/2/', '/en/parts/c/batteries/2/'],
-  ])('lower-cases the category in %s', (from, to) => {
-    const context = makeContext(`${from}?utm_source=x`);
-    run(context);
-    expect(context.redirect).toHaveBeenCalledWith(`${to}?utm_source=x`, 301);
   });
 
   it('leaves a later listing page to its route', () => {

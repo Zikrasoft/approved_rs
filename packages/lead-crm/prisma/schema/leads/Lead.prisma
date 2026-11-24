@@ -1,0 +1,110 @@
+model Lead {
+  id                     String          @id @default(uuid(7)) @db.Uuid
+  number                 Int             @unique @default(autoincrement())
+  legacyId               Int?            @unique @map("legacy_id")
+  brand                  String
+  name                   String
+  contact                String
+  service                String
+  services               String[]
+  contactChannel         ContactChannel? @map("contact_channel")
+  comment                String?
+  country                String?
+  sourceUrl              String?         @map("source_url")
+  visitorId              String?         @map("visitor_id")
+  locale                 String
+  kind                   LeadKind?
+  status                 LeadStatus      @default(new)
+  postponedFrom          LeadStatus?     @map("postponed_from")
+  remindAt               DateTime?       @map("remind_at") @db.Date
+  statusChangedAt        DateTime        @map("status_changed_at") @db.Timestamptz(3)
+  lastActivityAt         DateTime?       @map("last_activity_at") @db.Timestamptz(3)
+  visitorActiveAt        DateTime?       @map("visitor_active_at") @db.Timestamptz(3)
+  createdAt              DateTime        @default(now()) @map("created_at") @db.Timestamptz(3)
+  telegramChatId         BigInt?         @map("telegram_chat_id")
+  telegramMessageId      Int?            @map("telegram_message_id")
+  pendingPromptChatId    BigInt?         @map("pending_prompt_chat_id")
+  pendingPromptMessageId Int?            @map("pending_prompt_message_id")
+  pendingPromptKind      PromptKind?     @map("pending_prompt_kind")
+  capturePromptChatId    BigInt?         @map("capture_prompt_chat_id")
+  capturePromptStep      CaptureStep?    @map("capture_prompt_step")
+  telegramId             BigInt?         @map("telegram_id")
+  topicId                Int?            @map("topic_id")
+  topicMessageId         Int?            @map("topic_message_id")
+  topicClosed            Boolean         @default(false) @map("topic_closed")
+  topicActiveAt          DateTime?       @map("topic_active_at") @db.Timestamptz(3)
+  questionnaireDone      Boolean         @default(false) @map("questionnaire_done")
+  referredBy             Referrer?       @map("referred_by")
+  managerHandoffAt       DateTime?       @map("manager_handoff_at") @db.Timestamptz(3)
+  managerHandoffHandle   String?         @map("manager_handoff_handle")
+  adSource               Json?           @map("ad_source")
+  metaFbc                String?         @map("meta_fbc")
+  metaFbp                String?         @map("meta_fbp")
+  metaLeadSentAt         DateTime?       @map("meta_lead_sent_at") @db.Timestamptz(3)
+  orderId                String?         @map("order_id")
+  orderSettled           OrderOutcome?   @map("order_settled")
+  orderConflict          OrderOutcome?   @map("order_conflict")
+  orderStuck             OrderOutcome?   @map("order_stuck")
+
+  digests DigestLead[]
+  notes   LeadNote[]
+
+  @@unique([brand, orderId])
+  @@unique([pendingPromptChatId, pendingPromptMessageId])
+  @@index([brand, visitorId])
+  @@index([brand, contact])
+  @@index([brand, telegramId])
+  @@index([brand, capturePromptChatId])
+  @@index([topicId])
+  @@index([status])
+  @@map("leads")
+}
+
+enum LeadKind {
+  lead
+  call_click
+
+  @@map("lead_kind")
+}
+
+enum OrderOutcome {
+  won
+  lost
+
+  @@map("order_outcome")
+}
+
+enum Referrer {
+  approved
+
+  @@map("referrer")
+}
+
+enum PromptKind {
+  postpone
+  edit_name
+  edit_contact
+  note
+
+  @@map("prompt_kind")
+}
+
+enum CaptureStep {
+  looking_for
+  budget
+  phone
+  car_issue
+  car
+  service
+
+  @@map("capture_step")
+}
+
+enum ContactChannel {
+  phone
+  telegram
+  whatsapp
+  viber
+
+  @@map("contact_channel")
+}

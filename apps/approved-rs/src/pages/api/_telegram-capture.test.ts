@@ -1,29 +1,11 @@
+import '@podbor/lead-crm/testing/database';
 import { describe, expect, it, vi } from 'vitest';
 import { formatPhone } from '@podbor/site-kit/format-phone';
-import { LEADS_PATH } from '@podbor/lead-crm';
-import { recordBotApi, type MemoryStorage } from '@podbor/lead-crm/testing';
-
-const memory = vi.hoisted(() => {
-  const storages = new Map<string, MemoryStorage>();
-  return {
-    storages,
-    async module(name: string) {
-      const { createMemoryStorage } = await import('@podbor/lead-crm/testing');
-      const storageAt = (path: string) => {
-        if (!storages.has(path)) storages.set(path, createMemoryStorage());
-        return storages.get(path)!;
-      };
-      return { [name]: storageAt };
-    },
-  };
-});
-
-vi.mock('@podbor/lead-crm/storage/local', () =>
-  memory.module('localLeadStorage'),
-);
+import { recordBotApi } from '@podbor/lead-crm/testing';
 
 import { POST } from './telegram-capture';
 import { content } from '@/i18n/content';
+import { readLeads } from '@/lib/store';
 import { PHONE_NUMBER, SITE_URL } from '@/utils/constants';
 
 const api = recordBotApi();
@@ -106,10 +88,8 @@ function lastReply() {
     ?.payload as { reply_markup: { inline_keyboard: unknown[][] } };
 }
 
-function visitorLead(from: Visitor = VISITOR) {
-  return (
-    memory.storages.get(LEADS_PATH)?.current() as { telegramId: number }[]
-  ).find((lead) => lead.telegramId === from.id);
+async function visitorLead(from: Visitor = VISITOR) {
+  return (await readLeads()).find((lead) => lead.telegramId === from.id);
 }
 
 function tap(data: string) {
@@ -159,7 +139,7 @@ describe('the Approved capture bot', () => {
         [{ text: captureBot.menu.back, callback_data: 'services:sr' }],
       ],
     });
-    expect(memory.storages.get(LEADS_PATH)?.current()).toEqual([
+    expect(await readLeads()).toEqual([
       expect.objectContaining({
         brand: 'Approved.rs',
         service: 'vehicle-import',
@@ -262,7 +242,7 @@ describe('the Approved Questionnaire', () => {
       resize_keyboard: true,
       one_time_keyboard: true,
     });
-    expect(visitorLead(NO_HANDLE)).toMatchObject({
+    expect(await visitorLead(NO_HANDLE)).toMatchObject({
       contact: '+381641234567',
       capturePrompt: null,
     });
@@ -312,7 +292,7 @@ describe('the Approved Questionnaire', () => {
       },
     ]);
     expect(words.request.button).toMatch(/^📝 /);
-    expect(visitorLead()).toMatchObject({
+    expect(await visitorLead()).toMatchObject({
       service: 'vehicle-import',
       services: ['vehicle-import', 'vehicle-sourcing'],
       comment: 'Ищет: BMW X5 2019\nБюджет: 40 000 €',
@@ -405,7 +385,9 @@ describe('a photo from the visitor', () => {
       },
     });
 
-    const { topicId } = visitorLead(from) as unknown as { topicId: number };
+    const { topicId } = (await visitorLead(from)) as unknown as {
+      topicId: number;
+    };
     expect(topicId).toEqual(expect.any(Number));
     expect(
       api
@@ -434,7 +416,7 @@ describe('the Approved main menu', () => {
 
     await press('manager:ru', MENU_VISITOR);
 
-    const lead = visitorLead(MENU_VISITOR) as unknown as {
+    const lead = (await visitorLead(MENU_VISITOR)) as unknown as {
       managerHandoff: { handle: string };
       topicId: number;
     };

@@ -31,6 +31,7 @@ docker compose run --rm -T medusa \
   node_modules/.bin/medusa db:migrate --execute-safe-links --all-or-nothing
 
 ./crawler-role.sh
+./crm-role.sh
 
 docker compose up -d --wait --wait-timeout 300
 echo "Restored."

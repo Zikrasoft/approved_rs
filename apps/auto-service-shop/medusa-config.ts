@@ -3,6 +3,7 @@ import { defineConfig, loadEnv } from '@medusajs/framework/utils';
 import { adminFavicon } from './src/lib/admin-favicon';
 import { adminLanguage } from './src/lib/admin-language';
 import { readCalendarDatesAsText } from './src/lib/calendar-dates';
+import { DATABASE_POOL } from './src/lib/database-pool';
 import { parseEnv } from './src/lib/env';
 
 loadEnv(process.env.NODE_ENV || 'development', process.cwd());
@@ -37,7 +38,7 @@ export default defineConfig({
     databaseUrl: env.DATABASE_URL,
     databaseDriverOptions: {
       ssl: env.DATABASE_SSL ? { rejectUnauthorized: false } : false,
-      pool: { min: 2, max: 10 },
+      pool: DATABASE_POOL,
     },
     http: {
       storeCors: env.STORE_CORS,

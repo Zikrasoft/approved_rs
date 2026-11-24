@@ -70,9 +70,9 @@ in two components.
 
 ### Where the bot's infrastructure lives
 
-The webhook and the reminder cron for all three brands live in the approved.rs
-project. Raised by the owner on 2026-09-14, no decision yet. The options and a
-recommendation are in
+Closed: the webhook and the reminder cron for all three brands moved from
+approved.rs to carlab.rs, as route factories in `@podbor/lead-crm` that
+`apps/auto-service` mounts. See
 [ADR-0014](../adr/0014-bot-webhook-and-cron-hosted-by-approved-rs.md).
 
 ### Launching the CarLab shop
@@ -111,9 +111,6 @@ decision ([ADR-0024](../adr/0024-hand-collected-vehicle-dictionary.md)).
 
 - The consent banner does not cover the floating contact button on mobile, on all
   three sites.
-- The 301s for legacy slugs: `vercel.json` duplicates `middleware.ts` by hand, and
-  they diverge silently
-  ([ADR-0010](../adr/0010-locale-prefixed-urls-and-permanent-legacy-redirects.md)).
 - Declining in the banner really does keep the Google tag from starting on the next load.
 - Meta descriptions in non-English locales: if the site name or the city is missing
   anywhere the Russian has `{siteName}` / `{location}`, the model dropped a token.

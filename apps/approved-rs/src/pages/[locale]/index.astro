@@ -1,6 +1,5 @@
 ---
 import PageSection from '@/components/PageSection.astro';
-export const prerender = false;
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { DEVELOPER } from '@podbor/brands';
 import { websiteSchema } from '@podbor/site-kit';
@@ -26,13 +25,15 @@ import {
 import { generateOrganizationSchema } from '@/utils/seo';
 import { content } from '@/i18n/content';
 import { getI18n } from '@/i18n/getI18n';
-import { PathBuilder } from '@/utils/paths';
+import { PathBuilder, withLocales } from '@/utils/paths';
 import { SLUG } from '@/utils/labels';
 import { EU_SPOKE_COUNTRIES } from '@/utils/vehicleImportCrossSell';
 import { getLocale } from '@/i18n/config';
 import heroImage from '@/assets/hero-delivery.jpg';
 import { heroImageAttrs } from '@/utils/heroImage';
 import closingImage from '@/assets/closing.jpg';
+
+export const getStaticPaths = () => withLocales([{ params: {} }]);
 
 const hero = await heroImageAttrs(heroImage);
 const locale = getLocale(Astro.params.locale);

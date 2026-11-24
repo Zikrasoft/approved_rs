@@ -1,36 +1,10 @@
 import { defineMiddleware } from 'astro:middleware';
-import { detectLocale, isLocale } from './i18n/config';
-import { LOCALE_COOKIE, createUnlocalizedMatcher } from '@podbor/site-kit';
-import { createRedirectMatcher } from '@podbor/site-kit/redirects';
-import {
-  lowercasedCategoryPath,
-  siteRedirects,
-} from './utils/legacyCategories';
+import { createLocaleMiddleware } from '@podbor/site-kit/locale-middleware';
+import { localeSet } from './i18n/config';
 
-const redirectFor = createRedirectMatcher(siteRedirects());
-
-export const isUnlocalized = createUnlocalizedMatcher({
-  exact: ['/robots.txt', '/llms.txt', '/catalogue-build.json', '/404', '/404/'],
-  prefixes: ['/api/', '/admin/', '/keystatic', '/_image', '/.well-known/'],
-});
-
-export const onRequest = defineMiddleware((context, next) => {
-  const { pathname, search } = context.url;
-
-  if (isUnlocalized(pathname)) return next();
-
-  const redirect = lowercasedCategoryPath(pathname) ?? redirectFor(pathname);
-  if (redirect) return context.redirect(`${redirect}${search}`, 301);
-
-  const firstSegment = pathname.split('/')[1] ?? '';
-  if (isLocale(firstSegment)) return next();
-
-  const locale = detectLocale(
-    context.request.headers.get('accept-language'),
-    context.cookies.get(LOCALE_COOKIE)?.value,
-  );
-
-  if (pathname === '/') return context.redirect(`/${locale}/${search}`, 302);
-
-  return context.redirect(`/${locale}${pathname}${search}`, 302);
-});
+export const onRequest = defineMiddleware(
+  createLocaleMiddleware({
+    locales: localeSet,
+    unlocalized: { prefixes: ['/admin/'] },
+  }),
+);

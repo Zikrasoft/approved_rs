@@ -29,10 +29,13 @@ const json = (body: unknown, status = 200) =>
     headers: { 'content-type': 'application/json' },
   });
 
+const INTERNAL_SHOP = 'http://medusa:9000';
+
 const network = vi.fn(async (input: string | URL, init: RequestInit = {}) => {
   const url = String(input);
   calls.push({ url, init });
-  if (url.startsWith(SHOP)) return shopAnswer.clone();
+  if (url.startsWith(SHOP) || url.startsWith(INTERNAL_SHOP))
+    return shopAnswer.clone();
   if (url === REPO)
     return tokenCanPush
       ? json({ permissions: { push: true } })
@@ -90,6 +93,17 @@ const committedFile = () => {
 };
 
 describe('POST /api/admin/work-draft', () => {
+  it('reads the order from SHOP_INTERNAL_URL when set', async () => {
+    vi.stubEnv('SHOP_INTERNAL_URL', INTERNAL_SHOP);
+
+    const response = await draft('order_01', 'staff-token');
+
+    expect(response.status).toBe(303);
+    expect(
+      calls.some(({ url }) => url.startsWith(`${INTERNAL_SHOP}/hooks/`)),
+    ).toBe(true);
+  });
+
   it('commits one unpublished Parts sourcing Work with the car, the Parts and the total', async () => {
     const response = await draft('order_01', 'staff-token');
 

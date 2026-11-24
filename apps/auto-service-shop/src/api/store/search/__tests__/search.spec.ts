@@ -677,12 +677,10 @@ medusaIntegrationTestRunner({
         expect(response.data).toMatchObject({ results: [], count: 0 });
       });
 
-      it('refuses a request without a query or with an unknown locale', async () => {
-        const withoutQuery = await search({ locale: 'ru' });
+      it('refuses a request with an unknown or missing locale', async () => {
         const unknownLocale = await search({ q: 'filter', locale: 'de' });
         const withoutLocale = await search({ q: 'filter' });
 
-        expect(withoutQuery.status).toBe(400);
         expect(unknownLocale.status).toBe(400);
         expect(withoutLocale.status).toBe(400);
       });

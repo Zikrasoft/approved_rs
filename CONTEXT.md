@@ -88,7 +88,10 @@ Questionnaire left on a stale Lead no longer takes answers. Owner activity
 counts so that a conversation the owner is working stays one Lead. A merge
 never drops a contact: when the visitor sends a different real contact, the
 Lead keeps the first and the new one lands as a dated note signed by the
-visitor («Клиент (WhatsApp): Доп. контакт: …»), a different name likewise.
+visitor («Клиент (WhatsApp): Доп. контакт: …»), a different name likewise. On
+carlab.rs a Parts sourcing Lead (a VIN inquiry or a parts order) and a service
+booking never merge, even from the same visitor within the hour: each is its
+own Lead with its own card.
 
 **Referral** — a Lead a sister brand's Capture bot received from the Approved
 bot's Partners screen. `referredBy: approved` is the only record of it — the
@@ -282,9 +285,11 @@ _Avoid_: spec, recommendation
 _Avoid_: substitute, cross-reference
 
 **Publish**: the one staff action that puts catalogue changes on carlab.rs:
-it translates new texts, rebuilds and deploys the site and refreshes search.
-Admin edits and Imports are saved at once but reach the site only on the next
-Publish; there is no scheduled run.
+it translates new texts, decides which Parts are published, refreshes search,
+and rebuilds the site, which empties the cache of catalogue pages. A new Part
+reaches the site only on the next Publish; an edit to a published Part reaches
+it by itself within a day, when its cached page expires. There is no scheduled
+run.
 _Avoid_: deploy, sync, nightly import
 
 **Demand**: how much visitors want a Brand-number over the last 30 days,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { currentNumber, splitNumbers } from './partNumbers';
+import { currentNumber, nameWithoutNumber, splitNumbers } from './partNumbers';
 
 describe('splitNumbers', () => {
   it('puts OEM numbers first and moves superseded ones aside', () => {
@@ -46,5 +46,32 @@ describe('currentNumber', () => {
     expect(currentNumber(old, [old, mahle, other, bmw])).toBe(bmw);
     expect(currentNumber(old, [old, mahle])).toBe(mahle);
     expect(currentNumber(old, [old, other])).toBeUndefined();
+  });
+});
+
+describe('nameWithoutNumber', () => {
+  it.each([
+    ['Топливный фильтр FILTRON PE 816/5', 'Топливный фильтр'],
+    [
+      'Воздушный фильтр, вторичный элемент  filtron  pe 816/5 ',
+      'Воздушный фильтр, вторичный элемент',
+    ],
+    ['Топливный фильтр', 'Топливный фильтр'],
+    ['FILTRON PE 816/5', 'FILTRON PE 816/5'],
+    [
+      'Фильтр FILTRON PE 816/5 для Peugeot',
+      'Фильтр FILTRON PE 816/5 для Peugeot',
+    ],
+  ])('reads %j as %j', (name, expected) => {
+    expect(nameWithoutNumber(name, 'FILTRON', 'PE 816/5')).toBe(expected);
+  });
+
+  it('treats the number as text, not a pattern', () => {
+    expect(nameWithoutNumber('Фильтр BOSCH 0.986', 'BOSCH', '0.986')).toBe(
+      'Фильтр',
+    );
+    expect(nameWithoutNumber('Фильтр BOSCH 0x986', 'BOSCH', '0.986')).toBe(
+      'Фильтр BOSCH 0x986',
+    );
   });
 });

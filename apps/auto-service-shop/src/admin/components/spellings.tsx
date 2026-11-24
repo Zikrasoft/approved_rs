@@ -5,12 +5,9 @@ import { z } from 'zod';
 
 import { acknowledged, adminFetch, useWriting } from '../lib/admin-fetch';
 import { useConfirmed } from '../lib/confirm';
+import { spellingSchema, spellingSupplier } from '../lib/spelling';
 
-export const spellingSchema = z.object({
-  id: z.string(),
-  supplier_id: z.string(),
-  value: z.string(),
-});
+export { spellingSchema };
 
 type Spelling = z.infer<typeof spellingSchema>;
 
@@ -38,9 +35,6 @@ export const Spellings = ({
   const confirmed = useConfirmed();
   const [supplierId, setSupplierId] = useState('');
   const [value, setValue] = useState('');
-
-  const supplierName = (id: string) =>
-    suppliers.find((supplier) => supplier.id === id)?.name ?? id;
 
   const add = async () => {
     const created = await adminFetch(path, acknowledged, {
@@ -76,7 +70,12 @@ export const Spellings = ({
       <div className="flex flex-wrap gap-2">
         {spellings.map((spelling) => (
           <Badge key={spelling.id} size="small">
-            {supplierName(spelling.supplier_id)}: {spelling.value}
+            {spellingSupplier(
+              spelling.supplier_id,
+              suppliers,
+              t(`${copy}.everySupplier`),
+            )}
+            : {spelling.value}
             <button
               type="button"
               className="ml-1"

@@ -1,3 +1,4 @@
+import { inBackground } from './background.ts';
 import { logError } from './logError.ts';
 import { z } from 'zod';
 import type { ClaimedMetaLead } from './store.ts';
@@ -33,14 +34,12 @@ export type ReportMetaLead = (lead: SentLead) => void;
 export interface MetaLeadReporterOptions {
   pixelId: string | undefined;
   env: Record<string, unknown>;
-  waitUntil: (promise: Promise<unknown>) => void;
   timeoutMs?: number;
 }
 
 export function createMetaLeadReporter({
   pixelId,
   env,
-  waitUntil,
   timeoutMs = TIMEOUT_MS,
 }: MetaLeadReporterOptions): ReportMetaLead | undefined {
   const { META_CAPI_TOKEN: token, META_CAPI_TEST_CODE: testCode } =
@@ -77,5 +76,5 @@ export function createMetaLeadReporter({
     }
   }
 
-  return (lead) => waitUntil(send(lead));
+  return (lead) => inBackground(send(lead));
 }

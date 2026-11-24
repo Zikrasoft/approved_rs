@@ -12,7 +12,7 @@ export * from './comment.ts';
 export * from './fingerprint.ts';
 export * from './availability.ts';
 export * from './enrichment.ts';
-export * from './redirects.ts';
 export * from './placePages.ts';
 export * from './slug.ts';
 export * from './makeList.ts';
+export * from './snapshot.ts';

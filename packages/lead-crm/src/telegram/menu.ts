@@ -2,6 +2,7 @@ import { isClosed, type StoredLead } from '../schema.ts';
 import { MAX_LIST_ROWS } from '../store.ts';
 import {
   leadDisplayName,
+  leadTag,
   STATUS_META,
   type Btn,
   type Keyboard,
@@ -15,11 +16,11 @@ export function buildOpenList(leads: StoredLead[]): {
 } {
   const rows: Btn[][] = leads
     .filter((l) => !isClosed(l))
-    .sort((a, b) => b.id - a.id)
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     .slice(0, MAX_LIST_ROWS)
     .map((l) => [
       {
-        text: `#${l.id} ${leadDisplayName(l)} · ${l.brand} · ${STATUS_META[l.status].emoji}`,
+        text: `${leadTag(l)} ${leadDisplayName(l)} · ${l.brand} · ${STATUS_META[l.status].emoji}`,
         callback_data: `open:${l.id}`,
       },
     ]);
@@ -31,13 +32,13 @@ export function buildOpenList(leads: StoredLead[]): {
 
 export function buildMenu(
   role: Role,
-  balance: number | undefined,
+  balance: number,
 ): {
   text: string;
   reply_markup: Keyboard;
 } {
   const rows: Btn[][] = [
-    ...(balance === undefined ? [] : [LEDGER_ROW]),
+    LEDGER_ROW,
     [{ text: '📂 Открытые', callback_data: 'menu:open' }],
   ];
   if (role === 'admin')
@@ -58,7 +59,7 @@ export function buildSearchResults(leads: StoredLead[]): {
       reply_markup: { inline_keyboard: [] },
     };
   const rows: Btn[][] = leads.slice(0, MAX_LIST_ROWS).map((l) => {
-    const label = `${STATUS_META[l.status].emoji} #${l.id} ${l.brand} ${leadDisplayName(l)} — ${l.contact}`;
+    const label = `${STATUS_META[l.status].emoji} ${leadTag(l)} ${l.brand} ${leadDisplayName(l)} — ${l.contact}`;
     return [{ text: label, callback_data: `open:${l.id}` }];
   });
   return { text: 'Найдено:', reply_markup: { inline_keyboard: rows } };

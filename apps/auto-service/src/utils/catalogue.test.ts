@@ -1,4 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { mkdtemp, readFile, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { CATALOGUE_TIMEOUT_MS, createCatalogue } from './catalogue';
 import {
   DEV_SNAPSHOT_FRESH_MS,
@@ -6,11 +10,13 @@ import {
   PREVIOUS_BUILD_URL,
   type CatalogueEnv,
   catalogueFromEnv,
+  shopBackendUrl,
   categoriesForBuild,
   categoryPagesForBuild,
   makeHubsForBuild,
   makePartsForBuild,
   partPagesForBuild,
+  writeCatalogueMakes,
 } from './catalogueEnv';
 import { categoryFacets } from './categoryFacets';
 import {
@@ -22,6 +28,14 @@ import {
 import { fitGroups } from './fitGroups';
 import { catalogueLinks, PathBuilder } from './paths';
 import { seriesSlugOf } from '@podbor/catalog-contract/slug';
+import {
+  CATALOGUE_SNAPSHOT_CONTENT_TYPE,
+  compactFitment,
+  SNAPSHOT_END_LINE,
+  snapshotSectionLines,
+  type Fitment,
+  type SnapshotSection,
+} from '@podbor/catalog-contract';
 import { sitemapFilter } from './sitemap';
 import { GET as recordBuild } from '../pages/catalogue-build.json.ts';
 
@@ -134,22 +148,11 @@ const backend = ({
   categories = [] as unknown[],
   fitments = [] as unknown[],
   vehicles = [] as unknown[],
-  redirects = [] as unknown[],
+  makes = undefined as unknown[] | undefined,
 } = {}) =>
   vi.fn((url: string) => {
-    if (url.endsWith('/store/catalogue-redirects')) {
-      return respond({ redirects });
-    }
-    if (url.includes('/store/part-pages')) {
-      return respond({ pages, count: pages.length, offset: 0, limit: 1000 });
-    }
-    if (url.includes('/store/fitments')) {
-      return respond({
-        fitments,
-        count: fitments.length,
-        offset: 0,
-        limit: 1000,
-      });
+    if (url.endsWith('/store/catalogue-snapshot')) {
+      return respond({ pages, categories, fitments, vehicles, makes });
     }
     if (url.endsWith('/store/categories')) {
       return respond({ categories });
@@ -184,7 +187,7 @@ describe('catalogue.partPages', () => {
     ]);
     expect(pages[0].equivalents).toEqual(oilFilterMann.equivalents);
     expect(fetch).toHaveBeenCalledWith(
-      `${BACKEND_URL}/store/part-pages?limit=1000`,
+      `${BACKEND_URL}/store/catalogue-snapshot`,
       expect.objectContaining({
         headers: { 'x-publishable-api-key': 'pk_test' },
         signal: expect.any(AbortSignal),
@@ -201,22 +204,6 @@ describe('catalogue.partPages', () => {
       ['mann-filter-hu816x', true],
       ['bmw-11428575211', false],
     ]);
-  });
-
-  it('pages through the backend until no next cursor is named', async () => {
-    const fetch = vi.fn((url: string) => {
-      if (url.endsWith('part-pages?limit=1000')) {
-        return respond({ pages: [oilFilterMann], limit: 1, next: 'pi_mann' });
-      }
-      if (url.endsWith('part-pages?limit=1000&after=pi_mann')) {
-        return respond({ pages: [oilFilterBmw], limit: 1, next: null });
-      }
-      return backend()(url);
-    });
-
-    const pages = await catalogueWith(fetch).partPages();
-
-    expect(pages).toHaveLength(2);
   });
 
   it('builds one page when two identifiers share a Brand and number', async () => {
@@ -688,15 +675,18 @@ describe('a part page groups its Fitments', () => {
     expect(
       fitGroups(page.fits).map(({ make, models }) => [
         make.slug,
-        models.map(({ model, fits }) => [model.slug, fits.map(({ id }) => id)]),
+        models.map(({ model, fits }) => [
+          model.slug,
+          fits.map(({ vehicle_id }) => vehicle_id),
+        ]),
       ]),
     ).toEqual([
-      ['audi', [['b9-a4', ['fit_a4']]]],
+      ['audi', [['b9-a4', ['veh_a4']]]],
       [
         'bmw',
         [
-          ['f30-320d', ['fit_f30', 'fit_f30b']],
-          ['g20-320d', ['fit_g20']],
+          ['f30-320d', ['veh_1', 'veh_1b']],
+          ['g20-320d', ['veh_g20']],
         ],
       ],
     ]);
@@ -1173,10 +1163,9 @@ describe('catalogue.makeHubs', () => {
     ).makeHubs();
 
     const [series] = hubs[0].series;
-    expect(series.categories[0].parts[0].fits.map(({ id }) => id)).toEqual([
-      'fit_veh_1_part_HU816X',
-      'fit_veh_2_part_HU816X',
-    ]);
+    expect(
+      series.categories[0].parts[0].fits.map(({ vehicle_id }) => vehicle_id),
+    ).toEqual(['veh_1', 'veh_2']);
   });
 
   it('assembles the hubs once per catalogue snapshot', async () => {
@@ -1399,42 +1388,6 @@ describe('the Parts of a Make', () => {
   });
 });
 
-describe('catalogue redirects', () => {
-  const renamed = {
-    from: { make: 'bmw-old' },
-    to: { make: 'bmw' },
-  };
-
-  it('reads the redirect list with the rest of the catalogue', async () => {
-    const { redirects } = await catalogueWith(
-      backend({ redirects: [renamed] }),
-    ).snapshot();
-
-    expect(redirects).toEqual([
-      {
-        from: expect.objectContaining({ make: 'bmw-old', model: null }),
-        to: expect.objectContaining({ make: 'bmw', model: null }),
-      },
-    ]);
-  });
-
-  it('builds without redirects from a shop that has no redirect list yet, and fails on a shop error', async () => {
-    const answering = (status: number) =>
-      vi.fn((url: string) =>
-        url.endsWith('/store/catalogue-redirects')
-          ? Promise.resolve({ ok: false, status, json: async () => ({}) })
-          : backend()(url),
-      );
-
-    expect((await catalogueWith(answering(404)).snapshot()).redirects).toEqual(
-      [],
-    );
-    await expect(catalogueWith(answering(503)).snapshot()).rejects.toThrow(
-      '503',
-    );
-  });
-});
-
 describe('partPagesForBuild', () => {
   it('builds no part pages when no backend is configured', async () => {
     expect(await partPagesForBuild({})).toEqual([]);
@@ -1496,7 +1449,7 @@ describe('the deploy build', () => {
   it('reads the catalogue once for every page, the sitemap and llms.txt', async () => {
     const shop = backend({ pages: partPages(2) });
     deployed(2, shop);
-    const env = shopEnv({ VERCEL: '1' });
+    const env = shopEnv({ CATALOGUE_SHRINK_GUARD: 'true' });
 
     await partPagesForBuild(env);
     await categoriesForBuild(env);
@@ -1505,8 +1458,8 @@ describe('the deploy build', () => {
 
     const reads = (path: string) =>
       shop.mock.calls.filter(([url]) => url.includes(path)).length;
-    expect(reads('/store/part-pages')).toBe(1);
-    expect(reads('/store/categories')).toBe(1);
+    expect(reads('/store/catalogue-snapshot')).toBe(1);
+    expect(reads('/store/categories')).toBe(0);
   });
 
   it('reads the catalogue once for a burst of dev pages, and again once it went stale', async () => {
@@ -1517,8 +1470,9 @@ describe('the deploy build', () => {
       deployed(null, shop);
       const env = shopEnv();
       const reads = () =>
-        shop.mock.calls.filter(([url]) => url.includes('/store/part-pages'))
-          .length;
+        shop.mock.calls.filter(([url]) =>
+          url.includes('/store/catalogue-snapshot'),
+        ).length;
 
       await Promise.all([partPagesForBuild(env), makeHubsForBuild(env)]);
       await categoryPagesForBuild(env);
@@ -1533,18 +1487,55 @@ describe('the deploy build', () => {
     }
   });
 
+  it('keeps a dev snapshot whose load outlasted the freshness window', async () => {
+    vi.stubEnv('MODE', 'development');
+    vi.useFakeTimers();
+    try {
+      let answer = () => {};
+      const held = new Promise<void>((resolve) => {
+        answer = resolve;
+      });
+      const shop = backend({ pages: partPages(2) });
+      deployed(
+        null,
+        vi.fn(async (url: string) => {
+          await held;
+          return shop(url);
+        }),
+      );
+      const env = shopEnv();
+
+      const loading = partPagesForBuild(env);
+      vi.advanceTimersByTime(DEV_SNAPSHOT_FRESH_MS);
+      answer();
+      await loading;
+      await categoryPagesForBuild(env);
+
+      expect(
+        shop.mock.calls.filter(([url]) =>
+          url.includes('/store/catalogue-snapshot'),
+        ),
+      ).toHaveLength(1);
+    } finally {
+      vi.useRealTimers();
+      vi.unstubAllEnvs();
+    }
+  });
+
   it('fails without the backend URL once the live site has part pages', async () => {
     deployed(120);
 
-    await expect(partPagesForBuild({ VERCEL: '1' })).rejects.toThrow(
-      'MEDUSA_BACKEND_URL',
-    );
+    await expect(
+      partPagesForBuild({ CATALOGUE_SHRINK_GUARD: 'true' }),
+    ).rejects.toThrow('MEDUSA_BACKEND_URL');
   });
 
   it('builds without a catalogue while the live site has none', async () => {
     deployed(null);
 
-    expect(await partPagesForBuild({ VERCEL: '1' })).toEqual([]);
+    expect(await partPagesForBuild({ CATALOGUE_SHRINK_GUARD: 'true' })).toEqual(
+      [],
+    );
   });
 
   it('fails on a shop with no part pages once the catalogue is live, even when shrinking is allowed', async () => {
@@ -1552,7 +1543,10 @@ describe('the deploy build', () => {
 
     await expect(
       partPagesForBuild(
-        shopEnv({ VERCEL: '1', CATALOGUE_SHRINK_ALLOWED: 'true' }),
+        shopEnv({
+          CATALOGUE_SHRINK_GUARD: 'true',
+          CATALOGUE_SHRINK_ALLOWED: 'true',
+        }),
       ),
     ).rejects.toThrow('0 part pages');
   });
@@ -1560,15 +1554,17 @@ describe('the deploy build', () => {
   it('fails on far fewer part pages than the live site has', async () => {
     deployed(10, backend({ pages: partPages(4) }));
 
-    await expect(partPagesForBuild(shopEnv({ VERCEL: '1' }))).rejects.toThrow(
-      '4 part pages',
-    );
+    await expect(
+      partPagesForBuild(shopEnv({ CATALOGUE_SHRINK_GUARD: 'true' })),
+    ).rejects.toThrow('4 part pages');
   });
 
   it('builds a catalogue that shrank by less than half', async () => {
     deployed(10, backend({ pages: partPages(6) }));
 
-    expect(await partPagesForBuild(shopEnv({ VERCEL: '1' }))).toHaveLength(6);
+    expect(
+      await partPagesForBuild(shopEnv({ CATALOGUE_SHRINK_GUARD: 'true' })),
+    ).toHaveLength(6);
   });
 
   it('builds a shrunken catalogue the owner allowed', async () => {
@@ -1576,7 +1572,10 @@ describe('the deploy build', () => {
 
     expect(
       await partPagesForBuild(
-        shopEnv({ VERCEL: '1', CATALOGUE_SHRINK_ALLOWED: 'true' }),
+        shopEnv({
+          CATALOGUE_SHRINK_GUARD: 'true',
+          CATALOGUE_SHRINK_ALLOWED: 'true',
+        }),
       ),
     ).toHaveLength(4);
   });
@@ -1593,42 +1592,70 @@ describe('the deploy build', () => {
     );
   });
 
+  it('names MEDUSA_BACKEND_URL and the URL it tried when the shop is down', async () => {
+    const down = new TypeError('fetch failed');
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.reject(down)),
+    );
+    const env = shopEnv();
+
+    const failure = await partPagesForBuild(env).catch((error) => error);
+
+    expect(failure.message).toContain('MEDUSA_BACKEND_URL');
+    expect(failure.message).toContain(env.MEDUSA_BACKEND_URL);
+    expect(failure.message).toContain('fetch failed');
+    expect(failure.cause).toBe(down);
+  });
+
   it('fails when the live site cannot say what it serves', async () => {
     vi.stubGlobal(
       'fetch',
       vi.fn(() => respond({}, false)),
     );
 
-    await expect(partPagesForBuild(shopEnv({ VERCEL: '1' }))).rejects.toThrow(
-      '503',
-    );
+    await expect(
+      partPagesForBuild(shopEnv({ CATALOGUE_SHRINK_GUARD: 'true' })),
+    ).rejects.toThrow('503');
   });
 
-  it('warns when a catalogue Make is missing from the exported list', async () => {
-    const audi = { slug: 'audi', name: 'Audi' };
-    const unknown = { slug: 'zastava', name: 'Zastava' };
-    const vehicleOf = (make: typeof audi) => ({
-      ...VEHICLE,
-      id: make.slug,
-      model: {
-        ...VEHICLE.model,
-        chassis: {
-          ...VEHICLE.model.chassis,
-          series: { ...VEHICLE.model.chassis.series, make },
-        },
-      },
+  describe('the Make list Keystatic and the content schemas read', () => {
+    const listFile = async () =>
+      pathToFileURL(
+        join(await mkdtemp(join(tmpdir(), 'makes-')), 'makes.json'),
+      );
+    const kept = '[{"slug":"bmw","name":"BMW"}]';
+
+    it('writes every catalogue Make the shop sends, by name, with its site flag', async () => {
+      deployed(
+        null,
+        backend({
+          makes: [
+            { slug: 'mini', name: 'MINI', show_on_site: true },
+            { slug: 'alfa-romeo', name: 'Alfa Romeo', show_on_site: false },
+          ],
+        }),
+      );
+      const file = await listFile();
+
+      await writeCatalogueMakes(file, shopEnv());
+
+      expect(JSON.parse(await readFile(file, 'utf8'))).toEqual([
+        { slug: 'alfa-romeo', name: 'Alfa Romeo', show_on_site: false },
+        { slug: 'mini', name: 'MINI', show_on_site: true },
+      ]);
     });
-    deployed(null, backend({ vehicles: [audi, unknown].map(vehicleOf) }));
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
-    await partPagesForBuild(shopEnv());
+    it('keeps the committed list for a shop that sends no Make list yet, or without a shop', async () => {
+      deployed(null, backend());
+      const file = await listFile();
+      await writeFile(file, kept);
 
-    expect(warn.mock.calls).toEqual([
-      [
-        'Make zastava (Zastava) is in the catalogue but not in src/content/makes.json',
-      ],
-    ]);
-    warn.mockRestore();
+      await writeCatalogueMakes(file, shopEnv());
+      await writeCatalogueMakes(file, {});
+
+      expect(await readFile(file, 'utf8')).toBe(kept);
+    });
   });
 });
 
@@ -1644,18 +1671,21 @@ const catalog = (fetch: ReturnType<typeof vi.fn>) =>
     fetch: fetch as unknown as typeof globalThis.fetch,
   });
 
-describe('catalogue.vehicles', () => {
-  it('lists the Vehicles the car pages are built from', async () => {
-    const fetch = answer({
-      vehicles: [VEHICLE],
-      count: 1,
-      offset: 0,
-      limit: 1000,
-    });
+describe('catalogue.snapshot', () => {
+  const whole = {
+    pages: [],
+    categories: [],
+    fitments: [],
+    vehicles: [VEHICLE],
+  };
 
-    expect(await catalog(fetch).vehicles()).toEqual([VEHICLE]);
+  it('reads the whole catalogue in one request', async () => {
+    const fetch = answer(whole);
+
+    expect((await catalog(fetch).snapshot()).vehicles).toEqual([VEHICLE]);
+    expect(fetch).toHaveBeenCalledTimes(1);
     expect(fetch).toHaveBeenCalledWith(
-      'http://shop.test/store/vehicles?limit=1000',
+      'http://shop.test/store/catalogue-snapshot',
       expect.objectContaining({
         headers: expect.objectContaining({
           'x-publishable-api-key': 'pk_test',
@@ -1664,41 +1694,90 @@ describe('catalogue.vehicles', () => {
     );
   });
 
-  it('pages through the Vehicles until no next cursor is named', async () => {
-    const second = { ...VEHICLE, id: 'veh_2' };
-    const fetch = vi.fn((url: string) =>
-      respond(
-        url.endsWith('vehicles?limit=1000')
-          ? { vehicles: [VEHICLE], limit: 1, next: VEHICLE.id }
-          : { vehicles: [second], limit: 1, next: null },
-      ),
-    );
-
-    expect(await catalog(fetch).vehicles()).toEqual([VEHICLE, second]);
-    expect(fetch).toHaveBeenCalledTimes(2);
-    expect(fetch).toHaveBeenLastCalledWith(
-      `http://shop.test/store/vehicles?limit=1000&after=${VEHICLE.id}`,
-      expect.anything(),
-    );
-  });
-
-  it('takes the whole list in one answer from a shop that does not page it', async () => {
-    const fetch = answer({ vehicles: [VEHICLE] });
-
-    expect(await catalog(fetch).vehicles()).toEqual([VEHICLE]);
-    expect(fetch).toHaveBeenCalledTimes(1);
-  });
-
   it('fails the build when the backend answers with an error', async () => {
-    await expect(catalog(answer({}, false)).vehicles()).rejects.toThrow(
-      '/store/vehicles?limit=1000 answered 503',
+    await expect(catalog(answer({}, false)).snapshot()).rejects.toThrow(
+      '/store/catalogue-snapshot answered 503',
     );
   });
 
   it('fails the build on a body that breaks the contract', async () => {
     await expect(
-      catalog(answer({ vehicles: [{ id: 'veh_1' }] })).vehicles(),
+      catalog(answer({ ...whole, vehicles: [{ id: 'veh_1' }] })).snapshot(),
     ).rejects.toThrow();
+  });
+
+  const fitment: Fitment = {
+    id: 'fit_1',
+    part_id: oilPart.id,
+    vehicle_id: VEHICLE.id,
+    quantity: 2,
+    axle: null,
+    side: null,
+    production_from: null,
+    production_to: null,
+    gearbox: null,
+    steering: null,
+    note: 'Только с\n«M-пакетом» 🚗',
+    translations: null,
+  };
+
+  const streamed = async (sections: [SnapshotSection, unknown[]][]) => {
+    let text = '';
+    for (const [section, rows] of sections) {
+      for await (const line of snapshotSectionLines(section, [rows])) {
+        text += line;
+      }
+    }
+    return vi.fn(
+      async () =>
+        new Response(text + SNAPSHOT_END_LINE, {
+          headers: {
+            'content-type': `${CATALOGUE_SNAPSHOT_CONTENT_TYPE}; charset=utf-8`,
+          },
+        }),
+    );
+  };
+
+  it('reads a streamed catalogue line by line, compact fitment rows included', async () => {
+    const fetch = await streamed([
+      ['categories', []],
+      ['pages', [oilFilterMann]],
+      ['fitments', [compactFitment(fitment)]],
+      ['vehicles', [VEHICLE]],
+      ['makes', [{ slug: 'bmw', name: 'BMW', show_on_site: true }]],
+    ]);
+
+    const snapshot = await catalog(fetch).snapshot();
+
+    expect(snapshot.entries[0].fits).toEqual([
+      expect.objectContaining({
+        part_id: oilPart.id,
+        quantity: 2,
+        note: fitment.note,
+        axle: null,
+        translations: null,
+        vehicle: expect.objectContaining({ id: VEHICLE.id }),
+      }),
+    ]);
+    expect(snapshot.makes).toEqual([
+      { slug: 'bmw', name: 'BMW', show_on_site: true },
+    ]);
+  });
+
+  it('reads an older shop that answers one JSON body', async () => {
+    const fetch = vi.fn(async () => Response.json(whole));
+
+    expect((await catalog(fetch).snapshot()).vehicles).toEqual([VEHICLE]);
+  });
+
+  it('fails the build on a stream missing a section', async () => {
+    const fetch = await streamed([
+      ['categories', []],
+      ['pages', []],
+      ['fitments', []],
+    ]);
+
+    await expect(catalog(fetch).snapshot()).rejects.toThrow('without vehicles');
   });
 });
 
@@ -1791,17 +1870,31 @@ describe('catalogueFromEnv', () => {
       expect(headers.get('x-shop-client-secret')).toBe('secret');
     });
 
-    it("passes Vercel's request id on as the shop's, and only a well-formed one", async () => {
+    it('takes the address the proxy forwarded over one the visitor claims', async () => {
+      const headers = await headersSent(
+        { ...SHOP, SHOP_CLIENT_SECRET: 'secret' },
+        new Request('https://carlab.rs/api/cart', {
+          headers: {
+            'x-real-ip': '198.51.100.7',
+            'x-forwarded-for': '203.0.113.5',
+          },
+        }),
+      );
+
+      expect(headers.get('x-shop-client')).toBe('203.0.113.5');
+    });
+
+    it("passes the proxy's request id on as the shop's, and only a well-formed one", async () => {
       const traced = await headersSent(
         SHOP,
         new Request('https://carlab.rs/api/cart', {
-          headers: { 'x-vercel-id': 'fra1::iad1::abc-1700000000000' },
+          headers: { 'x-request-id': 'fra1::iad1::abc-1700000000000' },
         }),
       );
       const malformed = await headersSent(
         SHOP,
         new Request('https://carlab.rs/api/cart', {
-          headers: { 'x-vercel-id': 'not a request id' },
+          headers: { 'x-request-id': 'not a request id' },
         }),
       );
 
@@ -2565,5 +2658,28 @@ describe('the build record', () => {
     const response = await recordBuild({} as Parameters<typeof recordBuild>[0]);
 
     expect(await response.json()).toEqual({ partPages: 0 });
+  });
+});
+
+describe('shopBackendUrl', () => {
+  it.each([
+    [
+      'the internal address when set',
+      'http://medusa:9000',
+      'http://medusa:9000',
+    ],
+    ['the build address when unset', undefined, 'https://api.carlab.test'],
+    ['the build address when empty', '', 'https://api.carlab.test'],
+    ['the build address when not a URL', 'medusa', 'https://api.carlab.test'],
+  ])('is %s', (_, internal, expected) => {
+    expect(shopBackendUrl('https://api.carlab.test', internal)).toBe(expected);
+  });
+
+  it('reads SHOP_INTERNAL_URL from the process environment by default', () => {
+    vi.stubEnv('SHOP_INTERNAL_URL', 'http://medusa:9000');
+    expect(shopBackendUrl('https://api.carlab.test')).toBe(
+      'http://medusa:9000',
+    );
+    vi.unstubAllEnvs();
   });
 });

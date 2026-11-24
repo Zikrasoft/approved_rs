@@ -3,19 +3,10 @@ import { MedusaError } from '@medusajs/framework/utils';
 
 import { adminError } from '../_shared/admin-error';
 import { nameKey } from '../_shared/keys';
-import type { SlugKind } from './models/slug-redirect';
 import type CatalogModuleService from './service';
-import type { Provenance } from './service';
-import type { Retirement } from './slugs';
 
 export type MergeSteps = {
   catalog: CatalogModuleService;
-  retireSlugs: (
-    kind: SlugKind,
-    retired: Retirement[],
-    context: Context,
-    provenance: Provenance,
-  ) => Promise<void>;
   vehicleSlugIn: (
     vehicle: {
       id: string;
@@ -27,79 +18,36 @@ export type MergeSteps = {
     context: Context,
   ) => Promise<string>;
   flush: (context: Context) => Promise<void>;
-  purgeMake: (id: string, context: Context) => Promise<void>;
-  purgeModel: (id: string, context: Context) => Promise<void>;
 };
 
 const sameName = (a: string, b: string) => nameKey(a) === nameKey(b);
 
 async function mergeModels(
   steps: MergeSteps,
-  source: { id: string; slug: string },
+  sourceId: string,
   targetId: string,
-  makeId: string,
-  provenance: Provenance,
   context: Context,
 ): Promise<void> {
   const { catalog } = steps;
-  const renamed: { id: string; slug: string }[] = [];
   for (const vehicle of await catalog.listVehicles(
-    { model_id: source.id },
+    { model_id: sourceId },
     { select: ['id', 'slug', 'engine_id', 'power_kw'], take: null },
     context,
   )) {
     const slug = await steps.vehicleSlugIn(vehicle, targetId, context);
-    if (slug !== vehicle.slug) renamed.push(vehicle);
     await catalog.updateVehicles(
       { id: vehicle.id, model_id: targetId, slug },
       context,
     );
   }
-  await catalog.updateSlugRedirects(
-    {
-      selector: { kind: 'vehicle', scope_id: source.id },
-      data: { scope_id: targetId },
-    },
-    context,
-  );
-  if (renamed.length) {
-    await catalog.createSlugRedirects(
-      renamed.map(({ id, slug }) => ({
-        kind: 'vehicle' as const,
-        from_id: id,
-        from_slug: slug,
-        scope_id: source.id,
-        target_kind: 'vehicle' as const,
-        target_id: id,
-        ...provenance,
-      })),
-      context,
-    );
-  }
-  await steps.retireSlugs(
-    'model',
-    [
-      {
-        id: source.id,
-        slug: source.slug,
-        scope_id: makeId,
-        target_kind: 'model',
-        target_id: targetId,
-      },
-    ],
-    context,
-    provenance,
-  );
   await steps.flush(context);
-  await steps.purgeModel(source.id, context);
+  await catalog.deleteVehicleModels(sourceId, context);
 }
 
 async function mergeChassis(
   steps: MergeSteps,
   sourceId: string,
   targetId: string,
-  makeId: string,
-  provenance: Provenance,
   context: Context,
 ): Promise<void> {
   const { catalog } = steps;
@@ -115,7 +63,7 @@ async function mergeChassis(
   )) {
     const same = targets.find(({ name }) => sameName(name, model.name));
     if (same) {
-      await mergeModels(steps, model, same.id, makeId, provenance, context);
+      await mergeModels(steps, model.id, same.id, context);
     } else {
       await catalog.updateVehicleModels(
         { id: model.id, chassis_id: targetId },
@@ -156,8 +104,6 @@ async function mergeSeries(
   steps: MergeSteps,
   sourceId: string,
   targetId: string,
-  makeId: string,
-  provenance: Provenance,
   context: Context,
 ): Promise<void> {
   const { catalog } = steps;
@@ -173,14 +119,7 @@ async function mergeSeries(
   )) {
     const same = targets.find(({ code }) => code === chassis.code);
     if (same) {
-      await mergeChassis(
-        steps,
-        chassis.id,
-        same.id,
-        makeId,
-        provenance,
-        context,
-      );
+      await mergeChassis(steps, chassis.id, same.id, context);
     } else {
       await catalog.updateChassis(
         { id: chassis.id, series_id: targetId },
@@ -222,7 +161,6 @@ export async function mergeMakes(
   steps: MergeSteps,
   sourceId: string,
   targetId: string,
-  provenance: Provenance,
   context: Context,
 ): Promise<void> {
   const { catalog } = steps;
@@ -233,20 +171,9 @@ export async function mergeMakes(
       'A Make cannot be merged into itself',
     );
   }
-  const source = await catalog.retrieveMake(
-    sourceId,
-    { select: ['id', 'slug'] },
-    context,
-  );
+  await catalog.retrieveMake(sourceId, { select: ['id'] }, context);
   await catalog.retrieveMake(targetId, { select: ['id'] }, context);
   await moveSpellings(catalog, sourceId, targetId, context);
-  await catalog.updateSlugRedirects(
-    {
-      selector: { kind: 'model', scope_id: sourceId },
-      data: { scope_id: targetId },
-    },
-    context,
-  );
   const seriesOf = (make_id: string) =>
     catalog.listSeries(
       { make_id },
@@ -257,32 +184,11 @@ export async function mergeMakes(
   for (const series of await seriesOf(sourceId)) {
     const same = targetSeries.find(({ name }) => sameName(name, series.name));
     if (same) {
-      await mergeSeries(
-        steps,
-        series.id,
-        same.id,
-        targetId,
-        provenance,
-        context,
-      );
+      await mergeSeries(steps, series.id, same.id, context);
     } else {
       await catalog.updateSeries({ id: series.id, make_id: targetId }, context);
     }
   }
-  await steps.retireSlugs(
-    'make',
-    [
-      {
-        id: sourceId,
-        slug: source.slug,
-        scope_id: null,
-        target_kind: 'make',
-        target_id: targetId,
-      },
-    ],
-    context,
-    provenance,
-  );
   await steps.flush(context);
-  await steps.purgeMake(sourceId, context);
+  await catalog.deleteMakes(sourceId, context);
 }

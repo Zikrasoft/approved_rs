@@ -10,13 +10,13 @@ import {
   type CheckoutContact,
   type CheckoutRefusal,
   type PartOffer,
+  CATALOGUE_SNAPSHOT_CONTENT_TYPE,
+  CATALOGUE_SNAPSHOT_PATH,
+  catalogueSnapshotResponseSchema,
+  readCatalogueSnapshot,
   categoriesResponseSchema,
-  catalogueRedirectsResponseSchema,
-  type CatalogueRedirect,
-  fitmentsResponseSchema,
   partPageSlug,
   identifierOffersResponseSchema,
-  partPagesResponseSchema,
   IN_STOCK_FACET,
   PRICE_FACET,
   rangeFilter,
@@ -35,7 +35,6 @@ import {
   type VinFacts,
   CATALOGUE_ID_PATTERN,
   MAX_OFFER_IDS,
-  MAX_PAGE,
 } from '@podbor/catalog-contract';
 import {
   SHOP_CLIENT_HEADER,
@@ -160,7 +159,7 @@ export function createCatalogue({
       signal,
     });
 
-  const request = async (path: string, body?: unknown): Promise<unknown> => {
+  const answer = async (path: string, body?: unknown) => {
     const response = await send(
       path,
       body === undefined ? 'GET' : 'POST',
@@ -169,8 +168,11 @@ export function createCatalogue({
     if (!response.ok) {
       throw new Error(`Catalogue ${path} answered ${response.status}`);
     }
-    return response.json();
+    return response;
   };
+
+  const request = async (path: string, body?: unknown): Promise<unknown> =>
+    (await answer(path, body)).json();
 
   const segment = encodeURIComponent;
 
@@ -209,32 +211,9 @@ export function createCatalogue({
     }
   };
 
-  const paged = async <T>(
-    path: string,
-    read: (body: unknown) => { items: T[]; next: string | null },
-  ): Promise<T[]> => {
-    const all: T[] = [];
-    for (let after: string | null = null; ;) {
-      const page = new URLSearchParams({
-        limit: String(MAX_PAGE),
-        ...(after && { after }),
-      });
-      const { items, next } = read(await request(`${path}?${page}`));
-      all.push(...items);
-      if (!next) return all;
-      after = next;
-    }
-  };
-
   const categories = async (): Promise<Category[]> =>
     categoriesResponseSchema.parse(await request('/store/categories'))
       .categories;
-
-  const vehicles = (): Promise<Vehicle[]> =>
-    paged('/store/vehicles', (body) => {
-      const { vehicles, next } = vehiclesResponseSchema.parse(body);
-      return { items: vehicles, next };
-    });
 
   const modelNamed = async (make: string, slug: string) =>
     vehiclesResponseSchema
@@ -245,49 +224,28 @@ export function createCatalogue({
       )
       .vehicles.find((vehicle) => vehicle.model.slug === slug)?.model ?? null;
 
-  const redirects = async (): Promise<CatalogueRedirect[]> => {
-    const path = '/store/catalogue-redirects';
-    const response = await send(path);
-    if (response.status === 404) {
-      return [];
-    }
-    if (!response.ok) {
-      throw new Error(`Catalogue ${path} answered ${response.status}`);
-    }
-    return catalogueRedirectsResponseSchema.parse(await response.json())
-      .redirects;
-  };
-
   const snapshot = async () => {
-    const [pages, allCategories, fitments, allVehicles, allRedirects] =
-      await Promise.all([
-        paged('/store/part-pages', (body) => {
-          const { pages, next } = partPagesResponseSchema.parse(body);
-          return {
-            items: pages.map((page) => unpriced(page)),
-            next,
-          };
-        }),
-        categories(),
-        paged('/store/fitments', (body) => {
-          const { fitments, next } = fitmentsResponseSchema.parse(body);
-          return { items: fitments, next };
-        }),
-        vehicles(),
-        redirects(),
-      ]);
-    return assembleSnapshot(
-      pages,
-      allCategories,
-      fitments,
-      allVehicles,
-      allRedirects,
-    );
+    const response = await answer(CATALOGUE_SNAPSHOT_PATH);
+    const whole =
+      response.body &&
+      response.headers
+        .get('content-type')
+        ?.startsWith(CATALOGUE_SNAPSHOT_CONTENT_TYPE)
+        ? await readCatalogueSnapshot(response.body)
+        : catalogueSnapshotResponseSchema.parse(await response.json());
+    return {
+      ...assembleSnapshot(
+        whole.pages.map(unpriced),
+        whole.categories,
+        whole.fitments,
+        whole.vehicles,
+      ),
+      makes: whole.makes,
+    };
   };
 
   return {
     categories,
-    vehicles,
     snapshot,
 
     async partPages(): Promise<PartPageEntry[]> {

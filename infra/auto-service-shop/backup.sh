@@ -46,7 +46,7 @@ alert() {
 }
 trap 'alert $?' EXIT
 
-find "$dest" -maxdepth 1 -type f -name 'db-*.dump' ! -name '*-pre-deploy.dump' -mtime +6 -delete
+find "$dest" -maxdepth 1 -type f \( -name 'db-*.dump' -o -name 'crm-*.dump' \) ! -name '*-pre-deploy.dump' -mtime +6 -delete
 
 mkdir .deploy.lock 2>/dev/null || {
   echo "A deploy is running (.deploy.lock present), no backup tonight." >&2
@@ -63,6 +63,11 @@ trap release EXIT
 docker compose exec -T postgres \
   pg_dump -U carlab -d carlab --format=custom >"$dest/db-$stamp.dump.part"
 mv "$dest/db-$stamp.dump.part" "$dest/db-$stamp.dump"
+if [ -n "$(sed -n 's/^CRM_DB_PASSWORD=//p' .env 2>/dev/null)" ]; then
+  docker compose exec -T postgres \
+    pg_dump -U carlab -d crm --format=custom >"$dest/crm-$stamp.dump.part"
+  mv "$dest/crm-$stamp.dump.part" "$dest/crm-$stamp.dump"
+fi
 rmdir .deploy.lock
 
 echo "Backed up to $dest/db-$stamp.dump"
@@ -73,7 +78,7 @@ if [ -z "$bucket" ]; then
 fi
 {
   rclone copy /backups ":s3:$bucket" --include "*-$stamp.*" &&
-    rclone delete ":s3:$bucket" --min-age 30d --include 'db-*.dump'
+    rclone delete ":s3:$bucket" --min-age 30d --include '{db,crm}-*.dump'
 } || {
   echo "The off-host copy failed; the local backup in $dest is intact." >&2
   exit 1

@@ -2,28 +2,33 @@ name: Publish catalogue
 
 on:
   workflow_dispatch:
+    inputs:
+      app:
+        description: Site to rebuild
+        type: choice
+        options: [auto-service, detailing, approved-rs]
+        default: auto-service
+      ref:
+        description: Commit to build instead of the deployed one, for a release CI cannot pass
+        required: false
 
 concurrency:
-  group: publish-catalogue
+  group: publish-${{ inputs.app }}
   cancel-in-progress: true
 
 jobs:
-  rebuild-carlab:
+  rebuild:
     runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
-    environment: production
+    environment: site-${{ inputs.app }}
     permissions:
       contents: read
-    env:
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_AUTO_SERVICE }}
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-    defaults:
-      run:
-        working-directory: apps/auto-service
+    concurrency:
+      group: deploy-site-${{ inputs.app }}
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: refs/tags/deployed/auto-service
+          ref: ${{ inputs.ref || format('refs/tags/deployed/{0}', inputs.app) }}
           persist-credentials: false
       - uses: actions/checkout@v4
         with:
@@ -33,15 +38,42 @@ jobs:
       - uses: ./.github/actions/setup-pnpm
       - uses: actions/cache@v4
         with:
-          path: apps/auto-service/node_modules/.astro
-          key: astro-carlab-${{ github.ref_name }}-${{ github.run_id }}-${{ github.run_attempt }}
-          restore-keys: astro-carlab-${{ github.ref_name }}-
-      - run: pnpm exec vercel pull --yes --environment=production
-      - name: Check the shop backend answers
+          path: apps/${{ inputs.app }}/node_modules/.astro
+          key: astro-${{ inputs.app }}-${{ github.ref_name }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: astro-${{ inputs.app }}-${{ github.ref_name }}-
+      - name: Build and deploy
+        env:
+          SITE_SECRETS: >-
+            {"CRON_SECRET": ${{ toJSON(secrets.CRON_SECRET || '') }},
+            "GOOGLE_PLACES_API_KEY": ${{ toJSON(secrets.GOOGLE_PLACES_API_KEY || '') }},
+            "KEYSTATIC_GITHUB_CLIENT_ID": ${{ toJSON(secrets.KEYSTATIC_GITHUB_CLIENT_ID || '') }},
+            "KEYSTATIC_GITHUB_CLIENT_SECRET": ${{ toJSON(secrets.KEYSTATIC_GITHUB_CLIENT_SECRET || '') }},
+            "KEYSTATIC_SECRET": ${{ toJSON(secrets.KEYSTATIC_SECRET || '') }},
+            "MEDUSA_PUBLISHABLE_KEY": ${{ toJSON(secrets.MEDUSA_PUBLISHABLE_KEY || '') }},
+            "META_CAPI_TEST_CODE": ${{ toJSON(secrets.META_CAPI_TEST_CODE || '') }},
+            "META_CAPI_TOKEN": ${{ toJSON(secrets.META_CAPI_TOKEN || '') }},
+            "SHOP_CLIENT_SECRET": ${{ toJSON(secrets.SHOP_CLIENT_SECRET || '') }},
+            "SHOP_EVENTS_SECRET": ${{ toJSON(secrets.SHOP_EVENTS_SECRET || '') }},
+            "SHOP_LEAD_SECRET": ${{ toJSON(secrets.SHOP_LEAD_SECRET || '') }},
+            "SHOP_LEAD_SECRET_PREVIOUS": ${{ toJSON(secrets.SHOP_LEAD_SECRET_PREVIOUS || '') }},
+            "SHOP_ORDER_OUTCOME_SECRET": ${{ toJSON(secrets.SHOP_ORDER_OUTCOME_SECRET || '') }},
+            "SHOP_PREVIEW_TOKEN": ${{ toJSON(secrets.SHOP_PREVIEW_TOKEN || '') }},
+            "SHOP_VISITOR_SEARCHES_SECRET": ${{ toJSON(secrets.SHOP_VISITOR_SEARCHES_SECRET || '') }},
+            "TELEGRAM_ADMIN_ID": ${{ toJSON(secrets.TELEGRAM_ADMIN_ID || '') }},
+            "TELEGRAM_BOT_TOKEN": ${{ toJSON(secrets.TELEGRAM_BOT_TOKEN || '') }},
+            "TELEGRAM_CAPTURE_BOT_TOKEN": ${{ toJSON(secrets.TELEGRAM_CAPTURE_BOT_TOKEN || '') }},
+            "TELEGRAM_CAPTURE_BOT_TOKEN_APPROVED": ${{ toJSON(secrets.TELEGRAM_CAPTURE_BOT_TOKEN_APPROVED || '') }},
+            "TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS": ${{ toJSON(secrets.TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS || '') }},
+            "TELEGRAM_CAPTURE_WEBHOOK_SECRET": ${{ toJSON(secrets.TELEGRAM_CAPTURE_WEBHOOK_SECRET || '') }},
+            "TELEGRAM_GROUP_ID": ${{ toJSON(secrets.TELEGRAM_GROUP_ID || '') }},
+            "TELEGRAM_OWNER_ID": ${{ toJSON(secrets.TELEGRAM_OWNER_ID || '') }},
+            "TELEGRAM_WEBHOOK_SECRET": ${{ toJSON(secrets.TELEGRAM_WEBHOOK_SECRET || '') }}}
+          SITE_VARS: ${{ toJSON(vars) }}
+          VPS_HOST: ${{ secrets.AUTO_SERVICE_SHOP_VPS_HOST }}
+          VPS_USER: ${{ secrets.AUTO_SERVICE_SHOP_VPS_USER }}
+          VPS_SSH_KEY: ${{ secrets.AUTO_SERVICE_SHOP_VPS_SSH_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.AUTO_SERVICE_SHOP_VPS_KNOWN_HOSTS }}
+          APP: ${{ inputs.app }}
         run: |
-          sh ../../workflow/.github/scripts/shop-backend-up.sh || {
-            echo "::error::The shop backend does not answer /health, so the storefront cannot be built from it. Nothing was deployed; the live site keeps serving."
-            exit 1
-          }
-      - run: pnpm exec vercel build --prod
-      - run: pnpm exec vercel deploy --prebuilt --prod --archive=tgz
+          sha=$(git rev-parse HEAD)
+          sh workflow/.github/scripts/upload-site.sh "$APP" "$sha-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"

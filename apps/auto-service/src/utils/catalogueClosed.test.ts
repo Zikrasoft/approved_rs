@@ -103,20 +103,16 @@ const respond = (body: unknown) =>
 
 const backend = () =>
   vi.fn((url: string) => {
-    if (url.includes('/store/part-pages')) {
-      return respond({ pages: [page], count: 1, offset: 0, limit: 1000 });
-    }
-    if (url.includes('/store/fitments')) {
-      return respond({ fitments: [], count: 0, offset: 0, limit: 1000 });
+    if (url.endsWith('/store/catalogue-snapshot')) {
+      return respond({
+        pages: [page],
+        categories: [battery],
+        fitments: [],
+        vehicles: [],
+      });
     }
     if (url.endsWith('/store/categories')) {
       return respond({ categories: [battery] });
-    }
-    if (url.includes('/store/vehicles')) {
-      return respond({ vehicles: [] });
-    }
-    if (url.endsWith('/store/catalogue-redirects')) {
-      return respond({ redirects: [] });
     }
     if (url.includes('/store/search')) {
       return respond(found);

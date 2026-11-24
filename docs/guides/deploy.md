@@ -1,4 +1,4 @@
-# Deploy: three sites on Vercel, the shop backend on a VPS
+# Deploy: three sites and the shop backend on one VPS
 
 ## Stack
 
@@ -6,104 +6,125 @@
   (`export const prerender = false`)
 - **pnpm v11 + Turborepo** — a monorepo, apps in `apps/*`, shared packages in
   `packages/*`
-- **Vercel** — hosting. Three separate projects, one per app
+- **The VPS** (`infra/auto-service-shop`): Caddy serves each site's static
+  files and proxies the rest to its node server, beside the shop backend
 - **GitHub Actions** — the only place where a build or a deploy actually happens
-  (`.github/workflows/ci.yml`)
+  (`.github/workflows/ci.yml`), and where the sites' environment variables live
 
 ## Three sites, one repository
 
-| App                 | Domain        | Brand                          | What it deploys                                                                                                             |
-| ------------------- | ------------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------- |
-| `apps/approved-rs`  | `approved.rs` | Approved.rs — vehicle sourcing | the site plus `/api/leads`, `/api/contact-click`, `/api/telegram-capture`, `/api/telegram-webhook`, `/api/reminders` (cron) |
-| `apps/auto-service` | `carlab.rs`   | CarLab: auto service           | the site plus `/api/leads`, `/api/contact-click`, `/api/telegram-capture`, `/api/shop-orders`                               |
-| `apps/detailing`    | `details.rs`  | Details — detailing            | the site plus `/api/leads`, `/api/contact-click`, `/api/telegram-capture`                                                   |
+| App                 | Domain        | Brand                          | What it deploys                                                                                                                                 |
+| ------------------- | ------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/approved-rs`  | `approved.rs` | Approved.rs — vehicle sourcing | the site plus `/api/leads`, `/api/contact-click`, `/api/telegram-capture`                                                                       |
+| `apps/auto-service` | `carlab.rs`   | CarLab: auto service           | the site plus `/api/leads`, `/api/contact-click`, `/api/telegram-capture`, `/api/shop-orders`, `/api/telegram-webhook`, `/api/reminders` (cron) |
+| `apps/detailing`    | `details.rs`  | Details — detailing            | the site plus `/api/leads`, `/api/contact-click`, `/api/telegram-capture`                                                                       |
 
-Each app owns its own `astro.config.mjs`, `vercel.json`, `keystatic.config.ts` and
-`.env*`. The Vercel CLI identifies the project from the working directory, so every
-deploy job runs entirely from its own `apps/<app>`.
+Each app owns its own `astro.config.mjs`, `keystatic.config.ts` and `.env*`.
 
 **Four bots, one chat, one lead store, three brands.** `@SerbCRMBot` is the CRM
 bot (cards, statuses, money, postpone and reminders), and it is the same bot
 in all three projects; Telegram allows exactly one webhook
 URL per bot, so `api/telegram-webhook.ts` and `api/reminders.ts` live only in
-`apps/approved-rs`. `@ApprovedRsBot`, `@CarLabRsBot` and `@DetailsRsBot` are
+`apps/auto-service`. `@ApprovedRsBot`, `@CarLabRsBot` and `@DetailsRsBot` are
 capture bots, one per brand: each one talks to visitors, writes a lead, and has
 its own `api/telegram-capture.ts` webhook in its own project
 ([ADR-0030](../adr/0030-a-capture-bot-per-brand-takes-the-telegram-contact.md)).
-All three apps write to the same `data/leads.json` in the same Vercel Blob store
+All three apps write to the same `crm` Postgres database
 and are separated by the lead's `brand` field, which the server stamps on
 (`createBrandBot({ brand })`) — a visitor cannot set it.
 
 > Unprefixed paths in this document are relative to the app being discussed
-> (`vercel.json` in the approved.rs section means
-> `apps/approved-rs/vercel.json`). The repository root holds only `.github/`, the
-> linter configs, `pnpm-lock.yaml` and an "empty" `vercel.json` carrying a single
-> `git.deploymentEnabled: false`.
+> (`astro.config.mjs` in the approved.rs section means
+> `apps/approved-rs/astro.config.mjs`). The repository root holds only `.github/`, the
+> linter configs, `pnpm-lock.yaml` and a `vercel.json` carrying a single
+> `git.deploymentEnabled: false`, like each app's.
 
 ---
 
 ## How the deploy works
 
-### Vercel builds nothing
+### GitHub Actions builds, the VPS serves
 
 `git.deploymentEnabled: false` in the root `vercel.json` and in each app's
 `vercel.json` disables Vercel's own git trigger — for why, see
 [ADR-0007](../adr/0007-github-actions-builds-vercel-only-hosts.md).
 
 GitHub Actions builds and deploys, and only the sites that have fallen behind
-`main` (see "Not everything gets deployed" below):
+`main` (see "Not everything gets deployed" below). The `deploy-site` job is a
+matrix of the sites `.github/scripts/site-env.json` names (`verify` reads its
+`sites` keys into the `sites` output); each leg runs
+`.github/scripts/upload-site.sh <app> <sha>-<run>-<attempt>` from the repo root,
+which:
 
-- the `deploy` job — `apps/approved-rs`;
-- the `deploy-brand-site` job — a matrix of `detailing` and `auto-service`.
+1. writes the site env into a temp file (mode 0600) with
+   `.github/scripts/site-env.ts`: the names the manifest
+   `.github/scripts/site-env.json` gives that site, taken from the GitHub
+   secrets and variables the step sees (see
+   [Environment variables](#environment-variables)), and fails naming every
+   required one that is missing. `CRM_DATABASE_URL` never comes from GitHub:
+   compose sets it on the site container from the host's `CRM_DB_PASSWORD`,
+   over anything the env file holds;
+2. for carlab.rs, probes the shop backend (exit 75, see below) and sets
+   `CATALOGUE_SHRINK_GUARD=true`;
+3. builds with `turbo run build --filter=@podbor/<app> --env-mode=loose` under
+   that env (`node --env-file`), with the secrets JSON and the deploy secrets
+   unset;
+4. rsyncs `dist/client` and `dist/server` to
+   `/srv/sites/<app>/releases/<release>/` on the VPS, with `--link-dest` on
+   `/srv/sites/<app>/current`: `--checksum` compares contents, since every build
+   stamps new mtimes, and times are not preserved, so a file whose content did
+   not change is hard-linked to the live release and never crosses the wire;
+5. writes the same env into the release, `/srv/sites/<app>/releases/<release>/.env`
+   (mode 0600, over ssh stdin, after the rsync whose `--delete` would remove
+   it), and runs `/srv/carlab/deploy-site.sh <app> <release>`, which refuses a
+   release without its `.env` and then switches two links in order: `running`
+   (what the `site-<app>` container runs and reads its env from) first, then
+   recreates the container and waits for it to answer `/`, and only then
+   `current` (the directory Caddy serves static files from). So Caddy keeps
+   serving the old static pages until node is healthy on the new release, and
+   a release that fails its health check never has its files served: `running`
+   goes back to the previous release, its container comes back, and `current`
+   never moved. Compose reads the site env from
+   `/srv/sites/<app>/running/.env`, so a rollback brings back the code and the
+   env it ran with together.
 
-Both do the same thing from their app's directory:
+The temp dir holding the env and the ssh key is deleted on exit; nothing is
+printed or uploaded as an artifact. The release name carries the run id, so a
+rebuild of the live SHA (a Publish, a forced run) never writes into the release
+that is serving. As a last step (`Record what is live`) the leg moves its own
+`refs/tags/deployed/<app>` tag onto the SHA just shipped. That is how the next
+run learns what is already in production. Each app deploys serially
+(`concurrency: deploy-site-<app>`, shared with `publish.yml`), the three in
+parallel.
 
-```bash
-pnpm exec vercel pull --yes --environment=production
-pnpm exec vercel build --prod
-pnpm exec vercel deploy --prebuilt --prod --archive=tgz
-```
+The Vercel projects no longer serve or hold anything.
 
-…and as a last step (`Record what is live`) they move their own
-`refs/tags/deployed/<app>` tag onto the SHA just shipped. That is how the next run
-learns what is already in production.
-
-The Vercel project exists only to hold environment variables and the domain, and to
-be a deploy target. Build settings in the dashboard are irrelevant — they are
-already fixed in each app's `vercel.json`:
-
-```json
-{
-  "framework": "astro",
-  "buildCommand": "pnpm run build",
-  "installCommand": "pnpm install",
-  "outputDirectory": "dist"
-}
-```
-
-The same file sets the security headers on every path: `frame-ancestors 'self'`,
+Caddy sets the security headers on every response, static file or node: `frame-ancestors 'self'`,
 `nosniff`, `strict-origin-when-cross-origin`, a `Permissions-Policy` with the
 camera, microphone and geolocation off, HSTS, and a script CSP in
 `Content-Security-Policy-Report-Only` that allowlists GA4, Google Ads, Metrika
-and the Pixel beside `'self'` and the inline Astro scripts. The `headers` key is
-generated with the redirects from `SECURITY_HEADERS` in `packages/site-kit`,
-whose CSP takes the tag hosts from the analytics module; change it there and
-rerun each app's `scripts/redirects.ts`. `.github/scripts/redirects-drift.sh`
-fails `check` on a hand edit. Its `report-uri` is each site's `/api/csp-report`,
+and the Pixel beside `'self'` and the inline Astro scripts. They live in
+`infra/auto-service-shop/caddy/security-headers.caddy`, generated from
+`SECURITY_HEADERS` in `packages/site-kit`, whose CSP takes the tag hosts from
+the analytics module; change it there and run
+`.github/scripts/security-headers-drift.sh`, which also fails `check` on a hand
+edit. Its `report-uri` is each site's `/api/csp-report`,
 which logs one `[csp] <directive> <blocked host>` line per violation and nothing
 about the visitor.
 
-TODO: enforce the script CSP once a week of `[csp]` lines in the Vercel logs of
-all three sites shows no violation from the analytics scripts or the map embed.
+TODO: enforce the script CSP once a week of `[csp]` lines in the logs of
+all three site containers shows no violation from the analytics scripts or the map embed.
 
 ### Job order
 
 `check` (lint/prettier/typecheck/test, the shell tests for the scripts,
-shellcheck, actionlint) → `translate` → `verify` → `deploy` (approved.rs) and
-`deploy-brand-site` (details.rs, carlab.rs). Beside them, `shop-image` →
+shellcheck, actionlint) → `translate` → `verify` → `deploy-site` (approved.rs,
+details.rs, carlab.rs). Beside them, `shop-image` →
 `deploy-shop` → `record-shop` ship the shop backend to its VPS (see
 [the shop backend](#the-shop-backend-medusa-on-a-vps-apicarlabrs)), and
-`deploy-brand-site` waits for `deploy-shop`, held back only if it _failed_. The
+`deploy-site` waits for `shop-image` and `deploy-shop`, and holds every leg
+back if either _failed_: the shop image carries the `crm` migrations, so a site
+never ships against a schema that was not migrated. The
 `deploy*` jobs only run on `main`, each only if the previous one passed. The workflow fires on a push to
 any **branch** and never
 on a tag: a tag filter without a branch filter would switch branches off entirely,
@@ -121,6 +142,23 @@ content moved and whatever `git pull --rebase` brought in): `translate` pushes a
 `GITHUB_TOKEN`, and such a push starts no new run — otherwise nobody would check
 the translated tree. When nothing was translated the SHA is the pushed one, which
 `check` already tested, and `verify` runs no tests at all.
+
+### What `check` tests
+
+Lint, prettier, the YAML and Russian-copy checks, pinned versions, the
+security-headers drift, the Caddy split check, the migration manifest, shellcheck and actionlint run on every
+push. Typecheck, tests, the approved.rs and details.rs builds with their
+contact-placement check, and the shop's Docker Postgres, migration drift and
+`infra/auto-service-shop/test/*.test.sh` run only for what changed since the
+newest commit every app has passed CI with:
+`.github/scripts/check-base.sh` takes the merge-base of the `deployed/*` tags
+(they move only after `check` passed and the deploy finished) and the step runs
+`turbo --filter="...[<base>]"`, dependents included. The shop counts as changed
+when turbo names `@podbor/auto-service-shop` or anything under
+`infra/auto-service-shop/` moved. `check` tests everything when there is no
+`deployed/*` tag, a tag is not an ancestor of `HEAD`, the merge-base is not
+itself a deployed commit, a root build file or anything under `.github/`, the
+eslint or prettier config changed, or a `workflow_dispatch` run sets `force`.
 
 ### Not everything gets deployed
 
@@ -165,8 +203,8 @@ pnpm-lock.yaml  pnpm-workspace.yaml  turbo.json  package.json
 ```
 
 Any change to those ships every app whose `deployed/*` tag is older than the
-change. The list is maintained by hand — if a new file starts affecting the build,
-it has to be added there too. The rest of `.github/` is deliberately not tracked:
+change. The list lives once, in `.github/scripts/root-changed.sh`, which `check`
+reads too. If a new file starts affecting the build, it has to be added there. The rest of `.github/` is deliberately not tracked:
 otherwise any workflow edit would ship all three sites. By the same logic
 `setup-pnpm` installs the whole workspace in every job; until that measurably
 hurts, we don't introduce `pnpm install --filter`.
@@ -196,21 +234,22 @@ part in release notes, and exactly one step — `scope` — reads them.
 
 If everything needs redeploying at once — Actions → CI → Run workflow, with the
 **Deploy every app, whatever the tags say** checkbox. It is for when something
-changed outside git: an environment variable or a project setting in the Vercel
-dashboard, a Blob store rotation. Such edits require a rebuild but leave no trace in
+changed outside git: a GitHub secret or variable of a site, a rotated secret. Such edits require a rebuild but leave no trace in
 the repository's history, and `scope` only looks at git.
 
-`environment: production` on the deploy jobs is an ordinary GitHub Environment,
-created by itself on the first run, with no protection rules.
+`environment: site-<app>` on each `deploy-site` leg (and `site-auto-service` on
+`publish.yml`) is an ordinary GitHub Environment with no protection rules: it
+holds that site's own secrets and variables. `deploy-shop` keeps
+`environment: production`.
 
-### A consequence: environment variables live in the Vercel project
+### A consequence: environment variables live in GitHub
 
-`vercel pull` downloads the project's production environment variables into
-`.vercel/.env.production.local`, and `vercel build` builds with them. Which means:
+The build runs with the env the manifest assembles, and the server runs with
+the same file. Which means:
 
-- **variables are set in the Vercel dashboard, not in GitHub secrets.** GitHub only
-  holds the token/IDs for reaching Vercel plus `OPENAI_API_KEY` for the
-  `translate` job (see below);
+- **variables are set in GitHub, never in Vercel.** Settings → Secrets and
+  variables → Actions: a shared value once at repository level, a per-site one
+  in that site's environment (see [Environment variables](#environment-variables));
 - **a missing public variable fails the build, a missing server-side one fails the
   route.** `PUBLIC_*` variables are inlined into the HTML at build time, so each
   app's `src/utils/constants.ts` parses them through a zod schema at module load
@@ -224,8 +263,48 @@ created by itself on the first run, with no protection rules.
 
 ## Environment variables
 
-Set in Vercel Dashboard → the project → Settings → Environment Variables (the
-Production environment; Preview is unused — there are no preview deploys).
+**One manifest, `.github/scripts/site-env.json`, lists every name a site gets.**
+Each entry is `"secret"` or `"variable"`, where it is kept, with a trailing
+`?` when the name is optional (`"secret?"`, `"variable?"`), or `"unset"`:
+
+- `shared`: one value for all three sites, set **once at repository level**
+  (Settings → Secrets and variables → Actions → Repository);
+- `sites.<app>`: set in that site's GitHub environment, `site-approved-rs`,
+  `site-auto-service` or `site-detailing`. `unset` marks a name the site's code
+  reads (through a shared package) but that site deliberately leaves out;
+- `notInSiteEnv`: names the code reads that never come from GitHub, with where
+  they come from instead (`CRM_DATABASE_URL` from compose, and so on).
+
+Non-secret values (`PUBLIC_*`, `SITE`, `PUBLIC_KEYSTATIC_GITHUB_APP_SLUG`, URLs,
+the CRM bot's username) are GitHub **Variables**; everything else is a
+**Secret**. A secret set as a variable does not count: the deploy reads each
+name only from the side the manifest names.
+
+The deploy step gets two env values, `SITE_SECRETS` and `SITE_VARS`.
+`SITE_VARS` is `toJSON(vars)`. `SITE_SECRETS` is a JSON object the workflow
+spells out name by name (`"X": ${{ toJSON(secrets.X) }}`), because GitHub holds
+a workflow that dumps `toJSON(secrets)` as possibly malicious until someone
+approves the run. A new secret name therefore goes into the manifest and into
+both `ci.yml` and `publish.yml`; `site-env.test.ts` fails until the three agree.
+Why the rest is safe: GitHub masks every secret in the log whatever the step
+does with it; `site-env.ts` copies only the manifest's names for that site into
+the release `.env` and never prints a value (a refusal names the variable only);
+and `upload-site.sh` unsets both JSON values and the deploy secrets before the
+build, so pnpm, turbo, Astro and every dependency they run never see a secret
+outside the site's own env. Only the one deploy step carries them, not the job.
+
+`.github/scripts/site-env.test.ts` scans what each app reads
+(`process.env.X`, `import.meta.env.X`, `requireEnv('X')`, the env zod schemas)
+in `apps/<app>/src`, `astro.config.mjs`, `keystatic.config.ts` and the
+`packages/*` it depends on, and fails on a name the manifest does not list for
+that site. A new variable lands in the manifest in the same change, or `check`
+goes red. A value holding a single quote or a line break is refused by name:
+the `.env` quotes values in single quotes, which compose and `node --env-file`
+both read literally.
+
+**A missing required name fails the deploy**, naming it, before anything is
+built. Keystatic's own names are read inside `@keystatic/astro`, which the scan
+cannot see; the manifest lists them by hand.
 
 `PUBLIC_*` variables are visible in the browser — no secrets there.
 
@@ -252,8 +331,7 @@ the capture bot.
 workshop's rating and review count from Places API (New) (`rating`,
 `userRatingCount`). The key is a secret: restrict it to the Places API (New).
 The Place ID comes from Google's Place ID Finder for the workshop's Maps card.
-The build pulls them through `vercel pull`, so they live in the carlab.rs
-Vercel project only. Unset, or when the API fails or answers something
+They live in the `site-auto-service` environment only. Unset, or when the API fails or answers something
 malformed, the build logs a warning and shows `GOOGLE_RATING` from
 `src/utils/constants.ts`, so update that by hand now and then. The number
 refreshes only when carlab.rs deploys.
@@ -263,7 +341,7 @@ refreshes only when carlab.rs deploys.
 The GA4 measurement ids and the Meta Pixel id are baked into each
 `src/utils/analytics.ts` and are never read from the environment: they are not
 secrets, they are publicly visible in any request from the site, and spreading
-them across three Vercel dashboards would create a third place to get them
+them across three GitHub environments would create a third place to get them
 wrong.
 
 | Site        | GA4 Measurement ID | Metrika     | Meta Pixel          | Google Ads       |
@@ -300,7 +378,7 @@ gives `undefined` in the markup. carlab.rs and details.rs have fallbacks to
 placeholder numbers: the site will not break, but it will show the wrong contact,
 which is worse than a broken link because it goes unnoticed.
 
-On approved.rs, `PUBLIC_WHATSAPP_NUMBER` doubles as the number for an ordinary call
+`PUBLIC_WHATSAPP_NUMBER` and `PUBLIC_VIBER_NUMBER` are per site (each brand has its own numbers); `PUBLIC_PHONE_NUMBER` is shared. On approved.rs, `PUBLIC_WHATSAPP_NUMBER` doubles as the number for an ordinary call
 (`PHONE_NUMBER` there is an alias of it).
 
 ### Telegram (needed by all three projects)
@@ -308,18 +386,18 @@ On approved.rs, `PUBLIC_WHATSAPP_NUMBER` doubles as the number for an ordinary c
 Four bots, and the variables split along that line. The CRM bot `@SerbCRMBot` is
 one bot shared by the three projects; each brand's capture bot is its own.
 
-| Variable                             | approved.rs | carlab.rs | details.rs | Bot     | Without it                                                                     |
-| ------------------------------------ | ----------- | --------- | ---------- | ------- | ------------------------------------------------------------------------------ |
-| `TELEGRAM_BOT_TOKEN`                 | ✅          | ✅        | ✅         | CRM     | `/api/leads` and `/api/contact-click` answer 500                               |
-| `TELEGRAM_BOT_USERNAME`              | ✅          | ✅        | ✅         | CRM     | the same — 500                                                                 |
-| `TELEGRAM_GROUP_ID`                  | ✅          | ✅        | ✅         | CRM     | the same — 500                                                                 |
-| `TELEGRAM_OWNER_ID`                  | ✅          | ✅        | ✅         | CRM     | this brand's leads never reach the owner's DMs                                 |
-| `TELEGRAM_ADMIN_ID`                  | ✅          | ✅        | ✅         | CRM     | this brand's leads never reach the admin's DMs                                 |
-| `TELEGRAM_WEBHOOK_SECRET`            | ✅          | —         | —          | CRM     | `/api/telegram-webhook` answers 401 to everything — the bot's buttons are dead |
-| `TELEGRAM_CAPTURE_BOT_TOKEN`         | ✅          | ✅        | ✅         | capture | this brand's capture bot never answers a visitor and no lead is written        |
-| `TELEGRAM_CAPTURE_WEBHOOK_SECRET`    | ✅          | ✅        | ✅         | capture | `/api/telegram-capture` answers 401 to everything — the Telegram tile is dead  |
-| `TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB`  | optional    | —         | —          | capture | owner messages in a CarLab Topic are reported undelivered                      |
-| `TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS` | optional    | —         | —          | capture | owner messages in a Details Topic are reported undelivered                     |
+| Variable                              | approved.rs | carlab.rs | details.rs | Bot     | Without it                                                                     |
+| ------------------------------------- | ----------- | --------- | ---------- | ------- | ------------------------------------------------------------------------------ |
+| `TELEGRAM_BOT_TOKEN`                  | ✅          | ✅        | ✅         | CRM     | `/api/leads` and `/api/contact-click` answer 500                               |
+| `TELEGRAM_BOT_USERNAME`               | ✅          | ✅        | ✅         | CRM     | the same — 500                                                                 |
+| `TELEGRAM_GROUP_ID`                   | ✅          | ✅        | ✅         | CRM     | the same — 500                                                                 |
+| `TELEGRAM_OWNER_ID`                   | ✅          | ✅        | ✅         | CRM     | this brand's leads never reach the owner's DMs                                 |
+| `TELEGRAM_ADMIN_ID`                   | ✅          | ✅        | ✅         | CRM     | this brand's leads never reach the admin's DMs                                 |
+| `TELEGRAM_WEBHOOK_SECRET`             | —           | ✅        | —          | CRM     | `/api/telegram-webhook` answers 401 to everything — the bot's buttons are dead |
+| `TELEGRAM_CAPTURE_BOT_TOKEN`          | ✅          | ✅        | ✅         | capture | this brand's capture bot never answers a visitor and no lead is written        |
+| `TELEGRAM_CAPTURE_WEBHOOK_SECRET`     | ✅          | ✅        | ✅         | capture | `/api/telegram-capture` answers 401 to everything — the Telegram tile is dead  |
+| `TELEGRAM_CAPTURE_BOT_TOKEN_APPROVED` | —           | optional  | —          | capture | owner messages in an Approved.rs Topic are reported undelivered                |
+| `TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS`  | —           | optional  | —          | capture | owner messages in a Details Topic are reported undelivered                     |
 
 > **The main trap when setting up new projects.** All three `src/lib/crmBot.ts`
 > call `requireEnv('TELEGRAM_BOT_TOKEN')`, `requireEnv('TELEGRAM_BOT_USERNAME')` and
@@ -336,11 +414,11 @@ the bot id before the colon when the module loads and throws on anything else.
 `@username` — get them from [@userinfobot](https://t.me/userinfobot)),
 comma-separated if a person has several accounts (`111,222`). Their absence does not
 fail the route — it just means direct messages about this brand's leads go nowhere.
-Set the same ids in all three projects.
+`TELEGRAM_OWNER_ID` is shared, one value at repository level; `TELEGRAM_ADMIN_ID` is per site, because each brand can have its own admin.
 
 The **CRM** bot is shared across brands: `TELEGRAM_BOT_TOKEN`,
-`TELEGRAM_BOT_USERNAME` and `TELEGRAM_GROUP_ID` are identical in all three
-projects, and `TELEGRAM_WEBHOOK_SECRET` is set only on approved.rs, which hosts
+`TELEGRAM_BOT_USERNAME` and `TELEGRAM_GROUP_ID` are set once at repository
+level, and `TELEGRAM_WEBHOOK_SECRET` only in `site-auto-service`, which hosts
 that one bot's webhook.
 
 The **capture** bots are not. `TELEGRAM_CAPTURE_BOT_TOKEN` is `@ApprovedRsBot`'s
@@ -348,10 +426,10 @@ on approved.rs, `@CarLabRsBot`'s on carlab.rs and `@DetailsRsBot`'s on
 details.rs — three different tokens from @BotFather, never copied between
 projects: which bot received the update is what tells the server the brand, so a
 shared token would hand a visitor the choice. `TELEGRAM_CAPTURE_WEBHOOK_SECRET`
-is per project too, and on approved.rs it is a **different** value from
+is per project too, and on carlab.rs it is a **different** value from
 `TELEGRAM_WEBHOOK_SECRET` — the two webhooks there belong to two different bots
-and do not share a secret. approved.rs additionally holds the other two capture
-tokens as `TELEGRAM_CAPTURE_BOT_TOKEN_CARLAB` and `TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS`:
+and do not share a secret. carlab.rs additionally holds the other two capture
+tokens as `TELEGRAM_CAPTURE_BOT_TOKEN_APPROVED` and `TELEGRAM_CAPTURE_BOT_TOKEN_DETAILS`:
 whatever the owner writes in a Lead's Topic lands on the CRM webhook there, and
 only the visitor's own brand's bot can deliver it, so the webhook picks the bot by
 the lead's `brand` ([ADR-0030](../adr/0030-a-capture-bot-per-brand-takes-the-telegram-contact.md)).
@@ -372,29 +450,34 @@ token. What fires and when: [analytics.md](analytics.md#the-server-lead-event-fr
 
 ### Storage and cron
 
-| Variable                | approved.rs | carlab.rs | details.rs | Without it                                               |
-| ----------------------- | ----------- | --------- | ---------- | -------------------------------------------------------- |
-| `BLOB_READ_WRITE_TOKEN` | ✅ auto     | ✅ auto   | ✅ auto    | leads are not stored and the routes fail                 |
-| `CRON_SECRET`           | ✅          | —         | —          | `/api/reminders` answers 401 — the digest never goes out |
+| Variable           | approved.rs | carlab.rs | details.rs | Without it                                              |
+| ------------------ | ----------- | --------- | ---------- | ------------------------------------------------------- |
+| `CRM_DATABASE_URL` | ✅          | ✅        | ✅         | leads are not stored and the routes fail                |
+| `CRON_SECRET`      | no          | ✅        | no         | `/api/reminders` answers 401, the digest never goes out |
 
 ### Shop Orders (ADR-0053)
 
 | Variable                       | approved.rs | carlab.rs | details.rs | Without it                                                                                                 |
 | ------------------------------ | ----------- | --------- | ---------- | ---------------------------------------------------------------------------------------------------------- |
 | `SHOP_API_URL`                 | ✅          | ✅        | no         | ✅/❌ on a `parts-order` Lead never completes or cancels its shop Order; no «🔎 Искал» lines               |
-| `SHOP_ORDER_OUTCOME_SECRET`    | ✅ secret   | no        | no         | same                                                                                                       |
+| `SHOP_ORDER_OUTCOME_SECRET`    | no          | ✅ secret | no         | same                                                                                                       |
 | `SHOP_LEAD_SECRET`             | no          | ✅ secret | no         | `/api/shop-orders` answers 401 to the shop, a shop cancel never marks a Lead lost, «Сделать кейс» gets 401 |
 | `SHOP_VISITOR_SEARCHES_SECRET` | ✅ secret   | ✅ secret | no         | no «🔎 Искал» lines                                                                                        |
 | `SHOP_CLIENT_SECRET`           | no          | ✅ secret | no         | all shoppers share one store rate-limit bucket                                                             |
 | `SHOP_EVENTS_SECRET`           | no          | ✅ secret | no         | carlab.rs sends no Events to the shop's log; the shop's own Events still log                               |
 
+`SHOP_INTERNAL_URL` is set by `docker-compose.yml` on `site-auto-service` alone
+(`http://medusa:9000`, the shop over the `data` network): the running server
+calls the shop there instead of at `MEDUSA_BACKEND_URL`, which the Mac runner's
+build keeps using, and an unset or invalid value falls back to `MEDUSA_BACKEND_URL`.
+
 `SHOP_API_URL` is the shop's public API origin, `https://api.carlab.rs`. When
 the bot marks a `parts-order` Lead ✅ it completes the Order, ❌ cancels it,
 through `POST /hooks/carlab-orders/:id/outcome` with
 `Authorization: Bearer $SHOP_ORDER_OUTCOME_SECRET`. That route is not under
-`/admin`, so Caddy's admin basic_auth never sees it, and the secret can do
+`/admin`, and the secret can do
 nothing but complete or cancel an Order. `SHOP_ORDER_OUTCOME_SECRET` is one
-value set twice, on approved.rs and in the shop's `.env`
+value set twice, on carlab.rs and in the shop's `.env`
 (`openssl rand -hex 32`); unset in the shop, the route answers 401 to
 everyone. A call that fails stays pending on the Lead and `/api/reminders`
 retries it every day until the shop takes it.
@@ -411,7 +494,7 @@ token.
 The CRM bot uses `SHOP_API_URL` and `SHOP_VISITOR_SEARCHES_SECRET` to read
 `GET /hooks/visitors/:visitor_id/vin-lookups`, the last three VIN searches of a
 CarLab Lead's visitor, and lists them as «🔎 Искал» lines on the group card
-(sent by carlab.rs) and on the DM detail (built by approved.rs's webhook).
+(sent by carlab.rs) and on the DM detail (built by carlab.rs's CRM webhook).
 approved.rs and details.rs Leads never query the shop. The secret is one more
 value set twice, on carlab.rs and approved.rs and in the shop's `.env`, apart
 from `SHOP_LEAD_SECRET`, so approved.rs holds a key that can only read VIN
@@ -430,7 +513,7 @@ in the shop first, restart it, then on carlab.rs and redeploy.
 `SHOP_EVENTS_SECRET` is one more value set twice, on carlab.rs and in the shop's
 `.env`: carlab.rs's search, cart, checkout, lead and CSP-report routes post one
 Event per request to `POST /hooks/storefront-events` with it as a Bearer token
-(ADR-0057), through `waitUntil` with a 2-second timeout, so a slow or refusing
+(ADR-0057), through `inBackground` with a 2-second timeout, so a slow or refusing
 shop never slows or fails the visitor. The secret can do nothing but add a line
 to the log. Unset on carlab.rs, nothing is sent; unset in the shop, the route
 answers 401.
@@ -449,7 +532,7 @@ sends the current value.
    carlab.rs (no `_PREVIOUS` for `SHOP_CLIENT_SECRET` or `SHOP_EVENTS_SECRET`
    there, it only sends) and
    `/srv/carlab/.env`, for
-   `SHOP_ORDER_OUTCOME_SECRET` approved.rs (no `_PREVIOUS` there, it only sends)
+   `SHOP_ORDER_OUTCOME_SECRET` carlab.rs (no `_PREVIOUS` there, it only sends)
    and `/srv/carlab/.env`, for `SHOP_VISITOR_SEARCHES_SECRET` carlab.rs and
    approved.rs (no `_PREVIOUS` on either, they only send) and
    `/srv/carlab/.env`. Redeploy carlab.rs or approved.rs and restart the
@@ -458,8 +541,8 @@ sends the current value.
 3. Once both sides run the new value, empty `<NAME>_PREVIOUS` everywhere and
    redeploy or restart again.
 
-**Do not set `BLOB_READ_WRITE_TOKEN` by hand** — it appears on its own once the Blob
-store is connected to the project (see the next section).
+`CRM_DATABASE_URL` is not a GitHub value: compose sets it on every site
+container (see "The `crm` database shared by three sites").
 
 ### Keystatic (needed by all three projects)
 
@@ -470,72 +553,266 @@ store is connected to the project (see the next section).
 | `KEYSTATIC_SECRET`                 | no      | the same (it signs the session cookie)   |
 | `PUBLIC_KEYSTATIC_GITHUB_APP_SLUG` | **yes** | the sign-in button leads nowhere         |
 
-The values **differ** between the three projects — each site has its own GitHub App,
-see the "Keystatic: three GitHub Apps" section. `KEYSTATIC_SECRET` is an arbitrary
-random string, distinct per project.
+The values **differ** between the three sites, so each lives in its site's
+environment: each site has its own GitHub App, see the "Keystatic: three
+GitHub Apps" section. `KEYSTATIC_SECRET` is an arbitrary random string,
+distinct per site.
 
 ### `SITE`
 
-A special case: it does not need setting in the dashboard.
+A special case: it does not need setting at all (the manifest takes it as an
+optional variable per site).
 
 - the site's URL is hardcoded as `site:` in each app's `astro.config.mjs`, and that
   is where Astro fills `import.meta.env.SITE` from, which `src/utils/constants.ts`
   reads. A `SITE` environment variable does not affect that value — Astro inlines
   only `PUBLIC_*` and its own built-in keys into `import.meta.env`;
-- each app's `vercel.json` additionally puts `env.SITE` into the functions' runtime,
-  in case anything needs it;
 - in practice, only the local `scripts/register-webhook.ts` reads
   `process.env.SITE` (from the `.env.local` handed to `--env-file`), and it is
   the host the webhook is registered against — so point it at the `.env.local`
   of the project that hosts that bot's webhook, which for a capture bot is that
-  brand's own project.
+  brand's own project, and `https://crm.carlab.rs` for the CRM bot and
+  approved.rs's capture bot.
 
-Changing the domain means editing `site:` in `astro.config.mjs` and `env.SITE` in
-`vercel.json`, not a dashboard variable.
+Changing the domain means editing `site:` in `astro.config.mjs` and the host
+Caddy serves it on (`APPROVED_HOST`, `CARLAB_HOST`, `DETAILS_HOST` in the
+shop's compose), not a GitHub variable.
 
 ---
 
-## One Blob store shared by three projects
+## The `crm` database shared by three sites
 
-All three apps create the storage identically:
+Leads, digests and the Balance live in one Postgres database, `crm`, inside the
+shop's Postgres on the VPS (`infra/auto-service-shop`), next to but separate
+from the shop's own `carlab` database. The bot and the cron live only in
+carlab.rs and have to see all three brands' leads, so **all three sites get
+the same `CRM_DATABASE_URL`**:
 
-```ts
-createVercelBlobStorage({ path: 'data/leads.json' });
+```
+CRM_DATABASE_URL=postgres://crm:<CRM_DB_PASSWORD>@postgres:5432/crm
 ```
 
-The same key. So for every brand's leads to sit in one file — and they must,
-because the bot and the cron live only in approved.rs and have to see all three
-brands' leads — **there must be one store, connected to all three projects**.
+`postgres` resolves on the compose `data` network. Compose sets this URL on
+every `site-<app>` service from the host's `CRM_DB_PASSWORD` (never from
+Vercel), puts it on `networks: [data, edge]` and starts it only once Postgres
+is healthy. Brands are separated by the lead's `brand` field
+(`Approved.rs` / `CarLab` / `Details`), stamped by the server.
 
-1. Vercel Dashboard → Storage → Create → Blob (once, not one per project)
-2. On the created store → Connect Project → connect all three projects
-3. Each project then grows its own `BLOB_READ_WRITE_TOKEN` pointing at that same
-   store
+1. Put `CRM_DB_PASSWORD=$(openssl rand -hex 32)` into `/srv/carlab/.env`.
+2. `./deploy.sh` (or `./crm-role.sh` alone) creates the `crm` role and the
+   `crm` database it owns; the role can reach nothing else, and `PUBLIC` loses
+   `CONNECT` on both databases.
+3. Every shop deploy then migrates `crm` (see "CRM migrations" below), so
+   the schema is in place before any site starts.
+4. Move the old Blob data in during the cutover window (below). From
+   `packages/lead-crm`, with `BLOB_READ_WRITE_TOKEN` from any of the three
+   Vercel projects,
+   `node --env-file=<env> --experimental-strip-types scripts/import-blob.ts --dry-run`
+   prints counts only (Leads, digests, operations, prompts, unreadable records,
+   staff notes, comments kept whole, skipped order markers), never contents.
+   Without `--dry-run` and with `CRM_DATABASE_URL` set, it runs in one
+   transaction and inserts only what is not there yet, keyed on the old
+   numeric ids (`legacy_id`), digest days, prompt keys, ledger ids and payload
+   hashes. A row a previous run imported is left exactly as it is, since staff
+   may have changed its status or notes since, so a rerun only adds what
+   reached Blob in between. Each Lead keeps its old id as its `number` (what
+   the bot shows as `#123`). After the first run the sequence for new Leads
+   continues at the highest imported number + 1000: the gap is reserved for
+   the Leads that still reach Vercel while DNS moves, which the second run
+   inserts with their own numbers. A Lead whose number is already taken stops
+   the import, which then changes nothing, and it goes in by hand.
 
-Never set `BLOB_READ_WRITE_TOKEN` by hand: a value copied from another project
-easily drifts from the store, and some leads end up in a file the bot cannot see.
+   Staff notes were appended to the Lead's comment as signed lines
+   (`16.10.2026 · Админ: Звонил`). The import moves each such line into
+   `lead_notes` with its author and that day, and leaves the visitor's text in
+   the comment. Where a signed line is followed by a line that is neither
+   another dated line nor `Отложено до <date>` (a note written over several
+   lines, or a visitor message appended after it), the import cannot tell
+   where the note ends, so it keeps that comment whole, notes and all, and
+   counts it under `commentsKeptWhole`. Unsigned `Отложено до <date>` lines
+   stay in the comment, since they never named an author. The Blob store is
+   only read.
 
-Brands are separated by the lead's `brand` field (`Approved.rs` / `CarLab` /
-`Details`), stamped by the server. There is no per-brand file.
+### Cutover from Vercel
 
-A second file in the same store does occur, though: `data/leads-unreadable.json`.
-Records the schema stopped accepting — after a schema change, for instance — are
-copied there. It appears by itself when such a record is met, and the admin gets a
-Telegram message with the count and the name of the site that found it. **Nothing is
-deleted** from `data/leads.json` in the process: the records stay where they are
-until someone sorts them out by hand. Nothing ever disappears from the blob
-automatically.
+The leads storage and the CRM bot switch together, in **one window**: the bot
+must read and write the same Leads as the sites that capture them. The bot
+does not wait for approved.rs's DNS: its webhook and approved.rs's capture bot
+answer on `crm.carlab.rs` (`CRM_HOST`, see [The Telegram webhooks](#the-telegram-webhooks)),
+and the reminder cron runs on the host, so approved.rs may move later than the
+other two. Until it does, its form and contact clicks still land in Blob on
+Vercel: their cards reach the chat, their buttons answer only once an import
+has taken them, so rerun the import while that lasts. Nothing here prints a
+secret; keep it that way.
 
-`data/ledger.json` is the third file: the Balance. It appears on the first Lead
-write after the release that introduced it, opened with whatever the old
-records said the owner still owed, and the same write drops those old money
-fields from `data/leads.json`. So that release needs three things around it —
-a backup of `data/leads.json` before it deploys, a check that `data/ledger.json`
-exists and «💶 Мне должны» matches the old «🔴 Мне должны» after the first Lead
-write, and the expectation that the first digest lists every open Lead untouched
-for 7+ days, every capture-bot `/start` Lead included — only a placeholder
-Contact click retires itself as a Ghost lead. Steps 1 and 8 of
-[`crm-bot-migration.md`](crm-bot-migration.md) walk through them.
+**Before the window**
+
+0. **Env into GitHub, before merging the self-hosting PR (#465).** The
+   deploy reads the sites' env from GitHub from then on, so it has to be
+   there first. On the owner's Mac, logged in to both CLIs (`vercel login`,
+   `gh auth login`; install the CLI with `npm i -g vercel@59.11.7` if
+   `vercel --version` finds none), from the repository root:
+
+   ```bash
+   node --experimental-strip-types .github/scripts/env-to-github.ts --dry-run
+   node --experimental-strip-types .github/scripts/env-to-github.ts
+   ```
+
+   It links each Vercel project (`approved-rs`, `auto-service`, `detailing`
+   under the team `aleksey-zikrackiys-projects`; `VERCEL_TEAM=<slug>`
+   overrides it) inside a private temp dir, `vercel env pull`s its production
+   env there and deletes the dir on exit. A shared name whose value differs
+   between projects stops the run before anything is written, naming the
+   variable and which projects agree (never a value): make the projects agree
+   in Vercel, or set that one by hand in GitHub, and run again. Otherwise it
+   creates the `site-*` environments that are missing and writes every
+   manifest name with `gh secret set` / `gh variable set` from stdin, shared
+   ones at repository level, the rest into their site's environment. The dry
+   run pulls and prints the same names and destinations and writes nothing.
+   Both print `missing:` for a required name no project has (set it in
+   GitHub by hand, or the deploy fails naming it) and `not migrated:` for a
+   project name outside the manifest (legacy, or infra such as
+   `CRM_DATABASE_URL`: check it is not a variable the manifest forgot).
+   Done: Settings → Environments lists the three `site-*`, and the dry run
+   prints no `missing:` line you did not expect.
+
+Steps 1 and 2 are also done **before merging #465**: the merge's first CI run
+ships the new stack files to the host ("Ship the stack files") and then runs
+`deploy.sh`, which refuses to start without `CRM_DB_PASSWORD` in
+`/srv/carlab/.env`, leaving the host with the new files and the old
+containers; the site legs after it need `rsync` and `/srv/sites`.
+
+1. **Host prerequisites.** On a host bootstrapped before the sites moved, copy
+   `infra/auto-service-shop/bootstrap-host.sh` over and rerun it as root: it
+   installs `rsync`, makes `/srv/sites` and enables the `carlab-reminders`
+   timer. Stop that timer until the window
+   (`sudo systemctl disable --now carlab-reminders.timer`), or it posts a
+   digest from the host while Vercel still posts its own. A day ahead, lower
+   the TTL of the three apex and `www` records to 300 s.
+2. **Password.** Append `CRM_DB_PASSWORD=$(openssl rand -hex 32)` to
+   `/srv/carlab/.env` on the host (mode 600). It lives only there, never in
+   Vercel or GitHub.
+3. **Database.** Ship the shop (a push to `main` that deploys
+   `auto-service-shop`, or `./deploy.sh <live sha>` on the host): `crm-role.sh`
+   creates the role and database, `deploy.sh` migrates it. Check with
+   `docker compose exec -T postgres psql -U carlab -d crm -c '\dt'`. The
+   shop deploy also creates the `running` link beside an existing `current`,
+   so it runs before the first site deploy.
+4. **Sites on the host.** Let `deploy-site` ship all three (delete their
+   `deployed/*` tags or run CI with **Deploy every app**). They answer only
+   through Caddy, whose hosts still resolve to Vercel, so no visitor reaches
+   them yet. If Grafana was left running from a look, stop it
+   (`docker compose stop grafana`): the budget with the three sites counts it
+   off.
+5. **Import env.** On the owner's Mac, open the crawler's tunnel
+   (`ssh -i ~/.ssh/carlab-crawler -N -L 15432:10.200.0.10:5432 crawler@<IPv4>`,
+   see [the crawler](#the-crawler-on-the-owners-mac)) and write a local env
+   file (mode 600) with `BLOB_READ_WRITE_TOKEN` and
+   `CRM_DATABASE_URL=postgres://crm:<CRM_DB_PASSWORD>@127.0.0.1:15432/crm`.
+   From `packages/lead-crm`, run
+   `node --env-file=<env> --experimental-strip-types scripts/import-blob.ts --dry-run`
+   and check the counts, `commentsKeptWhole` included.
+
+**The window**, between two 08:00 UTC digests, in this order. Ask the owner
+and the admin not to press any CRM button from step 1 until step 6: the
+first import is final for every Lead it takes, so a status changed on Vercel
+after it is lost.
+
+1. **Cron off on Vercel.** Vercel → the approved.rs project → Settings → Cron
+   Jobs: disable it. The last Vercel deployment keeps calling its own
+   Blob-backed `/api/reminders` otherwise.
+2. **First import.** Run `scripts/import-blob.ts` without `--dry-run`. The
+   sequence now continues at the highest imported number + 1000. The
+   `shop-orders/*` markers stay in Blob (the run only counts them as
+   `orderMarkersSkipped`): nothing has read them since the old shop went, and
+   the unique `(brand, order_id)` on `leads` is what keeps one order to one
+   Lead now.
+3. **DNS.** Point the apex and `www` A records of carlab.rs and details.rs,
+   and `crm.carlab.rs`, at the reserved IP, and remove any AAAA record that
+   still names Vercel. approved.rs's apex and `www` go in the same step when
+   its registrar allows, or later (step 7).
+4. **Caddy.** As soon as the three names resolve to the host
+   (`dig +short <domain> A` against a couple of public resolvers), force a
+   Caddy reload so it asks for the certificates at once
+   (`docker compose exec -T caddy caddy reload --force --config /etc/caddy/Caddyfile --adapter caddyfile`).
+   A plain `caddy reload` with an unchanged Caddyfile does nothing and leaves a
+   failed ACME attempt waiting out its backoff; `--force` reapplies the config
+   and starts the certificate requests again
+   and open each site. Register the CRM bot and approved.rs's capture bot on
+   `https://crm.carlab.rs` (see [The Telegram webhooks](#the-telegram-webhooks)),
+   and point any other bot webhook that named a Vercel URL at its domain again.
+5. **Cron on the host.** `sudo systemctl enable --now carlab-reminders.timer`.
+6. **Second import.** Once every resolver you check answers with the host and
+   Vercel's logs show no more `/api/*` calls (wait out the 300 s TTL, then a
+   margin), run the import again. It inserts the Leads that reached Blob while
+   DNS moved, each with its own number inside the reserved gap, and leaves
+   everything the first run imported alone. Then delete the local env file,
+   unless approved.rs is still on Vercel.
+7. **approved.rs, if it moved later.** Rerun the import once a day until its
+   apex and `www` resolve to the host; after the DNS change, `caddy reload
+--force` as in step 4, a last import once Vercel's logs show no more
+   `/api/*` calls, then delete the local env file. Every run takes only the
+   Leads it has not taken yet, each keeping its Blob number.
+
+**After the window.** The three Vercel projects stay for a week as the
+fallback, but they must not serve anyone. Check, and keep checking for that
+week:
+
+- each domain is removed from its Vercel project (Settings → Domains), so a
+  stale record cannot route to it;
+- Deployment Protection (Vercel Authentication) covers production, so the
+  `*.vercel.app` URLs of the last deployments answer 401 instead of taking
+  Leads into Blob;
+- `getWebhookInfo` names `crm.carlab.rs` for the CRM bot and approved.rs's
+  capture bot, and their own domains for the other two capture bots, never a
+  `vercel.app` URL;
+- the Cron Job stays disabled, and Vercel's logs show no function calls.
+
+After the week, delete the Blob store and the three Vercel projects: they hold
+nothing the sites need any more, the env lives in GitHub. Then the
+`VERCEL_TOKEN`, `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID*` repository secrets can
+go too: no workflow reads them.
+
+### CRM migrations
+
+`deploy.sh` runs `prisma migrate deploy` for `crm` on every shop deploy, after
+`crm-role.sh` and before anything restarts, in a one-off container of the new
+shop image: `@podbor/lead-crm` is a shop dependency, so the image already
+carries the lockfile-pinned Prisma CLI with its linux-musl schema engine, and
+the package ships `prisma/` beside it. The site containers stay plain node with
+no CLI in them. A failed migration fails the deploy before `MEDUSA_TAG` moves.
+The `shop-image` job migrates a blank database with the built image, so a
+broken migrator fails CI before it reaches the host.
+
+Any change under `packages/lead-crm` makes the shop a dependent in turbo's
+`...[tag]` filter, so a new CRM migration always ships with a shop deploy, and
+`deploy-site` waits for it. `deploy.sh` refuses to start while
+`CRM_DB_PASSWORD` is unset, before it touches anything: the sites keep their
+Leads in `crm`, so a deploy that skipped its migrations would leave them
+reading a schema that is not there.
+
+**Every CRM migration is additive**, like the shop's: the running sites keep
+serving the previous build while the new schema lands, and a rollback brings
+an older shop image over a newer schema. Add a column nullable or with a
+default, add a table or an index; a rename or a drop ships in two deploys,
+first the code that stops reading the old shape, then the migration. Generate
+one with `pnpm --filter @podbor/lead-crm exec prisma migrate dev --name <name>`
+against the local test database and commit it: Prisma applies the folders in
+name order, so every one, `20261116000000_init` included, starts with its
+timestamp. The migration files are frozen by `packages/lead-crm/migrations.sha256`,
+which `.github/scripts/migrations-frozen.sh` checks in `check`, as the shop's
+are; append a new migration's line in the same commit.
+
+The nightly `backup.sh` dumps `crm` beside `carlab` (`crm-<stamp>.dump`, same
+retention and off-host copy) once `CRM_DB_PASSWORD` is set, which is why
+approved.rs's own `scripts/backup-leads.ts` and `scripts/restore-leads.ts` are
+gone. Restore it with
+`docker compose exec -T postgres pg_restore -U carlab -d crm --clean --if-exists --no-owner --role=crm --single-transaction <crm-<stamp>.dump`.
+
+Locally, `docker compose -f packages/lead-crm/docker-compose.test.yml up -d`
+gives a throwaway Postgres on `127.0.0.1:55452`; point `CRM_DATABASE_URL` at
+`postgres://postgres:postgres@127.0.0.1:55452/crm` and run `db:deploy`. The
+tests start their own container on a free port and remove it afterwards.
 
 ---
 
@@ -562,16 +839,15 @@ For each:
 5. Generate a client secret
 6. Put `KEYSTATIC_GITHUB_CLIENT_ID`, `KEYSTATIC_GITHUB_CLIENT_SECRET`,
    `PUBLIC_KEYSTATIC_GITHUB_APP_SLUG` (the slug from the app's URL) and a random
-   `KEYSTATIC_SECRET` of its own into the corresponding Vercel project
+   `KEYSTATIC_SECRET` of its own into the site's GitHub environment
+   (`site-<app>`): the slug as a variable, the other three as secrets
 
 Local development does not go through the GitHub App: `import.meta.env.PROD` is
 `false` there and Keystatic writes straight into the working copy
 (`storage: { kind: 'local' }`).
 
-`PUBLIC_KEYSTATIC_GITHUB_APP_SLUG` must not be marked Sensitive in Vercel: such
-variables are unavailable at build time, and the slug is needed by the `/keystatic`
-client bundle. The three secrets, conversely, should be Sensitive — only the
-function reads them.
+The slug is needed by the `/keystatic` client bundle, so it is inlined at build
+time; the three secrets are read only by the server.
 
 A site without these variables builds, deploys and serves every page; only signing
 in to `/keystatic` is dead, and only once somebody tries — carlab.rs and details.rs
@@ -585,59 +861,45 @@ lived that way for twelve days. To check by hand:
 
 Settings → Secrets and variables → Actions:
 
-| Secret                              | For what                                       | Where to get it                                                |
-| ----------------------------------- | ---------------------------------------------- | -------------------------------------------------------------- |
-| `OPENAI_API_KEY`                    | the `translate` job (content auto-translation) | OpenAI. **GitHub only, not needed on Vercel**                  |
-| `VERCEL_TOKEN`                      | every deploy job                               | [vercel.com/account/tokens](https://vercel.com/account/tokens) |
-| `VERCEL_ORG_ID`                     | every deploy job                               | `.vercel/project.json` → `orgId` after `vercel link`           |
-| `VERCEL_PROJECT_ID`                 | the approved.rs deploy                         | Project Settings → General of that project                     |
-| `VERCEL_PROJECT_ID_AUTO_SERVICE`    | the carlab.rs deploy                           | the same, on the carlab.rs project                             |
-| `VERCEL_PROJECT_ID_DETAILING`       | the details.rs deploy                          | the same, on the details.rs project                            |
-| `AUTO_SERVICE_SHOP_VPS_HOST`        | the shop deploy (the server's reserved IPv4)   | `terraform output ipv4`                                        |
-| `AUTO_SERVICE_SHOP_VPS_USER`        | the shop deploy                                | `deploy` (created by `bootstrap-host.sh`)                      |
-| `AUTO_SERVICE_SHOP_VPS_SSH_KEY`     | the shop deploy (CI's private key)             | `ssh-keygen -t ed25519`; the public half gets `restrict`       |
-| `AUTO_SERVICE_SHOP_VPS_KNOWN_HOSTS` | the shop deploy (the host key)                 | `ssh-keyscan -t ed25519 <IPv4>`, fingerprint verified apart    |
+| Secret                              | For what                                       | Where to get it                                             |
+| ----------------------------------- | ---------------------------------------------- | ----------------------------------------------------------- |
+| `OPENAI_API_KEY`                    | the `translate` job (content auto-translation) | OpenAI                                                      |
+| `AUTO_SERVICE_SHOP_VPS_HOST`        | the shop deploy (the server's reserved IPv4)   | `terraform output ipv4`                                     |
+| `AUTO_SERVICE_SHOP_VPS_USER`        | the shop deploy                                | `deploy` (created by `bootstrap-host.sh`)                   |
+| `AUTO_SERVICE_SHOP_VPS_SSH_KEY`     | the shop deploy (CI's private key)             | `ssh-keygen -t ed25519`; the public half gets `restrict`    |
+| `AUTO_SERVICE_SHOP_VPS_KNOWN_HOSTS` | the shop deploy (the host key)                 | `ssh-keyscan -t ed25519 <IPv4>`, fingerprint verified apart |
 
 `AUTO_SERVICE_SHOP_VPS_*` are **repository** secrets, not `production` environment
 secrets: `shop-image` has no environment, and with environment secrets it would not
 push the image while `deploy-shop` would try to pull a tag that does not exist.
 Until all four are set, `shop-image` does not push and `deploy-shop`'s `guard` step
 prints "`AUTO_SERVICE_SHOP_VPS_* secrets are not set, skipping the shop deploy.`", and the
-workflow stays green.
+workflow stays green. A site leg has no such guard: without them, or without a
+required name from the manifest, it fails, naming what is missing.
 
-> **Careful: an unset `VERCEL_PROJECT_ID_*` is not highlighted anywhere.** The
-> `guard` step in `deploy-brand-site` checks that the secret is non-empty, and if it
-> is empty it **skips every remaining step and leaves the job green**. In Actions
-> that looks like a successful deploy; the `guard` log will carry the line
-> "`VERCEL_PROJECT_ID_… is not set — skipping the … deploy`". The only way to notice
-> is to read the log, or to see that nothing changed on the site. approved.rs has no
-> such guard: without `VERCEL_PROJECT_ID`, the `deploy` job fails honestly at
-> `vercel pull`.
->
-> The check lives in a step rather than in the job's `if:` because the `matrix`
-> context is unavailable in a job-level condition.
->
-> With the `deployed/*` tags, `guard` has a second and entirely normal reason to
-> skip a deploy: "`<app> is current in production — skipping`" — the site has not
-> changed since the last ship. That is it working, not a broken configuration. Tell
-> them apart by the text in the `guard` step's log: "is not set" is a configuration
-> error, "is current in production" is by design.
+The sites' own secrets and variables are not in this table: the manifest
+`.github/scripts/site-env.json` lists them (see
+[Environment variables](#environment-variables)).
+
+> With the `deployed/*` tags, `deploy-site`'s `guard` skips a deploy for an
+> entirely normal reason: "`<app> is current in production, skipping`": the
+> site has not changed since the last ship. That is it working, not a broken
+> configuration.
 
 ### Job permissions
 
 `GITHUB_TOKEN` is granted per job rather than for the whole file. Four jobs hold
 `contents: write`, for two different reasons:
 
-| Job                 | `permissions`                       | Why exactly that much                                                                        |
-| ------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------- |
-| `check`             | `contents: read`                    | checkout only                                                                                |
-| `translate`         | `contents: write`                   | commits and pushes translations into the same branch                                         |
-| `verify`            | `contents: read`                    | a checkout with `fetch-depth: 0`; the `deployed/*` tags arrive with the history              |
-| `shop-image`        | `contents: read`, `packages: write` | pushes `ghcr.io/zikrasoft/podbor-auto-service-shop:<sha>` to GHCR                            |
-| `deploy-shop`       | `contents: read`, `packages: read`  | hands the server a one-shot token for `docker pull`; that token cannot write to the repo     |
-| `record-shop`       | `contents: write`                   | moves `deployed/auto-service-shop` after a successful `deploy-shop`, a separate job for that |
-| `deploy`            | `contents: write`                   | moves `refs/tags/deployed/approved-rs` after a successful deploy                             |
-| `deploy-brand-site` | `contents: write`                   | the same for `deployed/detailing` and `deployed/auto-service`                                |
+| Job           | `permissions`                       | Why exactly that much                                                                        |
+| ------------- | ----------------------------------- | -------------------------------------------------------------------------------------------- |
+| `check`       | `contents: read`                    | a checkout with `fetch-depth: 0`, for the `deployed/*` tags its test scope starts from       |
+| `translate`   | `contents: write`                   | commits and pushes translations into the same branch                                         |
+| `verify`      | `contents: read`                    | a checkout with `fetch-depth: 0`; the `deployed/*` tags arrive with the history              |
+| `shop-image`  | `contents: read`, `packages: write` | pushes `ghcr.io/zikrasoft/podbor-auto-service-shop:<sha>` to GHCR                            |
+| `deploy-shop` | `contents: read`, `packages: read`  | hands the server a one-shot token for `docker pull`; that token cannot write to the repo     |
+| `record-shop` | `contents: write`                   | moves `deployed/auto-service-shop` after a successful `deploy-shop`, a separate job for that |
+| `deploy-site` | `contents: write`                   | moves `refs/tags/deployed/<app>` after a successful deploy of that app                       |
 
 Write access for `translate` and write access for the deploy jobs are different
 things: the first changes a branch's contents, the second touches only housekeeping
@@ -650,10 +912,10 @@ only for `packages`, and only in the two shop jobs.
 
 Both deploy jobs check out with `persist-credentials: false`. They need the token
 only on the last step, where it is passed explicitly through `GH_TOKEN`, and in
-between `vercel build` executes the repository's code — there is no reason to leave
+between the build executes the repository's code, so there is no reason to leave
 it a write-capable token recorded in `.git/config`.
 
-Two traps, both of which look like "the Vercel secrets broke" while having nothing
+Two traps, both of which look like "the site secrets broke" while having nothing
 to do with them:
 
 - Settings → Actions → General → Workflow permissions must be **Read and write**.
@@ -667,24 +929,24 @@ to do with them:
 
 ## The shop backend: Medusa on a VPS (`api.carlab.rs`)
 
-`apps/auto-service-shop` is not on Vercel. It is docker compose on a single DigitalOcean
+`apps/auto-service-shop` is docker compose on a single DigitalOcean
 Droplet in Frankfurt (`fra1`, Ubuntu 24.04, Basic `s-2vcpu-4gb`: 2 vCPU, 4 GB,
 80 GB SSD, 4 TB transfer, $24 a month, IPv4 only). The S3 buckets and IAM users
 stay on AWS in `eu-north-1`: AWS would not enable a 4 GB Lightsail plan for the
 account. All of it is described in `infra/auto-service-shop/`:
 
-| File                                     | What it is                                                                                                                                                                                       |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `Dockerfile` + `Dockerfile.dockerignore` | the production image: `pnpm --filter @podbor/auto-service-shop build`, `pnpm deploy --legacy`; runtime from `.medusa/server` as `node`                                                           |
-| `docker-compose.yml`                     | postgres 16.15, typesense 30.2, medusa (the GHCR image by sha), caddy 2.11.4                                                                                                                     |
-| `caddy/Caddyfile`                        | `api.carlab.rs` and `admin.carlab.rs` → `medusa:9000`, TLS, security headers, body up to 1 MB on the API host and 25 MB on the admin host, payment webhooks closed, basic_auth on the admin host |
-| `production.env.example`                 | the template for `/srv/carlab/.env`                                                                                                                                                              |
-| `backup.env.example`                     | the template for `/srv/carlab/.env.backup`, the off-host backup bucket                                                                                                                           |
-| `deploy.sh`, `backup.sh`, `restore.sh`   | shipping, the nightly backup and its off-host copy (`backup.sh fetch` pulls one back), restore                                                                                                   |
-| `crawler-role.sh`                        | the crawler's Postgres role, run by `deploy.sh` and `restore.sh` after the migrations                                                                                                            |
-| `move-static-to-s3.sh`                   | once: copies the old `static` volume to the public bucket; stored image keys need no rewrite                                                                                                     |
-| `bootstrap-host.sh`, `harden-ssh.sh`     | first-time server setup (once, by hand)                                                                                                                                                          |
-| `test/*.test.sh`                         | the compose shape, the Caddy rules against a live Caddy, the crawler role against a live Postgres, the scripts' behaviour against a stubbed `docker`, run in `check`                             |
+| File                                     | What it is                                                                                                                                                           |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Dockerfile` + `Dockerfile.dockerignore` | the production image: `pnpm --filter @podbor/auto-service-shop build`, `pnpm deploy --legacy`; runtime from `.medusa/server` as `node`                               |
+| `docker-compose.yml`                     | postgres 16.15, typesense 30.2, medusa (the GHCR image by sha), caddy 2.11.4                                                                                         |
+| `caddy/Caddyfile`                        | `api.carlab.rs` and `admin.carlab.rs` → `medusa:9000`, TLS, security headers, body up to 1 MB on the API host and 25 MB on the admin host, payment webhooks closed   |
+| `production.env.example`                 | the template for `/srv/carlab/.env`                                                                                                                                  |
+| `backup.env.example`                     | the template for `/srv/carlab/.env.backup`, the off-host backup bucket                                                                                               |
+| `deploy.sh`, `backup.sh`, `restore.sh`   | shipping, the nightly backup and its off-host copy (`backup.sh fetch` pulls one back), restore                                                                       |
+| `crawler-role.sh`                        | the crawler's Postgres role, run by `deploy.sh` and `restore.sh` after the migrations                                                                                |
+| `move-static-to-s3.sh`                   | once: copies the old `static` volume to the public bucket; stored image keys need no rewrite                                                                         |
+| `bootstrap-host.sh`, `harden-ssh.sh`     | first-time server setup (once, by hand)                                                                                                                              |
+| `test/*.test.sh`                         | the compose shape, the Caddy rules against a live Caddy, the crawler role against a live Postgres, the scripts' behaviour against a stubbed `docker`, run in `check` |
 
 There is no Redis: one Medusa process runs the in-memory event bus, cache and
 workflow engine. A second Medusa instance would need Redis first.
@@ -797,6 +1059,21 @@ stopped mid-way (Ctrl+C, a sleeping Mac, a dropped tunnel) stays `running` and
 resumes from where it stopped the next time the worker starts; a page it held
 is retried once its 10 minute lease runs out.
 
+`pnpm --filter @podbor/auto-service-shop crawler:status` prints each site's run
+status, its pause reason and its page counts. A run paused by the worker (the
+worker logs `Crawl of <site> paused: <reason>`) waits for a new crawl queued in
+the admin.
+
+### Admin runs from a terminal
+
+`pnpm --filter @podbor/auto-service-shop admin publish|import <supplier_id>|status [<supplier_id>]`
+starts a Publish or an Import, or prints the latest run, as one JSON line;
+`--wait` polls once a minute until the run leaves `running` and exits 1 when it
+failed. It signs in with a Medusa secret API key, not a session, so a shop
+restart does not log it out. Create the key in the admin (Settings → Secret API
+Keys) and put it with the admin URL in `apps/auto-service-shop/.env.admin`
+(see `.env.admin.example`).
+
 ### The server
 
 - `/srv/carlab/`: CI places `docker-compose.yml`, `caddy/Caddyfile`, the Loki,
@@ -832,12 +1109,35 @@ is retried once its 10 minute lease runs out.
   the userland proxy back on, or every IPv6 client becomes the docker gateway's
   address.
 - Memory limits for 4 GB: medusa 1536m (a 1024 MB Node heap), typesense 768m,
-  postgres 512m, caddy 128m, and for the logs grafana 256m, loki 192m,
-  alloy 160m: 3552 MB together, under 3.5 GB (checked by the compose test),
-  with the 2 GB swap `bootstrap-host.sh` makes behind it. Measured idle in
-  `infra/auto-service-shop/test/logs.test.sh`: grafana about 200 MB, loki and
-  alloy about 100 MB each. If the box swaps, the logs go first: stop them with
-  `docker compose stop grafana alloy loki`, the shop runs without them. The crawler runs on the owner's Mac, so it is not in the budget.
+  postgres 512m, caddy 128m, the three sites 160m each (a 112 MB Node heap),
+  loki 192m, alloy 160m: 3776 MB for what always runs, under 3.75 GB, and
+  grafana's 256m on demand only, 4032 MB with it, under the 4 GB of the host
+  (both checked by the compose test), with the 2 GB swap `bootstrap-host.sh`
+  makes behind it. Grafana sits behind the `grafana` profile: start it for a
+  look with `docker compose --profile grafana up -d grafana` and stop it after.
+  Measured idle in `infra/auto-service-shop/test/logs.test.sh`: grafana about
+  200 MB, loki and alloy about 100 MB each. If the box swaps, the logs go
+  first: stop them with `docker compose stop grafana alloy loki`, the shop
+  runs without them.
+- The three Astro sites run from `/srv/sites/<app>/running` and Caddy serves
+  their files from `/srv/sites/<app>/current`, both links to
+  `releases/<name>`, one `site-<app>` container each, started only once a
+  release is live (`deploy.sh` turns on the `site-<app>` profile of every
+  directory under `/srv/sites` with a `current` link, and gives a site released
+  before `running` existed its link). `deploy-site.sh <app> <name>` points
+  `running` at the release, recreates the container, waits for it to answer
+  `/`, and only then points `current` at it; on failure it points `running`
+  back and leaves `current` alone. It keeps the live release and the one before it. Caddy serves a release's files itself
+  (`/_astro/*` for a year, everything else revalidated) and hands every other
+  path to node, except `/_image`, which answers 404 (no sharp at runtime).
+  Every redirect comes from node: each site's 404 is on demand, so middleware
+  runs for every path Caddy hands over. Caddy adds only the security headers,
+  from `caddy/security-headers.caddy` (shared by the three sites;
+  `.github/scripts/security-headers-drift.sh` fails `check` when it drifts).
+  Proxied requests keep the apex `Host`, carry `X-Forwarded-Proto: https` and an
+  `X-Request-Id`, and `X-Forwarded-For` is Caddy's own view of the client. The `carlab-reminders`
+  systemd timer runs `reminders.sh` at 08:00 UTC, which calls carlab.rs's
+  `/api/reminders` inside its container with the container's own `CRON_SECRET`. The crawler runs on the owner's Mac, so it is not in the budget.
   Typesense holds its whole index in memory; measure it with
   `docker stats --no-stream` once the catalogue is at scale, and raise the limit
   before the index outgrows it.
@@ -967,7 +1267,13 @@ number gets its CI value in that script. The non-obvious parts:
   rerun or a rebuilt database asks nothing twice; changing the model or the
   prompt asks again. The prompt carries only the article's own Category, so
   editing another Category asks nothing again. A re-import refreshes the
-  attributes of a Part it filed, unless staff edited them. An answer that fails validation twice is cached as a
+  attributes of a Part it filed, unless staff edited them, and re-files a Part
+  whose supplier category now maps to another Category, with attributes read
+  afresh for it, unless staff set the Part's Category; a code mapped to no
+  Category leaves its Parts where they are. `IMPORT_AI_LIMIT` (empty means no
+  limit) stops each Supplier's Import after that many AI answers and keeps the
+  offers and flags of the articles it did not reach, for a costed trial run:
+  the report counts `ai_answers`, `ai_input_tokens` and `ai_output_tokens`. An answer that fails validation twice is cached as a
   failure too and listed in the Import report, so a rerun does not pay for it
   again. Without S3 nothing is cached. `IMPORT_CONCURRENCY` (empty means 4) is
   how many articles are asked at once; vehicle fitting still runs one article
@@ -975,8 +1281,8 @@ number gets its CI value in that script. The non-obvious parts:
   long a part's offer view reuses a supplier's live quote; the cart and checkout
   always quote afresh. `STORE_WRITES_PER_MINUTE` (empty means 120) and
   `STORE_SEARCHES_PER_MINUTE` (empty means 600) are the per-client limits on
-  store cart/VIN writes and on search. Storefront traffic arrives from Vercel's
-  shared egress, so carlab.rs names the visitor behind each call: its
+  store cart/VIN writes and on search. Storefront traffic arrives from the
+  carlab.rs server, one address for every visitor, so carlab.rs names the visitor behind each call: its
   server-side catalogue sends the visitor's address (`x-real-ip`, else the
   first `x-forwarded-for` hop) as `x-shop-client` beside
   `x-shop-client-secret: $SHOP_CLIENT_SECRET`, and the shop counts that visitor
@@ -987,21 +1293,11 @@ number gets its CI value in that script. The non-obvious parts:
   Without the secret on both sides every shopper shares one bucket again. An answer's attributes that do not fit its Category are dropped one
   by one; a Part whose answer still misses a required field stays without a
   Category, and the report names the Category and the missing fields.
-- `ADMIN_BASIC_AUTH_USER` and `ADMIN_BASIC_AUTH_HASH` put HTTP basic_auth in
-  front of everything on `ADMIN_HOST`, before Medusa's own login, so staff
-  passwords cannot be guessed from the internet. The hash is bcrypt, made
-  without printing the password to the terminal history:
-  `docker run --rm -it caddy:2.11.4-alpine caddy hash-password` (it prompts).
-  Write it in **single quotes**, `ADMIN_BASIC_AUTH_HASH='$2a$14$...'`, or compose
-  substitutes its `$` signs. Both are required: compose refuses to start without
-  them. Three requests on the admin host pass with a `Bearer` token alone, since
-  the admin's own fetch replaces the browser's basic_auth header there:
-  `/auth/session` (sign-in), `/admin/invites/accept` and
-  `/auth/user/emailpass/update` (a password reset); each one is refused by Medusa
-  without a valid token, and staff sign-in itself (`/auth/user/emailpass`) is
-  not among them. The API host answers 404 on `/admin` and `/auth/user`, so
-  staff routes exist only behind the admin host's basic_auth; the storefront
-  calls only `/store/*` (and the `/health/ready` probe). Checked against a live Caddy by
+- The admin host has no basic_auth: Medusa's own sign-in is the only gate, and
+  Medusa does not limit sign-in attempts, so every staff account gets a long
+  random password. The API host answers 404 on `/admin` and `/auth/user`, so
+  staff routes exist only on the admin host; the storefront calls only
+  `/store/*` (and the `/health/ready` probe). Checked against a live Caddy by
   `infra/auto-service-shop/test/compose.test.sh`.
 - `CRAWLER_DB_PASSWORD` is the crawler's Postgres password, see
   [The crawler on the owner's Mac](#the-crawler-on-the-owners-mac).
@@ -1028,7 +1324,7 @@ number gets its CI value in that script. The non-obvious parts:
   memory. A re-send cannot make a second Lead: the post carries `order_id`, and
   the lead store answers a known order with the Lead it already made. The last
   failed attempt is reported to the CRM group through `TELEGRAM_BOT_TOKEN` and
-  `TELEGRAM_GROUP_ID`, the same names and values as the CRM bot's on Vercel.
+  `TELEGRAM_GROUP_ID`, the same names and values as the sites' CRM bot.
   Both are optional; unset, the failure is only logged.
 - `VIN_DECODERS` is the VIN decoder chain, comma-separated, in the order they
   are tried. An unknown name stops the server at startup. Each decoder works
@@ -1105,8 +1401,8 @@ number gets its CI value in that script. The non-obvious parts:
 - `SHOP_EVENTS_SECRET` (and `SHOP_EVENTS_SECRET_PREVIOUS` while it rotates) is
   the Bearer secret carlab.rs posts its Events with, see
   [Shop Orders](#shop-orders-adr-0053). `STOREFRONT_EVENTS_PER_MINUTE` (empty
-  means 1200) caps those posts; they all come from Vercel's egress, so it is
-  one bucket for the whole storefront.
+  means 1200) caps those posts; they all come from the carlab.rs server, so
+  it is one bucket for the whole storefront.
 - `GRAFANA_ADMIN_PASSWORD` is Grafana's `admin` password,
   `openssl rand -hex 32`. Required: compose refuses to start the stack without
   it, so set it before the first deploy that carries the logs. Grafana keeps
@@ -1120,10 +1416,10 @@ number gets its CI value in that script. The non-obvious parts:
 The parts catalogue is public and indexable, but buying is closed until both
 sides say otherwise. Two variables, one per side:
 
-| Variable    | Where                                             | Closed (default)                                                                                                                                                                                                                                                                              | `true`                       |
-| ----------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
-| `SHOP_OPEN` | carlab.rs Vercel project (Production), build time | pages carry no price, no Offer JSON-LD, no add-on price, no cart link; every part asks «Узнать цену»; search drops prices and the price filter; llms.txt names no cart                                                                                                                        | prices and cart for everyone |
-| `SHOP_OPEN` | `/srv/carlab/.env` on the shop VPS                | without the preview token, `POST /store/offer-carts`, `/store/offer-carts/:id/items` and `/store/offer-carts/:id/complete` answer 403, and every store route answers with no offers, no add-on price and no price or stock filter (search ignores `in-stock` and `price` and counts no stock) | anyone may buy               |
+| Variable    | Where                                    | Closed (default)                                                                                                                                                                                                                                                                              | `true`                       |
+| ----------- | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| `SHOP_OPEN` | `site-auto-service` variable, build time | pages carry no price, no Offer JSON-LD, no add-on price, no cart link; every part asks «Узнать цену»; search drops prices and the price filter; llms.txt names no cart                                                                                                                        | prices and cart for everyone |
+| `SHOP_OPEN` | `/srv/carlab/.env` on the shop VPS       | without the preview token, `POST /store/offer-carts`, `/store/offer-carts/:id/items` and `/store/offer-carts/:id/complete` answer 403, and every store route answers with no offers, no add-on price and no price or stock filter (search ignores `in-stock` and `price` and counts no stock) | anyone may buy               |
 
 On carlab.rs only the exact value `true` opens the shop: unset or anything else
 is closed. turbo passes `SHOP_OPEN` and `SHOP_PREVIEW_TOKEN` through to the
@@ -1132,7 +1428,7 @@ applies a change. An open build sends the preview token itself, so it builds
 with prices even if the backend is still closed.
 
 The preview is a secret token, `SHOP_PREVIEW_TOKEN`: the same value in the
-carlab.rs Vercel project (Production, server-only, never `PUBLIC_`) and in
+`site-auto-service` environment (a secret, never `PUBLIC_`) and in
 `/srv/carlab/.env`. It is 32 to 256 letters, digits, `_` or `-`; make one with
 `openssl rand -hex 32`. Both sides refuse a shorter value at start, and while
 it is unset nobody gets the preview, the open build included.
@@ -1202,13 +1498,13 @@ moves forward again.
    fails if any script prints it).
 4. `record-shop` moves `deployed/auto-service-shop` only if `deploy-shop` actually shipped
    the image (`outputs.deployed == 'true'`).
-5. `deploy-brand-site` waits for `deploy-shop` and is held back only if it failed, so
-   carlab.rs never prerenders against a backend that failed to ship. approved.rs
-   does not wait: it does not read the shop. Right after `vercel pull` the
-   carlab.rs leg probes `MEDUSA_BACKEND_URL/health`
-   (`.github/scripts/shop-backend-up.sh`, a few retries over about 20 seconds).
-   If the backend does not answer, the leg prints a `::warning::`, skips the
-   build and the deploy, and leaves `deployed/auto-service` where it was, so the
+5. `deploy-site` waits for `deploy-shop`, and its carlab.rs leg is held back if
+   it failed, so carlab.rs never prerenders against a backend that failed to
+   ship. Right after writing the env the carlab.rs leg probes
+   `MEDUSA_BACKEND_URL/health` (`.github/scripts/shop-backend-up.sh`, a few
+   retries over about 20 seconds). If the backend does not answer,
+   `upload-site.sh` exits 75, the leg prints a `::warning::`, skips the build
+   and the deploy, and leaves `deployed/auto-service` where it was, so the
    live site keeps serving the last build and the next run retries. Without the
    probe, a VPS outage would fail every carlab.rs deploy, since the storefront
    build throws when the backend it is pointed at is unreachable. The Publish
@@ -1217,12 +1513,12 @@ moves forward again.
 
    The build reads the catalogue once (pages, sitemap and llms.txt share it)
    and records how many part pages it serves at
-   `https://carlab.rs/catalogue-build.json`. A `vercel build` (it sets
-   `VERCEL=1`) reads that record from the live site first, and once it counts
+   `https://carlab.rs/catalogue-build.json`. A production build (`upload-site.sh` sets
+   `CATALOGUE_SHRINK_GUARD=true`) reads that record from the live site first, and once it counts
    any part pages the catalogue is live: the build then fails without
    `MEDUSA_BACKEND_URL`, on zero part pages, and on fewer than half of what the
    live site serves. A shrink that is meant (a supplier removed) goes through
-   with `CATALOGUE_SHRINK_ALLOWED=true` in the carlab.rs Vercel project for one
+   with `CATALOGUE_SHRINK_ALLOWED=true` in the carlab.rs build env for one
    build; remove it afterwards. Part pages list only published numbers, the same
    ones search finds, so a CI deploy and a Publish build the same catalogue.
 
@@ -1299,7 +1595,7 @@ Only the image rolls back: migrations do not. If the ship changed the schema,
 restore the `db-<stamp>-pre-deploy.dump` that deploy wrote just before migrating
 instead: Medusa's migrations are not guaranteed to be backwards compatible, and an
 old image against a schema already migrated forward may fail to boot or corrupt
-data. The shop's own migrations stay additive for the same reason (AGENTS.md). After a manual rollback the
+data. The shop's own migrations stay additive for the same reason ([shop-migrations.md](shop-migrations.md)). After a manual rollback the
 `deployed/auto-service-shop` tag points at a version that is not in production; delete it
 once the fix is in `main`.
 
@@ -1412,6 +1708,10 @@ that would otherwise grow forever or hold personal data longer than needed:
   days, then reindexes every number with demand in the last 31 days so the
   «Популярные» sort follows the sliding 30-day score (ADR-0060). The rows hold
   identifiers, counts and redacted queries, nothing personal.
+- **Site access log, 7 days** (Caddy, `/data/access.log` in the `caddydata`
+  volume). Every request to the three sites, with the client IP and User-Agent,
+  to tell crawlers from people. Caddy rolls it at 100 MiB and deletes rolls
+  older than 7 days; Alloy never ships it to Loki.
 
 The crawl tables (`crawl_run`, `crawl_page`) belong to no Medusa module on
 purpose: only the crawler on the owner's Mac writes them, through raw SQL under
@@ -1454,6 +1754,12 @@ includes it). Set it up once:
 
 1. Create an HTTP(S) monitor on `https://api.carlab.rs/health/ready`, expecting
    status 200, every 5 minutes or more often, with a timeout of about 10 seconds.
+   Add one more for each site on its bare root: `https://approved.rs/`,
+   `https://carlab.rs/` and `https://details.rs/`, same interval and timeout,
+   following redirects. The sites have no health route, and every other page is
+   a file Caddy answers from disk, but `/` has no file: Caddy hands it to the
+   site's Node container, whose middleware 302s it to the visitor's locale. A
+   container that is down or out of memory turns it into a 502.
 2. Add Telegram as an alert contact, the way the service's own guide describes
    (usually a bot you start in Telegram that links the chat), and attach it to
    the monitor for both "down" and "up again".
@@ -1503,7 +1809,11 @@ itself. At that cap the worst case is about 2 GB of compressed chunks; at
 real traffic it is tens of MB. Check with
 `docker system df -v | grep carlab_lokidata`.
 
-**Opening Grafana.** It listens on the server's `127.0.0.1:3000` only, and
+**Opening Grafana.** It runs only behind the `grafana` compose profile, to keep
+the three site containers inside the host's memory budget: start it with
+`docker compose --profile grafana up -d grafana` before you open the tunnel,
+and `docker compose stop grafana` when you are done. It listens on the server's
+`127.0.0.1:3000` only, and
 `deploy` may open a tunnel to that one address and nothing else. On a server
 hardened before this, rerun the hardening once (it keeps the crawler's key):
 
@@ -1650,10 +1960,8 @@ Steps 1, 5 and 6 are one `terraform apply`: see `infra/auto-service-shop/terrafo
 3. **DNS.** A records for `api.carlab.rs` and `admin.carlab.rs` at the reserved IPv4.
    Done: `dig +short` returns it for both names.
 4. **`.env` on the server.** Copy `infra/auto-service-shop/production.env.example` to
-   `/srv/carlab/.env`, fill in every value (secrets with `openssl rand -hex 32`,
-   the admin's basic_auth hash as in [`.env`](#env)), then
-   `chmod 600 /srv/carlab/.env`. Give staff the basic_auth user and password
-   apart from their Medusa sign-in.
+   `/srv/carlab/.env`, fill in every value (secrets with `openssl rand -hex 32`),
+   then `chmod 600 /srv/carlab/.env`.
    Done: `ssh deploy@<IPv4> 'stat -c %a /srv/carlab/.env'` prints `600`.
 5. **Shop buckets.** Create the public and the private S3 bucket and the shop's
    IAM user as in [Files on S3](#files-on-s3), and put their values in
@@ -1702,7 +2010,7 @@ Steps 1, 5 and 6 are one `terraform apply`: see `infra/auto-service-shop/terrafo
     closed, `PUBLISH_DISPATCH_TOKEN` and `OPENAI_API_KEY` as described in
     [`.env`](#env); `docker compose up -d medusa` after editing.
     Done: `cut -d= -f1 /srv/carlab/.env` lists all four names.
-11. **carlab.rs on Vercel.** In the carlab.rs project (Production):
+11. **carlab.rs env.** In the `site-auto-service` GitHub environment:
     `MEDUSA_BACKEND_URL=https://api.carlab.rs`, `MEDUSA_PUBLISHABLE_KEY` = the key
     from step 9, and `SHOP_OPEN` **unset** until the shop opens. Then press Publish
     in the admin so the Categories get their Serbian and English text and carlab.rs
@@ -1720,43 +2028,25 @@ Steps 1, 5 and 6 are one `terraform apply`: see `infra/auto-service-shop/terrafo
 
 ---
 
-## Creating a new project in Vercel
+## Setting up a new site
 
-For a new site (this is how all three were set up):
+1. Add the app to the manifest, `.github/scripts/site-env.json` (`sites.<app>`);
+   the `deploy-site` matrix follows it, and `site-env.test.ts` tells you which
+   names its code reads.
+2. Create its GitHub environment, `site-<app>` (Settings → Environments), and
+   set its names there per the manifest: secrets as secrets, the rest as
+   variables. Shared names are already at repository level.
+3. The GitHub App for Keystatic (see above), into the same environment.
+4. Point the domain's A record at the VPS, where Caddy serves it from
+   an `import site <app>` block beside a `site-<app>` service (see
+   [The server](#the-server)); `infra/auto-service-shop/test/sites.test.sh`
+   fails until compose and the Caddyfile name the same sites as the manifest. `CRM_DATABASE_URL` is not a GitHub value:
+   compose sets it on the site container.
 
-1. Vercel → Add New → Project → Import Git Repository → the same
-   `Zikrasoft/approved_rs` repository
-2. **Root Directory** → leave it empty (`./`), despite Vercel prefilling the app's
-   path from the import screen. GitHub Actions does the deploying and the job
-   already runs inside `apps/<app>`; if the project adds its own Root Directory on
-   top, the CLI will look for `apps/detailing/apps/detailing` and `vercel deploy`
-   will fail with "The provided path … does not exist". The build stays green — only
-   the deploy step breaks. The approved.rs project is configured the same way
-3. Framework Preset: **Astro**. Leave Build/Install/Output Command alone — they are
-   already set in the app's `vercel.json` and will override the dashboard
-4. Environment Variables — per the tables above (public contacts, Telegram,
-   Keystatic). They can be added right on the import screen
-5. Deploy — Vercel does the first build itself; it only exists to bring the project
-   to life. After that GitHub Actions deploys
-6. Settings → Domains → add `carlab.rs` (or `details.rs`) and set the DNS at the
-   registrar per Vercel's instructions
-7. Storage → connect **the same** Blob store approved.rs uses
-8. Settings → General → copy the Project ID into the GitHub secret
-   (`VERCEL_PROJECT_ID_AUTO_SERVICE` / `VERCEL_PROJECT_ID_DETAILING`)
-
-There is no need to disable the git trigger in the dashboard —
-`git.deploymentEnabled: false` in the root `vercel.json` does it.
-
----
-
-## The order for setting up a new site
-
-First the Vercel project with its domain and variables, the shared Blob store, the
-GitHub App for Keystatic and the Project ID in the secrets — and only then the first
-deploy. A deploy started before the project has its variables will build
-successfully and ship a site with `undefined` in the contacts and a form that fails.
-The first run without a `deployed/<app>` tag deploys the app unconditionally and
-creates the tag; after that, a green run with no deploy at all is the normal state.
+Only then the first deploy. A deploy missing a required name fails, naming it,
+before it builds. The first run without a `deployed/<app>` tag deploys the app
+unconditionally and creates the tag; after that, a green run with no deploy at
+all is the normal state.
 
 ---
 
@@ -1769,14 +2059,14 @@ required there, because Keystatic cannot make an API call from its own form, so 
 "Translate" button cannot exist there in principle.
 
 In its place there is the `translate` job in `.github/workflows/ci.yml`: on every
-push (**to any branch**, not only `main`) it walks every `apps/*/` and runs each
-script it finds (`translate-cases`, `translate-works`, `translate-i18n`), then
-commits the result back — so the translations are already in the feature branch by
-the time it is merged, rather than appearing only afterwards.
+push to `main`, and on a manual `workflow_dispatch` run for any other branch, it
+walks every `apps/*/` and runs each script it finds (`translate-cases`,
+`translate-works`, `translate-i18n`), then commits the result back to the branch it
+ran on.
 
-This is safe to run on every branch: `git.deploymentEnabled` is now `false`
-throughout and Vercel no longer deploys on a git push for any branch — a translation
-commit on a feature branch cannot possibly start a surplus build. On `main` the
+A manual run on a feature branch is safe: `git.deploymentEnabled` is `false`
+throughout and Vercel does not deploy on a git push for any branch, so a translation
+commit on a feature branch cannot start a surplus build. On `main` the
 deploy jobs follow `translate` in the same run and check out exactly the commit it
 left behind — but only what has fallen behind production ships from them (see "Not
 everything gets deployed"). The `translate` step itself is unconditional: it is one
@@ -1805,18 +2095,22 @@ node --env-file=.env --experimental-strip-types scripts/translate-cases.ts
 
 ## The Telegram webhooks
 
-Two kinds, and only the CRM one is approved.rs-only.
+Two kinds, and only the CRM one is carlab.rs-only.
 
 - **`/api/telegram-webhook`** — `@SerbCRMBot`, the CRM bot. One bot, so one
-  webhook, and it lives in approved.rs; carlab.rs and details.rs have no such
-  route. Its `secret_token` is approved.rs's `TELEGRAM_WEBHOOK_SECRET`.
+  webhook, and it lives in carlab.rs; approved.rs and details.rs have no such
+  route. Its `secret_token` is carlab.rs's `TELEGRAM_WEBHOOK_SECRET`.
 - **`/api/telegram-capture`** — the brand's own capture bot, in **all three**
-  projects. `@ApprovedRsBot` is registered against `approved.rs`, `@CarLabRsBot`
+  projects. `@ApprovedRsBot` is registered against `crm.carlab.rs`, `@CarLabRsBot`
   against `carlab.rs`, `@DetailsRsBot` against `details.rs`, each with that
   project's `TELEGRAM_CAPTURE_WEBHOOK_SECRET`
   ([ADR-0030](../adr/0030-a-capture-bot-per-brand-takes-the-telegram-contact.md)).
 
-Each is registered once per bot, four registrations in total.
+Each is registered once per bot, four registrations in total. The CRM bot
+and approved.rs's capture bot are registered on `crm.carlab.rs`: Caddy's
+`CRM_HOST` passes `/api/telegram-webhook` to carlab.rs's node,
+`/api/telegram-capture` to approved.rs's, and answers 404 to anything else, so
+both bots follow the host rather than approved.rs's DNS.
 
 ### The CRM bot
 
@@ -1831,7 +2125,7 @@ in_progress / won / lost / postponed, and lost is the archive. 🗣 on the card,
 owner's first message in the Lead's Topic, moves a new Lead into negotiations. A
 postponed Lead comes back on its date to the status it left, with a DM reminder
 to the owner. Leads are stored
-in Vercel Blob (`data/leads.json`, private access), with no external database.
+in the `crm` Postgres database on the shop VPS.
 
 The owner and the admin each have to message the bot `/start` once before it can
 send them direct messages (including the notice of a Balance operation the other
@@ -1864,12 +2158,12 @@ Messages from bots — the Capture bots' copies of the visitor —
 and from anyone who is neither owner nor admin are ignored, so the relay cannot
 loop.
 
-The webhook must carry a `secret_token` equal to the approved.rs project's
+The webhook must carry a `secret_token` equal to the carlab.rs project's
 `TELEGRAM_WEBHOOK_SECRET` — without a match the endpoint answers 401 to every
 request:
 
 ```bash
-curl "https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/setWebhook?url=https://approved.rs/api/telegram-webhook&secret_token=<TELEGRAM_WEBHOOK_SECRET>"
+curl "https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/setWebhook?url=https://crm.carlab.rs/api/telegram-webhook&secret_token=<TELEGRAM_WEBHOOK_SECRET>"
 ```
 
 To check:
@@ -1883,11 +2177,12 @@ bot as its one argument — `crm` reads `TELEGRAM_BOT_TOKEN` /
 `TELEGRAM_WEBHOOK_SECRET` and registers `/api/telegram-webhook`, `capture` reads
 `TELEGRAM_CAPTURE_BOT_TOKEN` / `TELEGRAM_CAPTURE_WEBHOOK_SECRET` and registers
 `/api/telegram-capture`. Both take the target host from `SITE`, and an unknown
-bot or a missing variable exits non-zero without calling Telegram:
+bot or a missing variable exits non-zero without calling Telegram. A `SITE` set
+on the command line wins over the env file's:
 
 ```bash
 cd apps/approved-rs
-node --env-file=.env.local --experimental-strip-types scripts/register-webhook.ts crm
+SITE=https://crm.carlab.rs node --env-file=../auto-service/.env.local --experimental-strip-types scripts/register-webhook.ts crm
 ```
 
 > Until 2026-09-13 the script registered a non-existent `${SITE}/api/telegram` and
@@ -1904,7 +2199,7 @@ The script reads nothing but `process.env`, so the one copy in
 
 ```bash
 cd apps/approved-rs
-node --env-file=.env.local --experimental-strip-types scripts/register-webhook.ts capture
+SITE=https://crm.carlab.rs node --env-file=.env.local --experimental-strip-types scripts/register-webhook.ts capture
 node --env-file=../auto-service/.env.local --experimental-strip-types scripts/register-webhook.ts capture
 node --env-file=../detailing/.env.local --experimental-strip-types scripts/register-webhook.ts capture
 ```
@@ -1938,15 +2233,11 @@ cd apps/detailing && node --env-file=.env.local --experimental-strip-types scrip
 
 ---
 
-## The reminder cron (approved.rs only)
+## The reminder cron (carlab.rs only)
 
-`apps/approved-rs/vercel.json`:
-
-```json
-"crons": [{ "path": "/api/reminders", "schedule": "0 8 * * *" }]
-```
-
-Every day at 08:00 UTC, Vercel calls `/api/reminders` with
+Every day at 08:00 UTC the host's `carlab-reminders` timer calls
+`/api/reminders` inside the carlab.rs container (see
+[The server](#the-server)) with
 `Authorization: Bearer $CRON_SECRET` — the route marks expired Ghost leads lost,
 closes every Topic nobody has written in a day after its Lead was created (once;
 a quiet conversation stays open; the next message reopens it), then posts one digest to the group: postponed leads whose day has come (returned
@@ -1961,24 +2252,29 @@ There is no monthly summary: the Balance is in the bot's menu. Without
 `CRON_SECRET` in the project the route answers 401 and the digest silently never
 arrives.
 
-The cron belongs to a project, not to the bot: the other two projects have no
-`crons` section in `vercel.json` and do not need one — otherwise the same reminders
-would go out several times over.
+The timer calls carlab.rs alone, never the other two sites: otherwise the
+same reminders would go out several times over. Vercel's cron for the last deployment
+that carried one is disabled in the dashboard at the cutover
+([Cutover from Vercel](#cutover-from-vercel)).
 
 ---
 
 ## A custom domain
 
-1. Vercel Dashboard → the project → Settings → Domains
-2. Add the domain (`approved.rs` / `carlab.rs` / `details.rs`)
-3. Set the DNS records (A or CNAME) at the registrar per Vercel's instructions
-4. Check that `site:` in that app's `astro.config.mjs` and `env.SITE` in its
-   `vercel.json` match the domain — the canonical links, the sitemap and the OG tags
+1. Point the apex and `www` A records at the VPS's reserved IP
+2. Set the host in the shop's compose (`APPROVED_HOST` / `CARLAB_HOST` /
+   `DETAILS_HOST`) if it is not the default, and recreate Caddy with
+   `docker compose up -d caddy`: the host names reach it as environment, which
+   a reload does not reread
+3. Check that `site:` in that app's `astro.config.mjs` matches the domain: the canonical links, the sitemap and the OG tags
    all depend on them
 
 ---
 
 ## pnpm on Vercel
+
+Vercel no longer builds or serves the sites; this only explains why
+`pnpm-workspace.yaml` lists the allowed builds twice.
 
 A real deploy (`git push origin main` → `ci.yml`) does not touch any of this:
 `vercel build`/`vercel deploy` run from GitHub Actions, where `pnpm/action-setup`
@@ -2026,10 +2322,13 @@ For each of the three domains:
 - [ ] `/keystatic` lets you in through GitHub and saves an edit to the repository
 - [ ] HTTPS and the custom domain are active
 
-Additionally for approved.rs:
+Additionally for carlab.rs:
 
 - [ ] The buttons in the bot's DM work (meaning the webhook and
       `TELEGRAM_WEBHOOK_SECRET` match)
-- [ ] All three brands' leads are visible to the bot (meaning the Blob store really
-      is shared)
+- [ ] All three brands' leads are visible to the bot (meaning all three sites really
+      share one `CRM_DATABASE_URL`)
+
+Additionally for approved.rs:
+
 - [ ] The geo banner appears when arriving from DE/RS/ES (VPN)

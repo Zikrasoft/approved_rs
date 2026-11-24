@@ -1,8 +1,8 @@
 ---
+import { getCollection } from 'astro:content';
 import LinkRow from '@/components/LinkRow.astro';
 import Icon from '@/components/Icon.astro';
 import { withPlaceholder } from '@podbor/i18n';
-import { makeName } from '@/utils/makes';
 import { translated } from '@podbor/catalog-contract';
 import { seriesName } from '@/utils/carName';
 import Shell from '@/layouts/Shell.astro';
@@ -13,19 +13,37 @@ import { makeHubsForBuild } from '@/utils/catalogueEnv';
 import { cacheKey } from '@/utils/cacheKey';
 import type { MakeHubEntry } from '@/utils/catalogueSnapshot';
 import { PathBuilder, withLocales } from '@/utils/paths';
+import { workshopMakePages } from '@/utils/works';
 
 export async function getStaticPaths() {
   const hubs = await makeHubsForBuild();
+  const workshop = new Set(
+    workshopMakePages(
+      await getCollection('works'),
+      await getCollection('articles'),
+      [],
+    ).map(({ make }) => make.slug),
+  );
   return withLocales(
     hubs.map((hub) => ({
       params: { make: hub.make.slug },
-      props: { hub },
-      cacheKey: cacheKey(hub),
+      props: { hub, workshop: workshop.has(hub.make.slug) },
+      cacheKey: cacheKey({
+        make: hub.make,
+        workshop: workshop.has(hub.make.slug),
+        series: hub.series.map(({ series, categories }) => ({
+          series,
+          categories: categories.map(({ category }) => category),
+        })),
+      }),
     })),
   );
 }
 
-const { hub } = Astro.props as { hub: MakeHubEntry };
+const { hub, workshop } = Astro.props as {
+  hub: MakeHubEntry;
+  workshop: boolean;
+};
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const copy = content(locale).partsCar.hubs.make;
@@ -69,7 +87,7 @@ const series = hub.series
       }
     </ul>
     {
-      makeName(make.slug) && (
+      workshop && (
         <a
           href={PathBuilder.carsMake(locale, make.slug)}
           class="link-underlined inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-semibold text-ink"
