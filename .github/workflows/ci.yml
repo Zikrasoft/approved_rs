@@ -16,6 +16,7 @@ concurrency:
 
 env:
   SHOP_IMAGE: ghcr.io/zikrasoft/podbor-auto-service-shop
+  CADDY_IMAGE: ghcr.io/zikrasoft/podbor-carlab-caddy
   ACTIONLINT_IMAGE: rhysd/actionlint:1.7.12
 
 jobs:
@@ -274,6 +275,10 @@ jobs:
             --tag "$SHOP_IMAGE:$SHA" \
             .
           docker image inspect "$SHOP_IMAGE:$SHA" --format 'image size: {{.Size}} bytes'
+          docker buildx build --load --platform linux/amd64 \
+            --label "org.opencontainers.image.source=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
+            --tag "$CADDY_IMAGE:$SHA" \
+            infra/auto-service-shop/caddy-image
 
       - name: Migrate a blank database and boot to healthy
         run: |
@@ -322,6 +327,7 @@ jobs:
           auth=$(printf '%s:%s' "$GITHUB_ACTOR" "$GH_TOKEN" | base64 | tr -d '\n')
           printf '{"auths":{"ghcr.io":{"auth":"%s"}}}' "$auth" >"$DOCKER_CONFIG/config.json"
           docker push "$SHOP_IMAGE:$SHA"
+          docker push "$CADDY_IMAGE:$SHA"
 
       - name: Clean up
         if: always()
@@ -374,7 +380,7 @@ jobs:
         if: steps.guard.outputs.deploy == 'true'
         run: |
           tar -C infra/auto-service-shop -cf - docker-compose.yml caddy/Caddyfile deploy.sh backup.sh restore.sh crawler-role.sh crm-role.sh move-static-to-s3.sh \
-            logs-export.sh loki/config.yaml alloy/config.alloy grafana deploy-site.sh reminders.sh caddy/security-headers.caddy caddy-image/Dockerfile \
+            logs-export.sh loki/config.yaml alloy/config.alloy grafana deploy-site.sh reminders.sh caddy/security-headers.caddy \
             | ssh -o BatchMode=yes -o StrictHostKeyChecking=yes "$TARGET" 'tar -C /srv/carlab -xf -'
       - name: Deploy
         if: steps.guard.outputs.deploy == 'true'
