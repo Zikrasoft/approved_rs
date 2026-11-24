@@ -16,6 +16,7 @@ import {
   LISTED_PARTS_IN_CATEGORY,
   LISTED_PER_CATEGORY,
   LISTED_SERIES_CATEGORY_COUNTS,
+  LISTED_SERIES_PARTS,
   PUBLISH_ALL,
   PUBLISHED_NUMBER_BY_SLUG,
   PUBLISHED_NUMBERS,
@@ -36,6 +37,8 @@ export type SeriesCategoryCount = {
   category_id: string;
   parts: number;
 };
+
+export type SeriesPart = { category_id: string | null; part_id: string };
 
 export type PublishedPartSlug = {
   brand_slug: string;
@@ -184,6 +187,21 @@ class PublishModuleService extends MedusaService({
         requirementFits.map(({ category_id }) => category_id),
       ],
     );
+    return rows;
+  }
+
+  @InjectManager()
+  async listedSeriesParts(
+    requirementFits: PartFit[],
+    seriesId: string,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<SeriesPart[]> {
+    const { rows } = await runBoundSql(sharedContext, LISTED_SERIES_PARTS, [
+      requirementFits.map(({ vehicle_id }) => vehicle_id),
+      requirementFits.map(({ part_id }) => part_id),
+      requirementFits.map(({ category_id }) => category_id),
+      seriesId,
+    ]);
     return rows;
   }
 
