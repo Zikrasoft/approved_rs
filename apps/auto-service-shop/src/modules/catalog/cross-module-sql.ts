@@ -62,7 +62,7 @@ const LISTED_PLACES = `
       and pn.deleted_at is null and pn.listed
     where pi.deleted_at is null
   ), places as (
-    select c.series_id, x.part_id, x.category_id, x.fitted
+    select c.series_id, m.id as model_id, x.part_id, x.category_id, x.fitted
     from (
       select f.vehicle_id, f.part_id, pt.category_id, true as fitted
       from fitment f left join part pt on pt.id = f.part_id
@@ -90,6 +90,38 @@ export const LISTED_PART_COUNTS = `${LISTED_PLACES}, series_matches as (
     and m.series_id = p.series_id and m.category_id = p.category_id
   where ?::text[] is null or p.series_id = any(?::text[])
   group by p.series_id`;
+
+export const LISTED_MAKE_PART_COUNTS = `${LISTED_PLACES}, scoped as (
+    select p.model_id, p.part_id, p.category_id, p.fitted, s.make_id
+    from places p
+    join series s on s.id = p.series_id and s.deleted_at is null
+    where p.series_id = any(?::text[])
+  ), model_matches as (
+    select model_id, category_id, count(distinct part_id) as matches
+    from scoped where not fitted group by model_id, category_id
+  ), kept as (
+    select sc.model_id
+    from scoped sc
+    left join model_matches mm on not sc.fitted
+      and mm.model_id = sc.model_id and mm.category_id = sc.category_id
+    group by sc.model_id
+    having count(distinct sc.part_id)
+      filter (where sc.fitted or mm.matches >= ?) > 0
+  ), make_matches as (
+    select make_id, category_id, count(distinct part_id) as matches
+    from scoped
+    where not fitted and model_id in (select model_id from kept)
+    group by make_id, category_id
+  )
+  select mk.slug as make_slug,
+    (count(distinct sc.part_id)
+      filter (where sc.fitted or mm.matches >= ?))::int as parts
+  from scoped sc
+  join kept k on k.model_id = sc.model_id
+  join make mk on mk.id = sc.make_id
+  left join make_matches mm on not sc.fitted
+    and mm.make_id = sc.make_id and mm.category_id = sc.category_id
+  group by mk.slug`;
 
 export const LISTED_SERIES_CATEGORY_COUNTS = `${LISTED_PLACES}
   select series_id, category_id, count(distinct part_id)::int as parts

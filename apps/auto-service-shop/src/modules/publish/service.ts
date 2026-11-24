@@ -13,6 +13,7 @@ import PublishedNumber from './models/published-number';
 import { runBoundSql } from '../_shared/bound-sql';
 import {
   LISTED_NUMBERS_IN_CATEGORY,
+  LISTED_MAKE_PART_COUNTS,
   LISTED_PART_COUNTS,
   LISTED_PARTS_IN_CATEGORY,
   LISTED_PER_CATEGORY,
@@ -32,6 +33,8 @@ export type ListedPartCount = {
   parts: number;
   required: number;
 };
+
+export type MakePartCount = { make_slug: string; parts: number };
 
 export type SeriesCategoryCount = {
   series_id: string;
@@ -192,6 +195,23 @@ class PublishModuleService extends MedusaService({
       MIN_REQUIREMENT_MATCHES_FOR_PAGE,
       seriesIds,
       seriesIds,
+    ]);
+    return rows;
+  }
+
+  @InjectManager()
+  async listedMakePartCounts(
+    requirementFits: PartFit[],
+    seriesIds: string[],
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<MakePartCount[]> {
+    const { rows } = await runBoundSql(sharedContext, LISTED_MAKE_PART_COUNTS, [
+      requirementFits.map(({ vehicle_id }) => vehicle_id),
+      requirementFits.map(({ part_id }) => part_id),
+      requirementFits.map(({ category_id }) => category_id),
+      seriesIds,
+      MIN_REQUIREMENT_MATCHES_FOR_PAGE,
+      MIN_REQUIREMENT_MATCHES_FOR_PAGE,
     ]);
     return rows;
   }
