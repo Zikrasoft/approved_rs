@@ -34,9 +34,14 @@ vi.mock('@/utils/catalogueEnv', async (original) => {
 
 const copy = content('ru').pages.partsInquiry;
 
-type Entry = { category: Category; listed: number };
+type Entry = { category: Category; listed: number; demand: number | null };
 
-const category = (slug: string, empty: boolean, listed = 1): Entry => ({
+const category = (
+  slug: string,
+  empty: boolean,
+  listed = 1,
+  demand: number | null = null,
+): Entry => ({
   category: {
     id: `category_${slug}`,
     slug,
@@ -53,6 +58,7 @@ const category = (slug: string, empty: boolean, listed = 1): Entry => ({
     fields: [],
   },
   listed: empty ? 0 : listed,
+  demand,
 });
 
 type HubMake = { slug: string; name: string; hub: boolean; parts: number };
@@ -70,11 +76,11 @@ const hub = (
         parts: [],
         makes,
         series: [],
-        categories: entries.map(({ category: own, listed }) => ({
+        categories: entries.map(({ category: own, listed, demand }) => ({
           slug: own.slug,
           name: own.name,
           listed,
-          demand: null,
+          demand,
         })),
         catalogue_makes: null,
       },
@@ -160,15 +166,15 @@ describe('the parts hub', () => {
     ).toBe(false);
   });
 
-  it('lists the categories with the most listed parts first', async () => {
+  it('lists the most demanded categories first, not the biggest', async () => {
     setShop(false);
     const root = await hub([
-      category('batteries', false, 3),
+      category('batteries', false, 3, 5),
       category('wipers', true),
-      category('brakes', false, 11),
+      category('brakes', false, 11, 2),
     ]);
 
-    expect(tileOrder(root)).toEqual(['brakes', 'batteries', 'wipers']);
+    expect(tileOrder(root)).toEqual(['batteries', 'brakes', 'wipers']);
   });
 
   it('keeps the categories in their own order while their counts are equal', async () => {
