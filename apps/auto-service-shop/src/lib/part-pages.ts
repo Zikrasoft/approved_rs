@@ -24,7 +24,7 @@ import { releasedSupplierData } from '../modules/supplier/released';
 import type SupplierModuleService from '../modules/supplier/service';
 import { imagesSchema, publicFileUrl, publicImage } from './images';
 import { installationPrice } from './installation';
-import { loadPartDemand } from './part-demand';
+import { memoPartDemand } from './part-demand';
 
 type BrandNumberRow = {
   id: string;
@@ -210,7 +210,7 @@ export async function sluggedPagesOf(
 ): Promise<SluggedPartPage[]> {
   const pages = await partPagesOf(scope, published, {
     shown,
-    demand: demand ?? (await loadPartDemand(scope)),
+    demand: demand ?? (await memoPartDemand(scope)),
   });
   const seen = new Set<string>();
   return pages

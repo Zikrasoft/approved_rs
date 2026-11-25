@@ -21,7 +21,7 @@ import { isBuyable } from '@podbor/catalog-contract/availability';
 
 import { serbianScripts } from '../lib/serbian';
 import { type CarAddress, fittedCarKeys } from '../lib/car-pages';
-import { loadPartDemand } from '../lib/part-demand';
+import { memoPartDemand } from '../lib/part-demand';
 import { partNumberKey } from '../modules/_shared/part-number-key';
 import { PUBLISH_MODULE } from '../modules/publish';
 import type PublishModuleService from '../modules/publish/service';
@@ -283,7 +283,7 @@ const source = {
         filters: { id: rows.map(({ id }) => id) },
       }),
       requiredCars(container.query, partIds),
-      loadPartDemand(appContainer),
+      memoPartDemand(appContainer),
       releasedSupplierData(
         appContainer.resolve<SupplierModuleService>(SUPPLIER_MODULE),
         rows.map(({ id }) => id),

@@ -3,6 +3,7 @@ import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 import { VISITOR_ID_HEADER } from '@podbor/catalog-contract/events';
 
+import { clearCatalogueMemo } from '../../../../lib/catalogue-memo';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 import { DEMAND_MODULE } from '../../../../modules/demand';
@@ -129,6 +130,7 @@ medusaIntegrationTestRunner({
           signal: 'pick',
           identifierIds: [number['VD 4']],
         });
+        clearCatalogueMemo();
         await reindex();
 
         const popular = await search({

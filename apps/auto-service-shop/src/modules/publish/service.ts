@@ -31,6 +31,7 @@ import {
   REFRESH_LISTED,
 } from '../catalog/cross-module-sql';
 import { INTERRUPTED_BY_RESTART } from '../_shared/run-errors';
+import { clearCatalogueMemo } from '../../lib/catalogue-memo';
 
 export type MakePartCount = { make_slug: string; parts: number };
 
@@ -115,8 +116,19 @@ class PublishModuleService extends MedusaService({
     },
   };
 
+  async publishAll(): Promise<string[]> {
+    const fresh = await this.publishAll_();
+    clearCatalogueMemo();
+    return fresh;
+  }
+
+  async unpublish(ids: string[]): Promise<void> {
+    await this.unpublish_(ids);
+    clearCatalogueMemo();
+  }
+
   @InjectTransactionManager()
-  async publishAll(
+  protected async publishAll_(
     @MedusaContext() sharedContext: Context = {},
   ): Promise<string[]> {
     const { rows } = await runBoundSql(sharedContext, PUBLISH_ALL);
@@ -125,7 +137,7 @@ class PublishModuleService extends MedusaService({
   }
 
   @InjectTransactionManager()
-  async unpublish(
+  protected async unpublish_(
     ids: string[],
     @MedusaContext() sharedContext: Context = {},
   ): Promise<void> {
