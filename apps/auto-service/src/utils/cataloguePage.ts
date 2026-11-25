@@ -9,6 +9,8 @@ export const NOT_FOUND_PAGE_CACHE = 'public, s-maxage=600';
 
 export const PREVIEW_PAGE_CACHE = 'private, no-store';
 
+export const SHOP_DOWN_FILE_CACHE = 'public, s-maxage=60';
+
 export const RETRY_AFTER_SECONDS = 60;
 
 export type Catalogue = NonNullable<ReturnType<typeof catalogueFor>>;
@@ -82,14 +84,20 @@ export async function answerCatalogueFile(
   { request, url }: Pick<APIContext, 'request' | 'url'>,
   contentType: string,
   load: CatalogueLoad<string>,
+  withoutShop?: () => Promise<string | null>,
 ): Promise<Response> {
+  const file = (found: string | null, publicCache: string) =>
+    found === null
+      ? notFound(request)
+      : new Response(found, {
+          headers: {
+            'content-type': contentType,
+            'cache-control': cacheControlOf(request, publicCache),
+          },
+        });
   const loaded = await fromCatalogue(request, url, load);
-  if (loaded instanceof Response) return loaded;
-  if (loaded.found === null) return notFound(request);
-  return new Response(loaded.found, {
-    headers: {
-      'content-type': contentType,
-      'cache-control': cacheControlOf(request, PUBLIC_PAGE_CACHE),
-    },
-  });
+  if (!(loaded instanceof Response)) {
+    return file(loaded.found, PUBLIC_PAGE_CACHE);
+  }
+  return withoutShop ? file(await withoutShop(), SHOP_DOWN_FILE_CACHE) : loaded;
 }

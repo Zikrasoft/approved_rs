@@ -1,18 +1,22 @@
 import type { APIRoute } from 'astro';
 import { isLocale } from '@/i18n/config';
 import { answerCatalogueFile } from '@/utils/cataloguePage';
-import { generateLlmsTxt, llmsCatalogueOf } from '@/utils/llmsTxt';
+import {
+  generateLlmsTxt,
+  llmsCatalogueOf,
+  NO_LLMS_CATALOGUE,
+} from '@/utils/llmsTxt';
 
 export const prerender = false;
 
-export const GET: APIRoute = (context) =>
-  answerCatalogueFile(
+export const GET: APIRoute = (context) => {
+  const { locale } = context.params;
+  const served = locale && isLocale(locale) ? locale : null;
+  return answerCatalogueFile(
     context,
     'text/plain; charset=utf-8',
-    async (catalogue) => {
-      const { locale } = context.params;
-      return locale && isLocale(locale)
-        ? generateLlmsTxt(locale, await llmsCatalogueOf(catalogue))
-        : null;
-    },
+    async (catalogue) =>
+      served && generateLlmsTxt(served, await llmsCatalogueOf(catalogue)),
+    async () => served && generateLlmsTxt(served, NO_LLMS_CATALOGUE),
   );
+};

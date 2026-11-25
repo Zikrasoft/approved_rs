@@ -209,6 +209,8 @@ export async function generateLlmsTxt(
   });
 }
 
+export const NO_LLMS_CATALOGUE: LlmsCatalogue = { categories: [], makes: [] };
+
 export const llmsCatalogueOf = async (
   catalogue: Catalogue,
 ): Promise<LlmsCatalogue> => {

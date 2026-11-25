@@ -114,17 +114,26 @@ describe.each(routes)('%s', (path, route, type, params) => {
 
     expect(response.headers.get('cache-control')).toBe('private, no-store');
   });
-
-  it('asks to retry, uncached, while the shop is down', async () => {
-    stubShop(() => new Response(null, { status: 500 }));
-    vi.spyOn(console, 'error').mockImplementation(() => undefined);
-
-    const response = await answer(route, path, { params });
-
-    expect(response.status).toBe(503);
-    expect(response.headers.get('cache-control')).toBe('no-store');
-  });
 });
+
+const shopDown = () => {
+  stubShop(() => new Response(null, { status: 500 }));
+  vi.spyOn(console, 'error').mockImplementation(() => undefined);
+};
+
+describe.each(routes.filter(([path]) => !path.endsWith('llms.txt')))(
+  '%s',
+  (path, route, _type, params) => {
+    it('asks to retry, uncached, while the shop is down', async () => {
+      shopDown();
+
+      const response = await answer(route, path, { params });
+
+      expect(response.status).toBe(503);
+      expect(response.headers.get('cache-control')).toBe('no-store');
+    });
+  },
+);
 
 describe('catalogue-build.json', () => {
   it('counts the Part pages the shop publishes now', async () => {
@@ -153,6 +162,45 @@ describe('llms.txt', () => {
     ).text();
 
     expect(body).toContain('(https://carlab.rs/en/parts/c/brakes/)');
+  });
+
+  it.each([
+    ['/llms.txt', rootLlms, {}],
+    ['/en/llms.txt', localeLlms, { locale: 'en' }],
+  ])(
+    'serves %s without the catalogue, briefly cached, while the shop is down',
+    async (path, route, params) => {
+      shopDown();
+
+      const response = await answer(route, path, { params });
+      const body = await response.text();
+
+      expect(response.status).toBe(200);
+      expect(response.headers.get('content-type')).toBe(
+        'text/plain; charset=utf-8',
+      );
+      expect(response.headers.get('cache-control')).toBe('public, s-maxage=60');
+      expect(body).toContain('https://carlab.rs/');
+      expect(body).not.toContain('/parts/c/');
+    },
+  );
+
+  it('serves llms.txt while the shop is down even without a shop address', async () => {
+    vi.stubEnv('MEDUSA_BACKEND_URL', '');
+
+    const response = await answer(rootLlms, '/llms.txt');
+
+    expect(response.status).toBe(200);
+  });
+
+  it('is a 404 for a locale the site does not serve, even while the shop is down', async () => {
+    shopDown();
+
+    const response = await answer(localeLlms, '/xx/llms.txt', {
+      params: { locale: 'xx' },
+    });
+
+    expect(response.status).toBe(404);
   });
 
   it('is a 404 for a locale the site does not serve', async () => {
