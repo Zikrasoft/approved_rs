@@ -938,8 +938,8 @@ account. All of it is described in `infra/auto-service-shop/`:
 | File                                     | What it is                                                                                                                                                           |
 | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Dockerfile` + `Dockerfile.dockerignore` | the production image: `pnpm --filter @podbor/auto-service-shop build`, `pnpm deploy --legacy`; runtime from `.medusa/server` as `node`                               |
-| `docker-compose.yml`                     | postgres 16.15, typesense 30.2, medusa and caddy 2.11.4 (both GHCR images by the same sha)                                                                           |
-| `caddy-image/Dockerfile`                 | Caddy 2.11.4 built with `cache-handler` v0.17.0 and Souin's `simplefs` storage v0.0.20, plus `curl` for the purge; built by CI, pulled from GHCR by sha              |
+| `docker-compose.yml`                     | postgres 16.15, typesense 30.2, medusa and caddy 2.11.8 (both GHCR images by the same sha)                                                                           |
+| `caddy-image/Dockerfile`                 | Caddy 2.11.8 built with `cache-handler` v0.17.0 and Souin's `simplefs` storage v0.0.23, plus `curl` for the purge; built by CI, pulled from GHCR by sha              |
 | `caddy/Caddyfile`                        | `api.carlab.rs` and `admin.carlab.rs` → `medusa:9000`, TLS, security headers, body up to 1 MB on the API host and 25 MB on the admin host, payment webhooks closed   |
 | `production.env.example`                 | the template for `/srv/carlab/.env`                                                                                                                                  |
 | `backup.env.example`                     | the template for `/srv/carlab/.env.backup`, the off-host backup bucket                                                                                               |
@@ -1230,6 +1230,27 @@ Keys) and put it with the admin URL in `apps/auto-service-shop/.env.admin`
     has no published port. The public hosts hand `/souin-api/...` to node like
     any other path. If the purge fails, the deploy fails and the healthy
     release stays live. Run the same command by hand to empty the cache.
+  - **Publish purge.** The shop purges only what a Publish changed, through
+    an internal Caddy listener, `http://:2020` in the Caddyfile. It sits on
+    the compose network alone, with no entry in `ports`, and the shop reaches
+    it as `CACHE_PURGE_URL=http://caddy:2020/souin-api/souin` (set in compose;
+    unset, the `purge` step sends nothing). It forwards to the Souin API only a
+    `PURGE` under `/souin-api/souin/`, whose rest of the path is a regex over
+    the cache keys (`GET-https-carlab.rs-/ru/parts/c/brakes/`); it answers 403
+    to `flush`, `mapping`, every other path and every other method. The
+    pattern travels in the path unescaped, so it holds no `|`, `^`, `{`, `?`
+    or `\`: Go escapes them on the proxy hop and Souin then matches the
+    escape literally. That is why the hubs take several patterns, not one
+    alternation: `-/[a-z][a-z]/cars/`, `-/[a-z][a-z]/parts/$` (the `/parts/`
+    hub), `-/[a-z][a-z]/parts/[0-9a-oq-z]` and `-/[a-z][a-z]/parts/p[0-9a-z-]`
+    (every `/parts/` page but `/parts/p/`), `llms[.]txt`, `sitemap` and
+    `catalogue-build[.]json`. Each Part page whose number is fresh, flipped
+    `listed` or was swept gets `-/[a-z][a-z]/parts/p/<slug>/`, which covers
+    the three locales at once. The patterns live in
+    `apps/auto-service-shop/src/lib/publish/purge.ts`. `simplefs` before
+    v0.0.23 deleted only the first key a regex matched, because it deleted
+    while ranging over the cache; the image pins v0.0.23, which collects the
+    keys first.
   - **Checking a hit.** `curl -sI https://carlab.rs/ru/parts/makes/ | grep -i cache-status`.
     `Souin; hit; ttl=...` came from the cache. `Souin; fwd=uri-miss; stored`
     went to node and was stored. `detail=NO-STORE-DIRECTIVE` went to node and
@@ -1343,7 +1364,7 @@ number gets its CI value in that script. The non-obvious parts:
   the first translates catalogue text, the second is a fine-grained GitHub token
   with `actions: write` on this repository that dispatches `publish.yml` and
   then reads that run until it finishes (`write` includes `read`). The chain is
-  `sweep → translate → publish → reindex → deploy`. `publish` collects the
+  `sweep → translate → publish → reindex → deploy → purge`. `publish` collects the
   change set: the freshly published numbers, the numbers whose `listed`
   flipped, the Parts whose translations `translate` wrote and the numbers the
   orphan `sweep` removed. It refuses a Publish that would leave fewer than half
@@ -1359,6 +1380,11 @@ number gets its CI value in that script. The non-obvious parts:
   failing the Publish. Search is updated before the dispatch, so the reindex
   never slows the build or the first renders after the site's cache is emptied;
   a failed deploy unpublishes the fresh numbers and reindexes their Parts again;
+  `purge` then empties the catalogue hubs and the changed Part pages from the
+  page cache (see the Publish purge above). A failed purge keeps the numbers
+  published and fails the run at `purge`; Publish again to retry. The retry
+  purges the hubs again but not the earlier run's Part pages, which age out
+  within the day;
   a failed or cancelled run,
   or one still unfinished after 90 minutes, stops the chain at the deploy step. Either
   may stay empty; the chain then stops at that step and the admin shows why.

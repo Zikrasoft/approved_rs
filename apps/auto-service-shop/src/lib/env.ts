@@ -127,6 +127,7 @@ const envFields = z.object({
   DEMO_SUPPLIER_OVERRIDES: optionalValue,
   CRAWLER_FROM: optionalValue.pipe(z.email().optional()),
   FILE_URL: optionalValue.pipe(z.url().optional()),
+  CACHE_PURGE_URL: optionalValue.pipe(z.url().optional()),
   S3_ENDPOINT: optionalValue.pipe(z.url().optional()),
   S3_REGION: optionalValue,
   S3_ACCESS_KEY_ID: optionalSecret,

@@ -105,6 +105,7 @@ services:
       TYPESENSE_PORT: '8108'
       TYPESENSE_PROTOCOL: http
       TYPESENSE_API_KEY: ${TYPESENSE_API_KEY:?}
+      CACHE_PURGE_URL: http://caddy:2020/souin-api/souin
       NODE_OPTIONS: --max-old-space-size=1024
       LOG_LEVEL: info
     depends_on:

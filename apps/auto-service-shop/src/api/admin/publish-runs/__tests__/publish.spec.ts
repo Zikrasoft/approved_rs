@@ -9,7 +9,9 @@ import { importRuns } from '../../../../../integration-tests/importRuns';
 import { loggedEvents } from '../../../../../integration-tests/loggedEvents';
 import { SHOP_AI_REGISTRATION } from '../../../../lib/ai';
 import {
+  PUBLISH_PURGE_REGISTRATION,
   PUBLISH_REINDEX_REGISTRATION,
+  type PublishPurge,
   type PublishSearch,
 } from '../../../../lib/publish/chain';
 import type { IndexChanges } from '../../../../lib/index-changes';
@@ -74,6 +76,18 @@ const searchIndex = {
   active: true,
   indexed: null as number | null,
 };
+
+const pageCache = { purged: [] as string[], refusal: null as Error | null };
+
+const HUB_PATTERNS = [
+  '-/[a-z][a-z]/cars/',
+  '-/[a-z][a-z]/parts/$',
+  '-/[a-z][a-z]/parts/[0-9a-oq-z]',
+  '-/[a-z][a-z]/parts/p[0-9a-z-]',
+  'llms[.]txt',
+  'sitemap',
+  'catalogue-build[.]json',
+];
 
 const openAiAnswer = (body: {
   messages: { content: string }[];
@@ -157,6 +171,13 @@ medusaIntegrationTestRunner({
               .countPublished(),
           countSettle: { tries: 2, pauseMs: 10 },
         } satisfies PublishSearch),
+      );
+      container.register(
+        PUBLISH_PURGE_REGISTRATION,
+        asValue((async (pattern) => {
+          if (pageCache.refusal) throw pageCache.refusal;
+          pageCache.purged.push(pattern);
+        }) satisfies PublishPurge),
       );
       container.register(
         SUPPLIER_ADAPTERS_REGISTRATION,
@@ -255,6 +276,8 @@ medusaIntegrationTestRunner({
         searchIndex.swaps = [];
         searchIndex.active = true;
         searchIndex.indexed = null;
+        pageCache.purged = [];
+        pageCache.refusal = null;
         delete process.env.CATALOGUE_SHRINK_ALLOWED;
         supplier.articles.length = 0;
       });
@@ -765,6 +788,135 @@ medusaIntegrationTestRunner({
             'part_identifier',
             'catalogue_car',
           ]);
+        });
+      });
+
+      describe('the pages the cache purges', () => {
+        const mannId = async () =>
+          (await catalog.listBrands({ slug: 'mann-filter' }))[0].id;
+
+        const settled = async () => {
+          await publish();
+          pageCache.purged = [];
+        };
+
+        it('are the hubs alone when no number changed', async () => {
+          await settled();
+
+          const run = await publish();
+
+          expect(run.status).toBe('succeeded');
+          expect(pageCache.purged).toEqual(HUB_PATTERNS);
+        });
+
+        it('add the Part page of a freshly published number, in every locale', async () => {
+          await settled();
+          await catalog.createPartWithIdentifiers({
+            name: 'Масляный фильтр',
+            identifiers: [
+              {
+                type: 'manufacturer-number',
+                brand_id: await mannId(),
+                value: 'PG 1',
+              },
+            ],
+          });
+
+          await publish();
+
+          expect(pageCache.purged).toEqual([
+            ...HUB_PATTERNS,
+            '-/[a-z][a-z]/parts/p/mann-filter-pg1/',
+          ]);
+        });
+
+        it('add the Part page whose number stopped being listed', async () => {
+          const brand_id = await mannId();
+          const replaced = await catalog.createPartWithIdentifiers({
+            name: 'Масляный фильтр',
+            identifiers: [
+              { type: 'manufacturer-number', brand_id, value: 'PG 2' },
+            ],
+          });
+          const successor = await catalog.createPartWithIdentifiers({
+            name: 'Масляный фильтр',
+            identifiers: [
+              { type: 'manufacturer-number', brand_id, value: 'PG 3' },
+            ],
+          });
+          await settled();
+          await catalog.updateParts({
+            id: replaced,
+            replaced_by_id: successor,
+          });
+
+          await publish();
+
+          expect(pageCache.purged).toEqual([
+            ...HUB_PATTERNS,
+            '-/[a-z][a-z]/parts/p/mann-filter-pg2/',
+          ]);
+        });
+
+        it('add the Part page of a swept number', async () => {
+          const brand_id = await mannId();
+          await catalog.createPartWithIdentifiers({
+            name: 'Масляный фильтр',
+            identifiers: ['PG 4', 'PG 4 B'].map((value) => ({
+              type: 'manufacturer-number' as const,
+              brand_id,
+              value,
+            })),
+          });
+          await settled();
+          const [gone] = await catalog.listPartIdentifiers({
+            normalized_value: 'PG4B',
+          });
+          await catalog.softDeletePartIdentifiers([gone.id]);
+
+          await publish();
+
+          expect(pageCache.purged).toEqual([
+            ...HUB_PATTERNS,
+            '-/[a-z][a-z]/parts/p/mann-filter-pg4b/',
+          ]);
+        });
+
+        it('fail the run at purge and keep the numbers published when the cache refuses', async () => {
+          await catalog.createPartWithIdentifiers({
+            name: 'Масляный фильтр',
+            identifiers: [
+              {
+                type: 'manufacturer-number',
+                brand_id: await mannId(),
+                value: 'PG 5',
+              },
+            ],
+          });
+          pageCache.refusal = new Error('The page cache refused the purge');
+          const publishModule: PublishModuleService =
+            getContainer().resolve(PUBLISH_MODULE);
+
+          const failed = await publish();
+          const [identifier] = await catalog.listPartIdentifiers({
+            normalized_value: 'PG5',
+          });
+          const kept = await publishModule.listPublishedNumbers({
+            id: identifier.id,
+          });
+          pageCache.refusal = null;
+          const retried = await publish();
+
+          expect(failed).toEqual(
+            expect.objectContaining({
+              status: 'failed',
+              failed_step: 'purge',
+              error: 'The page cache refused the purge',
+            }),
+          );
+          expect(kept).toHaveLength(1);
+          expect(retried.status).toBe('succeeded');
+          expect(pageCache.purged).toEqual(HUB_PATTERNS);
         });
       });
 

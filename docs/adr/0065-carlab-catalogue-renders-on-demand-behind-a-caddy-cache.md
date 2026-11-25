@@ -10,7 +10,7 @@ carlab.rs prerendered every catalogue page from one shop snapshot. After the bil
 
 ## Consequences
 
-The cache is Souin's `simplefs` (v0.0.20, the last that builds against Caddy 2.11.4), in a Caddy image CI builds and pushes to GHCR beside the shop image, under Caddy's 128 MB limit. Two of its limits are accepted:
+The cache is Souin's `simplefs` (v0.0.23 on Caddy 2.11.8; earlier versions deleted only the first key a regex purge matched), in a Caddy image CI builds and pushes to GHCR beside the shop image, under Caddy's 128 MB limit. Two of its limits are accepted:
 
 - **No stale copy after a day.** `simplefs` drops a page when its `s-maxage` runs out, so the page header carries no `stale-while-revalidate` or `stale-if-error`. While the shop is down, a page cached within the last 24 hours is a hit; any other page is a 503.
 - **A restart empties it.** The index lives in Caddy's memory, so every Caddy restart, every reload with a changed Caddyfile and every shop deploy starts the cache cold.

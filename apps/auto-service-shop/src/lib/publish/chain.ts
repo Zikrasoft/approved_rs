@@ -5,6 +5,7 @@ import type {
   MedusaContainer,
 } from '@medusajs/framework/types';
 import { Modules } from '@medusajs/framework/utils';
+import { partPageSlug } from '@podbor/catalog-contract';
 import { z } from 'zod';
 
 import { CATALOG_MODULE } from '../../modules/catalog';
@@ -16,6 +17,12 @@ import { CATALOGUE_CAR_INDEX } from '../car-pages';
 import { parseEnv } from '../env';
 import { deploySite } from './deploy';
 import { sweepOrphans } from './orphans';
+import {
+  CATALOGUE_HUB_PATTERNS,
+  cachePurge,
+  partPagePattern,
+  type PublishPurge,
+} from './purge';
 import { translateCatalogue } from './translate';
 import { type RunOutcome, startCatalogueRun } from '../catalogue-writer';
 import { errorMessage } from '../errors';
@@ -26,7 +33,11 @@ import {
 } from '../index-changes';
 import { logEvent } from '../log-event';
 
+export type { PublishPurge } from './purge';
+
 export const PUBLISH_REINDEX_REGISTRATION = 'publishReindex';
+
+export const PUBLISH_PURGE_REGISTRATION = 'publishPurge';
 
 const SHRINK_FLOOR = 0.5;
 
@@ -69,6 +80,30 @@ const searchOf = (scope: MedusaContainer): PublishSearch =>
           ).metadata?.count ?? 0,
         countSettle: { tries: 12, pauseMs: 5_000 },
       };
+
+const purgeOf = (scope: MedusaContainer): PublishPurge =>
+  scope.hasRegistration(PUBLISH_PURGE_REGISTRATION)
+    ? scope.resolve<PublishPurge>(PUBLISH_PURGE_REGISTRATION)
+    : cachePurge(parseEnv(process.env).CACHE_PURGE_URL);
+
+async function partPageSlugsOf(
+  scope: MedusaContainer,
+  identifierIds: string[],
+) {
+  const catalog: CatalogModuleService = scope.resolve(CATALOG_MODULE);
+  const identifiers = await catalog.listPartIdentifiers(
+    { id: identifierIds },
+    {
+      select: ['normalized_value', 'brand.slug'],
+      relations: ['brand'],
+      withDeleted: true,
+      take: null,
+    },
+  );
+  return identifiers.flatMap(({ brand, normalized_value }) =>
+    brand ? [partPageSlug(brand.slug, normalized_value)] : [],
+  );
+}
 
 async function partIdsOf(scope: MedusaContainer, identifierIds: string[]) {
   const catalog: CatalogModuleService = scope.resolve(CATALOG_MODULE);
@@ -115,6 +150,7 @@ async function checkPublishedCount(
 const publishChain = (scope: MedusaContainer) => {
   const publish = scope.resolve<PublishModuleService>(PUBLISH_MODULE);
   const search = searchOf(scope);
+  const purge = purgeOf(scope);
   const changes: PublishChanges = {
     fresh: [],
     listedFlipped: [],
@@ -190,6 +226,22 @@ const publishChain = (scope: MedusaContainer) => {
             partIds: await partIdsOf(scope, changes.fresh),
           });
           throw error;
+        }
+      },
+    },
+    {
+      name: 'purge',
+      run: async () => {
+        const slugs = await partPageSlugsOf(scope, [
+          ...changes.fresh,
+          ...changes.listedFlipped,
+          ...changes.sweptIdentifiers,
+        ]);
+        for (const pattern of [
+          ...CATALOGUE_HUB_PATTERNS,
+          ...[...new Set(slugs)].map(partPagePattern),
+        ]) {
+          await purge(pattern);
         }
       },
     },

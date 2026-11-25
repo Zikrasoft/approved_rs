@@ -446,7 +446,8 @@
       "translate": "translation",
       "publish": "number publishing",
       "reindex": "search refresh",
-      "deploy": "site build and deploy"
+      "deploy": "site build and deploy",
+      "purge": "page cache refresh"
     },
     "errorDetails": "Error details: {{error}}",
     "startedBy": "Started by: {{who}}",
