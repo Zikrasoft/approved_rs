@@ -1,6 +1,5 @@
 ---
 import { withPlaceholder } from '@podbor/i18n';
-import { translated } from '@podbor/catalog-contract';
 import { partThumbnail } from '@/utils/partImages';
 import { localizedArticle } from '@podbor/blog/article';
 import { faqPageSchema, safeMarkdown } from '@podbor/site-kit';
@@ -77,7 +76,7 @@ const faq = about?.faq ?? [];
           {catalogue.categories.map((category) => (
             <li class="max-w-full">
               <LinkChip href={PathBuilder.partsCategory(locale, category.slug)}>
-                {translated(category, 'name', locale)}
+                {category.name}
               </LinkChip>
             </li>
           ))}
@@ -91,7 +90,7 @@ const faq = about?.faq ?? [];
                 slug={part.slug}
                 brand={part.brand.name}
                 value={part.value}
-                name={translated(part.part, 'name', locale)}
+                name={part.part.name}
                 priced={part}
               />
             ))}

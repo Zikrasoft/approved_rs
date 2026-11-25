@@ -2,7 +2,7 @@
 export const prerender = false;
 
 import DisclosureCard from '@/components/DisclosureCard.astro';
-import { partPageSlug, translated } from '@podbor/catalog-contract';
+import { partPageSlug } from '@podbor/catalog-contract';
 import { bestOffer } from '@podbor/catalog-contract/availability';
 import { productSchema } from '@podbor/site-kit';
 import Shell from '@/layouts/Shell.astro';
@@ -67,7 +67,7 @@ const linkOf = seriesLink(locale, linkedSeries);
 const site = content(locale).site;
 const copy = content(locale).shopPart;
 const heading = `${page.brand.name} ${page.value}`;
-const partName = translated(page.part, 'name', locale);
+const partName = page.part.name;
 const replacement = page.part.replaced_by;
 const category = page.category;
 const attributes = category
@@ -77,24 +77,16 @@ const attributes = category
     })
   : [];
 const description = page.part.description
-  ? paragraphs(
-      translated(
-        { ...page.part, description: page.part.description },
-        'description',
-        locale,
-      ),
-    )
+  ? paragraphs(page.part.description)
   : [];
-const categoryText = category
-  ? paragraphs(translated(category, 'text', locale))
-  : [];
+const categoryText = category ? paragraphs(category.text) : [];
 const gallery = partGallery(page);
 const picture = partPicture(page, category);
 const shown = picture && {
   images: picture.images,
   alt:
     picture.illustration && category
-      ? translated(category, 'name', locale)
+      ? category.name
       : imageAlt(page.brand.name, page.value, partName),
   note: picture.illustration ? copy.categoryIllustration : undefined,
 };
@@ -165,7 +157,7 @@ const installPrice =
 const works = sourcingWorks(await getCollection('works'), page);
 const equivalentName = (equivalent: PartPageView['equivalents'][number]) => {
   const entry = bySlug.get(equivalentSlug(equivalent));
-  return entry && translated(entry.part, 'name', locale);
+  return entry?.part.name;
 };
 const thumbFor = (slug: string) => {
   const entry = bySlug.get(slug);
@@ -191,7 +183,7 @@ const thumbFor = (slug: string) => {
         ? [
             {
               href: PathBuilder.partsCategory(locale, category.slug),
-              label: translated(category, 'name', locale),
+              label: category.name,
             },
           ]
         : []),
@@ -431,7 +423,7 @@ const thumbFor = (slug: string) => {
     {
       category && (
         <div class="flex flex-col gap-3 max-lg:order-4 lg:col-start-1">
-          <h2 class="text-section">{translated(category, 'name', locale)}</h2>
+          <h2 class="text-section">{category.name}</h2>
           <div class="flex max-w-2xl flex-col gap-3 text-base leading-relaxed text-ink-2">
             {categoryText.map((paragraph) => (
               <p>{paragraph}</p>

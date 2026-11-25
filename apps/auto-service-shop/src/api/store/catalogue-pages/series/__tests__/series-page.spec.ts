@@ -7,6 +7,7 @@ import {
   seriesCategoryPageResponseSchema,
   seriesPagePath,
   seriesPageResponseSchema,
+  type Vehicle,
 } from '@podbor/catalog-contract';
 import { SHOP_PREVIEW_HEADER } from '@podbor/catalog-contract/preview';
 import { seriesSlugOf } from '@podbor/catalog-contract/slug';
@@ -211,8 +212,29 @@ medusaIntegrationTestRunner({
         ).not.toContain('mann-filter-hu9');
       });
 
+      it('names the Series and its cars in the locale of the header', async () => {
+        const page = await hub({ [CATALOGUE_LOCALE_HEADER]: 'sr' });
+        const named = [
+          page.series,
+          ...page.models.flatMap(({ vehicles }: { vehicles: Vehicle[] }) =>
+            vehicles.map(({ model }) => model.chassis.series),
+          ),
+        ];
+
+        expect(
+          named.map(({ name, translations }) => [name, translations]),
+        ).toEqual(named.map(() => ['Serija 3', null]));
+        expect(page.categories[0].translations).toBeNull();
+      });
+
       it('picks the translation the locale header names', async () => {
         const page = await categoryPage({ [CATALOGUE_LOCALE_HEADER]: 'sr' });
+
+        expect(page.series).toMatchObject({
+          name: 'Serija 3',
+          translations: null,
+        });
+        expect(page.category.translations).toBeNull();
 
         expect(
           page.parts.flatMap(({ pages }) => pages.map(({ part }) => part.name)),

@@ -14,6 +14,7 @@ import {
 import { SUPPLIER_MODULE } from '../modules/supplier';
 import type SupplierModuleService from '../modules/supplier/service';
 import { CATEGORY_RELATIONS, shownCategory } from './categories';
+import { localizedCategory, localizedSeries } from './catalogue-locale';
 import { loadPartDemand } from './part-demand';
 import { sluggedPagesOf } from './part-pages';
 import {
@@ -27,6 +28,7 @@ const byName = new Intl.Collator('en', { numeric: true }).compare;
 async function carsOf(
   modules: CatalogueModules,
   categoryId: string,
+  locale: CatalogLocale,
 ): Promise<CategoryPageResponse['cars']> {
   const held = await modules.publish.listedSeriesCategoryCounts({
     category: categoryId,
@@ -52,11 +54,9 @@ async function carsOf(
       make,
       series: own
         .sort((a, b) => byName(a.name, b.name))
-        .map(({ slug, name, translations }) => ({
-          slug,
-          name,
-          translations,
-        })),
+        .map(({ slug, name, translations }) =>
+          localizedSeries({ slug, name, translations }, locale),
+        ),
     }));
 }
 
@@ -144,7 +144,7 @@ export async function categoryPageAt(
   const entryOf = (id: string) => entries.get(id)!;
 
   return {
-    category,
+    category: localizedCategory(category, locale),
     page,
     pages,
     count: items.length,
@@ -154,6 +154,6 @@ export async function categoryPageAt(
     ranges,
     uniform,
     demanded: items.some(({ demand: own }) => (own?.score ?? 0) > 0),
-    cars: await carsOf(modules, category.id),
+    cars: await carsOf(modules, category.id, locale),
   };
 }

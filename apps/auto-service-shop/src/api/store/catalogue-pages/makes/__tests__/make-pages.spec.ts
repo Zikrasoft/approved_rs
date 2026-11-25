@@ -110,7 +110,7 @@ medusaIntegrationTestRunner({
             {
               slug: seriesSlugOf('Big series'),
               name: 'Big series',
-              categories: ['Фильтры'],
+              category_names: ['Фильтры'],
             },
           ],
         });
@@ -121,7 +121,7 @@ medusaIntegrationTestRunner({
           [CATALOGUE_LOCALE_HEADER]: 'sr',
         });
 
-        expect(response.data.series[0].categories).toEqual(['Filteri']);
+        expect(response.data.series[0].category_names).toEqual(['Filteri']);
       });
 
       it('answers 404 for a Make with no series page and for an unknown Make', async () => {

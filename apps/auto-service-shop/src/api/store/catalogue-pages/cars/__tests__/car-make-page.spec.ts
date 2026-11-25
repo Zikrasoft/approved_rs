@@ -135,9 +135,13 @@ medusaIntegrationTestRunner({
       it('picks the translation the locale header names', async () => {
         const page = await answer('bmw', { [CATALOGUE_LOCALE_HEADER]: 'sr' });
 
-        expect(page.categories[0].translations).toMatchObject({
-          sr: { name: 'Filteri ulja' },
+        expect(page.categories[0]).toMatchObject({
+          name: 'Filteri ulja',
+          translations: null,
         });
+        expect(page.showcase.map(({ category }) => category)).toContainEqual(
+          expect.objectContaining({ name: 'Filteri ulja', translations: null }),
+        );
       });
 
       it('ranks every Part of a Category before it caps the showcase', async () => {

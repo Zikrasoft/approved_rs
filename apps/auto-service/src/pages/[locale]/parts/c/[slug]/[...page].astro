@@ -1,7 +1,7 @@
 ---
 export const prerender = false;
 
-import { localizedUnit, translated } from '@podbor/catalog-contract';
+import { localizedUnit } from '@podbor/catalog-contract';
 import { withPlaceholder } from '@podbor/i18n';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
@@ -53,8 +53,8 @@ const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const inquiry = content(locale).pages.partsInquiry;
 const copy = inquiry.category;
-const name = translated(category, 'name', locale);
-const [lead, ...body] = paragraphs(translated(category, 'text', locale));
+const name = category.name;
+const [lead, ...body] = paragraphs(category.text);
 const empty = count === 0;
 const firstPage = number === 1;
 const listing = { number, count: pageCount };
@@ -74,10 +74,7 @@ const fields = category.fields
     const range = ranges.find(({ key }) => key === field.key);
     return {
       key: field.key,
-      label: [
-        translated(field, 'label', locale),
-        localizedUnit(field.unit, locale),
-      ]
+      label: [field.label, localizedUnit(field.unit, locale)]
         .filter(Boolean)
         .join(', '),
       values:
@@ -90,9 +87,7 @@ const fields = category.fields
                 (value) => value.toLocaleString(BCP47_BY_LOCALE[locale]),
               )
             : ''
-          : field.options
-              .map((option) => translated(option, 'label', locale))
-              .join(', '),
+          : field.options.map((option) => option.label).join(', '),
     };
   })
   .filter(({ values }) => values);
@@ -180,7 +175,7 @@ const fields = category.fields
                   slug={page.slug}
                   brand={page.brand.name}
                   value={page.value}
-                  name={translated(page.part, 'name', locale)}
+                  name={page.part.name}
                   specs={keySpecs(
                     category,
                     page.part.attributes,

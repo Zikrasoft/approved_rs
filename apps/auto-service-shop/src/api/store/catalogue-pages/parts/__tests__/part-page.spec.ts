@@ -6,6 +6,7 @@ import {
   partPagePath,
   partPageResponseSchema,
   type PartPageResponse,
+  type Vehicle,
 } from '@podbor/catalog-contract';
 import { SHOP_PREVIEW_HEADER } from '@podbor/catalog-contract/preview';
 import { seriesSlugOf } from '@podbor/catalog-contract/slug';
@@ -228,11 +229,19 @@ medusaIntegrationTestRunner({
       });
 
       it('picks the translation the locale header names', async () => {
-        const { page } = await partPage('mann-filter-hu816x', {
+        const { page, vehicles } = await partPage('mann-filter-hu816x', {
           [CATALOGUE_LOCALE_HEADER]: 'sr',
         });
 
         expect(page.part.name).toBe('Filter ulja');
+        expect(page.category).toMatchObject({ translations: null });
+        expect(
+          vehicles.map(({ model }: Vehicle) => model.chassis.series),
+        ).toEqual(
+          vehicles.map(() =>
+            expect.objectContaining({ name: 'Serija 3', translations: null }),
+          ),
+        );
       });
 
       it('shows prices only with the preview header while the shop is closed', async () => {

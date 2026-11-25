@@ -13,13 +13,18 @@ import {
   stubShop,
 } from '@/components/renderAstro';
 import { work } from '@/components/workFixture';
-import type { CarMakePageResponse, Category } from '@podbor/catalog-contract';
-
-type MakeParts = CarMakePageResponse & { make: { slug: string; name: string } };
+import {
+  CATALOGUE_LOCALE_HEADER,
+  translated,
+  type CarMakePageResponse,
+  type Category,
+} from '@podbor/catalog-contract';
 import { article } from '@/components/articleFixture';
 import { SITE_NAME } from '@/utils/constants';
 import type { Article } from '@/utils/blog';
 import MakePage from './[make].astro';
+
+type MakeParts = CarMakePageResponse & { make: { slug: string; name: string } };
 
 vi.mock('astro:content', () => ({ getCollection: vi.fn() }));
 
@@ -70,12 +75,16 @@ const PUBLIC_PAGE =
 const shop = stubShopOf(() => held);
 
 function stubShopOf(entries: () => MakeParts[]) {
-  return (make: string) => {
+  return (make: string, locale: string | null) => {
     const found = entries().find((entry) => entry.make.slug === make);
     return found
       ? Response.json({
           hub: found.hub,
-          categories: found.categories,
+          categories: found.categories.map((own) => ({
+            ...own,
+            name: translated(own, 'name', locale ?? 'ru'),
+            translations: null,
+          })),
           showcase: found.showcase,
         })
       : new Response(null, { status: 404 });
@@ -120,7 +129,9 @@ afterEach(() => {
 });
 
 const answer = (locale: Locale = 'ru', make = 'bmw', headers = {}) => {
-  stubShop((url) => shop(url.pathname.split('/').pop()!));
+  stubShop((url, headers) =>
+    shop(url.pathname.split('/').pop()!, headers.get(CATALOGUE_LOCALE_HEADER)),
+  );
   return respond(
     MakePage,
     new Request(new URL(`/${locale}/cars/${make}/`, 'https://carlab.rs'), {

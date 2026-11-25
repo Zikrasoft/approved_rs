@@ -20,7 +20,7 @@ const PUBLIC_PAGE =
 const series = (name: string, slug: string, categories: string[] = []) => ({
   slug,
   name,
-  categories,
+  category_names: categories,
 });
 
 type Answer = ReturnType<typeof series>[];

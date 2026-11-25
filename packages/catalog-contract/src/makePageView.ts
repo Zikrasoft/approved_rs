@@ -17,7 +17,7 @@ export const makePageResponseSchema = z.object({
     z.object({
       slug: z.string().min(1),
       name: z.string().min(1),
-      categories: z.array(z.string()),
+      category_names: z.array(z.string()),
     }),
   ),
 });

@@ -54,11 +54,11 @@ const series = loaded.series
     <h2 class="text-section">{copy.modelsHeading}</h2>
     <ul class="card divide-y divide-line">
       {
-        series.map(({ slug, label, categories }) => (
+        series.map(({ slug, label, category_names: categoryNames }) => (
           <LinkRow
             href={PathBuilder.partsSeries(locale, make.slug, slug)}
             label={label}
-            detail={categories.join(', ')}
+            detail={categoryNames.join(', ')}
           />
         ))
       }

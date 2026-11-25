@@ -14,6 +14,11 @@ import { seriesSlugOf } from '@podbor/catalog-contract/slug';
 import type CatalogModuleService from '../modules/catalog/service';
 import type { VehiclePart } from '../modules/publish/service';
 import { CATEGORY_RELATIONS, shownCategory } from './categories';
+import {
+  localizedCategory,
+  localizedSeries,
+  localizedVehicle,
+} from './catalogue-locale';
 import { loadPartDemand } from './part-demand';
 import { localizedFit, publishedOfParts, sluggedPagesOf } from './part-pages';
 import { catalogueModules, catalogueStructure } from './catalogue-structure';
@@ -123,6 +128,14 @@ const shownCategories = async (catalog: CatalogModuleService, ids: string[]) =>
       ).map(shownCategory)
     : [];
 
+const localizedPlace = (
+  { series, vehicles }: Pick<Place, 'series' | 'vehicles'>,
+  locale: CatalogLocale,
+) => ({
+  series: localizedSeries(series, locale),
+  vehicles: vehicles.map((vehicle) => localizedVehicle(vehicle, locale)),
+});
+
 export async function seriesPageAt(
   scope: MedusaContainer,
   makeSlug: string,
@@ -132,12 +145,15 @@ export async function seriesPageAt(
   const place = await placeOf(scope, makeSlug, seriesSlug);
   if (!place) return null;
   const demand = await loadPartDemand(scope);
+  const { locale } = options;
   return {
-    series: place.series,
-    models: modelsWithParts(place).map((vehicles) => ({ vehicles })),
-    categories: await shownCategories(place.catalog, [
-      ...place.categories.keys(),
-    ]),
+    series: localizedSeries(place.series, locale),
+    models: modelsWithParts(place).map((vehicles) => ({
+      vehicles: localizedPlace({ ...place, vehicles }, locale).vehicles,
+    })),
+    categories: (
+      await shownCategories(place.catalog, [...place.categories.keys()])
+    ).map((category) => localizedCategory(category, locale)),
     popular: await pagesOfParts(
       scope,
       [...new Set([...place.categories.values()].flat())],
@@ -187,9 +203,14 @@ export async function seriesCategoryPageAt(
     parts.flatMap(({ fits }) => fits.map(({ vehicle_id }) => vehicle_id)),
   );
   return {
-    series: place.series,
-    category: shownCategory(category),
+    ...localizedPlace(
+      {
+        series: place.series,
+        vehicles: place.vehicles.filter(({ id }) => fitted.has(id)),
+      },
+      options.locale,
+    ),
+    category: localizedCategory(shownCategory(category), options.locale),
     parts,
-    vehicles: place.vehicles.filter(({ id }) => fitted.has(id)),
   };
 }

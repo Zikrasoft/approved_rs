@@ -50,7 +50,7 @@ export async function makePageAt(
     series: paged.map((entry) => ({
       slug: entry.slug,
       name: translated(entry, 'name', locale),
-      categories: categoriesOf(entry.categoryIds),
+      category_names: categoriesOf(entry.categoryIds),
     })),
   };
 }

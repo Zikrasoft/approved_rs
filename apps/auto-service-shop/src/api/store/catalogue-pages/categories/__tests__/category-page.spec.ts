@@ -248,7 +248,7 @@ medusaIntegrationTestRunner({
               {
                 slug: seriesSlugOf('3 серия'),
                 name: '3 серия',
-                translations: expect.anything(),
+                translations: null,
               },
             ],
           },
@@ -261,6 +261,18 @@ medusaIntegrationTestRunner({
         });
 
         expect(entries[0].part.name).toBe('Filter ulja');
+      });
+
+      it('names the Category and the series in the locale of the header', async () => {
+        const { category, cars } = await answer('oil-filters', 1, {
+          [CATALOGUE_LOCALE_HEADER]: 'sr',
+        });
+
+        expect(category.translations).toBeNull();
+        expect(cars[0].series[0]).toMatchObject({
+          name: 'Serija 3',
+          translations: null,
+        });
       });
 
       it('shows prices only with the preview header while the shop is closed', async () => {

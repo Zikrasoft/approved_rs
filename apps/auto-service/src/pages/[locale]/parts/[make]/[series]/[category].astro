@@ -1,7 +1,6 @@
 ---
 export const prerender = false;
 
-import { translated } from '@podbor/catalog-contract';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import InquiryLink from '@/components/InquiryLink.astro';
@@ -33,8 +32,8 @@ const copy = content(locale).partsCar.hubs.modelCategory;
 const { make } = series;
 const name = seriesName(series, make, locale);
 const listingAttributes = parts.map(({ part }) => part.attributes);
-const categoryName = translated(category, 'name', locale);
-const [lead, ...body] = paragraphs(translated(category, 'text', locale));
+const categoryName = category.name;
+const [lead, ...body] = paragraphs(category.text);
 const listed = parts.flatMap(({ pages }) =>
   pages.filter(({ superseded }) => !superseded),
 );
@@ -83,7 +82,7 @@ const SAID_BY_FIT = ['axle'];
               <li class="card flex flex-col gap-3 p-5">
                 <FittedPart
                   pages={pages}
-                  name={translated(part, 'name', locale)}
+                  name={part.name}
                   specs={keySpecs(
                     category,
                     part.attributes,

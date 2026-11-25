@@ -2,7 +2,6 @@
 export const prerender = false;
 
 import LinkRow from '@/components/LinkRow.astro';
-import { translated } from '@podbor/catalog-contract';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import VinInquiryCard from '@/components/VinInquiryCard.astro';
@@ -64,7 +63,7 @@ const empty = categories.length === 0;
           !empty ? (
             <ul class="card divide-y divide-line">
               {categories.map((category) => {
-                const [lead] = paragraphs(translated(category, 'text', locale));
+                const [lead] = paragraphs(category.text);
                 return (
                   <LinkRow
                     href={PathBuilder.partsSeriesCategory(
@@ -73,7 +72,7 @@ const empty = categories.length === 0;
                       series.slug,
                       category.slug,
                     )}
-                    label={translated(category, 'name', locale)}
+                    label={category.name}
                     detail={lead}
                   />
                 );

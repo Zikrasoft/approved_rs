@@ -13,6 +13,7 @@ import type { CategoryPart } from '../modules/publish/service';
 import { SUPPLIER_MODULE } from '../modules/supplier';
 import type SupplierModuleService from '../modules/supplier/service';
 import { CATEGORY_RELATIONS, shownCategory } from './categories';
+import { localizedCategory } from './catalogue-locale';
 import { publishedOfParts, sluggedPagesOf } from './part-pages';
 import { catalogueModules, catalogueStructure } from './catalogue-structure';
 
@@ -101,7 +102,7 @@ export async function carMakePageAt(
     options,
   );
   const queues = top.map((category, column) => {
-    const shownOne = shownCategory(category);
+    const shownOne = localizedCategory(shownCategory(category), options.locale);
     return partsIn(category.id)
       .filter(({ part_id }) => contenders[column].includes(part_id))
       .map(({ part_id }) =>
@@ -113,7 +114,9 @@ export async function carMakePageAt(
   });
   return {
     hub: structure.hub(make.slug),
-    categories: top.map(shownCategory),
+    categories: top.map((category) =>
+      localizedCategory(shownCategory(category), options.locale),
+    ),
     showcase: showcaseOf(queues),
   };
 }

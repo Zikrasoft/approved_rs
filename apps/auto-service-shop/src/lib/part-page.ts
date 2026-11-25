@@ -11,6 +11,7 @@ import {
 } from '@podbor/catalog-contract';
 
 import { CATEGORY_RELATIONS, shownCategory } from './categories';
+import { localizedCategory, localizedVehicle } from './catalogue-locale';
 import { loadPartDemand } from './part-demand';
 import { localizedFit, sluggedPagesOf } from './part-pages';
 import {
@@ -154,7 +155,10 @@ export async function partPageAt(
         },
         { relations: CATEGORY_RELATIONS, take: null },
       )
-    ).map((category) => [category.id, shownCategory(category)]),
+    ).map((category) => [
+      category.id,
+      localizedCategory(shownCategory(category), locale),
+    ]),
   );
   const categoryOf = ({ part: { category_id } }: PartPage) =>
     categories.get(category_id ?? '') ?? null;
@@ -210,7 +214,9 @@ export async function partPageAt(
       ...other,
       category: categoryOf(other),
     })),
-    vehicles: byId([...fitVehicles, ...requirementCars, ...kit]),
+    vehicles: byId([...fitVehicles, ...requirementCars, ...kit]).map(
+      (vehicle) => localizedVehicle(vehicle, locale),
+    ),
     linked_series: await seriesLinks(
       modules,
       distinct(

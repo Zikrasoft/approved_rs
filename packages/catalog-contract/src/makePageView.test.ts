@@ -24,9 +24,9 @@ describe('the makes page contract', () => {
     expect(
       makePageResponseSchema.parse({
         make: { slug: 'bmw', name: 'BMW' },
-        series: [{ slug: '1', name: '1', categories: ['Oil'], extra: 1 }],
+        series: [{ slug: '1', name: '1', category_names: ['Oil'], extra: 1 }],
       }).series[0],
-    ).toEqual({ slug: '1', name: '1', categories: ['Oil'] });
+    ).toEqual({ slug: '1', name: '1', category_names: ['Oil'] });
   });
 
   it('refuses an answer without its Make', () => {
