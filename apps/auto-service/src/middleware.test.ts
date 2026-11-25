@@ -38,6 +38,9 @@ describe('onRequest', () => {
     '/llms.txt',
     '/404',
     '/sitemap-index.xml',
+    '/sitemap-catalogue.xml',
+    '/sitemap-catalogue-0.xml',
+    '/catalogue-build.json',
   ])('leaves %s to its route', (pathname) => {
     const context = makeContext(pathname);
     expect(run(context)).toBe('next');
