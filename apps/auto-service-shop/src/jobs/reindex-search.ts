@@ -21,7 +21,7 @@ const belgradeHour = (at: Date) =>
 
 export default async function reindexSearch(
   container: MedusaContainer,
-  { scheduledFor }: ScheduledJobContext = { scheduledFor: new Date() },
+  { scheduledFor }: ScheduledJobContext,
 ): Promise<void> {
   if (belgradeHour(scheduledFor) !== REBUILD_HOUR_IN_BELGRADE) return;
   await container.resolve<ISearchModuleService>(Modules.SEARCH).reindex({

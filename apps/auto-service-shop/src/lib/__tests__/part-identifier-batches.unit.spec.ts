@@ -1,4 +1,6 @@
-import { partIdentifierSource } from '../../search/part-identifier';
+import partIdentifierIndex, {
+  partIdentifierSource,
+} from '../../search/part-identifier';
 
 const mockResolve = jest.fn();
 
@@ -193,5 +195,26 @@ describe('the part_identifier index transform', () => {
       cross_reference_numbers: ['X-1', 'X1'],
       demand: 1,
     });
+  });
+});
+
+describe('the part_identifier seed', () => {
+  it('reads the catalogue in pages of 1000 rows, the module reindex batch', async () => {
+    const takes: number[] = [];
+    const graph = async ({ pagination }: { pagination: { take: number } }) => {
+      takes.push(pagination.take);
+      return { data: [] };
+    };
+
+    const batches: unknown[] = [];
+    for await (const batch of partIdentifierIndex.seed({
+      container: { query: { graph } },
+      index: { entity: 'part_identifier', primary_key: 'id' },
+    } as never)) {
+      batches.push(batch);
+    }
+
+    expect(batches).toEqual([]);
+    expect(takes).toEqual([1000]);
   });
 });

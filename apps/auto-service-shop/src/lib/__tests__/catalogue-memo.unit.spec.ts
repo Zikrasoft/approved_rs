@@ -1,6 +1,5 @@
 import {
   clearCatalogueMemo,
-  DEMAND_TTL_MS,
   memoized,
   type PublishRuns,
 } from '../catalogue-memo';
@@ -23,6 +22,8 @@ const counter = () => {
   let calls = 0;
   return jest.fn(async () => ++calls);
 };
+
+const TTL_MS = 10 * 60_000;
 
 describe('memoized', () => {
   beforeEach(() => clearCatalogueMemo());
@@ -125,13 +126,13 @@ describe('memoized', () => {
     jest.useFakeTimers({ now: new Date('2026-11-25T10:00:00Z') });
     const { publish } = runsOf(['run_1']);
     const compute = counter();
-    await memoized(publish, 'demand', compute, DEMAND_TTL_MS);
+    await memoized(publish, 'demand', compute, TTL_MS);
 
-    jest.setSystemTime(new Date(Date.now() + DEMAND_TTL_MS - 1));
-    expect(await memoized(publish, 'demand', compute, DEMAND_TTL_MS)).toBe(1);
+    jest.setSystemTime(new Date(Date.now() + TTL_MS - 1));
+    expect(await memoized(publish, 'demand', compute, TTL_MS)).toBe(1);
 
     jest.setSystemTime(new Date(Date.now() + 1));
-    expect(await memoized(publish, 'demand', compute, DEMAND_TTL_MS)).toBe(2);
+    expect(await memoized(publish, 'demand', compute, TTL_MS)).toBe(2);
   });
 
   it('keeps a value without a time to live for the whole run', async () => {
@@ -140,7 +141,7 @@ describe('memoized', () => {
     const compute = counter();
     await memoized(publish, 'counts', compute);
 
-    jest.setSystemTime(new Date(Date.now() + 30 * DEMAND_TTL_MS));
+    jest.setSystemTime(new Date(Date.now() + 30 * TTL_MS));
 
     expect(await memoized(publish, 'counts', compute)).toBe(1);
   });

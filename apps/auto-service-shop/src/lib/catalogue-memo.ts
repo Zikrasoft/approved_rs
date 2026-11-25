@@ -1,7 +1,5 @@
 import type PublishModuleService from '../modules/publish/service';
 
-export const DEMAND_TTL_MS = 10 * 60_000;
-
 export type PublishRuns = Pick<PublishModuleService, 'listCatalogueRuns'>;
 
 type Entry = { value: Promise<unknown>; expires: number };

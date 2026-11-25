@@ -38,6 +38,7 @@ import {
   PART_IDENTIFIERS_DELETED_EVENT,
   partChangedEventSchema,
   partIdentifiersDeletedEventSchema,
+  SEARCH_REINDEX_BATCH_SIZE,
 } from './part-changed-event';
 
 export { PART_IDENTIFIER_INDEX };
@@ -444,5 +445,8 @@ export default defineSearchIndex({
       return data.map(({ id }: { id: string }) => id);
     },
   }),
-  seed: graphSeed(partIdentifierSource),
+  seed: graphSeed({
+    ...partIdentifierSource,
+    batch_size: SEARCH_REINDEX_BATCH_SIZE,
+  }),
 });

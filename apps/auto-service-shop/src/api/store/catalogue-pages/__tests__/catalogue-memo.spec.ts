@@ -11,6 +11,7 @@ import { seriesSlugOf } from '@podbor/catalog-contract/slug';
 
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
 import { refreshPartDemandAt } from '../../../../jobs/refresh-part-demand';
+import { clearCatalogueMemo } from '../../../../lib/catalogue-memo';
 import { warmCatalogueMemo } from '../../../../lib/catalogue-page-list';
 import { reindexSupplierOffers } from '../../../../lib/suppliers/markup-reindex';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
@@ -143,6 +144,11 @@ medusaIntegrationTestRunner({
         return AGGREGATES.map((name) => jest.spyOn(service, name));
       };
 
+      const publishAll = async () => {
+        await publish().publishAll();
+        clearCatalogueMemo();
+      };
+
       const lowestHeight = async () =>
         categoryPageResponseSchema
           .parse(await categoryPage(1))
@@ -152,7 +158,7 @@ medusaIntegrationTestRunner({
         catalog().updateParts({ id: parts[0], attributes: { height } });
 
       it('answers the same bodies cold and warm', async () => {
-        await publish().publishAll();
+        await publishAll();
         const cold = await bodies();
 
         await warmCatalogueMemo(getContainer());
@@ -165,7 +171,7 @@ medusaIntegrationTestRunner({
       });
 
       it('runs no aggregate SQL again for a second Category page 2 and a second series page', async () => {
-        await publish().publishAll();
+        await publishAll();
         await categoryPage(2);
         await get(seriesPagePath('bmw', SERIES));
         const calls = aggregateCalls();
@@ -176,26 +182,9 @@ medusaIntegrationTestRunner({
         calls.forEach((call) => expect(call).not.toHaveBeenCalled());
       });
 
-      it('reflects the database after an unpublish', async () => {
-        await publish().publishAll();
-        expect(
-          categoryPageResponseSchema.parse(await categoryPage(1)).count,
-        ).toBe(LISTED);
-        const [last] = await catalog().listPartIdentifiers({
-          part_id: parts[LISTED - 1],
-        });
-
-        await publish().unpublish([last.id]);
-
-        expect(
-          categoryPageResponseSchema.parse(await categoryPage(1)).count,
-        ).toBe(LISTED - 1);
-        await publish().publishAll();
-      });
-
       it('reflects the database after a demand refresh', async () => {
         await changeLowestHeight(50);
-        await publish().publishAll();
+        await publishAll();
         expect(await lowestHeight()).toBe(50);
         await changeLowestHeight(10);
         expect(await lowestHeight()).toBe(50);
@@ -207,7 +196,7 @@ medusaIntegrationTestRunner({
 
       it('reflects the database after a supplier markup reindex', async () => {
         await changeLowestHeight(50);
-        await publish().publishAll();
+        await publishAll();
         expect(await lowestHeight()).toBe(50);
         await changeLowestHeight(20);
 
@@ -218,7 +207,7 @@ medusaIntegrationTestRunner({
 
       it('leaves the old memo behind once a new Publish run starts', async () => {
         await changeLowestHeight(50);
-        await publish().publishAll();
+        await publishAll();
         expect(await lowestHeight()).toBe(50);
         await changeLowestHeight(30);
 

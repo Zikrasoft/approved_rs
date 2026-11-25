@@ -6,9 +6,9 @@ import {
   partPageSlug,
 } from '@podbor/catalog-contract';
 
-import { DEMAND_TTL_MS, memoized } from './catalogue-memo';
+import { memoized } from './catalogue-memo';
 import { categoryPartPages, listedNumbersByCategory } from './category-page';
-import { memoPartDemand } from './part-demand';
+import { DEMAND_TTL_MS, memoPartDemand } from './part-demand';
 import {
   type CatalogueModules,
   catalogueModules,
