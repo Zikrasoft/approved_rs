@@ -3,5 +3,8 @@ Allow: /
 Disallow: /api/
 Disallow: /keystatic/
 Disallow: /admin/
+Disallow: /*/parts/search?*facets=
+Disallow: /*/parts/search?*offset=
+Disallow: /*/parts/search?*range=
 
 Sitemap: https://carlab.rs/sitemap-index.xml

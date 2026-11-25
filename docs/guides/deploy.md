@@ -1217,9 +1217,11 @@ Keys) and put it with the admin URL in `apps/auto-service-shop/.env.admin`
     bodies in memory, was OOM-killed at 256 MB before 40,000 pages.
   - **Stale copies.** While node is down, a page still within its
     `s-maxage` is served from the cache as a hit. `simplefs` v0.0.20 drops a
-    body when its `s-maxage` runs out, so `stale-while-revalidate` and
-    `stale-if-error` never apply after that day. An expired or never-cached
+    body when its `s-maxage` runs out, so the page header sends neither
+    `stale-while-revalidate` nor `stale-if-error`. An expired or never-cached
     page then gets what node gives, a 502 if node is down.
+  - **404.** A catalogue 404 carries `public, s-maxage=600`, not the day-long
+    page header, so a Part published after a visit opens within 10 minutes.
   - **Purge.** `deploy-site.sh auto-service <release>` empties the whole
     cache right after `current` points at the new release:
     `docker compose exec -T caddy curl -fsS -X PURGE http://127.0.0.1:2019/souin-api/souin/flush`.

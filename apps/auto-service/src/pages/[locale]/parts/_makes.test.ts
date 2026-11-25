@@ -8,8 +8,7 @@ import {
 } from '@/components/renderAstro';
 import MakesPage from './makes.astro';
 
-const PUBLIC_PAGE =
-  'public, s-maxage=86400, stale-while-revalidate=86400, stale-if-error=86400';
+const PUBLIC_PAGE = 'public, s-maxage=86400';
 
 const makesResponse = (
   makes = [
