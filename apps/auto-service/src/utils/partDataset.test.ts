@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { partPage } from '@/components/renderAstro';
+import { partCard } from '@/components/renderAstro';
 import { listedPartFromDataset } from '@/scripts/partsList';
 import { partDataset } from './partDataset';
 
-const pads = partPage({
+const pads = partCard({
   part: {
-    ...partPage().part,
+    ...partCard().part,
     translations: { sr: { name: 'Kočione pločice' } },
   },
 });
@@ -31,7 +31,7 @@ describe('partDataset', () => {
   });
 
   it('carries the category add-on service when the category prices one', () => {
-    const battery = partPage({
+    const battery = partCard({
       category: {
         id: 'cat_batteries',
         slug: 'batteries',

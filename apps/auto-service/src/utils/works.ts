@@ -17,7 +17,7 @@ import {
 import type { Locale } from '@/i18n/config';
 import type { Article } from './blog';
 import type { CarMakeParts } from './catalogue';
-import type { PartPageEntry } from './partEntry';
+import type { PartCard } from './partEntry';
 import { MAKES, type Make } from './makes';
 import type { ServiceSlug } from './services';
 
@@ -50,7 +50,7 @@ export const featuredWorks = (works: WorkEntry[]): Work[] => {
 export const titleNamesCar = (title: string, car: string) =>
   title.toLowerCase().startsWith(car.toLowerCase());
 
-const sourcedBy = (page: PartPageEntry, { brand, number }: WorkPart) => {
+const sourcedBy = (page: PartCard, { brand, number }: WorkPart) => {
   const wanted = brand.trim().toLowerCase();
   return (
     [page.brand.name.toLowerCase(), page.brand.slug].includes(wanted) &&
@@ -69,10 +69,7 @@ export const sourcedParts = (work: Work, slugs: Set<string>) =>
     return { ...part, slug: slug && slugs.has(slug) ? slug : null };
   });
 
-export const sourcingWorks = (
-  works: WorkEntry[],
-  page: PartPageEntry,
-): Work[] =>
+export const sourcingWorks = (works: WorkEntry[], page: PartCard): Work[] =>
   publishedWorks(works).filter((work) =>
     work.data.parts.some((part) => sourcedBy(page, part)),
   );

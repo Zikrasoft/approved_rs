@@ -1,17 +1,16 @@
 import type {
-  Category,
   PartPage,
+  RelatedPartPage,
   SiteFitment,
   Vehicle,
 } from '@podbor/catalog-contract';
 
 export type Fit = SiteFitment & { vehicle: Vehicle };
 
-export type PartPageEntry = PartPage & {
-  slug: string;
+export type PartCard = RelatedPartPage & { priceOnRequest: boolean };
+
+export type PartPageView = PartCard & {
   indexable: boolean;
-  priceOnRequest: boolean;
-  category: Category | null;
   fits: Fit[];
   requirementCars: Vehicle[];
   kitCars: Vehicle[];
@@ -25,6 +24,6 @@ export type SeriesModel = { model: Vehicle['model']; vehicles: Vehicle[] };
 
 export type ModelPart = {
   part: PartPage['part'];
-  pages: PartPageEntry[];
+  pages: PartCard[];
   fits: Fit[];
 };

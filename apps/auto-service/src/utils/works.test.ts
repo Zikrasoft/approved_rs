@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { article } from '@/components/articleFixture';
-import type { PartPageEntry } from './partEntry';
+import type { PartCard } from './partEntry';
 import {
   overviewConflicts,
   workshopMakePages,
@@ -179,13 +179,13 @@ describe('titleNamesCar', () => {
   });
 });
 
-const partPage = (brand: string, value: string, normalized: string) =>
+const partCard = (brand: string, value: string, normalized: string) =>
   ({
     slug: `${brand.toLowerCase()}-${normalized.toLowerCase()}`,
     value,
     normalized_value: normalized,
     brand: { name: brand, slug: brand.toLowerCase() },
-  }) as unknown as PartPageEntry;
+  }) as unknown as PartCard;
 
 describe('sourcedParts', () => {
   const slugs = new Set(['mann-filter-hu816x']);
@@ -226,7 +226,7 @@ describe('sourcedParts', () => {
 
 describe('sourcingWorks', () => {
   it('lists the published Works that sourced a Part page', () => {
-    const page = partPage('MANN-FILTER', 'HU 816 x', 'HU816X');
+    const page = partCard('MANN-FILTER', 'HU 816 x', 'HU816X');
     const sourced = makeWork({
       parts: [{ brand: 'mann-filter', number: 'HU816X' }],
     });

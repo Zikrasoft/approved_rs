@@ -2,7 +2,8 @@ import { experimental_AstroContainer as AstroContainer } from 'astro/container';
 import { JSDOM } from 'jsdom';
 import { vi } from 'vitest';
 import { CARLAB } from '@podbor/brands';
-import type { PartPageEntry } from '@/utils/partEntry';
+import type { RelatedPartPage } from '@podbor/catalog-contract';
+import type { PartCard } from '@/utils/partEntry';
 
 type Component = Parameters<AstroContainer['renderToString']>[0];
 
@@ -43,31 +44,6 @@ export const stubShop = (
   return fetch;
 };
 
-export const wirePart = ({
-  priceOnRequest: _priceOnRequest,
-  fits,
-  requirementCars,
-  kitCars,
-  ...page
-}: PartPageEntry) => ({
-  ...page,
-  fits: fits.map(({ vehicle: _vehicle, ...fit }) => fit),
-  requirement_cars: requirementCars.map(({ id }) => id),
-  kit_cars: kitCars.map(({ id }) => id),
-});
-
-export const wireVehicles = ({
-  fits,
-  requirementCars,
-  kitCars,
-}: PartPageEntry) => [
-  ...new Map(
-    [...fits.map(({ vehicle }) => vehicle), ...requirementCars, ...kitCars].map(
-      (vehicle) => [vehicle.id, vehicle],
-    ),
-  ).values(),
-];
-
 export async function render(
   component: Component,
   { path = '/ru/parts/', ...options }: RenderOptions = {},
@@ -89,7 +65,9 @@ export const offer = (price: number, stock = 3, lead = 0) => ({
   lead_time_days: lead,
 });
 
-export const partPage = (over: Partial<PartPageEntry> = {}): PartPageEntry => ({
+export const wirePage = (
+  over: Partial<RelatedPartPage> = {},
+): RelatedPartPage => ({
   id: 'pi_bosch',
   type: 'manufacturer-number',
   value: '0 986 494 524',
@@ -113,12 +91,13 @@ export const partPage = (over: Partial<PartPageEntry> = {}): PartPageEntry => ({
   supplier_data: { cross_references: [], applicability: [], images: [] },
   demand: null,
   slug: 'bosch-0986494524',
-  indexable: true,
-  priceOnRequest: false,
   category: null,
-  fits: [],
-  requirementCars: [],
-  kitCars: [],
+  ...over,
+});
+
+export const partCard = (over: Partial<PartCard> = {}): PartCard => ({
+  ...wirePage(),
+  priceOnRequest: false,
   ...over,
 });
 

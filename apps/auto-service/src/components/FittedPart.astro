@@ -2,7 +2,7 @@
 import { localeFrom } from '@/i18n/config';
 import { bestPage } from '@/utils/bestPrice';
 import { shopOpen } from '@/utils/catalogueEnv';
-import type { PartPageEntry } from '@/utils/partEntry';
+import type { PartCard } from '@/utils/partEntry';
 import { pagesThumbnail } from '@/utils/partImages';
 import { splitNumbers } from '@/utils/partNumbers';
 import { PathBuilder } from '@/utils/paths';
@@ -12,7 +12,7 @@ import PriceTag from './PriceTag.astro';
 import ThumbRow from './ThumbRow.astro';
 
 interface Props {
-  pages: PartPageEntry[];
+  pages: PartCard[];
   name: string;
   specs?: string | null;
   heading?: boolean;

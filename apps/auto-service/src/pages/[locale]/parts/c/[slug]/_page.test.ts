@@ -2,15 +2,14 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   orangeIn,
   parseHtml,
-  partPage,
+  wirePage,
   respond,
   setShop,
   SHOP_PREVIEW_TOKEN,
   stubShop,
-  wirePart,
 } from '@/components/renderAstro';
 import { content } from '@/i18n/content';
-import type { PartPageEntry } from '@/utils/partEntry';
+import type { RelatedPartPage } from '@podbor/catalog-contract';
 import CategoryPage from './[...page].astro';
 
 afterEach(() => {
@@ -58,8 +57,8 @@ const cars = [
 ];
 
 type Answer = {
-  entries?: PartPageEntry[];
-  popular?: PartPageEntry[];
+  entries?: RelatedPartPage[];
+  popular?: RelatedPartPage[];
   page?: number;
   pages?: number;
   count?: number;
@@ -81,8 +80,8 @@ const answerOf = ({
   page: 1,
   pages: 1,
   count,
-  entries: entries.map(wirePart),
-  popular: popular.map(wirePart),
+  entries,
+  popular,
   facets: [],
   ranges: [],
   uniform: [],
@@ -128,7 +127,7 @@ const text = (element: Element | null | undefined) =>
 
 describe('the car picker on a category page', () => {
   it('offers the makes and their series that have a page in the category', async () => {
-    const doc = await categoryPage({ entries: [partPage()], cars });
+    const doc = await categoryPage({ entries: [wirePage()], cars });
     const picker = doc.querySelector('car-picker')!;
     expect(text(picker.querySelector('h2'))).toBe('Для моего авто');
     expect(picker.getAttribute('data-href')).toBe(
@@ -159,7 +158,7 @@ describe('the car picker on a category page', () => {
   });
 
   it('falls back to the category search without JavaScript', async () => {
-    const doc = await categoryPage({ entries: [partPage()], cars });
+    const doc = await categoryPage({ entries: [wirePage()], cars });
     const form = doc.querySelector('car-picker form')!;
     expect(form.getAttribute('action')).toBe('/ru/parts/search/');
     expect(form.getAttribute('method')).toBe('GET');
@@ -172,12 +171,12 @@ describe('the car picker on a category page', () => {
   });
 
   it('leaves the orange to the contact actions, since it only filters', async () => {
-    const doc = await categoryPage({ entries: [partPage()], cars });
+    const doc = await categoryPage({ entries: [wirePage()], cars });
     expect(orangeIn(doc.querySelector('car-picker')!)).toEqual([]);
   });
 
   it('is left out when no series has a page in the category', async () => {
-    const doc = await categoryPage({ entries: [partPage()] });
+    const doc = await categoryPage({ entries: [wirePage()] });
     expect(doc.querySelector('car-picker')).toBeNull();
   });
 
@@ -198,12 +197,12 @@ describe('an empty category', () => {
 
 describe('demand on a category page', () => {
   const demanded = (id: string, score: number, top: boolean) =>
-    partPage({
+    wirePage({
       id,
       slug: `bosch-${id}`,
       value: id,
       demand: { score, popular: true, top },
-      part: { ...partPage().part, id: `part_${id}` },
+      part: { ...wirePage().part, id: `part_${id}` },
     });
   const headings = (doc: Element) =>
     [...doc.querySelectorAll('h2')].map((heading) => text(heading));
@@ -220,7 +219,7 @@ describe('demand on a category page', () => {
 
   it('shows no block for a single popular part', async () => {
     const doc = await categoryPage({
-      entries: [demanded('a', 6, false), partPage()],
+      entries: [demanded('a', 6, false), wirePage()],
       popular: [demanded('a', 6, false)],
     });
 
@@ -229,7 +228,7 @@ describe('demand on a category page', () => {
 
   it('offers the popular order on the search beside its own', async () => {
     const doc = await categoryPage({
-      entries: [partPage(), demanded('a', 6, false)],
+      entries: [wirePage(), demanded('a', 6, false)],
       demanded: true,
     });
     const orders = [...doc.querySelectorAll('nav[aria-label="Порядок"] a')].map(
@@ -244,7 +243,7 @@ describe('demand on a category page', () => {
 
   it('offers no popular order while nothing in the category is demanded', async () => {
     const doc = await categoryPage({
-      entries: [partPage(), partPage({ id: 'pi_ate', slug: 'ate-1' })],
+      entries: [wirePage(), wirePage({ id: 'pi_ate', slug: 'ate-1' })],
     });
 
     expect(doc.querySelector('nav[aria-label="Порядок"]')).toBeNull();
@@ -267,9 +266,9 @@ describe('the whole Category behind one listing page', () => {
 
   it('hides a key spec the shop says every part shares', async () => {
     const entries = [
-      partPage({
+      wirePage({
         part: {
-          ...partPage().part,
+          ...wirePage().part,
           attributes: { voltage: '12', capacity: '60' },
         },
       }),
@@ -288,7 +287,7 @@ describe('the whole Category behind one listing page', () => {
 
   it('prints the range of a number field from the shop', async () => {
     const doc = await categoryPage({
-      entries: [partPage()],
+      entries: [wirePage()],
       ranges: [{ key: 'capacity', min: 40, max: 95 }],
       fields: [field('capacity', 'number', { label: 'Емкость' })],
     });
@@ -301,7 +300,7 @@ describe('the whole Category behind one listing page', () => {
 
   it('links the pages around this one with the numbers of the shop', async () => {
     const doc = await categoryPage(
-      { entries: [partPage()], page: 2, pages: 3, count: 100 },
+      { entries: [wirePage()], page: 2, pages: 3, count: 100 },
       { path: '/ru/parts/c/batteries/2/' },
     );
 
@@ -320,7 +319,7 @@ describe('the whole Category behind one listing page', () => {
 describe('the Category page rendered on demand', () => {
   it('answers an anonymous visitor with a page the shared cache may keep, without a cookie', async () => {
     setShop(false);
-    const response = await categoryResponse({ entries: [partPage()] }).response;
+    const response = await categoryResponse({ entries: [wirePage()] }).response;
 
     expect(response.status).toBe(200);
     expect(response.headers.get('cache-control')).toBe(PUBLIC_PAGE);
@@ -330,7 +329,7 @@ describe('the Category page rendered on demand', () => {
   it('asks the shop for the page and the locale of the path', async () => {
     setShop(false);
     const { shop, response } = categoryResponse(
-      { entries: [partPage()], page: 3, pages: 3 },
+      { entries: [wirePage()], page: 3, pages: 3 },
       { path: '/sr/parts/c/batteries/3/' },
     );
     await response;
@@ -396,7 +395,7 @@ describe('the Category page rendered on demand', () => {
   it('renders a preview visitor fresh, asking the shop for prices, and keeps it out of the cache', async () => {
     setShop(false);
     const { shop, response } = categoryResponse(
-      { entries: [partPage()] },
+      { entries: [wirePage()] },
       {
         headers: {
           cookie: `auto_service_shop_preview=${SHOP_PREVIEW_TOKEN}`,
@@ -412,7 +411,7 @@ describe('the Category page rendered on demand', () => {
   });
 
   it('keeps the canonical and hreflang of the static page, and leaves it open to search engines', async () => {
-    const doc = await categoryPage({ entries: [partPage()] });
+    const doc = await categoryPage({ entries: [wirePage()] });
     const alternates = [
       ...doc.querySelectorAll('link[rel="alternate"][hreflang]'),
     ].map((link) => [link.getAttribute('hreflang'), link.getAttribute('href')]);
@@ -431,7 +430,7 @@ describe('the Category page rendered on demand', () => {
     setShop(false);
     const html = await (
       await categoryResponse(
-        { entries: [partPage()] },
+        { entries: [wirePage()] },
         { path: '/ru/parts/c/batteries/?utm_source=visit491&gclid=click491' },
       ).response
     ).text();

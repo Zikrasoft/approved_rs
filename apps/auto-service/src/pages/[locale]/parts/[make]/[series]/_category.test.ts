@@ -4,12 +4,11 @@ import { content } from '@/i18n/content';
 import {
   isOrange,
   parseHtml,
-  partPage,
+  wirePage,
   respond,
   setShop,
   SHOP_PREVIEW_TOKEN,
   stubShop,
-  wirePart,
 } from '@/components/renderAstro';
 import SeriesCategoryPage from './[category].astro';
 
@@ -48,14 +47,14 @@ const series = {
 };
 
 const numbers = [
-  partPage({ id: 'pi_bmw', slug: 'bmw-11428507683', brand: bmw }),
-  partPage({
+  wirePage({ id: 'pi_bmw', slug: 'bmw-11428507683', brand: bmw }),
+  wirePage({
     id: 'pi_bmw_old',
     slug: 'bmw-11427953125',
     superseded: true,
     brand: bmw,
   }),
-  partPage({
+  wirePage({
     id: 'pi_mann',
     slug: 'mann-hu816x',
     brand: { name: 'MANN', slug: 'mann' },
@@ -94,9 +93,7 @@ const seriesCategoryResponse = (
       category: oilFilters,
       parts: [
         {
-          pages: numbers.map(({ category: _category, ...page }) =>
-            wirePart({ ...page, category: null }),
-          ),
+          pages: numbers.map(({ category: _category, ...page }) => page),
           fits: [
             { part_id: numbers[0].part.id, vehicle_id: g20.id },
             { part_id: numbers[0].part.id, vehicle_id: 'vehicle_gone' },

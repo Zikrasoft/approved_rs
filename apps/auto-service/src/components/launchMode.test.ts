@@ -11,8 +11,8 @@ import {
   vi,
 } from 'vitest';
 import { builtinEnvironments } from 'vitest/environments';
-import type { PartPageEntry } from '@/utils/partEntry';
-import { respond, stubShop, wirePart } from './renderAstro';
+import type { PartCard } from '@/utils/partEntry';
+import { respond, stubShop } from './renderAstro';
 import CategoryPage from '../pages/[locale]/parts/c/[slug]/[...page].astro';
 import ThanksPage from '../pages/[locale]/thanks/[...variant].astro';
 import FitLine from './FitLine.astro';
@@ -73,7 +73,7 @@ const fit: Fitment = {
   translations: null,
 };
 
-const page = (overrides: Partial<PartPageEntry> = {}): PartPageEntry => ({
+const page = (overrides: Partial<PartCard> = {}): PartCard => ({
   id: 'pi_hu816x',
   type: 'manufacturer-number',
   value: 'HU 816 x',
@@ -97,12 +97,8 @@ const page = (overrides: Partial<PartPageEntry> = {}): PartPageEntry => ({
   offers: [],
   supplier_data: { cross_references: [], applicability: [], images: [] },
   demand: null,
-  indexable: true,
   priceOnRequest: true,
   category: null,
-  fits: [],
-  requirementCars: [],
-  kitCars: [],
   ...overrides,
 });
 
@@ -291,14 +287,14 @@ describe('a category page', () => {
   };
 
   const offer = 'Пришлите VIN или номер, и мы назовем цену и срок.';
-  const categoryPage = async (pages: PartPageEntry[]) => {
+  const categoryPage = async (pages: PartCard[]) => {
     stubShop(() =>
       Response.json({
         category,
         page: 1,
         pages: pages.length ? 2 : 1,
         count: pages.length,
-        entries: pages.map(wirePart),
+        entries: pages,
       }),
     );
     const response = await respond(

@@ -1,19 +1,21 @@
-import { partPageSlug } from '@podbor/catalog-contract';
+import {
+  partPageSlug,
+  type PartPageResponse,
+  type RelatedPartPage,
+  type Vehicle,
+} from '@podbor/catalog-contract';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { content } from '@/i18n/content';
 import {
   offer,
   orangeIn,
   parseHtml,
-  partPage,
+  wirePage,
   respond,
   setShop,
   SHOP_PREVIEW_TOKEN,
   stubShop,
-  wirePart,
-  wireVehicles,
 } from '@/components/renderAstro';
-import type { PartPageEntry } from '@/utils/partEntry';
 import { PathBuilder } from '@/utils/paths';
 import { getCollection } from 'astro:content';
 import { BUILT_COVER, work } from '@/components/workFixture';
@@ -32,17 +34,17 @@ vi.mock('astro:content', () => ({
 const copy = content('ru').shopPart;
 const pickup = content('ru').shopCart.pickupMethod;
 
-const successor = partPage({
+const successor = wirePage({
   id: 'pi_new',
   slug: partPageSlug('bosch', 'NEW1'),
   value: 'NEW 1',
   normalized_value: 'NEW1',
 });
 
-const replaced = (over: Partial<PartPageEntry> = {}) =>
-  partPage({
+const replaced = (over: Partial<RelatedPartPage> = {}) =>
+  wirePage({
     part: {
-      ...partPage().part,
+      ...wirePage().part,
       replaced_by: {
         id: 'part_new',
         name: 'Новые колодки',
@@ -60,29 +62,45 @@ const replaced = (over: Partial<PartPageEntry> = {}) =>
     ...over,
   });
 
+type PageWire = PartPageResponse['page'];
+
+const pageView = (over: Partial<PageWire> = {}): PageWire => ({
+  ...wirePage(),
+  indexable: true,
+  fits: [],
+  requirement_cars: [],
+  kit_cars: [],
+  ...over,
+});
+
 const partPageAnswer = (
-  [page, ...related]: PartPageEntry[],
+  [page, ...related]: (RelatedPartPage | PageWire)[],
   linked: { make: string; slug: string }[] = [],
-) => ({
-  page: wirePart(page),
-  related: related.map(wirePart),
-  vehicles: wireVehicles(page),
+  vehicles: Vehicle[] = [],
+): PartPageResponse => ({
+  page: pageView(page),
+  related,
+  vehicles,
   linked_series: linked,
 });
 
 const partPageResponse = (
-  pages: PartPageEntry[],
+  pages: (RelatedPartPage | PageWire)[],
   {
     path = `/ru/parts/p/${pages[0].slug}/`,
     headers = {},
     linked = [],
+    vehicles = [],
   }: {
     path?: string;
     headers?: Record<string, string>;
     linked?: { make: string; slug: string }[];
+    vehicles?: Vehicle[];
   } = {},
 ) => {
-  const shop = stubShop(() => Response.json(partPageAnswer(pages, linked)));
+  const shop = stubShop(() =>
+    Response.json(partPageAnswer(pages, linked, vehicles)),
+  );
   const [, locale, , , slug] = new URL(
     path,
     'https://carlab.rs',
@@ -98,7 +116,7 @@ const partPageResponse = (
 };
 
 const partPageHtml = async (
-  pages: PartPageEntry[],
+  pages: (RelatedPartPage | PageWire)[],
   options?: Parameters<typeof partPageResponse>[1],
 ) => parseHtml(await (await partPageResponse(pages, options).response).text());
 
@@ -113,7 +131,7 @@ afterEach(() => {
 describe('the part page', () => {
   it('describes the part without prices, orders it and names the pickup while the shop is closed', async () => {
     setShop(false);
-    const root = await partPageHtml([partPage()]);
+    const root = await partPageHtml([wirePage()]);
 
     expect(description(root)).toBe(copy.metaDescriptionClosed);
     expect(root.textContent).toContain(copy.orderHeading);
@@ -124,7 +142,7 @@ describe('the part page', () => {
 
   it('describes prices and sells the part instead of ordering it once the shop is open', async () => {
     setShop(true);
-    const root = await partPageHtml([partPage({ offers: [offer(3900)] })]);
+    const root = await partPageHtml([wirePage({ offers: [offer(3900)] })]);
 
     expect(description(root)).toBe(copy.metaDescription);
     expect(root.textContent).not.toContain(copy.orderHeading);
@@ -146,7 +164,7 @@ describe('the part page', () => {
   it('sells the priced successor of an unpriced replaced part once the shop is open', async () => {
     setShop(true);
     const root = await partPageHtml([
-      replaced({ priceOnRequest: true }),
+      replaced(),
       { ...successor, offers: [offer(4100)] },
     ]);
 
@@ -194,7 +212,7 @@ const pagesCategory = {
 describe('the equivalents of a part', () => {
   it('asks for an equivalent of this part, quietly, when none are listed', async () => {
     setShop(false);
-    const section = equivalentsSection(await partPageHtml([partPage()]));
+    const section = equivalentsSection(await partPageHtml([wirePage()]));
     const ask = section.querySelector('parts-list-add')!;
     const button = ask.querySelector('a')!;
 
@@ -222,7 +240,7 @@ describe('the equivalents of a part', () => {
     };
     const section = equivalentsSection(
       await partPageHtml([
-        partPage({
+        wirePage({
           equivalents: [
             {
               id: equivalent.id,
@@ -247,7 +265,7 @@ describe('the equivalents of a part', () => {
 describe('the category block of a part page', () => {
   it('links the whole category in ink, not orange', async () => {
     setShop(false);
-    const root = await partPageHtml([partPage({ category: pagesCategory })]);
+    const root = await partPageHtml([wirePage({ category: pagesCategory })]);
     const link = [...root.querySelectorAll('a')].find(
       (anchor) => anchor.textContent?.trim() === copy.categoryLink,
     )!;
@@ -273,6 +291,33 @@ const shopAnswering = (answer: () => Response | Promise<Response>) => {
   );
 };
 
+const carIn = (series: string): Vehicle => ({
+  id: `vehicle_${series}`,
+  slug: null,
+  power_kw: 100,
+  drive: null,
+  market: null,
+  year_from: 2015,
+  year_to: null,
+  steering: null,
+  model: {
+    slug: `${series}-model`,
+    name: `${series} model`,
+    chassis: {
+      code: series.toUpperCase(),
+      body_style: null,
+      series: {
+        name: series,
+        translations: null,
+        make: { slug: 'bmw', name: 'BMW' },
+      },
+    },
+  },
+  engine: null,
+  identifiers: [],
+  requirements: [],
+});
+
 const fitIn = (series: string) => ({
   part_id: 'part_pads',
   vehicle_id: `vehicle_${series}`,
@@ -285,38 +330,12 @@ const fitIn = (series: string) => ({
   steering: null,
   note: null,
   translations: null,
-  vehicle: {
-    id: `vehicle_${series}`,
-    slug: null,
-    power_kw: 100,
-    drive: null,
-    market: null,
-    year_from: 2015,
-    year_to: null,
-    steering: null,
-    model: {
-      slug: `${series}-model`,
-      name: `${series} model`,
-      chassis: {
-        code: series.toUpperCase(),
-        body_style: null,
-        series: {
-          name: series,
-          translations: null,
-          make: { slug: 'bmw', name: 'BMW' },
-        },
-      },
-    },
-    engine: null,
-    identifiers: [],
-    requirements: [],
-  },
 });
 
 describe('the Part page rendered on demand', () => {
   it('answers an anonymous visitor with a page the shared cache may keep', async () => {
     setShop(false);
-    const response = await partPageResponse([partPage()]).response;
+    const response = await partPageResponse([wirePage()]).response;
 
     expect(response.status).toBe(200);
     expect(response.headers.get('cache-control')).toBe(PUBLIC_PAGE);
@@ -325,7 +344,7 @@ describe('the Part page rendered on demand', () => {
 
   it('asks the shop for the page in the locale of the path', async () => {
     setShop(false);
-    const { shop, response } = partPageResponse([partPage()], {
+    const { shop, response } = partPageResponse([wirePage()], {
       path: '/sr/parts/p/bosch-0986494524/',
     });
     await response;
@@ -384,7 +403,7 @@ describe('the Part page rendered on demand', () => {
   it('renders a preview visitor fresh, asking the shop for prices, and keeps it out of the cache', async () => {
     setShop(false);
     const { shop, response } = partPageResponse(
-      [partPage({ offers: [offer(3900)] })],
+      [wirePage({ offers: [offer(3900)] })],
       { headers: PREVIEW_COOKIE_HEADER },
     );
     const answered = await response;
@@ -398,14 +417,14 @@ describe('the Part page rendered on demand', () => {
 
   it('renders the prices once the shop is open', async () => {
     setShop(true);
-    const root = await partPageHtml([partPage({ offers: [offer(3900)] })]);
+    const root = await partPageHtml([wirePage({ offers: [offer(3900)] })]);
 
     expect(root.textContent).toMatch(/3[\s.,]?900/);
   });
 
   it('keeps the canonical, hreflang and noindex of the static page', async () => {
     setShop(false);
-    const root = await partPageHtml([partPage({ indexable: false })]);
+    const root = await partPageHtml([pageView({ indexable: false })]);
     const alternates = [
       ...root.querySelectorAll('link[rel="alternate"][hreflang]'),
     ].map((link) => [link.getAttribute('hreflang'), link.getAttribute('href')]);
@@ -422,7 +441,7 @@ describe('the Part page rendered on demand', () => {
 
   it('leaves an indexable Part open to search engines', async () => {
     setShop(false);
-    const root = await partPageHtml([partPage()]);
+    const root = await partPageHtml([wirePage()]);
 
     expect(root.querySelector('meta[name="robots"]')).toBeNull();
   });
@@ -430,7 +449,7 @@ describe('the Part page rendered on demand', () => {
   it('prints no query string, so the cached copy fits every visit', async () => {
     setShop(false);
     const html = await (
-      await partPageResponse([partPage()], {
+      await partPageResponse([wirePage()], {
         path: '/ru/parts/p/bosch-0986494524/?utm_source=visit490&gclid=click490',
       }).response
     ).text();
@@ -442,8 +461,11 @@ describe('the Part page rendered on demand', () => {
   it('links a fitted series only when the shop says its page exists', async () => {
     setShop(false);
     const root = await partPageHtml(
-      [partPage({ fits: [fitIn('linked'), fitIn('bare')] })],
-      { linked: [{ make: 'bmw', slug: 'linked' }] },
+      [pageView({ fits: [fitIn('linked'), fitIn('bare')] })],
+      {
+        linked: [{ make: 'bmw', slug: 'linked' }],
+        vehicles: [carIn('linked'), carIn('bare')],
+      },
     );
     const hrefs = [...root.querySelectorAll('a')].map((anchor) =>
       anchor.getAttribute('href'),
@@ -458,7 +480,7 @@ describe('the Part page rendered on demand', () => {
     vi.mocked(getCollection).mockResolvedValueOnce([
       work({ parts: [{ brand: 'Bosch', number: '0 986 494 524' }] }),
     ] as never);
-    const root = await partPageHtml([partPage()]);
+    const root = await partPageHtml([wirePage()]);
 
     expect(root.querySelector('#works img')?.getAttribute('srcset')).toBe(
       BUILT_COVER.srcset,

@@ -6,16 +6,16 @@ import type { Locale } from '@/i18n/config';
 import {
   orangeIn,
   parseHtml,
-  partPage,
+  wirePage,
   respond,
   SHOP_PREVIEW_TOKEN,
   heroPartsSearch,
   stubShop,
-  wirePart,
 } from '@/components/renderAstro';
 import { work } from '@/components/workFixture';
-import type { MakeParts } from '@/utils/works';
-import type { Category } from '@podbor/catalog-contract';
+import type { CarMakePageResponse, Category } from '@podbor/catalog-contract';
+
+type MakeParts = CarMakePageResponse & { make: { slug: string; name: string } };
 import { article } from '@/components/articleFixture';
 import { SITE_NAME } from '@/utils/constants';
 import type { Article } from '@/utils/blog';
@@ -41,7 +41,7 @@ const category = (slug: string, name: string) =>
   }) as unknown as Category;
 
 const showcase = ['HU816X', 'P1'].map((value) =>
-  partPage({ slug: `mann-${value.toLowerCase()}`, value }),
+  wirePage({ slug: `mann-${value.toLowerCase()}`, value }),
 );
 
 const bmwParts = (hub = true, shown = showcase): MakeParts => ({
@@ -76,7 +76,7 @@ function stubShopOf(entries: () => MakeParts[]) {
       ? Response.json({
           hub: found.hub,
           categories: found.categories,
-          showcase: found.showcase.map(wirePart),
+          showcase: found.showcase,
         })
       : new Response(null, { status: 404 });
   };

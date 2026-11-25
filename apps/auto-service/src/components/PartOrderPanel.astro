@@ -5,25 +5,24 @@ import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
 import { carName } from '@/utils/carName';
-import type { PartPageEntry } from '@/utils/partEntry';
+import type { Fit, PartCard } from '@/utils/partEntry';
 import { fitGroups, fitSummary } from '@/utils/fitGroups';
 import { PathBuilder } from '@/utils/paths';
 import Icon from './Icon.astro';
 import PartAskRow from './PartAskRow.astro';
 
 interface Props {
-  page: PartPageEntry;
+  page: PartCard;
+  fits: Fit[];
   part: Record<string, string | undefined>;
   replaced?: string;
 }
 
-const { page, part, replaced } = Astro.props;
+const { page, fits: pageFits, part, replaced } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
 const copy = content(locale).shopPart;
 const named = `${page.brand.name} ${page.value}`;
-const fits = fitSummary(fitGroups(page.fits), (model) =>
-  carName(model, locale),
-);
+const fits = fitSummary(fitGroups(pageFits), (model) => carName(model, locale));
 const oem =
   page.type === 'oem'
     ? null

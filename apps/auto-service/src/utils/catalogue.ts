@@ -64,7 +64,8 @@ import {
 } from '@podbor/catalog-contract/events';
 import type {
   ModelPart,
-  PartPageEntry,
+  PartCard,
+  PartPageView,
   SeriesHub,
   SeriesModel,
 } from './partEntry';
@@ -127,15 +128,15 @@ export type VinOutcome =
   | { kind: 'inquiry'; vin: string; place: CarHit | null };
 
 export type PartPageData = {
-  page: PartPageEntry;
-  related: PartPageEntry[];
+  page: PartPageView;
+  related: PartCard[];
   linkedSeries: Set<string>;
 };
 
 export type CarMakeParts = {
   hub: boolean;
   categories: Category[];
-  showcase: PartPageEntry[];
+  showcase: PartCard[];
 };
 
 export type CategoryPageData = {
@@ -143,8 +144,8 @@ export type CategoryPageData = {
   page: number;
   pages: number;
   count: number;
-  entries: PartPageEntry[];
-  popular: PartPageEntry[];
+  entries: PartCard[];
+  popular: PartCard[];
   facets: SearchFacet[];
   ranges: { key: string; min: number; max: number }[];
   uniform: string[];
@@ -156,7 +157,7 @@ export type SeriesHubData = {
   series: SeriesHub;
   models: SeriesModel[];
   categories: Category[];
-  popular: PartPageEntry[];
+  popular: PartCard[];
 };
 
 export type SeriesCategoryData = {
@@ -261,20 +262,13 @@ export function createCatalogue({
     return schema.parse(await response.json());
   };
 
-  const partEntry = (wire: RelatedPartPage): PartPageEntry => {
+  const partCard = (wire: RelatedPartPage): PartCard => {
     const page = unpriced(wire);
-    return {
-      ...page,
-      indexable: true,
-      priceOnRequest: page.offers.length === 0,
-      fits: [],
-      requirementCars: [],
-      kitCars: [],
-    };
+    return { ...page, priceOnRequest: page.offers.length === 0 };
   };
 
-  const seriesEntry = (page: SluggedPartPage, category: Category | null) =>
-    partEntry({ ...page, category });
+  const seriesCard = (page: SluggedPartPage, category: Category | null) =>
+    partCard({ ...page, category });
 
   const viewCart = (cartId: string): Promise<CartOutcome> =>
     cartOutcome(
@@ -347,13 +341,13 @@ export function createCatalogue({
       const known = carsById(found.vehicles);
       return {
         page: {
-          ...partEntry(page),
+          ...partCard(page),
           indexable,
           fits: known.fits(fits),
           requirementCars: known.cars(requirementCars),
           kitCars: known.cars(kitCars),
         },
-        related: found.related.map(partEntry),
+        related: found.related.map(partCard),
         linkedSeries: new Set(
           found.linked_series.map(({ make, slug }) => seriesKey(make, slug)),
         ),
@@ -378,7 +372,7 @@ export function createCatalogue({
           .toSorted(byModelName),
         categories: found.categories,
         popular: found.popular.map((page) =>
-          seriesEntry(
+          seriesCard(
             page,
             found.categories.find(({ id }) => id === page.part.category_id) ??
               null,
@@ -405,7 +399,7 @@ export function createCatalogue({
         category: found.category,
         parts: found.parts.map(({ pages, fits }) => ({
           part: pages[0].part,
-          pages: pages.map((page) => seriesEntry(page, found.category)),
+          pages: pages.map((page) => seriesCard(page, found.category)),
           fits: known.fits(fits),
         })),
       };
@@ -433,7 +427,7 @@ export function createCatalogue({
       return {
         hub: found.hub,
         categories: found.categories,
-        showcase: found.showcase.map(partEntry),
+        showcase: found.showcase.map(partCard),
       };
     },
 
@@ -453,7 +447,7 @@ export function createCatalogue({
       if (!found) return null;
       const { category, entries, popular, ...rest } = found;
       const own = (entry: (typeof entries)[number]) =>
-        partEntry({ ...entry, category });
+        partCard({ ...entry, category });
       return {
         ...rest,
         category,

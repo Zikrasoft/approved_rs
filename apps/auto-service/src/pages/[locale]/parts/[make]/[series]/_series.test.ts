@@ -3,14 +3,13 @@ import type { Category } from '@podbor/catalog-contract';
 import { content } from '@/i18n/content';
 import {
   parseHtml,
-  partPage,
+  wirePage,
   respond,
   setShop,
   SHOP_PREVIEW_TOKEN,
   stubShop,
-  wirePart,
 } from '@/components/renderAstro';
-import type { PartPageEntry } from '@/utils/partEntry';
+import type { RelatedPartPage } from '@podbor/catalog-contract';
 import SeriesPage from './index.astro';
 
 const copy = content('ru').partsSearch;
@@ -68,25 +67,23 @@ const f30 = {
 };
 
 const demanded = (id: string) =>
-  partPage({
+  wirePage({
     id,
     slug: `mann-${id}`,
     value: id,
     demand: { score: 6, popular: true, top: false },
-    part: { ...partPage().part, id: `part_${id}`, category_id: 'category_oil' },
+    part: { ...wirePage().part, id: `part_${id}`, category_id: 'category_oil' },
   });
 
-const hubAnswer = (pages: PartPageEntry[], models: unknown[] = []) => ({
+const hubAnswer = (pages: RelatedPartPage[], models: unknown[] = []) => ({
   series,
   models: models.map((vehicle) => ({ vehicles: [vehicle] })),
   categories: [oilFilters],
-  popular: pages.map(({ category: _category, ...page }) =>
-    wirePart({ ...page, category: null }),
-  ),
+  popular: pages.map(({ category: _category, ...page }) => page),
 });
 
 const seriesResponse = (
-  pages: PartPageEntry[],
+  pages: RelatedPartPage[],
   {
     models,
     path = '/ru/parts/bmw/3-series/',
@@ -112,7 +109,7 @@ const seriesResponse = (
   };
 };
 
-const seriesPage = async (pages: PartPageEntry[], models?: unknown[]) => {
+const seriesPage = async (pages: RelatedPartPage[], models?: unknown[]) => {
   setShop(false);
   return parseHtml(
     await (await seriesResponse(pages, { models }).response).text(),
@@ -131,7 +128,7 @@ afterEach(() => {
 
 describe('the Series page', () => {
   it('links each category of the Series to its page', async () => {
-    const root = await seriesPage([partPage()]);
+    const root = await seriesPage([wirePage()]);
 
     expect(
       root.querySelector('a[href="/ru/parts/bmw/3-series/oil-filters/"]'),
@@ -139,7 +136,7 @@ describe('the Series page', () => {
   });
 
   it('lists each modification as a link into the parts search scoped to it', async () => {
-    const root = await seriesPage([partPage()], [f30]);
+    const root = await seriesPage([wirePage()], [f30]);
     const link = root.querySelector<HTMLAnchorElement>(
       'a[href="/ru/parts/search/?make=bmw&model=f30-320d"]',
     );
@@ -150,7 +147,7 @@ describe('the Series page', () => {
   });
 
   it('shows no modifications block while the Series lists none', async () => {
-    const root = await seriesPage([partPage()]);
+    const root = await seriesPage([wirePage()]);
 
     expect(headings(root)).not.toContain(hubCopy.carsHeading);
   });
@@ -166,7 +163,7 @@ describe('demand on the Series page', () => {
   });
 
   it('shows no block while only one part fitting the Series is popular', async () => {
-    const root = await seriesPage([demanded('a'), partPage()]);
+    const root = await seriesPage([demanded('a'), wirePage()]);
 
     expect(
       headings(root).some((heading) =>
@@ -179,7 +176,7 @@ describe('demand on the Series page', () => {
 describe('the Series page rendered on demand', () => {
   it('answers an anonymous visitor with a page the shared cache may keep', async () => {
     setShop(false);
-    const response = await seriesResponse([partPage()]).response;
+    const response = await seriesResponse([wirePage()]).response;
 
     expect(response.status).toBe(200);
     expect(response.headers.get('cache-control')).toBe(PUBLIC_PAGE);
@@ -188,7 +185,7 @@ describe('the Series page rendered on demand', () => {
 
   it('asks the shop for the page in the locale of the path', async () => {
     setShop(false);
-    const { shop, response } = seriesResponse([partPage()], {
+    const { shop, response } = seriesResponse([wirePage()], {
       path: '/sr/parts/bmw/3-series/',
     });
     await response;
@@ -229,7 +226,7 @@ describe('the Series page rendered on demand', () => {
 
   it('keeps a preview visitor out of the cache and asks the shop for prices', async () => {
     setShop(false);
-    const { shop, response } = seriesResponse([partPage()], {
+    const { shop, response } = seriesResponse([wirePage()], {
       headers: { cookie: `auto_service_shop_preview=${SHOP_PREVIEW_TOKEN}` },
     });
     const answered = await response;
@@ -243,7 +240,7 @@ describe('the Series page rendered on demand', () => {
   it('keeps the canonical and hreflang of the static page', async () => {
     setShop(false);
     const root = parseHtml(
-      await (await seriesResponse([partPage()]).response).text(),
+      await (await seriesResponse([wirePage()]).response).text(),
     );
     const alternates = [
       ...root.querySelectorAll('link[rel="alternate"][hreflang]'),
@@ -262,7 +259,7 @@ describe('the Series page rendered on demand', () => {
   it('prints no query string, so the cached copy fits every visit', async () => {
     setShop(false);
     const html = await (
-      await seriesResponse([partPage()], {
+      await seriesResponse([wirePage()], {
         path: '/ru/parts/bmw/3-series/?utm_source=visit493',
       }).response
     ).text();

@@ -30,7 +30,7 @@ import { content } from '@/i18n/content';
 import { attributeRows } from '@/utils/attributeRows';
 import { shopOpen } from '@/utils/catalogueEnv';
 import { loadCataloguePage } from '@/utils/cataloguePage';
-import type { PartPageEntry } from '@/utils/partEntry';
+import type { PartPageView } from '@/utils/partEntry';
 import {
   imageAlt,
   partGallery,
@@ -98,7 +98,7 @@ const shown = picture && {
       : imageAlt(page.brand.name, page.value, partName),
   note: picture.illustration ? copy.categoryIllustration : undefined,
 };
-const carLink = (vehicle: PartPageEntry['kitCars'][number]) => ({
+const carLink = (vehicle: PartPageView['kitCars'][number]) => ({
   href: linkOf(vehicle.model.chassis.series),
   label: `${carName(vehicle.model, locale)}, ${vehicleVariant(vehicle, locale)}`,
 });
@@ -137,7 +137,7 @@ const jsonLd = topOffer
 const [noticeBefore, noticeAfter] = (
   replacement ? copy.partReplacedNotice : copy.numberSupersededNotice
 ).split('{number}');
-const equivalentSlug = (equivalent: PartPageEntry['equivalents'][number]) =>
+const equivalentSlug = (equivalent: PartPageView['equivalents'][number]) =>
   partPageSlug(equivalent.brand.slug, equivalent.normalized_value);
 const replacementSlugs = new Set(replacements.map(({ slug }) => slug));
 const equivalents = splitNumbers(
@@ -163,7 +163,7 @@ const installPrice =
           ),
         };
 const works = sourcingWorks(await getCollection('works'), page);
-const equivalentName = (equivalent: PartPageEntry['equivalents'][number]) => {
+const equivalentName = (equivalent: PartPageView['equivalents'][number]) => {
   const entry = bySlug.get(equivalentSlug(equivalent));
   return entry && translated(entry.part, 'name', locale);
 };
@@ -274,6 +274,7 @@ const thumbFor = (slug: string) => {
         !ordersSuccessor && (
           <PartOffers
             page={page}
+            fits={page.fits}
             demoted={Boolean(successor)}
             alternative={successor ? null : pricedEquivalent(page, bySlug)}
           />
