@@ -16,6 +16,9 @@
 		mode bypass_request
 		default_cache_control no-store
 		disable_surrogate_key
+		timeout {
+			backend 40s
+		}
 	}
 }
 

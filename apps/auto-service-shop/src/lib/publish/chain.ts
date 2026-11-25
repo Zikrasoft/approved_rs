@@ -38,6 +38,7 @@ const publishSteps = (scope: MedusaContainer): PublishStep[] => [
         parseEnv(process.env).OPENAI_API_KEY,
       ),
   },
+  { name: 'reindex', run: reindex(scope) },
   {
     name: 'deploy',
     run: async () => {
@@ -51,7 +52,6 @@ const publishSteps = (scope: MedusaContainer): PublishStep[] => [
       }
     },
   },
-  { name: 'reindex', run: reindex(scope) },
 ];
 
 type StepFailure = { failed_step: string; error: string };

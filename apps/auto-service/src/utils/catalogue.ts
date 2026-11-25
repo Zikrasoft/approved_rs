@@ -88,7 +88,7 @@ const carsById = (vehicles: Vehicle[]) => {
   };
 };
 
-export const CATALOGUE_TIMEOUT_MS = 10_000;
+export const CATALOGUE_TIMEOUT_MS = 30_000;
 export const ORDER_TIMEOUT_MS = 15_000;
 
 export type SearchQuery = {

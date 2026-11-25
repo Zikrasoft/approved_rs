@@ -240,7 +240,7 @@ medusaIntegrationTestRunner({
         expect(latest.data.publish_run).toBeNull();
       });
 
-      it('translates Russian names, deploys the site, then reindexes', async () => {
+      it('translates Russian names, reindexes, then deploys the site', async () => {
         const part = await catalog.createParts({ name: 'Масляный фильтр' });
 
         const run = await publish();
@@ -459,7 +459,7 @@ medusaIntegrationTestRunner({
         expect(await translationsOf(part.id)).toEqual({});
       });
 
-      it('stops before the reindex when the deploy dispatch is refused', async () => {
+      it('reindexes before the deploy, so a refused dispatch still leaves search fresh', async () => {
         network.githubStatus = 500;
 
         const run = await publish();
@@ -468,7 +468,7 @@ medusaIntegrationTestRunner({
         expect(run.failed_step).toBe('deploy');
         expect(run.error).toContain('500');
         expect(run.error).not.toContain('test-dispatch-token');
-        expect(reindexCalls).toEqual([]);
+        expect(reindexCalls).toHaveLength(1);
       });
 
       it('logs every finished run as catalogue.run, with the failed step as its reason', async () => {
@@ -509,7 +509,7 @@ medusaIntegrationTestRunner({
         jest.restoreAllMocks();
       });
 
-      it('stops before the reindex when the site build fails', async () => {
+      it('reindexes before the site build, so the build never races the reindex', async () => {
         network.runConclusion = 'failure';
 
         const run = await publish();
@@ -519,7 +519,7 @@ medusaIntegrationTestRunner({
         expect(run.error).toBe(
           `The deploy run did not succeed: failure ${RUN_HTML_URL}`,
         );
-        expect(reindexCalls).toEqual([]);
+        expect(reindexCalls).toHaveLength(1);
       });
 
       it('marks the brand-numbers of a deployed site as published, never those of a failed deploy', async () => {
