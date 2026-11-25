@@ -118,10 +118,10 @@ class PublishModuleService extends MedusaService({
     },
   };
 
-  async publishAll(): Promise<string[]> {
-    const fresh = await this.publishAll_();
+  async publishAll(): Promise<{ fresh: string[]; listedFlipped: string[] }> {
+    const changes = await this.publishAll_();
     clearCatalogueMemo();
-    return fresh;
+    return changes;
   }
 
   async unpublish(ids: string[]): Promise<void> {
