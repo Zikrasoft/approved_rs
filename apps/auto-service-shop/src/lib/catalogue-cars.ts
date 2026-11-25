@@ -13,7 +13,7 @@ import type { CategoryPart } from '../modules/publish/service';
 import { SUPPLIER_MODULE } from '../modules/supplier';
 import type SupplierModuleService from '../modules/supplier/service';
 import { CATEGORY_RELATIONS, shownCategory } from './categories';
-import { pagesOfPublished, publishedOfParts } from './series-page';
+import { publishedOfParts, sluggedPagesOf } from './part-pages';
 import { catalogueModules, catalogueStructure } from './catalogue-structure';
 
 const firstFitment = (rows: CategoryPart[]) =>
@@ -64,7 +64,7 @@ export async function carMakePageAt(
     )
     .slice(0, MAKE_TOP_CATEGORIES);
   const published = await publishedOfParts(
-    modules,
+    scope,
     top.flatMap(({ id }) => partsIn(id).map(({ part_id }) => part_id)),
   );
   const offers = options.shown
@@ -95,7 +95,7 @@ export async function carMakePageAt(
       .map(({ id }) => id),
   );
   const shownParts = new Set(contenders.flat());
-  const pages = await pagesOfPublished(
+  const pages = await sluggedPagesOf(
     scope,
     published.filter(({ part_id }) => shownParts.has(part_id)),
     options,

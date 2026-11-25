@@ -5,8 +5,6 @@ import {
   attributeValuesSchema,
   categoryPageCount,
   categoryFacets,
-  sluggedPartPageSchema,
-  partPageSchema,
   partPageSlug,
   popularPicks,
   type CatalogLocale,
@@ -17,8 +15,7 @@ import { SUPPLIER_MODULE } from '../modules/supplier';
 import type SupplierModuleService from '../modules/supplier/service';
 import { CATEGORY_RELATIONS, shownCategory } from './categories';
 import { loadPartDemand } from './part-demand';
-import { localized, slugOf } from './part-page';
-import { partPagesOf } from './part-pages';
+import { sluggedPagesOf } from './part-pages';
 import {
   type CatalogueModules,
   catalogueModules,
@@ -137,21 +134,12 @@ export async function categoryPageAt(
   const shownIds = new Set([...listing, ...popular]);
   const entries = new Map(
     (
-      await partPagesOf(
+      await sluggedPagesOf(
         scope,
         [...shownIds].map((id) => ({ id, listed: true })),
-        { shown, demand },
+        { locale, shown, demand },
       )
-    ).map((raw) => {
-      const entry = partPageSchema.parse(raw);
-      return [
-        entry.id,
-        sluggedPartPageSchema.parse({
-          ...localized(entry, locale),
-          slug: slugOf(entry),
-        }),
-      ];
-    }),
+    ).map((entry) => [entry.id, entry]),
   );
   const entryOf = (id: string) => entries.get(id)!;
 

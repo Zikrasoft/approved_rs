@@ -1,13 +1,9 @@
 import type { MedusaContainer } from '@medusajs/framework/types';
 import {
   generationOf,
-  partPageSchema,
-  partPageSlug,
   positionGroups,
   requirementMatches,
-  translated,
   type CatalogLocale,
-  type Fitment,
   type LinkedSeries,
   type PartPage,
   type PartPageResponse,
@@ -16,13 +12,12 @@ import {
 
 import { CATEGORY_RELATIONS, shownCategory } from './categories';
 import { loadPartDemand } from './part-demand';
-import { partPagesOf } from './part-pages';
+import { localizedFit, sluggedPagesOf } from './part-pages';
 import {
   type CatalogueModules,
   catalogueModules,
   catalogueStructure,
 } from './catalogue-structure';
-import type { PublishedNumber } from '../modules/publish/service';
 import { listVehicleResponses, toFitmentResponse } from './store-response';
 
 const distinct = <T>(values: T[]) => [...new Set(values)];
@@ -35,39 +30,6 @@ const byId = <Row extends { id: string }>(rows: Row[]) =>
 const slugAddress = (slug: string): [string, string] | null => {
   const at = slug.lastIndexOf('-');
   return at > 0 ? [slug.slice(0, at), slug.slice(at + 1).toUpperCase()] : null;
-};
-
-export const slugOf = (page: PartPage) =>
-  partPageSlug(page.brand.slug, page.normalized_value);
-
-export const localizedFit = (fit: Fitment, locale: CatalogLocale) => ({
-  ...fit,
-  note: fit.note && translated({ ...fit, note: fit.note }, 'note', locale),
-  translations: null,
-});
-
-export const localized = (page: PartPage, locale: CatalogLocale): PartPage => {
-  const { part } = page;
-  return {
-    ...page,
-    part: {
-      ...part,
-      name: translated(part, 'name', locale),
-      description:
-        part.description &&
-        translated(
-          { ...part, description: part.description },
-          'description',
-          locale,
-        ),
-      translations: null,
-      replaced_by: part.replaced_by && {
-        ...part.replaced_by,
-        name: translated(part.replaced_by, 'name', locale),
-        translations: null,
-      },
-    },
-  };
 };
 
 async function seriesLinks(
@@ -157,12 +119,8 @@ export async function partPageAt(
   const { catalog, publish } = modules;
   const own = address && (await publish.publishedBySlug(...address));
   if (!own) return null;
-  const options = { shown, demand: await loadPartDemand(scope) };
-  const pagesOf = async (rows: PublishedNumber[]) =>
-    (await partPagesOf(scope, rows, options)).map((page) =>
-      partPageSchema.parse(page),
-    );
-  const [page] = await pagesOf([own]);
+  const options = { locale, shown, demand: await loadPartDemand(scope) };
+  const [page] = await sluggedPagesOf(scope, [own], options);
   const { part } = page;
   const replacementIds = part.replaced_by
     ? (
@@ -180,9 +138,8 @@ export async function partPageAt(
   const retired = ![own, ...relatedRows]
     .filter(({ id }) => id === own.id || equivalentIds.has(id))
     .some(({ listed }) => listed);
-  const seen = new Set([slugOf(page)]);
-  const related = (await pagesOf(relatedRows)).filter(
-    (other) => !seen.has(slugOf(other)) && seen.add(slugOf(other)),
+  const related = (await sluggedPagesOf(scope, relatedRows, options)).filter(
+    (other) => other.slug !== page.slug,
   );
 
   const categories = new Map(
@@ -242,8 +199,7 @@ export async function partPageAt(
 
   return {
     page: {
-      ...localized(page, locale),
-      slug: slugOf(page),
+      ...page,
       category,
       indexable: own.indexable,
       fits,
@@ -251,8 +207,7 @@ export async function partPageAt(
       kit_cars: kit.map(({ id }) => id),
     },
     related: related.map((other) => ({
-      ...localized(other, locale),
-      slug: slugOf(other),
+      ...other,
       category: categoryOf(other),
     })),
     vehicles: byId([...fitVehicles, ...requirementCars, ...kit]),

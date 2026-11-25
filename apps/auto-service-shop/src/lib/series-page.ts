@@ -1,10 +1,9 @@
 import type { MedusaContainer } from '@medusajs/framework/types';
 import {
   generationOf,
-  partPageSchema,
-  partPageSlug,
   requirementMatchesCount,
   type CatalogLocale,
+  type PartDemand,
   type SeriesCategoryPageResponse,
   type SeriesPageResponse,
   type SluggedPartPage,
@@ -13,16 +12,11 @@ import {
 import { seriesSlugOf } from '@podbor/catalog-contract/slug';
 
 import type CatalogModuleService from '../modules/catalog/service';
-import type { PublishedNumber, VehiclePart } from '../modules/publish/service';
+import type { VehiclePart } from '../modules/publish/service';
 import { CATEGORY_RELATIONS, shownCategory } from './categories';
 import { loadPartDemand } from './part-demand';
-import { localized, localizedFit } from './part-page';
-import { partPagesOf } from './part-pages';
-import {
-  type CatalogueModules,
-  catalogueModules,
-  catalogueStructure,
-} from './catalogue-structure';
+import { localizedFit, publishedOfParts, sluggedPagesOf } from './part-pages';
+import { catalogueModules, catalogueStructure } from './catalogue-structure';
 import { vehiclesOfSeries } from './series-vehicles';
 import { toFitmentResponse } from './store-response';
 
@@ -111,54 +105,13 @@ const modelsWithParts = ({ vehicles, places }: Place): Vehicle[][] => {
   );
 };
 
-export const publishedOfParts = async (
-  { catalog, publish }: CatalogueModules,
-  partIds: string[],
-  only?: (identifierId: string) => boolean,
-): Promise<(PublishedNumber & { part_id: string })[]> => {
-  const identifiers = partIds.length
-    ? await catalog.listPartIdentifiers(
-        { part_id: partIds },
-        { select: ['id', 'part_id'], order: { id: 'ASC' }, take: null },
-      )
-    : [];
-  const partOf = new Map(identifiers.map(({ id, part_id }) => [id, part_id]));
-  const published = await publish.publishedNumbers(
-    identifiers.map(({ id }) => id).filter((id) => only?.(id) ?? true),
-  );
-  return published.map((row) => ({ ...row, part_id: partOf.get(row.id)! }));
-};
-
-export const pagesOfPublished = async (
-  scope: MedusaContainer,
-  published: PublishedNumber[],
-  { locale, shown }: Options,
-): Promise<SluggedPartPage[]> => {
-  const pages = await partPagesOf(scope, published, {
-    shown,
-    demand: await loadPartDemand(scope),
-  });
-  const seen = new Set<string>();
-  return pages
-    .map((page) => ({
-      ...localized(partPageSchema.parse(page), locale),
-      slug: partPageSlug(page.brand.slug, page.normalized_value),
-    }))
-    .filter(({ slug }) => !seen.has(slug) && seen.add(slug));
-};
-
-export const pagesOfParts = async (
-  modules: CatalogueModules,
+const pagesOfParts = async (
   scope: MedusaContainer,
   partIds: string[],
-  options: Options,
+  options: Options & { demand?: Map<string, PartDemand> },
   only?: (identifierId: string) => boolean,
 ): Promise<SluggedPartPage[]> =>
-  pagesOfPublished(
-    scope,
-    await publishedOfParts(modules, partIds, only),
-    options,
-  );
+  sluggedPagesOf(scope, await publishedOfParts(scope, partIds, only), options);
 
 const shownCategories = async (catalog: CatalogModuleService, ids: string[]) =>
   ids.length
@@ -186,10 +139,9 @@ export async function seriesPageAt(
       ...place.categories.keys(),
     ]),
     popular: await pagesOfParts(
-      place,
       scope,
       [...new Set([...place.categories.values()].flat())],
-      options,
+      { ...options, demand },
       (id) => demand.get(id)?.popular === true,
     ),
   };
@@ -210,7 +162,7 @@ export async function seriesCategoryPageAt(
   );
   const partIds = category && place.categories.get(category.id);
   if (!category || !partIds) return null;
-  const pages = await pagesOfParts(place, scope, partIds, options);
+  const pages = await pagesOfParts(scope, partIds, options);
   const vehicleById = new Map(place.vehicles.map((one) => [one.id, one]));
   const fitments = (
     await place.catalog.listFitments(

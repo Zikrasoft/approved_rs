@@ -1,8 +1,15 @@
 import type { MedusaContainer } from '@medusajs/framework/types';
-import type {
-  PartDemand,
-  PartOffer,
-  SupplierData,
+import {
+  partPageSchema,
+  partPageSlug,
+  translated,
+  type CatalogLocale,
+  type Fitment,
+  type PartDemand,
+  type PartOffer,
+  type PartPage,
+  type SluggedPartPage,
+  type SupplierData,
 } from '@podbor/catalog-contract';
 
 import { CATALOG_MODULE } from '../modules/catalog';
@@ -17,6 +24,7 @@ import { releasedSupplierData } from '../modules/supplier/released';
 import type SupplierModuleService from '../modules/supplier/service';
 import { imagesSchema, publicFileUrl, publicImage } from './images';
 import { installationPrice } from './installation';
+import { loadPartDemand } from './part-demand';
 
 type BrandNumberRow = {
   id: string;
@@ -155,4 +163,84 @@ export async function partPagesOf(
     supplier_data: publicSupplierData(supplierData(identifier.id)),
     demand: demand.get(identifier.id) ?? null,
   }));
+}
+
+export const localizedFit = (fit: Fitment, locale: CatalogLocale) => ({
+  ...fit,
+  note: fit.note && translated({ ...fit, note: fit.note }, 'note', locale),
+  translations: null,
+});
+
+const localized = (page: PartPage, locale: CatalogLocale): PartPage => {
+  const { part } = page;
+  return {
+    ...page,
+    part: {
+      ...part,
+      name: translated(part, 'name', locale),
+      description:
+        part.description &&
+        translated(
+          { ...part, description: part.description },
+          'description',
+          locale,
+        ),
+      translations: null,
+      replaced_by: part.replaced_by && {
+        ...part.replaced_by,
+        name: translated(part.replaced_by, 'name', locale),
+        translations: null,
+      },
+    },
+  };
+};
+
+export async function sluggedPagesOf(
+  scope: MedusaContainer,
+  published: PublishedNumber[],
+  {
+    locale,
+    shown,
+    demand,
+  }: {
+    locale: CatalogLocale;
+    shown: boolean;
+    demand?: Map<string, PartDemand>;
+  },
+): Promise<SluggedPartPage[]> {
+  const pages = await partPagesOf(scope, published, {
+    shown,
+    demand: demand ?? (await loadPartDemand(scope)),
+  });
+  const seen = new Set<string>();
+  return pages
+    .map((raw) => {
+      const page = partPageSchema.parse(raw);
+      return {
+        ...localized(page, locale),
+        slug: partPageSlug(page.brand.slug, page.normalized_value),
+      };
+    })
+    .filter(({ slug }) => !seen.has(slug) && seen.add(slug));
+}
+
+export async function publishedOfParts(
+  scope: MedusaContainer,
+  partIds: string[],
+  only?: (identifierId: string) => boolean,
+): Promise<(PublishedNumber & { part_id: string })[]> {
+  const catalog: CatalogModuleService = scope.resolve(CATALOG_MODULE);
+  const identifiers = partIds.length
+    ? await catalog.listPartIdentifiers(
+        { part_id: partIds },
+        { select: ['id', 'part_id'], order: { id: 'ASC' }, take: null },
+      )
+    : [];
+  const partOf = new Map(identifiers.map(({ id, part_id }) => [id, part_id]));
+  const published = await scope
+    .resolve<PublishModuleService>(PUBLISH_MODULE)
+    .publishedNumbers(
+      identifiers.map(({ id }) => id).filter((id) => only?.(id) ?? true),
+    );
+  return published.map((row) => ({ ...row, part_id: partOf.get(row.id)! }));
 }
