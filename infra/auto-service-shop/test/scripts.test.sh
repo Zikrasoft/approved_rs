@@ -157,6 +157,19 @@ expect 'the old tag is kept for rollback' has "$OLD" "$work/host/.previous-tag"
 expect 'the lock is released after a deploy' test ! -d "$work/host/.deploy.lock"
 expect 'a deploy on a host without a sites root makes it as root, for the deploy user' grep -q "^sudo install -d -m 0755 -o $(id -u) -g $(id -g) $SITES_ROOT\$" "$LOG.sudo"
 expect 'a deploy before any site release starts no site' test "$(cat "$LOG.profiles")" = ''
+expect 'a deploy without a caddy-tag file leaves no CADDY_TAG in .env' test "$(grep -c '^CADDY_TAG=' "$work/host/.env")" = 0
+
+CADDY=3333333333333333333333333333333333333333
+stage
+printf 'CADDY_TAG=%s\n' "$OLD" >>"$work/host/.env"
+printf '%s\n' "$CADDY" >"$work/host/caddy-tag"
+expect 'a deploy with a caddy-tag file succeeds' run deploy.sh "$NEW"
+expect '.env names the caddy tag once' test "$(grep -c "^CADDY_TAG=$CADDY\$" "$work/host/.env")" = 1
+expect '.env drops the old caddy tag' test "$(grep -c "^CADDY_TAG=$OLD\$" "$work/host/.env")" = 0
+stage
+printf 'CADDY_TAG=%s\n' "$OLD" >>"$work/host/.env"
+expect 'a deploy without a caddy-tag file succeeds' run deploy.sh "$NEW"
+expect 'a rollback without a caddy-tag file falls back to the shop tag' test "$(grep -c '^CADDY_TAG=' "$work/host/.env")" = 0
 
 stage
 mkdir -p "$SITES_ROOT/detailing/releases/r" "$SITES_ROOT/approved-rs/releases/r" "$SITES_ROOT/new-brand/releases/r" "$SITES_ROOT/auto-service/releases"
