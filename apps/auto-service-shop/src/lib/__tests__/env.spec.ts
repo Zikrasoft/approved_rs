@@ -29,6 +29,7 @@ const PRODUCTION_ENV = {
   NODE_ENV: 'production',
   TYPESENSE_API_KEY: 'secret',
   FILE_URL: 'https://carlab-public.s3.eu-central-1.amazonaws.com',
+  CACHE_PURGE_URL: 'http://caddy:2020/souin-api/souin',
 };
 
 describe('parseEnv', () => {
@@ -195,6 +196,13 @@ describe('parseEnv', () => {
     expect(parseEnv({ ...VALID_ENV, PORT: '4000' }).FILE_URL).toBe(
       'http://localhost:4000/static',
     );
+  });
+
+  it('requires the page cache purge URL in production only, so a Publish never skips its purge there', () => {
+    expect(() =>
+      parseEnv({ ...PRODUCTION_ENV, CACHE_PURGE_URL: undefined }),
+    ).toThrow('CACHE_PURGE_URL is required in production');
+    expect(parseEnv(VALID_ENV).CACHE_PURGE_URL).toBeUndefined();
   });
 
   it('requires the public file URL in production', () => {

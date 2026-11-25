@@ -95,7 +95,7 @@
 http://:2020 {
 	@purge {
 		method PURGE
-		path /souin-api/souin/*
+		path_regexp ^/souin-api/souin/.*[a-z0-9]{3}
 		not path */flush */mapping
 	}
 	handle @purge {

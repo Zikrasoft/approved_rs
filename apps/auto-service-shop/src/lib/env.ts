@@ -213,6 +213,14 @@ const envSchema = envFields
     path: ['FILE_URL'],
     message: 'FILE_URL is required in production',
   })
+  .refine(
+    ({ NODE_ENV, CACHE_PURGE_URL }) =>
+      NODE_ENV !== 'production' || CACHE_PURGE_URL,
+    {
+      path: ['CACHE_PURGE_URL'],
+      message: 'CACHE_PURGE_URL is required in production',
+    },
+  )
   .superRefine(requireS3)
   .superRefine(requireStrongSecrets)
   .transform((env) => ({
