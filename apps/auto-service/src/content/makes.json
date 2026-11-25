@@ -1,5 +1,9 @@
 [
   {
+    "slug": "alfa-romeo",
+    "name": "Alfa Romeo"
+  },
+  {
     "slug": "alpina",
     "name": "Alpina"
   },
@@ -70,6 +74,10 @@
   {
     "slug": "mercedes-benz",
     "name": "Mercedes-Benz"
+  },
+  {
+    "slug": "mini",
+    "name": "MINI"
   },
   {
     "slug": "mitsubishi",
