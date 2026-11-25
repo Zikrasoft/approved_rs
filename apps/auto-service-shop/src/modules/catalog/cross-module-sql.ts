@@ -135,13 +135,16 @@ export const PART_REQUIREMENT_FITS = `
   order by d.vehicle_id, p.id`;
 
 const LISTED_PLACES = `
-  with listed as (
+  with params as (
+    select ?::text[] as series, ?::text as category, ?::int as min_matches
+  ), listed as (
     select distinct pi.part_id from part_identifier pi
     join published_number pn on pn.id = pi.id
       and pn.deleted_at is null and pn.listed
     where pi.deleted_at is null
   ), scoped as (${LIVE_VEHICLES}
-      and (?::text[] is null or c.series_id = any(?::text[]))
+      and ((select series from params) is null
+        or c.series_id = any((select series from params)::text[]))
   ), demands as (${demandsOf('requirement')}
   ), required as (
     select d.vehicle_id, p.id as part_id, p.category_id
@@ -149,7 +152,8 @@ const LISTED_PLACES = `
     join category_field cf on cf.id = d.field_id and cf.deleted_at is null
     join part p on p.category_id = cf.category_id and p.deleted_at is null
     join listed l on l.part_id = p.id
-    where ?::text is null or p.category_id = ?
+    where (select category from params) is null
+      or p.category_id = (select category from params)
     group by d.vehicle_id, p.id, p.category_id
     having ${REQUIREMENTS_MET}
   ), places as (
@@ -159,7 +163,8 @@ const LISTED_PLACES = `
     join fitment f on f.vehicle_id = s.vehicle_id and f.deleted_at is null
     join listed l on l.part_id = f.part_id
     left join part pt on pt.id = f.part_id
-    where ?::text is null or pt.category_id = ?
+    where (select category from params) is null
+      or pt.category_id = (select category from params)
     union all
     select s.series_id, s.model_id, s.vehicle_id, null, r.part_id,
       r.category_id, false
@@ -180,7 +185,8 @@ export const LISTED_MAKE_PART_COUNTS = `${LISTED_PLACES}, scoped_places as (
       and mm.model_id = sc.model_id and mm.category_id = sc.category_id
     group by sc.model_id
     having count(distinct sc.part_id)
-      filter (where sc.fitted or mm.matches >= ?) > 0
+      filter (where sc.fitted
+        or mm.matches >= (select min_matches from params)) > 0
   ), make_matches as (
     select make_id, category_id, count(distinct part_id) as matches
     from scoped_places
@@ -189,7 +195,8 @@ export const LISTED_MAKE_PART_COUNTS = `${LISTED_PLACES}, scoped_places as (
   )
   select mk.slug as make_slug,
     (count(distinct sc.part_id)
-      filter (where sc.fitted or mm.matches >= ?))::int as parts
+      filter (where sc.fitted
+        or mm.matches >= (select min_matches from params)))::int as parts
   from scoped_places sc
   join kept k on k.model_id = sc.model_id
   join make mk on mk.id = sc.make_id

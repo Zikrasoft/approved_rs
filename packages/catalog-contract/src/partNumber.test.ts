@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   normalizePartNumber,
   partNumberQuery,
+  partPageAddress,
   partPageSlug,
   orderLineTitle,
   partTitle,
@@ -36,6 +37,20 @@ describe('normalizePartNumber', () => {
 describe('partPageSlug', () => {
   it('joins the Brand slug and the lower-cased normalized number', () => {
     expect(partPageSlug('mann-filter', 'HU816X')).toBe('mann-filter-hu816x');
+  });
+});
+
+describe('partPageAddress', () => {
+  it('reads the Brand slug and the normalized number back from a slug', () => {
+    expect(partPageAddress('mann-filter-hu816x')).toEqual({
+      brand: 'mann-filter',
+      number: 'HU816X',
+    });
+  });
+
+  it('reads nothing from a slug without a Brand', () => {
+    expect(partPageAddress('hu816x')).toBeNull();
+    expect(partPageAddress('-hu816x')).toBeNull();
   });
 });
 

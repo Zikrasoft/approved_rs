@@ -12,12 +12,7 @@ import { PathBuilder } from '@/utils/paths';
 const loaded = await loadCataloguePage(
   Astro,
   async (catalogue, catalogueLocale) =>
-    makesByLetter(
-      (await catalogue.makesList(catalogueLocale)).map((make) => ({
-        make,
-        parts: 0,
-      })),
-    ),
+    makesByLetter(await catalogue.makesList(catalogueLocale)),
 );
 if (loaded instanceof Response) return loaded;
 const letters = loaded;

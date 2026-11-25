@@ -1,6 +1,7 @@
 import type { MedusaContainer } from '@medusajs/framework/types';
 import {
   generationOf,
+  partPageAddress,
   positionGroups,
   requirementMatches,
   type CatalogLocale,
@@ -27,11 +28,6 @@ const byId = <Row extends { id: string }>(rows: Row[]) =>
   [...new Map(rows.map((row) => [row.id, row])).values()].sort((a, b) =>
     a.id.localeCompare(b.id),
   );
-
-const slugAddress = (slug: string): [string, string] | null => {
-  const at = slug.lastIndexOf('-');
-  return at > 0 ? [slug.slice(0, at), slug.slice(at + 1).toUpperCase()] : null;
-};
 
 async function seriesLinks(
   modules: CatalogueModules,
@@ -115,10 +111,11 @@ export async function partPageAt(
   slug: string,
   { locale, shown }: { locale: CatalogLocale; shown: boolean },
 ): Promise<PartPageResponse | null> {
-  const address = slugAddress(slug);
+  const address = partPageAddress(slug);
   const modules = catalogueModules(scope);
   const { catalog, publish } = modules;
-  const own = address && (await publish.publishedBySlug(...address));
+  const own =
+    address && (await publish.publishedBySlug(address.brand, address.number));
   if (!own) return null;
   const options = { locale, shown, demand: await loadPartDemand(scope) };
   const [page] = await sluggedPagesOf(scope, [own], options);

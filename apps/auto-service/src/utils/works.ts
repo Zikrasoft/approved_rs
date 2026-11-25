@@ -148,6 +148,30 @@ export const carsListing = (tiles: MakeTile[], page?: string) => {
     : null;
 };
 
+type Written = { works: WorkEntry[]; articles: Article[] };
+
+export const carsListingPage = (
+  segment: string,
+  { works, articles }: Written,
+) => {
+  const cards = makeTiles(works, articles);
+  const listing = carsListing(cards, segment);
+  return listing && { listing, cards };
+};
+
+export const carMakePage = async (
+  segment: string,
+  { works, articles }: Written,
+  partsOf: (make: string) => Promise<CarMakeParts | null>,
+): Promise<WorkshopMakePage | null> => {
+  const page = workshopMakePages<MakeParts>(works, articles, []).find(
+    ({ make }) => make.slug === segment,
+  );
+  if (!page) return null;
+  const parts = await partsOf(page.make.slug);
+  return { ...page, parts: parts ? [{ make: page.make, ...parts }] : [] };
+};
+
 const WORKSHOP = 'workshop';
 
 const SERVICE_PHOTO: Partial<Record<ServiceSlug, string>> = {

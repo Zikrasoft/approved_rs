@@ -13,8 +13,8 @@ export type Showcased = {
 const bestOfPages = (pages: Showcased[]) =>
   bestOffer(pages.flatMap(({ offers }) => offers));
 
-export const offerRank = (pages: Showcased[]): number => {
-  const best = bestOfPages(pages);
+export const offerRank = (offers: Showcased['offers']): number => {
+  const best = bestOffer(offers);
   return best ? (best.stock_quantity > 0 ? 0 : 1) : 2;
 };
 
@@ -36,7 +36,10 @@ export const showcaseOf = <Page extends Showcased>(
   const picks = queues
     .flatMap((queue, column) =>
       queue
-        .map((pages) => ({ pages, rank: offerRank(pages) }))
+        .map((pages) => ({
+          pages,
+          rank: offerRank(pages.flatMap(({ offers }) => offers)),
+        }))
         .sort((a, b) => a.rank - b.rank)
         .map((pick, round) => ({ ...pick, round, column })),
     )

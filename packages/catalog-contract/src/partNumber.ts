@@ -16,6 +16,15 @@ export const partPageSlug = (
   normalizedValue: string,
 ): string => `${brandSlug}-${normalizedValue.toLowerCase()}`;
 
+export const partPageAddress = (
+  slug: string,
+): { brand: string; number: string } | null => {
+  const at = slug.lastIndexOf('-');
+  return at > 0
+    ? { brand: slug.slice(0, at), number: slug.slice(at + 1).toUpperCase() }
+    : null;
+};
+
 const WORD = /^\p{L}{3,}$/u;
 
 export const partNumberQuery = (raw: string): string | null => {

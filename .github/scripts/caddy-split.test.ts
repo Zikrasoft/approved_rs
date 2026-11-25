@@ -1,9 +1,11 @@
+import { readFileSync } from 'node:fs';
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   brokenAnswer,
   cachedNotFound,
   caddyServes,
+  catalogueCaches,
   linksCaddy404,
   shadowedRedirects,
 } from './caddy-split.ts';
@@ -64,4 +66,19 @@ test('an unknown slug is a 404 page the cache may keep, never a bare or private 
   assert.equal(cachedNotFound(404, 'private, no-store', page), false);
   assert.equal(cachedNotFound(404, kept, ''), false);
   assert.equal(cachedNotFound(200, kept, page), false);
+});
+
+test('the Caddyfile caches every catalogue page and never the search, cart or prices', () => {
+  const caches = catalogueCaches(
+    readFileSync('infra/auto-service-shop/caddy/Caddyfile', 'utf8'),
+  );
+  for (const path of [
+    '/ru/parts/p/bosch-0986494524/',
+    '/sr/parts/c/brakes/2/',
+    '/ru/parts/bmw/3-series/oil-filters/',
+    '/en/cars/bmw/',
+  ])
+    assert.equal(caches(path), true, path);
+  for (const path of ['/ru/parts/search/', '/ru/parts/cart', '/ru/parts/'])
+    assert.equal(caches(path), false, path);
 });

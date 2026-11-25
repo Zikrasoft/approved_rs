@@ -40,9 +40,9 @@ const values = (pages: Page[]) => pages.map(({ value }) => value);
 
 describe('the Make showcase', () => {
   it('ranks a Part by its best offer: in stock, on order, no price', () => {
-    expect(offerRank([page('a', { stock: 2 })])).toBe(0);
-    expect(offerRank([page('a', { stock: 0 })])).toBe(1);
-    expect(offerRank([page('a')])).toBe(2);
+    expect(offerRank(page('a', { stock: 2 }).offers)).toBe(0);
+    expect(offerRank(page('a', { stock: 0 }).offers)).toBe(1);
+    expect(offerRank(page('a').offers)).toBe(2);
   });
 
   it('ranks a picture: photo, illustration, none', () => {

@@ -87,7 +87,7 @@ const placeBindings = ({
 }: {
   series?: string[] | null;
   category?: string | null;
-}) => [series, series, category, category, category, category];
+}) => [series, category, MIN_REQUIREMENT_MATCHES_FOR_PAGE];
 
 const PRUNE_RUNS_BEFORE = `
   delete from catalogue_run r
@@ -206,11 +206,11 @@ class PublishModuleService extends MedusaService({
     seriesIds: string[],
     @MedusaContext() sharedContext: Context = {},
   ): Promise<MakePartCount[]> {
-    const { rows } = await runBoundSql(sharedContext, LISTED_MAKE_PART_COUNTS, [
-      ...placeBindings({ series: seriesIds }),
-      MIN_REQUIREMENT_MATCHES_FOR_PAGE,
-      MIN_REQUIREMENT_MATCHES_FOR_PAGE,
-    ]);
+    const { rows } = await runBoundSql(
+      sharedContext,
+      LISTED_MAKE_PART_COUNTS,
+      placeBindings({ series: seriesIds }),
+    );
     return rows;
   }
 

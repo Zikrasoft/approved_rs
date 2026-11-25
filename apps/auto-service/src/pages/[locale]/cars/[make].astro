@@ -5,42 +5,31 @@ import { getCollection } from 'astro:content';
 import CarMakePage from '@/components/CarMakePage.astro';
 import CarsListPage from '@/components/CarsListPage.astro';
 import { answerPage, loadCataloguePage } from '@/utils/cataloguePage';
-import {
-  CARS_PAGE_NUMBER,
-  carsListing,
-  makeTiles,
-  workshopMakePages,
-  type MakeParts,
-} from '@/utils/works';
+import { CARS_PAGE_NUMBER, carMakePage, carsListingPage } from '@/utils/works';
 
 const segment = Astro.params.make ?? '';
-const works = await getCollection('works');
-const articles = await getCollection('articles');
-const cards = CARS_PAGE_NUMBER.test(segment) ? makeTiles(works, articles) : [];
+const written = {
+  works: await getCollection('works'),
+  articles: await getCollection('articles'),
+};
 const listing = CARS_PAGE_NUMBER.test(segment)
-  ? answerPage(Astro, carsListing(cards, segment))
+  ? answerPage(Astro, carsListingPage(segment, written))
   : null;
 if (listing instanceof Response) return listing;
-const loaded = listing
+const make = listing
   ? null
-  : await loadCataloguePage(Astro, async (catalogue, catalogueLocale) => {
-      const [page] = workshopMakePages<MakeParts>(works, articles, []).filter(
-        ({ make }) => make.slug === segment,
-      );
-      if (!page) return null;
-      const parts = await catalogue.carMakeParts(
-        page.make.slug,
-        catalogueLocale,
-      );
-      return { ...page, parts: parts ? [{ make: page.make, ...parts }] : [] };
-    });
-if (loaded instanceof Response) return loaded;
+  : await loadCataloguePage(Astro, (catalogue, catalogueLocale) =>
+      carMakePage(segment, written, (slug) =>
+        catalogue.carMakeParts(slug, catalogueLocale),
+      ),
+    );
+if (make instanceof Response) return make;
 ---
 
 {
   listing ? (
-    <CarsListPage listing={listing} cards={cards} />
+    <CarsListPage listing={listing.listing} cards={listing.cards} />
   ) : (
-    loaded && <CarMakePage page={loaded} />
+    make && <CarMakePage page={make} />
   )
 }

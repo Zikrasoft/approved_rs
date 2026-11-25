@@ -85,6 +85,38 @@ export const cachedNotFound = (
 
 export const brokenAnswer = (status: number) => status >= 500 && status !== 503;
 
+const CADDYFILE = 'infra/auto-service-shop/caddy/Caddyfile';
+
+const CACHED_APPS = new Set(['auto-service']);
+
+export function catalogueCaches(caddyfile: string): (path: string) => boolean {
+  const matcher = /@catalogue \{([\s\S]*?)\n\s*\}/.exec(caddyfile)?.[1] ?? '';
+  const patterns = (prefix: string) =>
+    [
+      ...matcher.matchAll(
+        new RegExp(`^\\s*${prefix}path_regexp (\\S+)$`, 'gm'),
+      ),
+    ].map(([, pattern]) => new RegExp(pattern));
+  const kept = patterns('');
+  const skipped = patterns('not ');
+  return (path) =>
+    kept.length > 0 &&
+    kept.every((pattern) => pattern.test(path)) &&
+    !skipped.some((pattern) => pattern.test(path));
+}
+
+function uncachedPublic(app: string) {
+  const caches = CACHED_APPS.has(app)
+    ? catalogueCaches(readFileSync(CADDYFILE, 'utf8'))
+    : () => true;
+  return (path: string, cacheControl: string | null) =>
+    PUBLIC_CACHE.test(cacheControl ?? '') && !caches(path)
+      ? [
+          `${app}: ${path} answers '${cacheControl}' but the @catalogue matcher in ${CADDYFILE} never caches it`,
+        ]
+      : [];
+}
+
 const ON_DEMAND = /^export const prerender = false;?$/m;
 
 function onDemandPages(pages: string): string[] {
@@ -150,9 +182,11 @@ async function probeUnknownSlugs(app: string): Promise<string[]> {
   try {
     const base = `http://127.0.0.1:${port}`;
     await waitFor(base);
+    const uncached = uncachedPublic(app);
     for (const path of paths) {
       const response = await fetch(base + path, { redirect: 'manual' });
       const body = await response.text();
+      failures.push(...uncached(path, response.headers.get('cache-control')));
       if (
         !cachedNotFound(
           response.status,
@@ -184,9 +218,11 @@ async function probeOnDemandPages(app: string): Promise<string[]> {
   try {
     const base = `http://127.0.0.1:${port}`;
     await waitFor(base);
+    const uncached = uncachedPublic(app);
     for (const path of Object.values(probes)) {
       const response = await fetch(base + path, { redirect: 'manual' });
       const body = await response.text();
+      failures.push(...uncached(path, response.headers.get('cache-control')));
       if (brokenAnswer(response.status))
         failures.push(`${app}: ${path} answered ${response.status}`);
       if (linksCaddy404(body))

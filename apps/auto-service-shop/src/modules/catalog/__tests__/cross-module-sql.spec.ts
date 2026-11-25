@@ -8,6 +8,7 @@ import {
   LISTED_SERIES_CATEGORY_COUNTS,
   LISTED_VEHICLE_PARTS,
   ORPHAN_SWEEPS,
+  PART_REQUIREMENT_FITS,
   PUBLISH_ALL,
   PUBLISHED_PAGE,
   REFRESH_LISTED,
@@ -20,16 +21,17 @@ const STATEMENTS: [string, string, Knex.RawBinding[]][] = [
   ['PUBLISHED_PAGE', PUBLISHED_PAGE, [null, null, 10]],
   ...(
     [
-      ['LISTED_SERIES_CATEGORY_COUNTS', LISTED_SERIES_CATEGORY_COUNTS, []],
-      ['LISTED_CATEGORY_PARTS', LISTED_CATEGORY_PARTS, []],
-      ['LISTED_VEHICLE_PARTS', LISTED_VEHICLE_PARTS, []],
-      ['LISTED_MAKE_PART_COUNTS', LISTED_MAKE_PART_COUNTS, [2, 2]],
-    ] as [string, string, Knex.RawBinding[]][]
-  ).map(([name, sql, own]): [string, string, Knex.RawBinding[]] => [
+      ['LISTED_SERIES_CATEGORY_COUNTS', LISTED_SERIES_CATEGORY_COUNTS],
+      ['LISTED_CATEGORY_PARTS', LISTED_CATEGORY_PARTS],
+      ['LISTED_VEHICLE_PARTS', LISTED_VEHICLE_PARTS],
+      ['LISTED_MAKE_PART_COUNTS', LISTED_MAKE_PART_COUNTS],
+    ] as [string, string][]
+  ).map(([name, sql]): [string, string, Knex.RawBinding[]] => [
     name,
     sql,
-    [[], [], 'category', 'category', 'category', 'category', ...own],
+    [[], 'category', 2],
   ]),
+  ['PART_REQUIREMENT_FITS', PART_REQUIREMENT_FITS, [[]]],
   ['UNRESOLVED_VIN_CODES', UNRESOLVED_VIN_CODES, [[], true, 0, 10]],
   ...ORPHAN_SWEEPS.map((sql, index): [string, string, Knex.RawBinding[]] => [
     `ORPHAN_SWEEPS[${index}]`,

@@ -78,14 +78,7 @@ export async function carMakePageAt(
     numbersOf.set(part_id, [...(numbersOf.get(part_id) ?? []), id]);
   }
   const rankOf = (partId: string) =>
-    offerRank([
-      {
-        offers: numbersOf.get(partId)!.flatMap((id) => offers.get(id) ?? []),
-        images: [],
-        supplier_data: { images: [] },
-        category: null,
-      },
-    ]);
+    offerRank(numbersOf.get(partId)!.flatMap((id) => offers.get(id) ?? []));
   const contenders = top.map((category) =>
     partsIn(category.id)
       .map(({ part_id }) => part_id)
