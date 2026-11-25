@@ -75,7 +75,7 @@ class TypesenseSearchProviderService extends AbstractSearchProviderService {
         { host: options.host, port: options.port, protocol: options.protocol },
       ],
       apiKey: options.apiKey,
-      connectionTimeoutSeconds: 5,
+      connectionTimeoutSeconds: 60,
     });
   }
 

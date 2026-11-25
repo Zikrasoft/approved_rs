@@ -1117,6 +1117,11 @@ Keys) and put it with the admin URL in `apps/auto-service-shop/.env.admin`
 - **Typesense is not backed up.** Its index is derived from Postgres and rebuilt
   by the nightly `reindex-search` job (ADR-0041), so after a restore search stays
   empty until the next 04:00 Belgrade rebuild.
+  A rebuild reindexes in batches of 1000 (`reindex.batch_size` in
+  `medusa-config.ts`) and the Typesense client waits 60 s for a connection.
+  After the deploy that ships this, run a full rebuild once and write its
+  docs/s (documents indexed divided by the job's wall time in `docker compose
+logs medusa`) here. TODO: record the measured docs/s.
 - Only Caddy is published outward: 80, 443, 443/udp. Grafana listens on
   `127.0.0.1:3000` only, for an SSH tunnel. Medusa, Postgres, Typesense, Loki
   and Alloy have no host ports; Postgres and Typesense sit on an internal network with no

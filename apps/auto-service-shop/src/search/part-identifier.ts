@@ -54,6 +54,8 @@ type NumberRow = {
 
 type FacetFieldRow = { key: string; category_id: string; type: string };
 
+type FacetFields = Map<string | null, FacetFieldRow[]>;
+
 type OfferRow = PricedOfferRow & { part_identifier_id: string };
 
 type FitmentRow = { part_id: string; vehicle: CarAddress };
@@ -79,6 +81,17 @@ type IdentifierRow = {
   };
 };
 
+const groupBy = <T, K>(items: T[], keyOf: (item: T) => K) => {
+  const groups = new Map<K, T[]>();
+  for (const item of items) {
+    const key = keyOf(item);
+    const group = groups.get(key);
+    if (group) group.push(item);
+    else groups.set(key, [item]);
+  }
+  return groups;
+};
+
 const lower = (text: string | undefined) => text?.toLowerCase();
 
 const names = (
@@ -97,21 +110,18 @@ const names = (
 
 const valuesOf = (
   { attributes, category_id }: IdentifierRow['part'],
-  facetFields: FacetFieldRow[],
+  facetFields: FacetFields,
 ) =>
-  facetFields
-    .filter(
-      ({ key, category_id: fieldCategory }) =>
-        fieldCategory === category_id && attributes[key] !== undefined,
-    )
+  (facetFields.get(category_id) ?? [])
+    .filter(({ key }) => attributes[key] !== undefined)
     .map(({ key, type }) => ({ key, type, values: [attributes[key]].flat() }));
 
-const facets = (part: IdentifierRow['part'], facetFields: FacetFieldRow[]) =>
+const facets = (part: IdentifierRow['part'], facetFields: FacetFields) =>
   valuesOf(part, facetFields).flatMap(({ key, values }) =>
     values.map((value) => facetFilter(key, String(value))),
   );
 
-const measures = (part: IdentifierRow['part'], facetFields: FacetFieldRow[]) =>
+const measures = (part: IdentifierRow['part'], facetFields: FacetFields) =>
   valuesOf(part, facetFields)
     .filter(({ type }) => type === 'number')
     .flatMap(({ key, values }) =>
@@ -122,7 +132,7 @@ const measures = (part: IdentifierRow['part'], facetFields: FacetFieldRow[]) =>
     );
 
 type Catalogue = {
-  siblings: NumberRow[];
+  siblings: Map<string, NumberRow[]>;
   published: Map<string, boolean>;
 };
 
@@ -134,7 +144,7 @@ const STANDING = { superseded: 0, unbuyable: 1, buyable: 2 } as const;
 const toDocument = (
   row: IdentifierRow,
   catalogue: Catalogue,
-  facetFields: FacetFieldRow[],
+  facetFields: FacetFields,
   own: PartOffer[],
   fitted: CarAddress[],
   demand: number,
@@ -153,8 +163,8 @@ const toDocument = (
         : STANDING.unbuyable,
     brand: row.brand.name,
     number: [row.value, row.normalized_value],
-    equivalent_numbers: catalogue.siblings
-      .filter(({ id, part_id }) => part_id === row.part.id && id !== row.id)
+    equivalent_numbers: (catalogue.siblings.get(row.part.id) ?? [])
+      .filter(({ id }) => id !== row.id)
       .flatMap(({ value, normalized_value }) => [value, normalized_value]),
     cross_reference_numbers: supplierData.cross_references.flatMap(
       ({ number }) => [number, partNumberKey(number)],
@@ -205,7 +215,7 @@ const requiredCars = async (
   });
 };
 
-const source = {
+export const partIdentifierSource = {
   fields: [
     'id',
     'value',
@@ -289,10 +299,17 @@ const source = {
         rows.map(({ id }) => id),
       ),
     ]);
-    const fitted = [...(fitments as FitmentRow[]), ...required];
+    const fittedCars = groupBy(
+      [...(fitments as FitmentRow[]), ...required],
+      ({ part_id }) => part_id,
+    );
+    const facetFieldsOf: FacetFields = groupBy(
+      facetFields as FacetFieldRow[],
+      ({ category_id }) => category_id,
+    );
     const offersOf = offersByIdentifier(offers as OfferRow[]);
     const catalogue: Catalogue = {
-      siblings: siblings as NumberRow[],
+      siblings: groupBy(siblings as NumberRow[], ({ part_id }) => part_id),
       published: new Map(
         published.map(({ id, listed }: { id: string; listed: boolean }) => [
           id,
@@ -304,11 +321,9 @@ const source = {
       toDocument(
         row,
         catalogue,
-        facetFields as FacetFieldRow[],
+        facetFieldsOf,
         offersOf.get(row.id) ?? [],
-        fitted
-          .filter(({ part_id }) => part_id === row.part.id)
-          .map(({ vehicle }) => vehicle),
+        (fittedCars.get(row.part.id) ?? []).map(({ vehicle }) => vehicle),
         demand.get(row.id)?.score ?? 0,
         supplierData(row.id),
       ),
@@ -414,7 +429,7 @@ export default defineSearchIndex({
   }),
   events: [PART_CHANGED_EVENT, PART_IDENTIFIERS_DELETED_EVENT],
   consume: graphConsume({
-    ...source,
+    ...partIdentifierSource,
     resolve_ids: async (event, { container }) => {
       if (event.name === PART_IDENTIFIERS_DELETED_EVENT) {
         return partIdentifiersDeletedEventSchema.parse(event.data).ids;
@@ -429,5 +444,5 @@ export default defineSearchIndex({
       return data.map(({ id }: { id: string }) => id);
     },
   }),
-  seed: graphSeed(source),
+  seed: graphSeed(partIdentifierSource),
 });
