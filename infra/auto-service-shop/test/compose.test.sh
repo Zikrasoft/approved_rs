@@ -131,7 +131,7 @@ cat >"$work/stub/Caddyfile" <<'STUB'
 	header X-Upstream "{http.request.host} {http.request.header.X-Forwarded-Proto} {http.request.header.X-Forwarded-For} {http.request.header.X-Request-Id}"
 	@private path /ru/parts/p/private/
 	@public {
-		path /ru/parts/* /ru/cars/* /sr/parts/*
+		path /ru/parts/* /ru/cars/* /sr/parts/* /llms.txt /sr/llms.txt /catalogue-build.json /sitemap-catalogue*
 		not path /ru/parts/p/private/
 	}
 	header @private Cache-Control "private, no-store"
@@ -328,7 +328,11 @@ cached 'a cookie that only starts with the token stays on the cache' '; hit;' ca
 cached 'the preview flag cookie alone does not' '; hit;' carlab /ru/parts/p/a/ -H 'Cookie: auto_service_shop_preview_on=1'
 cache_status carlab /ru/parts/p/private/ >/dev/null
 cached 'a private, no-store response is never stored' 'fwd=uri-miss; detail=NO-STORE-DIRECTIVE' carlab /ru/parts/p/private/
-for path in /ru/parts/ /ru/parts/search/ /ru/parts/cart/ /ru/parts/prices/ /ru/services/ /ru/; do
+for path in /llms.txt /sr/llms.txt /catalogue-build.json /sitemap-catalogue.xml /sitemap-catalogue-0.xml /ru/parts/; do
+  cached "$path is cached like a catalogue page" 'fwd=uri-miss; stored' carlab "$path"
+done
+cached 'a browsed /parts/ hub stays out of the cache' '^$' carlab '/ru/parts/?offset=12'
+for path in /ru/parts/search/ /ru/parts/cart/ /ru/parts/prices/ /ru/services/ /ru/ /sitemap-index.xml; do
   cached "$path stays out of the cache" '^$' carlab "$path"
 done
 cached 'details.rs has no page cache' '^$' details /ru/parts/p/a/
@@ -350,7 +354,7 @@ refuses() {
 }
 purge_listener=http://$net-caddy:2020/souin-api/souin
 warm() {
-  for path in /ru/cars/bmw/ /ru/cars/audi/ /ru/parts/c/brakes/ /ru/parts/peugeot/3008/ /sr/parts/p/a/; do cache_status carlab "$path" >/dev/null; done
+  for path in /ru/cars/bmw/ /ru/cars/audi/ /ru/parts/c/brakes/ /ru/parts/peugeot/3008/ /ru/parts/ /llms.txt /sr/llms.txt /catalogue-build.json /sitemap-catalogue.xml /sitemap-catalogue-0.xml /sr/parts/p/a/; do cache_status carlab "$path" >/dev/null; done
 }
 warm
 refuses -X PURGE "$purge_listener/flush"
@@ -366,7 +370,7 @@ console.log(partPagePattern('a'));
 " >"$work/purge-patterns"
 hub_status=$(sed '$d' "$work/purge-patterns" | while read -r pattern; do listener -X PURGE "$purge_listener/$pattern"; echo; done | sort -u)
 if [ "$hub_status" = 204 ]; then echo "ok - the shop's hub purges pass the listener"; else echo "not ok - the hub purges answered $hub_status"; failures=$((failures + 1)); fi
-for path in /ru/cars/bmw/ /ru/cars/audi/ /ru/parts/c/brakes/ /ru/parts/peugeot/3008/; do
+for path in /ru/cars/bmw/ /ru/cars/audi/ /ru/parts/c/brakes/ /ru/parts/peugeot/3008/ /ru/parts/ /llms.txt /sr/llms.txt /catalogue-build.json /sitemap-catalogue.xml /sitemap-catalogue-0.xml; do
   cached "the hub purge empties $path" 'fwd=uri-miss; stored' carlab "$path"
 done
 cached 'the hub purge keeps the Part pages' '; hit;' carlab /sr/parts/p/a/

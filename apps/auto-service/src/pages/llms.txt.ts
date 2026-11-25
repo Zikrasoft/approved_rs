@@ -1,10 +1,11 @@
 import type { APIRoute } from 'astro';
 import { PRIMARY_LOCALE } from '@/i18n/config';
-import { generateLlmsTxt } from '@/utils/llmsTxt';
+import { answerCatalogueFile } from '@/utils/cataloguePage';
+import { generateLlmsTxt, llmsCatalogueOf } from '@/utils/llmsTxt';
 
-export const GET: APIRoute = async () => {
-  const body = await generateLlmsTxt(PRIMARY_LOCALE);
-  return new Response(body, {
-    headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-  });
-};
+export const prerender = false;
+
+export const GET: APIRoute = (context) =>
+  answerCatalogueFile(context, 'text/plain; charset=utf-8', async (catalogue) =>
+    generateLlmsTxt(PRIMARY_LOCALE, await llmsCatalogueOf(catalogue)),
+  );

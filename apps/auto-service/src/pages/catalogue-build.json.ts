@@ -1,5 +1,9 @@
 import type { APIRoute } from 'astro';
-import { pageListForBuild } from '@/utils/catalogueEnv';
+import { answerCatalogueFile } from '@/utils/cataloguePage';
 
-export const GET: APIRoute = async () =>
-  Response.json({ partPages: (await pageListForBuild()).parts.length });
+export const prerender = false;
+
+export const GET: APIRoute = (context) =>
+  answerCatalogueFile(context, 'application/json', async (catalogue) =>
+    JSON.stringify({ partPages: (await catalogue.pageList()).parts.length }),
+  );

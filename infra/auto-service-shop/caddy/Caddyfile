@@ -161,8 +161,9 @@ http://:2020 {
 
 	@catalogue {
 		method GET HEAD
-		path_regexp ^/[a-z]{2}/(parts/.+|cars/.*)$
+		path_regexp ^/([a-z]{2}/(parts/.*|cars/.*|llms[.]txt)|llms[.]txt|catalogue-build[.]json|sitemap-catalogue(-[0-9]+)?[.]xml)$
 		not path_regexp ^/[a-z]{2}/parts/(search|cart|prices)/?$
+		not expression path_regexp('^/[a-z]{2}/parts/$') && {query} != ''
 		not header_regexp Cookie (^|;\s*)auto_service_shop_preview={$SHOP_PREVIEW_TOKEN:^}(;|$)
 	}
 	handle @catalogue {

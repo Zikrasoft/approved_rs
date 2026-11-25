@@ -5,11 +5,7 @@ import {
 } from '@podbor/catalog-contract';
 import { paragraphs } from '@podbor/site-kit';
 import { localeConfig, type Locale } from '../i18n/config.ts';
-import {
-  type CatalogueEnv,
-  categoriesForBuild,
-  pageListForBuild,
-} from './catalogueEnv.ts';
+import type { Catalogue } from './cataloguePage.ts';
 import { byDemand } from './demand.ts';
 import { TOP_MAKES, topMakes } from './makeIndex.ts';
 
@@ -22,8 +18,6 @@ export type PartsHub = {
     lead: Record<Locale, string | null>;
   }[];
 };
-
-export const PARTS_HUB_MODULE = 'virtual:parts-hub';
 
 const perLocale = <T>(read: (locale: Locale) => T) =>
   Object.fromEntries(
@@ -55,18 +49,9 @@ export const partsHubOf = (
   };
 };
 
-export function partsHubPlugin(env: CatalogueEnv) {
-  const resolved = `\0${PARTS_HUB_MODULE}`;
-  return {
-    name: 'carlab-parts-hub',
-    resolveId: (id: string) => (id === PARTS_HUB_MODULE ? resolved : null),
-    async load(id: string) {
-      if (id !== resolved) return null;
-      const [categories, list] = await Promise.all([
-        categoriesForBuild(env),
-        pageListForBuild(env),
-      ]);
-      return `export default ${JSON.stringify(partsHubOf(categories, list))};`;
-    },
-  };
-}
+export const EMPTY_PARTS_HUB: PartsHub = { makes: [], categories: [] };
+
+export const partsHubFrom = async (catalogue: Catalogue): Promise<PartsHub> =>
+  partsHubOf(
+    ...(await Promise.all([catalogue.categories(), catalogue.pageList()])),
+  );

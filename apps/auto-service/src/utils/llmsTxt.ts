@@ -10,12 +10,12 @@ import {
 } from '@/utils/constants';
 import { formatPhone } from '@podbor/site-kit/format-phone';
 import { SERVICE_SLUGS } from '@/utils/services';
-import { translated } from '@podbor/catalog-contract';
 import {
-  categoriesForBuild,
-  pageListForBuild,
-  shopOpen,
-} from '@/utils/catalogueEnv';
+  translated,
+  type CataloguePageList,
+  type Category,
+} from '@podbor/catalog-contract';
+import { shopOpen } from '@/utils/catalogueEnv';
 import { categoryAddon } from '@/utils/categoryAddon';
 import { BROWSE_PAGE_SIZE, browseHref } from '@/utils/searchPage';
 import { formatMoney, PRICE_CURRENCY } from '@/utils/money';
@@ -34,10 +34,19 @@ import { PathBuilder } from '@/utils/paths';
 import { BCP47_BY_LOCALE, SUPPORTED_LOCALES, type Locale } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { googleRatingLabel } from '@/utils/googleRating';
+import type { Catalogue } from '@/utils/cataloguePage';
 
 const url = (path: string) => `${SITE_URL}${path}`;
 
-export async function generateLlmsTxt(locale: Locale): Promise<string> {
+export type LlmsCatalogue = {
+  categories: Category[];
+  makes: CataloguePageList['makes'];
+};
+
+export async function generateLlmsTxt(
+  locale: Locale,
+  { categories, makes }: LlmsCatalogue,
+): Promise<string> {
   const home = content(locale).home;
   const pages = content(locale).pages;
   const services = content(locale).services;
@@ -47,8 +56,6 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
   const articleEntries = await getCollection('articles');
   const articles = blogArticles(articleEntries);
   const blog = content(locale).blog;
-  const categories = await categoriesForBuild();
-  const { makes } = await pageListForBuild();
   const hubs = makes.filter(({ hub }) => hub);
 
   return renderBrandLlmsTxt({
@@ -201,3 +208,13 @@ export async function generateLlmsTxt(locale: Locale): Promise<string> {
     locale,
   });
 }
+
+export const llmsCatalogueOf = async (
+  catalogue: Catalogue,
+): Promise<LlmsCatalogue> => {
+  const [categories, { makes }] = await Promise.all([
+    catalogue.categories(),
+    catalogue.pageList(),
+  ]);
+  return { categories, makes };
+};

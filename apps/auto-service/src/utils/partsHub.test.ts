@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { CataloguePageList, Category } from '@podbor/catalog-contract';
-import { PARTS_HUB_MODULE, partsHubOf, partsHubPlugin } from './partsHub';
+import { partsHubOf } from './partsHub';
 
 const category = (slug: string): Category =>
   ({
@@ -98,16 +98,5 @@ describe('the parts hub data', () => {
 
     expect(hub.makes.map(({ slug }) => slug)).toEqual(['new', 'old']);
     expect(hub.categories[0].empty).toBe(false);
-  });
-
-  it('builds an empty hub into the bundle without a shop', async () => {
-    const plugin = partsHubPlugin({});
-    const id = plugin.resolveId(PARTS_HUB_MODULE)!;
-
-    expect(plugin.resolveId('other')).toBeNull();
-    expect(await plugin.load('other')).toBeNull();
-    expect(await plugin.load(id)).toBe(
-      'export default {"makes":[],"categories":[]};',
-    );
   });
 });

@@ -8,3 +8,4 @@ Disallow: /*/parts/search?*offset=
 Disallow: /*/parts/search?*range=
 
 Sitemap: https://carlab.rs/sitemap-index.xml
+Sitemap: https://carlab.rs/sitemap-catalogue.xml

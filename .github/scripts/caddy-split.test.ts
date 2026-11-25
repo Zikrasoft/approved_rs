@@ -81,9 +81,23 @@ test('the Caddyfile caches every catalogue page and never the search, cart or pr
     '/sr/parts/c/brakes/2/',
     '/ru/parts/bmw/3-series/oil-filters/',
     '/en/cars/bmw/',
+    '/ru/parts/',
+    '/llms.txt',
+    '/sr/llms.txt',
+    '/catalogue-build.json',
+    '/sitemap-catalogue.xml',
+    '/sitemap-catalogue-12.xml',
   ])
     assert.equal(caches(path), true, path);
-  for (const path of ['/ru/parts/search/', '/ru/parts/cart', '/ru/parts/'])
+  for (const path of [
+    '/ru/parts/search/',
+    '/ru/parts/cart',
+    '/ru/parts/prices/',
+    '/ru/parts',
+    '/sitemap-index.xml',
+    '/sitemap-0.xml',
+    '/ru/services/',
+  ])
     assert.equal(caches(path), false, path);
 });
 
@@ -107,8 +121,17 @@ test('a Publish purge empties every cached catalogue hub and only the Part pages
     assert.equal(caches(path), true, path);
     assert.equal(purged(CATALOGUE_HUB_PATTERNS, path), true, path);
   }
-  for (const path of ['/ru/llms.txt', '/llms.txt', '/catalogue-build.json'])
+  for (const path of [
+    '/ru/parts/',
+    '/ru/llms.txt',
+    '/llms.txt',
+    '/catalogue-build.json',
+    '/sitemap-catalogue.xml',
+    '/sitemap-catalogue-3.xml',
+  ]) {
+    assert.equal(caches(path), true, path);
     assert.equal(purged(CATALOGUE_HUB_PATTERNS, path), true, path);
+  }
   for (const locale of ['ru', 'sr', 'en']) {
     const part = `/${locale}/parts/p/bosch-0986494524/`;
     assert.equal(purged(CATALOGUE_HUB_PATTERNS, part), false, part);

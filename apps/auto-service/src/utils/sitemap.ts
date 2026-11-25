@@ -6,11 +6,10 @@ import { SUPPORTED_LOCALES } from '../i18n/config.ts';
 import { CARS_PAGE_SIZE } from './works';
 import { PathBuilder } from './paths';
 
-const PART_PAGE_SEGMENT = '/parts/p/';
+export const CATALOGUE_SITEMAP_SIZE = 45_000;
 
 export function sitemapFilter(
   site: string,
-  partPages: { slug: string; indexable: boolean }[] = [],
   blogListed = true,
 ): (page: string) => boolean {
   const excluded = [
@@ -19,17 +18,8 @@ export function sitemapFilter(
     '/admin/',
     ...(blogListed ? [] : ['/blog/']),
   ];
-  const indexable = new Set(
-    partPages.filter((page) => page.indexable).map(({ slug }) => slug),
-  );
-  return (page) => {
-    const [, partSlug] = page.split(PART_PAGE_SEGMENT);
-    return (
-      page !== `${site}/` &&
-      !excluded.some((part) => page.includes(part)) &&
-      (partSlug === undefined || indexable.has(partSlug.replace(/\/$/, '')))
-    );
-  };
+  return (page) =>
+    page !== `${site}/` && !excluded.some((part) => page.includes(part));
 }
 
 export function catalogueUrls(
@@ -39,6 +29,7 @@ export function catalogueUrls(
   const hubs = makes.filter(({ hub }) => hub);
   return SUPPORTED_LOCALES.flatMap((locale) =>
     [
+      PathBuilder.parts(locale),
       PathBuilder.partsMakes(locale),
       ...hubs.map(({ slug }) => PathBuilder.partsMake(locale, slug)),
       ...series.flatMap((entry) => [
@@ -75,3 +66,29 @@ export function carsUrls(site: string, makes: string[]): string[] {
     ].map((path) => `${site}${path}`),
   );
 }
+
+const XML_HEAD = '<?xml version="1.0" encoding="UTF-8"?>';
+const SITEMAP_NAMESPACE = 'http://www.sitemaps.org/schemas/sitemap/0.9';
+
+export const catalogueSitemapChunks = (urls: string[]): string[][] =>
+  Array.from(
+    { length: Math.ceil(urls.length / CATALOGUE_SITEMAP_SIZE) },
+    (_, index) =>
+      urls.slice(
+        index * CATALOGUE_SITEMAP_SIZE,
+        (index + 1) * CATALOGUE_SITEMAP_SIZE,
+      ),
+  );
+
+export const catalogueSitemapPath = (chunk: number) =>
+  `/sitemap-catalogue-${chunk}.xml`;
+
+export const sitemapIndexXml = (sitemaps: string[]): string =>
+  `${XML_HEAD}<sitemapindex xmlns="${SITEMAP_NAMESPACE}">${sitemaps
+    .map((loc) => `<sitemap><loc>${loc}</loc></sitemap>`)
+    .join('')}</sitemapindex>`;
+
+export const urlsetXml = (urls: string[]): string =>
+  `${XML_HEAD}<urlset xmlns="${SITEMAP_NAMESPACE}">${urls
+    .map((loc) => `<url><loc>${loc}</loc></url>`)
+    .join('')}</urlset>`;

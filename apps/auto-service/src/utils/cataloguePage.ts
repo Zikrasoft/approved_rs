@@ -1,4 +1,4 @@
-import type { AstroGlobal } from 'astro';
+import type { APIContext, AstroGlobal } from 'astro';
 import { content } from '../i18n/content';
 import { localeFrom, type Locale } from '../i18n/config';
 import { catalogueFor, previewRequested } from './catalogueEnv';
@@ -11,7 +11,12 @@ export const PREVIEW_PAGE_CACHE = 'private, no-store';
 
 export const RETRY_AFTER_SECONDS = 60;
 
-type Catalogue = NonNullable<ReturnType<typeof catalogueFor>>;
+export type Catalogue = NonNullable<ReturnType<typeof catalogueFor>>;
+
+type CatalogueLoad<T> = (
+  catalogue: Catalogue,
+  locale: Locale,
+) => Promise<T | null>;
 
 const unavailable = (locale: Locale) =>
   new Response(content(locale).shopCart.fallbackHeading, {
@@ -23,21 +28,22 @@ const unavailable = (locale: Locale) =>
     },
   });
 
-const cacheControlOf = (request: Request, publicCache: string) =>
+export const cacheControlOf = (request: Request, publicCache: string) =>
   previewRequested(request) ? PREVIEW_PAGE_CACHE : publicCache;
+
+const notFound = (request: Request) =>
+  new Response(null, {
+    status: 404,
+    headers: {
+      'cache-control': cacheControlOf(request, NOT_FOUND_PAGE_CACHE),
+    },
+  });
 
 export function answerPage<T>(
   { request, response }: Pick<AstroGlobal, 'request' | 'response'>,
   found: T | null,
 ): T | Response {
-  if (found === null) {
-    return new Response(null, {
-      status: 404,
-      headers: {
-        'cache-control': cacheControlOf(request, NOT_FOUND_PAGE_CACHE),
-      },
-    });
-  }
+  if (found === null) return notFound(request);
   response.headers.set(
     'cache-control',
     cacheControlOf(request, PUBLIC_PAGE_CACHE),
@@ -45,17 +51,16 @@ export function answerPage<T>(
   return found;
 }
 
-export async function loadCataloguePage<T>(
-  astro: Pick<AstroGlobal, 'request' | 'url' | 'response'>,
-  load: (catalogue: Catalogue, locale: Locale) => Promise<T | null>,
-): Promise<T | Response> {
-  const { request, url } = astro;
+async function fromCatalogue<T>(
+  request: Request,
+  url: URL,
+  load: CatalogueLoad<T>,
+): Promise<{ found: T | null } | Response> {
   const locale = localeFrom(url.pathname);
   const catalogue = catalogueFor(request);
   if (!catalogue) return unavailable(locale);
-  let found: T | null;
   try {
-    found = await load(catalogue, locale);
+    return { found: await load(catalogue, locale) };
   } catch (error) {
     console.error(
       `catalogue page ${url.pathname} failed`,
@@ -63,5 +68,28 @@ export async function loadCataloguePage<T>(
     );
     return unavailable(locale);
   }
-  return answerPage(astro, found);
+}
+
+export async function loadCataloguePage<T>(
+  astro: Pick<AstroGlobal, 'request' | 'url' | 'response'>,
+  load: CatalogueLoad<T>,
+): Promise<T | Response> {
+  const loaded = await fromCatalogue(astro.request, astro.url, load);
+  return loaded instanceof Response ? loaded : answerPage(astro, loaded.found);
+}
+
+export async function answerCatalogueFile(
+  { request, url }: Pick<APIContext, 'request' | 'url'>,
+  contentType: string,
+  load: CatalogueLoad<string>,
+): Promise<Response> {
+  const loaded = await fromCatalogue(request, url, load);
+  if (loaded instanceof Response) return loaded;
+  if (loaded.found === null) return notFound(request);
+  return new Response(loaded.found, {
+    headers: {
+      'content-type': contentType,
+      'cache-control': cacheControlOf(request, PUBLIC_PAGE_CACHE),
+    },
+  });
 }

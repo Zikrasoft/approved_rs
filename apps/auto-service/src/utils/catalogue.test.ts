@@ -15,8 +15,6 @@ import {
   pageListForBuild,
   writeCatalogueMakes,
 } from './catalogueEnv';
-import { partsHubPlugin } from './partsHub';
-import { GET as recordBuild } from '../pages/catalogue-build.json.ts';
 
 const BACKEND_URL = 'http://localhost:9009';
 
@@ -199,12 +197,10 @@ describe('the deploy build', () => {
       join(await mkdtemp(join(tmpdir(), 'makes-')), 'makes.json'),
     );
 
-    const hub = await partsHubPlugin(env).load('\0virtual:parts-hub');
+    const categories = await categoriesForBuild(env);
     await writeCatalogueMakes(file, env);
 
-    expect(
-      JSON.parse(hub!.replace('export default ', '').slice(0, -1)),
-    ).toMatchObject({ categories: [{ slug: 'oil-filters' }] });
+    expect(categories).toMatchObject([{ slug: 'oil-filters' }]);
     expect(JSON.parse(await readFile(file, 'utf8'))).toHaveLength(1);
     expect(
       vi
@@ -1140,14 +1136,6 @@ describe('catalogue.listingScope', () => {
     ).listingScope({ category: 'oil-filters' }, 'ru');
 
     expect(scope).toBeNull();
-  });
-});
-
-describe('the build record', () => {
-  it('tells the next build how many part pages this one serves', async () => {
-    const response = await recordBuild({} as Parameters<typeof recordBuild>[0]);
-
-    expect(await response.json()).toEqual({ partPages: 0 });
   });
 });
 

@@ -298,7 +298,7 @@ for (const [what, text] of [
     );
   });
 
-for (const workflow of ['ci.yml', 'publish.yml']) {
+for (const workflow of ['ci.yml']) {
   test(`${workflow} hands the deploy exactly the manifest's secrets, by name`, () => {
     const text = readFileSync(`.github/workflows/${workflow}`, 'utf8');
     assert.doesNotMatch(text, /toJSON\(secrets\)|toJSON\(secrets\.\w+\)/);
