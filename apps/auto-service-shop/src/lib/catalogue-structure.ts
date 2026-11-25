@@ -85,6 +85,15 @@ export async function catalogueStructure(
   const counts = new Map(
     seriesCountsOf(held).map((row) => [row.series_id, row]),
   );
+  const categoryPages = new Map<string, string[]>();
+  for (const { series_id, category_id, parts } of held) {
+    if (category_id !== null && seriesCategoryHasPage(parts)) {
+      categoryPages.set(series_id, [
+        ...(categoryPages.get(series_id) ?? []),
+        category_id,
+      ]);
+    }
+  }
   const paged = series
     .filter(({ id }) => {
       const count = counts.get(id);
@@ -93,20 +102,45 @@ export async function catalogueStructure(
     .map((row) => ({
       ...row,
       slug: seriesSlugOf(row.name),
-      categoryIds: held
-        .filter(
-          ({ series_id, category_id, parts }) =>
-            series_id === row.id &&
-            category_id !== null &&
-            seriesCategoryHasPage(parts),
-        )
-        .map(({ category_id }) => category_id!),
+      categoryIds: categoryPages.get(row.id) ?? [],
     }));
+  const pagedPerMake = new Map<string, number>();
+  for (const { make } of paged) {
+    pagedPerMake.set(make.slug, (pagedPerMake.get(make.slug) ?? 0) + 1);
+  }
   return {
     series,
     stocked: series.filter(({ id }) => counts.has(id)),
     paged,
-    hub: (makeSlug) =>
-      makeHasPage(paged.filter(({ make }) => make.slug === makeSlug).length),
+    hub: (makeSlug) => makeHasPage(pagedPerMake.get(makeSlug) ?? 0),
   };
+}
+
+export async function seriesPagedInCategory(
+  modules: CatalogueModules,
+  categoryId: string,
+): Promise<(SeriesRow & { slug: string })[]> {
+  const held = (
+    await modules.publish.listedSeriesCategoryCounts({ category: categoryId })
+  ).filter(({ parts }) => seriesCategoryHasPage(parts));
+  const sure = ({ fitted, required }: SeriesCategoryCount) =>
+    seriesHasPage({ parts: fitted, required });
+  const surely = held.filter(sure);
+  const rest = held.filter((row) => !sure(row));
+  return [
+    ...(surely.length
+      ? await modules.catalog.listSeries(
+          { id: surely.map(({ series_id }) => series_id) },
+          { relations: ['make'], take: null },
+        )
+      : []
+    ).map((row) => ({ ...row, slug: seriesSlugOf(row.name) })),
+    ...(rest.length
+      ? (
+          await catalogueStructure(modules, {
+            id: rest.map(({ series_id }) => series_id),
+          })
+        ).paged
+      : []),
+  ];
 }

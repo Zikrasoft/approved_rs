@@ -87,7 +87,11 @@ const placeBindings = ({
 }: {
   series?: string[] | null;
   category?: string | null;
-}) => [series, category, MIN_REQUIREMENT_MATCHES_FOR_PAGE];
+}) => ({
+  series,
+  category,
+  min_matches: MIN_REQUIREMENT_MATCHES_FOR_PAGE,
+});
 
 const PRUNE_RUNS_BEFORE = `
   delete from catalogue_run r

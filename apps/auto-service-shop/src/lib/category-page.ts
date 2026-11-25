@@ -20,7 +20,7 @@ import { sluggedPagesOf } from './part-pages';
 import {
   type CatalogueModules,
   catalogueModules,
-  catalogueStructure,
+  seriesPagedInCategory,
 } from './catalogue-structure';
 
 const byName = new Intl.Collator('en', { numeric: true }).compare;
@@ -30,14 +30,7 @@ async function carsOf(
   categoryId: string,
   locale: CatalogLocale,
 ): Promise<CategoryPageResponse['cars']> {
-  const held = await modules.publish.listedSeriesCategoryCounts({
-    category: categoryId,
-  });
-  const series = (
-    await catalogueStructure(modules, {
-      id: [...new Set(held.map(({ series_id }) => series_id))],
-    })
-  ).paged.filter(({ categoryIds }) => categoryIds.includes(categoryId));
+  const series = await seriesPagedInCategory(modules, categoryId);
   const makes = new Map<
     string,
     { make: { slug: string; name: string }; series: typeof series }
