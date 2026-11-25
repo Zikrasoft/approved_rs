@@ -70,31 +70,38 @@ describe('SiteHeader', () => {
     ).toBe(false);
   });
 
-  it.each(['/ru/', '/ru/parts/search/'])(
-    'drops the inline header search on %s, which has its own',
+  it('drops the inline header search on the parts search page, which has its own', async () => {
+    setShop(false);
+    const root = await header('/ru/parts/search/');
+
+    expect(root.querySelector('header catalogue-search')).toBeNull();
+    expect(searchButton(root).classList.contains('min-[1360px]:hidden')).toBe(
+      false,
+    );
+  });
+
+  it.each(['/ru/', '/ru/services/', '/ru/parts/'])(
+    'shows the inline header search on %s only where no hero search sits below it',
     async (path) => {
       setShop(false);
       const root = await header(path);
+      const field = root.querySelector(
+        'header catalogue-search',
+      )!.parentElement!;
 
-      expect(
-        root.querySelector('div.min-\\[1360px\\]\\:block catalogue-search'),
-      ).toBeNull();
-      expect(searchButton(root).classList.contains('min-[1360px]:hidden')).toBe(
-        false,
+      expect(field.classList).toContain('min-[1360px]:block');
+      expect(field.classList).toContain(
+        '[body:has([data-hero-parts-search])_&]:hidden',
       );
+      expect([...searchButton(root).classList]).toEqual(
+        expect.arrayContaining([
+          'min-[1360px]:hidden',
+          '[body:has([data-hero-parts-search])_&]:min-[1360px]:flex',
+        ]),
+      );
+      expect(searchButton(root).getAttribute('href')).toBe('/ru/parts/');
     },
   );
-
-  it('keeps the inline header search on other pages', async () => {
-    setShop(false);
-    const root = await header('/ru/parts/');
-
-    expect(root.querySelector('div.min-\\[1360px\\]\\:block')).not.toBeNull();
-    expect(searchButton(root).classList.contains('min-[1360px]:hidden')).toBe(
-      true,
-    );
-    expect(searchButton(root).getAttribute('href')).toBe('/ru/parts/');
-  });
 
   it('links the about page from the primary nav instead of an in-page anchor', async () => {
     setShop(false);
@@ -138,6 +145,92 @@ describe('SiteHeader', () => {
         )
         ?.textContent?.trim(),
     ).toBe(cars);
+  });
+
+  it('links the Make list from the desktop and the mobile nav under the footer label', async () => {
+    setShop(false);
+    const root = await header('/ru/cars/bmw/');
+    const links = [...root.querySelectorAll('nav[aria-label]')].map((nav) =>
+      nav.querySelector('a[href="/ru/cars/"]'),
+    );
+
+    expect(links.map((link) => link?.textContent?.trim())).toEqual([
+      content('ru').pages.cars.navLabel,
+      content('ru').pages.cars.navLabel,
+    ]);
+    expect(links.map((link) => link?.getAttribute('aria-current'))).toEqual([
+      'true',
+      'true',
+    ]);
+  });
+
+  describe('the desktop language switcher', () => {
+    const switcher = async (path = '/ru/services/') => {
+      setShop(false);
+      const lang = (await header(path)).querySelector('header carlab-lang')!;
+      const button = lang.querySelector('button[popovertarget]')!;
+      const list = lang.querySelector(
+        `#${button.getAttribute('popovertarget')}`,
+      )!;
+      return { button, list };
+    };
+
+    it('shows only the current locale on a button that opens the list', async () => {
+      const { button, list } = await switcher('/sr/services/');
+
+      expect(button.textContent?.replace(/\s+/g, ' ').trim()).toBe(
+        `${content('sr').site.header.languageLabel}: sr`,
+      );
+      expect(button.querySelector('.sr-only')).not.toBeNull();
+      expect(list.hasAttribute('popover')).toBe(true);
+      expect(
+        button.closest('header')!.querySelectorAll('a[hreflang]'),
+      ).toHaveLength(list.querySelectorAll('a[hreflang]').length);
+    });
+
+    it('names every language and checks the current one', async () => {
+      const { list } = await switcher();
+      const options = [...list.querySelectorAll('a')];
+
+      expect(
+        options.map((option) => [
+          option.textContent?.trim(),
+          option.getAttribute('href'),
+          option.getAttribute('data-lang-choice'),
+          option.getAttribute('aria-current'),
+          option.querySelector('svg') !== null,
+        ]),
+      ).toEqual([
+        ['Русский', '/ru/services/', 'ru', 'true', true],
+        ['Srpski', '/sr/services/', 'sr', null, false],
+        ['English', '/en/services/', 'en', null, false],
+      ]);
+      expect(
+        options.every((option) => option.classList.contains('min-h-11')),
+      ).toBe(true);
+    });
+
+    it('hides the language suggestion while the list is open', async () => {
+      const { list } = await switcher();
+      const wrapper = list.closest('carlab-lang')!.parentElement!;
+
+      expect(wrapper.querySelector('language-suggestion')).not.toBeNull();
+      expect(wrapper.classList).toContain(
+        '[&:has(:popover-open)_language-suggestion]:hidden',
+      );
+    });
+
+    it('leaves the mobile menu its own row of locale codes', async () => {
+      setShop(false);
+      const menu = (await header('/ru/services/')).querySelector('#site-menu')!;
+
+      expect(
+        [...menu.querySelectorAll('carlab-lang a')].map((a) =>
+          a.textContent?.trim(),
+        ),
+      ).toEqual(['ru', 'sr', 'en']);
+      expect(menu.querySelector('[popover]')).toBeNull();
+    });
   });
 
   it.each(['/ru/', '/ru/services/', '/ru/parts/'])(

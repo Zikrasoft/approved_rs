@@ -344,7 +344,7 @@ describe('Подобрать on a part page', () => {
     defineModalDialog('parts-inquiry-modal');
   });
 
-  const partPage = () => {
+  const partCard = () => {
     document.body.innerHTML = `
       <parts-list-add
         data-slug="${mannOil.slug}"
@@ -382,7 +382,7 @@ describe('Подобрать on a part page', () => {
   };
 
   it('adds the part and opens the inquiry form with it listed', () => {
-    const { button, dialog } = partPage();
+    const { button, dialog } = partCard();
 
     button.click();
 
@@ -396,7 +396,7 @@ describe('Подобрать on a part page', () => {
   });
 
   it('lets the visitor close the form and keep the part', () => {
-    const { button, dialog } = partPage();
+    const { button, dialog } = partCard();
 
     button.click();
     dialog.querySelector<HTMLElement>('[data-modal-close]')!.click();
@@ -406,7 +406,7 @@ describe('Подобрать on a part page', () => {
   });
 
   it('sends how many of a part the visitor wants, at least one', () => {
-    const { button, dialog, form } = partPage();
+    const { button, dialog, form } = partCard();
     button.click();
     const group = () =>
       dialog.querySelector<HTMLElement>('[data-part-quantity]')!;
@@ -443,7 +443,7 @@ describe('Подобрать on a part page', () => {
       'my_garage_car',
       JSON.stringify({ vin: 'WBA35BG070N074158', car: 'BMW 3 серия F30 320d' }),
     );
-    const { button, form } = partPage();
+    const { button, form } = partCard();
     button.click();
 
     const formData = new FormData(form);
@@ -461,7 +461,7 @@ describe('Подобрать on a part page', () => {
       'my_garage_car',
       JSON.stringify({ vin: 'WBA35BG070N074158', car: 'BMW 3 серия F30 320d' }),
     );
-    const { button, dialog } = partPage();
+    const { button, dialog } = partCard();
     button.click();
 
     const line = dialog.querySelector<HTMLElement>('[data-parts-car]')!;
@@ -472,7 +472,7 @@ describe('Подобрать on a part page', () => {
   });
 
   it('shows a car added without a VIN by its name alone', () => {
-    const { dialog } = partPage();
+    const { dialog } = partCard();
     addToPartsList({ ...mannOil, car: 'BMW 3 серия F30 320d' });
 
     expect(dialog.querySelector('[data-parts-car]')!.textContent).toBe(
@@ -486,14 +486,14 @@ describe('Подобрать on a part page', () => {
       'my_garage_car',
       JSON.stringify({ vin: 'WBA35BG070N074158', car: 'BMW 3 серия F30 320d' }),
     );
-    const { button } = partPage();
+    const { button } = partCard();
     button.click();
 
     expect(readPartsList()).toEqual([mannOil]);
   });
 
   it('sends the listed parts with only a contact and no VIN', () => {
-    const { button, form } = partPage();
+    const { button, form } = partCard();
     button.click();
 
     const formData = new FormData(form);

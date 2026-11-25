@@ -1,7 +1,7 @@
 import { getCollection } from 'astro:content';
 import { describe, expect, it, vi } from 'vitest';
 import { content } from '@/i18n/content';
-import { render } from '@/components/renderAstro';
+import { render, heroPartsSearch } from '@/components/renderAstro';
 import { work } from '@/components/workFixture';
 import WorksIndex from './index.astro';
 
@@ -107,5 +107,11 @@ describe('the works list', () => {
 
     expect(root.textContent).toContain(site.common.emptyWorks);
     expect(root.querySelector('chip-filter')).toBeNull();
+  });
+});
+
+describe('the hero of the works list', () => {
+  it('offers the VIN parts search', async () => {
+    expect(heroPartsSearch(await page([]))).not.toBeNull();
   });
 });

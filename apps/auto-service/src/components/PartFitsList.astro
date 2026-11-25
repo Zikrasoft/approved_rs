@@ -6,19 +6,19 @@ import ShowMore from './ShowMore.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { carName, seriesName, vehicleVariant } from '@/utils/carName';
-import type { PartPageEntry } from '@/utils/catalogueSnapshot';
+import type { Fit } from '@/utils/partEntry';
 import { fitGroups } from '@/utils/fitGroups';
-import { catalogueLinks, type CataloguePages } from '@/utils/paths';
+import { seriesLink } from '@/utils/paths';
 
 interface Props {
-  fits: PartPageEntry['fits'];
-  places: CataloguePages;
+  fits: Fit[];
+  linkedSeries: Set<string>;
 }
 
 const VISIBLE_MODELS = 5;
-const { fits, places } = Astro.props;
+const { fits, linkedSeries } = Astro.props;
 const locale = localeFrom(Astro.url.pathname);
-const links = catalogueLinks(locale, places);
+const linkOf = seriesLink(locale, linkedSeries);
 const fitmentCopy = content(locale).partsCar.fitment;
 const { showAllValues } = content(locale).partsSearch;
 const fitsByMake = fitGroups(fits);
@@ -55,10 +55,8 @@ const singleModel =
                             <Chevron />
                           </summary>
                           <div class="flex flex-col gap-3 px-5 pb-4 sm:px-6 pointer-coarse:gap-1">
-                            {links.series(model.chassis.series) && (
-                              <InkLink
-                                href={links.series(model.chassis.series)!}
-                              >
+                            {linkOf(model.chassis.series) && (
+                              <InkLink href={linkOf(model.chassis.series)!}>
                                 {fitmentCopy.modelLink.replace(
                                   '{model}',
                                   seriesName(

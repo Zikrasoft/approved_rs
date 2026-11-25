@@ -5,7 +5,7 @@ import type { Context } from '@medusajs/framework/types';
 export const runBoundSql = (
   context: Context,
   sql: string,
-  bindings: Knex.RawBinding[] = [],
+  bindings: readonly Knex.RawBinding[] | Knex.ValueDict = [],
 ) => {
   const manager = (context.transactionManager ??
     context.manager) as SqlEntityManager;

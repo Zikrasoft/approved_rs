@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
   byDemand,
-  demandOf,
   isTopDemand,
   POPULAR_BLOCK_MIN,
   POPULAR_BLOCK_SIZE,
@@ -82,13 +81,5 @@ describe('byDemand', () => {
       'c',
     ]);
     expect(byDemand(items, () => 0)).toEqual(items);
-  });
-});
-
-describe('demandOf', () => {
-  it('sums the score of numbers, reading a number without Demand as none', () => {
-    expect(demandOf([popular('a', 6), page('b', null), popular('c', 1)])).toBe(
-      7,
-    );
   });
 });

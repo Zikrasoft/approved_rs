@@ -77,6 +77,7 @@ channels:
 form:
   heading: Записаться в сервис
   subheading: Опишите, что с машиной. Перезвоним, уточним детали и назовем время и цену.
+  callInstead: 'Или позвоните:'
   nameLabel: Имя
   namePlaceholder: Как к вам обращаться
   contactLabel: Телефон
@@ -206,6 +207,7 @@ translations:
     form:
       heading: Zakažite termin u servisu
       subheading: Opišite šta nije u redu sa automobilom. Pozvaćemo Vas, proveriti detalje i reći Vam termin i cenu.
+      callInstead: 'Ili pozovite:'
       nameLabel: Ime
       namePlaceholder: Kako da Vam se obraćamo?
       contactLabel: Telefon
@@ -324,6 +326,7 @@ translations:
     form:
       heading: Book a service appointment
       subheading: Tell us what's wrong with your car. We'll call back, get the details and let you know the time and price.
+      callInstead: 'Or call us:'
       nameLabel: Name
       namePlaceholder: What should we call you?
       contactLabel: Phone
@@ -355,4 +358,4 @@ translations:
       accept: OK
       decline: No
       settings: Cookie settings
-translatedFrom: aaf63287c9baf8b6
+translatedFrom: 7b9f864cdf8648a1

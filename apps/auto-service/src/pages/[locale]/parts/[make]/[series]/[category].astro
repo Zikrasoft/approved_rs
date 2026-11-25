@@ -1,5 +1,6 @@
 ---
-import { translated } from '@podbor/catalog-contract';
+export const prerender = false;
+
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import InquiryLink from '@/components/InquiryLink.astro';
@@ -10,53 +11,30 @@ import ListingBar from '@/components/ListingBar.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { carName, seriesName, vehicleVariant } from '@/utils/carName';
-import { makeHubsForBuild } from '@/utils/catalogueEnv';
-import { cacheKey } from '@/utils/cacheKey';
-import type {
-  SeriesCategoryEntry,
-  SeriesHubEntry,
-} from '@/utils/catalogueSnapshot';
+import { loadCataloguePage } from '@/utils/cataloguePage';
 import { keySpecs } from '@/utils/attributeRows';
 import { paragraphs } from '@podbor/site-kit';
-import { PathBuilder, withLocales } from '@/utils/paths';
+import { PathBuilder } from '@/utils/paths';
 
-export async function getStaticPaths() {
-  const hubs = await makeHubsForBuild();
-  return withLocales(
-    hubs.flatMap((hub) =>
-      hub.series.flatMap((series) =>
-        series.categories.map((entry) => ({
-          params: {
-            make: hub.make.slug,
-            series: series.series.slug,
-            category: entry.category.slug,
-          },
-          props: { hub: series, entry },
-          cacheKey: cacheKey({
-            make: series.make,
-            series: series.series,
-            entry,
-          }),
-        })),
-      ),
-    ),
-  );
-}
-
-const { hub, entry } = Astro.props as {
-  hub: SeriesHubEntry;
-  entry: SeriesCategoryEntry;
-};
+const loaded = await loadCataloguePage(Astro, (catalogue, catalogueLocale) =>
+  catalogue.seriesCategoryPage(
+    Astro.params.make ?? '',
+    Astro.params.series ?? '',
+    Astro.params.category ?? '',
+    catalogueLocale,
+  ),
+);
+if (loaded instanceof Response) return loaded;
+const { series, category, parts } = loaded;
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const copy = content(locale).partsCar.hubs.modelCategory;
-const { make, series } = hub;
-const { category } = entry;
+const { make } = series;
 const name = seriesName(series, make, locale);
-const listingAttributes = entry.parts.map(({ part }) => part.attributes);
-const categoryName = translated(category, 'name', locale);
-const [lead, ...body] = paragraphs(translated(category, 'text', locale));
-const listed = entry.parts.flatMap(({ pages }) =>
+const listingAttributes = parts.map(({ part }) => part.attributes);
+const categoryName = category.name;
+const [lead, ...body] = paragraphs(category.text);
+const listed = parts.flatMap(({ pages }) =>
   pages.filter(({ superseded }) => !superseded),
 );
 const fill = (template: string) =>
@@ -100,11 +78,11 @@ const SAID_BY_FIT = ['axle'];
         />
         <ul class="flex flex-col gap-4">
           {
-            entry.parts.map(({ part, pages, fits }) => (
+            parts.map(({ part, pages, fits }) => (
               <li class="card flex flex-col gap-3 p-5">
                 <FittedPart
                   pages={pages}
-                  name={translated(part, 'name', locale)}
+                  name={part.name}
                   specs={keySpecs(
                     category,
                     part.attributes,

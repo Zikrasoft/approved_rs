@@ -3,12 +3,12 @@ import { BCP47_BY_LOCALE } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { formatMoney } from '@/utils/money';
 import FittedPart from './FittedPart.astro';
-import { offer, partPage, render, setShop } from './renderAstro';
+import { offer, partCard, render, setShop } from './renderAstro';
 
 const copy = content('ru').shopPart;
 
-const unpriced = partPage();
-const priced = partPage({
+const unpriced = partCard();
+const priced = partCard({
   id: 'pi_ate',
   slug: 'ate-13046',
   value: '13.0460-7184.2',
@@ -79,7 +79,7 @@ describe('FittedPart', () => {
 
   it('links the current number when nothing is priced, skipping a superseded one', async () => {
     setShop(false);
-    const old = partPage({
+    const old = partCard({
       id: 'pi_old',
       slug: 'bosch-old',
       value: 'OLD',

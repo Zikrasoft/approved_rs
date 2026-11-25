@@ -1,6 +1,6 @@
 ---
 import { translated } from '@podbor/catalog-contract';
-import type { PartPageEntry } from '@/utils/catalogueSnapshot';
+import type { PartCard } from '@/utils/partEntry';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { bestPrice, priceLabel } from '@/utils/bestPrice';
@@ -9,7 +9,7 @@ import { PathBuilder } from '@/utils/paths';
 import BottomActionBar from './BottomActionBar.astro';
 
 interface Props {
-  page: PartPageEntry;
+  page: PartCard;
   target: string;
 }
 

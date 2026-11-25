@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { content } from '@/i18n/content';
-import { render } from '@/components/renderAstro';
+import { render, heroOrder, heroPartsSearch } from '@/components/renderAstro';
 import HomePage from './index.astro';
 
 const { home, site } = content('ru');
@@ -61,5 +61,25 @@ describe('the home page', () => {
     expect(
       root.querySelector('[data-contact-placement="visit"] carlab-map'),
     ).not.toBeNull();
+  });
+});
+
+describe('the hero of the home page', () => {
+  it('puts the address above the contacts and the contacts above the VIN search, as the homepage does', async () => {
+    const [address, contacts, search] = heroOrder(await page());
+
+    expect(address).toBeGreaterThan(-1);
+    expect(address).toBeLessThan(contacts);
+    expect(contacts).toBeLessThan(search);
+  });
+  it('offers the VIN parts search', async () => {
+    expect(heroPartsSearch(await page())).not.toBeNull();
+  });
+
+  it('keeps its trust ticks on a phone', async () => {
+    const ticks = heroPartsSearch(await page())!.nextElementSibling!;
+
+    expect(ticks.textContent).toContain(home.hero.badges[0]);
+    expect(ticks.classList).not.toContain('max-sm:hidden');
   });
 });

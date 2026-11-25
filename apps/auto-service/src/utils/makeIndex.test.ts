@@ -20,16 +20,13 @@ describe('topMakes', () => {
 
 describe('makesByLetter', () => {
   it('groups the Makes under their first letter in name order', () => {
-    const hubs = [
-      hub('Volvo', 3),
-      hub('alpina', 3),
-      hub('Audi', 3),
-      hub('BMW', 3),
-      hub('3M', 3),
-    ];
+    const makes = ['Volvo', 'alpina', 'Audi', 'BMW', '3M'].map((name) => ({
+      slug: name.toLowerCase(),
+      name,
+    }));
 
     expect(
-      makesByLetter(hubs).map(({ letter, makes }) => [
+      makesByLetter(makes).map(({ letter, makes }) => [
         letter,
         makes.map(({ name }) => name),
       ]),

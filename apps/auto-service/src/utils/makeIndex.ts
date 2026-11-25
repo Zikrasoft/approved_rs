@@ -13,11 +13,9 @@ export const TOP_MAKES = 12;
 export const topMakes = <T extends MakeCount>(hubs: T[], count: number): T[] =>
   hubs.toSorted((a, b) => b.parts - a.parts).slice(0, count);
 
-export function makesByLetter(hubs: MakeCount[]): MakeLetter[] {
+export function makesByLetter(makes: Make[]): MakeLetter[] {
   const letters = new Map<string, Make[]>();
-  for (const { make } of hubs.toSorted((a, b) =>
-    byName(a.make.name, b.make.name),
-  )) {
+  for (const make of makes.toSorted((a, b) => byName(a.name, b.name))) {
     const first = make.name.charAt(0).toLocaleUpperCase('en');
     const letter = /\p{L}/u.test(first) ? first : NOT_A_LETTER;
     letters.set(letter, [...(letters.get(letter) ?? []), make]);

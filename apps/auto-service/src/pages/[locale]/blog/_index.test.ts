@@ -1,7 +1,7 @@
 import { getCollection } from 'astro:content';
 import { describe, expect, it, vi } from 'vitest';
 import { content } from '@/i18n/content';
-import { orangeIn, render } from '@/components/renderAstro';
+import { orangeIn, render, heroPartsSearch } from '@/components/renderAstro';
 import { article } from '@/components/articleFixture';
 import BlogIndex, { getStaticPaths } from './[...page].astro';
 
@@ -149,5 +149,11 @@ describe('the blog list', () => {
     const list = root.querySelector('[data-article-card]')!.closest('section')!;
 
     expect(orangeIn(list)).toEqual([]);
+  });
+});
+
+describe('the hero of the blog list', () => {
+  it('offers the VIN parts search', async () => {
+    expect(heroPartsSearch(await page([]))).not.toBeNull();
   });
 });

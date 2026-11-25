@@ -1,0 +1,83 @@
+---
+import CatalogueSearch from './CatalogueSearch.astro';
+import GoogleRating from './GoogleRating.astro';
+import Icon from './Icon.astro';
+import PartsInquiryModal from './PartsInquiryModal.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
+import { PathBuilder } from '@/utils/paths';
+
+interface Props {
+  tone: 'panel' | 'card';
+  trust?: boolean;
+  trustOnPhone?: boolean;
+}
+
+const { tone, trust = true, trustOnPhone = false } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const { hero } = content(locale).home;
+const panel = tone === 'panel';
+---
+
+<div
+  data-hero-parts-search
+  class:list={[
+    'border-t pt-5 lg:pt-6',
+    panel ? 'border-panel-line/60' : 'max-w-xl border-line',
+  ]}
+>
+  <h2 class="text-base leading-snug font-semibold tracking-normal">
+    {hero.partsHeading}
+  </h2>
+  <CatalogueSearch
+    hint={false}
+    onPanel={panel}
+    secondary={!panel}
+    submitLabel={hero.partsSubmit}
+    class="mt-2"
+  />
+  <p
+    class:list={[
+      'mt-2 text-sm leading-snug',
+      panel ? 'text-panel-ink' : 'text-muted',
+    ]}
+  >
+    {hero.partsHint}{' '}
+    <a
+      href={PathBuilder.partsInquiry(locale)}
+      class:list={[
+        'inline-flex min-h-11 items-center font-semibold underline underline-offset-2 transition-colors duration-150 sm:min-h-0',
+        panel
+          ? 'text-panel-fg decoration-panel-line hover:decoration-panel-fg'
+          : 'text-ink decoration-line-strong hover:decoration-ink',
+      ]}
+      {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
+    >
+      {hero.partsInquiry}
+    </a>
+  </p>
+  <PartsInquiryModal comment="" />
+</div>
+
+{
+  trust && (
+    <ul
+      class:list={[
+        'flex flex-wrap gap-x-5 gap-y-1.5 text-[0.8125rem] lg:text-xs',
+        panel ? 'text-panel-ink' : 'max-w-xl text-muted',
+        !trustOnPhone && 'max-sm:hidden',
+      ]}
+    >
+      <li class="flex items-center">
+        <GoogleRating tone={tone} />
+      </li>
+      {hero.badges.map((fact) => (
+        <li class="flex items-center gap-1.5 lg:gap-1">
+          <Icon name="check" size={12} />
+          {fact}
+        </li>
+      ))}
+    </ul>
+  )
+}

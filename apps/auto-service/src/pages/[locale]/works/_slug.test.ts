@@ -127,3 +127,9 @@ describe('a work page', () => {
     );
   });
 });
+
+describe('the hero of a work page', () => {
+  it('leaves the VIN parts search to the section pages', async () => {
+    expect((await page()).querySelector('[data-hero-parts-search]')).toBeNull();
+  });
+});

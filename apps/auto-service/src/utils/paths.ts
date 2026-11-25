@@ -58,30 +58,15 @@ export const seriesPath = (
   { name, make }: SeriesAddress,
 ): string => PathBuilder.partsSeries(locale, make.slug, seriesSlugOf(name));
 
-export type CataloguePages = {
-  makes: Set<string>;
-  series: Set<string>;
-  categories: Set<string>;
-};
+export const seriesKey = (make: string, series: string): string =>
+  `${make}/${series}`;
 
-export const placeKey = (...slugs: string[]): string => slugs.join('/');
-
-export const seriesKey = ({ name, make }: SeriesAddress) =>
-  placeKey(make.slug, seriesSlugOf(name));
-
-export const catalogueLinks = (locale: Locale, pages: CataloguePages) => ({
-  series: (series: SeriesAddress): string | null =>
-    pages.series.has(seriesKey(series)) ? seriesPath(locale, series) : null,
-  seriesCategory: (series: SeriesAddress, category: string): string | null =>
-    pages.categories.has(placeKey(seriesKey(series), category))
-      ? PathBuilder.partsSeriesCategory(
-          locale,
-          series.make.slug,
-          seriesSlugOf(series.name),
-          category,
-        )
-      : null,
-});
+export const seriesLink =
+  (locale: Locale, linked: Set<string>) =>
+  (series: SeriesAddress): string | null =>
+    linked.has(seriesKey(series.make.slug, seriesSlugOf(series.name)))
+      ? seriesPath(locale, series)
+      : null;
 
 export function localePaths(): { params: { locale: Locale } }[] {
   return SUPPORTED_LOCALES.map((locale) => ({ params: { locale } }));

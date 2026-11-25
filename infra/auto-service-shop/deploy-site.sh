@@ -58,6 +58,10 @@ if ! start; then
   exit 1
 fi
 point current "$release"
+if [ "$app" = auto-service ] && ! docker compose exec -T caddy curl -fsS -X PURGE http://127.0.0.1:2019/souin-api/souin/flush; then
+  echo "site-$app is live at $name, but its page cache was not emptied: visitors may get pages from the previous release for a day." >&2
+  exit 1
+fi
 
 find "$site/releases" -mindepth 1 -maxdepth 1 -type d -exec ls -1dt {} + | tail -n +3 | while read -r old; do
   [ "$old" = "$site/$release" ] || rm -rf "$old"

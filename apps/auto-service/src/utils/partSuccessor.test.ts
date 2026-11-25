@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { PartPageEntry } from './catalogueSnapshot';
+import type { PartCard } from './partEntry';
 import {
   currentNumbers,
   partSuccessor,
@@ -15,7 +15,7 @@ const number = (
   superseded = false,
 ) => ({
   id: `pi_${normalized_value}`,
-  type: 'oem' as PartPageEntry['type'],
+  type: 'oem' as PartCard['type'],
   value: normalized_value,
   normalized_value,
   superseded,
@@ -25,8 +25,8 @@ const number = (
 
 const entry = (
   numbered: ReturnType<typeof number>,
-  overrides: Partial<PartPageEntry> = {},
-): PartPageEntry => ({
+  overrides: Partial<PartCard> = {},
+): PartCard => ({
   ...numbered,
   listed: null,
   slug: `${numbered.brand.slug}-${numbered.normalized_value.toLowerCase()}`,
@@ -44,16 +44,12 @@ const entry = (
   offers: [],
   supplier_data: { cross_references: [], applicability: [], images: [] },
   demand: null,
-  indexable: false,
   priceOnRequest: true,
   category: null,
-  fits: [],
-  requirementCars: [],
-  kitCars: [],
   ...overrides,
 });
 
-const index = (...pages: PartPageEntry[]) =>
+const index = (...pages: PartCard[]) =>
   new Map(pages.map((page) => [page.slug, page]));
 
 describe('partSuccessor', () => {

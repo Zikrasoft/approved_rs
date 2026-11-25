@@ -1,63 +1,163 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { withPlaceholder } from '@podbor/i18n';
 import { content } from '@/i18n/content';
-import { render } from '@/components/renderAstro';
-import type { MakeHubEntry } from '@/utils/catalogueSnapshot';
+import {
+  parseHtml,
+  respond,
+  setShop,
+  SHOP_PREVIEW_TOKEN,
+  stubShop,
+} from '@/components/renderAstro';
 import { work } from '@/components/workFixture';
+import { getCollection } from 'astro:content';
 import MakePage from './index.astro';
 
 vi.mock('astro:content', () => ({ getCollection: vi.fn(async () => []) }));
 
-const make = { slug: 'bmw', name: 'BMW' };
-const series = (name: string, slug: string) => ({
-  series: { name, slug, translations: null, make },
-  models: [],
-  categories: [],
+const PUBLIC_PAGE =
+  'public, s-maxage=86400, stale-while-revalidate=86400, stale-if-error=86400';
+
+const series = (name: string, slug: string, categories: string[] = []) => ({
+  slug,
+  name,
+  category_names: categories,
+});
+
+type Answer = ReturnType<typeof series>[];
+
+const hubResponse = (
+  make = { slug: 'bmw', name: 'BMW' },
+  entries: Answer = [series('1', '1')],
+  { path = `/ru/parts/${make.slug}/`, headers = {} } = {},
+) => {
+  const shop = stubShop(() => Response.json({ make, series: entries }));
+  const [, locale, , slug] = path.split('/');
+  return {
+    shop,
+    response: respond(
+      MakePage,
+      new Request(new URL(path, 'https://carlab.rs'), { headers }),
+      { params: { locale, make: slug } },
+    ),
+  };
+};
+
+const hubHtml = async (...args: Parameters<typeof hubResponse>) =>
+  parseHtml(await (await hubResponse(...args).response).text());
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
+  vi.mocked(getCollection).mockResolvedValue([] as never);
 });
 
 describe('the make hub', () => {
-  it('names each series with its make', async () => {
-    const page = await render(MakePage, {
-      path: '/ru/parts/bmw/',
-      params: { locale: 'ru', make: 'bmw' },
-      props: {
-        hub: {
-          make,
-          series: [series('3 GT', '3-gt'), series('1', '1')],
-          parts: 0,
-        } as unknown as MakeHubEntry,
-        workshop: true,
-      },
-    });
-    const labels = [
-      ...page.querySelectorAll(`ul a[href^="/ru/parts/bmw/"]`),
-    ].map((link) => link.textContent?.trim().split('\n')[0]);
+  it('names each series with its make and lists its categories', async () => {
+    setShop(false);
+    const page = await hubHtml({ slug: 'bmw', name: 'BMW' }, [
+      series('3 GT', '3-gt', ['Фильтры', 'Тормоза']),
+      series('1', '1'),
+    ]);
+    const rows = [
+      ...page.querySelectorAll(`main ul a[href^="/ru/parts/bmw/"]`),
+    ];
 
-    expect(labels).toEqual(['BMW 1', 'BMW 3 GT']);
+    expect(
+      rows.map((link) => link.querySelector('span, div')?.textContent?.trim()),
+    ).toEqual(['BMW 1', 'BMW 3 GT']);
+    expect(rows[1].textContent).toContain('Фильтры, Тормоза');
+    expect(rows[1].getAttribute('href')).toBe('/ru/parts/bmw/3-gt/');
   });
 
-  const hubOf = (
-    hubMake: { slug: string; name: string },
-    locale = 'ru',
-    workshop = true,
-  ) =>
-    render(MakePage, {
-      path: `/${locale}/parts/${hubMake.slug}/`,
-      params: { locale, make: hubMake.slug },
-      props: {
-        hub: {
-          make: hubMake,
-          series: [series('1', '1')],
-          parts: 3,
-        } as unknown as MakeHubEntry,
-        workshop,
-      },
+  it('asks the shop for the Make in the locale of the path', async () => {
+    setShop(false);
+    const { shop, response } = hubResponse(undefined, undefined, {
+      path: '/sr/parts/bmw/',
     });
+    await response;
+    const [url, init] = shop.mock.calls[0];
+
+    expect(String(url)).toBe(
+      'http://shop.test/store/catalogue-pages/makes/bmw',
+    );
+    expect(new Headers(init?.headers).get('x-catalogue-locale')).toBe('sr');
+  });
+
+  it('answers with a page the shared cache may keep and no cookie', async () => {
+    setShop(false);
+    const response = await hubResponse().response;
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe(PUBLIC_PAGE);
+    expect(response.headers.get('set-cookie')).toBeNull();
+  });
+
+  it('is indexable and canonical to its own path', async () => {
+    setShop(false);
+    const page = await hubHtml();
+
+    expect(
+      page.querySelector('meta[name="robots"][content*="noindex"]'),
+    ).toBeNull();
+    expect(
+      page.querySelector('link[rel="canonical"]')?.getAttribute('href'),
+    ).toBe('https://carlab.rs/ru/parts/bmw/');
+    expect(
+      page
+        .querySelector('link[rel="alternate"][hreflang="sr"]')
+        ?.getAttribute('href'),
+    ).toBe('https://carlab.rs/sr/parts/bmw/');
+  });
+
+  it('answers a Make with no page with a 404 the cache keeps like a page', async () => {
+    setShop(false);
+    stubShop(() => new Response(null, { status: 404 }));
+    const response = await respond(
+      MakePage,
+      new Request('https://carlab.rs/ru/parts/tiny/'),
+      { params: { locale: 'ru', make: 'tiny' } },
+    );
+
+    expect(response.status).toBe(404);
+    expect(response.headers.get('cache-control')).toBe(PUBLIC_PAGE);
+  });
+
+  it('asks the visitor to retry, uncached, when the shop fails', async () => {
+    setShop(false);
+    stubShop(() => new Response(null, { status: 500 }));
+    const response = await respond(
+      MakePage,
+      new Request('https://carlab.rs/ru/parts/bmw/'),
+      { params: { locale: 'ru', make: 'bmw' } },
+    );
+
+    expect(response.status).toBe(503);
+    expect(response.headers.get('retry-after')).toBe('60');
+    expect(response.headers.get('cache-control')).toBe('no-store');
+  });
+
+  it('keeps a preview visitor out of the cache', async () => {
+    setShop(false);
+    const { response } = hubResponse(undefined, undefined, {
+      headers: { cookie: `auto_service_shop_preview=${SHOP_PREVIEW_TOKEN}` },
+    });
+
+    expect((await response).headers.get('cache-control')).toBe(
+      'private, no-store',
+    );
+  });
 
   it.each(['ru', 'sr', 'en'] as const)(
     'links back to the Make page in %s',
     async (locale) => {
-      const page = await hubOf(make, locale);
+      setShop(false);
+      vi.mocked(getCollection).mockImplementation((async (name: string) =>
+        name === 'works'
+          ? [work({ id: 'bmw-x5', make: 'bmw' })]
+          : []) as never);
+      const page = await hubHtml(undefined, undefined, {
+        path: `/${locale}/parts/bmw/`,
+      });
 
       expect(
         page
@@ -74,64 +174,9 @@ describe('the make hub', () => {
   );
 
   it('links no Make page for a Make the site does not show', async () => {
-    const page = await hubOf({ slug: 'tesla', name: 'Tesla' }, 'ru', false);
+    setShop(false);
+    const page = await hubHtml({ slug: 'tesla', name: 'Tesla' });
 
     expect(page.querySelector('a[href="/ru/cars/tesla/"]')).toBeNull();
-  });
-});
-
-describe('the make hub cache key', () => {
-  it('changes with what the page shows, not with the models under each series', async () => {
-    const hubs = vi.hoisted(() => ({ value: [] as unknown[] }));
-    vi.doMock('@/utils/catalogueEnv', () => ({
-      makeHubsForBuild: async () => hubs.value,
-    }));
-    vi.resetModules();
-    const { getStaticPaths } = await import('./index.astro');
-    const keyOf = async (models: unknown[], name = '3') => {
-      hubs.value = [
-        {
-          make,
-          series: [{ ...series(name, name), models }],
-          parts: models.length,
-        },
-      ];
-      const [first] = await getStaticPaths();
-      return first.cacheKey;
-    };
-
-    expect(await keyOf([{ id: 'a' }])).toBe(await keyOf([{ id: 'b' }]));
-    expect(await keyOf([])).not.toBe(await keyOf([], '5'));
-    vi.doUnmock('@/utils/catalogueEnv');
-  });
-
-  it('links the Make page only from the hub of a Make the site shows', async () => {
-    vi.doMock('@/utils/catalogueEnv', () => ({
-      makeHubsForBuild: async () =>
-        [make, { slug: 'tesla', name: 'Tesla' }].map((hubMake) => ({
-          make: hubMake,
-          series: [],
-          parts: 1,
-        })),
-    }));
-    vi.resetModules();
-    const { getCollection } = await import('astro:content');
-    vi.mocked(getCollection).mockImplementation((async (collection: string) =>
-      collection === 'works'
-        ? [work({ id: 'bmw-x5', make: 'bmw' })]
-        : []) as never);
-    const { getStaticPaths } = await import('./index.astro');
-
-    const paths = (await getStaticPaths()).filter(
-      ({ params }) => params.locale === 'ru',
-    );
-
-    expect(
-      paths.map(({ params, props }) => [params.make, props.workshop]),
-    ).toEqual([
-      ['bmw', true],
-      ['tesla', false],
-    ]);
-    vi.doUnmock('@/utils/catalogueEnv');
   });
 });

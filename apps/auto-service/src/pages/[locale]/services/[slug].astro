@@ -21,7 +21,7 @@ import {
   SERVICE_SLUGS,
   VIN_INQUIRY_SERVICE,
 } from '@/utils/services';
-import { categoryPagesForBuild } from '@/utils/catalogueEnv';
+import { pageListForBuild } from '@/utils/catalogueEnv';
 import { safeMarkdown } from '@podbor/site-kit';
 import { servicePageSchema } from '@/utils/schema';
 import { content } from '@/i18n/content';
@@ -47,7 +47,10 @@ const image = servicePhoto(slug, works, {
 });
 const photo = image && (await panelPhoto(image));
 
-const partsCategory = partsCategoryFor(slug, await categoryPagesForBuild());
+const partsCategory = partsCategoryFor(
+  slug,
+  (await pageListForBuild()).categories,
+);
 const partsHref = partsCategory
   ? PathBuilder.partsCategory(locale, partsCategory)
   : slug === 'servicing' && PathBuilder.parts(locale);
@@ -88,6 +91,7 @@ const asideCards = [
       { href: PathBuilder.service(locale, slug), label: service.name },
     ]}
   >
+    <GarageAddress layout="line" tone="panel" class="text-sm" />
     <dl class="flex flex-col gap-0.5 border-y border-panel-line/60 py-3.5">
       <dt class="text-xs text-panel-ink">{services.specsDurationLabel}</dt>
       <dd class="spec text-lg leading-tight font-semibold">
@@ -95,7 +99,6 @@ const asideCards = [
       </dd>
     </dl>
     <HeroContacts service={slug} bookLabel={service.cta} bookModal={!parts} />
-    <GarageAddress layout="line" tone="panel" class="text-sm" />
   </PanelHero>
 
   <section

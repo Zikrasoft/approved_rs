@@ -309,16 +309,17 @@ describe('generateLlmsTxt', () => {
         ],
       },
     };
-    const listed = (path: string, key: string) =>
-      (answers[path] as Record<string, unknown>)[key];
-    answers['/store/catalogue-snapshot'] = {
-      pages: listed('/store/part-pages', 'pages'),
-      categories: listed('/store/categories', 'categories'),
-      fitments: listed('/store/fitments', 'fitments'),
-      vehicles: listed('/store/vehicles', 'vehicles'),
+    answers['/store/catalogue-pages'] = {
+      parts: numbers.map((number) => ({
+        slug: `mann-filter-${number.toLowerCase()}`,
+        indexable: true,
+      })),
+      makes: fitted.length ? [{ slug: 'bmw', name: 'BMW', hub: true }] : [],
+      series: [],
+      categories: [],
     };
     (globalThis as { [key: symbol]: Map<string, unknown> | undefined })[
-      Symbol.for('carlab.buildSnapshots')
+      Symbol.for('carlab.buildMemo')
     ]?.clear();
     vi.stubEnv('MEDUSA_BACKEND_URL', 'http://localhost:9009');
     vi.stubEnv('MEDUSA_PUBLISHABLE_KEY', 'pk_test');

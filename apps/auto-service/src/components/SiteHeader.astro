@@ -26,12 +26,10 @@ const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const searchCopy = content(locale).partsSearch;
 const pathname = Astro.url.pathname;
-const inLocale = (code: Locale) =>
-  `${swapLocale(pathname, code)}${Astro.url.search}`;
-
-const onHome = navCurrent(pathname, PathBuilder.home(locale)) === 'page';
 const pageHasSearch =
-  onHome || navCurrent(pathname, PathBuilder.partsSearch(locale)) === 'page';
+  navCurrent(pathname, PathBuilder.partsSearch(locale)) === 'page';
+const inLocale = (code: Locale) =>
+  `${swapLocale(pathname, code)}${pageHasSearch ? Astro.url.search : ''}`;
 const onParts = pathname.startsWith(PathBuilder.parts(locale));
 const open = shopOpen();
 const basket = open
@@ -112,7 +110,7 @@ const links = [
 
       {
         !pageHasSearch && (
-          <div class="hidden max-w-72 min-w-0 flex-1 min-[1360px]:block">
+          <div class="hidden max-w-72 min-w-0 flex-1 min-[1360px]:block [body:has([data-hero-parts-search])_&]:hidden">
             <CatalogueSearch compact />
           </div>
         )
@@ -120,28 +118,56 @@ const links = [
 
       <div class="flex items-center gap-1 self-stretch sm:gap-2">
         <div
-          class="contents lg:relative lg:flex lg:items-center lg:self-stretch"
+          class="contents lg:relative lg:flex lg:items-center lg:self-stretch [&:has(:popover-open)_language-suggestion]:hidden"
         >
-          <carlab-lang class="hidden items-center gap-1 lg:flex">
-            {
-              SUPPORTED_LOCALES.map((code) => (
-                <a
-                  href={inLocale(code)}
-                  hreflang={code}
-                  {...{ [LOCALE_CHOICE_ATTRIBUTE]: code }}
-                  title={LOCALE_NAME[code]}
-                  aria-current={code === locale ? 'true' : undefined}
-                  class:list={[
-                    'spec rounded-pill px-2.5 py-1 text-[0.6875rem] uppercase tracking-widest transition-colors duration-150 data-lang-suggested:text-panel-fg data-lang-suggested:ring-1 data-lang-suggested:ring-signal',
-                    code === locale
-                      ? 'bg-panel-2 text-panel-fg'
-                      : 'text-panel-ink hover:text-panel-fg',
-                  ]}
-                >
-                  {code}
-                </a>
-              ))
-            }
+          <carlab-lang class="group/lang hidden lg:flex lg:items-center">
+            <button
+              type="button"
+              popovertarget="site-lang"
+              class="spec flex min-h-11 items-center gap-1 rounded-control px-2.5 text-[0.6875rem] tracking-widest text-panel-fg uppercase transition-colors duration-150 [anchor-name:--site-lang] group-has-[[data-lang-suggested]]/lang:ring-1 group-has-[[data-lang-suggested]]/lang:ring-signal hover:bg-panel-2"
+            >
+              <span class="sr-only normal-case">
+                {site.header.languageLabel}:{' '}
+              </span>
+              {locale}
+              <Icon
+                name="chevronDown"
+                size={14}
+                class="shrink-0 text-panel-ink transition-transform duration-150 group-has-[:popover-open]/lang:rotate-180 motion-reduce:transition-none"
+              />
+            </button>
+            <div
+              id="site-lang"
+              popover
+              class="inset-auto top-[4.5rem] right-[max(1.25rem,calc((100vw-74rem)/2+1.25rem))] m-0 min-w-44 rounded-control border border-panel-line bg-panel-2 p-1 text-panel-fg shadow-xl shadow-ink/25 [position-anchor:--site-lang] supports-[anchor-name:--a]:top-[calc(anchor(bottom)+0.25rem)] supports-[anchor-name:--a]:right-[anchor(right)]"
+            >
+              <ul class="flex flex-col">
+                {
+                  SUPPORTED_LOCALES.map((code) => (
+                    <li>
+                      <a
+                        href={inLocale(code)}
+                        hreflang={code}
+                        lang={code}
+                        {...{ [LOCALE_CHOICE_ATTRIBUTE]: code }}
+                        aria-current={code === locale ? 'true' : undefined}
+                        class:list={[
+                          'flex min-h-11 items-center justify-between gap-6 rounded-[calc(var(--radius-control)-0.25rem)] px-3 text-sm transition-colors duration-150 hover:bg-panel focus-visible:bg-panel data-lang-suggested:ring-1 data-lang-suggested:ring-signal',
+                          code === locale
+                            ? 'font-semibold text-panel-fg'
+                            : 'text-panel-ink hover:text-panel-fg',
+                        ]}
+                      >
+                        {LOCALE_NAME[code]}
+                        {code === locale && (
+                          <Icon name="check" size={14} class="shrink-0" />
+                        )}
+                      </a>
+                    </li>
+                  ))
+                }
+              </ul>
+            </div>
           </carlab-lang>
           <LanguageSuggestion />
         </div>
@@ -162,7 +188,8 @@ const links = [
           aria-label={searchCopy.openSearch}
           class:list={[
             'flex size-11 items-center justify-center rounded-control text-panel-fg transition-colors duration-150 hover:bg-panel-2',
-            !pageHasSearch && 'min-[1360px]:hidden',
+            !pageHasSearch &&
+              'min-[1360px]:hidden [body:has([data-hero-parts-search])_&]:min-[1360px]:flex',
           ]}
         >
           <Icon name="search" size={20} />

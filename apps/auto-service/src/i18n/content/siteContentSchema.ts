@@ -112,6 +112,7 @@ export const siteContentSchema = z
       .object({
         heading: z.string(),
         subheading: z.string(),
+        callInstead: z.string(),
         nameLabel: z.string(),
         namePlaceholder: z.string(),
         contactLabel: z.string(),

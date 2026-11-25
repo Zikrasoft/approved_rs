@@ -8,25 +8,38 @@ import tailwindcss from '@tailwindcss/vite';
 import { CARLAB } from '@podbor/brands';
 import { localeConfig } from './src/i18n/config.ts';
 import { blogListed } from '@podbor/blog/article';
-import { sitemapFilter } from './src/utils/sitemap.ts';
+import { carsUrls, catalogueUrls, sitemapFilter } from './src/utils/sitemap.ts';
 import {
-  partPagesForBuild,
+  pageListForBuild,
   writeCatalogueMakes,
 } from './src/utils/catalogueEnv.ts';
 import { partsHubPlugin } from './src/utils/partsHub.ts';
 
 const site = CARLAB.url;
-const partPages = await partPagesForBuild(process.env);
+const pageList = await pageListForBuild(process.env);
 await writeCatalogueMakes(
   new URL('./src/content/makes.json', import.meta.url),
   process.env,
 );
 const { articleFiles } = await import('./src/utils/articleFiles.ts');
-const blog = blogListed(
-  await articleFiles(
-    fileURLToPath(new URL('./src/content/articles/', import.meta.url)),
-  ),
+const articles = await articleFiles(
+  fileURLToPath(new URL('./src/content/articles/', import.meta.url)),
 );
+const blog = blogListed(articles);
+const { workFiles } = await import('./src/utils/workFiles.ts');
+const { overviewConflicts, workshopMakePages } =
+  await import('./src/utils/works.ts');
+const workshopPages = workshopMakePages(
+  await workFiles(
+    fileURLToPath(new URL('./src/content/works/', import.meta.url)),
+  ),
+  articles,
+  [],
+);
+for (const conflict of overviewConflicts(workshopPages)) {
+  console.warn(conflict);
+}
+const workshopMakes = workshopPages.map(({ make }) => make.slug);
 
 export default defineConfig({
   site,
@@ -45,7 +58,11 @@ export default defineConfig({
     react(),
     keystatic(),
     sitemap({
-      filter: sitemapFilter(site, partPages, blog),
+      filter: sitemapFilter(site, pageList.parts, blog),
+      customPages: [
+        ...catalogueUrls(site, pageList),
+        ...carsUrls(site, workshopMakes),
+      ],
       i18n: {
         defaultLocale: localeConfig.primaryLocale,
         locales: Object.fromEntries(localeConfig.locales.map((l) => [l, l])),
@@ -62,8 +79,5 @@ export default defineConfig({
         config: () => ({ ssr: { noExternal: true } }),
       },
     ],
-  },
-  experimental: {
-    incrementalBuild: true,
   },
 });

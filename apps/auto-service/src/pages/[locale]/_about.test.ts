@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { content } from '@/i18n/content';
-import { render } from '@/components/renderAstro';
+import { render, heroPartsSearch } from '@/components/renderAstro';
 import { work } from '@/components/workFixture';
 import AboutPage from './about.astro';
 
@@ -43,16 +43,12 @@ describe('the about page', () => {
     about.equipment.forEach((item) => expect(root.textContent).toContain(item));
   });
 
-  it('names the makes from the Works, each linking its Make page, and links every Work', async () => {
+  it('names the makes from the Works as tap-sized chips, each linking its Make page, and links every Work', async () => {
     const root = await page();
-    const makes = [...root.querySelectorAll('p')].filter(
-      (line) => line.textContent?.trim() === 'BMW, SEAT',
-    );
+    const makes = [...root.querySelectorAll('ul a[href^="/ru/cars/"]')];
 
-    expect(makes).toHaveLength(1);
-    expect(root.querySelector('.chip')).toBeNull();
     expect(
-      [...makes[0].querySelectorAll('a')].map((link) => [
+      makes.map((link) => [
         link.getAttribute('href'),
         link.textContent?.trim(),
       ]),
@@ -60,6 +56,11 @@ describe('the about page', () => {
       ['/ru/cars/bmw/', 'BMW'],
       ['/ru/cars/seat/', 'SEAT'],
     ]);
+    makes.forEach((link) =>
+      expect([...link.classList]).toEqual(
+        expect.arrayContaining(['inline-flex', 'min-h-11', 'rounded-pill']),
+      ),
+    );
     expect(
       [...root.querySelectorAll('a[href="/ru/works/"]')].some(
         (link) => link.textContent?.trim() === site.common.allWorks,
@@ -120,12 +121,17 @@ describe('the about page', () => {
     ).not.toBeNull();
   });
 
-  it('offers no call or booking above the facts', async () => {
+  it('offers the call and the booking in the hero above the VIN search', async () => {
     const hero = (await page()).querySelector('section')!;
+    const contacts = hero.querySelector('[data-contact-placement="hero"]')!;
 
+    expect(contacts.querySelector('a[href^="tel:"]')).not.toBeNull();
+    expect(contacts.querySelector('[data-open-lead-modal]')).not.toBeNull();
     expect(
-      hero.querySelector('[data-open-lead-modal], a[href^="tel:"]'),
-    ).toBeNull();
+      contacts.compareDocumentPosition(
+        hero.querySelector('[data-hero-parts-search]')!,
+      ) & contacts.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
   });
 
   it('opens on the workshop bay and preloads it', async () => {
@@ -165,5 +171,11 @@ describe('the about page', () => {
     );
     expect(following(equipment, sign)).toBeTruthy();
     expect(following(sign, makes)).toBeTruthy();
+  });
+});
+
+describe('the hero of the about page', () => {
+  it('offers the VIN parts search', async () => {
+    expect(heroPartsSearch(await page())).not.toBeNull();
   });
 });

@@ -22,10 +22,9 @@ import { isBuyable } from '@podbor/catalog-contract/availability';
 import { serbianScripts } from '../lib/serbian';
 import { type CarAddress, fittedCarKeys } from '../lib/car-pages';
 import { loadPartDemand } from '../lib/part-demand';
-import { requirementFits } from '../lib/requirement-fit';
 import { partNumberKey } from '../modules/_shared/part-number-key';
-import { CATALOG_MODULE } from '../modules/catalog';
-import type CatalogModuleService from '../modules/catalog/service';
+import { PUBLISH_MODULE } from '../modules/publish';
+import type PublishModuleService from '../modules/publish/service';
 import {
   offersByIdentifier,
   type PricedOfferRow,
@@ -179,6 +178,33 @@ const toDocument = (
   };
 };
 
+const requiredCars = async (
+  query: SearchTypes.SearchIngestionContext['container']['query'],
+  partIds: string[],
+): Promise<FitmentRow[]> => {
+  const fits = await appContainer
+    .resolve<PublishModuleService>(PUBLISH_MODULE)
+    .partRequirementFits(partIds);
+  if (!fits.length) return [];
+  const { data } = await query.graph({
+    entity: 'vehicle',
+    fields: [
+      'id',
+      'model.slug',
+      'model.chassis.series.name',
+      'model.chassis.series.make.slug',
+    ],
+    filters: { id: [...new Set(fits.map(({ vehicle_id }) => vehicle_id))] },
+  });
+  const cars = new Map(
+    (data as CarAddress[]).map((vehicle) => [vehicle.id, vehicle]),
+  );
+  return fits.flatMap(({ part_id, vehicle_id }) => {
+    const vehicle = cars.get(vehicle_id);
+    return vehicle ? [{ part_id, vehicle }] : [];
+  });
+};
+
 const source = {
   fields: [
     'id',
@@ -256,11 +282,7 @@ const source = {
         fields: ['id', 'listed'],
         filters: { id: rows.map(({ id }) => id) },
       }),
-      // TODO: every index batch reloads the cars its Categories' Requirements reach; cache them per reindex once a full reindex gets slow
-      requirementFits(
-        appContainer.resolve<CatalogModuleService>(CATALOG_MODULE),
-        parts,
-      ),
+      requiredCars(container.query, partIds),
       loadPartDemand(appContainer),
       releasedSupplierData(
         appContainer.resolve<SupplierModuleService>(SUPPLIER_MODULE),

@@ -21,10 +21,7 @@ import GarageAddress from '@/components/GarageAddress.astro';
 import Faq from '@/components/Faq.astro';
 import FinalCta from '@/components/FinalCta.astro';
 import HeroContacts from '@/components/HeroContacts.astro';
-import GoogleRating from '@/components/GoogleRating.astro';
-import CatalogueSearch from '@/components/CatalogueSearch.astro';
-import PartsInquiryModal from '@/components/PartsInquiryModal.astro';
-import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
+import HeroPartsSearch from '@/components/HeroPartsSearch.astro';
 import { localeFrom } from '@/i18n/config';
 import { featuredWorks } from '@/utils/works';
 import { localePaths, PathBuilder } from '@/utils/paths';
@@ -120,48 +117,10 @@ const website = websiteSchema({
 
         <HeroContacts />
 
-        <div
-          class="flex flex-col gap-2 border-t border-panel-line/60 pt-5 lg:pt-6"
-        >
-          <h2 class="text-base leading-snug font-semibold tracking-normal">
-            {home.hero.partsHeading}
-          </h2>
-          <CatalogueSearch
-            hint={false}
-            onPanel
-            submitLabel={home.hero.partsSubmit}
-          />
-          <p class="text-sm leading-snug text-panel-ink">
-            {home.hero.partsHint}{' '}
-            <a
-              href={PathBuilder.partsInquiry(locale)}
-              class="inline-flex min-h-11 items-center font-semibold text-panel-fg underline decoration-panel-line underline-offset-2 transition-colors duration-150 hover:decoration-panel-fg sm:min-h-0"
-              {...{ [PARTS_INQUIRY_OPEN_ATTRIBUTE]: '' }}
-            >
-              {home.hero.partsInquiry}
-            </a>
-          </p>
-        </div>
-
-        <ul
-          class="flex flex-wrap gap-x-5 gap-y-1.5 text-[0.8125rem] text-panel-ink lg:text-xs"
-        >
-          <li class="flex items-center">
-            <GoogleRating tone="panel" />
-          </li>
-          {
-            home.hero.badges.map((fact) => (
-              <li class="flex items-center gap-1.5 lg:gap-1">
-                <Icon name="check" size={12} />
-                {fact}
-              </li>
-            ))
-          }
-        </ul>
+        <HeroPartsSearch tone="panel" trustOnPhone />
       </div>
     </div>
   </section>
-  <PartsInquiryModal comment="" />
 
   <section id="services" class="wrap scroll-mt-20 py-band md:py-band-lg">
     <SplitSection>

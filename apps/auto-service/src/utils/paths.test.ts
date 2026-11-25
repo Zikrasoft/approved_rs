@@ -2,7 +2,7 @@ import { readdirSync } from 'node:fs';
 import { describe, it, expect } from 'vitest';
 import { RESERVED_PARTS_SEGMENTS } from '@podbor/catalog-contract';
 import {
-  catalogueLinks,
+  seriesLink,
   PathBuilder,
   seriesPath,
   swapLocale,
@@ -161,26 +161,12 @@ describe('reserved parts segments', () => {
   });
 });
 
-describe('catalogueLinks', () => {
+describe('seriesLink', () => {
+  const link = seriesLink('ru', new Set(['bmw/3-series']));
   const series = { name: '3 Series', make: { slug: 'bmw' } };
-  const links = catalogueLinks('ru', {
-    makes: new Set(['bmw']),
-    series: new Set(['bmw/3-series']),
-    categories: new Set(['bmw/3-series/brake-pads']),
-  });
 
-  it('links a Series that has a page', () => {
-    expect(links.series(series)).toBe('/ru/parts/bmw/3-series/');
-    expect(links.series({ ...series, name: '5 Series' })).toBeNull();
-  });
-
-  it('links a category the Series has a page for', () => {
-    expect(links.seriesCategory(series, 'brake-pads')).toBe(
-      '/ru/parts/bmw/3-series/brake-pads/',
-    );
-  });
-
-  it('gives nothing for a category without a Series page', () => {
-    expect(links.seriesCategory(series, 'oil-filters')).toBeNull();
+  it('links a Series the shop linked and nothing else', () => {
+    expect(link(series)).toBe('/ru/parts/bmw/3-series/');
+    expect(link({ ...series, name: '5 Series' })).toBeNull();
   });
 });

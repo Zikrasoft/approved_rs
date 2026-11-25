@@ -1,9 +1,12 @@
 import type { ImageMetadata } from 'astro';
+import { paginate } from '@podbor/site-kit/pagination';
 import type { CollectionEntry } from 'astro:content';
 import { makeArticles } from '@podbor/blog/article';
 import { makePages } from '@podbor/blog/make-pages';
 import {
   normalizePartNumber,
+  partPageSlug,
+  slugOf,
   type CatalogueMake,
 } from '@podbor/catalog-contract';
 import {
@@ -13,8 +16,9 @@ import {
 } from '@podbor/i18n';
 import type { Locale } from '@/i18n/config';
 import type { Article } from './blog';
-import type { MakePartsEntry, PartPageEntry } from './catalogueSnapshot';
-import { MAKES } from './makes';
+import type { CarMakeParts } from './catalogue';
+import type { PartCard } from './partEntry';
+import { MAKES, type Make } from './makes';
 import type { ServiceSlug } from './services';
 
 type WorkEntry = CollectionEntry<'works'>;
@@ -46,7 +50,7 @@ export const featuredWorks = (works: WorkEntry[]): Work[] => {
 export const titleNamesCar = (title: string, car: string) =>
   title.toLowerCase().startsWith(car.toLowerCase());
 
-const sourcedBy = (page: PartPageEntry, { brand, number }: WorkPart) => {
+const sourcedBy = (page: PartCard, { brand, number }: WorkPart) => {
   const wanted = brand.trim().toLowerCase();
   return (
     [page.brand.name.toLowerCase(), page.brand.slug].includes(wanted) &&
@@ -54,16 +58,18 @@ const sourcedBy = (page: PartPageEntry, { brand, number }: WorkPart) => {
   );
 };
 
-export const sourcedParts = (work: Work, pages: PartPageEntry[]) =>
-  work.data.parts.map((part) => ({
-    ...part,
-    slug: pages.find((page) => sourcedBy(page, part))?.slug ?? null,
-  }));
+const pageSlugOf = ({ brand, number }: WorkPart): string | null => {
+  const normalized = normalizePartNumber(number);
+  return normalized && partPageSlug(slugOf(brand), normalized);
+};
 
-export const sourcingWorks = (
-  works: WorkEntry[],
-  page: PartPageEntry,
-): Work[] =>
+export const sourcedParts = (work: Work, slugs: Set<string>) =>
+  work.data.parts.map((part) => {
+    const slug = pageSlugOf(part);
+    return { ...part, slug: slug && slugs.has(slug) ? slug : null };
+  });
+
+export const sourcingWorks = (works: WorkEntry[], page: PartCard): Work[] =>
   publishedWorks(works).filter((work) =>
     work.data.parts.some((part) => sourcedBy(page, part)),
   );
@@ -86,10 +92,10 @@ export const sharedMakes = (works: Work[]) =>
 
 export const makesOf = (works: Work[]) => carried(works, 1);
 
-export const workshopMakePages = (
+export const workshopMakePages = <P extends { make: { slug: string } }>(
   works: WorkEntry[],
   articles: Article[],
-  parts: MakePartsEntry[],
+  parts: P[],
   makes: CatalogueMake[] = MAKES,
 ) =>
   makePages(makes, {
@@ -104,7 +110,11 @@ export const workshopMakePages = (
     ...makeArticles(page.articles),
   }));
 
-export type WorkshopMakePage = ReturnType<typeof workshopMakePages>[number];
+export type MakeParts = CarMakeParts & { make: Make };
+
+export type WorkshopMakePage = ReturnType<
+  typeof workshopMakePages<MakeParts>
+>[number];
 
 export const overviewConflicts = (pages: WorkshopMakePage[]) =>
   pages.flatMap(({ make, overview, ignoredOverviews }) =>
@@ -119,6 +129,48 @@ export const makeCover = ({ overview, works }: WorkshopMakePage) =>
   overview?.data.image ?? publishedByNewest(works)[0]?.data.image;
 
 export const CARS_PAGE_SIZE = 24;
+
+export const CARS_PAGE_NUMBER = /^[2-9]\d*$/;
+
+export type MakeTile = { make: Make; cover: ImageMetadata | undefined };
+
+export const makeTiles = (works: WorkEntry[], articles: Article[]) =>
+  workshopMakePages<MakeParts>(works, articles, []).map((page): MakeTile => ({
+    make: page.make,
+    cover: makeCover(page),
+  }));
+
+export const carsListing = (tiles: MakeTile[], page?: string) => {
+  const listings = paginate(tiles, CARS_PAGE_SIZE);
+  if (page === undefined) return listings[0];
+  return CARS_PAGE_NUMBER.test(page)
+    ? (listings[Number(page) - 1] ?? null)
+    : null;
+};
+
+type Written = { works: WorkEntry[]; articles: Article[] };
+
+export const carsListingPage = (
+  segment: string,
+  { works, articles }: Written,
+) => {
+  const cards = makeTiles(works, articles);
+  const listing = carsListing(cards, segment);
+  return listing && { listing, cards };
+};
+
+export const carMakePage = async (
+  segment: string,
+  { works, articles }: Written,
+  partsOf: (make: string) => Promise<CarMakeParts | null>,
+): Promise<WorkshopMakePage | null> => {
+  const page = workshopMakePages<MakeParts>(works, articles, []).find(
+    ({ make }) => make.slug === segment,
+  );
+  if (!page) return null;
+  const parts = await partsOf(page.make.slug);
+  return { ...page, parts: parts ? [{ make: page.make, ...parts }] : [] };
+};
 
 const WORKSHOP = 'workshop';
 

@@ -1,4 +1,5 @@
 ---
+import SnapRow from './SnapRow.astro';
 import WorkCard from './WorkCard.astro';
 import type { Work } from '@/utils/works';
 
@@ -11,20 +12,10 @@ interface Props {
 const { works, desktop = works.length, class: className } = Astro.props;
 ---
 
-<ul
-  class:list={[
-    '-mx-5 flex snap-x snap-mandatory scroll-px-5 gap-3 overflow-x-auto px-5 pb-1 [scrollbar-width:none] lg:mx-0 lg:grid lg:grid-cols-3 lg:gap-4 lg:overflow-visible lg:px-0',
-    className,
-  ]}
->
+<SnapRow class:list={['lg:grid-cols-3', className]}>
   {
     works.map((work, i) => (
-      <li
-        class:list={[
-          'w-[78%] shrink-0 snap-start sm:w-[46%] lg:w-auto',
-          i >= desktop && 'lg:hidden',
-        ]}
-      >
+      <li class:list={[i >= desktop && 'lg:hidden']}>
         <WorkCard
           work={work}
           tags={false}
@@ -33,4 +24,4 @@ const { works, desktop = works.length, class: className } = Astro.props;
       </li>
     ))
   }
-</ul>
+</SnapRow>

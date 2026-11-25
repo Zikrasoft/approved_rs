@@ -1,5 +1,5 @@
 import type { MedusaContainer } from '@medusajs/framework/types';
-import type { PartDemand } from '@podbor/catalog-contract';
+import { partPageAddress, type PartDemand } from '@podbor/catalog-contract';
 
 import { CATALOG_MODULE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
@@ -18,16 +18,13 @@ export const demandModule = (scope: MedusaContainer) =>
 const catalogModule = (scope: MedusaContainer) =>
   scope.resolve<CatalogModuleService>(CATALOG_MODULE);
 
-const brandAndNumber = (slug: string) => {
-  const at = slug.lastIndexOf('-');
-  return { brand: slug.slice(0, at), number: slug.slice(at + 1).toUpperCase() };
-};
-
 export async function identifiersOfSlugs(
   scope: MedusaContainer,
   slugs: string[],
 ): Promise<string[]> {
-  const read = [...new Set(slugs)].map(brandAndNumber);
+  const read = [...new Set(slugs)].flatMap(
+    (slug) => partPageAddress(slug) ?? [],
+  );
   const catalog = catalogModule(scope);
   const brands = await catalog.listBrands(
     { slug: read.map(({ brand }) => brand) },

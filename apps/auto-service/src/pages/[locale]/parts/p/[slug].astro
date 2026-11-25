@@ -1,6 +1,8 @@
 ---
+export const prerender = false;
+
 import DisclosureCard from '@/components/DisclosureCard.astro';
-import { partPageSlug, translated } from '@podbor/catalog-contract';
+import { partPageSlug } from '@podbor/catalog-contract';
 import { bestOffer } from '@podbor/catalog-contract/availability';
 import { productSchema } from '@podbor/site-kit';
 import Shell from '@/layouts/Shell.astro';
@@ -20,19 +22,15 @@ import LeadModal from '@/components/LeadModal.astro';
 import WorkGrid from '@/components/WorkGrid.astro';
 import { getCollection } from 'astro:content';
 import { sourcingWorks } from '@/utils/works';
-import { partCacheKey } from '@/utils/cacheKey';
 import { carName, vehicleVariant } from '@/utils/carName';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { formatMoney, PRICE_CURRENCY } from '@/utils/money';
 import { installationService } from '@/utils/services';
 import { content } from '@/i18n/content';
 import { attributeRows } from '@/utils/attributeRows';
-import {
-  cataloguePagesForBuild,
-  partPagesForBuild,
-  shopOpen,
-} from '@/utils/catalogueEnv';
-import type { PartPageEntry } from '@/utils/catalogueSnapshot';
+import { shopOpen } from '@/utils/catalogueEnv';
+import { loadCataloguePage } from '@/utils/cataloguePage';
+import type { PartPageView } from '@/utils/partEntry';
 import {
   imageAlt,
   partGallery,
@@ -46,55 +44,30 @@ import {
 } from '@/utils/partSuccessor';
 import { splitNumbers } from '@/utils/partNumbers';
 import { paragraphs } from '@podbor/site-kit';
-import {
-  catalogueLinks,
-  PathBuilder,
-  withLocales,
-  type CataloguePages,
-} from '@/utils/paths';
+import { PathBuilder, seriesLink } from '@/utils/paths';
 import { schemaAvailability } from '@/utils/leadTime';
 import { partDataset } from '@/utils/partDataset';
 import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
 import { contactCta } from '@podbor/site-kit/contact-control';
 
-export async function getStaticPaths() {
-  const pages = await partPagesForBuild();
-  const places = await cataloguePagesForBuild();
-  const works = await getCollection('works');
-  const bySlug = new Map(pages.map((page) => [page.slug, page]));
-  return withLocales(
-    pages.map((page) => {
-      const rendered = {
-        page,
-        successor: partSuccessor(page, bySlug),
-        replacements: currentNumbers(page, bySlug),
-      };
-      return {
-        params: { slug: page.slug },
-        props: { ...rendered, bySlug, places },
-        cacheKey: partCacheKey(rendered, { bySlug, places, works }),
-      };
-    }),
-  );
-}
-
-const { page, successor, replacements, bySlug, places } = Astro.props as {
-  page: PartPageEntry;
-  successor: PartPageEntry | null;
-  replacements: ReturnType<typeof currentNumbers>;
-  bySlug: Map<string, PartPageEntry>;
-  places: CataloguePages;
-};
+const loaded = await loadCataloguePage(Astro, (catalogue, catalogueLocale) =>
+  catalogue.partPage(Astro.params.slug ?? '', catalogueLocale),
+);
+if (loaded instanceof Response) return loaded;
+const { page, related, linkedSeries } = loaded;
+const bySlug = new Map([page, ...related].map((entry) => [entry.slug, entry]));
+const successor = partSuccessor(page, bySlug);
+const replacements = currentNumbers(page, bySlug);
 const locale = localeFrom(Astro.url.pathname);
 const open = shopOpen();
 const ordersSuccessor = Boolean(
   successor && (!open || (successor.offers.length > 0 && page.priceOnRequest)),
 );
-const pageLinks = catalogueLinks(locale, places);
+const linkOf = seriesLink(locale, linkedSeries);
 const site = content(locale).site;
 const copy = content(locale).shopPart;
 const heading = `${page.brand.name} ${page.value}`;
-const partName = translated(page.part, 'name', locale);
+const partName = page.part.name;
 const replacement = page.part.replaced_by;
 const category = page.category;
 const attributes = category
@@ -104,29 +77,21 @@ const attributes = category
     })
   : [];
 const description = page.part.description
-  ? paragraphs(
-      translated(
-        { ...page.part, description: page.part.description },
-        'description',
-        locale,
-      ),
-    )
+  ? paragraphs(page.part.description)
   : [];
-const categoryText = category
-  ? paragraphs(translated(category, 'text', locale))
-  : [];
+const categoryText = category ? paragraphs(category.text) : [];
 const gallery = partGallery(page);
 const picture = partPicture(page, category);
 const shown = picture && {
   images: picture.images,
   alt:
     picture.illustration && category
-      ? translated(category, 'name', locale)
+      ? category.name
       : imageAlt(page.brand.name, page.value, partName),
   note: picture.illustration ? copy.categoryIllustration : undefined,
 };
-const carLink = (vehicle: PartPageEntry['kitCars'][number]) => ({
-  href: pageLinks.series(vehicle.model.chassis.series),
+const carLink = (vehicle: PartPageView['kitCars'][number]) => ({
+  href: linkOf(vehicle.model.chassis.series),
   label: `${carName(vehicle.model, locale)}, ${vehicleVariant(vehicle, locale)}`,
 });
 const carLists = [
@@ -164,7 +129,7 @@ const jsonLd = topOffer
 const [noticeBefore, noticeAfter] = (
   replacement ? copy.partReplacedNotice : copy.numberSupersededNotice
 ).split('{number}');
-const equivalentSlug = (equivalent: PartPageEntry['equivalents'][number]) =>
+const equivalentSlug = (equivalent: PartPageView['equivalents'][number]) =>
   partPageSlug(equivalent.brand.slug, equivalent.normalized_value);
 const replacementSlugs = new Set(replacements.map(({ slug }) => slug));
 const equivalents = splitNumbers(
@@ -190,9 +155,9 @@ const installPrice =
           ),
         };
 const works = sourcingWorks(await getCollection('works'), page);
-const equivalentName = (equivalent: PartPageEntry['equivalents'][number]) => {
+const equivalentName = (equivalent: PartPageView['equivalents'][number]) => {
   const entry = bySlug.get(equivalentSlug(equivalent));
-  return entry && translated(entry.part, 'name', locale);
+  return entry?.part.name;
 };
 const thumbFor = (slug: string) => {
   const entry = bySlug.get(slug);
@@ -218,7 +183,7 @@ const thumbFor = (slug: string) => {
         ? [
             {
               href: PathBuilder.partsCategory(locale, category.slug),
-              label: translated(category, 'name', locale),
+              label: category.name,
             },
           ]
         : []),
@@ -301,6 +266,7 @@ const thumbFor = (slug: string) => {
         !ordersSuccessor && (
           <PartOffers
             page={page}
+            fits={page.fits}
             demoted={Boolean(successor)}
             alternative={successor ? null : pricedEquivalent(page, bySlug)}
           />
@@ -377,7 +343,7 @@ const thumbFor = (slug: string) => {
           </div>
         )
       }
-      <PartFitsList fits={page.fits} places={places} />
+      <PartFitsList fits={page.fits} linkedSeries={linkedSeries} />
       {
         carLists.length > 0 && (
           <div class="card flex flex-col divide-y divide-line">
@@ -457,7 +423,7 @@ const thumbFor = (slug: string) => {
     {
       category && (
         <div class="flex flex-col gap-3 max-lg:order-4 lg:col-start-1">
-          <h2 class="text-section">{translated(category, 'name', locale)}</h2>
+          <h2 class="text-section">{category.name}</h2>
           <div class="flex max-w-2xl flex-col gap-3 text-base leading-relaxed text-ink-2">
             {categoryText.map((paragraph) => (
               <p>{paragraph}</p>

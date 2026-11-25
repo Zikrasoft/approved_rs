@@ -32,3 +32,13 @@ export const fitmentsResponseSchema = z.object({
 });
 
 export type Fitment = z.infer<typeof fitmentSchema>;
+
+export const siteFitmentSchema = fitmentSchema.omit({ id: true }).extend({
+  quantity: fitmentSchema.shape.quantity.default(1),
+  production_from: fitmentSchema.shape.production_from.default(null),
+  production_to: fitmentSchema.shape.production_to.default(null),
+  note: fitmentSchema.shape.note.default(null),
+  translations: translationsSchema.default(null),
+});
+
+export type SiteFitment = z.infer<typeof siteFitmentSchema>;

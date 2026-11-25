@@ -11,7 +11,8 @@ import {
   vi,
 } from 'vitest';
 import { builtinEnvironments } from 'vitest/environments';
-import type { PartPageEntry } from '@/utils/catalogueSnapshot';
+import type { PartCard } from '@/utils/partEntry';
+import { respond, stubShop } from './renderAstro';
 import CategoryPage from '../pages/[locale]/parts/c/[slug]/[...page].astro';
 import ThanksPage from '../pages/[locale]/thanks/[...variant].astro';
 import FitLine from './FitLine.astro';
@@ -32,7 +33,10 @@ beforeAll(async () => {
 
 afterAll(() => jsdom.teardown(globalThis));
 
-afterEach(() => vi.unstubAllEnvs());
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
+});
 
 const render = async (
   component: AstroComponentFactory,
@@ -69,7 +73,7 @@ const fit: Fitment = {
   translations: null,
 };
 
-const page = (overrides: Partial<PartPageEntry> = {}): PartPageEntry => ({
+const page = (overrides: Partial<PartCard> = {}): PartCard => ({
   id: 'pi_hu816x',
   type: 'manufacturer-number',
   value: 'HU 816 x',
@@ -93,12 +97,8 @@ const page = (overrides: Partial<PartPageEntry> = {}): PartPageEntry => ({
   offers: [],
   supplier_data: { cross_references: [], applicability: [], images: [] },
   demand: null,
-  indexable: true,
   priceOnRequest: true,
   category: null,
-  fits: [],
-  requirementCars: [],
-  kitCars: [],
   ...overrides,
 });
 
@@ -284,19 +284,27 @@ describe('a category page', () => {
     installation_price: null,
     image: null,
     fields: [],
-    pages: [],
   };
 
   const offer = 'Пришлите VIN или номер, и мы назовем цену и срок.';
-  const categoryPage = async (pages: PartPageEntry[]) => {
-    const doc = await render(
+  const categoryPage = async (pages: PartCard[]) => {
+    stubShop(() =>
+      Response.json({
+        category,
+        page: 1,
+        pages: pages.length ? 2 : 1,
+        count: pages.length,
+        entries: pages,
+      }),
+    );
+    const response = await respond(
       CategoryPage,
-      {
-        category: { ...category, pages },
-        listing: { number: 1, count: pages.length ? 2 : 1, pages },
-      },
-      '/ru/parts/c/suspension/',
-      { locale: 'ru', slug: 'suspension' },
+      new Request('https://carlab.rs/ru/parts/c/suspension/'),
+      { params: { locale: 'ru', slug: 'suspension' } },
+    );
+    const doc = new DOMParser().parseFromString(
+      await response.text(),
+      'text/html',
     );
     return { doc, copy: [...doc.querySelectorAll('main p')].map(text) };
   };

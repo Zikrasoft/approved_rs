@@ -1,6 +1,7 @@
 ---
+export const prerender = false;
+
 import LinkRow from '@/components/LinkRow.astro';
-import { translated } from '@podbor/catalog-contract';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import VinInquiryCard from '@/components/VinInquiryCard.astro';
@@ -9,32 +10,25 @@ import PopularParts from '@/components/PopularParts.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { carName, seriesName, vehicleVariant } from '@/utils/carName';
-import { makeHubsForBuild } from '@/utils/catalogueEnv';
-import { cacheKey } from '@/utils/cacheKey';
-import type { SeriesHubEntry } from '@/utils/catalogueSnapshot';
+import { loadCataloguePage } from '@/utils/cataloguePage';
 import { paragraphs } from '@podbor/site-kit';
-import { PathBuilder, withLocales } from '@/utils/paths';
+import { PathBuilder } from '@/utils/paths';
 
-export async function getStaticPaths() {
-  const hubs = await makeHubsForBuild();
-  return withLocales(
-    hubs.flatMap((hub) =>
-      hub.series.map((series) => ({
-        params: { make: hub.make.slug, series: series.series.slug },
-        props: { hub: series },
-        cacheKey: cacheKey(series),
-      })),
-    ),
-  );
-}
-
-const { hub } = Astro.props as { hub: SeriesHubEntry };
+const loaded = await loadCataloguePage(Astro, (catalogue, catalogueLocale) =>
+  catalogue.seriesPage(
+    Astro.params.make ?? '',
+    Astro.params.series ?? '',
+    catalogueLocale,
+  ),
+);
+if (loaded instanceof Response) return loaded;
+const { series, models, categories, popular } = loaded;
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const copy = content(locale).partsCar.hubs.model;
-const { make, series } = hub;
+const { make } = series;
 const name = seriesName(series, make, locale);
-const empty = hub.categories.length === 0;
+const empty = categories.length === 0;
 ---
 
 <Shell
@@ -62,19 +56,14 @@ const empty = hub.categories.length === 0;
     ]}
   >
     <div class="flex flex-col gap-8">
-      <PopularParts
-        pages={hub.categories.flatMap(({ parts }) =>
-          parts.flatMap(({ pages }) => pages),
-        )}
-        car={name}
-      />
+      <PopularParts pages={popular} car={name} />
       <div class="flex flex-col gap-3">
         <h2 class="text-section">{copy.categoriesHeading}</h2>
         {
           !empty ? (
             <ul class="card divide-y divide-line">
-              {hub.categories.map(({ category }) => {
-                const [lead] = paragraphs(translated(category, 'text', locale));
+              {categories.map((category) => {
+                const [lead] = paragraphs(category.text);
                 return (
                   <LinkRow
                     href={PathBuilder.partsSeriesCategory(
@@ -83,7 +72,7 @@ const empty = hub.categories.length === 0;
                       series.slug,
                       category.slug,
                     )}
-                    label={translated(category, 'name', locale)}
+                    label={category.name}
                     detail={lead}
                   />
                 );
@@ -97,12 +86,12 @@ const empty = hub.categories.length === 0;
       </div>
 
       {
-        hub.models.length > 0 && (
+        models.length > 0 && (
           <div class="flex flex-col gap-3">
             <h2 class="text-section">{copy.carsHeading}</h2>
             <p class="max-w-2xl text-sm text-ink-2">{copy.carsLead}</p>
             <ul class="card divide-y divide-line">
-              {hub.models.map(({ model, vehicles }) => (
+              {models.map(({ model, vehicles }) => (
                 <LinkRow
                   href={PathBuilder.partsModelSearch(
                     locale,

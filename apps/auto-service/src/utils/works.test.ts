@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { article } from '@/components/articleFixture';
-import type { PartPageEntry } from './catalogueSnapshot';
+import type { PartCard } from './partEntry';
 import {
   overviewConflicts,
   workshopMakePages,
@@ -179,41 +179,46 @@ describe('titleNamesCar', () => {
   });
 });
 
-const partPage = (brand: string, value: string, normalized: string) =>
+const partCard = (brand: string, value: string, normalized: string) =>
   ({
     slug: `${brand.toLowerCase()}-${normalized.toLowerCase()}`,
     value,
     normalized_value: normalized,
     brand: { name: brand, slug: brand.toLowerCase() },
-  }) as unknown as PartPageEntry;
+  }) as unknown as PartCard;
 
 describe('sourcedParts', () => {
-  const pages = [partPage('MANN-FILTER', 'HU 816 x', 'HU816X')];
+  const slugs = new Set(['mann-filter-hu816x']);
 
   it('links a Part that has a Part page, matching brand and number loosely', () => {
     const work = makeWork({
       parts: [{ brand: 'Mann-Filter', number: 'hu-816 x' }],
     });
-    expect(sourcedParts(work, pages)).toEqual([
+    expect(sourcedParts(work, slugs)).toEqual([
       { brand: 'Mann-Filter', number: 'hu-816 x', slug: 'mann-filter-hu816x' },
     ]);
   });
 
   it('shows a Part without a page as brand and number only', () => {
     const work = makeWork({ parts: [{ brand: 'Bosch', number: '0 986 4' }] });
-    expect(sourcedParts(work, pages)).toEqual([
+    expect(sourcedParts(work, slugs)).toEqual([
       { brand: 'Bosch', number: '0 986 4', slug: null },
     ]);
   });
 
   it('does not link the same number under another brand', () => {
     const work = makeWork({ parts: [{ brand: 'Bosch', number: 'HU816X' }] });
-    expect(sourcedParts(work, pages)[0].slug).toBeNull();
+    expect(sourcedParts(work, slugs)[0].slug).toBeNull();
+  });
+
+  it('shows a number with no letters or digits as text', () => {
+    const work = makeWork({ parts: [{ brand: 'Mann-Filter', number: '--' }] });
+    expect(sourcedParts(work, slugs)[0].slug).toBeNull();
   });
 
   it('renders every Part as text when the catalogue is missing', () => {
     const work = makeWork({ parts: [{ brand: 'Bosch', number: '1' }] });
-    expect(sourcedParts(work, [])).toEqual([
+    expect(sourcedParts(work, new Set())).toEqual([
       { brand: 'Bosch', number: '1', slug: null },
     ]);
   });
@@ -221,7 +226,7 @@ describe('sourcedParts', () => {
 
 describe('sourcingWorks', () => {
   it('lists the published Works that sourced a Part page', () => {
-    const page = partPage('MANN-FILTER', 'HU 816 x', 'HU816X');
+    const page = partCard('MANN-FILTER', 'HU 816 x', 'HU816X');
     const sourced = makeWork({
       parts: [{ brand: 'mann-filter', number: 'HU816X' }],
     });

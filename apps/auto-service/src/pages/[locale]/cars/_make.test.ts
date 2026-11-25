@@ -1,36 +1,58 @@
 import { getCollection } from 'astro:content';
 import { withPlaceholder } from '@podbor/i18n';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { content } from '@/i18n/content';
 import type { Locale } from '@/i18n/config';
-import { orangeIn, render } from '@/components/renderAstro';
+import {
+  orangeIn,
+  parseHtml,
+  wirePage,
+  respond,
+  SHOP_PREVIEW_TOKEN,
+  heroPartsSearch,
+  stubShop,
+} from '@/components/renderAstro';
 import { work } from '@/components/workFixture';
-import { makePartsForBuild } from '@/utils/catalogueEnv';
-import type { MakePartsEntry } from '@/utils/catalogueSnapshot';
-import type { Category } from '@podbor/catalog-contract';
+import {
+  CATALOGUE_LOCALE_HEADER,
+  translated,
+  type CarMakePageResponse,
+  type Category,
+} from '@podbor/catalog-contract';
 import { article } from '@/components/articleFixture';
 import { SITE_NAME } from '@/utils/constants';
 import type { Article } from '@/utils/blog';
-import MakePage, { getStaticPaths } from './[make].astro';
+import MakePage from './[make].astro';
+
+type MakeParts = CarMakePageResponse & { make: { slug: string; name: string } };
 
 vi.mock('astro:content', () => ({ getCollection: vi.fn() }));
-vi.mock('@/utils/catalogueEnv', async (original) => ({
-  ...(await original<typeof import('@/utils/catalogueEnv')>()),
-  makePartsForBuild: vi.fn(async () => []),
-}));
 
 const category = (slug: string, name: string) =>
   ({
     id: `category_${slug}`,
     slug,
     name,
+    text: '',
     translations: { sr: { name: `${name} sr` } },
+    maintenance_kit: false,
+    kit_rank: 0,
+    service_label: null,
+    service_price: null,
+    service_note: null,
+    installation_price: null,
+    image: null,
+    fields: [],
   }) as unknown as Category;
 
-const bmwParts = (hub = true): MakePartsEntry => ({
+const showcase = ['HU816X', 'P1'].map((value) =>
+  wirePage({ slug: `mann-${value.toLowerCase()}`, value }),
+);
+
+const bmwParts = (hub = true, shown = showcase): MakeParts => ({
   make: { slug: 'bmw', name: 'BMW' },
-  parts: 12,
   hub,
+  showcase: shown,
   categories: [
     'oil-filters',
     'brake-pads',
@@ -38,12 +60,36 @@ const bmwParts = (hub = true): MakePartsEntry => ({
     'spark-plugs',
     'wipers',
     'bulbs',
-    'belts',
   ].map((slug) => category(slug, slug.toUpperCase())),
 });
 
-const withParts = (...entries: MakePartsEntry[]) =>
-  vi.mocked(makePartsForBuild).mockResolvedValue(entries);
+let held: MakeParts[] = [];
+
+const withParts = (...entries: MakeParts[]) => {
+  held = entries;
+};
+
+const PUBLIC_PAGE =
+  'public, s-maxage=86400, stale-while-revalidate=86400, stale-if-error=86400';
+
+const shop = stubShopOf(() => held);
+
+function stubShopOf(entries: () => MakeParts[]) {
+  return (make: string, locale: string | null) => {
+    const found = entries().find((entry) => entry.make.slug === make);
+    return found
+      ? Response.json({
+          hub: found.hub,
+          categories: found.categories.map((own) => ({
+            ...own,
+            name: translated(own, 'name', locale ?? 'ru'),
+            translations: null,
+          })),
+          showcase: found.showcase,
+        })
+      : new Response(null, { status: 404 });
+  };
+}
 
 const bmwWorks = Array.from({ length: 7 }, (_, i) =>
   work({ id: `bmw-${i}`, make: 'bmw' }),
@@ -77,49 +123,105 @@ beforeEach(() => {
   withParts();
 });
 
-const page = async (locale: Locale = 'ru', make = 'bmw') => {
-  const [path] = (await getStaticPaths()).filter(
-    ({ params }) => params.locale === locale && params.make === make,
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
+});
+
+const answer = (locale: Locale = 'ru', make = 'bmw', headers = {}) => {
+  stubShop((url, headers) =>
+    shop(url.pathname.split('/').pop()!, headers.get(CATALOGUE_LOCALE_HEADER)),
   );
-  return render(MakePage as never, {
-    path: `/${locale}/cars/${make}/`,
-    params: path.params,
-    props: path.props,
-  });
+  return respond(
+    MakePage,
+    new Request(new URL(`/${locale}/cars/${make}/`, 'https://carlab.rs'), {
+      headers,
+    }),
+    { params: { locale, make } },
+  );
 };
+
+const page = async (locale: Locale = 'ru', make = 'bmw') =>
+  parseHtml(await (await answer(locale, make)).text());
 const classes = (element: Element | null) =>
   element ? element.className.split(/\s+/) : [];
 
+const status = async (locale: Locale, make: string) =>
+  (await answer(locale, make)).status;
+
 describe('the Make pages', () => {
   it('exist in every locale for a Make with a published Work and for no other', async () => {
-    expect((await getStaticPaths()).map(({ params }) => params)).toEqual([
-      { locale: 'ru', make: 'bmw' },
-      { locale: 'sr', make: 'bmw' },
-      { locale: 'en', make: 'bmw' },
-    ]);
+    expect(
+      await Promise.all(
+        (['ru', 'sr', 'en'] as const).map((locale) => status(locale, 'bmw')),
+      ),
+    ).toEqual([200, 200, 200]);
+    expect(await status('ru', 'volkswagen')).toBe(404);
+    expect(await status('ru', 'tesla')).toBe(404);
   });
 
   it('do not exist for a Make with Parts and nothing else', async () => {
-    withParts(
-      {
-        make: { slug: 'audi', name: 'Audi' },
-        parts: 1,
-        hub: false,
-        categories: [],
-      },
-      {
-        make: { slug: 'tesla', name: 'Tesla' },
-        parts: 4,
-        hub: true,
-        categories: [],
-      },
+    withParts({
+      make: { slug: 'audi', name: 'Audi' },
+      hub: false,
+      categories: [],
+      showcase: [],
+    });
+
+    expect(await status('ru', 'audi')).toBe(404);
+  });
+
+  it('answer a page the cache may keep, without a cookie', async () => {
+    const response = await answer();
+
+    expect(response.headers.get('cache-control')).toBe(PUBLIC_PAGE);
+    expect(response.headers.get('set-cookie')).toBeNull();
+    expect((await answer('ru', 'tesla')).headers.get('cache-control')).toBe(
+      PUBLIC_PAGE,
+    );
+  });
+
+  it('keep a preview visitor out of the cache', async () => {
+    const response = await answer('ru', 'bmw', {
+      cookie: `auto_service_shop_preview=${SHOP_PREVIEW_TOKEN}`,
+    });
+
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+  });
+
+  it('ask the shop for the Make in the locale of the path', async () => {
+    const calls = stubShop(() => new Response(null, { status: 404 }));
+    await respond(
+      MakePage,
+      new Request(new URL('/sr/cars/bmw/', 'https://carlab.rs')),
+      { params: { locale: 'sr', make: 'bmw' } },
+    );
+    const [url, init] = calls.mock.calls[0];
+
+    expect(String(url)).toBe('http://shop.test/store/catalogue-pages/cars/bmw');
+    expect(new Headers(init?.headers).get('x-catalogue-locale')).toBe('sr');
+  });
+
+  it('answer 503 with Retry-After when the shop fails', async () => {
+    stubShop(() => new Response(null, { status: 500 }));
+    const response = await respond(
+      MakePage,
+      new Request(new URL('/ru/cars/bmw/', 'https://carlab.rs')),
+      { params: { locale: 'ru', make: 'bmw' } },
     );
 
-    expect(
-      (await getStaticPaths())
-        .filter(({ params }) => params.locale === 'ru')
-        .map(({ params }) => params.make),
-    ).toEqual(['bmw']);
+    expect(response.status).toBe(503);
+    expect(response.headers.get('retry-after')).toBe('60');
+  });
+
+  it('answer the numbered list page for a number instead of a Make', async () => {
+    const response = await respond(
+      MakePage,
+      new Request(new URL('/ru/cars/2/', 'https://carlab.rs')),
+      { params: { locale: 'ru', make: '2' } },
+    );
+
+    expect(response.status).toBe(404);
   });
 });
 
@@ -135,14 +237,14 @@ describe('the Parts block of a Make page', () => {
         ),
     );
 
-  it('is absent without a catalogue snapshot', async () => {
+  it('is absent without a catalogue', async () => {
     const root = await page();
 
     expect(partsHeading(root)).toBeUndefined();
     expect(root.querySelector('a[href="/ru/parts/bmw/"]')).toBeNull();
   });
 
-  it('is absent when the snapshot holds no Parts for the Make', async () => {
+  it('is absent when the shop holds no Parts for the Make', async () => {
     withParts({ ...bmwParts(), make: { slug: 'audi', name: 'Audi' } });
 
     expect(partsHeading(await page())).toBeUndefined();
@@ -170,7 +272,7 @@ describe('the Parts block of a Make page', () => {
     ['ru', 'OIL-FILTERS'],
     ['sr', 'OIL-FILTERS sr'],
   ] as const)(
-    'links the top six Categories of the Make in %s',
+    'links the Categories the shop names for the Make in %s',
     async (locale, first) => {
       withParts(bmwParts());
       const block = partsHeading(await page(locale), locale)!.closest(
@@ -205,6 +307,60 @@ describe('the Parts block of a Make page', () => {
     );
   });
 
+  it('shows the showcase Parts as cards between the Categories and the hub link', async () => {
+    withParts(bmwParts());
+    const block = partsHeading(await page())!.closest('section')!;
+    const cards = [...block.querySelectorAll('a[href^="/ru/parts/p/"]')];
+    const all = [...block.querySelectorAll('*')];
+
+    expect(cards.map((card) => card.getAttribute('href'))).toEqual([
+      '/ru/parts/p/mann-hu816x/',
+      '/ru/parts/p/mann-p1/',
+    ]);
+    expect(cards[0].textContent).toContain('HU816X');
+    expect(all.indexOf(cards[0])).toBeGreaterThan(
+      all.indexOf(block.querySelector('a[href^="/ru/parts/c/"]')!),
+    );
+    expect(all.indexOf(cards[1])).toBeLessThan(
+      all.indexOf(block.querySelector('a[href="/ru/parts/bmw/"]')!),
+    );
+  });
+
+  it('scrolls the Part cards sideways on a phone, as the Works do', async () => {
+    withParts(bmwParts());
+    const row = partsHeading(await page())!
+      .closest('section')!
+      .querySelector('a[href^="/ru/parts/p/"]')!
+      .closest('ul')!;
+
+    expect(classes(row)).toEqual(
+      expect.arrayContaining(['snap-x', 'overflow-x-auto', 'lg:grid']),
+    );
+  });
+
+  it('rings the whole Part card, not its title, when the card link takes the keyboard focus', async () => {
+    withParts(bmwParts());
+    const link = partsHeading(await page())!
+      .closest('section')!
+      .querySelector('a[href^="/ru/parts/p/"]')!;
+
+    expect(classes(link)).toContain('focus-visible:outline-none');
+    expect(classes(link.closest('li'))).toEqual(
+      expect.arrayContaining([
+        'has-[>span>span>a:focus-visible]:outline-3',
+        'has-[>span>span>a:focus-visible]:outline-ink',
+      ]),
+    );
+  });
+
+  it('shows no Part cards when the Make has none to show', async () => {
+    withParts(bmwParts(true, []));
+    const block = partsHeading(await page())!.closest('section')!;
+
+    expect(block.querySelector('a[href^="/ru/parts/p/"]')).toBeNull();
+    expect(block.querySelector('a[href^="/ru/parts/c/"]')).not.toBeNull();
+  });
+
   it('links no Parts make hub while the Make has too few Parts for one', async () => {
     withParts(bmwParts(false));
     const block = partsHeading(await page())!.closest('section')!;
@@ -217,19 +373,13 @@ describe('the Make pages with Articles', () => {
   it('exist for a Make with an Article and no Work', async () => {
     withArticles([article({ id: 'audi-oil', make: 'audi' })]);
 
-    expect(
-      (await getStaticPaths())
-        .filter(({ params }) => params.locale === 'ru')
-        .map(({ params }) => params.make),
-    ).toEqual(['audi', 'bmw']);
+    expect(await status('ru', 'audi')).toBe(200);
   });
 
   it('leave out a Make whose only Article is unpublished', async () => {
     withArticles([article({ make: 'audi', published: false })]);
 
-    expect(
-      (await getStaticPaths()).map(({ params }) => params.make),
-    ).not.toContain('audi');
+    expect(await status('ru', 'audi')).toBe(404);
   });
 });
 
@@ -413,8 +563,7 @@ describe('a Make page with an overview', () => {
     expect(schemaTypes(root)).toContain('FAQPage');
   });
 
-  it('warns about a second overview and heads with the later one', async () => {
-    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+  it('heads with the later of two overviews', async () => {
     withArticles([
       overview({
         id: 'old',
@@ -431,8 +580,6 @@ describe('a Make page with an overview', () => {
     expect((await page()).querySelector('h1')?.textContent?.trim()).toBe(
       'Новый обзор',
     );
-    expect(warn).toHaveBeenCalledWith(expect.stringContaining('bmw'));
-    warn.mockRestore();
   });
 });
 
@@ -477,5 +624,11 @@ describe('the Articles on a Make page', () => {
 
     expect(sections).toHaveLength(3);
     expect(sections.flatMap((section) => orangeIn(section))).toEqual([]);
+  });
+});
+
+describe('the hero of a Make page', () => {
+  it('offers the VIN parts search', async () => {
+    expect(heroPartsSearch(await page())).not.toBeNull();
   });
 });

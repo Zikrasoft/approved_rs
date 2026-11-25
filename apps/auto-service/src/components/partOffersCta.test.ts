@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CONTACT_CTA_SELECTOR } from '@podbor/site-kit/contact-control';
 import PartOffers from './PartOffers.astro';
-import { offer, partPage, render, setShop } from './renderAstro';
+import { offer, partCard, render, setShop } from './renderAstro';
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -11,7 +11,7 @@ const pricedOffers = async () => {
   setShop(true);
   const root = await render(PartOffers, {
     props: {
-      page: partPage({
+      page: partCard({
         offers: [offer(2400), offer(1850, 0, 7), offer(1500, 0, 14)],
       }),
     },

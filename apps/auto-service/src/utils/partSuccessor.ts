@@ -3,23 +3,23 @@ import {
   bestOffer,
   compareOffers,
 } from '@podbor/catalog-contract/availability';
-import type { PartPageEntry } from './catalogueSnapshot';
+import type { PartCard } from './partEntry';
 
 const slugOf = (number: BrandNumber) =>
   partPageSlug(number.brand.slug, number.normalized_value);
 
-const pricedPage = (pages: PartPageEntry[]) => {
+const pricedPage = (pages: PartCard[]) => {
   const offer = bestOffer(pages.flatMap(({ offers }) => offers));
   return pages.find(({ offers }) => offer && offers.includes(offer)) ?? null;
 };
 
-const pageWithBestOffer = (pages: PartPageEntry[]) =>
+const pageWithBestOffer = (pages: PartCard[]) =>
   pricedPage(pages) ?? pages[0] ?? null;
 
 export const pricedEquivalent = (
-  page: PartPageEntry,
-  bySlug: Map<string, PartPageEntry>,
-): PartPageEntry | null =>
+  page: PartCard,
+  bySlug: Map<string, PartCard>,
+): PartCard | null =>
   pricedPage(
     page.equivalents
       .filter(({ superseded }) => !superseded)
@@ -27,9 +27,9 @@ export const pricedEquivalent = (
   );
 
 export function partSuccessor(
-  page: PartPageEntry,
-  bySlug: Map<string, PartPageEntry>,
-): PartPageEntry | null {
+  page: PartCard,
+  bySlug: Map<string, PartCard>,
+): PartCard | null {
   const replacement = page.part.replaced_by;
   if (replacement) {
     const named = bySlug.get(slugOf(replacement.brand_number));
@@ -54,8 +54,8 @@ export function partSuccessor(
 }
 
 export function currentNumbers(
-  page: PartPageEntry,
-  bySlug: Map<string, PartPageEntry>,
+  page: PartCard,
+  bySlug: Map<string, PartCard>,
 ): (BrandNumber & { slug: string })[] {
   const replacement = page.part.replaced_by;
   const candidates: BrandNumber[] = replacement

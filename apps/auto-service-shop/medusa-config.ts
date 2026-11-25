@@ -3,7 +3,7 @@ import { defineConfig, loadEnv } from '@medusajs/framework/utils';
 import { adminFavicon } from './src/lib/admin-favicon';
 import { adminLanguage } from './src/lib/admin-language';
 import { readCalendarDatesAsText } from './src/lib/calendar-dates';
-import { DATABASE_POOL } from './src/lib/database-pool';
+import { DATABASE_POOL, withoutJit } from './src/lib/database-pool';
 import { parseEnv } from './src/lib/env';
 
 loadEnv(process.env.NODE_ENV || 'development', process.cwd());
@@ -35,7 +35,7 @@ const fileProvider = env.S3
 
 export default defineConfig({
   projectConfig: {
-    databaseUrl: env.DATABASE_URL,
+    databaseUrl: withoutJit(env.DATABASE_URL),
     databaseDriverOptions: {
       ssl: env.DATABASE_SSL ? { rejectUnauthorized: false } : false,
       pool: DATABASE_POOL,

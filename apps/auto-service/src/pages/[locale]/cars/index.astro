@@ -1,0 +1,17 @@
+---
+export const prerender = false;
+
+import { getCollection } from 'astro:content';
+import CarsListPage from '@/components/CarsListPage.astro';
+import { answerPage } from '@/utils/cataloguePage';
+import { carsListing, makeTiles } from '@/utils/works';
+
+const cards = makeTiles(
+  await getCollection('works'),
+  await getCollection('articles'),
+);
+const listing = answerPage(Astro, carsListing(cards));
+if (listing instanceof Response) return listing;
+---
+
+<CarsListPage listing={listing} cards={cards} />

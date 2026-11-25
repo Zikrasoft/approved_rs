@@ -1,18 +1,21 @@
 ---
+export const prerender = false;
+
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
-import { makeHubsForBuild } from '@/utils/catalogueEnv';
-import { makesByLetter, type MakeLetter } from '@/utils/makeIndex';
-import { localePaths, PathBuilder } from '@/utils/paths';
+import { loadCataloguePage } from '@/utils/cataloguePage';
+import { makesByLetter } from '@/utils/makeIndex';
+import { PathBuilder } from '@/utils/paths';
 
-export async function getStaticPaths() {
-  const letters = makesByLetter(await makeHubsForBuild());
-  return localePaths().map((path) => ({ ...path, props: { letters } }));
-}
-
-const { letters } = Astro.props as { letters: MakeLetter[] };
+const loaded = await loadCataloguePage(
+  Astro,
+  async (catalogue, catalogueLocale) =>
+    makesByLetter(await catalogue.makesList(catalogueLocale)),
+);
+if (loaded instanceof Response) return loaded;
+const letters = loaded;
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const hubs = content(locale).partsCar.hubs;

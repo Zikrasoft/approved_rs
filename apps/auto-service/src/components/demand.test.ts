@@ -4,7 +4,7 @@ import FittedPart from './FittedPart.astro';
 import ListingSort from './ListingSort.astro';
 import PartRow from './PartRow.astro';
 import PopularParts from './PopularParts.astro';
-import { isOrange, partPage, render, setShop } from './renderAstro';
+import { isOrange, partCard, render, setShop } from './renderAstro';
 
 const copy = content('ru').partsSearch;
 
@@ -50,8 +50,8 @@ describe('the demand badge', () => {
       render(FittedPart, {
         props: {
           pages: [
-            partPage(),
-            partPage({ id: 'pi_ate', slug: 'ate-1', demand }),
+            partCard(),
+            partCard({ id: 'pi_ate', slug: 'ate-1', demand }),
           ],
           name: 'Колодки',
         },
@@ -64,13 +64,13 @@ describe('the demand badge', () => {
 
 describe('the popular parts block', () => {
   const pages = [
-    partPage({ id: 'pi_a', slug: 'bosch-a', value: 'A', demand: popularOnly }),
-    partPage({
+    partCard({ id: 'pi_a', slug: 'bosch-a', value: 'A', demand: popularOnly }),
+    partCard({
       id: 'pi_b',
       slug: 'bosch-b',
       value: 'B',
       demand: top,
-      part: { ...partPage().part, id: 'part_b' },
+      part: { ...partCard().part, id: 'part_b' },
     }),
   ];
 
@@ -99,7 +99,7 @@ describe('the popular parts block', () => {
 
   it('renders nothing below two popular parts', async () => {
     const block = await render(PopularParts, {
-      props: { pages: [pages[0], partPage({ id: 'pi_c', slug: 'bosch-c' })] },
+      props: { pages: [pages[0], partCard({ id: 'pi_c', slug: 'bosch-c' })] },
     });
 
     expect(block.innerHTML.trim()).toBe('');

@@ -1,6 +1,7 @@
 ---
 import Breadcrumbs, { type Crumb } from './Breadcrumbs.astro';
 import HeroContacts from './HeroContacts.astro';
+import HeroPartsSearch from './HeroPartsSearch.astro';
 import type { ServiceSlug } from '@/utils/services';
 
 interface Props {
@@ -12,6 +13,7 @@ interface Props {
   actions?: boolean;
   compact?: boolean;
   desktopLead?: boolean;
+  partsSearch?: boolean;
 }
 
 const {
@@ -23,6 +25,7 @@ const {
   actions = true,
   compact = false,
   desktopLead = false,
+  partsSearch = false,
 } = Astro.props;
 ---
 
@@ -55,6 +58,7 @@ const {
         <HeroContacts tone="card" service={service} class="max-w-xl pt-2" />
       )
     }
+    {partsSearch && <HeroPartsSearch tone="card" />}
     <slot />
   </div>
 </section>
