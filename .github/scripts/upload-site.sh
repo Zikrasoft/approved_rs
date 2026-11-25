@@ -48,8 +48,9 @@ node --env-file="$work/site.env" -e '
   process.exit(status ?? 1);
 ' pnpm exec turbo run build "--filter=@podbor/$app" --env-mode=loose
 
-remote="ssh -i $work/key -o IdentitiesOnly=yes -o UserKnownHostsFile=$work/known_hosts -o BatchMode=yes -o StrictHostKeyChecking=yes"
+remote="ssh -i $work/key -o IdentitiesOnly=yes -o UserKnownHostsFile=$work/known_hosts -o BatchMode=yes -o StrictHostKeyChecking=yes -o ControlMaster=auto -o ControlPath=$work/cm -o ControlPersist=120"
 target="$VPS_USER@$VPS_HOST"
+trap '$remote -O exit "$target" 2>/dev/null; rm -rf "$work"' EXIT
 
 $remote "$target" "umask 022 && mkdir -p $site/releases/$release" </dev/null
 rsync -rlp --checksum --compress --delete --stats -e "$remote" \

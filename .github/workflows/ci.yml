@@ -377,23 +377,26 @@ jobs:
           printf '%s\n' "$VPS_KNOWN_HOSTS" >~/.ssh/known_hosts
           chmod 600 ~/.ssh/id_ed25519 ~/.ssh/known_hosts
           echo "TARGET=$VPS_USER@$VPS_HOST" >>"$GITHUB_ENV"
+          echo "SSH=ssh -o BatchMode=yes -o StrictHostKeyChecking=yes -o ControlMaster=auto -o ControlPath=$RUNNER_TEMP/cm -o ControlPersist=300" >>"$GITHUB_ENV"
       - name: Ship the stack files
         if: steps.guard.outputs.deploy == 'true'
         run: |
           tar -C infra/auto-service-shop -cf - docker-compose.yml caddy/Caddyfile deploy.sh backup.sh restore.sh crawler-role.sh crm-role.sh move-static-to-s3.sh \
             logs-export.sh loki/config.yaml alloy/config.alloy grafana deploy-site.sh reminders.sh caddy/security-headers.caddy \
-            | ssh -o BatchMode=yes -o StrictHostKeyChecking=yes "$TARGET" 'tar -C /srv/carlab -xf -'
+            | $SSH "$TARGET" 'tar -C /srv/carlab -xf -'
       - name: Deploy
         if: steps.guard.outputs.deploy == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          echo "$GH_TOKEN" | ssh -o BatchMode=yes -o StrictHostKeyChecking=yes "$TARGET" \
+          echo "$GH_TOKEN" | $SSH "$TARGET" \
             "docker login ghcr.io -u '$GITHUB_ACTOR' --password-stdin"
-          ssh -o BatchMode=yes -o StrictHostKeyChecking=yes "$TARGET" "/srv/carlab/deploy.sh $SHA"
+          $SSH "$TARGET" "/srv/carlab/deploy.sh $SHA"
       - name: Log the host out of GHCR
         if: always() && steps.guard.outputs.deploy == 'true'
-        run: ssh -o BatchMode=yes -o StrictHostKeyChecking=yes "$TARGET" 'docker logout ghcr.io' || true
+        run: |
+          $SSH "$TARGET" 'docker logout ghcr.io' || true
+          $SSH -O exit "$TARGET" 2>/dev/null || true
       - id: result
         if: steps.guard.outputs.deploy == 'true'
         run: echo "deployed=true" >> "$GITHUB_OUTPUT"
