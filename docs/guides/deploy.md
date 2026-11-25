@@ -90,11 +90,11 @@ which:
 
 The temp dir holding the env and the ssh key is deleted on exit; nothing is
 printed or uploaded as an artifact. The release name carries the run id, so a
-rebuild of the live SHA (a Publish, a forced run) never writes into the release
+rebuild of the live SHA (a forced run) never writes into the release
 that is serving. As a last step (`Record what is live`) the leg moves its own
 `refs/tags/deployed/<app>` tag onto the SHA just shipped. That is how the next
 run learns what is already in production. Each app deploys serially
-(`concurrency: deploy-site-<app>`, shared with `publish.yml`), the three in
+(`concurrency: deploy-site-<app>`), the three in
 parallel.
 
 The Vercel projects no longer serve or hold anything.
@@ -237,8 +237,7 @@ If everything needs redeploying at once — Actions → CI → Run workflow, wit
 changed outside git: a GitHub secret or variable of a site, a rotated secret. Such edits require a rebuild but leave no trace in
 the repository's history, and `scope` only looks at git.
 
-`environment: site-<app>` on each `deploy-site` leg (and `site-auto-service` on
-`publish.yml`) is an ordinary GitHub Environment with no protection rules: it
+`environment: site-<app>` on each `deploy-site` leg is an ordinary GitHub Environment with no protection rules: it
 holds that site's own secrets and variables. `deploy-shop` keeps
 `environment: production`.
 
@@ -285,7 +284,7 @@ The deploy step gets two env values, `SITE_SECRETS` and `SITE_VARS`.
 spells out name by name (`"X": ${{ toJSON(secrets.X) }}`), because GitHub holds
 a workflow that dumps `toJSON(secrets)` as possibly malicious until someone
 approves the run. A new secret name therefore goes into the manifest and into
-both `ci.yml` and `publish.yml`; `site-env.test.ts` fails until the three agree.
+`ci.yml`; `site-env.test.ts` fails until the two agree.
 Why the rest is safe: GitHub masks every secret in the log whatever the step
 does with it; `site-env.ts` copies only the manifest's names for that site into
 the release `.env` and never prints a value (a refusal names the variable only);
@@ -1165,9 +1164,14 @@ logs medusa`) here. TODO: record the measured docs/s.
   `docker stats --no-stream` once the catalogue is at scale, and raise the limit
   before the index outgrows it.
 - **carlab.rs catalogue page cache** (ADR-0065). Caddy caches what node
-  renders for `/<locale>/parts/...` and `/<locale>/cars/...`, on GET and HEAD
-  only. `/<locale>/parts/` itself, `search`, `cart` and `prices` are not cached,
-  and neither are the other paths or the other two sites. The response's
+  renders for `/<locale>/parts/...`, `/<locale>/cars/...`, `/llms.txt`,
+  `/<locale>/llms.txt`, `/catalogue-build.json` and the catalogue sitemap
+  (`/sitemap-catalogue.xml` and its `/sitemap-catalogue-<n>.xml` chunks), on
+  GET and HEAD only (the `@catalogue` matcher in the Caddyfile). `search`,
+  `cart` and `prices` are not cached, nor the `/<locale>/parts/` hub when the
+  request carries a query string (its showcase pages through `?offset=` and
+  filters, which the key would drop), and neither are the other paths or the
+  other two sites. The response's
   `Cache-Control` decides what is stored. Without one, nothing is stored
   (`default_cache_control no-store`). `private` and `no-store` are never
   stored. A request's own `Cache-Control` or `Pragma` cannot force a render
@@ -1382,45 +1386,38 @@ number gets its CI value in that script. The non-obvious parts:
 - `DATABASE_URL` and the `TYPESENSE_HOST`/`PORT`/`PROTOCOL` are not written into
   `.env`: compose assembles them from the service names, `POSTGRES_PASSWORD` and
   `TYPESENSE_API_KEY`, and hands the same key to Typesense itself.
-- `OPENAI_API_KEY` and `PUBLISH_DISPATCH_TOKEN` feed the admin's Publish chain:
-  the first translates catalogue text, the second is a fine-grained GitHub token
-  with `actions: write` on this repository that dispatches `publish.yml` and
-  then reads that run until it finishes (`write` includes `read`). The chain is
-  `sweep → translate → publish → reindex → deploy → purge`. `publish` collects the
+- `OPENAI_API_KEY` feeds the admin's Publish chain, which translates catalogue
+  text with it. A Publish is data-only: it never dispatches a GitHub workflow,
+  rebuilds the site or opens SSH, and the host holds no GitHub token. The chain is
+  `sweep → translate → publish → reindex → purge`. `publish` collects the
   change set: the freshly published numbers, the numbers whose `listed`
   flipped, the Parts whose translations `translate` wrote and the numbers the
   orphan `sweep` removed. It refuses a Publish that would leave fewer than half
   of the numbers the last successful Publish left (the count is that run's
   `report.published`): it unpublishes the fresh numbers and fails at `publish`,
   again on every retry, until `CATALOGUE_SHRINK_ALLOWED=true` sits in the shop's
-  `.env` for one Publish; remove it afterwards. `reindex` is incremental: only
+  `.env` for one Publish; remove it afterwards. Then it warms the shop's
+  catalogue memo (the page list, counts and demand), so the renders after the
+  purge read it ready. `reindex` is incremental: only
   the changed Parts go to `part_identifier` (the removed numbers are deleted
   from it), and `catalogue_car` is rebuilt with a swap; when `part_identifier`
   has no active version, it gets a full swap instead. Then a count check
   compares the `published:true` documents with the published numbers for up to
   a minute and logs a `search.drift` Event when they still disagree, without
-  failing the Publish. Search is updated before the dispatch, so the reindex
-  never slows the build or the first renders after the site's cache is emptied;
-  a failed deploy unpublishes the fresh numbers and reindexes their Parts again;
-  `purge` then empties the catalogue hubs and the changed Part pages from the
-  page cache (see the Publish purge above). A failed purge keeps the numbers
-  published and fails the run at `purge`; Publish again to retry. The retry
-  purges the hubs again but not the earlier run's Part pages, which age out
-  within the day;
-  a failed or cancelled run,
-  or one still unfinished after 90 minutes, stops the chain at the deploy step. Either
-  may stay empty; the chain then stops at that step and the admin shows why.
-  `publish.yml` rebuilds carlab.rs from the `deployed/auto-service` tag, so it
-  ships fresh catalogue data and never code that is not live yet. The chain runs
-  only from the admin's Publish button, in the top bar of every admin page.
-  **Accepted risk:** the token sits in `/srv/carlab/.env` in plain text, and
-  `actions: write` lets whoever reads it dispatch or cancel any workflow in this
-  repository, not only `publish.yml`, since a fine-grained token cannot be
-  narrowed to one workflow. Only `deploy` (and root) can read that file, and a
-  dispatched workflow runs the repository's own code at a ref that is already
-  pushed, so the token cannot ship code that is not in the repository. Give it
-  the shortest expiry you are willing to rotate, and revoke it at
-  Settings → Developer settings at the first sign the server is compromised.
+  failing the Publish. Search is updated before the purge, so the first renders
+  after it already find the new Parts. `purge` then empties the catalogue hubs
+  and the changed Part pages from the page cache (see the Publish purge above).
+  The hubs include everything on carlab.rs that lists the catalogue and renders
+  on demand: the catalogue sitemap, both `llms.txt`, the `/parts/` hub and
+  `catalogue-build.json`, so the purge is all a Publish needs for them to show
+  the new state. A failed purge keeps the numbers published and fails the run at
+  `purge`; Publish again to retry. The retry purges the hubs again but not the
+  earlier run's Part pages, which age out within the day. Without
+  `OPENAI_API_KEY` the chain stops at `translate` once any text is untranslated,
+  and the admin shows why. The chain runs only from the admin's Publish button,
+  in the top bar of every admin page. The services and works pages stay
+  prerendered and read the Category links at build, so they pick up a new
+  Category on the next code release, not on a Publish.
 - `OPENAI_API_KEY` also answers a Supplier Import's one question per new
   article (Russian name, attributes, description; the Category comes from the
   supplier category mapping, never from AI), on
@@ -1585,7 +1582,7 @@ sides say otherwise. Two variables, one per side:
 
 On carlab.rs only the exact value `true` opens the shop: unset or anything else
 is closed. turbo passes `SHOP_OPEN` and `SHOP_PREVIEW_TOKEN` through to the
-`@podbor/auto-service` build, so a rebuild (`publish.yml` or a deploy) is what
+`@podbor/auto-service` build, so a deploy is what
 applies a change. An open build sends the preview token itself, so it builds
 with prices even if the backend is still closed.
 
@@ -1671,16 +1668,15 @@ moves forward again.
    and the deploy, and leaves `deployed/auto-service` where it was, so the
    live site keeps serving the last build and the next run retries. Without the
    probe, a VPS outage would fail every carlab.rs deploy, since the storefront
-   build throws when the backend it is pointed at is unreachable. The Publish
-   workflow runs the same probe but fails instead (`::error::`), so the admin
-   shows the Publish as failed rather than as done.
+   build throws when the backend it is pointed at is unreachable.
 
    The build never reads `/store/catalogue-snapshot`: every catalogue page is
    rendered on demand (ADR-0065). It reads the light page list
-   (`/store/catalogue-pages`, once per build: sitemap, `llms.txt`, the parts
-   hub, the Make list for Keystatic and the shrink guard share it) and
-   `/store/categories`, and records how many part pages it serves at
-   `https://carlab.rs/catalogue-build.json`. A production build (`upload-site.sh` sets
+   (`/store/catalogue-pages`, once per build: the services and works pages'
+   Category links, the Make list for Keystatic and the shrink guard share it)
+   and `/store/categories`. The catalogue sitemap, `llms.txt`, the parts hub and
+   `https://carlab.rs/catalogue-build.json` (how many part pages the live site
+   serves) render on demand from the same endpoints. A production build (`upload-site.sh` sets
    `CATALOGUE_SHRINK_GUARD=true`) reads that record from the live site first, and once it counts
    any part pages the catalogue is live: the build then fails without
    `MEDUSA_BACKEND_URL`, on zero part pages, and on fewer than half of what the
@@ -2180,14 +2176,14 @@ Steps 1, 5 and 6 are one `terraform apply`: see `infra/auto-service-shop/terrafo
 10. **The shop's `.env` values for carlab.rs.** In `/srv/carlab/.env`:
     `STOREFRONT_ORIGIN=https://carlab.rs` (orders go to its `/api/shop-orders`,
     see [`.env`](#env)), `SHOP_OPEN=false` while the shop is
-    closed, `PUBLISH_DISPATCH_TOKEN` and `OPENAI_API_KEY` as described in
+    closed, and `OPENAI_API_KEY` as described in
     [`.env`](#env); `docker compose up -d medusa` after editing.
-    Done: `cut -d= -f1 /srv/carlab/.env` lists all four names.
+    Done: `cut -d= -f1 /srv/carlab/.env` lists all three names.
 11. **carlab.rs env.** In the `site-auto-service` GitHub environment:
     `MEDUSA_BACKEND_URL=https://api.carlab.rs`, `MEDUSA_PUBLISHABLE_KEY` = the key
     from step 9, and `SHOP_OPEN` **unset** until the shop opens. Then press Publish
-    in the admin so the Categories get their Serbian and English text and carlab.rs
-    rebuilds against the catalogue.
+    in the admin so the Categories get their Serbian and English text, then deploy
+    carlab.rs so its prerendered services pages link the Categories.
     Done: `https://carlab.rs/sr/parts/brakes/` 301s to `/sr/parts/c/brakes/`, which
     answers 200 with the Category's text and picture. From now on a carlab.rs deploy
     while `https://api.carlab.rs/health` is down is skipped with a warning in the
