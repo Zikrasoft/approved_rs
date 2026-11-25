@@ -50,6 +50,8 @@ echo "==> Backup to $dump"
 mkdir -p "$backups"
 docker compose up -d --wait postgres
 docker compose exec -T postgres \
+  psql -U carlab -d carlab -v ON_ERROR_STOP=1 -c 'create extension if not exists pg_stat_statements'
+docker compose exec -T postgres \
   pg_dump -U carlab -d carlab --format=custom >"$dump.part"
 mv "$dump.part" "$dump"
 find "$backups" -maxdepth 1 -type f -name 'db-*-pre-deploy.dump' | sort -r | tail -n +4 | while read -r old; do

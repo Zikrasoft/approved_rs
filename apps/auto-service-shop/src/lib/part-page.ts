@@ -13,7 +13,7 @@ import {
 
 import { CATEGORY_RELATIONS, shownCategory } from './categories';
 import { localizedCategory, localizedVehicle } from './catalogue-locale';
-import { loadPartDemand } from './part-demand';
+import { memoPartDemand } from './part-demand';
 import { localizedFit, sluggedPagesOf } from './part-pages';
 import {
   type CatalogueModules,
@@ -117,7 +117,7 @@ export async function partPageAt(
   const own =
     address && (await publish.publishedBySlug(address.brand, address.number));
   if (!own) return null;
-  const options = { locale, shown, demand: await loadPartDemand(scope) };
+  const options = { locale, shown, demand: await memoPartDemand(scope) };
   const [page] = await sluggedPagesOf(scope, [own], options);
   const { part } = page;
   const replacementIds = part.replaced_by

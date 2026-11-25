@@ -1012,6 +1012,23 @@ next deploy. Unset, the step says so and the crawler has no role. Checked agains
 a live Postgres by `infra/auto-service-shop/test/crawler-role.test.sh`. `restore.sh`
 restores with `--no-privileges`, so a dump never needs the role to exist first.
 
+Postgres runs tuned for the 4 GB droplet: `jit=off`, `work_mem=8MB`,
+`random_page_cost=1.1` (SSD), `shared_preload_libraries=pg_stat_statements` and
+`log_min_duration_statement=1000` (statements over one second reach the logs).
+`shared_buffers` stays at its default. They are `-c` flags on the `postgres`
+service in `docker-compose.yml`, asserted by `test/compose.test.sh`. Changing a
+flag recreates the container, so a deploy that ships one restarts Postgres, and
+that is accepted. `deploy.sh` runs `create extension if not exists
+pg_stat_statements` in `carlab` right after Postgres is up, so it is safe to
+repeat. The slowest statements by total time:
+
+```bash
+docker compose exec -T postgres psql -U carlab -d carlab -c \
+  "select calls, round(total_exec_time) ms, round(mean_exec_time) mean_ms, left(query, 80) from pg_stat_statements order by total_exec_time desc limit 10"
+```
+
+`select pg_stat_statements_reset()` clears the counters.
+
 Postgres has no host port and sits on the internal `data` network at a fixed
 address, `10.200.0.10` (`ipv4_address` in `docker-compose.yml`, subnet
 `10.200.0.0/24`), so the worker reaches it through an SSH tunnel as the `crawler`
@@ -1100,6 +1117,11 @@ Keys) and put it with the admin URL in `apps/auto-service-shop/.env.admin`
 - **Typesense is not backed up.** Its index is derived from Postgres and rebuilt
   by the nightly `reindex-search` job (ADR-0041), so after a restore search stays
   empty until the next 04:00 Belgrade rebuild.
+  A rebuild reindexes in batches of 1000 (`reindex.batch_size` in
+  `medusa-config.ts`) and the Typesense client waits 60 s for a connection.
+  After the deploy that ships this, run a full rebuild once and write its
+  docs/s (documents indexed divided by the job's wall time in `docker compose
+logs medusa`) here. TODO: record the measured docs/s.
 - Only Caddy is published outward: 80, 443, 443/udp. Grafana listens on
   `127.0.0.1:3000` only, for an SSH tunnel. Medusa, Postgres, Typesense, Loki
   and Alloy have no host ports; Postgres and Typesense sit on an internal network with no

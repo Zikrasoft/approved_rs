@@ -78,6 +78,7 @@ export default defineConfig({
       resolve: '@medusajs/medusa/search',
       options: {
         default_provider: 'typesense',
+        reindex: { batch_size: 1000 },
         providers: [
           {
             resolve: './src/modules/search-typesense',
