@@ -20,6 +20,9 @@ type FacetValue = SearchFacet['values'][number];
 
 export const CATEGORY_PAGE_SIZE = 48;
 
+export const categoryPageCount = (listed: number): number =>
+  Math.max(1, Math.ceil(listed / CATEGORY_PAGE_SIZE));
+
 export const POPULAR_BLOCK_MIN = 2;
 
 export const POPULAR_BLOCK_SIZE = 6;

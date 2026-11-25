@@ -3,6 +3,7 @@ import type { MedusaContainer } from '@medusajs/framework/types';
 import {
   CATEGORY_PAGE_SIZE,
   attributeValuesSchema,
+  categoryPageCount,
   categoryFacets,
   seriesHasPage,
   sluggedPartPageSchema,
@@ -79,6 +80,18 @@ async function carsOf(
     }));
 }
 
+export const categoryPartPages = <
+  Number extends { brand_slug: string; normalized_value: string },
+>(
+  numbers: Number[],
+): Number[] => {
+  const seen = new Set<string>();
+  return numbers.filter((number) => {
+    const slug = partPageSlug(number.brand_slug, number.normalized_value);
+    return !seen.has(slug) && seen.add(slug);
+  });
+};
+
 export async function categoryPageAt(
   scope: MedusaContainer,
   slug: string,
@@ -98,14 +111,8 @@ export async function categoryPageAt(
   if (!row) return null;
   const category = shownCategory(row);
 
-  const seen = new Set<string>();
-  const numbers = (await publish.listedNumbersIn(category.id)).filter(
-    (number) => {
-      const key = partPageSlug(number.brand_slug, number.normalized_value);
-      return !seen.has(key) && seen.add(key);
-    },
-  );
-  const pages = Math.max(1, Math.ceil(numbers.length / CATEGORY_PAGE_SIZE));
+  const numbers = categoryPartPages(await publish.listedNumbersIn(category.id));
+  const pages = categoryPageCount(numbers.length);
   if (page > pages) return null;
 
   const demand = await loadPartDemand(scope);

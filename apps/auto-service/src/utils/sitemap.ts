@@ -1,5 +1,5 @@
 import {
-  CATEGORY_PAGE_SIZE,
+  categoryPageCount,
   type CataloguePageList,
 } from '@podbor/catalog-contract';
 import { SUPPORTED_LOCALES } from '../i18n/config.ts';
@@ -53,11 +53,8 @@ export function catalogueUrls(
         ),
       ]),
       ...categories.flatMap(({ slug, listed }) =>
-        Array.from(
-          {
-            length: Math.max(1, Math.ceil((listed ?? 0) / CATEGORY_PAGE_SIZE)),
-          },
-          (_, index) => PathBuilder.partsCategory(locale, slug, index + 1),
+        Array.from({ length: categoryPageCount(listed ?? 0) }, (_, index) =>
+          PathBuilder.partsCategory(locale, slug, index + 1),
         ),
       ),
       ...parts

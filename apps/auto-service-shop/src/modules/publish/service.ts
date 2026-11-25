@@ -20,7 +20,6 @@ import {
   LISTED_NUMBERS_IN_CATEGORY,
   LISTED_MAKE_PART_COUNTS,
   LISTED_PARTS_IN_CATEGORY,
-  LISTED_PER_CATEGORY,
   LISTED_SERIES_CATEGORY_COUNTS,
   LISTED_VEHICLE_PARTS,
   PUBLISH_ALL,
@@ -287,14 +286,6 @@ class PublishModuleService extends MedusaService({
     @MedusaContext() sharedContext: Context = {},
   ): Promise<PublishedPartSlug[]> {
     const { rows } = await runBoundSql(sharedContext, PUBLISHED_PART_SLUGS);
-    return rows;
-  }
-
-  @InjectManager()
-  async listedPerCategory(
-    @MedusaContext() sharedContext: Context = {},
-  ): Promise<{ category_id: string; listed: number }[]> {
-    const { rows } = await runBoundSql(sharedContext, LISTED_PER_CATEGORY);
     return rows;
   }
 

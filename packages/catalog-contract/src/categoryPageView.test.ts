@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   CATEGORY_PAGE_SIZE,
   categoryFacets,
+  categoryPageCount,
   categoryPagePath,
   categoryPageResponseSchema,
   popularPicks,
@@ -196,5 +197,14 @@ describe('categoryFacets', () => {
     expect(facets.find(({ key }) => key === 'capacity')?.values).toHaveLength(
       2,
     );
+  });
+});
+
+describe('categoryPageCount', () => {
+  it('keeps one page for an empty Category and adds one per full page', () => {
+    expect(categoryPageCount(0)).toBe(1);
+    expect(categoryPageCount(48)).toBe(1);
+    expect(categoryPageCount(49)).toBe(2);
+    expect(categoryPageCount(97)).toBe(3);
   });
 });

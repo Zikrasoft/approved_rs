@@ -9,6 +9,8 @@ import {
 } from '@podbor/catalog-contract';
 import { seriesSlugOf } from '@podbor/catalog-contract/slug';
 
+import type { ListedNumber } from '../modules/publish/service';
+import { categoryPartPages } from './category-page';
 import { loadPartDemand } from './part-demand';
 import {
   type CatalogueModules,
@@ -16,26 +18,32 @@ import {
   seriesWithPages,
 } from './series-pages';
 
-async function demandPerCategory(
+async function categoryCounts(
   publish: CatalogueModules['publish'],
   demand: Map<string, PartDemand>,
 ) {
-  const sums = new Map<string, number>();
-  if (!demand.size) return sums;
-  const seen = new Set<string>();
+  const numbersOf = new Map<string, ListedNumber[]>();
   for (const number of await publish.listedNumbersIn(null)) {
-    const slug = partPageSlug(number.brand_slug, number.normalized_value);
-    const key = `${number.category_id}/${slug}`;
-    if (!seen.has(key)) {
-      seen.add(key);
-      sums.set(
-        number.category_id,
-        (sums.get(number.category_id) ?? 0) +
-          (demand.get(number.id)?.score ?? 0),
-      );
-    }
+    numbersOf.set(number.category_id, [
+      ...(numbersOf.get(number.category_id) ?? []),
+      number,
+    ]);
   }
-  return sums;
+  return new Map(
+    [...numbersOf].map(([categoryId, numbers]) => {
+      const pages = categoryPartPages(numbers);
+      return [
+        categoryId,
+        {
+          listed: pages.length,
+          demand: pages.reduce(
+            (sum, { id }) => sum + (demand.get(id)?.score ?? 0),
+            0,
+          ),
+        },
+      ];
+    }),
+  );
 }
 
 export async function cataloguePageList(scope: MedusaContainer) {
@@ -47,22 +55,15 @@ export async function cataloguePageList(scope: MedusaContainer) {
     paged,
     held: seriesCategories,
   } = await seriesWithPages(modules, {});
-  const [slugs, perCategory, categories, catalogueMakes, demandOf] =
-    await Promise.all([
-      publish.publishedPartSlugs(),
-      publish.listedPerCategory(),
-      catalog.listCategories(
-        {},
-        { select: ['id', 'slug', 'name'], take: null },
-      ),
-      catalog.listMakes(
-        {},
-        { select: ['slug', 'name', 'show_on_site'], order: { slug: 'ASC' } },
-      ),
-      loadPartDemand(scope).then((demand) =>
-        demandPerCategory(publish, demand),
-      ),
-    ]);
+  const [slugs, perCategory, categories, catalogueMakes] = await Promise.all([
+    publish.publishedPartSlugs(),
+    loadPartDemand(scope).then((demand) => categoryCounts(publish, demand)),
+    catalog.listCategories({}, { select: ['id', 'slug', 'name'], take: null }),
+    catalog.listMakes(
+      {},
+      { select: ['slug', 'name', 'show_on_site'], order: { slug: 'ASC' } },
+    ),
+  ]);
 
   const parts = new Map<string, boolean>();
   for (const { brand_slug, normalized_value, indexable } of slugs) {
@@ -96,9 +97,6 @@ export async function cataloguePageList(scope: MedusaContainer) {
       .filter(({ id }) => counts.has(id))
       .map(({ make }) => [make.slug, make]),
   );
-  const listed = new Map(
-    perCategory.map(({ category_id, listed: n }) => [category_id, n]),
-  );
 
   return cataloguePageListSchema.parse({
     parts: [...parts].map(([slug, indexable]) => ({ slug, indexable })),
@@ -117,8 +115,8 @@ export async function cataloguePageList(scope: MedusaContainer) {
     categories: categories.map(({ id, slug, name }) => ({
       slug,
       name,
-      listed: listed.get(id) ?? 0,
-      demand: demandOf.get(id) ?? 0,
+      listed: perCategory.get(id)?.listed ?? 0,
+      demand: perCategory.get(id)?.demand ?? 0,
     })),
     catalogue_makes: makeListSchema.parse(catalogueMakes),
   });

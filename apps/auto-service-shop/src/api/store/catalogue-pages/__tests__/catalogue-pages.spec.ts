@@ -1,5 +1,5 @@
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
-import { Modules } from '@medusajs/framework/utils';
+import { ContainerRegistrationKeys, Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
@@ -67,6 +67,18 @@ medusaIntegrationTestRunner({
         const hidden = await numbered('CP 4', 'Fits');
         const bare = await numbered('CP 5');
         await numbered('CP 6');
+        const gone = await catalog.createBrands({ name: 'Gone', slug: 'gone' });
+        await catalog.findOrCreatePart({
+          name: 'Part of a deleted brand',
+          description: 'Fits',
+          category_id: filters.id,
+          identifier: {
+            type: 'manufacturer-number',
+            brand_id: gone.id,
+            value: 'CP 7',
+          },
+          source: 'test',
+        });
         unpublished = 'mann-filter-cp4';
         await catalog.createFitments([
           ...parts.map(({ part_id }) => ({
@@ -78,6 +90,10 @@ medusaIntegrationTestRunner({
         ]);
         await publish.publishAll();
         await publish.unpublish([hidden.part_identifier_id]);
+        await getContainer()
+          .resolve(ContainerRegistrationKeys.PG_CONNECTION)('brand')
+          .where({ id: gone.id })
+          .update({ deleted_at: new Date() });
       });
 
       const list = async () =>
@@ -143,8 +159,16 @@ medusaIntegrationTestRunner({
         );
       });
 
-      it('counts the listed Parts of a Category', async () => {
+      it('counts the listed Part pages a Category page shows', async () => {
         const { categories } = await list();
+        const page = (
+          await api.get(
+            '/store/catalogue-pages/categories/filters',
+            storeHeaders,
+          )
+        ).data;
+
+        expect(page.count).toBe(5);
 
         expect(categories).toEqual([
           { slug: 'filters', name: 'Filters', listed: 5, demand: 0 },
