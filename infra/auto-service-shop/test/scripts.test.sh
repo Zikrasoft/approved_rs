@@ -139,6 +139,7 @@ expect 'a deploy succeeds' run deploy.sh "$NEW"
 expect 'pull, migrate, check the schema, seed, up, reload and health run in order on the new tag' logged \
   "docker[$NEW] compose pull --policy missing medusa caddy" \
   "docker[$NEW] compose up -d --wait postgres" \
+  "docker[$NEW] compose exec -T postgres psql -U carlab -d carlab -v ON_ERROR_STOP=1 -c create extension if not exists pg_stat_statements" \
   "docker[$NEW] compose exec -T postgres pg_dump -U carlab -d carlab --format=custom" \
   "docker[$NEW] compose run --rm -T medusa node_modules/.bin/medusa db:migrate --execute-safe-links --all-or-nothing" \
   "docker[$NEW] compose run --rm -T medusa node_modules/.bin/medusa exec ./src/scripts/check-schema.js" \
