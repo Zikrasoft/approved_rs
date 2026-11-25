@@ -32,10 +32,29 @@ export const PUBLISHED_PAGE = `
   order by pn.id
   limit ?`;
 
+const INDEXABLE = `(
+    coalesce(p.description, '') ~ '\\S'
+    or exists (
+      select 1 from jsonb_each(coalesce(p.attributes, '{}'::jsonb)) a
+      where not (jsonb_typeof(a.value) in ('string', 'array')
+        and a.value in ('""'::jsonb, '[]'::jsonb))
+    )
+    or exists (
+      select 1 from fitment f
+      join vehicle v on v.id = f.vehicle_id and v.deleted_at is null
+      where f.part_id = p.id and f.deleted_at is null
+    )
+    or exists (
+      select 1 from part_identifier o
+      where o.part_id = p.id and o.id <> pi.id and o.deleted_at is null
+    )
+  ) as indexable`;
+
 export const PUBLISHED_NUMBER_BY_SLUG = `
-  select pn.id, pn.listed from published_number pn
+  select pn.id, pn.listed, ${INDEXABLE} from published_number pn
   join part_identifier pi on pi.id = pn.id and pi.deleted_at is null
   join brand b on b.id = pi.brand_id and b.deleted_at is null
+  join part p on p.id = pi.part_id and p.deleted_at is null
   where pn.deleted_at is null and b.slug = ? and pi.normalized_value = ?
   order by pn.id
   limit 1`;
@@ -172,24 +191,7 @@ export const LISTED_VEHICLE_PARTS = `${LISTED_PLACES}
   order by vehicle_id, part_id`;
 
 export const PUBLISHED_PART_SLUGS = `
-  select b.slug as brand_slug, pi.normalized_value,
-    (
-      nullif(btrim(coalesce(p.description, '')), '') is not null
-      or exists (
-        select 1 from jsonb_each(coalesce(p.attributes, '{}'::jsonb)) a
-        where not (jsonb_typeof(a.value) in ('string', 'array')
-          and a.value in ('""'::jsonb, '[]'::jsonb))
-      )
-      or exists (
-        select 1 from fitment f
-        join vehicle v on v.id = f.vehicle_id and v.deleted_at is null
-        where f.part_id = p.id and f.deleted_at is null
-      )
-      or exists (
-        select 1 from part_identifier o
-        where o.part_id = p.id and o.id <> pi.id and o.deleted_at is null
-      )
-    ) as indexable
+  select b.slug as brand_slug, pi.normalized_value, ${INDEXABLE}
   from published_number pn
   join part_identifier pi on pi.id = pn.id and pi.deleted_at is null
   join brand b on b.id = pi.brand_id and b.deleted_at is null

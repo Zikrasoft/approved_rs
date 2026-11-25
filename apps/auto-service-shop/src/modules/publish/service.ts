@@ -175,7 +175,7 @@ class PublishModuleService extends MedusaService({
     brandSlug: string,
     normalizedValue: string,
     @MedusaContext() sharedContext: Context = {},
-  ): Promise<PublishedNumber | null> {
+  ): Promise<(PublishedNumber & { indexable: boolean }) | null> {
     const { rows } = await runBoundSql(
       sharedContext,
       PUBLISHED_NUMBER_BY_SLUG,

@@ -88,6 +88,21 @@ medusaIntegrationTestRunner({
           { part_id: parts[0].part_id, vehicle_id: small.vehicle.id },
           { part_id: bare.part_id, vehicle_id: small.vehicle.id },
         ]);
+        const bulbs = await catalog.createCategories({
+          slug: 'bulbs',
+          name: 'Bulbs',
+        });
+        await catalog.findOrCreatePart({
+          name: 'Bulb',
+          description: '\n\t',
+          category_id: bulbs.id,
+          identifier: {
+            type: 'manufacturer-number',
+            brand_id: brand.id,
+            value: 'CP 8',
+          },
+          source: 'test',
+        });
         await publish.publishAll();
         await publish.unpublish([hidden.part_identifier_id]);
         await getContainer()
@@ -123,6 +138,23 @@ medusaIntegrationTestRunner({
         expect(indexable('mann-filter-cp1')).toBe(true);
         expect(indexable('mann-filter-cp5')).toBe(true);
         expect(indexable('mann-filter-cp6')).toBe(false);
+      });
+
+      it('judges a number noindex on the list and on its page alike when its description is blank', async () => {
+        const { parts } = await list();
+        const { page } = (
+          await api.get(
+            '/store/catalogue-pages/parts/mann-filter-cp8',
+            storeHeaders,
+          )
+        ).data;
+
+        expect(
+          parts.find(
+            ({ slug }: { slug: string }) => slug === 'mann-filter-cp8',
+          ),
+        ).toEqual({ slug: 'mann-filter-cp8', indexable: false });
+        expect(page.indexable).toBe(false);
       });
 
       it('gives a series a page only when it holds enough Parts, and its Category page likewise', async () => {
@@ -172,6 +204,7 @@ medusaIntegrationTestRunner({
 
         expect(categories).toEqual([
           { slug: 'filters', name: 'Filters', listed: 5, demand: 0 },
+          { slug: 'bulbs', name: 'Bulbs', listed: 1, demand: 0 },
         ]);
       });
     });

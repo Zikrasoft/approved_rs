@@ -1,6 +1,5 @@
 import type { MedusaContainer } from '@medusajs/framework/types';
 import {
-  enrichmentGaps,
   generationOf,
   partPageSchema,
   partPageSlug,
@@ -25,6 +24,7 @@ import {
   catalogueModules,
   pagedSeries,
 } from './series-pages';
+import type { PublishedNumber } from '../modules/publish/service';
 import { listVehicleResponses, toFitmentResponse } from './store-response';
 
 const distinct = <T>(values: T[]) => [...new Set(values)];
@@ -160,7 +160,7 @@ export async function partPageAt(
   const own = address && (await publish.publishedBySlug(...address));
   if (!own) return null;
   const options = { shown, demand: await loadPartDemand(scope) };
-  const pagesOf = async (rows: (typeof own)[]) =>
+  const pagesOf = async (rows: PublishedNumber[]) =>
     (await partPagesOf(scope, rows, options)).map((page) =>
       partPageSchema.parse(page),
     );
@@ -242,13 +242,7 @@ export async function partPageAt(
       ...localized(page, locale),
       slug: slugOf(page),
       category,
-      indexable:
-        enrichmentGaps({
-          description: part.description,
-          attributes: part.attributes,
-          fitments: fits.length,
-          equivalents: page.equivalents.length,
-        }).length === 0,
+      indexable: own.indexable,
       fits,
       requirement_cars: requirementCars.map(({ id }) => id),
       kit_cars: kit.map(({ id }) => id),
