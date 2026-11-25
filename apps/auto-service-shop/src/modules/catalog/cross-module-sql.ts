@@ -23,7 +23,8 @@ export const REFRESH_LISTED = `
     join part p on p.id = pi.part_id and p.deleted_at is null
     where pi.deleted_at is null
   ) l
-  where pn.id = l.id and pn.listed is distinct from l.listed`;
+  where pn.id = l.id and pn.listed is distinct from l.listed
+  returning pn.id`;
 
 export const PUBLISHED_PAGE = `
   select pn.id, pn.listed from published_number pn
@@ -280,7 +281,7 @@ const missingIdentifier = (column: string) =>
 export const ORPHAN_SWEEPS = [
   `delete from supplier_offer o where ${missingIdentifier('o.part_identifier_id')}`,
   `delete from staged_record r where ${missingIdentifier('r.part_identifier_id')}`,
-  `delete from published_number n where ${missingIdentifier('n.id')}`,
+  `delete from published_number n where ${missingIdentifier('n.id')} returning n.id`,
   `delete from supplier_category s where s.category_id is not null and not exists
    (select 1 from category c where c.id = s.category_id and c.deleted_at is null)`,
   `update vin_lookup l set vehicle_id = null where vehicle_id is not null

@@ -3,8 +3,9 @@ import { content } from '../i18n/content';
 import { localeFrom, type Locale } from '../i18n/config';
 import { catalogueFor, previewRequested } from './catalogueEnv';
 
-export const PUBLIC_PAGE_CACHE =
-  'public, s-maxage=86400, stale-while-revalidate=86400, stale-if-error=86400';
+export const PUBLIC_PAGE_CACHE = 'public, s-maxage=86400';
+
+export const NOT_FOUND_PAGE_CACHE = 'public, s-maxage=600';
 
 export const PREVIEW_PAGE_CACHE = 'private, no-store';
 
@@ -22,21 +23,25 @@ const unavailable = (locale: Locale) =>
     },
   });
 
-const cacheControlOf = (request: Request) =>
-  previewRequested(request) ? PREVIEW_PAGE_CACHE : PUBLIC_PAGE_CACHE;
+const cacheControlOf = (request: Request, publicCache: string) =>
+  previewRequested(request) ? PREVIEW_PAGE_CACHE : publicCache;
 
 export function answerPage<T>(
   { request, response }: Pick<AstroGlobal, 'request' | 'response'>,
   found: T | null,
 ): T | Response {
-  const cacheControl = cacheControlOf(request);
   if (found === null) {
     return new Response(null, {
       status: 404,
-      headers: { 'cache-control': cacheControl },
+      headers: {
+        'cache-control': cacheControlOf(request, NOT_FOUND_PAGE_CACHE),
+      },
     });
   }
-  response.headers.set('cache-control', cacheControl);
+  response.headers.set(
+    'cache-control',
+    cacheControlOf(request, PUBLIC_PAGE_CACHE),
+  );
   return found;
 }
 

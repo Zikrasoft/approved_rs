@@ -89,6 +89,9 @@ const envFields = z.object({
     .transform((seconds) => Number(seconds ?? 60))
     .pipe(z.number().int().nonnegative()),
   PUBLISH_DISPATCH_TOKEN: optionalSecret,
+  CATALOGUE_SHRINK_ALLOWED: optionalValue
+    .pipe(z.enum(['true', 'false']).optional())
+    .transform((allowed) => allowed === 'true'),
   STOREFRONT_ORIGIN: optionalValue.pipe(
     z
       .url()

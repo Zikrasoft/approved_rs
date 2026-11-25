@@ -110,7 +110,7 @@ expect 'caddy pulls the page cache image CI built for the same commit as medusa,
   '.services.caddy | .image == "ghcr.io/zikrasoft/podbor-carlab-caddy:0000000000000000000000000000000000000000" and .build == null and .mem_limit == "134217728"'
 expect 'caddy takes the preview token from .env to verify the preview cookie' \
   ".services.caddy.environment.SHOP_PREVIEW_TOKEN == \"$preview_token\""
-expect 'the caddy image tag follows the shop tag unless CADDY_TAG names its own' \
+expect 'the caddy image tag falls back to the shop tag unless CADDY_TAG names its own content tag' \
   '.services.caddy.image | endswith(":0000000000000000000000000000000000000000")'
 caddy_tag=$(CADDY_TAG=1111111111111111111111111111111111111111 env -u MEDUSA_TAG docker compose -f "$here/docker-compose.yml" --project-directory "$work" --profile "*" config --format json 2>/dev/null | jq -r .services.caddy.image)
 if [ "$caddy_tag" = ghcr.io/zikrasoft/podbor-carlab-caddy:1111111111111111111111111111111111111111 ]; then echo 'ok - CADDY_TAG overrides the caddy image tag alone'; else echo "not ok - CADDY_TAG ($caddy_tag)"; failures=$((failures + 1)); fi
