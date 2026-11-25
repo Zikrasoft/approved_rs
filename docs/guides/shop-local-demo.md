@@ -180,7 +180,7 @@ pnpm publish:local
 `OPENAI_API_KEY` is unset (as `shop:prepare` runs it) and reindexes Typesense. Each holds the catalogue
 writer lock, so neither starts while an Import, Publish or deletion runs.
 
-The admin's Publish button runs the real chain (sweep, translate, publish,
+The admin's Publish button runs the real chain (shrink, sweep, translate, publish,
 reindex, purge; it imports nothing; the purge sends nothing while
 `CACHE_PURGE_URL` is unset) and, without an OpenAI key, stops at `translate` with
 "OPENAI_API_KEY is not set" once any row is untranslated. That is expected

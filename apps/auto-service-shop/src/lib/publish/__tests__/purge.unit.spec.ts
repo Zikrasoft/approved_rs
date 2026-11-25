@@ -1,7 +1,7 @@
 import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 
-import { cachePurge } from '../purge';
+import { cachePurge, partPagePattern } from '../purge';
 
 describe('cachePurge', () => {
   let server: Server;
@@ -47,5 +47,19 @@ describe('cachePurge', () => {
     await cachePurge(undefined)('sitemap');
 
     expect(received).toEqual([]);
+  });
+});
+
+describe('partPagePattern', () => {
+  it('matches a Part page in any locale', () => {
+    expect(partPagePattern('mann-filter-hu816x')).toBe(
+      '-/[a-z][a-z]/parts/p/mann-filter-hu816x/',
+    );
+  });
+
+  it('turns every character outside a slug into a single-character wildcard', () => {
+    expect(partPagePattern('a.+b|c(d)$[e]')).toBe(
+      '-/[a-z][a-z]/parts/p/a..b.c.d...e./',
+    );
   });
 });

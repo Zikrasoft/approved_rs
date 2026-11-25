@@ -1260,10 +1260,15 @@ logs medusa`) here. TODO: record the measured docs/s.
     an internal Caddy listener, `http://:2020` in the Caddyfile. It sits on
     the compose network alone, with no entry in `ports`, and the shop reaches
     it as `CACHE_PURGE_URL=http://caddy:2020/souin-api/souin` (set in compose;
-    unset, the `purge` step sends nothing). It forwards to the Souin API only a
-    `PURGE` under `/souin-api/souin/`, whose rest of the path is a regex over
-    the cache keys (`GET-https-carlab.rs-/ru/parts/c/brakes/`); it answers 403
-    to `flush`, `mapping`, every other path and every other method. The
+    the shop refuses to start in production without it, and elsewhere the
+    `purge` step sends nothing while it is unset). It forwards to the Souin
+    API only a `PURGE` under `/souin-api/souin/`, whose rest of the path is a
+    regex over the cache keys (`GET-https-carlab.rs-/ru/parts/c/brakes/`) and
+    holds at least three letters or digits in a row; it answers 403 to
+    `flush`, `mapping`, a catch-all such as an empty pattern, `.+`, `.*` or
+    `-/.*`, every other path and every other method. That check only stops a
+    slip; the boundary is the compose network itself: anything on it can still
+    purge a broad pattern such as `carlab`, so nothing untrusted runs on it. The
     pattern travels in the path unescaped, so it holds no `|`, `^`, `{`, `?`
     or `\`: Go escapes them on the proxy hop and Souin then matches the
     escape literally. That is why the hubs take several patterns, not one
@@ -1272,7 +1277,8 @@ logs medusa`) here. TODO: record the measured docs/s.
     (every `/parts/` page but `/parts/p/`), `llms[.]txt`, `sitemap` and
     `catalogue-build[.]json`. Each Part page whose number is fresh, flipped
     `listed` or was swept gets `-/[a-z][a-z]/parts/p/<slug>/`, which covers
-    the three locales at once. The patterns live in
+    the three locales at once; a slug character outside `a-z`, `0-9` and `-`
+    becomes `.`, so a slug never smuggles regex into the pattern. The patterns live in
     `apps/auto-service-shop/src/lib/publish/purge.ts`. `simplefs` before
     v0.0.23 deleted only the first key a regex matched, because it deleted
     while ranging over the cache; the image pins v0.0.23, which collects the
@@ -1389,14 +1395,17 @@ number gets its CI value in that script. The non-obvious parts:
 - `OPENAI_API_KEY` feeds the admin's Publish chain, which translates catalogue
   text with it. A Publish is data-only: it never dispatches a GitHub workflow,
   rebuilds the site or opens SSH, and the host holds no GitHub token. The chain is
-  `sweep → translate → publish → reindex → purge`. `publish` collects the
+  `shrink → sweep → translate → publish → reindex → purge`. `shrink` writes
+  nothing: it counts the Part pages the published numbers name now (numbers
+  whose identifier was deleted since still count, the sweep has not removed
+  them yet) and the Part pages the live identifiers would give once swept and
+  published, and refuses the Publish when the second is under half the first,
+  so the run fails at `shrink` with the catalogue untouched, again on every
+  retry, until `CATALOGUE_SHRINK_ALLOWED=true` sits in the shop's
+  `.env` for one Publish; remove it afterwards. `publish` collects the
   change set: the freshly published numbers, the numbers whose `listed`
   flipped, the Parts whose translations `translate` wrote and the numbers the
-  orphan `sweep` removed. It refuses a Publish that would leave fewer than half
-  of the numbers the last successful Publish left (the count is that run's
-  `report.published`): it unpublishes the fresh numbers and fails at `publish`,
-  again on every retry, until `CATALOGUE_SHRINK_ALLOWED=true` sits in the shop's
-  `.env` for one Publish; remove it afterwards. Then it warms the shop's
+  orphan `sweep` removed. Then it warms the shop's
   catalogue memo (the page list, counts and demand), so the renders after the
   purge read it ready. `reindex` is incremental: only
   the changed Parts go to `part_identifier` (the removed numbers are deleted
@@ -1410,9 +1419,13 @@ number gets its CI value in that script. The non-obvious parts:
   The hubs include everything on carlab.rs that lists the catalogue and renders
   on demand: the catalogue sitemap, both `llms.txt`, the `/parts/` hub and
   `catalogue-build.json`, so the purge is all a Publish needs for them to show
-  the new state. A failed purge keeps the numbers published and fails the run at
-  `purge`; Publish again to retry. The retry purges the hubs again but not the
-  earlier run's Part pages, which age out within the day. Without
+  the new state. A failed run keeps what it published and writes its change
+  set, with whatever it carried, into its report as `unfinished`; the next
+  Publish starts from the `unfinished` of the latest run that wrote a report,
+  so a retry after a failed `reindex` or `purge` reindexes and purges the
+  earlier run's Parts and pages as well as its own. A run the restart
+  interrupted writes no report, so the Publish before it is the one carried.
+  Without
   `OPENAI_API_KEY` the chain stops at `translate` once any text is untranslated,
   and the admin shows why. The chain runs only from the admin's Publish button,
   in the top bar of every admin page. The services and works pages stay

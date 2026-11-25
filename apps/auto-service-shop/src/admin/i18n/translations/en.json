@@ -442,6 +442,7 @@
       "failed": "Failed"
     },
     "steps": {
+      "shrink": "catalogue size check",
       "sweep": "catalogue cleanup",
       "translate": "translation",
       "publish": "number publishing",
@@ -452,7 +453,7 @@
     "startedBy": "Started by: {{who}}",
     "knownErrors": {
       "openAiKey": "The OpenAI key (OPENAI_API_KEY) is not set, so translation did not run and the later steps were skipped. This is a server setting: ask a developer to add the key.",
-      "shrinkRefused": "This Publish would leave fewer than half of the numbers the last Publish put on the site, so nothing new was published. If the catalogue really shrank on purpose (a supplier removed), ask a developer to set CATALOGUE_SHRINK_ALLOWED=true for one Publish.",
+      "shrinkRefused": "This Publish would leave fewer than half of the Part pages the site has now, so nothing was changed. If the catalogue really shrank on purpose (a supplier removed), ask a developer to set CATALOGUE_SHRINK_ALLOWED=true for one Publish.",
       "abandoned": "The run stopped reporting that it was alive, so it was marked as failed. Start it again.",
       "interrupted": "The server restarted while this run was going, so it did not finish. Start it again."
     },

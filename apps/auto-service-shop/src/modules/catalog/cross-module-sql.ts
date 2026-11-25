@@ -234,6 +234,19 @@ export const PUBLISHED_PART_SLUGS = `
   where pn.deleted_at is null
   order by pn.id`;
 
+export const PART_PAGE_COUNTS = `
+  select
+    (select count(distinct (b.slug, pi.normalized_value))
+      from published_number pn
+      join part_identifier pi on pi.id = pn.id
+      join brand b on b.id = pi.brand_id
+      where pn.deleted_at is null)::int as published,
+    (select count(distinct (b.slug, pi.normalized_value))
+      from part_identifier pi
+      join brand b on b.id = pi.brand_id and b.deleted_at is null
+      join part p on p.id = pi.part_id and p.deleted_at is null
+      where pi.deleted_at is null)::int as projected`;
+
 export const LISTED_NUMBERS_IN_CATEGORY = `
   select pn.id, b.slug as brand_slug, b.name as brand_name,
     pi.normalized_value, p.id as part_id, p.category_id, p.attributes

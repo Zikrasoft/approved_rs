@@ -48,6 +48,7 @@ describe('admin translations', () => {
       'publish',
       'purge',
       'reindex',
+      'shrink',
       'sweep',
       'translate',
     ]);

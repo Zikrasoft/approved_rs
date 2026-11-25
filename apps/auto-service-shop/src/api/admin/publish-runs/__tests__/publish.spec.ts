@@ -10,7 +10,7 @@ import { loggedEvents } from '../../../../../integration-tests/loggedEvents';
 import { SHOP_AI_REGISTRATION } from '../../../../lib/ai';
 import {
   PUBLISH_PURGE_REGISTRATION,
-  PUBLISH_REINDEX_REGISTRATION,
+  PUBLISH_SEARCH_REGISTRATION,
   type PublishPurge,
   type PublishSearch,
 } from '../../../../lib/publish/chain';
@@ -69,6 +69,7 @@ const searchIndex = {
   swaps: [] as string[],
   active: true,
   indexed: null as number | null,
+  refusal: null as Error | null,
 };
 
 const pageCache = {
@@ -135,21 +136,18 @@ medusaIntegrationTestRunner({
   hooks: {
     beforeServerStart: async (container) => {
       container.register(
-        PUBLISH_REINDEX_REGISTRATION,
+        PUBLISH_SEARCH_REGISTRATION,
         asValue({
           changed: async (changes) => {
+            if (searchIndex.refusal) throw searchIndex.refusal;
             searchIndex.changes.push(changes);
           },
           swap: async (index) => {
             searchIndex.swaps.push(index);
           },
           partsIndexActive: async () => searchIndex.active,
-          publishedDocuments: async () =>
-            searchIndex.indexed ??
-            container
-              .resolve<PublishModuleService>(PUBLISH_MODULE)
-              .countPublished(),
-          countSettle: { tries: 2, pauseMs: 10 },
+          settledPublishedDocuments: async (published) =>
+            searchIndex.indexed ?? published,
         } satisfies PublishSearch),
       );
       container.register(
@@ -252,6 +250,7 @@ medusaIntegrationTestRunner({
         searchIndex.swaps = [];
         searchIndex.active = true;
         searchIndex.indexed = null;
+        searchIndex.refusal = null;
         pageCache.purged = [];
         pageCache.refusal = null;
         pageCache.gate = null;
@@ -825,6 +824,9 @@ medusaIntegrationTestRunner({
           });
           pageCache.refusal = null;
           const retried = await publish();
+          const retriedPurge = pageCache.purged;
+          pageCache.purged = [];
+          await publish();
 
           expect(failed).toEqual(
             expect.objectContaining({
@@ -835,7 +837,46 @@ medusaIntegrationTestRunner({
           );
           expect(kept).toHaveLength(1);
           expect(retried.status).toBe('succeeded');
+          expect(retriedPurge).toEqual([
+            ...HUB_PATTERNS,
+            '-/[a-z][a-z]/parts/p/mann-filter-pg5/',
+          ]);
           expect(pageCache.purged).toEqual(HUB_PATTERNS);
+        });
+
+        it('carry the Part pages of a run that failed before its purge into the next Publish', async () => {
+          await settled();
+          const partId = await catalog.createPartWithIdentifiers({
+            name: 'Масляный фильтр',
+            identifiers: [
+              {
+                type: 'manufacturer-number',
+                brand_id: await mannId(),
+                value: 'PG 6',
+              },
+            ],
+          });
+          searchIndex.changes = [];
+          searchIndex.refusal = new Error('Typesense is down');
+
+          const failed = await publish();
+          searchIndex.refusal = null;
+          const retried = await publish();
+
+          expect(failed).toEqual(
+            expect.objectContaining({
+              status: 'failed',
+              failed_step: 'reindex',
+            }),
+          );
+          expect(retried.status).toBe('succeeded');
+          expect(searchIndex.changes).toEqual([
+            { partIds: [partId], deletedIdentifierIds: [] },
+          ]);
+          expect(pageCache.purged).toEqual([
+            ...HUB_PATTERNS,
+            '-/[a-z][a-z]/parts/p/mann-filter-pg6/',
+          ]);
         });
       });
 
@@ -872,7 +913,7 @@ medusaIntegrationTestRunner({
         jest.restoreAllMocks();
       });
 
-      it('refuses a Publish that would leave fewer than half the published numbers, unless the shrink is allowed', async () => {
+      it('refuses, before writing anything, a Publish that would leave fewer than half the Part pages, unless the shrink is allowed', async () => {
         const [mann] = await catalog.listBrands({ slug: 'mann-filter' });
         await catalog.createPartWithIdentifiers({
           name: 'Масляный фильтр',
@@ -896,28 +937,46 @@ medusaIntegrationTestRunner({
         });
         const publishModule: PublishModuleService =
           getContainer().resolve(PUBLISH_MODULE);
+        searchIndex.changes = [];
+        searchIndex.swaps = [];
+        pageCache.purged = [];
 
         const refused = await publish();
         const publishedAfterRefusal = await publishModule.listPublishedNumbers({
-          id: fresh.id,
+          id: [fresh.id, ...live.map(({ id }) => id)],
         });
         const refusedAgain = await publish();
+        const touchedByRefusals = [
+          ...searchIndex.changes,
+          ...searchIndex.swaps,
+          ...pageCache.purged,
+        ];
         process.env.CATALOGUE_SHRINK_ALLOWED = 'true';
         const allowed = await publish();
 
         expect(refused).toEqual(
           expect.objectContaining({
             status: 'failed',
-            failed_step: 'publish',
+            failed_step: 'shrink',
             error: expect.stringContaining('CATALOGUE_SHRINK_ALLOWED'),
           }),
         );
-        expect(publishedAfterRefusal).toEqual([]);
-        expect(refusedAgain.failed_step).toBe('publish');
+        expect(refused.error).toContain('1 Part pages');
+        expect(publishedAfterRefusal.map(({ id }) => id).sort()).toEqual(
+          live.map(({ id }) => id).sort(),
+        );
+        expect(refusedAgain.failed_step).toBe('shrink');
+        expect(touchedByRefusals).toEqual([]);
         expect(allowed.status).toBe('succeeded');
         expect(
           await publishModule.listPublishedNumbers({ id: fresh.id }),
         ).toHaveLength(1);
+        expect(pageCache.purged).toEqual(
+          expect.arrayContaining([
+            '-/[a-z][a-z]/parts/p/mann-filter-sh1/',
+            '-/[a-z][a-z]/parts/p/mann-filter-sh2/',
+          ]),
+        );
       });
 
       it('rejects a translation edit for an unknown locale, field or entity', async () => {

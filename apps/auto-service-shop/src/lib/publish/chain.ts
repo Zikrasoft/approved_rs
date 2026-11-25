@@ -23,6 +23,7 @@ import {
   type PublishPurge,
 } from './purge';
 import { translateCatalogue } from './translate';
+import { clearCatalogueMemo } from '../catalogue-memo';
 import { warmCatalogueMemo } from '../catalogue-page-list';
 import { type RunOutcome, startCatalogueRun } from '../catalogue-writer';
 import { errorMessage } from '../errors';
@@ -35,7 +36,7 @@ import { logEvent } from '../log-event';
 
 export type { PublishPurge } from './purge';
 
-export const PUBLISH_REINDEX_REGISTRATION = 'publishReindex';
+export const PUBLISH_SEARCH_REGISTRATION = 'publishSearch';
 
 export const PUBLISH_PURGE_REGISTRATION = 'publishPurge';
 
@@ -45,40 +46,67 @@ export type PublishSearch = {
   changed: (changes: IndexChanges) => Promise<void>;
   swap: (index: string) => Promise<void>;
   partsIndexActive: () => Promise<boolean>;
-  publishedDocuments: () => Promise<number>;
-  countSettle: { tries: number; pauseMs: number };
+  settledPublishedDocuments: (published: number) => Promise<number>;
 };
 
-export type PublishChanges = {
-  fresh: string[];
-  listedFlipped: string[];
-  translatedParts: string[];
-  sweptIdentifiers: string[];
+const publishChangesSchema = z.object({
+  fresh: z.array(z.string()),
+  listedFlipped: z.array(z.string()),
+  translatedParts: z.array(z.string()),
+  sweptIdentifiers: z.array(z.string()),
+});
+
+export type PublishChanges = z.infer<typeof publishChangesSchema>;
+
+const unfinishedReportSchema = z.object({ unfinished: publishChangesSchema });
+
+const NO_CHANGES: PublishChanges = {
+  fresh: [],
+  listedFlipped: [],
+  translatedParts: [],
+  sweptIdentifiers: [],
 };
+
+const SETTLE_TRIES = 12;
+
+const SETTLE_PAUSE_MS = 5_000;
 
 type PublishStep = { name: string; run: () => Promise<unknown> };
 
 const searchModule = (scope: MedusaContainer) =>
   scope.resolve<ISearchModuleService>(Modules.SEARCH);
 
+async function publishedDocuments(scope: MedusaContainer) {
+  const { metadata } = await searchModule(scope).search({
+    entity: PART_IDENTIFIER_INDEX,
+    filters: { published: true },
+    pagination: { skip: 0, take: 1 },
+  });
+  return metadata?.count ?? 0;
+}
+
+async function settledPublishedDocuments(
+  scope: MedusaContainer,
+  published: number,
+) {
+  for (let attempt = 1; ; attempt += 1) {
+    const indexed = await publishedDocuments(scope);
+    if (indexed === published || attempt >= SETTLE_TRIES) return indexed;
+    await sleep(SETTLE_PAUSE_MS);
+  }
+}
+
 const searchOf = (scope: MedusaContainer): PublishSearch =>
-  scope.hasRegistration(PUBLISH_REINDEX_REGISTRATION)
-    ? scope.resolve<PublishSearch>(PUBLISH_REINDEX_REGISTRATION)
+  scope.hasRegistration(PUBLISH_SEARCH_REGISTRATION)
+    ? scope.resolve<PublishSearch>(PUBLISH_SEARCH_REGISTRATION)
     : {
         changed: (changes) => emitIndexChanges(scope, changes),
         swap: async (index) => {
           await searchModule(scope).reindex({ index, strategy: 'swap' });
         },
         partsIndexActive: async () => !(await hasNoActiveVersion(scope)),
-        publishedDocuments: async () =>
-          (
-            await searchModule(scope).search({
-              entity: PART_IDENTIFIER_INDEX,
-              filters: { published: true },
-              pagination: { skip: 0, take: 1 },
-            })
-          ).metadata?.count ?? 0,
-        countSettle: { tries: 12, pauseMs: 5_000 },
+        settledPublishedDocuments: (published) =>
+          settledPublishedDocuments(scope, published),
       };
 
 const purgeOf = (scope: MedusaContainer): PublishPurge =>
@@ -114,36 +142,59 @@ async function partIdsOf(scope: MedusaContainer, identifierIds: string[]) {
   return identifiers.map(({ part_id }) => part_id);
 }
 
-const publishedReportSchema = z.object({ published: z.number() });
-
-async function lastPublished(publish: PublishModuleService) {
+async function unfinishedChanges(
+  publish: PublishModuleService,
+): Promise<PublishChanges> {
   const [last] = await publish.listCatalogueRuns(
-    { kind: 'publish', status: 'succeeded' },
+    { kind: 'publish', report: { $ne: null } },
     { select: ['report'], order: { created_at: 'DESC' }, take: 1 },
   );
-  return publishedReportSchema.safeParse(last?.report).data?.published ?? 0;
+  return (
+    unfinishedReportSchema.safeParse(last?.report).data?.unfinished ??
+    NO_CHANGES
+  );
+}
+
+const withChanges = (
+  changes: PublishChanges,
+  more: Partial<PublishChanges>,
+): PublishChanges => {
+  const union = (key: keyof PublishChanges) => [
+    ...new Set([...changes[key], ...(more[key] ?? [])]),
+  ];
+  return {
+    fresh: union('fresh'),
+    listedFlipped: union('listedFlipped'),
+    translatedParts: union('translatedParts'),
+    sweptIdentifiers: union('sweptIdentifiers'),
+  };
+};
+
+async function checkShrink(publish: PublishModuleService) {
+  const { published, projected } = await publish.partPageCounts();
+  if (
+    projected < published * SHRINK_FLOOR &&
+    !parseEnv(process.env).CATALOGUE_SHRINK_ALLOWED
+  ) {
+    throw new Error(
+      `The Publish would leave ${projected} Part pages, under half of the ${published} published now; set CATALOGUE_SHRINK_ALLOWED=true in the shop env for one Publish if that is intended`,
+    );
+  }
 }
 
 async function checkPublishedCount(
   search: PublishSearch,
   publish: PublishModuleService,
 ) {
-  for (let attempt = 1; ; attempt += 1) {
-    const [indexed, published] = await Promise.all([
-      search.publishedDocuments(),
-      publish.countPublished(),
-    ]);
-    if (indexed === published) return;
-    if (attempt >= search.countSettle.tries) {
-      logEvent('search.drift', {
-        outcome: 'mismatch',
-        index: PART_IDENTIFIER_INDEX,
-        indexed,
-        published,
-      });
-      return;
-    }
-    await sleep(search.countSettle.pauseMs);
+  const published = await publish.countPublished();
+  const indexed = await search.settledPublishedDocuments(published);
+  if (indexed !== published) {
+    logEvent('search.drift', {
+      outcome: 'mismatch',
+      index: PART_IDENTIFIER_INDEX,
+      indexed,
+      published,
+    });
   }
 }
 
@@ -151,46 +202,43 @@ const publishChain = (scope: MedusaContainer) => {
   const publish = scope.resolve<PublishModuleService>(PUBLISH_MODULE);
   const search = searchOf(scope);
   const purge = purgeOf(scope);
-  const changes: PublishChanges = {
-    fresh: [],
-    listedFlipped: [],
-    translatedParts: [],
-    sweptIdentifiers: [],
-  };
+  let changes = NO_CHANGES;
   let published = 0;
   const steps: PublishStep[] = [
     {
+      name: 'shrink',
+      run: async () => {
+        changes = withChanges(changes, await unfinishedChanges(publish));
+        await checkShrink(publish);
+      },
+    },
+    {
       name: 'sweep',
       run: async () => {
-        changes.sweptIdentifiers = await sweepOrphans(scope);
+        changes = withChanges(changes, {
+          sweptIdentifiers: await sweepOrphans(scope),
+        });
       },
     },
     {
       name: 'translate',
       run: async () => {
-        changes.translatedParts = [
-          ...(await translateCatalogue(
-            scope.resolve(CATALOG_MODULE),
-            parseEnv(process.env).OPENAI_API_KEY,
-          )),
-        ];
+        changes = withChanges(changes, {
+          translatedParts: [
+            ...(await translateCatalogue(
+              scope.resolve(CATALOG_MODULE),
+              parseEnv(process.env).OPENAI_API_KEY,
+            )),
+          ],
+        });
       },
     },
     {
       name: 'publish',
       run: async () => {
-        const before = await lastPublished(publish);
-        Object.assign(changes, await publish.publishAll());
+        changes = withChanges(changes, await publish.publishAll());
+        clearCatalogueMemo();
         published = await publish.countPublished();
-        if (
-          published < before * SHRINK_FLOOR &&
-          !parseEnv(process.env).CATALOGUE_SHRINK_ALLOWED
-        ) {
-          await publish.unpublish(changes.fresh);
-          throw new Error(
-            `The Publish would leave ${published} published numbers, under half of the ${before} the last Publish left; set CATALOGUE_SHRINK_ALLOWED=true in the shop env for one Publish if that is intended`,
-          );
-        }
         await warmCatalogueMemo(scope);
       },
     },
@@ -233,7 +281,11 @@ const publishChain = (scope: MedusaContainer) => {
       },
     },
   ];
-  return { steps, report: () => ({ published }) };
+  return {
+    steps,
+    report: () => ({ published }),
+    unfinished: () => ({ published, unfinished: changes }),
+  };
 };
 
 type StepFailure = { failed_step: string; error: string };
@@ -271,6 +323,8 @@ export const startPublishRun = (
     { kind: 'publish', created_by: actorId },
     () => runSteps(chain.steps),
     (failure): RunOutcome =>
-      failure ? { status: 'failed', ...failure } : { report: chain.report() },
+      failure
+        ? { status: 'failed', ...failure, report: chain.unfinished() }
+        : { report: chain.report() },
   );
 };

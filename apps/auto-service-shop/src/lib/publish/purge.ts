@@ -11,7 +11,7 @@ export const CATALOGUE_HUB_PATTERNS = [
 ];
 
 export const partPagePattern = (slug: string) =>
-  `-/[a-z][a-z]/parts/p/${slug}/`;
+  `-/[a-z][a-z]/parts/p/${slug.replace(/[^a-z0-9-]/g, '.')}/`;
 
 export const cachePurge =
   (endpoint: string | undefined): PublishPurge =>

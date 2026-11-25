@@ -22,6 +22,7 @@ import {
   LISTED_PARTS_IN_CATEGORY,
   LISTED_SERIES_CATEGORY_COUNTS,
   LISTED_VEHICLE_PARTS,
+  PART_PAGE_COUNTS,
   PART_REQUIREMENT_FITS,
   PUBLISH_ALL,
   PUBLISHED_NUMBER_BY_SLUG,
@@ -31,7 +32,6 @@ import {
   REFRESH_LISTED,
 } from '../catalog/cross-module-sql';
 import { INTERRUPTED_BY_RESTART } from '../_shared/run-errors';
-import { clearCatalogueMemo } from '../../lib/catalogue-memo';
 
 export type MakePartCount = { make_slug: string; parts: number };
 
@@ -118,19 +118,8 @@ class PublishModuleService extends MedusaService({
     },
   };
 
-  async publishAll(): Promise<{ fresh: string[]; listedFlipped: string[] }> {
-    const changes = await this.publishAll_();
-    clearCatalogueMemo();
-    return changes;
-  }
-
-  async unpublish(ids: string[]): Promise<void> {
-    await this.unpublish_(ids);
-    clearCatalogueMemo();
-  }
-
   @InjectTransactionManager()
-  protected async publishAll_(
+  async publishAll(
     @MedusaContext() sharedContext: Context = {},
   ): Promise<{ fresh: string[]; listedFlipped: string[] }> {
     const fresh = await runBoundSql(sharedContext, PUBLISH_ALL);
@@ -150,7 +139,7 @@ class PublishModuleService extends MedusaService({
   }
 
   @InjectTransactionManager()
-  protected async unpublish_(
+  async unpublish(
     ids: string[],
     @MedusaContext() sharedContext: Context = {},
   ): Promise<void> {
@@ -162,6 +151,14 @@ class PublishModuleService extends MedusaService({
       );
       await runBoundSql(sharedContext, REFRESH_LISTED);
     }
+  }
+
+  @InjectManager()
+  async partPageCounts(
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<{ published: number; projected: number }> {
+    const { rows } = await runBoundSql(sharedContext, PART_PAGE_COUNTS);
+    return rows[0];
   }
 
   @InjectManager()
