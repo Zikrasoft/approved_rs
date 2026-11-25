@@ -74,6 +74,12 @@ export type ShopEvents = Omit<StorefrontEvents, 'storefront.demand'> & {
     cause: string | null;
     counts: Record<string, number>;
   };
+  'search.drift': {
+    outcome: 'mismatch';
+    index: string;
+    indexed: number;
+    published: number;
+  };
 };
 
 export type EventName = keyof ShopEvents;

@@ -50,8 +50,8 @@ medusaIntegrationTestRunner({
           (await numberedPart('P 2')).part_identifier_id,
         ].sort();
 
-        const published = (await publish.publishAll()).sort();
-        const again = await publish.publishAll();
+        const published = (await publish.publishAll()).fresh.sort();
+        const again = (await publish.publishAll()).fresh;
         const firstPage = await publish.publishedPage({ limit: 1 });
         const secondPage = await publish.publishedPage({
           after: firstPage[0].id,

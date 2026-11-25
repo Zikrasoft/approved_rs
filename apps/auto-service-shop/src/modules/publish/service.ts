@@ -104,6 +104,8 @@ const PRUNE_RUNS_BEFORE = `
         and newer.created_at > r.created_at
     )`;
 
+const idsOf = (rows: { id: string }[]) => rows.map(({ id }) => id);
+
 const inServerWorkerMode = () => process.env.MEDUSA_WORKER_MODE === 'server';
 
 class PublishModuleService extends MedusaService({
@@ -130,10 +132,21 @@ class PublishModuleService extends MedusaService({
   @InjectTransactionManager()
   protected async publishAll_(
     @MedusaContext() sharedContext: Context = {},
-  ): Promise<string[]> {
-    const { rows } = await runBoundSql(sharedContext, PUBLISH_ALL);
-    await runBoundSql(sharedContext, REFRESH_LISTED);
-    return rows.map(({ id }: { id: string }) => id);
+  ): Promise<{ fresh: string[]; listedFlipped: string[] }> {
+    const fresh = await runBoundSql(sharedContext, PUBLISH_ALL);
+    const flipped = await runBoundSql(sharedContext, REFRESH_LISTED);
+    return { fresh: idsOf(fresh.rows), listedFlipped: idsOf(flipped.rows) };
+  }
+
+  @InjectManager()
+  async countPublished(
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<number> {
+    const { rows } = await runBoundSql(
+      sharedContext,
+      'select count(*)::int as count from published_number where deleted_at is null',
+    );
+    return rows[0].count;
   }
 
   @InjectTransactionManager()

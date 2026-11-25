@@ -17,8 +17,8 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-const PUBLIC_PAGE =
-  'public, s-maxage=86400, stale-while-revalidate=86400, stale-if-error=86400';
+const PUBLIC_PAGE = 'public, s-maxage=86400';
+const NOT_FOUND_PAGE = 'public, s-maxage=600';
 
 const category = {
   id: 'cat_batteries',
@@ -349,6 +349,7 @@ describe('the Category page rendered on demand', () => {
       const answered = await response;
 
       expect(answered.status).toBe(404);
+      expect(answered.headers.get('cache-control')).toBe(NOT_FOUND_PAGE);
       expect(shop).not.toHaveBeenCalled();
     },
   );
@@ -363,7 +364,7 @@ describe('the Category page rendered on demand', () => {
     );
 
     expect(response.status).toBe(404);
-    expect(response.headers.get('cache-control')).toBe(PUBLIC_PAGE);
+    expect(response.headers.get('cache-control')).toBe(NOT_FOUND_PAGE);
   });
 
   it.each([

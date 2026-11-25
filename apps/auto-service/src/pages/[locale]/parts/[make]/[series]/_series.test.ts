@@ -15,8 +15,8 @@ import SeriesPage from './index.astro';
 const copy = content('ru').partsSearch;
 const hubCopy = content('ru').partsCar.hubs.model;
 
-const PUBLIC_PAGE =
-  'public, s-maxage=86400, stale-while-revalidate=86400, stale-if-error=86400';
+const PUBLIC_PAGE = 'public, s-maxage=86400';
+const NOT_FOUND_PAGE = 'public, s-maxage=600';
 
 const oilFilters = {
   id: 'category_oil',
@@ -207,7 +207,7 @@ describe('the Series page rendered on demand', () => {
     );
 
     expect(response.status).toBe(404);
-    expect(response.headers.get('cache-control')).toBe(PUBLIC_PAGE);
+    expect(response.headers.get('cache-control')).toBe(NOT_FOUND_PAGE);
   });
 
   it('asks the visitor to retry, uncached, when the shop fails', async () => {

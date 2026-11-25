@@ -162,6 +162,20 @@ describe('parseEnv', () => {
     expect(env.DATABASE_SSL).toBe(true);
   });
 
+  it('allows a catalogue shrink only when CATALOGUE_SHRINK_ALLOWED=true', () => {
+    const allowed = (value: string | undefined) =>
+      parseEnv({ ...VALID_ENV, CATALOGUE_SHRINK_ALLOWED: value })
+        .CATALOGUE_SHRINK_ALLOWED;
+
+    expect([undefined, '', 'false', 'true'].map(allowed)).toEqual([
+      false,
+      false,
+      false,
+      true,
+    ]);
+    expect(() => allowed('yes')).toThrow();
+  });
+
   it('throws when DATABASE_URL is missing', () => {
     expect(() => parseEnv({ ...VALID_ENV, DATABASE_URL: undefined })).toThrow();
   });

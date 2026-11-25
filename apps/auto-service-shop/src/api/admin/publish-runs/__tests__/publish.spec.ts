@@ -8,7 +8,11 @@ import { createFakeSupplier } from '../../../../../integration-tests/fakeSupplie
 import { importRuns } from '../../../../../integration-tests/importRuns';
 import { loggedEvents } from '../../../../../integration-tests/loggedEvents';
 import { SHOP_AI_REGISTRATION } from '../../../../lib/ai';
-import { PUBLISH_REINDEX_REGISTRATION } from '../../../../lib/publish/chain';
+import {
+  PUBLISH_REINDEX_REGISTRATION,
+  type PublishSearch,
+} from '../../../../lib/publish/chain';
+import type { IndexChanges } from '../../../../lib/index-changes';
 import { SUPPLIER_ADAPTERS_REGISTRATION } from '../../../../lib/suppliers/adapter';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import { PUBLISH_MODULE } from '../../../../modules/publish';
@@ -64,7 +68,12 @@ const network: FakeNetwork = {
   githubGate: null,
 };
 
-const reindexCalls: number[] = [];
+const searchIndex = {
+  changes: [] as IndexChanges[],
+  swaps: [] as string[],
+  active: true,
+  indexed: null as number | null,
+};
 
 const openAiAnswer = (body: {
   messages: { content: string }[];
@@ -133,9 +142,21 @@ medusaIntegrationTestRunner({
     beforeServerStart: async (container) => {
       container.register(
         PUBLISH_REINDEX_REGISTRATION,
-        asValue(async () => {
-          reindexCalls.push(Date.now());
-        }),
+        asValue({
+          changed: async (changes) => {
+            searchIndex.changes.push(changes);
+          },
+          swap: async (index) => {
+            searchIndex.swaps.push(index);
+          },
+          partsIndexActive: async () => searchIndex.active,
+          publishedDocuments: async () =>
+            searchIndex.indexed ??
+            container
+              .resolve<PublishModuleService>(PUBLISH_MODULE)
+              .countPublished(),
+          countSettle: { tries: 2, pauseMs: 10 },
+        } satisfies PublishSearch),
       );
       container.register(
         SUPPLIER_ADAPTERS_REGISTRATION,
@@ -230,7 +251,11 @@ medusaIntegrationTestRunner({
         network.githubStatus = 200;
         network.runConclusion = 'success';
         network.githubGate = null;
-        reindexCalls.length = 0;
+        searchIndex.changes = [];
+        searchIndex.swaps = [];
+        searchIndex.active = true;
+        searchIndex.indexed = null;
+        delete process.env.CATALOGUE_SHRINK_ALLOWED;
         supplier.articles.length = 0;
       });
 
@@ -263,7 +288,7 @@ medusaIntegrationTestRunner({
             authorization: 'Bearer test-dispatch-token',
           },
         ]);
-        expect(reindexCalls).toHaveLength(1);
+        expect(searchIndex.swaps).toEqual(['catalogue_car']);
       });
 
       it('imports no Supplier catalogue; its own Import brings the articles Publish then translates', async () => {
@@ -455,7 +480,8 @@ medusaIntegrationTestRunner({
         expect(run.failed_step).toBe('translate');
         expect(run.error).toContain('HTML');
         expect(network.dispatches).toEqual([]);
-        expect(reindexCalls).toEqual([]);
+        expect(searchIndex.changes).toEqual([]);
+        expect(searchIndex.swaps).toEqual([]);
         expect(await translationsOf(part.id)).toEqual({});
       });
 
@@ -468,7 +494,7 @@ medusaIntegrationTestRunner({
         expect(run.failed_step).toBe('deploy');
         expect(run.error).toContain('500');
         expect(run.error).not.toContain('test-dispatch-token');
-        expect(reindexCalls).toHaveLength(1);
+        expect(searchIndex.swaps).toEqual(['catalogue_car']);
       });
 
       it('logs every finished run as catalogue.run, with the failed step as its reason', async () => {
@@ -494,7 +520,7 @@ medusaIntegrationTestRunner({
             run: succeeded.id,
             supplier: null,
             cause: null,
-            counts: {},
+            counts: { published: expect.any(Number) },
           }),
           expect.objectContaining({
             outcome: 'failed',
@@ -519,7 +545,7 @@ medusaIntegrationTestRunner({
         expect(run.error).toBe(
           `The deploy run did not succeed: failure ${RUN_HTML_URL}`,
         );
-        expect(reindexCalls).toHaveLength(1);
+        expect(searchIndex.swaps).toEqual(['catalogue_car']);
       });
 
       it('marks the brand-numbers of a deployed site as published, never those of a failed deploy', async () => {
@@ -624,6 +650,203 @@ medusaIntegrationTestRunner({
         expect(latest.data.publish_run.created_by_user).toMatchObject({
           email: expect.any(String),
         });
+      });
+
+      describe('the change set search receives', () => {
+        const mannId = async () =>
+          (await catalog.listBrands({ slug: 'mann-filter' }))[0].id;
+
+        const numberedPart = async (value: string) => {
+          const partId = await catalog.createPartWithIdentifiers({
+            name: 'Масляный фильтр',
+            identifiers: [
+              {
+                type: 'manufacturer-number',
+                brand_id: await mannId(),
+                value,
+              },
+            ],
+          });
+          const [identifier] = await catalog.listPartIdentifiers({
+            part_id: partId,
+          });
+          return { partId, identifierId: identifier.id };
+        };
+
+        const settled = async () => {
+          await publish();
+          searchIndex.changes = [];
+          searchIndex.swaps = [];
+        };
+
+        it('is the Part of a freshly published number', async () => {
+          const { partId } = await numberedPart('CS 1');
+          await settled();
+          await catalog.addPartIdentifier(
+            partId,
+            {
+              type: 'manufacturer-number',
+              brand_id: await mannId(),
+              value: 'CS 1 B',
+            },
+            {},
+          );
+
+          const run = await publish();
+
+          expect(run.status).toBe('succeeded');
+          expect(searchIndex.changes).toEqual([
+            { partIds: [partId], deletedIdentifierIds: [] },
+          ]);
+          expect(searchIndex.swaps).toEqual(['catalogue_car']);
+        });
+
+        it('is the Part whose number stopped being listed', async () => {
+          const replaced = await numberedPart('CS 2');
+          const successor = await numberedPart('CS 3');
+          await settled();
+          await catalog.updateParts({
+            id: replaced.partId,
+            replaced_by_id: successor.partId,
+          });
+
+          await publish();
+
+          expect(searchIndex.changes).toEqual([
+            { partIds: [replaced.partId], deletedIdentifierIds: [] },
+          ]);
+        });
+
+        it('is the Part whose translation was written', async () => {
+          const { partId } = await numberedPart('CS 4');
+          await settled();
+          await catalog.updateParts({ id: partId, name: 'Воздушный фильтр' });
+
+          await publish();
+
+          expect(searchIndex.changes).toEqual([
+            { partIds: [partId], deletedIdentifierIds: [] },
+          ]);
+        });
+
+        it('names the swept numbers as deleted', async () => {
+          const { partId } = await numberedPart('CS 5');
+          await catalog.addPartIdentifier(
+            partId,
+            {
+              type: 'manufacturer-number',
+              brand_id: await mannId(),
+              value: 'CS 5 B',
+            },
+            {},
+          );
+          await settled();
+          const [gone] = await catalog.listPartIdentifiers({
+            normalized_value: 'CS5B',
+          });
+          await catalog.softDeletePartIdentifiers([gone.id]);
+
+          await publish();
+
+          expect(searchIndex.changes).toEqual([
+            { partIds: [], deletedIdentifierIds: [gone.id] },
+          ]);
+        });
+
+        it('rebuilds the whole number index instead while it has no active version', async () => {
+          await numberedPart('CS 6');
+          searchIndex.active = false;
+
+          const run = await publish();
+
+          expect(run.status).toBe('succeeded');
+          expect(searchIndex.changes).toEqual([]);
+          expect(searchIndex.swaps).toEqual([
+            'part_identifier',
+            'catalogue_car',
+          ]);
+        });
+      });
+
+      it('logs search.drift when search disagrees with the published numbers, and still succeeds', async () => {
+        jest.spyOn(console, 'log').mockImplementation(() => undefined);
+        const [mann] = await catalog.listBrands({ slug: 'mann-filter' });
+        await catalog.createPartWithIdentifiers({
+          name: 'Масляный фильтр',
+          identifiers: [
+            { type: 'manufacturer-number', brand_id: mann.id, value: 'DR 1' },
+          ],
+        });
+        searchIndex.indexed = 0;
+
+        const run = await publish();
+        expect(run.status).toBe('succeeded');
+        expect(loggedEvents('search.drift')).toEqual([
+          expect.objectContaining({
+            outcome: 'mismatch',
+            index: 'part_identifier',
+            indexed: 0,
+            published: 1,
+          }),
+        ]);
+        jest.restoreAllMocks();
+      });
+
+      it('logs no drift when search agrees', async () => {
+        jest.spyOn(console, 'log').mockImplementation(() => undefined);
+
+        await publish();
+
+        expect(loggedEvents('search.drift')).toEqual([]);
+        jest.restoreAllMocks();
+      });
+
+      it('refuses a Publish that would leave fewer than half the published numbers, unless the shrink is allowed', async () => {
+        const [mann] = await catalog.listBrands({ slug: 'mann-filter' });
+        await catalog.createPartWithIdentifiers({
+          name: 'Масляный фильтр',
+          identifiers: ['SH 2', 'SH 3', 'SH 4'].map((value) => ({
+            type: 'manufacturer-number' as const,
+            brand_id: mann.id,
+            value,
+          })),
+        });
+        await publish();
+        const live = await catalog.listPartIdentifiers({}, { take: null });
+        await catalog.softDeletePartIdentifiers(live.map(({ id }) => id));
+        const freshPart = await catalog.createPartWithIdentifiers({
+          name: 'Масляный фильтр',
+          identifiers: [
+            { type: 'manufacturer-number', brand_id: mann.id, value: 'SH 1' },
+          ],
+        });
+        const [fresh] = await catalog.listPartIdentifiers({
+          part_id: freshPart,
+        });
+        const publishModule: PublishModuleService =
+          getContainer().resolve(PUBLISH_MODULE);
+
+        const refused = await publish();
+        const publishedAfterRefusal = await publishModule.listPublishedNumbers({
+          id: fresh.id,
+        });
+        const refusedAgain = await publish();
+        process.env.CATALOGUE_SHRINK_ALLOWED = 'true';
+        const allowed = await publish();
+
+        expect(refused).toEqual(
+          expect.objectContaining({
+            status: 'failed',
+            failed_step: 'publish',
+            error: expect.stringContaining('CATALOGUE_SHRINK_ALLOWED'),
+          }),
+        );
+        expect(publishedAfterRefusal).toEqual([]);
+        expect(refusedAgain.failed_step).toBe('publish');
+        expect(allowed.status).toBe('succeeded');
+        expect(
+          await publishModule.listPublishedNumbers({ id: fresh.id }),
+        ).toHaveLength(1);
       });
 
       it('rejects a translation edit for an unknown locale, field or entity', async () => {

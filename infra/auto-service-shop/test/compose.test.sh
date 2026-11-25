@@ -47,6 +47,8 @@ expect 'postgres and typesense sit on the internal network only' \
 pg_address=$(sed -n "s/^POSTGRES_ADDRESS=\\(.*\\):5432\$/\\1/p" "$here/harden-ssh.sh")
 expect "postgres keeps the fixed address the crawler tunnel may open ($pg_address)" \
   ".services.postgres.networks.data.ipv4_address == \"$pg_address\" and .networks.data.ipam.config == [{\"subnet\": \"10.200.0.0/24\", \"ip_range\": \"10.200.0.128/25\"}]"
+expect 'postgres runs jit off, tuned for the droplet, with pg_stat_statements and a slow-query log, shared_buffers left at its default' \
+  '.services.postgres.command == ["postgres", "-c", "jit=off", "-c", "work_mem=8MB", "-c", "random_page_cost=1.1", "-c", "shared_preload_libraries=pg_stat_statements", "-c", "log_min_duration_statement=1000"]'
 expect 'medusa reaches typesense by service name with the shared key' \
   '.services.medusa.environment.TYPESENSE_HOST == "typesense" and .services.medusa.environment.TYPESENSE_API_KEY == "y" and .services.typesense.environment.TYPESENSE_API_KEY == "y"'
 expect 'medusa reaches postgres by service name' \
@@ -108,7 +110,7 @@ expect 'caddy pulls the page cache image CI built for the same commit as medusa,
   '.services.caddy | .image == "ghcr.io/zikrasoft/podbor-carlab-caddy:0000000000000000000000000000000000000000" and .build == null and .mem_limit == "134217728"'
 expect 'caddy takes the preview token from .env to verify the preview cookie' \
   ".services.caddy.environment.SHOP_PREVIEW_TOKEN == \"$preview_token\""
-expect 'the caddy image tag follows the shop tag unless CADDY_TAG names its own' \
+expect 'the caddy image tag falls back to the shop tag unless CADDY_TAG names its own content tag' \
   '.services.caddy.image | endswith(":0000000000000000000000000000000000000000")'
 caddy_tag=$(CADDY_TAG=1111111111111111111111111111111111111111 env -u MEDUSA_TAG docker compose -f "$here/docker-compose.yml" --project-directory "$work" --profile "*" config --format json 2>/dev/null | jq -r .services.caddy.image)
 if [ "$caddy_tag" = ghcr.io/zikrasoft/podbor-carlab-caddy:1111111111111111111111111111111111111111 ]; then echo 'ok - CADDY_TAG overrides the caddy image tag alone'; else echo "not ok - CADDY_TAG ($caddy_tag)"; failures=$((failures + 1)); fi

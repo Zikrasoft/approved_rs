@@ -1012,6 +1012,23 @@ next deploy. Unset, the step says so and the crawler has no role. Checked agains
 a live Postgres by `infra/auto-service-shop/test/crawler-role.test.sh`. `restore.sh`
 restores with `--no-privileges`, so a dump never needs the role to exist first.
 
+Postgres runs tuned for the 4 GB droplet: `jit=off`, `work_mem=8MB`,
+`random_page_cost=1.1` (SSD), `shared_preload_libraries=pg_stat_statements` and
+`log_min_duration_statement=1000` (statements over one second reach the logs).
+`shared_buffers` stays at its default. They are `-c` flags on the `postgres`
+service in `docker-compose.yml`, asserted by `test/compose.test.sh`. Changing a
+flag recreates the container, so a deploy that ships one restarts Postgres, and
+that is accepted. `deploy.sh` runs `create extension if not exists
+pg_stat_statements` in `carlab` right after Postgres is up, so it is safe to
+repeat. The slowest statements by total time:
+
+```bash
+docker compose exec -T postgres psql -U carlab -d carlab -c \
+  "select calls, round(total_exec_time) ms, round(mean_exec_time) mean_ms, left(query, 80) from pg_stat_statements order by total_exec_time desc limit 10"
+```
+
+`select pg_stat_statements_reset()` clears the counters.
+
 Postgres has no host port and sits on the internal `data` network at a fixed
 address, `10.200.0.10` (`ipv4_address` in `docker-compose.yml`, subnet
 `10.200.0.0/24`), so the worker reaches it through an SSH tunnel as the `crawler`
@@ -1097,9 +1114,9 @@ Keys) and put it with the admin URL in `apps/auto-service-shop/.env.admin`
   [Backup and restore](#backup-and-restore)). The Droplet's paid backups are
   off to save cost: a lost instance is rebuilt with Terraform, `bootstrap-host.sh`
   and `restore.sh`.
-- **Typesense is not backed up.** Its index is derived from Postgres and rebuilt by
-  the reindex at every Publish (ADR-0041), so after a restore search stays empty
-  until the next Publish.
+- **Typesense is not backed up.** Its index is derived from Postgres and rebuilt
+  by the nightly `reindex-search` job (ADR-0041), so after a restore search stays
+  empty until the next 04:00 Belgrade rebuild.
 - Only Caddy is published outward: 80, 443, 443/udp. Grafana listens on
   `127.0.0.1:3000` only, for an SSH tunnel. Medusa, Postgres, Typesense, Loki
   and Alloy have no host ports; Postgres and Typesense sit on an internal network with no
@@ -1156,17 +1173,25 @@ Keys) and put it with the admin URL in `apps/auto-service-shop/.env.admin`
   `.env`, so changing it needs `docker compose up -d caddy`); a junk or empty
   value stays on the cache, and with no token set nothing bypasses. The
   `auto_service_shop_preview_on` flag cookie alone does not.
-  - **Image.** `shop-image` in CI builds `caddy-image/Dockerfile` for amd64
-    and pushes it as `ghcr.io/zikrasoft/podbor-carlab-caddy:<sha>`, the same
-    sha as the shop image. `docker-compose.yml` names it by `CADDY_TAG`, which defaults
-    to `MEDUSA_TAG` (leave it unset), and `deploy.sh` pulls it with the shop image, so the host never compiles
-    Caddy and a rollback brings back the Caddy of that sha. A sha shipped
-    before this image existed has no Caddy image: a rollback to it fails at
-    the pull and changes nothing.
+  - **Image.** `infra/auto-service-shop/caddy-tag.sh` derives the tag: the
+    first 40 hex characters of a sha256 over `caddy-image/Dockerfile`,
+    `caddy/Caddyfile` and `caddy/security-headers.caddy`, so it changes only
+    when Caddy itself changes. `shop-image` in CI builds `caddy-image/Dockerfile`
+    for amd64 and pushes `ghcr.io/zikrasoft/podbor-carlab-caddy:<tag>` only when
+    that tag is not in the registry yet. `deploy-shop` writes the tag to a
+    `caddy-tag` file shipped with the stack files; `deploy.sh` reads it, pulls
+    that image with the shop image and records `CADDY_TAG` in `.env`.
+    `docker-compose.yml` names the image by `CADDY_TAG`, which defaults to
+    `MEDUSA_TAG`: a host with no `caddy-tag` file (a rollback to a sha shipped
+    before this) drops `CADDY_TAG` and falls back to the shop tag. A shop
+    deploy that does not touch Caddy leaves its tag, so compose does not
+    recreate the container and the page cache survives. The host never
+    compiles Caddy. A sha shipped before this image existed has no Caddy
+    image: a rollback to it fails at the pull and changes nothing.
   - **Storage.** Souin `simplefs` keeps the bodies, lz4-compressed, in the
     `caddycache` volume at `/cache`. The index stays in Caddy's memory, so a
     restart or a reload with a changed Caddyfile empties the cache: every
-    shop deploy starts it cold. This is accepted (ADR-0065). The image
+    shop deploy that changes Caddy starts it cold, any other keeps it (ADR-0065). The image
     command empties `/cache` before Caddy starts, so a restart leaves no
     orphaned files and the disk stays bounded by the entries of one run.
   - **Cap: 40,000 index entries.** A page takes three entries, so the cache
@@ -1209,9 +1234,11 @@ Keys) and put it with the admin URL in `apps/auto-service-shop/.env.admin`
     bodies in memory, was OOM-killed at 256 MB before 40,000 pages.
   - **Stale copies.** While node is down, a page still within its
     `s-maxage` is served from the cache as a hit. `simplefs` v0.0.20 drops a
-    body when its `s-maxage` runs out, so `stale-while-revalidate` and
-    `stale-if-error` never apply after that day. An expired or never-cached
+    body when its `s-maxage` runs out, so the page header sends neither
+    `stale-while-revalidate` nor `stale-if-error`. An expired or never-cached
     page then gets what node gives, a 502 if node is down.
+  - **404.** A catalogue 404 carries `public, s-maxage=600`, not the day-long
+    page header, so a Part published after a visit opens within 10 minutes.
   - **Purge.** `deploy-site.sh auto-service <release>` empties the whole
     cache right after `current` points at the new release:
     `docker compose exec -T caddy curl -fsS -X PURGE http://127.0.0.1:2019/souin-api/souin/flush`.
@@ -1332,11 +1359,24 @@ number gets its CI value in that script. The non-obvious parts:
 - `OPENAI_API_KEY` and `PUBLISH_DISPATCH_TOKEN` feed the admin's Publish chain:
   the first translates catalogue text, the second is a fine-grained GitHub token
   with `actions: write` on this repository that dispatches `publish.yml` and
-  then reads that run until it finishes (`write` includes `read`). Search is
-  reindexed after the new numbers are published and before the dispatch, so
-  the reindex never slows the build or the first renders after the site's cache
-  is emptied; a failed deploy unpublishes those numbers and reindexes their
-  Parts again; a failed or cancelled run,
+  then reads that run until it finishes (`write` includes `read`). The chain is
+  `sweep → translate → publish → reindex → deploy`. `publish` collects the
+  change set: the freshly published numbers, the numbers whose `listed`
+  flipped, the Parts whose translations `translate` wrote and the numbers the
+  orphan `sweep` removed. It refuses a Publish that would leave fewer than half
+  of the numbers the last successful Publish left (the count is that run's
+  `report.published`): it unpublishes the fresh numbers and fails at `publish`,
+  again on every retry, until `CATALOGUE_SHRINK_ALLOWED=true` sits in the shop's
+  `.env` for one Publish; remove it afterwards. `reindex` is incremental: only
+  the changed Parts go to `part_identifier` (the removed numbers are deleted
+  from it), and `catalogue_car` is rebuilt with a swap; when `part_identifier`
+  has no active version, it gets a full swap instead. Then a count check
+  compares the `published:true` documents with the published numbers for up to
+  a minute and logs a `search.drift` Event when they still disagree, without
+  failing the Publish. Search is updated before the dispatch, so the reindex
+  never slows the build or the first renders after the site's cache is emptied;
+  a failed deploy unpublishes the fresh numbers and reindexes their Parts again;
+  a failed or cancelled run,
   or one still unfinished after 90 minutes, stops the chain at the deploy step. Either
   may stay empty; the chain then stops at that step and the admin shows why.
   `publish.yml` rebuilds carlab.rs from the `deployed/auto-service` tag, so it
@@ -1794,6 +1834,11 @@ that would otherwise grow forever or hold personal data longer than needed:
   cleared 90 days after that lookup, its source and bot flag stay. The carlab.rs privacy page
   states this retention; change both together. The nightly dumps still hold a
   scrubbed VIN for up to 30 days (the off-site retention above).
+- **Search, rebuilt nightly** (`reindex-search`). The job wakes every hour
+  and at 04:00 Europe/Belgrade (summer time included) swaps both indexes,
+  `part_identifier` and `catalogue_car`, from scratch. It is the safety net
+  under the incremental Publish: anything an incremental change missed is
+  right by the next morning.
 - **Catalogue runs, 90 days** (`prune-catalogue-runs`, nightly). Finished import,
   Publish, deletion, merge and rename runs older than 90 days are deleted with
   their `report`, except the newest run of each kind per Supplier, which the
