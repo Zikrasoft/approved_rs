@@ -38,10 +38,10 @@ medusaIntegrationTestRunner({
           [brand.id, part.id, PAST_THE_BIND_LIMIT],
         );
 
-        const fresh = await publish().publishAll();
+        const { fresh } = await publish().publishAll();
 
         expect(fresh).toHaveLength(PAST_THE_BIND_LIMIT);
-        expect(await publish().publishAll()).toEqual([]);
+        expect((await publish().publishAll()).fresh).toEqual([]);
         await publish().unpublish(fresh);
         expect(await countOf('published_number')).toBe(0);
       }, 360_000);

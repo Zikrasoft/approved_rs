@@ -10,7 +10,12 @@ import {
   PART_IDENTIFIERS_DELETED_EVENT,
 } from '../search/part-changed-event';
 
-const hasNoActiveVersion = async (scope: MedusaContainer) =>
+export type IndexChanges = {
+  partIds?: Iterable<string>;
+  deletedIdentifierIds?: string[];
+};
+
+export const hasNoActiveVersion = async (scope: MedusaContainer) =>
   (
     await scope.resolve<ISearchModuleService>(Modules.SEARCH).listIndexes()
   ).some(
@@ -20,10 +25,7 @@ const hasNoActiveVersion = async (scope: MedusaContainer) =>
 
 export async function emitIndexChanges(
   scope: MedusaContainer,
-  {
-    partIds = [],
-    deletedIdentifierIds = [],
-  }: { partIds?: Iterable<string>; deletedIdentifierIds?: string[] },
+  { partIds = [], deletedIdentifierIds = [] }: IndexChanges,
 ): Promise<void> {
   const changed = [...new Set(partIds)];
   const messages = [

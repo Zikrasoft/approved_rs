@@ -1097,9 +1097,9 @@ Keys) and put it with the admin URL in `apps/auto-service-shop/.env.admin`
   [Backup and restore](#backup-and-restore)). The Droplet's paid backups are
   off to save cost: a lost instance is rebuilt with Terraform, `bootstrap-host.sh`
   and `restore.sh`.
-- **Typesense is not backed up.** Its index is derived from Postgres and rebuilt by
-  the reindex at every Publish (ADR-0041), so after a restore search stays empty
-  until the next Publish.
+- **Typesense is not backed up.** Its index is derived from Postgres and rebuilt
+  by the nightly `reindex-search` job (ADR-0041), so after a restore search stays
+  empty until the next 04:00 Belgrade rebuild.
 - Only Caddy is published outward: 80, 443, 443/udp. Grafana listens on
   `127.0.0.1:3000` only, for an SSH tunnel. Medusa, Postgres, Typesense, Loki
   and Alloy have no host ports; Postgres and Typesense sit on an internal network with no
@@ -1332,11 +1332,24 @@ number gets its CI value in that script. The non-obvious parts:
 - `OPENAI_API_KEY` and `PUBLISH_DISPATCH_TOKEN` feed the admin's Publish chain:
   the first translates catalogue text, the second is a fine-grained GitHub token
   with `actions: write` on this repository that dispatches `publish.yml` and
-  then reads that run until it finishes (`write` includes `read`). Search is
-  reindexed after the new numbers are published and before the dispatch, so
-  the reindex never slows the build or the first renders after the site's cache
-  is emptied; a failed deploy unpublishes those numbers and reindexes their
-  Parts again; a failed or cancelled run,
+  then reads that run until it finishes (`write` includes `read`). The chain is
+  `sweep → translate → publish → reindex → deploy`. `publish` collects the
+  change set: the freshly published numbers, the numbers whose `listed`
+  flipped, the Parts whose translations `translate` wrote and the numbers the
+  orphan `sweep` removed. It refuses a Publish that would leave fewer than half
+  of the numbers the last successful Publish left (the count is that run's
+  `report.published`): it unpublishes the fresh numbers and fails at `publish`,
+  again on every retry, until `CATALOGUE_SHRINK_ALLOWED=true` sits in the shop's
+  `.env` for one Publish; remove it afterwards. `reindex` is incremental: only
+  the changed Parts go to `part_identifier` (the removed numbers are deleted
+  from it), and `catalogue_car` is rebuilt with a swap; when `part_identifier`
+  has no active version, it gets a full swap instead. Then a count check
+  compares the `published:true` documents with the published numbers for up to
+  a minute and logs a `search.drift` Event when they still disagree, without
+  failing the Publish. Search is updated before the dispatch, so the reindex
+  never slows the build or the first renders after the site's cache is emptied;
+  a failed deploy unpublishes the fresh numbers and reindexes their Parts again;
+  a failed or cancelled run,
   or one still unfinished after 90 minutes, stops the chain at the deploy step. Either
   may stay empty; the chain then stops at that step and the admin shows why.
   `publish.yml` rebuilds carlab.rs from the `deployed/auto-service` tag, so it
@@ -1794,6 +1807,11 @@ that would otherwise grow forever or hold personal data longer than needed:
   cleared 90 days after that lookup, its source and bot flag stay. The carlab.rs privacy page
   states this retention; change both together. The nightly dumps still hold a
   scrubbed VIN for up to 30 days (the off-site retention above).
+- **Search, rebuilt nightly** (`reindex-search`). The job wakes every hour
+  and at 04:00 Europe/Belgrade (summer time included) swaps both indexes,
+  `part_identifier` and `catalogue_car`, from scratch. It is the safety net
+  under the incremental Publish: anything an incremental change missed is
+  right by the next morning.
 - **Catalogue runs, 90 days** (`prune-catalogue-runs`, nightly). Finished import,
   Publish, deletion, merge and rename runs older than 90 days are deleted with
   their `report`, except the newest run of each kind per Supplier, which the
