@@ -179,7 +179,7 @@ medusaIntegrationTestRunner({
           )
           .sort();
 
-      it('matches the same cars to the same Parts', async () => {
+      it('matches the same cars to the same Parts, by series and by Part', async () => {
         const vehicles = await vehiclesOfSeries(catalog, [seriesId]);
         const listed = await publish.listedPartsIn(
           (await catalog.listCategories({ slug: 'oils' }))[0].id,
@@ -212,6 +212,9 @@ medusaIntegrationTestRunner({
           'V5:P1',
         ]);
         expect(byContract).toEqual(bySql);
+        expect(
+          named(await publish.partRequirementFits([...partOf.keys()])),
+        ).toEqual(bySql);
       });
     });
   },

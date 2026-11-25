@@ -22,6 +22,7 @@ import {
   LISTED_PARTS_IN_CATEGORY,
   LISTED_SERIES_CATEGORY_COUNTS,
   LISTED_VEHICLE_PARTS,
+  PART_REQUIREMENT_FITS,
   PUBLISH_ALL,
   PUBLISHED_NUMBER_BY_SLUG,
   PUBLISHED_NUMBERS,
@@ -249,6 +250,18 @@ class PublishModuleService extends MedusaService({
       LISTED_VEHICLE_PARTS,
       placeBindings({ series: [seriesId] }),
     );
+    return rows;
+  }
+
+  @InjectManager()
+  async partRequirementFits(
+    partIds: string[],
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<Omit<VehiclePart, 'fitted'>[]> {
+    if (!partIds.length) return [];
+    const { rows } = await runBoundSql(sharedContext, PART_REQUIREMENT_FITS, [
+      partIds,
+    ]);
     return rows;
   }
 

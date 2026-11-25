@@ -17,7 +17,6 @@ import {
 import { CATEGORY_RELATIONS, shownCategory } from './categories';
 import { loadPartDemand } from './part-demand';
 import { partPagesOf } from './part-pages';
-import { requirementFits } from './requirement-fit';
 import {
   type CatalogueModules,
   catalogueModules,
@@ -220,11 +219,16 @@ export async function partPageAt(
     .filter(({ vehicle_id }) => vehicleById.has(vehicle_id))
     .map((fit) => localizedFit(fit, locale));
 
-  const requirementCars = retired
+  const requirementIds = retired
     ? []
-    : byId(
-        (await requirementFits(catalog, [part])).map(({ vehicle }) => vehicle),
+    : distinct(
+        (await publish.partRequirementFits([part.id])).map(
+          ({ vehicle_id }) => vehicle_id,
+        ),
       );
+  const requirementCars = requirementIds.length
+    ? byId(await listVehicleResponses(catalog, { id: requirementIds }))
+    : [];
   const category = categoryOf(page);
   const kit =
     category?.maintenance_kit && !retired && part.category_id

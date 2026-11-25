@@ -74,43 +74,30 @@ export const LISTED_PARTS_IN_CATEGORY = `
   having bool_or(pn.listed)
   order by min(pn.id)`;
 
-const LISTED_PLACES = `
-  with listed as (
-    select distinct pi.part_id from part_identifier pi
-    join published_number pn on pn.id = pi.id
-      and pn.deleted_at is null and pn.listed
-    where pi.deleted_at is null
-  ), scoped as (
+const LIVE_VEHICLES = `
     select v.id as vehicle_id, v.engine_id, m.id as model_id, m.chassis_id,
       c.series_id
     from vehicle v
     join vehicle_model m on m.id = v.model_id and m.deleted_at is null
     join chassis c on c.id = m.chassis_id and c.deleted_at is null
-    where v.deleted_at is null
-      and (?::text[] is null or c.series_id = any(?::text[]))
-  ), demands as (
+    where v.deleted_at is null`;
+
+const demandsOf = (requirements: string) => `
     select s.vehicle_id, r.field_id, r.option_keys, r.min, r.max
-    from requirement r join scoped s on s.vehicle_id = r.vehicle_id
+    from ${requirements} r join scoped s on s.vehicle_id = r.vehicle_id
     where r.deleted_at is null
     union all
     select s.vehicle_id, r.field_id, r.option_keys, r.min, r.max
-    from requirement r
+    from ${requirements} r
     join engine e on e.id = r.engine_id and e.deleted_at is null
     join scoped s on s.engine_id = e.id
     where r.deleted_at is null
     union all
     select s.vehicle_id, r.field_id, r.option_keys, r.min, r.max
-    from requirement r join scoped s on s.chassis_id = r.chassis_id
-    where r.deleted_at is null
-  ), required as (
-    select d.vehicle_id, p.id as part_id, p.category_id
-    from demands d
-    join category_field cf on cf.id = d.field_id and cf.deleted_at is null
-    join part p on p.category_id = cf.category_id and p.deleted_at is null
-    join listed l on l.part_id = p.id
-    where ?::text is null or p.category_id = ?
-    group by d.vehicle_id, p.id, p.category_id
-    having bool_and(case
+    from ${requirements} r join scoped s on s.chassis_id = r.chassis_id
+    where r.deleted_at is null`;
+
+const REQUIREMENTS_MET = `bool_and(case
       when jsonb_typeof(p.attributes -> cf.key) = 'number'
         then (p.attributes ->> cf.key)::numeric
           between coalesce(d.min, '-Infinity') and coalesce(d.max, 'Infinity')
@@ -119,7 +106,52 @@ const LISTED_PLACES = `
       when jsonb_typeof(p.attributes -> cf.key) in ('string', 'boolean')
         then p.attributes ->> cf.key = any(coalesce(d.option_keys, '{}'))
       else false
-    end)
+    end)`;
+
+export const PART_REQUIREMENT_FITS = `
+  with parts as (
+    select p.id, p.category_id, p.attributes from part p
+    where p.deleted_at is null and p.id = any(?::text[])
+  ), fields as (
+    select cf.id, cf.key, cf.category_id from category_field cf
+    where cf.deleted_at is null
+      and cf.category_id in (select category_id from parts)
+  ), owners as (
+    select r.* from requirement r
+    join fields f on f.id = r.field_id
+    where r.deleted_at is null
+  ), scoped as (${LIVE_VEHICLES}
+      and (v.id in (select vehicle_id from owners)
+        or v.engine_id in (select engine_id from owners)
+        or m.chassis_id in (select chassis_id from owners))
+  ), demands as (${demandsOf('owners')}
+  )
+  select d.vehicle_id, p.id as part_id, p.category_id
+  from demands d
+  join fields cf on cf.id = d.field_id
+  join parts p on p.category_id = cf.category_id
+  group by d.vehicle_id, p.id, p.category_id
+  having ${REQUIREMENTS_MET}
+  order by d.vehicle_id, p.id`;
+
+const LISTED_PLACES = `
+  with listed as (
+    select distinct pi.part_id from part_identifier pi
+    join published_number pn on pn.id = pi.id
+      and pn.deleted_at is null and pn.listed
+    where pi.deleted_at is null
+  ), scoped as (${LIVE_VEHICLES}
+      and (?::text[] is null or c.series_id = any(?::text[]))
+  ), demands as (${demandsOf('requirement')}
+  ), required as (
+    select d.vehicle_id, p.id as part_id, p.category_id
+    from demands d
+    join category_field cf on cf.id = d.field_id and cf.deleted_at is null
+    join part p on p.category_id = cf.category_id and p.deleted_at is null
+    join listed l on l.part_id = p.id
+    where ?::text is null or p.category_id = ?
+    group by d.vehicle_id, p.id, p.category_id
+    having ${REQUIREMENTS_MET}
   ), places as (
     select s.series_id, s.model_id, s.vehicle_id, f.id as fitment_id,
       f.part_id, pt.category_id, true as fitted
