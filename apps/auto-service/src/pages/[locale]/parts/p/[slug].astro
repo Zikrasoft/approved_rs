@@ -44,7 +44,7 @@ import {
 } from '@/utils/partSuccessor';
 import { splitNumbers } from '@/utils/partNumbers';
 import { paragraphs } from '@podbor/site-kit';
-import { catalogueLinks, PathBuilder } from '@/utils/paths';
+import { PathBuilder, seriesLink } from '@/utils/paths';
 import { schemaAvailability } from '@/utils/leadTime';
 import { partDataset } from '@/utils/partDataset';
 import { PARTS_INQUIRY_OPEN_ATTRIBUTE } from '@/scripts/partsList';
@@ -54,7 +54,7 @@ const loaded = await loadCataloguePage(Astro, (catalogue, catalogueLocale) =>
   catalogue.partPage(Astro.params.slug ?? '', catalogueLocale),
 );
 if (loaded instanceof Response) return loaded;
-const { page, related, places } = loaded;
+const { page, related, linkedSeries } = loaded;
 const bySlug = new Map([page, ...related].map((entry) => [entry.slug, entry]));
 const successor = partSuccessor(page, bySlug);
 const replacements = currentNumbers(page, bySlug);
@@ -63,7 +63,7 @@ const open = shopOpen();
 const ordersSuccessor = Boolean(
   successor && (!open || (successor.offers.length > 0 && page.priceOnRequest)),
 );
-const pageLinks = catalogueLinks(locale, places);
+const linkOf = seriesLink(locale, linkedSeries);
 const site = content(locale).site;
 const copy = content(locale).shopPart;
 const heading = `${page.brand.name} ${page.value}`;
@@ -99,7 +99,7 @@ const shown = picture && {
   note: picture.illustration ? copy.categoryIllustration : undefined,
 };
 const carLink = (vehicle: PartPageEntry['kitCars'][number]) => ({
-  href: pageLinks.series(vehicle.model.chassis.series),
+  href: linkOf(vehicle.model.chassis.series),
   label: `${carName(vehicle.model, locale)}, ${vehicleVariant(vehicle, locale)}`,
 });
 const carLists = [
@@ -350,7 +350,7 @@ const thumbFor = (slug: string) => {
           </div>
         )
       }
-      <PartFitsList fits={page.fits} places={places} />
+      <PartFitsList fits={page.fits} linkedSeries={linkedSeries} />
       {
         carLists.length > 0 && (
           <div class="card flex flex-col divide-y divide-line">

@@ -70,7 +70,7 @@ import type {
 } from './partEntry';
 import type { CartOutcome, OffersOutcome } from './catalogueWire';
 import { latinBrands } from './brandAliases';
-import { placeKey, type CataloguePages } from './paths';
+import { seriesKey } from './paths';
 import { byModelName } from './carName';
 
 export type { Vehicle, VinFacts };
@@ -129,7 +129,7 @@ export type VinOutcome =
 export type PartPageData = {
   page: PartPageEntry;
   related: PartPageEntry[];
-  places: CataloguePages;
+  linkedSeries: Set<string>;
 };
 
 export type CarMakeParts = {
@@ -354,15 +354,9 @@ export function createCatalogue({
           kitCars: known.cars(kitCars),
         },
         related: found.related.map(partEntry),
-        places: {
-          makes: new Set(),
-          series: new Set(
-            found.linked_series.map(({ make, slug: series }) =>
-              placeKey(make, series),
-            ),
-          ),
-          categories: new Set(),
-        },
+        linkedSeries: new Set(
+          found.linked_series.map(({ make, slug }) => seriesKey(make, slug)),
+        ),
       };
     },
 
