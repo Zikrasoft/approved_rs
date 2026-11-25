@@ -37,6 +37,9 @@ api_host=$(sed -n 's/^API_HOST=//p' .env)
 image=$(sed -n 's/^MEDUSA_IMAGE=//p' .env)
 image=${image:-ghcr.io/zikrasoft/podbor-auto-service-shop}
 export MEDUSA_TAG="$tag"
+caddy_tag=$(cat caddy-tag 2>/dev/null || true)
+unset CADDY_TAG
+[ -z "$caddy_tag" ] || export CADDY_TAG="$caddy_tag"
 
 echo "==> Image $tag"
 docker compose pull --policy missing medusa caddy
@@ -73,8 +76,9 @@ CRM_DATABASE_URL="postgres://crm:$crm_password@postgres:5432/crm" CHECKPOINT_DIS
   docker compose run --rm -T -e CRM_DATABASE_URL -e CHECKPOINT_DISABLE \
   -w /server/node_modules/@podbor/lead-crm medusa node_modules/.bin/prisma migrate deploy
 
-grep -v '^MEDUSA_TAG=' .env >.env.next
+grep -v -e '^MEDUSA_TAG=' -e '^CADDY_TAG=' .env >.env.next
 echo "MEDUSA_TAG=$tag" >>.env.next
+[ -z "$caddy_tag" ] || echo "CADDY_TAG=$caddy_tag" >>.env.next
 mv .env.next .env
 if [ -n "$previous" ] && [ "$previous" != "$tag" ]; then
   echo "$previous" >.previous-tag
@@ -101,7 +105,7 @@ if curl -fsS -o /dev/null --max-time 10 --retry 12 --retry-delay 5 --retry-all-e
   echo "Live at $tag."
   keep=$(cat .previous-tag 2>/dev/null || echo "$tag")
   for repo in "$image" ghcr.io/zikrasoft/podbor-carlab-caddy; do
-    docker image ls "$repo" --format '{{.Tag}}' | grep -vx -e "$tag" -e "$keep" -e '<none>' -e '' | while read -r old; do
+    docker image ls "$repo" --format '{{.Tag}}' | grep -vx -e "$tag" -e "$keep" -e "$caddy_tag" -e '<none>' -e '' | while read -r old; do
       docker image rm "$repo:$old" >/dev/null || echo "Could not remove $repo:$old." >&2
     done || true
   done

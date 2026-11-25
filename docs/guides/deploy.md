@@ -1156,17 +1156,25 @@ Keys) and put it with the admin URL in `apps/auto-service-shop/.env.admin`
   `.env`, so changing it needs `docker compose up -d caddy`); a junk or empty
   value stays on the cache, and with no token set nothing bypasses. The
   `auto_service_shop_preview_on` flag cookie alone does not.
-  - **Image.** `shop-image` in CI builds `caddy-image/Dockerfile` for amd64
-    and pushes it as `ghcr.io/zikrasoft/podbor-carlab-caddy:<sha>`, the same
-    sha as the shop image. `docker-compose.yml` names it by `CADDY_TAG`, which defaults
-    to `MEDUSA_TAG` (leave it unset), and `deploy.sh` pulls it with the shop image, so the host never compiles
-    Caddy and a rollback brings back the Caddy of that sha. A sha shipped
-    before this image existed has no Caddy image: a rollback to it fails at
-    the pull and changes nothing.
+  - **Image.** `infra/auto-service-shop/caddy-tag.sh` derives the tag: the
+    first 40 hex characters of a sha256 over `caddy-image/Dockerfile`,
+    `caddy/Caddyfile` and `caddy/security-headers.caddy`, so it changes only
+    when Caddy itself changes. `shop-image` in CI builds `caddy-image/Dockerfile`
+    for amd64 and pushes `ghcr.io/zikrasoft/podbor-carlab-caddy:<tag>` only when
+    that tag is not in the registry yet. `deploy-shop` writes the tag to a
+    `caddy-tag` file shipped with the stack files; `deploy.sh` reads it, pulls
+    that image with the shop image and records `CADDY_TAG` in `.env`.
+    `docker-compose.yml` names the image by `CADDY_TAG`, which defaults to
+    `MEDUSA_TAG`: a host with no `caddy-tag` file (a rollback to a sha shipped
+    before this) drops `CADDY_TAG` and falls back to the shop tag. A shop
+    deploy that does not touch Caddy leaves its tag, so compose does not
+    recreate the container and the page cache survives. The host never
+    compiles Caddy. A sha shipped before this image existed has no Caddy
+    image: a rollback to it fails at the pull and changes nothing.
   - **Storage.** Souin `simplefs` keeps the bodies, lz4-compressed, in the
     `caddycache` volume at `/cache`. The index stays in Caddy's memory, so a
     restart or a reload with a changed Caddyfile empties the cache: every
-    shop deploy starts it cold. This is accepted (ADR-0065). The image
+    shop deploy that changes Caddy starts it cold, any other keeps it (ADR-0065). The image
     command empties `/cache` before Caddy starts, so a restart leaves no
     orphaned files and the disk stays bounded by the entries of one run.
   - **Cap: 40,000 index entries.** A page takes three entries, so the cache
