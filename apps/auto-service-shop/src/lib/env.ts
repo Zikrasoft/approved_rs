@@ -88,7 +88,6 @@ const envFields = z.object({
   LIVE_QUOTE_CACHE_SECONDS: optionalValue
     .transform((seconds) => Number(seconds ?? 60))
     .pipe(z.number().int().nonnegative()),
-  PUBLISH_DISPATCH_TOKEN: optionalSecret,
   CATALOGUE_SHRINK_ALLOWED: optionalValue
     .pipe(z.enum(['true', 'false']).optional())
     .transform((allowed) => allowed === 'true'),

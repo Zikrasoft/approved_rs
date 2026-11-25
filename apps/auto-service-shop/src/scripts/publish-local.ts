@@ -35,6 +35,6 @@ export default async function publishLocal({ container }: ExecArgs) {
       .reindex({ strategy: 'swap' });
   });
   logger.info(
-    'Reindexed search. Import and deploy skipped: import from the Suppliers screen, then rebuild the storefront.',
+    'Reindexed search. Import skipped: import from the Suppliers screen.',
   );
 }

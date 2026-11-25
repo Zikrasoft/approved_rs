@@ -1,4 +1,4 @@
-import { partIdentifierSource } from '../part-identifier';
+import { partIdentifierSource } from '../../search/part-identifier';
 
 const mockResolve = jest.fn();
 
@@ -9,7 +9,7 @@ jest.mock('@medusajs/framework', () => ({
 
 const mockDemand = new Map<string, { score: number }>();
 
-jest.mock('../../lib/part-demand', () => ({
+jest.mock('../part-demand', () => ({
   memoPartDemand: async () => mockDemand,
 }));
 

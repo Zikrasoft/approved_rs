@@ -15,7 +15,6 @@ import type PublishModuleService from '../../modules/publish/service';
 import { PART_IDENTIFIER_INDEX } from '../../search/part-changed-event';
 import { CATALOGUE_CAR_INDEX } from '../car-pages';
 import { parseEnv } from '../env';
-import { deploySite } from './deploy';
 import { sweepOrphans } from './orphans';
 import {
   CATALOGUE_HUB_PATTERNS,
@@ -24,6 +23,7 @@ import {
   type PublishPurge,
 } from './purge';
 import { translateCatalogue } from './translate';
+import { warmCatalogueMemo } from '../catalogue-page-list';
 import { type RunOutcome, startCatalogueRun } from '../catalogue-writer';
 import { errorMessage } from '../errors';
 import {
@@ -191,6 +191,7 @@ const publishChain = (scope: MedusaContainer) => {
             `The Publish would leave ${published} published numbers, under half of the ${before} the last Publish left; set CATALOGUE_SHRINK_ALLOWED=true in the shop env for one Publish if that is intended`,
           );
         }
+        await warmCatalogueMemo(scope);
       },
     },
     {
@@ -213,20 +214,6 @@ const publishChain = (scope: MedusaContainer) => {
         });
         await search.swap(CATALOGUE_CAR_INDEX);
         await checkPublishedCount(search, publish);
-      },
-    },
-    {
-      name: 'deploy',
-      run: async () => {
-        try {
-          await deploySite(parseEnv(process.env).PUBLISH_DISPATCH_TOKEN);
-        } catch (error) {
-          await publish.unpublish(changes.fresh);
-          await search.changed({
-            partIds: await partIdsOf(scope, changes.fresh),
-          });
-          throw error;
-        }
       },
     },
     {

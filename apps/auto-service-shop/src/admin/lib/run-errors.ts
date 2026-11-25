@@ -5,9 +5,6 @@ import {
 
 const KNOWN_ERRORS: Record<string, string> = {
   'OPENAI_API_KEY is not set': 'publish.knownErrors.openAiKey',
-  'PUBLISH_DISPATCH_TOKEN is not set': 'publish.knownErrors.dispatchToken',
-  'The deploy run did not succeed': 'publish.knownErrors.deployFailed',
-  'The deploy run timed out': 'publish.knownErrors.deployTimedOut',
   'The Publish would leave': 'publish.knownErrors.shrinkRefused',
   [ABANDONED]: 'publish.knownErrors.abandoned',
   [INTERRUPTED_BY_RESTART]: 'publish.knownErrors.interrupted',

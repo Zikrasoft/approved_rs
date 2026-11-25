@@ -101,14 +101,9 @@ describe('parseEnv', () => {
   });
 
   it('reads an empty publish secret as unset', () => {
-    const env = parseEnv({
-      ...VALID_ENV,
-      OPENAI_API_KEY: '',
-      PUBLISH_DISPATCH_TOKEN: 'token',
-    });
+    const env = parseEnv({ ...VALID_ENV, OPENAI_API_KEY: '' });
 
     expect(env.OPENAI_API_KEY).toBeUndefined();
-    expect(env.PUBLISH_DISPATCH_TOKEN).toBe('token');
   });
 
   it('reads the order alert chat as a Telegram chat id, empty as unset', () => {
