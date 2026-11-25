@@ -443,8 +443,9 @@
     },
     "steps": {
       "translate": "translation",
-      "deploy": "site build and deploy",
-      "reindex": "search refresh"
+      "publish": "number publishing",
+      "reindex": "search refresh",
+      "deploy": "site build and deploy"
     },
     "errorDetails": "Error details: {{error}}",
     "startedBy": "Started by: {{who}}",

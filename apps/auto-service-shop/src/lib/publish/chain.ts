@@ -5,6 +5,7 @@ import type {
 import { Modules } from '@medusajs/framework/utils';
 
 import { CATALOG_MODULE } from '../../modules/catalog';
+import type CatalogModuleService from '../../modules/catalog/service';
 import { PUBLISH_MODULE } from '../../modules/publish';
 import type PublishModuleService from '../../modules/publish/service';
 import { parseEnv } from '../env';
@@ -13,6 +14,7 @@ import { sweepOrphans } from './orphans';
 import { translateCatalogue } from './translate';
 import { type RunOutcome, startCatalogueRun } from '../catalogue-writer';
 import { errorMessage } from '../errors';
+import { emitIndexChanges } from '../index-changes';
 
 export const PUBLISH_REINDEX_REGISTRATION = 'publishReindex';
 
@@ -28,31 +30,51 @@ const reindex = (scope: MedusaContainer): Reindex =>
           .resolve<ISearchModuleService>(Modules.SEARCH)
           .reindex({ strategy: 'swap' });
 
-const publishSteps = (scope: MedusaContainer): PublishStep[] => [
-  { name: 'sweep', run: () => sweepOrphans(scope) },
-  {
-    name: 'translate',
-    run: () =>
-      translateCatalogue(
-        scope.resolve(CATALOG_MODULE),
-        parseEnv(process.env).OPENAI_API_KEY,
-      ),
-  },
-  { name: 'reindex', run: reindex(scope) },
-  {
-    name: 'deploy',
-    run: async () => {
-      const publish = scope.resolve<PublishModuleService>(PUBLISH_MODULE);
-      const fresh = await publish.publishAll();
-      try {
-        await deploySite(parseEnv(process.env).PUBLISH_DISPATCH_TOKEN);
-      } catch (error) {
-        await publish.unpublish(fresh);
-        throw error;
-      }
+async function reindexParts(scope: MedusaContainer, identifierIds: string[]) {
+  const catalog: CatalogModuleService = scope.resolve(CATALOG_MODULE);
+  const identifiers = await catalog.listPartIdentifiers(
+    { id: identifierIds },
+    { select: ['part_id'], take: null },
+  );
+  await emitIndexChanges(scope, {
+    partIds: identifiers.map(({ part_id }) => part_id),
+  });
+}
+
+const publishSteps = (scope: MedusaContainer): PublishStep[] => {
+  const publish = scope.resolve<PublishModuleService>(PUBLISH_MODULE);
+  let fresh: string[] = [];
+  return [
+    { name: 'sweep', run: () => sweepOrphans(scope) },
+    {
+      name: 'translate',
+      run: () =>
+        translateCatalogue(
+          scope.resolve(CATALOG_MODULE),
+          parseEnv(process.env).OPENAI_API_KEY,
+        ),
     },
-  },
-];
+    {
+      name: 'publish',
+      run: async () => {
+        fresh = await publish.publishAll();
+      },
+    },
+    { name: 'reindex', run: reindex(scope) },
+    {
+      name: 'deploy',
+      run: async () => {
+        try {
+          await deploySite(parseEnv(process.env).PUBLISH_DISPATCH_TOKEN);
+        } catch (error) {
+          await publish.unpublish(fresh);
+          await reindexParts(scope, fresh);
+          throw error;
+        }
+      },
+    },
+  ];
+};
 
 type StepFailure = { failed_step: string; error: string };
 
