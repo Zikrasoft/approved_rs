@@ -1,6 +1,7 @@
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
 import { createVehicleFixture } from '../../../../integration-tests/vehicleFixture';
+import { seriesPartCounts } from '../../../lib/catalogue-structure';
 import { CATALOG_MODULE } from '../../catalog';
 import type CatalogModuleService from '../../catalog/service';
 import { PUBLISH_MODULE } from '..';
@@ -22,7 +23,7 @@ medusaIntegrationTestRunner({
         });
 
       const listedOn = async (seriesId: string) =>
-        (await publish.listedPartCounts()).find(
+        (await seriesPartCounts(publish)).find(
           (row) => row.series_id === seriesId,
         )?.parts ?? 0;
 
@@ -251,7 +252,7 @@ medusaIntegrationTestRunner({
         }
         await publish.publishAll();
 
-        const counts = await publish.listedPartCounts({
+        const counts = await seriesPartCounts(publish, {
           series: [series.id, loneSeries.id],
         });
         const placeOf = (seriesId: string) =>

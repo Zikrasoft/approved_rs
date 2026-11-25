@@ -3,6 +3,7 @@ import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
+import { seriesPartCounts } from '../../../../lib/catalogue-structure';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 import { PUBLISH_MODULE } from '../../../../modules/publish';
@@ -299,9 +300,9 @@ medusaIntegrationTestRunner({
       });
 
       it('gives that car its pages and counts its Requirement matches', async () => {
-        const counts = await getContainer()
-          .resolve<PublishModuleService>(PUBLISH_MODULE)
-          .listedPartCounts();
+        const counts = await seriesPartCounts(
+          getContainer().resolve<PublishModuleService>(PUBLISH_MODULE),
+        );
         const cars = await search({ q: 'g21' });
         const scoped = await search({
           q: 'аккумулятор',

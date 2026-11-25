@@ -8,8 +8,6 @@ import {
   type CarHit,
   type CarKind,
   makeHasPage,
-  type PlaceParts,
-  seriesHasPage,
 } from '@podbor/catalog-contract';
 
 import {
@@ -19,9 +17,10 @@ import {
   seriesKey,
 } from '../lib/car-pages';
 import { serbianScripts } from '../lib/serbian';
-import { PUBLISH_MODULE } from '../modules/publish';
-import type PublishModuleService from '../modules/publish/service';
-import type { ListedPartCount } from '../modules/publish/service';
+import {
+  catalogueModules,
+  catalogueStructure,
+} from '../lib/catalogue-structure';
 
 const MAX_QUERY_TOKENS = 8;
 const HITS_PER_TOKEN = 100;
@@ -51,10 +50,6 @@ type VehicleRow = {
     };
   };
 };
-
-export type PartCounts = Map<string, PlaceParts>;
-
-const NO_PARTS: PlaceParts = { parts: 0, required: 0 };
 
 export const searchTokens = (text: string): string[] =>
   text
@@ -119,9 +114,9 @@ const groupBy = (
   return [...groups.values()];
 };
 
-export function carsWithPages(vehicles: VehicleRow[], counts: PartCounts) {
+export function carsWithPages(vehicles: VehicleRow[], paged: Set<string>) {
   const series = groupBy(vehicles, seriesOf).filter(([row]) =>
-    seriesHasPage(counts.get(seriesOf(row)) ?? NO_PARTS),
+    paged.has(seriesOf(row)),
   );
   return {
     makes: groupBy(series.flat(), makeOf)
@@ -145,8 +140,8 @@ const document = (
   card: JSON.stringify({ kind, ...card }),
 });
 
-export function carDocuments(vehicles: VehicleRow[], counts: PartCounts) {
-  const paged = carsWithPages(vehicles, counts);
+export function carDocuments(vehicles: VehicleRow[], pagedSeries: Set<string>) {
+  const paged = carsWithPages(vehicles, pagedSeries);
   const makeTerms = ({ model }: VehicleRow) => {
     const { make } = model.chassis.series;
     return termsOf(make.name, ...make.spellings.map(({ value }) => value));
@@ -203,14 +198,6 @@ const VEHICLE_FIELDS = [
   'model.chassis.series.make.spellings.value',
 ];
 
-const partCountsOf = (rows: ListedPartCount[]): PartCounts =>
-  new Map(
-    rows.map(({ series_id, parts, required }) => [
-      series_id,
-      { parts, required },
-    ]),
-  );
-
 async function* seed({
   container: { query },
   catchup,
@@ -218,14 +205,14 @@ async function* seed({
   if (catchup) {
     return;
   }
-  const [{ data: vehicles }, counts] = await Promise.all([
+  const [{ data: vehicles }, { paged }] = await Promise.all([
     query.graph({ entity: 'vehicle', fields: VEHICLE_FIELDS }),
-    container
-      .resolve<PublishModuleService>(PUBLISH_MODULE)
-      .listedPartCounts()
-      .then(partCountsOf),
+    catalogueStructure(catalogueModules(container)),
   ]);
-  const documents = carDocuments(vehicles as VehicleRow[], counts);
+  const documents = carDocuments(
+    vehicles as VehicleRow[],
+    new Set(paged.map(({ id }) => id)),
+  );
   if (documents.length) {
     yield [{ action: 'upsert' as const, documents }];
   }

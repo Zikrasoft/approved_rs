@@ -4,7 +4,6 @@ import {
   partPageSchema,
   partPageSlug,
   requirementMatchesCount,
-  seriesCategoryHasPage,
   type CatalogLocale,
   type SeriesCategoryPageResponse,
   type SeriesPageResponse,
@@ -22,9 +21,8 @@ import { partPagesOf } from './part-pages';
 import {
   type CatalogueModules,
   catalogueModules,
-  partsByCategory,
-  seriesWithPages,
-} from './series-pages';
+  catalogueStructure,
+} from './catalogue-structure';
 import { vehiclesOfSeries } from './series-vehicles';
 import { toFitmentResponse } from './store-response';
 
@@ -43,8 +41,8 @@ async function placeOf(
     await catalog.listSeries({ make_id: make.id }, { take: null })
   ).find(({ name }) => seriesSlugOf(name) === seriesSlug);
   if (!named) return null;
-  const { paged } = await seriesWithPages(modules, { id: named.id });
-  if (!paged.length) return null;
+  const [paged] = (await catalogueStructure(modules, { id: [named.id] })).paged;
+  if (!paged) return null;
   const vehicles = await vehiclesOfSeries(catalog, [named.id]);
   const places = await publish.listedVehicleParts(named.id);
   return {
@@ -52,14 +50,21 @@ async function placeOf(
     scope,
     series: {
       ...vehicles[0].model.chassis.series,
-      slug: seriesSlugOf(named.name),
+      slug: paged.slug,
     },
     vehicles,
     places,
     categories: new Map(
-      [...partsByCategory(places)]
-        .filter(([, parts]) => seriesCategoryHasPage(parts.size))
-        .map(([id, parts]) => [id, [...parts].sort()]),
+      paged.categoryIds.map((id) => [
+        id,
+        [
+          ...new Set(
+            places
+              .filter(({ category_id }) => category_id === id)
+              .map(({ part_id }) => part_id),
+          ),
+        ].sort(),
+      ]),
     ),
   };
 }

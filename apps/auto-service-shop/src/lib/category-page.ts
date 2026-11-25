@@ -5,16 +5,13 @@ import {
   attributeValuesSchema,
   categoryPageCount,
   categoryFacets,
-  seriesHasPage,
   sluggedPartPageSchema,
   partPageSchema,
   partPageSlug,
   popularPicks,
-  seriesCategoryHasPage,
   type CatalogLocale,
   type CategoryPageResponse,
 } from '@podbor/catalog-contract';
-import { seriesSlugOf } from '@podbor/catalog-contract/slug';
 
 import { SUPPLIER_MODULE } from '../modules/supplier';
 import type SupplierModuleService from '../modules/supplier/service';
@@ -25,8 +22,8 @@ import { partPagesOf } from './part-pages';
 import {
   type CatalogueModules,
   catalogueModules,
-  pagedSeries,
-} from './series-pages';
+  catalogueStructure,
+} from './catalogue-structure';
 
 const byName = new Intl.Collator('en', { numeric: true }).compare;
 
@@ -34,28 +31,14 @@ async function carsOf(
   modules: CatalogueModules,
   categoryId: string,
 ): Promise<CategoryPageResponse['cars']> {
-  const held = (
-    await modules.publish.listedSeriesCategoryCounts({ category: categoryId })
-  ).filter((row) => seriesCategoryHasPage(row.parts));
-  const pagedByCategory = new Set(
-    held.filter(({ fitted, required }) =>
-      seriesHasPage({ parts: fitted, required }),
-    ),
-  );
-  const series = [
-    ...(pagedByCategory.size
-      ? await modules.catalog.listSeries(
-          { id: [...pagedByCategory].map(({ series_id }) => series_id) },
-          { relations: ['make'], take: null },
-        )
-      : []),
-    ...(await pagedSeries(
-      modules,
-      held
-        .filter((row) => !pagedByCategory.has(row))
-        .map(({ series_id }) => series_id),
-    )),
-  ];
+  const held = await modules.publish.listedSeriesCategoryCounts({
+    category: categoryId,
+  });
+  const series = (
+    await catalogueStructure(modules, {
+      id: [...new Set(held.map(({ series_id }) => series_id))],
+    })
+  ).paged.filter(({ categoryIds }) => categoryIds.includes(categoryId));
   const makes = new Map<
     string,
     { make: { slug: string; name: string }; series: typeof series }
@@ -72,8 +55,8 @@ async function carsOf(
       make,
       series: own
         .sort((a, b) => byName(a.name, b.name))
-        .map(({ name, translations }) => ({
-          slug: seriesSlugOf(name),
+        .map(({ slug, name, translations }) => ({
+          slug,
           name,
           translations,
         })),

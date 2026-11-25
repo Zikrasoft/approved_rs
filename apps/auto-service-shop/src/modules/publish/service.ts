@@ -31,12 +31,6 @@ import {
 } from '../catalog/cross-module-sql';
 import { INTERRUPTED_BY_RESTART } from '../_shared/run-errors';
 
-export type ListedPartCount = {
-  series_id: string;
-  parts: number;
-  required: number;
-};
-
 export type MakePartCount = { make_slug: string; parts: number };
 
 export type SeriesCategoryCount = {
@@ -84,23 +78,6 @@ export type ListedNumber = {
   part_id: string;
   category_id: string;
   attributes: Record<string, unknown>;
-};
-
-export const seriesCountsOf = (
-  rows: SeriesCategoryCount[],
-): ListedPartCount[] => {
-  const counts = new Map<string, ListedPartCount>();
-  for (const { series_id, parts, fitted, required } of rows) {
-    const known = counts.get(series_id) ?? { series_id, parts: 0, required: 0 };
-    counts.set(series_id, {
-      series_id,
-      parts:
-        known.parts +
-        (required >= MIN_REQUIREMENT_MATCHES_FOR_PAGE ? parts : fitted),
-      required: Math.max(known.required, required),
-    });
-  }
-  return [...counts.values()];
 };
 
 const placeBindings = ({
@@ -221,12 +198,6 @@ class PublishModuleService extends MedusaService({
       [categoryId, categoryId],
     );
     return rows;
-  }
-
-  async listedPartCounts({ series }: Pick<PlaceScope, 'series'> = {}): Promise<
-    ListedPartCount[]
-  > {
-    return seriesCountsOf(await this.listedSeriesCategoryCounts({ series }));
   }
 
   @InjectManager()

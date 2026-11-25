@@ -13,7 +13,6 @@ import {
   type PartPageResponse,
   type Vehicle,
 } from '@podbor/catalog-contract';
-import { seriesSlugOf } from '@podbor/catalog-contract/slug';
 
 import { CATEGORY_RELATIONS, shownCategory } from './categories';
 import { loadPartDemand } from './part-demand';
@@ -22,8 +21,8 @@ import { requirementFits } from './requirement-fit';
 import {
   type CatalogueModules,
   catalogueModules,
-  pagedSeries,
-} from './series-pages';
+  catalogueStructure,
+} from './catalogue-structure';
 import type { PublishedNumber } from '../modules/publish/service';
 import { listVehicleResponses, toFitmentResponse } from './store-response';
 
@@ -83,8 +82,8 @@ async function seriesLinks(
     { relations: ['model', 'model.chassis'], take: null },
   );
   const seriesIds = distinct(rows.map(({ model }) => model.chassis.series_id));
-  return (await pagedSeries(modules, seriesIds))
-    .map(({ name, make }) => ({ make: make.slug, slug: seriesSlugOf(name) }))
+  return (await catalogueStructure(modules, { id: seriesIds })).paged
+    .map(({ slug, make }) => ({ make: make.slug, slug }))
     .sort((a, b) => `${a.make}/${a.slug}`.localeCompare(`${b.make}/${b.slug}`));
 }
 

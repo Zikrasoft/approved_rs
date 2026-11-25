@@ -2,7 +2,6 @@ import type { MedusaContainer } from '@medusajs/framework/types';
 import {
   MAKE_SHOWCASE,
   MAKE_TOP_CATEGORIES,
-  makeHasPage,
   offerRank,
   showcaseOf,
   type PartOffer,
@@ -15,7 +14,7 @@ import { SUPPLIER_MODULE } from '../modules/supplier';
 import type SupplierModuleService from '../modules/supplier/service';
 import { CATEGORY_RELATIONS, shownCategory } from './categories';
 import { pagesOfPublished, publishedOfParts } from './series-page';
-import { catalogueModules, seriesWithPages } from './series-pages';
+import { catalogueModules, catalogueStructure } from './catalogue-structure';
 
 const firstFitment = (rows: CategoryPart[]) =>
   rows.reduce<string | null>(
@@ -36,9 +35,8 @@ export async function carMakePageAt(
   const { catalog, publish } = modules;
   const [make] = await catalog.listMakes({ slug }, { take: 1 });
   if (!make) return null;
-  const { series, paged } = await seriesWithPages(modules, {
-    make_id: make.id,
-  });
+  const structure = await catalogueStructure(modules, { make_id: make.id });
+  const { series } = structure;
   const places = series.length
     ? await publish.listedCategoryParts(series.map(({ id }) => id))
     : [];
@@ -114,7 +112,7 @@ export async function carMakePageAt(
       .filter((own) => own.length > 0);
   });
   return {
-    hub: makeHasPage(paged.length),
+    hub: structure.hub(make.slug),
     categories: top.map(shownCategory),
     showcase: showcaseOf(queues),
   };

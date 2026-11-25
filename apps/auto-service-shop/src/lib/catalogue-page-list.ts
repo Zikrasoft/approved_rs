@@ -2,12 +2,9 @@ import type { MedusaContainer } from '@medusajs/framework/types';
 import {
   cataloguePageListSchema,
   type PartDemand,
-  makeHasPage,
   makeListSchema,
   partPageSlug,
-  seriesCategoryHasPage,
 } from '@podbor/catalog-contract';
-import { seriesSlugOf } from '@podbor/catalog-contract/slug';
 
 import type { ListedNumber } from '../modules/publish/service';
 import { categoryPartPages } from './category-page';
@@ -15,8 +12,8 @@ import { loadPartDemand } from './part-demand';
 import {
   type CatalogueModules,
   catalogueModules,
-  seriesWithPages,
-} from './series-pages';
+  catalogueStructure,
+} from './catalogue-structure';
 
 async function categoryCounts(
   publish: CatalogueModules['publish'],
@@ -49,12 +46,8 @@ async function categoryCounts(
 export async function cataloguePageList(scope: MedusaContainer) {
   const modules = catalogueModules(scope);
   const { catalog, publish } = modules;
-  const {
-    series,
-    counts,
-    paged,
-    held: seriesCategories,
-  } = await seriesWithPages(modules, {});
+  const structure = await catalogueStructure(modules);
+  const { paged } = structure;
   const [slugs, perCategory, categories, catalogueMakes] = await Promise.all([
     publish.publishedPartSlugs(),
     loadPartDemand(scope).then((demand) => categoryCounts(publish, demand)),
@@ -72,45 +65,28 @@ export async function cataloguePageList(scope: MedusaContainer) {
   }
 
   const categorySlug = new Map(categories.map(({ id, slug }) => [id, slug]));
-  const categoriesOf = new Map<string, string[]>();
-  for (const { series_id, category_id, parts: held } of seriesCategories) {
-    const slug = category_id && categorySlug.get(category_id);
-    if (slug && seriesCategoryHasPage(held)) {
-      categoriesOf.set(series_id, [
-        ...(categoriesOf.get(series_id) ?? []),
-        slug,
-      ]);
-    }
-  }
-
-  const pagedPerMake = new Map<string, number>();
-  for (const { make } of paged) {
-    pagedPerMake.set(make.slug, (pagedPerMake.get(make.slug) ?? 0) + 1);
-  }
   const partsPerMake = new Map(
     (await publish.listedMakePartCounts(paged.map(({ id }) => id))).map(
       ({ make_slug, parts: held }) => [make_slug, held],
     ),
   );
-  const makes = new Map(
-    series
-      .filter(({ id }) => counts.has(id))
-      .map(({ make }) => [make.slug, make]),
-  );
+  const makes = new Map(structure.stocked.map(({ make }) => [make.slug, make]));
 
   return cataloguePageListSchema.parse({
     parts: [...parts].map(([slug, indexable]) => ({ slug, indexable })),
     makes: [...makes.values()].map(({ slug, name }) => ({
       slug,
       name,
-      hub: makeHasPage(pagedPerMake.get(slug) ?? 0),
+      hub: structure.hub(slug),
       parts: partsPerMake.get(slug) ?? 0,
     })),
-    series: paged.map(({ id, name, make }) => ({
+    series: paged.map(({ slug, name, make, categoryIds }) => ({
       make: make.slug,
-      slug: seriesSlugOf(name),
+      slug,
       name,
-      categories: [...(categoriesOf.get(id) ?? [])].sort(),
+      categories: categoryIds
+        .flatMap((id) => categorySlug.get(id) ?? [])
+        .sort(),
     })),
     categories: categories.map(({ id, slug, name }) => ({
       slug,
