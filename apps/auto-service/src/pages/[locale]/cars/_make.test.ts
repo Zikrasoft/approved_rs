@@ -69,8 +69,8 @@ const withParts = (...entries: MakeParts[]) => {
   held = entries;
 };
 
-const PUBLIC_PAGE =
-  'public, s-maxage=86400, stale-while-revalidate=86400, stale-if-error=86400';
+const PUBLIC_PAGE = 'public, s-maxage=86400';
+const NOT_FOUND_PAGE = 'public, s-maxage=600';
 
 const shop = stubShopOf(() => held);
 
@@ -177,7 +177,7 @@ describe('the Make pages', () => {
     expect(response.headers.get('cache-control')).toBe(PUBLIC_PAGE);
     expect(response.headers.get('set-cookie')).toBeNull();
     expect((await answer('ru', 'tesla')).headers.get('cache-control')).toBe(
-      PUBLIC_PAGE,
+      NOT_FOUND_PAGE,
     );
   });
 
@@ -222,6 +222,7 @@ describe('the Make pages', () => {
     );
 
     expect(response.status).toBe(404);
+    expect(response.headers.get('cache-control')).toBe(NOT_FOUND_PAGE);
   });
 });
 

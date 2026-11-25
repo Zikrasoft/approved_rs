@@ -275,8 +275,8 @@ describe('the category block of a part page', () => {
   });
 });
 
-const PUBLIC_PAGE =
-  'public, s-maxage=86400, stale-while-revalidate=86400, stale-if-error=86400';
+const PUBLIC_PAGE = 'public, s-maxage=86400';
+const NOT_FOUND_PAGE = 'public, s-maxage=600';
 
 const PREVIEW_COOKIE_HEADER = {
   cookie: `auto_service_shop_preview=${SHOP_PREVIEW_TOKEN}`,
@@ -363,7 +363,7 @@ describe('the Part page rendered on demand', () => {
     );
 
     expect(response.status).toBe(404);
-    expect(response.headers.get('cache-control')).toBe(PUBLIC_PAGE);
+    expect(response.headers.get('cache-control')).toBe(NOT_FOUND_PAGE);
   });
 
   it.each([

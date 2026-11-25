@@ -43,8 +43,7 @@ beforeEach(() => {
   source([]);
 });
 
-const PUBLIC_PAGE =
-  'public, s-maxage=86400, stale-while-revalidate=86400, stale-if-error=86400';
+const PUBLIC_PAGE = 'public, s-maxage=86400';
 
 const answer = ({ locale = 'ru' as Locale, number = 1 } = {}) =>
   respond(
