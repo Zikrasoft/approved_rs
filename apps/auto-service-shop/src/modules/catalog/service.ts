@@ -1476,6 +1476,31 @@ class CatalogModuleService extends CatalogModuleBase {
   }
 
   @InjectManager()
+  async translationSources(
+    table: string,
+    fields: readonly string[],
+    after: string | undefined,
+    take: number,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<({ id: string } & Record<string, unknown>)[]> {
+    const knex = (
+      (sharedContext.transactionManager ??
+        sharedContext.manager) as SqlEntityManager
+    ).getKnex();
+    return knex(table)
+      .select('id', ...fields, 'translated_from')
+      .whereNull('deleted_at')
+      .where((sourced) => {
+        for (const field of fields) sourced.orWhereNotNull(field);
+      })
+      .modify((query) => {
+        if (after) query.where('id', '>', after);
+      })
+      .orderBy('id')
+      .limit(take);
+  }
+
+  @InjectManager()
   async countRowsBySource(
     @MedusaContext() sharedContext: Context = {},
   ): Promise<SourceCount[]> {

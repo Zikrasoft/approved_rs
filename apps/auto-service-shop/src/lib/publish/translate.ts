@@ -10,6 +10,7 @@ import {
 import { z } from 'zod';
 
 import { OPENAI_MODEL } from '../openai-model';
+import { keysetPages } from '../../modules/_shared/keyset-pages';
 import type CatalogModuleService from '../../modules/catalog/service';
 
 export type TargetLocale = (typeof CATALOG_TRANSLATION_LOCALES)[number];
@@ -27,7 +28,7 @@ const LOCALE_GUIDANCE: Partial<Record<TargetLocale, string>> = {
 const BUSINESS_DESCRIPTION = `${CARLAB.name}, a car service in Belgrade, Serbia, with a parts catalogue for all common car makes`;
 
 const ROWS_PER_REQUEST = 50;
-const ROWS_PER_PAGE = 2_000;
+const ROWS_PER_PAGE = 20_000;
 const CHARS_PER_REQUEST = 4_000;
 const REQUESTS_AT_ONCE = 100;
 
@@ -61,8 +62,7 @@ type TranslatableEntity = {
   fields: readonly string[];
   list: (
     catalog: CatalogModuleService,
-    filters: { id?: string | { $gt: string } },
-    take?: number,
+    filters: { id: string | string[] },
   ) => Promise<StoredRow[]>;
   update: (
     catalog: CatalogModuleService,
@@ -81,10 +81,7 @@ const TRANSLATION_COLUMNS = [
   'updated_by',
 ];
 
-const page = (take: number | undefined) => ({
-  take: take ?? null,
-  order: { id: 'ASC' as const },
-});
+const UNPAGED = { take: null, order: { id: 'ASC' as const } };
 
 export const TRANSLATABLE_ENTITIES = new Map<string, TranslatableEntity>([
   [
@@ -92,10 +89,10 @@ export const TRANSLATABLE_ENTITIES = new Map<string, TranslatableEntity>([
     {
       subject: 'car part names and descriptions in a parts catalogue',
       fields: ['name', 'description'],
-      list: (catalog, filters, take) =>
+      list: (catalog, filters) =>
         catalog.listParts(filters, {
           select: [...TRANSLATION_COLUMNS, 'name', 'description'],
-          ...page(take),
+          ...UNPAGED,
         }),
       update: (catalog, rows) => catalog.updateParts(rows),
     },
@@ -105,10 +102,10 @@ export const TRANSLATABLE_ENTITIES = new Map<string, TranslatableEntity>([
     {
       subject: 'car model series names, such as "3 серия"',
       fields: ['name'],
-      list: (catalog, filters, take) =>
+      list: (catalog, filters) =>
         catalog.listSeries(filters, {
           select: [...TRANSLATION_COLUMNS, 'name'],
-          ...page(take),
+          ...UNPAGED,
         }),
       update: (catalog, rows) => catalog.updateSeries(rows),
     },
@@ -119,7 +116,7 @@ export const TRANSLATABLE_ENTITIES = new Map<string, TranslatableEntity>([
       subject:
         'car part category names, their descriptions and the CarLab service sold with a part',
       fields: ['name', 'text', 'service_label', 'service_note'],
-      list: (catalog, filters, take) =>
+      list: (catalog, filters) =>
         catalog.listCategories(filters, {
           select: [
             ...TRANSLATION_COLUMNS,
@@ -128,7 +125,7 @@ export const TRANSLATABLE_ENTITIES = new Map<string, TranslatableEntity>([
             'service_label',
             'service_note',
           ],
-          ...page(take),
+          ...UNPAGED,
         }),
       update: (catalog, rows) => catalog.updateCategories(rows),
     },
@@ -138,10 +135,10 @@ export const TRANSLATABLE_ENTITIES = new Map<string, TranslatableEntity>([
     {
       subject: 'names of car part characteristics, such as "Вязкость"',
       fields: ['label'],
-      list: (catalog, filters, take) =>
+      list: (catalog, filters) =>
         catalog.listCategoryFields(filters, {
           select: [...TRANSLATION_COLUMNS, 'label'],
-          ...page(take),
+          ...UNPAGED,
         }),
       update: (catalog, rows) => catalog.updateCategoryFields(rows),
     },
@@ -151,10 +148,10 @@ export const TRANSLATABLE_ENTITIES = new Map<string, TranslatableEntity>([
     {
       subject: 'values of car part characteristics, such as "Сменный элемент"',
       fields: ['label'],
-      list: (catalog, filters, take) =>
+      list: (catalog, filters) =>
         catalog.listCategoryFieldOptions(filters, {
           select: [...TRANSLATION_COLUMNS, 'label'],
-          ...page(take),
+          ...UNPAGED,
         }),
       update: (catalog, rows) => catalog.updateCategoryFieldOptions(rows),
     },
@@ -164,10 +161,10 @@ export const TRANSLATABLE_ENTITIES = new Map<string, TranslatableEntity>([
     {
       subject: 'notes on where a car part fits, such as "Только с M-пакетом"',
       fields: ['note'],
-      list: (catalog, filters, take) =>
+      list: (catalog, filters) =>
         catalog.listFitments(
           { ...filters, note: { $ne: null } },
-          { select: [...TRANSLATION_COLUMNS, 'note'], ...page(take) },
+          { select: [...TRANSLATION_COLUMNS, 'note'], ...UNPAGED },
         ),
       update: (catalog, rows) => catalog.updateFitments(rows),
     },
@@ -342,6 +339,11 @@ async function translateLocale(
   return stale.map(({ id }) => id);
 }
 
+const isStale = (item: Item) =>
+  CATALOG_TRANSLATION_LOCALES.some(
+    (locale) => item.translatedFrom[locale] !== item.hash[locale],
+  );
+
 export async function translateCatalogue(
   catalog: CatalogModuleService,
   apiKey: string | undefined,
@@ -349,13 +351,19 @@ export async function translateCatalogue(
   const translatedParts = new Set<string>();
   for (const [name, entity] of TRANSLATABLE_ENTITIES) {
     const hashOf = sourceHasher(entity);
-    for (let after: string | null = null; ;) {
-      const rows = await entity.list(
-        catalog,
-        after ? { id: { $gt: after } } : {},
-        ROWS_PER_PAGE,
+    for await (const sources of keysetPages(
+      (after, take) =>
+        catalog.translationSources(name, entity.fields, after, take),
+      ROWS_PER_PAGE,
+    )) {
+      const staleIds = sources
+        .map((row) => itemOf(entity, row, hashOf))
+        .filter(isStale)
+        .map(({ id }) => id);
+      if (staleIds.length === 0) continue;
+      const items = (await entity.list(catalog, { id: staleIds })).map((row) =>
+        itemOf(entity, row, hashOf),
       );
-      const items = rows.map((row) => itemOf(entity, row, hashOf));
       for (const locale of CATALOG_TRANSLATION_LOCALES) {
         const written = await translateLocale(
           entity,
@@ -366,8 +374,6 @@ export async function translateCatalogue(
         );
         if (name === 'part') written.forEach((id) => translatedParts.add(id));
       }
-      if (rows.length < ROWS_PER_PAGE) break;
-      after = rows[rows.length - 1].id;
     }
   }
   return [...translatedParts];

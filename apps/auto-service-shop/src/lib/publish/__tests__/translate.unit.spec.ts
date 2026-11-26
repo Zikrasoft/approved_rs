@@ -12,8 +12,14 @@ const catalogueOf = (parts: Row[]) => {
     translated_from?: unknown;
   }[] = [];
   const none = async () => [];
+  const fullReads: string[][] = [];
   const catalog = {
-    listParts: async () => parts,
+    translationSources: async (table: string) =>
+      table === 'part' ? parts : [],
+    listParts: async ({ id }: { id: string[] }) => {
+      fullReads.push(id);
+      return parts.filter((part) => id.includes(part.id));
+    },
     updateParts: async (rows: typeof updated) => {
       updated.push(...rows);
     },
@@ -23,7 +29,7 @@ const catalogueOf = (parts: Row[]) => {
     listCategoryFieldOptions: none,
     listFitments: none,
   } as unknown as CatalogModuleService;
-  return { catalog, updated };
+  return { catalog, updated, fullReads };
 };
 
 const openAi = () => {
@@ -63,20 +69,23 @@ afterEach(() => {
 });
 
 describe('translateCatalogue', () => {
-  it('reads the Parts a page at a time', async () => {
+  it('scans the Parts a page at a time', async () => {
     openAi();
-    const parts = Array.from({ length: 2_001 }, (_, index) =>
+    const parts = Array.from({ length: 20_001 }, (_, index) =>
       part(index, null),
     ).sort((a, b) => a.id.localeCompare(b.id));
     const pages: number[] = [];
-    const { catalog, updated } = catalogueOf([]);
+    const { catalog, updated } = catalogueOf(parts);
     Object.assign(catalog, {
-      listParts: async (
-        filters: { id?: { $gt: string } },
-        { take }: { take: number },
+      translationSources: async (
+        table: string,
+        _fields: string[],
+        after: string | undefined,
+        take: number,
       ) => {
+        if (table !== 'part') return [];
         const page = parts
-          .filter(({ id }) => !filters.id || id > filters.id.$gt)
+          .filter(({ id }) => !after || id > after)
           .slice(0, take);
         pages.push(page.length);
         return page;
@@ -85,8 +94,8 @@ describe('translateCatalogue', () => {
 
     await translateCatalogue(catalog, 'key');
 
-    expect(pages).toEqual([2_000, 1]);
-    expect(new Set(updated.map(({ id }) => id)).size).toBe(2_001);
+    expect(pages).toEqual([20_000, 1]);
+    expect(new Set(updated.map(({ id }) => id)).size).toBe(20_001);
   });
 
   it('stamps Parts with the same source with the same translated_from', async () => {
@@ -181,6 +190,7 @@ describe('translateCatalogue', () => {
     const current = catalogueOf([{ ...part(1, null), translated_from } as Row]);
     await translateCatalogue(current.catalog, 'key');
     expect(requests).toHaveLength(0);
+    expect(current.fullReads).toEqual([]);
 
     const older = catalogueOf([
       {
