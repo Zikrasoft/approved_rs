@@ -8,6 +8,7 @@ import {
 import type { z } from 'zod';
 
 import { pricesShown } from './shop-gate';
+import { storeRead } from './store-read';
 
 export const CATALOGUE_PAGES_AT_ONCE = 4;
 
@@ -25,6 +26,11 @@ const done = () => {
   else running--;
 };
 
+const closed = (res: MedusaResponse) =>
+  new Promise<'closed'>((resolve) =>
+    res.once('close', () => resolve('closed')),
+  );
+
 export type PageRequest = { locale: CatalogLocale; shown: boolean };
 
 export async function answerCataloguePage<T>(
@@ -34,13 +40,21 @@ export async function answerCataloguePage<T>(
   label: string,
   load: (page: PageRequest) => Promise<unknown>,
 ): Promise<void> {
-  await turn();
+  const taken = turn();
+  if ((await Promise.race([taken, closed(res)])) === 'closed') {
+    void taken.then(done);
+    return;
+  }
   try {
     if (req.socket?.destroyed) return;
-    const page = await load({
-      locale: catalogueLocaleSchema.parse(req.headers[CATALOGUE_LOCALE_HEADER]),
-      shown: pricesShown(req),
-    });
+    const page = await storeRead(req.scope, () =>
+      load({
+        locale: catalogueLocaleSchema.parse(
+          req.headers[CATALOGUE_LOCALE_HEADER],
+        ),
+        shown: pricesShown(req),
+      }),
+    );
     if (!page) {
       throw new MedusaError(
         MedusaError.Types.NOT_FOUND,
