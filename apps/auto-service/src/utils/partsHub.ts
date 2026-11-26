@@ -5,7 +5,12 @@ import {
 } from '@podbor/catalog-contract';
 import { paragraphs } from '@podbor/site-kit';
 import { localeConfig, type Locale } from '../i18n/config.ts';
-import type { Catalogue } from './cataloguePage.ts';
+import type { AstroGlobal } from 'astro';
+import {
+  type Catalogue,
+  PUBLIC_PAGE_CACHE,
+  cacheControlOf,
+} from './cataloguePage.ts';
 import { byDemand } from './demand.ts';
 import { TOP_MAKES, topMakes } from './makeIndex.ts';
 
@@ -51,7 +56,28 @@ export const partsHubOf = (
 
 export const EMPTY_PARTS_HUB: PartsHub = { makes: [], categories: [] };
 
-export const partsHubFrom = async (catalogue: Catalogue): Promise<PartsHub> =>
+const partsHubFrom = async (catalogue: Catalogue): Promise<PartsHub> =>
   partsHubOf(
     ...(await Promise.all([catalogue.categories(), catalogue.pageList()])),
   );
+
+export async function loadPartsHub(
+  { request, response }: Pick<AstroGlobal, 'request' | 'response'>,
+  catalogue: Catalogue | null,
+  cacheable: boolean,
+): Promise<PartsHub> {
+  if (!catalogue) return EMPTY_PARTS_HUB;
+  try {
+    const hub = await partsHubFrom(catalogue);
+    if (cacheable) {
+      response.headers.set(
+        'cache-control',
+        cacheControlOf(request, PUBLIC_PAGE_CACHE),
+      );
+    }
+    return hub;
+  } catch (error) {
+    console.error('parts hub failed', String(error));
+    return EMPTY_PARTS_HUB;
+  }
+}

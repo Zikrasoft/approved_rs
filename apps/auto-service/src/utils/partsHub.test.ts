@@ -1,6 +1,7 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { CataloguePageList, Category } from '@podbor/catalog-contract';
-import { partsHubOf } from './partsHub';
+import type { Catalogue } from './cataloguePage';
+import { EMPTY_PARTS_HUB, loadPartsHub, partsHubOf } from './partsHub';
 
 const category = (slug: string): Category =>
   ({
@@ -98,5 +99,70 @@ describe('the parts hub data', () => {
 
     expect(hub.makes.map(({ slug }) => slug)).toEqual(['new', 'old']);
     expect(hub.categories[0].empty).toBe(false);
+  });
+});
+
+describe('loadPartsHub', () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  const page = () => ({
+    request: new Request('https://carlab.rs/sr/parts/'),
+    response: { headers: new Headers() } as ResponseInit & {
+      headers: Headers;
+    },
+  });
+
+  const catalogueOf = (pageList: () => Promise<CataloguePageList>) =>
+    ({
+      categories: async () => [category('brakes')],
+      pageList,
+    }) as unknown as Catalogue;
+
+  const loaded = catalogueOf(async () =>
+    listOf([make('bmw', 9)], [counted('brakes', 5, 1)]),
+  );
+
+  it('loads the hub and caches the page publicly when the browse found something', async () => {
+    const astro = page();
+
+    const hub = await loadPartsHub(astro, loaded, true);
+
+    expect(hub.makes).toEqual([{ slug: 'bmw', name: 'BMW' }]);
+    expect(hub.categories.map(({ slug }) => slug)).toEqual(['brakes']);
+    expect(astro.response.headers.get('cache-control')).toBe(
+      'public, s-maxage=86400',
+    );
+  });
+
+  it('leaves the cache header alone when the browse found nothing', async () => {
+    const astro = page();
+
+    await loadPartsHub(astro, loaded, false);
+
+    expect(astro.response.headers.get('cache-control')).toBeNull();
+  });
+
+  it('falls back to the empty hub, uncached, when the shop fails', async () => {
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const astro = page();
+
+    const hub = await loadPartsHub(
+      astro,
+      catalogueOf(async () => {
+        throw new Error('shop down');
+      }),
+      true,
+    );
+
+    expect(hub).toBe(EMPTY_PARTS_HUB);
+    expect(astro.response.headers.get('cache-control')).toBeNull();
+    expect(logged).toHaveBeenCalledWith('parts hub failed', 'Error: shop down');
+  });
+
+  it('answers the empty hub, uncached, without a catalogue', async () => {
+    const astro = page();
+
+    expect(await loadPartsHub(astro, null, true)).toBe(EMPTY_PARTS_HUB);
+    expect(astro.response.headers.get('cache-control')).toBeNull();
   });
 });

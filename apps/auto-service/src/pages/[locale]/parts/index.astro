@@ -10,8 +10,7 @@ import CatalogueSearch from '@/components/CatalogueSearch.astro';
 import CatalogueListing from '@/components/CatalogueListing.astro';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { catalogueFor, shopOpen } from '@/utils/catalogueEnv';
-import { EMPTY_PARTS_HUB, partsHubFrom } from '@/utils/partsHub';
-import { PUBLIC_PAGE_CACHE, cacheControlOf } from '@/utils/cataloguePage';
+import { loadPartsHub } from '@/utils/partsHub';
 import { inquiryTopic } from '@/utils/catalogueSearch';
 import { chosenFilters, withFacetCopy } from '@/utils/partsSearch';
 import { planSearch } from '@/utils/searchPage';
@@ -41,13 +40,9 @@ const plan = await planSearch({
 if ('redirect' in plan) {
   return Astro.redirect(plan.redirect, plan.status);
 }
-const loaded = catalogue
-  ? await partsHubFrom(catalogue).catch((error: unknown) => {
-      console.error('parts hub failed', String(error));
-      return null;
-    })
-  : null;
-const hub = loaded ?? EMPTY_PARTS_HUB;
+const { view } = plan;
+const { found, chosen, ranges, offset, sort } = view;
+const hub = await loadPartsHub(Astro, catalogue, Boolean(found));
 const pages = content(locale).pages;
 const site = content(locale).site;
 const copy = pages.partsInquiry;
@@ -60,14 +55,6 @@ const categories = hub.categories.map((category) => ({
   name: category.name[locale],
   lead: category.lead[locale],
 }));
-const { view } = plan;
-const { found, chosen, ranges, offset, sort } = view;
-if (loaded && found) {
-  Astro.response.headers.set(
-    'cache-control',
-    cacheControlOf(Astro.request, PUBLIC_PAGE_CACHE),
-  );
-}
 const facets = withFacetCopy(view.sheetFacets, searchCopy);
 const chips = chosenFilters(facets, chosen, ranges, searchCopy, (value) =>
   value.toLocaleString(BCP47_BY_LOCALE[locale]),
