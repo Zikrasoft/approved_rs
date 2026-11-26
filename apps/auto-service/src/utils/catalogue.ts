@@ -11,6 +11,7 @@ import {
   type CheckoutRefusal,
   type PartOffer,
   cataloguePageListSchema,
+  cataloguePartsHubSchema,
   categoriesResponseSchema,
   partPageSlug,
   identifierOffersResponseSchema,
@@ -460,6 +461,12 @@ export function createCatalogue({
     async pageList() {
       return cataloguePageListSchema.parse(
         await request('/store/catalogue-pages'),
+      );
+    },
+
+    async partsHub() {
+      return cataloguePartsHubSchema.parse(
+        await request('/store/catalogue-pages/hub'),
       );
     },
 

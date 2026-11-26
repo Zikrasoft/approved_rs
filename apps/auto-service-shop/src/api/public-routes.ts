@@ -9,6 +9,7 @@ export const PUBLIC_ROUTES = [
   'GET /store/catalogue-pages',
   'GET /store/catalogue-pages/cars/:make',
   'GET /store/catalogue-pages/categories/:slug',
+  'GET /store/catalogue-pages/hub',
   'GET /store/catalogue-pages/makes',
   'GET /store/catalogue-pages/makes/:slug',
   'GET /store/catalogue-pages/parts/:slug',
