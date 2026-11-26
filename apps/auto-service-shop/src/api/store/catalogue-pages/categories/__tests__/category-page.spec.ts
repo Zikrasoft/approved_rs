@@ -239,6 +239,24 @@ medusaIntegrationTestRunner({
         ).toEqual([[IN_STOCK_FACET, 1]]);
       });
 
+      it('follows a Category field edit made after the page was read while the shop is closed', async () => {
+        process.env.SHOP_OPEN = 'false';
+        const catalog: CatalogModuleService =
+          getContainer().resolve(CATALOG_MODULE);
+        const height = (await catalog.listCategoryFields({ key: 'height' }))[0];
+        const keys = async () =>
+          (await answer('oil-filters', 2)).facets.map(({ key: own }) => own);
+
+        expect(await keys()).not.toContain('height');
+        await catalog.updateCategoryFields({ id: height.id, facet: true });
+        try {
+          expect(await keys()).toContain('height');
+        } finally {
+          await catalog.updateCategoryFields({ id: height.id, facet: false });
+          delete process.env.SHOP_OPEN;
+        }
+      });
+
       it('offers only the series that have a page in the Category', async () => {
         const { cars } = await answer('oil-filters');
 

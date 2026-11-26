@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { isDeepStrictEqual } from 'node:util';
 import type { MedusaContainer } from '@medusajs/framework/types';
 import {
@@ -101,36 +102,48 @@ export async function categoryPageAt(
   if (page > pages) return null;
 
   const demand = await memoPartDemand(scope);
-  const offers = shown
-    ? await suppliers.storeOffersFor(numbers.map(({ id }) => id))
-    : new Map();
-  const items = numbers.map((number) => ({
-    id: number.id,
-    brand: { slug: number.brand_slug, name: number.brand_name },
-    offers: offers.get(number.id) ?? [],
-    attributes: attributeValuesSchema.parse(number.attributes),
-    part: { id: number.part_id },
-    demand: demand.get(number.id) ?? null,
+  const summarise = async () => {
+    const offers = shown
+      ? await suppliers.storeOffersFor(numbers.map(({ id }) => id))
+      : new Map();
+    const parsed = numbers.map((number) => ({
+      id: number.id,
+      brand: { slug: number.brand_slug, name: number.brand_name },
+      offers: offers.get(number.id) ?? [],
+      attributes: attributeValuesSchema.parse(number.attributes),
+      part: { id: number.part_id },
+    }));
+    const ranges = category.fields.flatMap(({ key, type }) => {
+      const values = parsed
+        .flatMap(({ attributes }) => [attributes[key] ?? []].flat())
+        .map(Number)
+        .filter(Number.isFinite);
+      return type === 'number' && values.length
+        ? [{ key, min: Math.min(...values), max: Math.max(...values) }]
+        : [];
+    });
+    const uniform = category.fields
+      .filter(
+        ({ key }) =>
+          parsed.length > 1 &&
+          parsed.every(({ attributes }) =>
+            isDeepStrictEqual(attributes[key], parsed[0].attributes[key]),
+          ),
+      )
+      .map(({ key }) => key);
+    const facets = categoryFacets(category.fields, parsed, locale);
+    return { parsed, ranges, uniform, facets };
+  };
+  const { parsed, ranges, uniform, facets } = shown
+    ? await summarise()
+    : await memoized(
+        `category-summary:${category.id}:${locale}:${createHash('sha256').update(JSON.stringify(category.fields)).digest('hex')}`,
+        summarise,
+      );
+  const items = parsed.map((item) => ({
+    ...item,
+    demand: demand.get(item.id) ?? null,
   }));
-
-  const ranges = category.fields.flatMap(({ key, type }) => {
-    const values = items
-      .flatMap(({ attributes }) => [attributes[key] ?? []].flat())
-      .map(Number)
-      .filter(Number.isFinite);
-    return type === 'number' && values.length
-      ? [{ key, min: Math.min(...values), max: Math.max(...values) }]
-      : [];
-  });
-  const uniform = category.fields
-    .filter(
-      ({ key }) =>
-        items.length > 1 &&
-        items.every(({ attributes }) =>
-          isDeepStrictEqual(attributes[key], items[0].attributes[key]),
-        ),
-    )
-    .map(({ key }) => key);
 
   const listing = items
     .slice((page - 1) * CATEGORY_PAGE_SIZE, page * CATEGORY_PAGE_SIZE)
@@ -155,7 +168,7 @@ export async function categoryPageAt(
     count: items.length,
     entries: listing.map(entryOf),
     popular: popular.map(entryOf),
-    facets: categoryFacets(category.fields, items, locale),
+    facets,
     ranges,
     uniform,
     demanded: items.some(({ demand: own }) => (own?.score ?? 0) > 0),
