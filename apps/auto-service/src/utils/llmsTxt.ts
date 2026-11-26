@@ -34,7 +34,8 @@ import { PathBuilder } from '@/utils/paths';
 import { BCP47_BY_LOCALE, SUPPORTED_LOCALES, type Locale } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { googleRatingLabel } from '@/utils/googleRating';
-import type { Catalogue } from '@/utils/cataloguePage';
+import { answerCatalogueFile, type Catalogue } from '@/utils/cataloguePage';
+import type { APIContext } from 'astro';
 
 const url = (path: string) => `${SITE_URL}${path}`;
 
@@ -209,9 +210,9 @@ export async function generateLlmsTxt(
   });
 }
 
-export const NO_LLMS_CATALOGUE: LlmsCatalogue = { categories: [], makes: [] };
+const NO_LLMS_CATALOGUE: LlmsCatalogue = { categories: [], makes: [] };
 
-export const llmsCatalogueOf = async (
+const llmsCatalogueOf = async (
   catalogue: Catalogue,
 ): Promise<LlmsCatalogue> => {
   const [categories, { makes }] = await Promise.all([
@@ -220,3 +221,15 @@ export const llmsCatalogueOf = async (
   ]);
   return { categories, makes };
 };
+
+export const answerLlmsTxt = (
+  context: Pick<APIContext, 'request' | 'url'>,
+  locale: Locale | null,
+) =>
+  answerCatalogueFile(
+    context,
+    'text/plain; charset=utf-8',
+    async (catalogue) =>
+      locale && generateLlmsTxt(locale, await llmsCatalogueOf(catalogue)),
+    async () => locale && generateLlmsTxt(locale, NO_LLMS_CATALOGUE),
+  );
