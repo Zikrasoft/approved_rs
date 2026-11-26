@@ -183,7 +183,7 @@ jobs:
 
   verify:
     needs: translate
-    if: needs.translate.result == 'success'
+    if: "!cancelled() && needs.translate.result == 'success'"
     runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
     permissions:
       contents: read
@@ -261,6 +261,7 @@ jobs:
   shop-image:
     needs: [translate, verify]
     if: >-
+      !cancelled() &&
       needs.verify.result == 'success' &&
       (github.ref != 'refs/heads/main' ||
        contains(fromJSON(needs.verify.outputs.changed), 'auto-service-shop'))
@@ -355,6 +356,7 @@ jobs:
   deploy-shop:
     needs: [translate, verify, shop-image]
     if: >-
+      !cancelled() &&
       needs.shop-image.result == 'success' &&
       github.ref == 'refs/heads/main' &&
       contains(fromJSON(needs.verify.outputs.changed), 'auto-service-shop')
@@ -420,7 +422,7 @@ jobs:
 
   record-shop:
     needs: [translate, deploy-shop]
-    if: needs.deploy-shop.outputs.deployed == 'true'
+    if: "!cancelled() && needs.deploy-shop.outputs.deployed == 'true'"
     runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
     permissions:
       contents: write
