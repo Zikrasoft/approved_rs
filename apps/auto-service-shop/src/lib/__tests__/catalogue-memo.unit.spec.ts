@@ -1,4 +1,9 @@
-import { clearCatalogueMemo, memoized } from '../catalogue-memo';
+import {
+  clearCatalogueMemo,
+  forgetCatalogueMemo,
+  markCatalogueMemoStale,
+  memoized,
+} from '../catalogue-memo';
 
 const counter = () => {
   let calls = 0;
@@ -6,6 +11,10 @@ const counter = () => {
 };
 
 const TTL_MS = 10 * 60_000;
+
+const flush = async () => {
+  for (let i = 0; i < 5; i++) await Promise.resolve();
+};
 
 describe('memoized', () => {
   beforeEach(() => clearCatalogueMemo());
@@ -87,16 +96,81 @@ describe('memoized', () => {
     expect(await memoized('counts', compute)).toBe(1);
   });
 
-  it('expires a value with a time to live and keeps it before that', async () => {
+  it('keeps a value before its time to live ends', async () => {
     jest.useFakeTimers({ now: new Date('2026-11-25T10:00:00Z') });
     const compute = counter();
     await memoized('demand', compute, TTL_MS);
 
     jest.setSystemTime(new Date(Date.now() + TTL_MS - 1));
     expect(await memoized('demand', compute, TTL_MS)).toBe(1);
+    expect(compute).toHaveBeenCalledTimes(1);
+  });
 
-    jest.setSystemTime(new Date(Date.now() + 1));
+  it('serves the old value of an expired entry and refreshes it once in the background', async () => {
+    jest.useFakeTimers({ now: new Date('2026-11-25T10:00:00Z') });
+    const compute = counter();
+    await memoized('demand', compute, TTL_MS);
+    jest.setSystemTime(new Date(Date.now() + TTL_MS));
+
+    const reads = [
+      memoized('demand', compute, TTL_MS),
+      memoized('demand', compute, TTL_MS),
+    ];
+    expect(await Promise.all(reads)).toEqual([1, 1]);
+    expect(compute).toHaveBeenCalledTimes(2);
+
+    await flush();
     expect(await memoized('demand', compute, TTL_MS)).toBe(2);
+    expect(compute).toHaveBeenCalledTimes(2);
+  });
+
+  it('keeps the old value when the background refresh fails and tries again next read', async () => {
+    jest.useFakeTimers({ now: new Date('2026-11-25T10:00:00Z') });
+    await memoized('demand', async () => 'old', TTL_MS);
+    jest.setSystemTime(new Date(Date.now() + TTL_MS));
+
+    const failing = jest.fn(async () => {
+      throw new Error('down');
+    });
+    expect(await memoized('demand', failing, TTL_MS)).toBe('old');
+    await flush();
+    expect(await memoized('demand', failing, TTL_MS)).toBe('old');
+    expect(failing).toHaveBeenCalledTimes(2);
+  });
+
+  it('serves the old value of a stale entry and swaps the fresh one in', async () => {
+    const compute = counter();
+    await memoized('counts', compute);
+    markCatalogueMemoStale();
+
+    expect(await memoized('counts', compute)).toBe(1);
+    await flush();
+    expect(await memoized('counts', compute)).toBe(2);
+    expect(compute).toHaveBeenCalledTimes(2);
+  });
+
+  it('marks only the named entries stale', async () => {
+    const a = counter();
+    const b = counter();
+    await memoized('a', a);
+    await memoized('b', b);
+    markCatalogueMemoStale('a');
+
+    await memoized('a', a);
+    await memoized('b', b);
+    expect(a).toHaveBeenCalledTimes(2);
+    expect(b).toHaveBeenCalledTimes(1);
+  });
+
+  it('forgets only the named entries', async () => {
+    const a = counter();
+    const b = counter();
+    await memoized('a', a);
+    await memoized('b', b);
+    forgetCatalogueMemo('a');
+
+    expect(await memoized('a', a)).toBe(2);
+    expect(await memoized('b', b)).toBe(1);
   });
 
   it('keeps a value without a time to live until cleared', async () => {
