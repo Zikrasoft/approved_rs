@@ -231,9 +231,6 @@ async function tableProblems(pg: Knex, table: SchemaTable): Promise<string[]> {
         ([name, want]) =>
           `${table.name}.${name}: expected ${want}, found ${actual.get(name) ?? 'nothing'}`,
       ),
-    ...[...actual.keys()]
-      .filter((name) => !expected.has(name))
-      .map((name) => `${table.name}.${name}: column not in the migrations`),
     ...missing(
       table.indexes.map(({ keyName }) => keyName),
       indexes.map((row: { indexname: string }) => row.indexname),
@@ -287,6 +284,29 @@ async function typeProblems(pg: Knex): Promise<string[]> {
       ? []
       : [`${name}: expected ${type}, found ${found.get(name) ?? 'nothing'}`],
   );
+}
+
+async function tableExtras(pg: Knex, table: SchemaTable): Promise<string[]> {
+  const { rows } = await pg.raw(
+    `select column_name from information_schema.columns
+     where table_schema = 'public' and table_name = ?`,
+    [table.name],
+  );
+  const expected = new Set(
+    Object.values(table.columns).map(({ name }) => name),
+  );
+  return rows
+    .map((row: { column_name: string }) => row.column_name)
+    .filter((name: string) => !expected.has(name))
+    .map(
+      (name: string) => `${table.name}.${name}: column not in the migrations`,
+    );
+}
+
+export async function schemaExtras(pg: Knex): Promise<string[]> {
+  return (
+    await Promise.all(SCHEMA_TABLES.map((table) => tableExtras(pg, table)))
+  ).flat();
 }
 
 export async function schemaProblems(pg: Knex): Promise<string[]> {

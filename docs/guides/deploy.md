@@ -1688,7 +1688,9 @@ moves forward again.
    checks the migrated schema against what the migrations build
    (`medusa exec ./src/scripts/check-schema.js`, the assertions of
    `src/lib/schema-check.ts`; it catches a database that ran an older version of a
-   migration file or was restored from an old dump, and names each difference),
+   migration file or was restored from an old dump, and names each difference;
+   a column the migrations do not build is only logged as a warning, so an
+   image rolled back over a newer additive schema still starts),
    then rebuilds the catalogue snapshot (`listed_series_part`) on every deploy
    (`medusa exec ./src/scripts/build-catalogue-snapshot.js`; the build is idempotent
    and takes the snapshot's advisory lock, so a deploy after a rollback never serves

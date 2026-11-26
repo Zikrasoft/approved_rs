@@ -4,7 +4,11 @@ import type { Knex } from '@medusajs/framework/mikro-orm/knex';
 import { globSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 
-import { schemaProblems, SNAPSHOT_TABLES } from '../../../lib/schema-check';
+import {
+  schemaExtras,
+  schemaProblems,
+  SNAPSHOT_TABLES,
+} from '../../../lib/schema-check';
 import { codeKey, nameKey } from '../../_shared/keys';
 import linkFitmentNotesOnce from '../../../migration-scripts/link-fitment-notes';
 import orderTimeIndexes from '../../../migration-scripts/order-time-indexes';
@@ -145,6 +149,20 @@ medusaIntegrationTestRunner({
         ).resolves.toBeUndefined();
       });
 
+      it('lets a deploy through a column a newer image added, and names it as an extra', async () => {
+        await pg().raw('alter table crawl_page add column body text');
+        try {
+          await expect(
+            checkSchema({ container: getContainer(), args: [] }),
+          ).resolves.toBeUndefined();
+          expect(await schemaExtras(pg())).toEqual([
+            'crawl_page.body: column not in the migrations',
+          ]);
+        } finally {
+          await pg().raw('alter table crawl_page drop column body');
+        }
+      });
+
       it('stops a deploy on a database the migrations did not build, naming each problem', async () => {
         await pg().raw('drop index "IDX_part_description_hash"');
 
@@ -175,11 +193,6 @@ medusaIntegrationTestRunner({
           'a missing column',
           ['alter table vin_lookup drop column wmi'],
           'vin_lookup.wmi: expected text null, found nothing',
-        ],
-        [
-          'a column the migrations do not create',
-          ['alter table crawl_page add column body text'],
-          'crawl_page.body: column not in the migrations',
         ],
         [
           'a missing Fitment note table',
