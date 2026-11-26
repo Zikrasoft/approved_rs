@@ -265,11 +265,24 @@ class PublishModuleService extends MedusaService({
   }
 
   @InjectManager()
+  async hasRequirements(
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<boolean> {
+    const { rows } = await runBoundSql(
+      sharedContext,
+      'select exists(select 1 from requirement where deleted_at is null) as present',
+    );
+    return rows[0].present;
+  }
+
+  @InjectManager()
   async partRequirementFits(
     partIds: string[],
     @MedusaContext() sharedContext: Context = {},
   ): Promise<Omit<VehiclePart, 'fitted'>[]> {
-    if (!partIds.length) return [];
+    if (!partIds.length || !(await this.hasRequirements(sharedContext))) {
+      return [];
+    }
     const { rows } = await runBoundSql(sharedContext, PART_REQUIREMENT_FITS, [
       partIds,
     ]);
