@@ -33,6 +33,7 @@ export const seriesCategoryPageResponseSchema = z.object({
     z.object({
       pages: z.array(sluggedPartPageSchema),
       fits: z.array(siteFitmentSchema).default([]),
+      fit_count: z.number().int().nonnegative().nullable().default(null),
     }),
   ),
   vehicles: z.array(vehicleSchema).default([]),

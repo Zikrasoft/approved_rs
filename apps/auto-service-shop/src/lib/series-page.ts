@@ -26,6 +26,8 @@ import { catalogueModules, catalogueStructure } from './catalogue-structure';
 import { vehiclesOfSeries } from './series-vehicles';
 import { toFitmentResponse } from './store-response';
 
+export const SERIES_FITS_SHOWN = 6;
+
 type Options = { locale: CatalogLocale; shown: boolean };
 
 async function placeOf(
@@ -191,13 +193,15 @@ export async function seriesCategoryPageAt(
   );
   const parts = partIds.flatMap((id) => {
     const own = pagesOf.get(id);
+    const fits = fitsOf.get(id) ?? [];
     return own
       ? [
           {
             pages: own,
-            fits: (fitsOf.get(id) ?? []).map((fit) =>
-              localizedFit(fit, options.locale),
-            ),
+            fits: fits
+              .slice(0, SERIES_FITS_SHOWN)
+              .map((fit) => localizedFit(fit, options.locale)),
+            fit_count: fits.length,
           },
         ]
       : [];

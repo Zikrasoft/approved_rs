@@ -12,6 +12,8 @@ import {
 import { SHOP_PREVIEW_HEADER } from '@podbor/catalog-contract/preview';
 import { seriesSlugOf } from '@podbor/catalog-contract/slug';
 
+import { SERIES_FITS_SHOWN } from '../../../../../lib/series-page';
+
 import { createVehicleFixture } from '../../../../../../integration-tests/vehicleFixture';
 import { CATALOG_MODULE } from '../../../../../modules/catalog';
 import type CatalogModuleService from '../../../../../modules/catalog/service';
@@ -21,6 +23,7 @@ import { SUPPLIER_MODULE } from '../../../../../modules/supplier';
 import type SupplierModuleService from '../../../../../modules/supplier/service';
 
 const SERIES = seriesSlugOf('3 серия');
+const WIDE_SERIES = '5 серия';
 
 medusaIntegrationTestRunner({
   moduleName: 'catalogue-series-page',
@@ -29,6 +32,7 @@ medusaIntegrationTestRunner({
     describe('GET /store/catalogue-pages/series/:make/:series', () => {
       let key: string;
       let bigVehicle: string;
+      let wideVehicles: string[];
 
       beforeAll(async () => {
         const container = getContainer();
@@ -114,6 +118,24 @@ medusaIntegrationTestRunner({
           })),
           { part_id: oilFilter, vehicle_id: small.vehicle.id },
         ]);
+
+        wideVehicles = [];
+        for (let index = 0; index <= SERIES_FITS_SHOWN; index++) {
+          const { vehicle } = await createVehicleFixture(catalog, {
+            seriesName: WIDE_SERIES,
+            typeCode: `G3${index}`,
+            chassisCode: 'G30',
+            modelSlug: `g30-${index}`,
+            modelName: `52${index}d`,
+          });
+          wideVehicles.push(vehicle.id);
+        }
+        for (const vehicle_id of wideVehicles) {
+          await catalog.createFitments([{ part_id: oilFilter, vehicle_id }]);
+        }
+        await catalog.createFitments(
+          others.map((part_id) => ({ part_id, vehicle_id: wideVehicles[0] })),
+        );
 
         const [mannOil] = await catalog.listPartIdentifiers({
           normalized_value: 'HU816X',
@@ -214,6 +236,33 @@ medusaIntegrationTestRunner({
         expect(
           page.parts.flatMap(({ pages }) => pages.map(({ slug }) => slug)),
         ).not.toContain('mann-filter-hu9');
+      });
+
+      it('sends the first fits of a part and how many cars of the Series it fits in all', async () => {
+        const response = await get(
+          seriesCategoryPagePath(
+            'bmw',
+            seriesSlugOf(WIDE_SERIES),
+            'oil-filters',
+          ),
+        );
+        expect(response.status).toBe(200);
+        const page = seriesCategoryPageResponseSchema.parse(response.data);
+        const wide = page.parts.find(({ pages }) =>
+          pages.some(({ slug }) => slug === 'mann-filter-hu816x'),
+        )!;
+        const shown = wideVehicles.slice(0, SERIES_FITS_SHOWN);
+
+        expect(wide.fits.map(({ vehicle_id }) => vehicle_id)).toEqual(shown);
+        expect(wide.fit_count).toBe(wideVehicles.length);
+        expect(
+          page.parts
+            .filter((part) => part !== wide)
+            .map(({ fit_count }) => fit_count),
+        ).toEqual([1, 1]);
+        expect(page.vehicles.map(({ id }) => id).sort()).toEqual(
+          [...shown].sort(),
+        );
       });
 
       it('names the Series and its cars in the locale of the header', async () => {

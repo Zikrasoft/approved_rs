@@ -147,6 +147,21 @@ describe('seriesCategoryPageResponseSchema', () => {
     expect(parsed.vehicles[0].id).toBe('veh_1');
   });
 
+  it('reads how many cars in the Series each part fits in all', () => {
+    const parsed = seriesCategoryPageResponseSchema.parse({
+      ...categoryPage,
+      parts: [{ pages: [page], fits: [], fit_count: 14 }],
+    });
+
+    expect(parsed.parts[0].fit_count).toBe(14);
+  });
+
+  it('reads an older shop that sends no fit count as unknown', () => {
+    const parsed = seriesCategoryPageResponseSchema.parse(categoryPage);
+
+    expect(parsed.parts[0].fit_count).toBeNull();
+  });
+
   it('reads a shop that sends no vehicles as none', () => {
     const { vehicles: _vehicles, ...older } = categoryPage;
 

@@ -165,7 +165,7 @@ export type SeriesHubData = {
 export type SeriesCategoryData = {
   series: SeriesHub;
   category: Category;
-  parts: ModelPart[];
+  parts: (ModelPart & { more: number })[];
 };
 
 export type CheckoutOutcome =
@@ -399,10 +399,11 @@ export function createCatalogue({
       return {
         series: found.series,
         category: found.category,
-        parts: found.parts.map(({ pages, fits }) => ({
+        parts: found.parts.map(({ pages, fits, fit_count }) => ({
           part: pages[0].part,
           pages: pages.map((page) => seriesCard(page, found.category)),
           fits: known.fits(fits),
+          more: Math.max(0, (fit_count ?? 0) - fits.length),
         })),
       };
     },

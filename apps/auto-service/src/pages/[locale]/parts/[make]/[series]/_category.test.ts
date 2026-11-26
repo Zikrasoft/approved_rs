@@ -82,9 +82,14 @@ const g20 = {
 };
 
 const seriesCategoryResponse = (
-  { path = '/ru/parts/bmw/3-series/oil-filters/', headers = {} } = {} as {
+  {
+    path = '/ru/parts/bmw/3-series/oil-filters/',
+    headers = {},
+    fitCount,
+  } = {} as {
     path?: string;
     headers?: Record<string, string>;
+    fitCount?: number | null;
   },
 ) => {
   const shop = stubShop(() =>
@@ -98,6 +103,7 @@ const seriesCategoryResponse = (
             { part_id: numbers[0].part.id, vehicle_id: g20.id },
             { part_id: numbers[0].part.id, vehicle_id: 'vehicle_gone' },
           ],
+          ...(fitCount !== undefined && { fit_count: fitCount }),
         },
       ],
       vehicles: [g20],
@@ -117,10 +123,19 @@ const seriesCategoryResponse = (
   };
 };
 
-const seriesCategory = async () => {
+const seriesCategory = async (fitCount?: number | null) => {
   setShop(true);
-  return parseHtml(await (await seriesCategoryResponse().response).text());
+  return parseHtml(
+    await (await seriesCategoryResponse({ fitCount }).response).text(),
+  );
 };
+
+const moreCarsLink = (page: ReturnType<typeof parseHtml>) =>
+  [...page.querySelectorAll('a')].find((anchor) =>
+    anchor.textContent
+      ?.trim()
+      .startsWith(content('ru').shopPart.fitsMore.replace(' {count}', '')),
+  );
 
 describe('the Series category page', () => {
   it('links the whole category in ink, not orange', async () => {
@@ -147,6 +162,22 @@ describe('the Series category page', () => {
 
     expect(page.querySelectorAll('li > ul.border-t > li')).toHaveLength(1);
     expect(page.textContent).toContain('318d');
+  });
+
+  it('says how many more cars the part fits and links its own page for them', async () => {
+    const page = await seriesCategory(9);
+    const link = moreCarsLink(page)!;
+
+    expect(link.textContent?.trim()).toBe(
+      content('ru').shopPart.fitsMore.replace('{count}', '7'),
+    );
+    expect(link.getAttribute('href')).toBe('/ru/parts/p/bmw-11428507683/');
+  });
+
+  it('says nothing more when every fit is shown or the shop sends no count', async () => {
+    expect(moreCarsLink(await seriesCategory(2))).toBeUndefined();
+    expect(moreCarsLink(await seriesCategory(null))).toBeUndefined();
+    expect(moreCarsLink(await seriesCategory())).toBeUndefined();
   });
 
   it('counts the current numbers and says so', async () => {
