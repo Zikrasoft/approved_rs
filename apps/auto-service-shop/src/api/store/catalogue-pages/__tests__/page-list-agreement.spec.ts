@@ -7,7 +7,10 @@ import {
   categoryPagePath,
   makePagePath,
   partPagePath,
+  SERIES_CATEGORY_PAGE_SIZE,
+  seriesCategoryPageCount,
   seriesCategoryPagePath,
+  seriesCategoryPageResponseSchema,
   seriesPagePath,
   type CataloguePageList,
 } from '@podbor/catalog-contract';
@@ -21,9 +24,14 @@ import type PublishModuleService from '../../../../modules/publish/service';
 
 const pagesOf = ({ makes, series, categories, parts }: CataloguePageList) => [
   ...makes.filter(({ hub }) => hub).map(({ slug }) => makePagePath(slug)),
-  ...series.flatMap(({ make, slug, categories: own }) => [
+  ...series.flatMap(({ make, slug, categories: own, listed }) => [
     seriesPagePath(make, slug),
-    ...own.map((category) => seriesCategoryPagePath(make, slug, category)),
+    ...own.flatMap((category) =>
+      Array.from(
+        { length: seriesCategoryPageCount(listed?.[category] ?? 0) },
+        (_, index) => seriesCategoryPagePath(make, slug, category, index + 1),
+      ),
+    ),
   ]),
   ...categories.flatMap(({ slug, listed }) =>
     Array.from({ length: categoryPageCount(listed ?? 0) }, (_, index) =>
@@ -147,9 +155,16 @@ medusaIntegrationTestRunner({
           quantity: 1,
           chassis_id: required.chassis.id,
         });
+        const bulbParts: { part_id: string }[] = [];
         for (let index = 0; index <= CATEGORY_PAGE_SIZE; index += 1) {
-          await numbered(`AGB ${index}`, bulbs.id, {});
+          bulbParts.push(await numbered(`AGB ${index}`, bulbs.id, {}));
         }
+        await catalog.createFitments(
+          bulbParts.map(({ part_id }) => ({
+            part_id,
+            vehicle_id: fitted.vehicle.id,
+          })),
+        );
         await publish.publishAll();
         await publish.buildCatalogueSnapshot();
       });
@@ -175,9 +190,46 @@ medusaIntegrationTestRunner({
               'oils',
             ),
             categoryPagePath('bulbs', 2),
+            seriesCategoryPagePath(
+              'bmw',
+              seriesSlugOf('Fitted series'),
+              'bulbs',
+              seriesCategoryPageCount(CATEGORY_PAGE_SIZE + 1),
+            ),
           ]),
         );
         expect(statuses.filter(([, status]) => status !== 200)).toEqual([]);
+      });
+
+      it('splits the parts of a Series Category across its pages in order', async () => {
+        const count = seriesCategoryPageCount(CATEGORY_PAGE_SIZE + 1);
+        const pages = await Promise.all(
+          Array.from({ length: count }, async (_, index) =>
+            seriesCategoryPageResponseSchema.parse(
+              (
+                await api.get(
+                  seriesCategoryPagePath(
+                    'bmw',
+                    seriesSlugOf('Fitted series'),
+                    'bulbs',
+                    index + 1,
+                  ),
+                  storeHeaders,
+                )
+              ).data,
+            ),
+          ),
+        );
+        const ids = pages.flatMap(({ parts }) =>
+          parts.map(({ pages: [first] }) => first.part.id),
+        );
+
+        expect(pages.map(({ page, pages: total }) => [page, total])).toEqual(
+          pages.map((_, index) => [index + 1, count]),
+        );
+        expect(pages[0].parts).toHaveLength(SERIES_CATEGORY_PAGE_SIZE);
+        expect(ids).toHaveLength(CATEGORY_PAGE_SIZE + 1);
+        expect(ids).toEqual([...new Set(ids)].sort());
       });
 
       it('gives every Part page the indexable flag the list gives it', async () => {
@@ -201,6 +253,13 @@ medusaIntegrationTestRunner({
           seriesPagePath('tiny', seriesSlugOf('Small series')),
           seriesCategoryPagePath('bmw', seriesSlugOf('Fitted series'), 'oils'),
           categoryPagePath('bulbs', categoryPageCount(bulbs.listed ?? 0) + 1),
+          seriesCategoryPagePath(
+            'bmw',
+            seriesSlugOf('Fitted series'),
+            'bulbs',
+            seriesCategoryPageCount(CATEGORY_PAGE_SIZE + 1) + 1,
+          ),
+          `${seriesCategoryPagePath('bmw', seriesSlugOf('Fitted series'), 'bulbs')}?page=0`,
         ];
 
         const statuses = await Promise.all(

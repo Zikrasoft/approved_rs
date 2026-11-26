@@ -87,6 +87,18 @@ describe('PathBuilder', () => {
     },
   );
 
+  it('puts a Series Category page past the first under its number', () => {
+    expect(
+      PathBuilder.partsSeriesCategory('sr', 'audi', 'a6', 'shock-absorbers'),
+    ).toBe('/sr/parts/audi/a6/shock-absorbers/');
+    expect(
+      PathBuilder.partsSeriesCategory('sr', 'audi', 'a6', 'shock-absorbers', 1),
+    ).toBe('/sr/parts/audi/a6/shock-absorbers/');
+    expect(
+      PathBuilder.partsSeriesCategory('sr', 'audi', 'a6', 'shock-absorbers', 2),
+    ).toBe('/sr/parts/audi/a6/shock-absorbers/2/');
+  });
+
   it('puts the blog, its later pages, an Article and a Make page under their sections', () => {
     expect(PathBuilder.blog('sr')).toBe('/sr/blog/');
     expect(PathBuilder.blog('sr', 1)).toBe('/sr/blog/');

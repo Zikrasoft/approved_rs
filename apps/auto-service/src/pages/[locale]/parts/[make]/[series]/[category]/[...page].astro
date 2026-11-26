@@ -8,6 +8,7 @@ import FitLine from '@/components/FitLine.astro';
 import InkLink from '@/components/InkLink.astro';
 import FittedPart from '@/components/FittedPart.astro';
 import ListingBar from '@/components/ListingBar.astro';
+import ListingPager from '@/components/ListingPager.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { carName, seriesName, vehicleVariant } from '@/utils/carName';
@@ -15,17 +16,31 @@ import { loadCataloguePage } from '@/utils/cataloguePage';
 import { keySpecs } from '@/utils/attributeRows';
 import { paragraphs } from '@podbor/site-kit';
 import { PathBuilder } from '@/utils/paths';
+import {
+  listingHeading,
+  neighbours,
+  requestedListingPage,
+} from '@/utils/listing';
+import { withPlaceholder } from '@podbor/i18n';
 
-const loaded = await loadCataloguePage(Astro, (catalogue, catalogueLocale) =>
-  catalogue.seriesCategoryPage(
-    Astro.params.make ?? '',
-    Astro.params.series ?? '',
-    Astro.params.category ?? '',
-    catalogueLocale,
-  ),
+const requested = requestedListingPage(Astro.params.page);
+const loaded = await loadCataloguePage(
+  Astro,
+  async (catalogue, catalogueLocale) => {
+    const found = requested
+      ? await catalogue.seriesCategoryPage(
+          Astro.params.make ?? '',
+          Astro.params.series ?? '',
+          Astro.params.category ?? '',
+          requested,
+          catalogueLocale,
+        )
+      : null;
+    return found?.page === requested ? found : null;
+  },
 );
 if (loaded instanceof Response) return loaded;
-const { series, category, parts } = loaded;
+const { series, category, parts, page: number, pages: pageCount } = loaded;
 const locale = localeFrom(Astro.url.pathname);
 const site = content(locale).site;
 const copy = content(locale).partsCar.hubs.modelCategory;
@@ -37,17 +52,35 @@ const [lead, ...body] = paragraphs(category.text);
 const listed = parts.flatMap(({ pages }) =>
   pages.filter(({ superseded }) => !superseded),
 );
+const listingCopy = content(locale).pages.partsInquiry.category;
+const listing = { number, count: pageCount };
+const firstPage = number === 1;
+const pageHref = (target: number) =>
+  PathBuilder.partsSeriesCategory(
+    locale,
+    make.slug,
+    series.slug,
+    category.slug,
+    target,
+  );
+const { prev, next } = neighbours(listing, pageHref);
+const heading = listingHeading(number, {
+  heading: categoryName,
+  pageName: withPlaceholder(listingCopy.pageName, 'name', categoryName),
+});
 const fill = (template: string) =>
-  template.replace('{category}', categoryName).replace('{model}', name);
+  template.replace('{category}', heading).replace('{model}', name);
 const SAID_BY_FIT = ['axle'];
 ---
 
 <Shell title={fill(copy.metaTitle)} description={fill(copy.metaDescription)}>
+  {prev && <link slot="head" rel="prev" href={prev} />}
+  {next && <link slot="head" rel="next" href={next} />}
   <PageHero
     actions={false}
     eyebrow={fill(copy.eyebrow)}
-    heading={categoryName}
-    lead={lead}
+    heading={heading}
+    lead={firstPage ? lead : undefined}
     crumbs={[
       { href: PathBuilder.parts(locale), label: site.nav.parts },
       { href: PathBuilder.partsMake(locale, make.slug), label: make.name },
@@ -55,15 +88,7 @@ const SAID_BY_FIT = ['axle'];
         href: PathBuilder.partsSeries(locale, make.slug, series.slug),
         label: name,
       },
-      {
-        href: PathBuilder.partsSeriesCategory(
-          locale,
-          make.slug,
-          series.slug,
-          category.slug,
-        ),
-        label: categoryName,
-      },
+      { href: pageHref(1), label: categoryName },
     ]}
   />
 
@@ -124,11 +149,16 @@ const SAID_BY_FIT = ['axle'];
             ))
           }
         </ul>
+        <ListingPager
+          label={listingCopy.pagination}
+          listing={listing}
+          href={pageHref}
+        />
         <InquiryLink topic={`${name}, ${categoryName}`} />
       </div>
 
       {
-        body.length > 0 && (
+        firstPage && body.length > 0 && (
           <div class="flex max-w-2xl flex-col gap-4 text-base leading-relaxed text-ink-2">
             {body.map((paragraph) => (
               <p>{paragraph}</p>

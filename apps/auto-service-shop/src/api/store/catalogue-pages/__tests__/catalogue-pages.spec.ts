@@ -167,6 +167,7 @@ medusaIntegrationTestRunner({
             slug: expect.any(String),
             name: 'Big series',
             categories: ['filters'],
+            listed: { filters: 3 },
           },
         ]);
         expect(makes).toEqual(

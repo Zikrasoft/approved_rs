@@ -5,7 +5,7 @@ import {
   catalogueLocaleSchema,
   type CatalogLocale,
 } from '@podbor/catalog-contract';
-import type { z } from 'zod';
+import { z } from 'zod';
 
 import { pricesShown } from './shop-gate';
 import { storeRead } from './store-read';
@@ -30,6 +30,11 @@ const closed = (res: MedusaResponse) =>
   new Promise<'closed'>((resolve) =>
     res.once('close', () => resolve('closed')),
   );
+
+const pageNumberSchema = z.coerce.number().int().positive().catch(0);
+
+export const requestedPage = (req: MedusaRequest): number =>
+  pageNumberSchema.parse(req.query.page ?? 1);
 
 export type PageRequest = { locale: CatalogLocale; shown: boolean };
 

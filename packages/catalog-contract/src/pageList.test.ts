@@ -9,7 +9,13 @@ const list = {
   parts: [{ slug: 'bmw-11428575211', indexable: true }],
   makes: [{ slug: 'bmw', name: 'BMW', hub: true, parts: 9 }],
   series: [
-    { make: 'bmw', slug: '3-series', name: '3 Series', categories: ['brakes'] },
+    {
+      make: 'bmw',
+      slug: '3-series',
+      name: '3 Series',
+      categories: ['brakes'],
+      listed: { brakes: 60 },
+    },
   ],
   categories: [{ slug: 'brakes', name: 'Brakes', listed: 4, demand: 12 }],
   catalogue_makes: [{ slug: 'bmw', name: 'BMW', show_on_site: true }],
@@ -39,6 +45,14 @@ describe('cataloguePageListSchema', () => {
     expect(
       cataloguePageListSchema.parse({ ...list, categories: [older] })
         .categories[0].demand,
+    ).toBeNull();
+  });
+
+  it('reads a Series without its Category counts an older shop leaves out as null', () => {
+    const { listed: _listed, ...older } = list.series[0];
+    expect(
+      cataloguePageListSchema.parse({ ...list, series: [older] }).series[0]
+        .listed,
     ).toBeNull();
   });
 

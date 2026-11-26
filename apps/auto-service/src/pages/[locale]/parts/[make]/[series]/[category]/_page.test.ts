@@ -10,7 +10,7 @@ import {
   SHOP_PREVIEW_TOKEN,
   stubShop,
 } from '@/components/renderAstro';
-import SeriesCategoryPage from './[category].astro';
+import SeriesCategoryPage from './[...page].astro';
 
 const copy = content('ru').partsSearch;
 
@@ -86,10 +86,12 @@ const seriesCategoryResponse = (
     path = '/ru/parts/bmw/3-series/oil-filters/',
     headers = {},
     fitCount,
+    paging = {},
   } = {} as {
     path?: string;
     headers?: Record<string, string>;
     fitCount?: number | null;
+    paging?: { page?: number; pages?: number };
   },
 ) => {
   const shop = stubShop(() =>
@@ -107,9 +109,10 @@ const seriesCategoryResponse = (
         },
       ],
       vehicles: [g20],
+      ...paging,
     }),
   );
-  const [, locale, , make, seriesSlug, category] = new URL(
+  const [, locale, , make, seriesSlug, category, page] = new URL(
     path,
     'https://carlab.rs',
   ).pathname.split('/');
@@ -118,7 +121,15 @@ const seriesCategoryResponse = (
     response: respond(
       SeriesCategoryPage,
       new Request(new URL(path, 'https://carlab.rs'), { headers }),
-      { params: { locale, make, series: seriesSlug, category } },
+      {
+        params: {
+          locale,
+          make,
+          series: seriesSlug,
+          category,
+          ...(page && { page }),
+        },
+      },
     ),
   };
 };
@@ -194,6 +205,82 @@ describe('the Series category page', () => {
     expect(page.querySelector('filter-sheet')).toBeNull();
     expect(page.querySelector('nav[aria-label="Порядок"]')).toBeNull();
   });
+});
+
+describe('a later page of the Series category page', () => {
+  const laterPage = async (paging: { page?: number; pages?: number }) => {
+    setShop(false);
+    const { shop, response } = seriesCategoryResponse({
+      path: '/ru/parts/bmw/3-series/oil-filters/2/',
+      paging,
+    });
+    return { shop, response: await response };
+  };
+
+  it('asks the shop for its page and links the pages around it', async () => {
+    const { shop, response } = await laterPage({ page: 2, pages: 3 });
+    const page = parseHtml(await response.text());
+
+    expect(String(shop.mock.calls[0][0])).toBe(
+      'http://shop.test/store/catalogue-pages/series/bmw/3-series/oil-filters?page=2',
+    );
+    expect(page.querySelector('link[rel="prev"]')?.getAttribute('href')).toBe(
+      '/ru/parts/bmw/3-series/oil-filters/',
+    );
+    expect(page.querySelector('link[rel="next"]')?.getAttribute('href')).toBe(
+      '/ru/parts/bmw/3-series/oil-filters/3/',
+    );
+    expect(
+      page.querySelector('link[rel="canonical"]')?.getAttribute('href'),
+    ).toBe('https://carlab.rs/ru/parts/bmw/3-series/oil-filters/2/');
+    expect(
+      page
+        .querySelector(
+          `nav[aria-label="${content('ru').pages.partsInquiry.category.pagination}"] a[href="/ru/parts/bmw/3-series/oil-filters/3/"]`,
+        )
+        ?.textContent?.trim(),
+    ).toBe('3');
+  });
+
+  it('names its page number in the heading and leaves the Category text to the first page', async () => {
+    const { response } = await laterPage({ page: 2, pages: 3 });
+    const page = parseHtml(await response.text());
+
+    expect(page.querySelector('h1')?.textContent).toContain('2');
+    expect(page.textContent).not.toContain(oilFilters.text);
+  });
+
+  it('answers 404 when an older shop sends the first page instead', async () => {
+    const { response } = await laterPage({});
+
+    expect(response.status).toBe(404);
+  });
+
+  it.each(['1', '01', 'two'])(
+    'answers 404 for the page segment %s without asking the shop',
+    async (segment) => {
+      setShop(false);
+      const shop = stubShop(() => Response.json({}));
+      const response = await respond(
+        SeriesCategoryPage,
+        new Request(
+          `https://carlab.rs/ru/parts/bmw/3-series/oil-filters/${segment}/`,
+        ),
+        {
+          params: {
+            locale: 'ru',
+            make: 'bmw',
+            series: '3-series',
+            category: 'oil-filters',
+            page: segment,
+          },
+        },
+      );
+
+      expect(response.status).toBe(404);
+      expect(shop).not.toHaveBeenCalled();
+    },
+  );
 });
 
 describe('the Series category page rendered on demand', () => {

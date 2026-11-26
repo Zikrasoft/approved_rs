@@ -59,6 +59,7 @@ type SeriesRow = Awaited<
 export type PagedSeries = SeriesRow & {
   slug: string;
   categoryIds: string[];
+  categoryParts: Map<string, number>;
 };
 
 export type CatalogueStructure = {
@@ -86,13 +87,13 @@ export async function catalogueStructure(
   const counts = new Map(
     seriesCountsOf(held).map((row) => [row.series_id, row]),
   );
-  const categoryPages = new Map<string, string[]>();
+  const categoryPages = new Map<string, Map<string, number>>();
   for (const { series_id, category_id, parts } of held) {
     if (category_id !== null && seriesCategoryHasPage(parts)) {
-      categoryPages.set(series_id, [
-        ...(categoryPages.get(series_id) ?? []),
-        category_id,
-      ]);
+      categoryPages.set(
+        series_id,
+        (categoryPages.get(series_id) ?? new Map()).set(category_id, parts),
+      );
     }
   }
   const paged = series
@@ -103,7 +104,8 @@ export async function catalogueStructure(
     .map((row) => ({
       ...row,
       slug: seriesSlugOf(row.name),
-      categoryIds: categoryPages.get(row.id) ?? [],
+      categoryIds: [...(categoryPages.get(row.id)?.keys() ?? [])],
+      categoryParts: categoryPages.get(row.id) ?? new Map<string, number>(),
     }));
   const partsPerMake = new Map<string, number>();
   for (const { id, make } of series) {

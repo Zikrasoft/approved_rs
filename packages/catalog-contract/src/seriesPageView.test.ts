@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
+  SERIES_CATEGORY_PAGE_SIZE,
+  seriesCategoryPageCount,
   seriesCategoryPagePath,
   seriesCategoryPageResponseSchema,
   seriesPagePath,
@@ -162,6 +164,22 @@ describe('seriesCategoryPageResponseSchema', () => {
     expect(parsed.parts[0].fit_count).toBeNull();
   });
 
+  it('reads which page of how many the answer is', () => {
+    const parsed = seriesCategoryPageResponseSchema.parse({
+      ...categoryPage,
+      page: 2,
+      pages: 3,
+    });
+
+    expect([parsed.page, parsed.pages]).toEqual([2, 3]);
+  });
+
+  it('reads an older shop that sends no pages as unknown', () => {
+    const parsed = seriesCategoryPageResponseSchema.parse(categoryPage);
+
+    expect([parsed.page, parsed.pages]).toEqual([null, null]);
+  });
+
   it('reads a shop that sends no vehicles as none', () => {
     const { vehicles: _vehicles, ...older } = categoryPage;
 
@@ -194,5 +212,22 @@ describe('the Series page paths', () => {
     expect(seriesCategoryPagePath('bmw', '3-series', 'oil-filters')).toBe(
       '/store/catalogue-pages/series/bmw/3-series/oil-filters',
     );
+  });
+
+  it('asks for a later page of the Category page and keeps the first bare', () => {
+    expect(seriesCategoryPagePath('bmw', '3-series', 'oil-filters', 1)).toBe(
+      '/store/catalogue-pages/series/bmw/3-series/oil-filters',
+    );
+    expect(seriesCategoryPagePath('bmw', '3-series', 'oil-filters', 2)).toBe(
+      '/store/catalogue-pages/series/bmw/3-series/oil-filters?page=2',
+    );
+  });
+});
+
+describe('seriesCategoryPageCount', () => {
+  it('splits the parts of a Series Category into pages and keeps one for none', () => {
+    expect(seriesCategoryPageCount(0)).toBe(1);
+    expect(seriesCategoryPageCount(SERIES_CATEGORY_PAGE_SIZE)).toBe(1);
+    expect(seriesCategoryPageCount(SERIES_CATEGORY_PAGE_SIZE + 1)).toBe(2);
   });
 });

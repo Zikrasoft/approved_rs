@@ -51,7 +51,20 @@ describe('catalogueUrls', () => {
       { slug: 'tiny', name: 'Tiny', hub: false, parts: null },
     ],
     series: [
-      { make: 'bmw', slug: '3-series', name: '3', categories: ['brakes'] },
+      {
+        make: 'bmw',
+        slug: '3-series',
+        name: '3',
+        categories: ['brakes', 'filters'],
+        listed: { brakes: 30 },
+      },
+      {
+        make: 'audi',
+        slug: 'a6',
+        name: 'A6',
+        categories: ['brakes'],
+        listed: null,
+      },
     ],
     categories: [
       { slug: 'brakes', name: 'Brakes', listed: 100, demand: null },
@@ -72,6 +85,19 @@ describe('catalogueUrls', () => {
     );
     expect(urls).not.toContain(`${SITE}/sr/parts/tiny/`);
     expect(urls).not.toContain(`${SITE}/sr/parts/p/bmw-2/`);
+  });
+
+  it('lists each page of a Series Category and one where the shop sends no count', () => {
+    expect(urls).toEqual(
+      expect.arrayContaining([
+        `${SITE}/sr/parts/bmw/3-series/brakes/`,
+        `${SITE}/sr/parts/bmw/3-series/brakes/2/`,
+        `${SITE}/sr/parts/bmw/3-series/filters/`,
+        `${SITE}/sr/parts/audi/a6/brakes/`,
+      ]),
+    );
+    expect(urls).not.toContain(`${SITE}/sr/parts/bmw/3-series/brakes/3/`);
+    expect(urls).not.toContain(`${SITE}/sr/parts/bmw/3-series/filters/2/`);
   });
 
   it('lists each page of a Category listing and one for an empty Category', () => {

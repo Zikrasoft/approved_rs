@@ -15,7 +15,15 @@ const list = (): CataloguePageList => ({
     { slug: 'bmw', name: 'BMW', hub: true, parts: 5 },
     { slug: 'kia', name: 'Kia', hub: false, parts: 1 },
   ],
-  series: [{ slug: 'x3', name: 'X3', make: 'bmw', categories: ['brakes'] }],
+  series: [
+    {
+      slug: 'x3',
+      name: 'X3',
+      make: 'bmw',
+      categories: ['brakes'],
+      listed: null,
+    },
+  ],
   categories: [
     { slug: 'brakes', name: 'Brakes', listed: 40, demand: 0 },
     { slug: 'oil', name: 'Oil', listed: 2, demand: 0 },

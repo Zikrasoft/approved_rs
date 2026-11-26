@@ -8,11 +8,18 @@ import { vehicleSchema } from './vehicle.ts';
 export const seriesPagePath = (make: string, series: string): string =>
   `${CATALOGUE_PAGES_PATH}/series/${encodeURIComponent(make)}/${encodeURIComponent(series)}`;
 
+export const SERIES_CATEGORY_PAGE_SIZE = 24;
+
+export const seriesCategoryPageCount = (listed: number): number =>
+  Math.max(1, Math.ceil(listed / SERIES_CATEGORY_PAGE_SIZE));
+
 export const seriesCategoryPagePath = (
   make: string,
   series: string,
   category: string,
-): string => `${seriesPagePath(make, series)}/${encodeURIComponent(category)}`;
+  page = 1,
+): string =>
+  `${seriesPagePath(make, series)}/${encodeURIComponent(category)}${page > 1 ? `?page=${page}` : ''}`;
 
 export const seriesRefSchema =
   vehicleSchema.shape.model.shape.chassis.shape.series.extend({
@@ -37,6 +44,8 @@ export const seriesCategoryPageResponseSchema = z.object({
     }),
   ),
   vehicles: z.array(vehicleSchema).default([]),
+  page: z.number().int().positive().nullable().default(null),
+  pages: z.number().int().positive().nullable().default(null),
 });
 
 export type SeriesPageResponse = z.infer<typeof seriesPageResponseSchema>;

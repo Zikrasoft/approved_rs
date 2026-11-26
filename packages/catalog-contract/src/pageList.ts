@@ -13,6 +13,10 @@ export const cataloguePageListSchema = z.object({
     makeSchema.extend({
       make: z.string().min(1),
       categories: z.array(z.string().min(1)),
+      listed: z
+        .record(z.string(), z.number().int().nonnegative())
+        .nullable()
+        .default(null),
     }),
   ),
   categories: z.array(

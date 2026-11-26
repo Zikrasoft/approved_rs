@@ -24,14 +24,16 @@ import { PARTS_INQUIRY_ANCHOR, PathBuilder } from '@/utils/paths';
 import { partThumbnail } from '@/utils/partImages';
 import { partSuccessor } from '@/utils/partSuccessor';
 import { rangeText, withFacetCopy } from '@/utils/partsSearch';
-import { listingHeading, neighbours } from '@/utils/listing';
+import {
+  listingHeading,
+  neighbours,
+  requestedListingPage,
+} from '@/utils/listing';
 
 const { slug = '', page: pageParam } = Astro.params;
-const requested = pageParam === undefined ? 1 : Number(pageParam);
-const listed =
-  pageParam === undefined || (/^[1-9]\d*$/.test(pageParam) && requested > 1);
+const requested = requestedListingPage(pageParam);
 const loaded = await loadCataloguePage(Astro, (catalogue, catalogueLocale) =>
-  listed
+  requested
     ? catalogue.categoryPage(slug, requested, catalogueLocale)
     : Promise.resolve(null),
 );

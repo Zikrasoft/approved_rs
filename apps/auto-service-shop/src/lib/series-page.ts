@@ -6,6 +6,8 @@ import {
   type PartDemand,
   type SeriesCategoryPageResponse,
   type SeriesPageResponse,
+  SERIES_CATEGORY_PAGE_SIZE,
+  seriesCategoryPageCount,
   type SluggedPartPage,
   type Vehicle,
 } from '@podbor/catalog-contract';
@@ -169,6 +171,7 @@ export async function seriesCategoryPageAt(
   seriesSlug: string,
   categorySlug: string,
   options: Options,
+  page = 1,
 ): Promise<SeriesCategoryPageResponse | null> {
   const [place, [category]] = await Promise.all([
     placeOf(scope, makeSlug, seriesSlug),
@@ -177,16 +180,22 @@ export async function seriesCategoryPageAt(
       { relations: CATEGORY_RELATIONS },
     ),
   ]);
-  const partIds = place && category && place.categories.get(category.id);
-  if (!place || !category || !partIds) return null;
-  const [pages, fitments] = await Promise.all([
+  const listed = place && category && place.categories.get(category.id);
+  if (!place || !category || !listed) return null;
+  const pages = seriesCategoryPageCount(listed.length);
+  if (page > pages) return null;
+  const partIds = listed.slice(
+    (page - 1) * SERIES_CATEGORY_PAGE_SIZE,
+    page * SERIES_CATEGORY_PAGE_SIZE,
+  );
+  const [numbers, fitments] = await Promise.all([
     pagesOfParts(scope, partIds, options),
     place.catalog.fitmentRows({
       part_id: partIds,
       vehicle_id: place.vehicles.map(({ id }) => id),
     }),
   ]);
-  const pagesOf = groupBy(pages, ({ part }) => part.id);
+  const pagesOf = groupBy(numbers, ({ part }) => part.id);
   const fitsOf = groupBy(
     fitments.map(toFitmentResponse),
     ({ part_id }) => part_id,
@@ -219,5 +228,7 @@ export async function seriesCategoryPageAt(
     ),
     category: localizedCategory(shownCategory(category), options.locale),
     parts,
+    page,
+    pages,
   };
 }

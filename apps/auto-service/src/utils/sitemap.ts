@@ -1,5 +1,6 @@
 import {
   categoryPageCount,
+  seriesCategoryPageCount,
   type CataloguePageList,
 } from '@podbor/catalog-contract';
 import { CARLAB } from '@podbor/brands';
@@ -36,12 +37,17 @@ export function catalogueUrls(
       ...hubs.map(({ slug }) => PathBuilder.partsMake(locale, slug)),
       ...series.flatMap((entry) => [
         PathBuilder.partsSeries(locale, entry.make, entry.slug),
-        ...entry.categories.map((category) =>
-          PathBuilder.partsSeriesCategory(
-            locale,
-            entry.make,
-            entry.slug,
-            category,
+        ...entry.categories.flatMap((category) =>
+          Array.from(
+            { length: seriesCategoryPageCount(entry.listed?.[category] ?? 0) },
+            (_, index) =>
+              PathBuilder.partsSeriesCategory(
+                locale,
+                entry.make,
+                entry.slug,
+                category,
+                index + 1,
+              ),
           ),
         ),
       ]),

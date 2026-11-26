@@ -166,6 +166,8 @@ export type SeriesCategoryData = {
   series: SeriesHub;
   category: Category;
   parts: (ModelPart & { more: number })[];
+  page: number;
+  pages: number;
 };
 
 export type CheckoutOutcome =
@@ -387,10 +389,11 @@ export function createCatalogue({
       make: string,
       series: string,
       category: string,
+      page: number,
       locale: CatalogLocale,
     ): Promise<SeriesCategoryData | null> {
       const found = await cataloguePage(
-        seriesCategoryPagePath(make, series, category),
+        seriesCategoryPagePath(make, series, category, page),
         locale,
         seriesCategoryPageResponseSchema,
       );
@@ -405,6 +408,8 @@ export function createCatalogue({
           fits: known.fits(fits),
           more: Math.max(0, (fit_count ?? 0) - fits.length),
         })),
+        page: found.page ?? 1,
+        pages: found.pages ?? 1,
       };
     },
 

@@ -23,7 +23,9 @@ export const PathBuilder = {
     make: string,
     series: string,
     category: string,
-  ) => `/${locale}/parts/${make}/${series}/${category}/`,
+    page = 1,
+  ) =>
+    `/${locale}/parts/${make}/${series}/${category}/${page > 1 ? `${page}/` : ''}`,
   partsSearch: (locale: Locale) => `/${locale}/parts/search/`,
   partsModelSearch: (locale: Locale, make: string, model: string) =>
     `/${locale}/parts/search/?${new URLSearchParams({ make, model })}`,

@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { SITE_NAME } from './constants';
-import { listingHeading, listingTitle, neighbours } from './listing';
+import {
+  listingHeading,
+  listingTitle,
+  neighbours,
+  requestedListingPage,
+} from './listing';
 
 const copy = {
   heading: 'Блог',
@@ -30,4 +35,18 @@ describe('a paged listing', () => {
       next: '/p/3/',
     });
   });
+});
+
+describe('requestedListingPage', () => {
+  it('reads no segment as the first page and a later number as that page', () => {
+    expect(requestedListingPage(undefined)).toBe(1);
+    expect(requestedListingPage('2')).toBe(2);
+  });
+
+  it.each(['1', '01', '0', 'two', '2.5'])(
+    'refuses the segment %s, which no page link prints',
+    (segment) => {
+      expect(requestedListingPage(segment)).toBeNull();
+    },
+  );
 });

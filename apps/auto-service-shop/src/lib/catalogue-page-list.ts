@@ -73,13 +73,19 @@ async function buildPageList(scope: MedusaContainer) {
       hub: structure.hub(slug),
       parts: structure.makeParts(slug),
     })),
-    series: paged.map(({ slug, name, make, categoryIds }) => ({
+    series: paged.map(({ slug, name, make, categoryIds, categoryParts }) => ({
       make: make.slug,
       slug,
       name,
       categories: categoryIds
         .flatMap((id) => categorySlug.get(id) ?? [])
         .sort(),
+      listed: Object.fromEntries(
+        [...categoryParts].flatMap(([id, parts]) => {
+          const slug = categorySlug.get(id);
+          return slug ? [[slug, parts]] : [];
+        }),
+      ),
     })),
     categories: categories.map(({ id, slug, name }) => ({
       slug,
