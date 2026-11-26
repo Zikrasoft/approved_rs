@@ -1,6 +1,7 @@
 import { Modules } from '@medusajs/framework/utils';
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
+import { memoized } from '../../lib/catalogue-memo';
 import { CATALOG_MODULE } from '../../modules/catalog';
 import type CatalogModuleService from '../../modules/catalog/service';
 import { DEMAND_MODULE } from '../../modules/demand';
@@ -93,6 +94,16 @@ medusaIntegrationTestRunner({
         await refreshPartDemandAt(getContainer(), NOW);
 
         expect(reindexed()).toEqual([parts.fresh, parts.leaving].sort());
+      });
+
+      it('leaves the series category counts memo alone', async () => {
+        await memoized('series-category-counts', async () => 'before');
+
+        await refreshPartDemandAt(getContainer(), NOW);
+
+        const counts = jest.fn(async () => 'after');
+        expect(await memoized('series-category-counts', counts)).toBe('before');
+        expect(counts).not.toHaveBeenCalled();
       });
 
       it('forgets demand older than it keeps', async () => {

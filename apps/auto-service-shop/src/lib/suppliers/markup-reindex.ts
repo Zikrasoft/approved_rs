@@ -5,7 +5,6 @@ import { CATALOG_MODULE } from '../../modules/catalog';
 import type CatalogModuleService from '../../modules/catalog/service';
 import { SUPPLIER_MODULE } from '../../modules/supplier';
 import type SupplierModuleService from '../../modules/supplier/service';
-import { clearCatalogueMemo } from '../catalogue-memo';
 import { emitIndexChanges } from '../index-changes';
 
 export const SUPPLIER_MARKUP_CHANGED_EVENT =
@@ -43,6 +42,5 @@ export async function reindexSupplierOffers(
     );
     identifiers.forEach(({ part_id }) => partIds.add(part_id));
   }
-  clearCatalogueMemo();
   await emitIndexChanges(scope, { partIds });
 }
