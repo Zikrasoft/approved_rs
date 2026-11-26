@@ -30,6 +30,7 @@ import {
   type PricedOfferRow,
   SUPPLIER_MODULE,
 } from '../modules/supplier';
+import { groupBy } from '../lib/group-by';
 import { releasedSupplierData } from '../modules/supplier/released';
 import type SupplierModuleService from '../modules/supplier/service';
 import {
@@ -80,17 +81,6 @@ type IdentifierRow = {
       translations: Translations;
     } | null;
   };
-};
-
-const groupBy = <T, K>(items: T[], keyOf: (item: T) => K) => {
-  const groups = new Map<K, T[]>();
-  for (const item of items) {
-    const key = keyOf(item);
-    const group = groups.get(key);
-    if (group) group.push(item);
-    else groups.set(key, [item]);
-  }
-  return groups;
 };
 
 const lower = (text: string | undefined) => text?.toLowerCase();

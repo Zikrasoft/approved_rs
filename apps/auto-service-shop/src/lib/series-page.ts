@@ -20,6 +20,7 @@ import {
   localizedSeries,
   localizedVehicle,
 } from './catalogue-locale';
+import { groupBy } from './group-by';
 import { memoPartDemand } from './part-demand';
 import { localizedFit, publishedOfParts, sluggedPagesOf } from './part-pages';
 import { catalogueModules, catalogueStructure } from './catalogue-structure';
@@ -72,14 +73,6 @@ async function placeOf(
 }
 
 type Place = NonNullable<Awaited<ReturnType<typeof placeOf>>>;
-
-const groupBy = <Row, Key>(rows: Row[], key: (row: Row) => Key) => {
-  const groups = new Map<Key, Row[]>();
-  for (const row of rows) {
-    groups.set(key(row), [...(groups.get(key(row)) ?? []), row]);
-  }
-  return groups;
-};
 
 const modelsWithParts = ({ vehicles, places }: Place): Vehicle[][] => {
   const fittedBy = groupBy(
