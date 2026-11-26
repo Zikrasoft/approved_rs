@@ -158,6 +158,7 @@ const publishChain = (scope: MedusaContainer) => {
   const purge = purgeOf(scope);
   let changes = NO_CHANGES;
   let published = 0;
+  const stepMs: Record<string, number> = {};
   const steps: PublishStep[] = [
     {
       name: 'shrink',
@@ -231,15 +232,20 @@ const publishChain = (scope: MedusaContainer) => {
   ];
   return {
     steps,
-    report: () => ({ published }),
-    unfinished: () => ({ published, unfinished: changes }),
+    stepMs,
+    report: () => ({ published, step_ms: stepMs }),
+    unfinished: () => ({ published, step_ms: stepMs, unfinished: changes }),
   };
 };
 
 type StepFailure = { failed_step: string; error: string };
 
-async function runSteps(steps: PublishStep[]): Promise<StepFailure | null> {
+async function runSteps(
+  steps: PublishStep[],
+  stepMs: Record<string, number>,
+): Promise<StepFailure | null> {
   for (const step of steps) {
+    const started = Date.now();
     try {
       await step.run();
     } catch (error) {
@@ -247,6 +253,8 @@ async function runSteps(steps: PublishStep[]): Promise<StepFailure | null> {
         failed_step: step.name,
         error: errorMessage(error),
       };
+    } finally {
+      stepMs[step.name] = Date.now() - started;
     }
   }
   return null;
@@ -269,7 +277,7 @@ export const startPublishRun = (
   return startCatalogueRun(
     scope,
     { kind: 'publish', created_by: actorId },
-    () => runSteps(chain.steps),
+    () => runSteps(chain.steps, chain.stepMs),
     (failure): RunOutcome =>
       failure
         ? { status: 'failed', ...failure, report: chain.unfinished() }

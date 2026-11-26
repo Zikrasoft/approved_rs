@@ -13,6 +13,7 @@ import { createVehicleFixture } from '../../../../../integration-tests/vehicleFi
 import { refreshPartDemandAt } from '../../../../jobs/refresh-part-demand';
 import { clearCatalogueMemo } from '../../../../lib/catalogue-memo';
 import { cataloguePageList } from '../../../../lib/catalogue-page-list';
+import { DEMAND_TTL_MS } from '../../../../lib/part-demand';
 import { reindexSupplierOffers } from '../../../../lib/suppliers/markup-reindex';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
@@ -180,6 +181,20 @@ medusaIntegrationTestRunner({
         await get(seriesPagePath('bmw', SERIES));
 
         calls.forEach((call) => expect(call).not.toHaveBeenCalled());
+      });
+
+      it('rebuilds the page list once demand expires without recounting the makes', async () => {
+        await publishAll();
+        await cataloguePageList(getContainer());
+        const later = Date.now() + DEMAND_TTL_MS + 1;
+        jest.spyOn(Date, 'now').mockReturnValue(later);
+        const slugs = jest.spyOn(publish(), 'publishedPartSlugs');
+        const makes = jest.spyOn(publish(), 'listedMakePartCounts');
+
+        await cataloguePageList(getContainer());
+
+        expect(slugs).toHaveBeenCalled();
+        expect(makes).not.toHaveBeenCalled();
       });
 
       it('reflects the database after a demand refresh', async () => {
