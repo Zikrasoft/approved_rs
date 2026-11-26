@@ -12,10 +12,10 @@ import {
 } from '@podbor/catalog-contract';
 
 import type PublishModuleService from '../modules/publish/service';
-import type { ListedNumber } from '../modules/publish/service';
 import { SUPPLIER_MODULE } from '../modules/supplier';
 import type SupplierModuleService from '../modules/supplier/service';
 import { memoized } from './catalogue-memo';
+import { groupBy } from './group-by';
 import { CATEGORY_RELATIONS, shownCategory } from './categories';
 import { localizedCategory, localizedSeries } from './catalogue-locale';
 import { memoPartDemand } from './part-demand';
@@ -71,16 +71,9 @@ export const categoryPartPages = <
 };
 
 export const listedNumbersByCategory = (publish: PublishModuleService) =>
-  memoized('listed-numbers', async () => {
-    const numbersOf = new Map<string, ListedNumber[]>();
-    for (const number of await publish.listedNumbers()) {
-      numbersOf.set(number.category_id, [
-        ...(numbersOf.get(number.category_id) ?? []),
-        number,
-      ]);
-    }
-    return numbersOf;
-  });
+  memoized('listed-numbers', async () =>
+    groupBy(await publish.listedNumbers(), ({ category_id }) => category_id),
+  );
 
 export async function categoryPageAt(
   scope: MedusaContainer,

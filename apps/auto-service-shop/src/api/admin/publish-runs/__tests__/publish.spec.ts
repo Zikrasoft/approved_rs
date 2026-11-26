@@ -12,9 +12,9 @@ import { memoized } from '../../../../lib/catalogue-memo';
 import {
   PUBLISH_PURGE_REGISTRATION,
   PUBLISH_SEARCH_REGISTRATION,
-  type PublishPurge,
   type PublishSearch,
 } from '../../../../lib/publish/chain';
+import type { PublishPurge } from '../../../../lib/publish/purge';
 import type { IndexChanges } from '../../../../lib/index-changes';
 import { SUPPLIER_ADAPTERS_REGISTRATION } from '../../../../lib/suppliers/adapter';
 import { CATALOG_MODULE } from '../../../../modules/catalog';

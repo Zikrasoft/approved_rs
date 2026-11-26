@@ -326,7 +326,7 @@ async function translateLocale(
 export async function translateCatalogue(
   catalog: CatalogModuleService,
   apiKey: string | undefined,
-): Promise<Set<string>> {
+): Promise<string[]> {
   const translatedParts = new Set<string>();
   for (const [name, entity] of TRANSLATABLE_ENTITIES) {
     for (let after: string | null = null; ;) {
@@ -350,7 +350,7 @@ export async function translateCatalogue(
       after = rows[rows.length - 1].id;
     }
   }
-  return translatedParts;
+  return [...translatedParts];
 }
 
 const entityNamed = (name: string): TranslatableEntity => {

@@ -9,7 +9,7 @@ export const NOT_FOUND_PAGE_CACHE = 'public, s-maxage=600';
 
 export const PREVIEW_PAGE_CACHE = 'private, no-store';
 
-export const SHOP_DOWN_FILE_CACHE = 'public, s-maxage=60';
+const SHOP_DOWN_FILE_CACHE = 'public, s-maxage=60';
 
 export const RETRY_AFTER_SECONDS = 60;
 

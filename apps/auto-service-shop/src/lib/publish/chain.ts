@@ -40,8 +40,6 @@ import {
 } from '../index-changes';
 import { logEvent } from '../log-event';
 
-export type { PublishPurge } from './purge';
-
 export const PUBLISH_SEARCH_REGISTRATION = 'publishSearch';
 
 export const PUBLISH_PURGE_REGISTRATION = 'publishPurge';
@@ -180,12 +178,10 @@ const publishChain = (scope: MedusaContainer) => {
       name: 'translate',
       run: async () => {
         changes = withChanges(changes, {
-          translatedParts: [
-            ...(await translateCatalogue(
-              scope.resolve(CATALOG_MODULE),
-              parseEnv(process.env).OPENAI_API_KEY,
-            )),
-          ],
+          translatedParts: await translateCatalogue(
+            scope.resolve(CATALOG_MODULE),
+            parseEnv(process.env).OPENAI_API_KEY,
+          ),
         });
       },
     },

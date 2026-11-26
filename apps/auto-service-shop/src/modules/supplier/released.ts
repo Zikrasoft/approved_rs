@@ -19,10 +19,10 @@ export async function releasedSupplierData(
   for (const record of staged) {
     if (!record.supplier.released_kinds.includes(record.kind)) continue;
     const key = `${record.part_identifier_id}:${record.kind}`;
-    items.set(key, [
-      ...(items.get(key) ?? []),
-      ...stagedPayloadSchema.parse(record.payload).items,
-    ]);
+    const parsed = stagedPayloadSchema.parse(record.payload).items;
+    const known = items.get(key);
+    if (known) known.push(...parsed);
+    else items.set(key, parsed);
   }
   return (identifierId) =>
     Object.fromEntries(
