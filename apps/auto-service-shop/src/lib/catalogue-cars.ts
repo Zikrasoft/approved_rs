@@ -47,9 +47,11 @@ export async function carMakePageAt(
   const top = [...categories]
     .sort((a, b) => partsIn(b.id).length - partsIn(a.id).length)
     .slice(0, MAKE_TOP_CATEGORIES);
+  const candidates = (id: string) =>
+    options.shown ? partsIn(id) : partsIn(id).slice(0, MAKE_SHOWCASE * 2);
   const published = await publishedOfParts(
     scope,
-    top.flatMap(({ id }) => partsIn(id).map(({ part_id }) => part_id)),
+    top.flatMap(({ id }) => candidates(id).map(({ part_id }) => part_id)),
   );
   const offers = options.shown
     ? await scope

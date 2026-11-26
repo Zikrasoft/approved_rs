@@ -47,7 +47,7 @@ async function buildPageList(scope: MedusaContainer) {
   const structure = await catalogueStructure(modules);
   const { paged } = structure;
   const [slugs, perCategory, categories, catalogueMakes] = await Promise.all([
-    publish.publishedPartSlugs(),
+    memoized('part-slugs', () => publish.publishedPartSlugs()),
     memoPartDemand(scope).then((demand) => categoryCounts(publish, demand)),
     catalog.listCategories({}, { select: ['id', 'slug', 'name'], take: null }),
     catalog.listMakes(

@@ -30,7 +30,7 @@ const LISTED = 50;
 const AGGREGATES = [
   'listedNumbers',
   'listedSeriesCategoryCounts',
-  'listedVehicleParts',
+  'publishedPartSlugs',
 ] as const;
 
 medusaIntegrationTestRunner({
@@ -186,7 +186,7 @@ medusaIntegrationTestRunner({
         calls.forEach((call) => expect(call).not.toHaveBeenCalled());
       });
 
-      it('rebuilds the page list without reading the snapshot again', async () => {
+      it('rebuilds the page list without reading the Part slugs or the snapshot again', async () => {
         await publishAll();
         const before = await cataloguePageList(getContainer());
         forgetCatalogueMemo('page-list');
