@@ -465,9 +465,17 @@ export function createCatalogue({
     },
 
     async partsHub() {
-      return cataloguePartsHubSchema.parse(
-        await request('/store/catalogue-pages/hub'),
-      );
+      const path = '/store/catalogue-pages/hub';
+      const response = await send(path, 'GET');
+      if (response.status === 404) {
+        return cataloguePartsHubSchema.parse(
+          await request('/store/catalogue-pages'),
+        );
+      }
+      if (!response.ok) {
+        throw new Error(`Catalogue ${path} answered ${response.status}`);
+      }
+      return cataloguePartsHubSchema.parse(await response.json());
     },
 
     async search(query: SearchQuery): Promise<SearchOutcome | null> {

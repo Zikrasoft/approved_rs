@@ -1221,3 +1221,36 @@ describe('shopBackendUrl', () => {
     vi.unstubAllEnvs();
   });
 });
+
+describe('catalogue.partsHub', () => {
+  const pageList = {
+    parts: [{ slug: 'mann-filter-hu7', indexable: true }],
+    makes: [{ slug: 'bmw', name: 'BMW', hub: true, parts: 3 }],
+    series: [],
+    categories: [
+      { slug: 'oil-filters', name: 'Oil filters', listed: 3, demand: 2 },
+    ],
+    catalogue_makes: null,
+  };
+
+  it('reads the page list when an older shop has no hub endpoint', async () => {
+    const fetch = vi.fn((url: string) =>
+      url.endsWith('/store/catalogue-pages/hub')
+        ? Promise.resolve({ ok: false, status: 404, json: async () => ({}) })
+        : respond(pageList),
+    );
+
+    expect(await catalogueWith(fetch).partsHub()).toEqual({
+      makes: pageList.makes,
+      categories: pageList.categories,
+    });
+  });
+
+  it('still fails on any other shop error', async () => {
+    const fetch = vi.fn(() => respond({}, false));
+
+    await expect(catalogueWith(fetch).partsHub()).rejects.toThrow(
+      'Catalogue /store/catalogue-pages/hub answered 503',
+    );
+  });
+});
