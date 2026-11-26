@@ -74,6 +74,11 @@ export type ShopEvents = Omit<StorefrontEvents, 'storefront.demand'> & {
     cause: string | null;
     counts: Record<string, number>;
   };
+  'catalogue.warm': {
+    outcome: 'failed';
+    memo: string;
+    cause: string;
+  };
   'catalogue.prewarm': {
     warmed: number;
     failed: number;

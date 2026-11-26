@@ -1016,6 +1016,29 @@ medusaIntegrationTestRunner({
         });
       });
 
+      it('logs a failed catalogue warm after the snapshot and still reindexes and purges', async () => {
+        jest.spyOn(console, 'log').mockImplementation(() => undefined);
+        const publishModule: PublishModuleService =
+          getContainer().resolve(PUBLISH_MODULE);
+        jest
+          .spyOn(publishModule, 'listedNumbers')
+          .mockRejectedValue(new Error('The warm timed out'));
+
+        const run = await publish();
+        const warms = loggedEvents('catalogue.warm');
+        jest.restoreAllMocks();
+
+        expect(run.status).toBe('succeeded');
+        expect(warms).toContainEqual(
+          expect.objectContaining({
+            outcome: 'failed',
+            memo: 'listed-numbers',
+            cause: expect.stringContaining('The warm timed out'),
+          }),
+        );
+        expect(pageCache.purged).toEqual(HUB_PATTERNS);
+      });
+
       it('logs search.drift when search disagrees with the published numbers, and still succeeds', async () => {
         jest.spyOn(console, 'log').mockImplementation(() => undefined);
         const [mann] = await catalog.listBrands({ slug: 'mann-filter' });

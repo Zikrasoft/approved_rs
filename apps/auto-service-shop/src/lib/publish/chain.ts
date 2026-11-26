@@ -44,7 +44,7 @@ import {
   hasNoActiveVersion,
   type IndexChanges,
 } from '../index-changes';
-import { logEvent } from '../log-event';
+import { causeOf, logEvent } from '../log-event';
 
 export const PUBLISH_SEARCH_REGISTRATION = 'publishSearch';
 
@@ -151,6 +151,18 @@ async function checkShrink(publish: PublishModuleService) {
   }
 }
 
+async function warmCatalogueMemo(memo: string, warm: () => Promise<unknown>) {
+  try {
+    await warm();
+  } catch (error) {
+    logEvent('catalogue.warm', {
+      outcome: 'failed',
+      memo,
+      cause: causeOf(error),
+    });
+  }
+}
+
 async function checkPublishedCount(search: PublishSearch, published: number) {
   const indexed = await search.settledPublishedDocuments(published);
   if (indexed !== published) {
@@ -211,8 +223,10 @@ const publishChain = (scope: MedusaContainer) => {
       run: async () => {
         await publish.buildCatalogueSnapshot();
         clearCatalogueMemo();
-        await cataloguePageList(scope);
-        await listedNumbersByCategory(publish);
+        await warmCatalogueMemo('page-list', () => cataloguePageList(scope));
+        await warmCatalogueMemo('listed-numbers', () =>
+          listedNumbersByCategory(publish),
+        );
       },
     },
     {
