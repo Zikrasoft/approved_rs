@@ -182,7 +182,42 @@ type Item = {
   translatedFrom: TranslatedFrom;
 };
 
-const itemOf = (entity: TranslatableEntity, row: StoredRow): Item => {
+type SourceHasher = (source: Record<string, string>) => Item['hash'];
+
+const sourceHasher = (entity: TranslatableEntity): SourceHasher => {
+  const prompts = CATALOG_TRANSLATION_LOCALES.map(
+    (locale) =>
+      [
+        locale,
+        fieldsPrompt(
+          LANGUAGE_NAME[locale],
+          BUSINESS_DESCRIPTION,
+          entity.subject,
+          LOCALE_GUIDANCE[locale],
+        ),
+      ] as const,
+  );
+  const known = new Map<string, Item['hash']>();
+  return (source) => {
+    const key = JSON.stringify(source);
+    const cached = known.get(key);
+    if (cached) return cached;
+    const hash = Object.fromEntries(
+      prompts.map(([locale, prompt]) => [
+        locale,
+        sha256Hex(JSON.stringify([prompt, OPENAI_MODEL, source])),
+      ]),
+    ) as Item['hash'];
+    known.set(key, hash);
+    return hash;
+  };
+};
+
+const itemOf = (
+  entity: TranslatableEntity,
+  row: StoredRow,
+  hashOf: SourceHasher = sourceHasher(entity),
+): Item => {
   const source = Object.fromEntries(
     entity.fields.flatMap((field) => {
       const value = row[field];
@@ -194,23 +229,7 @@ const itemOf = (entity: TranslatableEntity, row: StoredRow): Item => {
   return {
     id: row.id,
     source,
-    hash: Object.fromEntries(
-      CATALOG_TRANSLATION_LOCALES.map((locale) => [
-        locale,
-        sha256Hex(
-          JSON.stringify([
-            fieldsPrompt(
-              LANGUAGE_NAME[locale],
-              BUSINESS_DESCRIPTION,
-              entity.subject,
-              LOCALE_GUIDANCE[locale],
-            ),
-            OPENAI_MODEL,
-            source,
-          ]),
-        ),
-      ]),
-    ) as Record<TargetLocale, string>,
+    hash: hashOf(source),
     translations: decode(row.translations),
     translatedFrom:
       translatedFromSchema.parse(row.translated_from ?? null) ?? {},
@@ -329,13 +348,14 @@ export async function translateCatalogue(
 ): Promise<string[]> {
   const translatedParts = new Set<string>();
   for (const [name, entity] of TRANSLATABLE_ENTITIES) {
+    const hashOf = sourceHasher(entity);
     for (let after: string | null = null; ;) {
       const rows = await entity.list(
         catalog,
         after ? { id: { $gt: after } } : {},
         ROWS_PER_PAGE,
       );
-      const items = rows.map((row) => itemOf(entity, row));
+      const items = rows.map((row) => itemOf(entity, row, hashOf));
       for (const locale of CATALOG_TRANSLATION_LOCALES) {
         const written = await translateLocale(
           entity,

@@ -192,7 +192,7 @@ const publishChain = (scope: MedusaContainer) => {
         changes = withChanges(changes, await publish.publishAll());
         clearCatalogueMemo();
         published = await publish.countPublished();
-        await cataloguePageList(scope);
+        cataloguePageList(scope).catch(() => undefined);
       },
     },
     {
