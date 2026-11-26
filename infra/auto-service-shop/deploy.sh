@@ -109,6 +109,8 @@ echo "==> https://${api_host:-api.carlab.rs}/health/ready"
 if curl -fsS -o /dev/null --max-time 10 --retry 12 --retry-delay 5 --retry-all-errors \
   "https://${api_host:-api.carlab.rs}/health/ready"; then
   echo "Live at $tag."
+  docker compose exec -T -d medusa node_modules/.bin/medusa exec ./src/scripts/warm-pages.js ||
+    echo "The page warm-up did not start; the first visitors will find cold pages." >&2
   keep=$(cat .previous-tag 2>/dev/null || echo "$tag")
   for repo in "$image" ghcr.io/zikrasoft/podbor-carlab-caddy; do
     docker image ls "$repo" --format '{{.Tag}}' | grep -vx -e "$tag" -e "$keep" -e "$caddy_tag" -e '<none>' -e '' | while read -r old; do

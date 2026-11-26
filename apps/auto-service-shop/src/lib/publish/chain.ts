@@ -28,6 +28,11 @@ import {
   partPagePattern,
   type PublishPurge,
 } from './purge';
+import {
+  PUBLISH_PREWARM_REGISTRATION,
+  prewarmCatalogue,
+  type PublishPrewarm,
+} from './prewarm-run';
 import { translateCatalogue } from './translate';
 import { clearCatalogueMemo } from '../catalogue-memo';
 import { cataloguePageList } from '../catalogue-page-list';
@@ -101,6 +106,11 @@ const purgeOf = (scope: MedusaContainer): PublishPurge =>
     ? scope.resolve<PublishPurge>(PUBLISH_PURGE_REGISTRATION)
     : cachePurge(parseEnv(process.env).CACHE_PURGE_URL);
 
+const prewarmOf = (scope: MedusaContainer): PublishPrewarm =>
+  scope.hasRegistration(PUBLISH_PREWARM_REGISTRATION)
+    ? scope.resolve<PublishPrewarm>(PUBLISH_PREWARM_REGISTRATION)
+    : () => prewarmCatalogue(scope);
+
 async function partPageSlugsOf(
   scope: MedusaContainer,
   identifierIds: string[],
@@ -157,6 +167,7 @@ const publishChain = (scope: MedusaContainer) => {
   const publish = scope.resolve<PublishModuleService>(PUBLISH_MODULE);
   const search = searchOf(scope);
   const purge = purgeOf(scope);
+  const prewarm = prewarmOf(scope);
   let changes = NO_CHANGES;
   let published = 0;
   const stepMs: Record<string, number> = {};
@@ -236,6 +247,12 @@ const publishChain = (scope: MedusaContainer) => {
         ]) {
           await purge(pattern);
         }
+      },
+    },
+    {
+      name: 'prewarm',
+      run: async () => {
+        void prewarm().catch(() => undefined);
       },
     },
   ];

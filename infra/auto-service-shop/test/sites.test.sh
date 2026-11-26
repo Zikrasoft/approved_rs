@@ -222,11 +222,14 @@ fresh
 ship "$A"
 expect 'a carlab.rs release deploys' run deploy-site.sh "$APP" "$A"
 expect 'a carlab.rs release empties the page cache once caddy serves it' \
-  test "$(tail -n 1 "$LOG")" = "docker compose exec -T caddy curl -fsS -X PURGE http://127.0.0.1:2019/souin-api/souin/flush -> releases/$A (caddy releases/$A)"
+  called 'exec -T caddy curl -fsS -X PURGE http://127.0.0.1:2019/souin-api/souin/flush'
+expect 'a carlab.rs release then warms the pages in the background' \
+  test "$(tail -n 1 "$LOG")" = "docker compose exec -T -d medusa node_modules/.bin/medusa exec ./src/scripts/warm-pages.js -> releases/$A (caddy releases/$A)"
 ship "$B"
 PURGE_EXIT=7
 export PURGE_EXIT
 refuse 'a failed purge fails the deploy' run deploy-site.sh "$APP" "$B"
+expect 'a failed purge warms nothing' sh -c 'tail -n 1 "$1" | grep -q souin/flush' _ "$LOG"
 expect 'a failed purge says so' grep -q 'page cache' "$work/stderr"
 expect 'a failed purge leaves the healthy release live' current "$B"
 unset PURGE_EXIT

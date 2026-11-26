@@ -448,7 +448,8 @@
       "publish": "number publishing",
       "snapshot": "catalogue page build",
       "reindex": "search refresh",
-      "purge": "page cache refresh"
+      "purge": "page cache refresh",
+      "prewarm": "page warm-up"
     },
     "errorDetails": "Error details: {{error}}",
     "startedBy": "Started by: {{who}}",

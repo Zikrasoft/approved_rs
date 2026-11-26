@@ -74,6 +74,10 @@ export type ShopEvents = Omit<StorefrontEvents, 'storefront.demand'> & {
     cause: string | null;
     counts: Record<string, number>;
   };
+  'catalogue.prewarm': {
+    warmed: number;
+    failed: number;
+  };
   'search.drift': {
     outcome: 'mismatch';
     index: string;

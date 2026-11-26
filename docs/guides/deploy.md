@@ -1286,6 +1286,28 @@ logs medusa`) here. TODO: record the measured docs/s.
     v0.0.23 deleted only the first key a regex matched, because it deleted
     while ranging over the cache; the image pins v0.0.23, which collects the
     keys first.
+  - **Prewarm.** Right after the purge the Publish chain's last step,
+    `prewarm`, starts `warmCataloguePages`
+    (`apps/auto-service-shop/src/lib/publish/prewarm.ts`) in the background:
+    it GETs through `STOREFRONT_ORIGIN` (the public origin, so every answer
+    lands in the Caddy cache), two at a time with 30 s per URL, errors counted
+    and swallowed. The set is the `/parts/` hub, `/parts/makes/`, every
+    `/parts/<make>/` with a hub, every `/parts/c/<category>/` and `llms.txt` in
+    each of `ru`, `sr` and `en`, then `/llms.txt`, `/catalogue-build.json`,
+    the catalogue sitemap index and its chunks, and the `/<locale>/cars/<make>/`
+    pages the site's own `/<locale>/cars/` listing links (the shop cannot know
+    the workshop makes). Series and Part pages are left cold: they are cheap
+    and about 176,000 of them would push the hubs out of the cache. It runs in
+    the background because the run holds the catalogue writer lock, and a
+    cold hub can take 30 s: waiting would block the next Publish for
+    minutes. Its result is the `catalogue.prewarm` log event (warmed and
+    failed counts), not a run failure. It is a no-op while `STOREFRONT_ORIGIN`
+    is unset (production sets it in the shop `.env`, see
+    `production.env.example`). `deploy.sh` (after the health check) and
+    `deploy-site.sh` (after the flush, carlab.rs only) start the same warm-up
+    detached in the running `medusa` container with
+    `medusa exec ./src/scripts/warm-pages.js`; a failure to start it only
+    prints a warning.
   - **Checking a hit.** `curl -sI https://carlab.rs/ru/parts/makes/ | grep -i cache-status`.
     `Souin; hit; ttl=...` came from the cache. `Souin; fwd=uri-miss; stored`
     went to node and was stored. `detail=NO-STORE-DIRECTIVE` went to node and

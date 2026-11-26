@@ -152,6 +152,7 @@ expect 'pull, migrate, check the schema, seed, up, reload and health run in orde
   "docker[$NEW] compose up -d --wait --wait-timeout 300 --remove-orphans" \
   "docker[$NEW] compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile" \
   'curl -fsS -o /dev/null --max-time 10 --retry 12 --retry-delay 5 --retry-all-errors https://api.test/health/ready' \
+  "docker[$NEW] compose exec -T -d medusa node_modules/.bin/medusa exec ./src/scripts/warm-pages.js" \
   "docker[$NEW] image ls ghcr.io/zikrasoft/podbor-auto-service-shop --format {{.Tag}}" \
   "docker[$NEW] image ls ghcr.io/zikrasoft/podbor-carlab-caddy --format {{.Tag}}"
 expect '.env names the new tag' has "MEDUSA_TAG=$NEW" "$work/host/.env"
