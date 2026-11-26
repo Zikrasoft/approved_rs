@@ -213,15 +213,19 @@ medusaIntegrationTestRunner({
             await createVehicleFixture(catalog, { typeCode: 'T010' })
           ).vehicle;
           const part = await catalog.createParts({ name: 'Paged part' });
+          const [sedan] = await catalog.createFitmentNotes([
+            {
+              note: 'Только седан',
+              translations: { sr: { note: 'Samo limuzina' } },
+            },
+          ]);
           const fitment = await catalog.createFitments({
             part_id: part.id,
             vehicle_id: vehicle.id,
             axle: 'front',
             production_from: new Date('2016-03-01T00:00:00.000Z'),
-            note: 'Только седан',
-            translations: { sr: { note: 'Samo limuzina' } },
+            note_id: sedan.id,
           });
-          await catalog.linkFitmentNotes();
 
           const response = await api.get(
             '/store/fitments?limit=1000',

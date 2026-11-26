@@ -21,37 +21,12 @@ const NOTES_NAMED = `
   select id, note from fitment_note
   where md5(note) = any(select md5(note) from unnest(?::text[]) note)`;
 
-const CREATE_UNLINKED_NOTES = `
-  insert into fitment_note (id, note, translations, translated_from)
-  select ${NEW_NOTE_ID}, note, translations, translated_from from (
-    select distinct on (md5(note)) note, translations, translated_from
-    from fitment where note is not null and note_id is null
-    order by md5(note), translated_from is null, translations is null, id
-  ) unlinked
-  on conflict (md5(note)) do nothing`;
-
-const LINK_NOTES = `
-  update fitment f set note_id = n.id
-  from fitment_note n
-  where f.id in (
-    select id from fitment where note is not null and note_id is null
-    order by id limit ?
-  ) and md5(n.note) = md5(f.note) and n.note = f.note`;
-
-const FITMENT_INDEXES = [
-  [
-    'IDX_fitment_unlinked_note',
-    '("id") WHERE note IS NOT NULL AND note_id IS NULL',
-  ],
-  ['IDX_fitment_part_all', '("part_id")'],
-] as const;
+const FITMENT_INDEXES = [['IDX_fitment_part_all', '("part_id")']] as const;
 
 const VALID_INDEX = `
   select i.indisvalid as valid from pg_index i
   join pg_class c on c.oid = i.indexrelid
   where c.relname = ?`;
-
-export const LINK_BATCH = 20_000;
 
 export async function noteIdsOf(
   raw: RawSql,
@@ -64,18 +39,7 @@ export async function noteIdsOf(
   return new Map(rows.map((row) => [String(row.note), String(row.id)]));
 }
 
-export async function linkFitmentNotes(
-  raw: RawSql,
-  batch = LINK_BATCH,
-): Promise<number> {
-  await raw(CREATE_UNLINKED_NOTES);
-  let linked = 0;
-  for (;;) {
-    const { rowCount } = await raw(LINK_NOTES, [batch]);
-    linked += rowCount;
-    if (rowCount < batch) return linked;
-  }
-}
+export const linkFitmentNotes = async (_raw: RawSql): Promise<number> => 0;
 
 const indexValidity = async (raw: RawSql, name: string) =>
   (await raw(VALID_INDEX, [name])).rows[0]?.valid as boolean | undefined;

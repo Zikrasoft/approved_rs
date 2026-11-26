@@ -100,18 +100,20 @@ medusaIntegrationTestRunner({
           engineCode: 'S1E',
         });
         bigVehicle = big.vehicle.id;
+        const [facelift] = await catalog.createFitmentNotes([
+          {
+            note: 'Только рестайлинг',
+            translations: { sr: { note: 'Samo fejslift' } },
+          },
+        ]);
         await catalog.createFitments([
           ...[oilFilter, ...others, pad].map((part_id) => ({
             part_id,
             vehicle_id: big.vehicle.id,
-            ...(part_id === oilFilter && {
-              note: 'Только рестайлинг',
-              translations: { sr: { note: 'Samo fejslift' } },
-            }),
+            ...(part_id === oilFilter && { note_id: facelift.id }),
           })),
           { part_id: oilFilter, vehicle_id: small.vehicle.id },
         ]);
-        await catalog.linkFitmentNotes();
 
         const [mannOil] = await catalog.listPartIdentifiers({
           normalized_value: 'HU816X',

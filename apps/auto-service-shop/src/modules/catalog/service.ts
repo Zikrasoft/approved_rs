@@ -46,7 +46,7 @@ import Vehicle from './models/vehicle';
 import VehicleIdentifier from './models/vehicle-identifier';
 import VehicleModel from './models/vehicle-model';
 import { adminError, alreadyExists } from '../_shared/admin-error';
-import { linkFitmentNotes, noteIdsOf, type RawSql } from './fitment-notes';
+import { noteIdsOf, type RawSql } from './fitment-notes';
 import { runBoundSql } from '../_shared/bound-sql';
 import {
   FITMENT_ROWS,
@@ -1523,15 +1523,15 @@ class CatalogModuleService extends CatalogModuleBase {
   async notedFitments<Row extends object>(
     rows: (Row & { note?: string | null })[],
     @MedusaContext() sharedContext: Context = {},
-  ): Promise<(Row & { note_id?: string | null })[]> {
+  ): Promise<(Omit<Row, 'note'> & { note_id?: string | null })[]> {
     const ids = await noteIdsOf(
       boundRaw(sharedContext),
       rows.flatMap(({ note }) => (note ? [note] : [])),
     );
-    return rows.map((row) =>
-      row.note === undefined
+    return rows.map(({ note, ...row }) =>
+      note === undefined
         ? row
-        : { ...row, note_id: row.note ? ids.get(row.note)! : null },
+        : { ...row, note_id: note ? ids.get(note)! : null },
     );
   }
 
@@ -1552,18 +1552,13 @@ class CatalogModuleService extends CatalogModuleBase {
       ).map((note) => [note.id, note]),
     );
     return rows.map((row) => {
-      const note = row.note_id && notes.get(row.note_id);
-      return note
-        ? { ...row, note: note.note, translations: note.translations }
-        : row;
+      const note = row.note_id ? notes.get(row.note_id) : undefined;
+      return {
+        ...row,
+        note: note?.note ?? null,
+        translations: note?.translations ?? null,
+      };
     });
-  }
-
-  @InjectManager()
-  async linkFitmentNotes(
-    @MedusaContext() sharedContext: Context = {},
-  ): Promise<number> {
-    return linkFitmentNotes(boundRaw(sharedContext));
   }
 
   @InjectManager()

@@ -130,7 +130,7 @@ medusaIntegrationTestRunner({
       };
 
       const fitmentsOf = async (number: string) =>
-        catalog.listFitments(
+        catalog.listNotedFitments(
           { part_id: (await partOf(number)).id },
           {
             relations: [

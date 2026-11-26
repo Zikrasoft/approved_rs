@@ -348,7 +348,6 @@ export async function translateCatalogue(
   apiKey: string | undefined,
 ): Promise<string[]> {
   const translatedParts = new Set<string>();
-  await catalog.linkFitmentNotes();
   for (const [name, entity] of TRANSLATABLE_ENTITIES) {
     const hashOf = sourceHasher(entity);
     const sources = await catalog.translationSources(name, entity.fields);

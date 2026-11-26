@@ -8,10 +8,8 @@ import {
 
 import Part from './part';
 import { provenance } from './provenance';
-import { translatable } from './translatable';
 import Vehicle from './vehicle';
 
-// TODO: once every deployed image reads notes through note_id, link the last unlinked notes, drop fitment.note, translations, translated_from and IDX_fitment_unlinked_note in the next deploy, then VACUUM FULL fitment.
 const Fitment = model
   .define('fitment', {
     id: model.id().primaryKey(),
@@ -24,9 +22,7 @@ const Fitment = model
     production_to: model.dateTime().nullable(),
     steering: model.enum([...STEERING_SIDES]).nullable(),
     gearbox: model.enum([...GEARBOX_TYPES]).nullable(),
-    note: model.text().nullable(),
     note_id: model.text().nullable(),
-    ...translatable(),
     ...provenance(),
   })
   .checks([

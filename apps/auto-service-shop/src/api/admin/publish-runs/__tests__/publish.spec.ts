@@ -488,7 +488,7 @@ medusaIntegrationTestRunner({
         ).toEqual({ sr: { label: 'Sintetika' }, en: { label: 'Synthetic' } });
       });
 
-      it('translates each distinct Fitment note once, linking the notes an older image wrote', async () => {
+      it('translates each distinct Fitment note once', async () => {
         const vehicle = (
           await createVehicleFixture(catalog, { typeCode: 'PUBLISH-NOTE' })
         ).vehicle;
@@ -505,27 +505,12 @@ medusaIntegrationTestRunner({
             fitment({ side: 'left' }),
           ]),
         );
-        const [older] = await catalog.createFitments([
-          fitment({ side: 'right', note: 'Только с M-пакетом' }),
-        ]);
 
         await publish();
 
-        const linked = await catalog.listFitments(
-          { id: [front.id, rear.id, older.id, plain.id] },
-          { select: ['id', 'note_id', 'translations'] },
-        );
-        const noteOf = new Map(linked.map((row) => [row.id, row.note_id]));
         expect(front.note_id).toEqual(expect.any(String));
-        expect(noteOf.get(rear.id)).toBe(front.note_id);
-        expect(noteOf.get(older.id)).toBe(front.note_id);
-        expect(noteOf.get(plain.id)).toBeNull();
-        expect(linked.map(({ translations }) => translations)).toEqual([
-          null,
-          null,
-          null,
-          null,
-        ]);
+        expect(rear.note_id).toBe(front.note_id);
+        expect(plain.note_id).toBeNull();
         expect(
           (await get(`/admin/translations/fitment_note/${front.note_id}`)).data
             .translations,

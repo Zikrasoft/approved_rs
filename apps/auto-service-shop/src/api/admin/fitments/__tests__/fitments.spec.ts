@@ -532,13 +532,13 @@ medusaIntegrationTestRunner({
       describe('Fitment notes', () => {
         const stored = async (partId: string) =>
           (
-            await catalog.listFitments(
+            await catalog.listNotedFitments(
               { part_id: partId },
-              { select: ['id', 'note', 'note_id', 'translations'] },
+              { select: ['id', 'note_id'] },
             )
           ).sort((a, b) => a.id.localeCompare(b.id));
 
-        it('shares one note between every Fitment carrying its text, keeping the old column for a rollback', async () => {
+        it('shares one note between every Fitment carrying its text', async () => {
           const { part, vehicle } = await createPartAndVehicle('NOTE-SHARE');
           const other = (
             await createVehicleFixture(catalog, { typeCode: 'NOTE-SHARE-2' })

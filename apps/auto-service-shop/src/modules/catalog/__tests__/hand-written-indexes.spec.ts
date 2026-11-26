@@ -110,13 +110,28 @@ medusaIntegrationTestRunner({
           ),
         );
 
-      it('builds the Fitment note indexes and drops the wide part and vehicle index', async () => {
+      it('builds the full part index and drops the wide part and vehicle index', async () => {
         expect(await fitmentIndexes()).toMatchObject({
           IDX_fitment_part_all: true,
-          IDX_fitment_unlinked_note: true,
         });
         expect(await fitmentIndexes()).not.toHaveProperty(
           'IDX_fitment_part_vehicle_all',
+        );
+      });
+
+      it('keeps no Fitment note on the Fitment itself', async () => {
+        const { rows } = await pg().raw(
+          `select column_name from information_schema.columns
+           where table_name = 'fitment'
+             and column_name in ('note', 'translations', 'translated_from')
+           union all
+           select tgname from pg_trigger where tgname = 'fitment_note_unlink'
+           union all
+           select proname from pg_proc where proname = 'fitment_note_unlink'`,
+        );
+        expect(rows).toEqual([]);
+        expect(await fitmentIndexes()).not.toHaveProperty(
+          'IDX_fitment_unlinked_note',
         );
       });
 
@@ -260,16 +275,6 @@ medusaIntegrationTestRunner({
             'create unique index "IDX_fitment_note_note_unique" on fitment_note (note)',
           ],
           expect.stringMatching(/^IDX_fitment_note_note_unique is defined as/),
-        ],
-        [
-          'a missing unlinked-note index',
-          ['drop index "IDX_fitment_unlinked_note"'],
-          'IDX_fitment_unlinked_note is missing',
-        ],
-        [
-          'a Fitment note link without its unlinking trigger',
-          ['drop trigger fitment_note_unlink on fitment'],
-          'fitment_note_unlink is missing',
         ],
         [
           'a Fitment note link without its foreign key',
