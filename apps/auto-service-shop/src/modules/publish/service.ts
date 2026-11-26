@@ -17,7 +17,7 @@ import PublishedNumber from './models/published-number';
 import { runBoundSql } from '../_shared/bound-sql';
 import {
   LISTED_CATEGORY_PARTS,
-  LISTED_NUMBERS_IN_CATEGORY,
+  LISTED_NUMBERS,
   LISTED_MAKE_PART_COUNTS,
   LISTED_PARTS_IN_CATEGORY,
   LISTED_SERIES_CATEGORY_COUNTS,
@@ -56,8 +56,6 @@ export type VehiclePart = {
   fitted: boolean;
 };
 
-export type PlaceScope = { series?: string[]; category?: string };
-
 export type PublishedPartSlug = {
   brand_slug: string;
   normalized_value: string;
@@ -82,15 +80,8 @@ export type ListedNumber = {
   attributes: Record<string, unknown>;
 };
 
-const placeBindings = ({
-  series = null,
-  category = null,
-}: {
-  series?: string[] | null;
-  category?: string | null;
-}) => ({
+const placeBindings = ({ series = null }: { series?: string[] | null }) => ({
   series,
-  category,
   min_matches: MIN_REQUIREMENT_MATCHES_FOR_PAGE,
 });
 
@@ -215,15 +206,10 @@ class PublishModuleService extends MedusaService({
   }
 
   @InjectManager()
-  async listedNumbersIn(
-    categoryId: string | null,
+  async listedNumbers(
     @MedusaContext() sharedContext: Context = {},
   ): Promise<ListedNumber[]> {
-    const { rows } = await runBoundSql(
-      sharedContext,
-      LISTED_NUMBERS_IN_CATEGORY,
-      [categoryId, categoryId],
-    );
+    const { rows } = await runBoundSql(sharedContext, LISTED_NUMBERS);
     return rows;
   }
 
@@ -242,13 +228,12 @@ class PublishModuleService extends MedusaService({
 
   @InjectManager()
   async listedSeriesCategoryCounts(
-    scope: PlaceScope = {},
     @MedusaContext() sharedContext: Context = {},
   ): Promise<SeriesCategoryCount[]> {
     const { rows } = await runBoundSql(
       sharedContext,
       LISTED_SERIES_CATEGORY_COUNTS,
-      placeBindings(scope),
+      placeBindings({}),
     );
     return rows;
   }

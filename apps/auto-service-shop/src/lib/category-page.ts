@@ -73,7 +73,7 @@ export const categoryPartPages = <
 export const listedNumbersByCategory = (publish: PublishModuleService) =>
   memoized('listed-numbers', async () => {
     const numbersOf = new Map<string, ListedNumber[]>();
-    for (const number of await publish.listedNumbersIn(null)) {
+    for (const number of await publish.listedNumbers()) {
       numbersOf.set(number.category_id, [
         ...(numbersOf.get(number.category_id) ?? []),
         number,

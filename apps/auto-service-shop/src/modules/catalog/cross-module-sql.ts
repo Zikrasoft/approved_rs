@@ -150,7 +150,6 @@ const LISTED_PLACES = `
     join category_field cf on cf.id = d.field_id and cf.deleted_at is null
     join part p on p.category_id = cf.category_id and p.deleted_at is null
     join listed l on l.part_id = p.id
-    where :category::text is null or p.category_id = :category
     group by d.vehicle_id, p.id, p.category_id
     having ${REQUIREMENTS_MET}
   ), places as (
@@ -160,7 +159,6 @@ const LISTED_PLACES = `
     join fitment f on f.vehicle_id = s.vehicle_id and f.deleted_at is null
     join listed l on l.part_id = f.part_id
     left join part pt on pt.id = f.part_id
-    where :category::text is null or pt.category_id = :category
     union all
     select s.series_id, s.model_id, s.vehicle_id, null, r.part_id,
       r.category_id, false
@@ -247,7 +245,7 @@ export const PART_PAGE_COUNTS = `
       join part p on p.id = pi.part_id and p.deleted_at is null
       where pi.deleted_at is null)::int as projected`;
 
-export const LISTED_NUMBERS_IN_CATEGORY = `
+export const LISTED_NUMBERS = `
   select pn.id, b.slug as brand_slug, b.name as brand_name,
     pi.normalized_value, p.id as part_id, p.category_id, p.attributes
   from published_number pn
@@ -255,7 +253,6 @@ export const LISTED_NUMBERS_IN_CATEGORY = `
   join brand b on b.id = pi.brand_id and b.deleted_at is null
   join part p on p.id = pi.part_id and p.deleted_at is null
   where pn.deleted_at is null and pn.listed and p.category_id is not null
-    and (?::text is null or p.category_id = ?)
   order by pn.id`;
 
 export const UNRESOLVED_VIN_CODES = `

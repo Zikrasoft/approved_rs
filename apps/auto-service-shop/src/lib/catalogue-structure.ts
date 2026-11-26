@@ -11,10 +11,7 @@ import { CATALOG_MODULE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
 import { PUBLISH_MODULE } from '../modules/publish';
 import type PublishModuleService from '../modules/publish/service';
-import type {
-  PlaceScope,
-  SeriesCategoryCount,
-} from '../modules/publish/service';
+import type { SeriesCategoryCount } from '../modules/publish/service';
 import { memoized } from './catalogue-memo';
 
 export type CatalogueModules = {
@@ -33,7 +30,9 @@ export type SeriesPartCount = {
   required: number;
 };
 
-const seriesCountsOf = (rows: SeriesCategoryCount[]): SeriesPartCount[] => {
+export const seriesCountsOf = (
+  rows: SeriesCategoryCount[],
+): SeriesPartCount[] => {
   const counts = new Map<string, SeriesPartCount>();
   for (const { series_id, parts, fitted, required } of rows) {
     const known = counts.get(series_id) ?? { series_id, parts: 0, required: 0 };
@@ -47,12 +46,6 @@ const seriesCountsOf = (rows: SeriesCategoryCount[]): SeriesPartCount[] => {
   }
   return [...counts.values()];
 };
-
-export const seriesPartCounts = async (
-  publish: PublishModuleService,
-  scope: Pick<PlaceScope, 'series'> = {},
-): Promise<SeriesPartCount[]> =>
-  seriesCountsOf(await publish.listedSeriesCategoryCounts(scope));
 
 const listedSeriesCategoryCounts = (publish: PublishModuleService) =>
   memoized('series-category-counts', () =>

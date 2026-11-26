@@ -25,7 +25,7 @@ const SERIES = seriesSlugOf('3 серия');
 const LISTED = 50;
 
 const AGGREGATES = [
-  'listedNumbersIn',
+  'listedNumbers',
   'listedSeriesCategoryCounts',
   'listedVehicleParts',
   'listedMakePartCounts',
