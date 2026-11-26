@@ -87,7 +87,7 @@ async function kitCars(
   ]);
   const listedIds = new Set(listed.map(({ id }) => id));
   const fitments = (
-    await catalog.listFitments(
+    await catalog.listNotedFitments(
       {
         vehicle_id: distinct(
           [...candidates, ...engineLess].map(({ id }) => id),
@@ -175,7 +175,7 @@ export async function partPageAt(
   const categoryOf = ({ part: { category_id } }: PartPage) =>
     categories.get(category_id ?? '') ?? null;
 
-  const fitments = await catalog.listFitments(
+  const fitments = await catalog.listNotedFitments(
     { part_id: part.id },
     { order: { id: 'ASC' }, take: null },
   );

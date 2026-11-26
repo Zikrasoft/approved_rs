@@ -381,7 +381,9 @@ export async function fitVehicles(
     .map((id) => ({ vehicle_id: id, note: notes.get(id) ?? null }));
   if (fitting.length) {
     await catalog.createFitments(
-      fitting.map((fitment) => ({ ...fitment, part_id: partId, source })),
+      await catalog.notedFitments(
+        fitting.map((fitment) => ({ ...fitment, part_id: partId, source })),
+      ),
     );
   }
   return { unknownMakes };

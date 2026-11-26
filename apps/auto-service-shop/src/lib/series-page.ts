@@ -174,7 +174,7 @@ export async function seriesCategoryPageAt(
   const pages = await pagesOfParts(scope, partIds, options);
   const vehicleById = new Map(place.vehicles.map((one) => [one.id, one]));
   const fitments = (
-    await place.catalog.listFitments(
+    await place.catalog.listNotedFitments(
       { part_id: partIds, vehicle_id: [...vehicleById.keys()] },
       { order: { id: 'ASC' }, take: null },
     )

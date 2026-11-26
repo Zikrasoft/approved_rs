@@ -29,7 +29,8 @@ const catalogueOf = (parts: Row[]) => {
     listCategories: none,
     listCategoryFields: none,
     listCategoryFieldOptions: none,
-    listFitments: none,
+    listFitmentNotes: none,
+    linkFitmentNotes: async () => 0,
   } as unknown as CatalogModuleService;
   return { catalog, updated, fullReads };
 };

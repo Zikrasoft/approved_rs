@@ -111,6 +111,7 @@ medusaIntegrationTestRunner({
           })),
           { part_id: oilFilter, vehicle_id: small.vehicle.id },
         ]);
+        await catalog.linkFitmentNotes();
 
         const [mannOil] = await catalog.listPartIdentifiers({
           normalized_value: 'HU816X',

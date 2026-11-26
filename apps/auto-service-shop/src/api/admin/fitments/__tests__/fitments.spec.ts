@@ -529,6 +529,108 @@ medusaIntegrationTestRunner({
         });
       });
 
+      describe('Fitment notes', () => {
+        const stored = async (partId: string) =>
+          (
+            await catalog.listFitments(
+              { part_id: partId },
+              { select: ['id', 'note', 'note_id', 'translations'] },
+            )
+          ).sort((a, b) => a.id.localeCompare(b.id));
+
+        it('shares one note between every Fitment carrying its text, keeping the old column for a rollback', async () => {
+          const { part, vehicle } = await createPartAndVehicle('NOTE-SHARE');
+          const other = (
+            await createVehicleFixture(catalog, { typeCode: 'NOTE-SHARE-2' })
+          ).vehicle;
+
+          const single = await api.post(
+            '/admin/fitments',
+            {
+              part_id: part.id,
+              vehicle_id: vehicle.id,
+              note: 'Только с M-пакетом',
+            },
+            adminHeaders,
+          );
+          await api.post(
+            '/admin/fitments/bulk',
+            {
+              part_id: part.id,
+              vehicle_id: other.id,
+              note: 'Только с M-пакетом',
+            },
+            adminHeaders,
+          );
+
+          const [noteId] = new Set(
+            (await stored(part.id)).map(({ note_id }) => note_id),
+          );
+          expect(single.data.fitment.note_id).toBe(noteId);
+          expect(await stored(part.id)).toEqual([
+            expect.objectContaining({
+              note: 'Только с M-пакетом',
+              note_id: noteId,
+              translations: null,
+            }),
+            expect.objectContaining({
+              note: 'Только с M-пакетом',
+              note_id: noteId,
+              translations: null,
+            }),
+          ]);
+          expect(
+            await catalog.listFitmentNotes(
+              { id: noteId! },
+              { select: ['note'] },
+            ),
+          ).toEqual([expect.objectContaining({ note: 'Только с M-пакетом' })]);
+        });
+
+        it('moves a Fitment to the note of its new text, clears it, and leaves it alone when the note is not sent', async () => {
+          const { part, vehicle } = await createPartAndVehicle('NOTE-EDIT');
+          const created = await api.post(
+            '/admin/fitments',
+            { part_id: part.id, vehicle_id: vehicle.id, note: 'Только седан' },
+            adminHeaders,
+          );
+          const { id, note_id: first } = created.data.fitment;
+
+          const renamed = await api.post(
+            `/admin/fitments/${id}`,
+            { note: 'Только универсал' },
+            adminHeaders,
+          );
+          const untouched = await api.post(
+            `/admin/fitments/${id}`,
+            { quantity: 2 },
+            adminHeaders,
+          );
+          expect(renamed.data.fitment).toMatchObject({
+            note: 'Только универсал',
+            note_id: expect.any(String),
+          });
+          expect(renamed.data.fitment.note_id).not.toBe(first);
+          expect(untouched.data.fitment).toMatchObject({
+            note: 'Только универсал',
+            note_id: renamed.data.fitment.note_id,
+          });
+
+          const cleared = await api.post(
+            `/admin/fitments/${id}`,
+            { note: '' },
+            adminHeaders,
+          );
+          expect(cleared.data.fitment).toMatchObject({
+            note: null,
+            note_id: null,
+          });
+          expect(await stored(part.id)).toEqual([
+            expect.objectContaining({ note: null, note_id: null }),
+          ]);
+        });
+      });
+
       describe('/admin/fitments/:id', () => {
         it('changes the conditions of a Fitment and stamps the editor', async () => {
           const { part, vehicle } = await createPartAndVehicle('B47-EDIT');

@@ -561,37 +561,43 @@ async function seedCatalogue(
   });
 
   const parts = await seedParts(catalog, brand, category);
-  await catalog.createFitments([
-    ...[v320d, v520d].map(({ id }) => ({
-      part_id: parts.b47OilFilter,
-      vehicle_id: id,
-    })),
-    { part_id: parts.b47OilFilter, vehicle_id: v320i.id },
-    { part_id: parts.om654OilFilter, vehicle_id: vE220d.id },
-    {
-      part_id: parts.frontPads,
-      vehicle_id: v320d.id,
-      axle: 'front' as const,
-    },
-    {
-      part_id: parts.frontSportPads,
-      vehicle_id: v320d.id,
-      axle: 'front' as const,
-      note: 'Только для автомобилей с тормозами M Sport',
-    },
-    { part_id: parts.frontPads, vehicle_id: v320i.id, axle: 'front' as const },
-    { part_id: parts.rearPads, vehicle_id: v320d.id, axle: 'rear' as const },
-    {
-      part_id: parts.wipersLeft,
-      vehicle_id: vE220d.id,
-      steering: 'left' as const,
-    },
-    {
-      part_id: parts.wipersRight,
-      vehicle_id: vE220d.id,
-      steering: 'right' as const,
-    },
-  ]);
+  await catalog.createFitments(
+    await catalog.notedFitments([
+      ...[v320d, v520d].map(({ id }) => ({
+        part_id: parts.b47OilFilter,
+        vehicle_id: id,
+      })),
+      { part_id: parts.b47OilFilter, vehicle_id: v320i.id },
+      { part_id: parts.om654OilFilter, vehicle_id: vE220d.id },
+      {
+        part_id: parts.frontPads,
+        vehicle_id: v320d.id,
+        axle: 'front' as const,
+      },
+      {
+        part_id: parts.frontSportPads,
+        vehicle_id: v320d.id,
+        axle: 'front' as const,
+        note: 'Только для автомобилей с тормозами M Sport',
+      },
+      {
+        part_id: parts.frontPads,
+        vehicle_id: v320i.id,
+        axle: 'front' as const,
+      },
+      { part_id: parts.rearPads, vehicle_id: v320d.id, axle: 'rear' as const },
+      {
+        part_id: parts.wipersLeft,
+        vehicle_id: vE220d.id,
+        steering: 'left' as const,
+      },
+      {
+        part_id: parts.wipersRight,
+        vehicle_id: vE220d.id,
+        steering: 'right' as const,
+      },
+    ]),
+  );
 
   logger.info('Seeded the demo catalogue and vehicles.');
 }

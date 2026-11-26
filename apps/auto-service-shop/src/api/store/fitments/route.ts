@@ -14,7 +14,7 @@ export async function GET(
 
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
-  const fitments = await catalog.listFitments(
+  const fitments = await catalog.listNotedFitments(
     after ? { id: { $gt: after } } : {},
     { order: { id: 'ASC' }, take: limit },
   );
