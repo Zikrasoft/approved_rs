@@ -27,7 +27,7 @@ describe('sitemapFilter', () => {
   });
 
   it('lists no blog page while the blog lists no Article', () => {
-    const keep = sitemapFilter(SITE, [], false);
+    const keep = sitemapFilter(SITE, false);
     expect(keep(`${SITE}/sr/blog/`)).toBe(false);
     expect(keep(`${SITE}/ru/blog/2/`)).toBe(false);
     expect(keep(`${SITE}/sr/cars/bmw/`)).toBe(true);

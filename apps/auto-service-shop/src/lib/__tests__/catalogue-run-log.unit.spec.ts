@@ -76,7 +76,7 @@ describe('a finished catalogue run', () => {
       .mockResolvedValueOnce([
         finished({
           status: 'failed',
-          failed_step: 'deploy',
+          failed_step: 'purge',
           error: 'HTTP 500',
         }),
       ])
@@ -97,10 +97,10 @@ describe('a finished catalogue run', () => {
       }),
     ).rejects.toThrow('boom');
 
-    const [deploy, exception] = runs();
-    expect(deploy).toMatchObject({
+    const [purge, exception] = runs();
+    expect(purge).toMatchObject({
       outcome: 'failed',
-      reason: 'deploy',
+      reason: 'purge',
       cause: 'HTTP 500',
     });
     expect(exception).toMatchObject({ outcome: 'failed', reason: 'exception' });

@@ -47,6 +47,8 @@ expect 'postgres and typesense sit on the internal network only' \
 pg_address=$(sed -n "s/^POSTGRES_ADDRESS=\\(.*\\):5432\$/\\1/p" "$here/harden-ssh.sh")
 expect "postgres keeps the fixed address the crawler tunnel may open ($pg_address)" \
   ".services.postgres.networks.data.ipv4_address == \"$pg_address\" and .networks.data.ipam.config == [{\"subnet\": \"10.200.0.0/24\", \"ip_range\": \"10.200.0.128/25\"}]"
+expect 'postgres runs jit off, tuned for the droplet, with pg_stat_statements and a slow-query log, shared_buffers left at its default' \
+  '.services.postgres.command == ["postgres", "-c", "jit=off", "-c", "work_mem=8MB", "-c", "random_page_cost=1.1", "-c", "shared_preload_libraries=pg_stat_statements", "-c", "log_min_duration_statement=1000"]'
 expect 'medusa reaches typesense by service name with the shared key' \
   '.services.medusa.environment.TYPESENSE_HOST == "typesense" and .services.medusa.environment.TYPESENSE_API_KEY == "y" and .services.typesense.environment.TYPESENSE_API_KEY == "y"'
 expect 'medusa reaches postgres by service name' \
@@ -108,10 +110,14 @@ expect 'caddy pulls the page cache image CI built for the same commit as medusa,
   '.services.caddy | .image == "ghcr.io/zikrasoft/podbor-carlab-caddy:0000000000000000000000000000000000000000" and .build == null and .mem_limit == "134217728"'
 expect 'caddy takes the preview token from .env to verify the preview cookie' \
   ".services.caddy.environment.SHOP_PREVIEW_TOKEN == \"$preview_token\""
-expect 'the caddy image tag follows the shop tag unless CADDY_TAG names its own' \
+expect 'the caddy image tag falls back to the shop tag unless CADDY_TAG names its own content tag' \
   '.services.caddy.image | endswith(":0000000000000000000000000000000000000000")'
 caddy_tag=$(CADDY_TAG=1111111111111111111111111111111111111111 env -u MEDUSA_TAG docker compose -f "$here/docker-compose.yml" --project-directory "$work" --profile "*" config --format json 2>/dev/null | jq -r .services.caddy.image)
 if [ "$caddy_tag" = ghcr.io/zikrasoft/podbor-carlab-caddy:1111111111111111111111111111111111111111 ]; then echo 'ok - CADDY_TAG overrides the caddy image tag alone'; else echo "not ok - CADDY_TAG ($caddy_tag)"; failures=$((failures + 1)); fi
+expect 'medusa reaches the cache purge listener by service name' \
+  '.services.medusa.environment.CACHE_PURGE_URL == "http://caddy:2020/souin-api/souin"'
+expect 'the cache purge listener publishes no host port' \
+  '[.services.caddy.ports[].target] | index(2020) == null'
 expect 'caddy keeps its page cache on a volume' \
   '[.services.caddy.volumes[] | select(.target == "/cache") | [.type, .source]] == [["volume", "caddycache"]]'
 expect 'every image is pinned to an exact tag' \
@@ -125,7 +131,7 @@ cat >"$work/stub/Caddyfile" <<'STUB'
 	header X-Upstream "{http.request.host} {http.request.header.X-Forwarded-Proto} {http.request.header.X-Forwarded-For} {http.request.header.X-Request-Id}"
 	@private path /ru/parts/p/private/
 	@public {
-		path /ru/parts/* /ru/cars/*
+		path /ru/parts/* /ru/cars/* /sr/parts/* /llms.txt /sr/llms.txt /catalogue-build.json /sitemap-catalogue*
 		not path /ru/parts/p/private/
 	}
 	header @private Cache-Control "private, no-store"
@@ -322,7 +328,11 @@ cached 'a cookie that only starts with the token stays on the cache' '; hit;' ca
 cached 'the preview flag cookie alone does not' '; hit;' carlab /ru/parts/p/a/ -H 'Cookie: auto_service_shop_preview_on=1'
 cache_status carlab /ru/parts/p/private/ >/dev/null
 cached 'a private, no-store response is never stored' 'fwd=uri-miss; detail=NO-STORE-DIRECTIVE' carlab /ru/parts/p/private/
-for path in /ru/parts/ /ru/parts/search/ /ru/parts/cart/ /ru/parts/prices/ /ru/services/ /ru/; do
+for path in /llms.txt /sr/llms.txt /catalogue-build.json /sitemap-catalogue.xml /sitemap-catalogue-0.xml /ru/parts/; do
+  cached "$path is cached like a catalogue page" 'fwd=uri-miss; stored' carlab "$path"
+done
+cached 'a browsed /parts/ hub stays out of the cache' '^$' carlab '/ru/parts/?offset=12'
+for path in /ru/parts/search/ /ru/parts/cart/ /ru/parts/prices/ /ru/services/ /ru/ /sitemap-index.xml; do
   cached "$path stays out of the cache" '^$' carlab "$path"
 done
 cached 'details.rs has no page cache' '^$' details /ru/parts/p/a/
@@ -335,6 +345,42 @@ if [ -n "$purge" ] && docker exec "$net-caddy" sh -c "$purge" >/dev/null; then e
 cached 'after the purge the next request is a miss' 'fwd=uri-miss; stored' carlab /ru/parts/p/a/
 surrogates=$(docker exec "$net-caddy" curl -fsS http://127.0.0.1:2019/souin-api/souin/surrogate_keys)
 if [ "$surrogates" = '{}' ] || [ "$surrogates" = null ]; then echo 'ok - the cache keeps no surrogate-key index, which grew with every page it stored'; else echo "not ok - surrogate keys are stored ($surrogates)"; failures=$((failures + 1)); fi
+listener() {
+  docker exec "$net-medusa" curl -sg -o /dev/null -w '%{http_code}' --max-time 5 "$@" || true
+}
+refuses() {
+  got=$(listener "$@")
+  if [ "$got" = 403 ]; then echo "ok - the purge listener refuses $*"; else echo "not ok - the purge listener answered $got to $*"; failures=$((failures + 1)); fi
+}
+purge_listener=http://$net-caddy:2020/souin-api/souin
+warm() {
+  for path in /ru/cars/bmw/ /ru/cars/audi/ /ru/parts/c/brakes/ /ru/parts/peugeot/3008/ /ru/parts/ /llms.txt /sr/llms.txt /catalogue-build.json /sitemap-catalogue.xml /sitemap-catalogue-0.xml /sr/parts/p/a/; do cache_status carlab "$path" >/dev/null; done
+}
+warm
+refuses -X PURGE "$purge_listener/flush"
+refuses -X PURGE "$purge_listener/mapping"
+refuses "$purge_listener/"
+refuses -X DELETE "$purge_listener/.+"
+refuses -X PURGE "$purge_listener/"
+refuses -X PURGE "$purge_listener/.+"
+refuses -X PURGE "$purge_listener/.*"
+refuses -X PURGE "$purge_listener/-/.*"
+refuses -X PURGE "http://$net-caddy:2020/config/"
+cached 'a refused flush leaves the cache alone' '; hit;' carlab /ru/cars/bmw/
+node --experimental-strip-types --input-type=module -e "
+import { CATALOGUE_HUB_PATTERNS, partPagePattern } from '$here/../../apps/auto-service-shop/src/lib/publish/purge.ts';
+console.log(CATALOGUE_HUB_PATTERNS.join('\n'));
+console.log(partPagePattern('a'));
+" >"$work/purge-patterns"
+hub_status=$(sed '$d' "$work/purge-patterns" | while read -r pattern; do listener -X PURGE "$purge_listener/$pattern"; echo; done | sort -u)
+if [ "$hub_status" = 204 ]; then echo "ok - the shop's hub purges pass the listener"; else echo "not ok - the hub purges answered $hub_status"; failures=$((failures + 1)); fi
+for path in /ru/cars/bmw/ /ru/cars/audi/ /ru/parts/c/brakes/ /ru/parts/peugeot/3008/ /ru/parts/ /llms.txt /sr/llms.txt /catalogue-build.json /sitemap-catalogue.xml /sitemap-catalogue-0.xml; do
+  cached "the hub purge empties $path" 'fwd=uri-miss; stored' carlab "$path"
+done
+cached 'the hub purge keeps the Part pages' '; hit;' carlab /sr/parts/p/a/
+listener -X PURGE "$purge_listener/$(tail -n 1 "$work/purge-patterns")" >/dev/null
+cached "the Part page purge empties it in any locale" 'fwd=uri-miss; stored' carlab /sr/parts/p/a/
+cached 'the Part page purge leaves the hubs' '; hit;' carlab /ru/cars/bmw/
 docker exec "$net-caddy" sh -c 'echo stale >/cache/leftover'
 docker restart "$net-caddy" >/dev/null
 port=$(docker port "$net-caddy" 443/tcp | sed -n '1s/.*://p')
@@ -343,7 +389,7 @@ until [ "$(status api /health)" = 200 ] || [ "$tries" -ge 30 ]; do
   tries=$((tries + 1))
   sleep 1
 done
-leftover=$(docker exec "$net-caddy" sh -c 'find /cache -mindepth 1 | wc -l' | tr -d ' ')
+leftover=$(docker exec "$net-caddy" sh -c 'find /cache -mindepth 1 ! -name .simplefs-index | wc -l' | tr -d ' ')
 if [ "$leftover" = 0 ]; then echo 'ok - a restart empties the cache volume, so its disk stays bounded'; else echo "not ok - $leftover files stay on the cache volume after a restart"; failures=$((failures + 1)); fi
 cached 'after the restart the cache starts cold' 'fwd=uri-miss; stored' carlab /ru/parts/p/a/
 docker stop "$net-site" >/dev/null

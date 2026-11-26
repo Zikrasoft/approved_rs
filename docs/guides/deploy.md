@@ -90,11 +90,11 @@ which:
 
 The temp dir holding the env and the ssh key is deleted on exit; nothing is
 printed or uploaded as an artifact. The release name carries the run id, so a
-rebuild of the live SHA (a Publish, a forced run) never writes into the release
+rebuild of the live SHA (a forced run) never writes into the release
 that is serving. As a last step (`Record what is live`) the leg moves its own
 `refs/tags/deployed/<app>` tag onto the SHA just shipped. That is how the next
 run learns what is already in production. Each app deploys serially
-(`concurrency: deploy-site-<app>`, shared with `publish.yml`), the three in
+(`concurrency: deploy-site-<app>`), the three in
 parallel.
 
 The Vercel projects no longer serve or hold anything.
@@ -237,8 +237,7 @@ If everything needs redeploying at once — Actions → CI → Run workflow, wit
 changed outside git: a GitHub secret or variable of a site, a rotated secret. Such edits require a rebuild but leave no trace in
 the repository's history, and `scope` only looks at git.
 
-`environment: site-<app>` on each `deploy-site` leg (and `site-auto-service` on
-`publish.yml`) is an ordinary GitHub Environment with no protection rules: it
+`environment: site-<app>` on each `deploy-site` leg is an ordinary GitHub Environment with no protection rules: it
 holds that site's own secrets and variables. `deploy-shop` keeps
 `environment: production`.
 
@@ -285,7 +284,7 @@ The deploy step gets two env values, `SITE_SECRETS` and `SITE_VARS`.
 spells out name by name (`"X": ${{ toJSON(secrets.X) }}`), because GitHub holds
 a workflow that dumps `toJSON(secrets)` as possibly malicious until someone
 approves the run. A new secret name therefore goes into the manifest and into
-both `ci.yml` and `publish.yml`; `site-env.test.ts` fails until the three agree.
+`ci.yml`; `site-env.test.ts` fails until the two agree.
 Why the rest is safe: GitHub masks every secret in the log whatever the step
 does with it; `site-env.ts` copies only the manifest's names for that site into
 the release `.env` and never prints a value (a refusal names the variable only);
@@ -938,8 +937,8 @@ account. All of it is described in `infra/auto-service-shop/`:
 | File                                     | What it is                                                                                                                                                           |
 | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Dockerfile` + `Dockerfile.dockerignore` | the production image: `pnpm --filter @podbor/auto-service-shop build`, `pnpm deploy --legacy`; runtime from `.medusa/server` as `node`                               |
-| `docker-compose.yml`                     | postgres 16.15, typesense 30.2, medusa and caddy 2.11.4 (both GHCR images by the same sha)                                                                           |
-| `caddy-image/Dockerfile`                 | Caddy 2.11.4 built with `cache-handler` v0.17.0 and Souin's `simplefs` storage v0.0.20, plus `curl` for the purge; built by CI, pulled from GHCR by sha              |
+| `docker-compose.yml`                     | postgres 16.15, typesense 30.2, medusa and caddy 2.11.8 (both GHCR images by the same sha)                                                                           |
+| `caddy-image/Dockerfile`                 | Caddy 2.11.8 built with `cache-handler` v0.17.0 and Souin's `simplefs` storage v0.0.23, plus `curl` for the purge; built by CI, pulled from GHCR by sha              |
 | `caddy/Caddyfile`                        | `api.carlab.rs` and `admin.carlab.rs` → `medusa:9000`, TLS, security headers, body up to 1 MB on the API host and 25 MB on the admin host, payment webhooks closed   |
 | `production.env.example`                 | the template for `/srv/carlab/.env`                                                                                                                                  |
 | `backup.env.example`                     | the template for `/srv/carlab/.env.backup`, the off-host backup bucket                                                                                               |
@@ -1011,6 +1010,23 @@ nothing else: no other table, no delete, no DDL. A changed password applies at t
 next deploy. Unset, the step says so and the crawler has no role. Checked against
 a live Postgres by `infra/auto-service-shop/test/crawler-role.test.sh`. `restore.sh`
 restores with `--no-privileges`, so a dump never needs the role to exist first.
+
+Postgres runs tuned for the 4 GB droplet: `jit=off`, `work_mem=8MB`,
+`random_page_cost=1.1` (SSD), `shared_preload_libraries=pg_stat_statements` and
+`log_min_duration_statement=1000` (statements over one second reach the logs).
+`shared_buffers` stays at its default. They are `-c` flags on the `postgres`
+service in `docker-compose.yml`, asserted by `test/compose.test.sh`. Changing a
+flag recreates the container, so a deploy that ships one restarts Postgres, and
+that is accepted. `deploy.sh` runs `create extension if not exists
+pg_stat_statements` in `carlab` right after Postgres is up, so it is safe to
+repeat. The slowest statements by total time:
+
+```bash
+docker compose exec -T postgres psql -U carlab -d carlab -c \
+  "select calls, round(total_exec_time) ms, round(mean_exec_time) mean_ms, left(query, 80) from pg_stat_statements order by total_exec_time desc limit 10"
+```
+
+`select pg_stat_statements_reset()` clears the counters.
 
 Postgres has no host port and sits on the internal `data` network at a fixed
 address, `10.200.0.10` (`ipv4_address` in `docker-compose.yml`, subnet
@@ -1097,9 +1113,14 @@ Keys) and put it with the admin URL in `apps/auto-service-shop/.env.admin`
   [Backup and restore](#backup-and-restore)). The Droplet's paid backups are
   off to save cost: a lost instance is rebuilt with Terraform, `bootstrap-host.sh`
   and `restore.sh`.
-- **Typesense is not backed up.** Its index is derived from Postgres and rebuilt by
-  the reindex at every Publish (ADR-0041), so after a restore search stays empty
-  until the next Publish.
+- **Typesense is not backed up.** Its index is derived from Postgres and rebuilt
+  by the nightly `reindex-search` job (ADR-0041), so after a restore search stays
+  empty until the next 04:00 Belgrade rebuild.
+  A rebuild reindexes in batches of 1000 (`reindex.batch_size` in
+  `medusa-config.ts`) and the Typesense client waits 60 s for a connection.
+  After the deploy that ships this, run a full rebuild once and write its
+  docs/s (documents indexed divided by the job's wall time in `docker compose
+logs medusa`) here. TODO: record the measured docs/s.
 - Only Caddy is published outward: 80, 443, 443/udp. Grafana listens on
   `127.0.0.1:3000` only, for an SSH tunnel. Medusa, Postgres, Typesense, Loki
   and Alloy have no host ports; Postgres and Typesense sit on an internal network with no
@@ -1143,9 +1164,14 @@ Keys) and put it with the admin URL in `apps/auto-service-shop/.env.admin`
   `docker stats --no-stream` once the catalogue is at scale, and raise the limit
   before the index outgrows it.
 - **carlab.rs catalogue page cache** (ADR-0065). Caddy caches what node
-  renders for `/<locale>/parts/...` and `/<locale>/cars/...`, on GET and HEAD
-  only. `/<locale>/parts/` itself, `search`, `cart` and `prices` are not cached,
-  and neither are the other paths or the other two sites. The response's
+  renders for `/<locale>/parts/...`, `/<locale>/cars/...`, `/llms.txt`,
+  `/<locale>/llms.txt`, `/catalogue-build.json` and the catalogue sitemap
+  (`/sitemap-catalogue.xml` and its `/sitemap-catalogue-<n>.xml` chunks), on
+  GET and HEAD only (the `@catalogue` matcher in the Caddyfile). `search`,
+  `cart` and `prices` are not cached, nor the `/<locale>/parts/` hub when the
+  request carries a query string (its showcase pages through `?offset=` and
+  filters, which the key would drop), and neither are the other paths or the
+  other two sites. The response's
   `Cache-Control` decides what is stored. Without one, nothing is stored
   (`default_cache_control no-store`). `private` and `no-store` are never
   stored. A request's own `Cache-Control` or `Pragma` cannot force a render
@@ -1156,17 +1182,25 @@ Keys) and put it with the admin URL in `apps/auto-service-shop/.env.admin`
   `.env`, so changing it needs `docker compose up -d caddy`); a junk or empty
   value stays on the cache, and with no token set nothing bypasses. The
   `auto_service_shop_preview_on` flag cookie alone does not.
-  - **Image.** `shop-image` in CI builds `caddy-image/Dockerfile` for amd64
-    and pushes it as `ghcr.io/zikrasoft/podbor-carlab-caddy:<sha>`, the same
-    sha as the shop image. `docker-compose.yml` names it by `CADDY_TAG`, which defaults
-    to `MEDUSA_TAG` (leave it unset), and `deploy.sh` pulls it with the shop image, so the host never compiles
-    Caddy and a rollback brings back the Caddy of that sha. A sha shipped
-    before this image existed has no Caddy image: a rollback to it fails at
-    the pull and changes nothing.
+  - **Image.** `infra/auto-service-shop/caddy-tag.sh` derives the tag: the
+    first 40 hex characters of a sha256 over `caddy-image/Dockerfile`,
+    `caddy/Caddyfile` and `caddy/security-headers.caddy`, so it changes only
+    when Caddy itself changes. `shop-image` in CI builds `caddy-image/Dockerfile`
+    for amd64 and pushes `ghcr.io/zikrasoft/podbor-carlab-caddy:<tag>` only when
+    that tag is not in the registry yet. `deploy-shop` writes the tag to a
+    `caddy-tag` file shipped with the stack files; `deploy.sh` reads it, pulls
+    that image with the shop image and records `CADDY_TAG` in `.env`.
+    `docker-compose.yml` names the image by `CADDY_TAG`, which defaults to
+    `MEDUSA_TAG`: a host with no `caddy-tag` file (a rollback to a sha shipped
+    before this) drops `CADDY_TAG` and falls back to the shop tag. A shop
+    deploy that does not touch Caddy leaves its tag, so compose does not
+    recreate the container and the page cache survives. The host never
+    compiles Caddy. A sha shipped before this image existed has no Caddy
+    image: a rollback to it fails at the pull and changes nothing.
   - **Storage.** Souin `simplefs` keeps the bodies, lz4-compressed, in the
     `caddycache` volume at `/cache`. The index stays in Caddy's memory, so a
     restart or a reload with a changed Caddyfile empties the cache: every
-    shop deploy starts it cold. This is accepted (ADR-0065). The image
+    shop deploy that changes Caddy starts it cold, any other keeps it (ADR-0065). The image
     command empties `/cache` before Caddy starts, so a restart leaves no
     orphaned files and the disk stays bounded by the entries of one run.
   - **Cap: 40,000 index entries.** A page takes three entries, so the cache
@@ -1209,9 +1243,11 @@ Keys) and put it with the admin URL in `apps/auto-service-shop/.env.admin`
     bodies in memory, was OOM-killed at 256 MB before 40,000 pages.
   - **Stale copies.** While node is down, a page still within its
     `s-maxage` is served from the cache as a hit. `simplefs` v0.0.20 drops a
-    body when its `s-maxage` runs out, so `stale-while-revalidate` and
-    `stale-if-error` never apply after that day. An expired or never-cached
+    body when its `s-maxage` runs out, so the page header sends neither
+    `stale-while-revalidate` nor `stale-if-error`. An expired or never-cached
     page then gets what node gives, a 502 if node is down.
+  - **404.** A catalogue 404 carries `public, s-maxage=600`, not the day-long
+    page header, so a Part published after a visit opens within 10 minutes.
   - **Purge.** `deploy-site.sh auto-service <release>` empties the whole
     cache right after `current` points at the new release:
     `docker compose exec -T caddy curl -fsS -X PURGE http://127.0.0.1:2019/souin-api/souin/flush`.
@@ -1220,6 +1256,33 @@ Keys) and put it with the admin URL in `apps/auto-service-shop/.env.admin`
     has no published port. The public hosts hand `/souin-api/...` to node like
     any other path. If the purge fails, the deploy fails and the healthy
     release stays live. Run the same command by hand to empty the cache.
+  - **Publish purge.** The shop purges only what a Publish changed, through
+    an internal Caddy listener, `http://:2020` in the Caddyfile. It sits on
+    the compose network alone, with no entry in `ports`, and the shop reaches
+    it as `CACHE_PURGE_URL=http://caddy:2020/souin-api/souin` (set in compose;
+    the shop refuses to start in production without it, and elsewhere the
+    `purge` step sends nothing while it is unset). It forwards to the Souin
+    API only a `PURGE` under `/souin-api/souin/`, whose rest of the path is a
+    regex over the cache keys (`GET-https-carlab.rs-/ru/parts/c/brakes/`) and
+    holds at least three letters or digits in a row; it answers 403 to
+    `flush`, `mapping`, a catch-all such as an empty pattern, `.+`, `.*` or
+    `-/.*`, every other path and every other method. That check only stops a
+    slip; the boundary is the compose network itself: anything on it can still
+    purge a broad pattern such as `carlab`, so nothing untrusted runs on it. The
+    pattern travels in the path unescaped, so it holds no `|`, `^`, `{`, `?`
+    or `\`: Go escapes them on the proxy hop and Souin then matches the
+    escape literally. That is why the hubs take several patterns, not one
+    alternation: `-/[a-z][a-z]/cars/`, `-/[a-z][a-z]/parts/$` (the `/parts/`
+    hub), `-/[a-z][a-z]/parts/[0-9a-oq-z]` and `-/[a-z][a-z]/parts/p[0-9a-z-]`
+    (every `/parts/` page but `/parts/p/`), `llms[.]txt`, `sitemap` and
+    `catalogue-build[.]json`. Each Part page whose number is fresh, flipped
+    `listed` or was swept gets `-/[a-z][a-z]/parts/p/<slug>/`, which covers
+    the three locales at once; a slug character outside `a-z`, `0-9` and `-`
+    becomes `.`, so a slug never smuggles regex into the pattern. The patterns live in
+    `apps/auto-service-shop/src/lib/publish/purge.ts`. `simplefs` before
+    v0.0.23 deleted only the first key a regex matched, because it deleted
+    while ranging over the cache; the image pins v0.0.23, which collects the
+    keys first.
   - **Checking a hit.** `curl -sI https://carlab.rs/ru/parts/makes/ | grep -i cache-status`.
     `Souin; hit; ttl=...` came from the cache. `Souin; fwd=uri-miss; stored`
     went to node and was stored. `detail=NO-STORE-DIRECTIVE` went to node and
@@ -1329,27 +1392,45 @@ number gets its CI value in that script. The non-obvious parts:
 - `DATABASE_URL` and the `TYPESENSE_HOST`/`PORT`/`PROTOCOL` are not written into
   `.env`: compose assembles them from the service names, `POSTGRES_PASSWORD` and
   `TYPESENSE_API_KEY`, and hands the same key to Typesense itself.
-- `OPENAI_API_KEY` and `PUBLISH_DISPATCH_TOKEN` feed the admin's Publish chain:
-  the first translates catalogue text, the second is a fine-grained GitHub token
-  with `actions: write` on this repository that dispatches `publish.yml` and
-  then reads that run until it finishes (`write` includes `read`). Search is
-  reindexed after the new numbers are published and before the dispatch, so
-  the reindex never slows the build or the first renders after the site's cache
-  is emptied; a failed deploy unpublishes those numbers and reindexes their
-  Parts again; a failed or cancelled run,
-  or one still unfinished after 90 minutes, stops the chain at the deploy step. Either
-  may stay empty; the chain then stops at that step and the admin shows why.
-  `publish.yml` rebuilds carlab.rs from the `deployed/auto-service` tag, so it
-  ships fresh catalogue data and never code that is not live yet. The chain runs
-  only from the admin's Publish button, in the top bar of every admin page.
-  **Accepted risk:** the token sits in `/srv/carlab/.env` in plain text, and
-  `actions: write` lets whoever reads it dispatch or cancel any workflow in this
-  repository, not only `publish.yml`, since a fine-grained token cannot be
-  narrowed to one workflow. Only `deploy` (and root) can read that file, and a
-  dispatched workflow runs the repository's own code at a ref that is already
-  pushed, so the token cannot ship code that is not in the repository. Give it
-  the shortest expiry you are willing to rotate, and revoke it at
-  Settings → Developer settings at the first sign the server is compromised.
+- `OPENAI_API_KEY` feeds the admin's Publish chain, which translates catalogue
+  text with it. A Publish is data-only: it never dispatches a GitHub workflow,
+  rebuilds the site or opens SSH, and the host holds no GitHub token. The chain is
+  `shrink → sweep → translate → publish → reindex → purge`. `shrink` writes
+  nothing: it counts the Part pages the published numbers name now (numbers
+  whose identifier was deleted since still count, the sweep has not removed
+  them yet) and the Part pages the live identifiers would give once swept and
+  published, and refuses the Publish when the second is under half the first,
+  so the run fails at `shrink` with the catalogue untouched, again on every
+  retry, until `CATALOGUE_SHRINK_ALLOWED=true` sits in the shop's
+  `.env` for one Publish; remove it afterwards. `publish` collects the
+  change set: the freshly published numbers, the numbers whose `listed`
+  flipped, the Parts whose translations `translate` wrote and the numbers the
+  orphan `sweep` removed. Then it warms the shop's
+  catalogue memo (the page list, counts and demand), so the renders after the
+  purge read it ready. `reindex` is incremental: only
+  the changed Parts go to `part_identifier` (the removed numbers are deleted
+  from it), and `catalogue_car` is rebuilt with a swap; when `part_identifier`
+  has no active version, it gets a full swap instead. Then a count check
+  compares the `published:true` documents with the published numbers for up to
+  a minute and logs a `search.drift` Event when they still disagree, without
+  failing the Publish. Search is updated before the purge, so the first renders
+  after it already find the new Parts. `purge` then empties the catalogue hubs
+  and the changed Part pages from the page cache (see the Publish purge above).
+  The hubs include everything on carlab.rs that lists the catalogue and renders
+  on demand: the catalogue sitemap, both `llms.txt`, the `/parts/` hub and
+  `catalogue-build.json`, so the purge is all a Publish needs for them to show
+  the new state. A failed run keeps what it published and writes its change
+  set, with whatever it carried, into its report as `unfinished`; the next
+  Publish starts from the `unfinished` of the latest run that wrote a report,
+  so a retry after a failed `reindex` or `purge` reindexes and purges the
+  earlier run's Parts and pages as well as its own. A run the restart
+  interrupted writes no report, so the Publish before it is the one carried.
+  Without
+  `OPENAI_API_KEY` the chain stops at `translate` once any text is untranslated,
+  and the admin shows why. The chain runs only from the admin's Publish button,
+  in the top bar of every admin page. The services and works pages stay
+  prerendered and read the Category links at build, so they pick up a new
+  Category on the next code release, not on a Publish.
 - `OPENAI_API_KEY` also answers a Supplier Import's one question per new
   article (Russian name, attributes, description; the Category comes from the
   supplier category mapping, never from AI), on
@@ -1514,7 +1595,7 @@ sides say otherwise. Two variables, one per side:
 
 On carlab.rs only the exact value `true` opens the shop: unset or anything else
 is closed. turbo passes `SHOP_OPEN` and `SHOP_PREVIEW_TOKEN` through to the
-`@podbor/auto-service` build, so a rebuild (`publish.yml` or a deploy) is what
+`@podbor/auto-service` build, so a deploy is what
 applies a change. An open build sends the preview token itself, so it builds
 with prices even if the backend is still closed.
 
@@ -1600,23 +1681,24 @@ moves forward again.
    and the deploy, and leaves `deployed/auto-service` where it was, so the
    live site keeps serving the last build and the next run retries. Without the
    probe, a VPS outage would fail every carlab.rs deploy, since the storefront
-   build throws when the backend it is pointed at is unreachable. The Publish
-   workflow runs the same probe but fails instead (`::error::`), so the admin
-   shows the Publish as failed rather than as done.
+   build throws when the backend it is pointed at is unreachable.
 
    The build never reads `/store/catalogue-snapshot`: every catalogue page is
    rendered on demand (ADR-0065). It reads the light page list
-   (`/store/catalogue-pages`, once per build: sitemap, `llms.txt`, the parts
-   hub, the Make list for Keystatic and the shrink guard share it) and
-   `/store/categories`, and records how many part pages it serves at
-   `https://carlab.rs/catalogue-build.json`. A production build (`upload-site.sh` sets
+   (`/store/catalogue-pages`, once per build: the services and works pages'
+   Category links, the Make list for Keystatic and the shrink guard share it)
+   and `/store/categories`. The catalogue sitemap, `llms.txt`, the parts hub and
+   `https://carlab.rs/catalogue-build.json` (how many part pages the live site
+   serves) render on demand from the same endpoints. A production build (`upload-site.sh` sets
    `CATALOGUE_SHRINK_GUARD=true`) reads that record from the live site first, and once it counts
    any part pages the catalogue is live: the build then fails without
    `MEDUSA_BACKEND_URL`, on zero part pages, and on fewer than half of what the
    live site serves. A shrink that is meant (a supplier removed) goes through
    with `CATALOGUE_SHRINK_ALLOWED=true` in the carlab.rs build env for one
-   build; remove it afterwards. Part pages list only published numbers, the same
-   ones search finds, so a CI deploy and a Publish build the same catalogue.
+   build; remove it afterwards. The guard covers code releases only: a Publish
+   does not build the site, it changes the catalogue the live pages render
+   from, so no build guard sees a Publish. Part pages list only published
+   numbers, the same ones search finds.
 
 The production seed (`apps/auto-service-shop/src/scripts/seed-production.ts`) runs on
 every deploy and is idempotent. It creates the cash-at-pickup commerce defaults
@@ -1794,6 +1876,11 @@ that would otherwise grow forever or hold personal data longer than needed:
   cleared 90 days after that lookup, its source and bot flag stay. The carlab.rs privacy page
   states this retention; change both together. The nightly dumps still hold a
   scrubbed VIN for up to 30 days (the off-site retention above).
+- **Search, rebuilt nightly** (`reindex-search`). The job wakes every hour
+  and at 04:00 Europe/Belgrade (summer time included) swaps both indexes,
+  `part_identifier` and `catalogue_car`, from scratch. It is the safety net
+  under the incremental Publish: anything an incremental change missed is
+  right by the next morning.
 - **Catalogue runs, 90 days** (`prune-catalogue-runs`, nightly). Finished import,
   Publish, deletion, merge and rename runs older than 90 days are deleted with
   their `report`, except the newest run of each kind per Supplier, which the
@@ -2104,14 +2191,14 @@ Steps 1, 5 and 6 are one `terraform apply`: see `infra/auto-service-shop/terrafo
 10. **The shop's `.env` values for carlab.rs.** In `/srv/carlab/.env`:
     `STOREFRONT_ORIGIN=https://carlab.rs` (orders go to its `/api/shop-orders`,
     see [`.env`](#env)), `SHOP_OPEN=false` while the shop is
-    closed, `PUBLISH_DISPATCH_TOKEN` and `OPENAI_API_KEY` as described in
+    closed, and `OPENAI_API_KEY` as described in
     [`.env`](#env); `docker compose up -d medusa` after editing.
-    Done: `cut -d= -f1 /srv/carlab/.env` lists all four names.
+    Done: `cut -d= -f1 /srv/carlab/.env` lists all three names.
 11. **carlab.rs env.** In the `site-auto-service` GitHub environment:
     `MEDUSA_BACKEND_URL=https://api.carlab.rs`, `MEDUSA_PUBLISHABLE_KEY` = the key
     from step 9, and `SHOP_OPEN` **unset** until the shop opens. Then press Publish
-    in the admin so the Categories get their Serbian and English text and carlab.rs
-    rebuilds against the catalogue.
+    in the admin so the Categories get their Serbian and English text, then deploy
+    carlab.rs so its prerendered services pages link the Categories.
     Done: `https://carlab.rs/sr/parts/brakes/` 301s to `/sr/parts/c/brakes/`, which
     answers 200 with the Category's text and picture. From now on a carlab.rs deploy
     while `https://api.carlab.rs/health` is down is skipped with a warning in the

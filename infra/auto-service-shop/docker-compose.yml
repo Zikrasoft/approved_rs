@@ -46,6 +46,18 @@ services:
     image: postgres:16.15-alpine
     restart: unless-stopped
     logging: *logging
+    command:
+      - postgres
+      - -c
+      - jit=off
+      - -c
+      - work_mem=8MB
+      - -c
+      - random_page_cost=1.1
+      - -c
+      - shared_preload_libraries=pg_stat_statements
+      - -c
+      - log_min_duration_statement=1000
     mem_limit: 512m
     security_opt: ['no-new-privileges:true']
     networks:
@@ -105,6 +117,7 @@ services:
       TYPESENSE_PORT: '8108'
       TYPESENSE_PROTOCOL: http
       TYPESENSE_API_KEY: ${TYPESENSE_API_KEY:?}
+      CACHE_PURGE_URL: http://caddy:2020/souin-api/souin
       NODE_OPTIONS: --max-old-space-size=1024
       LOG_LEVEL: info
     depends_on:

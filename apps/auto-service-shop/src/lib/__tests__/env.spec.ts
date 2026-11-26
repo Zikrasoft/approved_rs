@@ -29,6 +29,7 @@ const PRODUCTION_ENV = {
   NODE_ENV: 'production',
   TYPESENSE_API_KEY: 'secret',
   FILE_URL: 'https://carlab-public.s3.eu-central-1.amazonaws.com',
+  CACHE_PURGE_URL: 'http://caddy:2020/souin-api/souin',
 };
 
 describe('parseEnv', () => {
@@ -101,14 +102,9 @@ describe('parseEnv', () => {
   });
 
   it('reads an empty publish secret as unset', () => {
-    const env = parseEnv({
-      ...VALID_ENV,
-      OPENAI_API_KEY: '',
-      PUBLISH_DISPATCH_TOKEN: 'token',
-    });
+    const env = parseEnv({ ...VALID_ENV, OPENAI_API_KEY: '' });
 
     expect(env.OPENAI_API_KEY).toBeUndefined();
-    expect(env.PUBLISH_DISPATCH_TOKEN).toBe('token');
   });
 
   it('reads the order alert chat as a Telegram chat id, empty as unset', () => {
@@ -162,6 +158,20 @@ describe('parseEnv', () => {
     expect(env.DATABASE_SSL).toBe(true);
   });
 
+  it('allows a catalogue shrink only when CATALOGUE_SHRINK_ALLOWED=true', () => {
+    const allowed = (value: string | undefined) =>
+      parseEnv({ ...VALID_ENV, CATALOGUE_SHRINK_ALLOWED: value })
+        .CATALOGUE_SHRINK_ALLOWED;
+
+    expect([undefined, '', 'false', 'true'].map(allowed)).toEqual([
+      false,
+      false,
+      false,
+      true,
+    ]);
+    expect(() => allowed('yes')).toThrow();
+  });
+
   it('throws when DATABASE_URL is missing', () => {
     expect(() => parseEnv({ ...VALID_ENV, DATABASE_URL: undefined })).toThrow();
   });
@@ -186,6 +196,13 @@ describe('parseEnv', () => {
     expect(parseEnv({ ...VALID_ENV, PORT: '4000' }).FILE_URL).toBe(
       'http://localhost:4000/static',
     );
+  });
+
+  it('requires the page cache purge URL in production only, so a Publish never skips its purge there', () => {
+    expect(() =>
+      parseEnv({ ...PRODUCTION_ENV, CACHE_PURGE_URL: undefined }),
+    ).toThrow('CACHE_PURGE_URL is required in production');
+    expect(parseEnv(VALID_ENV).CACHE_PURGE_URL).toBeUndefined();
   });
 
   it('requires the public file URL in production', () => {

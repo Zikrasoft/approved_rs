@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { mapPlaceUrl } from '@podbor/site-kit';
+import type { Category } from '@podbor/catalog-contract';
 
 vi.mock('astro:content', () => ({
   getCollection: vi.fn(async (collection: string) =>
@@ -77,6 +78,7 @@ const { articles, works } = vi.hoisted(() => ({
 }));
 
 const { generateLlmsTxt } = await import('./llmsTxt');
+const NO_CATALOGUE = { categories: [], makes: [] };
 const { SUPPORTED_LOCALES } = await import('@/i18n/config');
 const { SERVICE_SLUGS } = await import('./services');
 const { content } = await import('@/i18n/content');
@@ -86,25 +88,27 @@ describe('generateLlmsTxt', () => {
   it('states the phone number', async () => {
     const { PHONE_NUMBER } = await import('@/utils/constants');
     const { formatPhone } = await import('@podbor/site-kit/format-phone');
-    expect(await generateLlmsTxt('ru')).toContain(formatPhone(PHONE_NUMBER));
+    expect(await generateLlmsTxt('ru', NO_CATALOGUE)).toContain(
+      formatPhone(PHONE_NUMBER),
+    );
   });
 
   it('lists every service for every locale', async () => {
     for (const locale of SUPPORTED_LOCALES) {
-      const body = await generateLlmsTxt(locale);
+      const body = await generateLlmsTxt(locale, NO_CATALOGUE);
       for (const slug of SERVICE_SLUGS)
         expect(body).toContain(`/${locale}/services/${slug}/)`);
     }
   });
 
   it('lists Parts sourcing among the services', async () => {
-    expect(await generateLlmsTxt('ru')).toContain(
+    expect(await generateLlmsTxt('ru', NO_CATALOGUE)).toContain(
       '[Подбор запчастей](https://carlab.rs/ru/services/vin-parts-inquiry/)',
     );
   });
 
   it('links each published work by its localized title, leaving drafts out', async () => {
-    const body = await generateLlmsTxt('sr');
+    const body = await generateLlmsTxt('sr', NO_CATALOGUE);
     expect(body).toContain(
       '- [BMW X5 — PPF folija](https://carlab.rs/sr/works/bmw-x5/)',
     );
@@ -112,7 +116,9 @@ describe('generateLlmsTxt', () => {
   });
 
   it('falls back to the Russian title when a locale has no translation', async () => {
-    expect(await generateLlmsTxt('en')).toContain('[BMW X5 — плёнка PPF]');
+    expect(await generateLlmsTxt('en', NO_CATALOGUE)).toContain(
+      '[BMW X5 — плёнка PPF]',
+    );
   });
 
   it('links a Make page for each Make with a Work or an Article, in every locale', async () => {
@@ -121,7 +127,7 @@ describe('generateLlmsTxt', () => {
         '{make}',
         'SEAT',
       );
-      const body = await generateLlmsTxt(locale);
+      const body = await generateLlmsTxt(locale, NO_CATALOGUE);
       expect(body).toContain(
         `[${heading}](https://carlab.rs/${locale}/cars/seat/)`,
       );
@@ -133,7 +139,7 @@ describe('generateLlmsTxt', () => {
   it('lists the Make pages under the /cars/ index, in every locale', async () => {
     for (const locale of SUPPORTED_LOCALES) {
       const { cars } = content(locale).pages;
-      const body = await generateLlmsTxt(locale);
+      const body = await generateLlmsTxt(locale, NO_CATALOGUE);
       const section = body.slice(body.indexOf(`## ${cars.navLabel}\n`));
       const lines = section.split('\n## ')[0].split('\n').filter(Boolean);
 
@@ -145,37 +151,39 @@ describe('generateLlmsTxt', () => {
   });
 
   it('names a Make page by its overview when it has one', async () => {
-    expect(await generateLlmsTxt('ru')).toContain(
+    expect(await generateLlmsTxt('ru', NO_CATALOGUE)).toContain(
       '[Обзор BMW](https://carlab.rs/ru/cars/bmw/)',
     );
   });
 
   it('"other languages" links to the other locales, not the current one', async () => {
-    const body = await generateLlmsTxt('sr');
+    const body = await generateLlmsTxt('sr', NO_CATALOGUE);
     expect(body).toContain('https://carlab.rs/ru/llms.txt');
     expect(body).toContain('https://carlab.rs/en/llms.txt');
     expect(body).not.toContain('https://carlab.rs/sr/llms.txt');
   });
 
   it('names the brand in the top heading', async () => {
-    expect((await generateLlmsTxt('sr')).startsWith('# CarLab')).toBe(true);
+    expect(
+      (await generateLlmsTxt('sr', NO_CATALOGUE)).startsWith('# CarLab'),
+    ).toBe(true);
   });
 
   it('carries the garage address and opening hours as key facts', async () => {
-    const body = await generateLlmsTxt('sr');
+    const body = await generateLlmsTxt('sr', NO_CATALOGUE);
     expect(body).toContain(GARAGE_ADDRESS.street);
     expect(body).toContain(mapPlaceUrl(GARAGE_ADDRESS.googleMapsCid));
     expect(body).toContain(content('sr').site.footer.hours);
   });
 
   it('states the Google rating as a key fact', async () => {
-    expect(await generateLlmsTxt('ru')).toContain(
+    expect(await generateLlmsTxt('ru', NO_CATALOGUE)).toContain(
       '- 5.0 в Google · 23 отзыва\n',
     );
   });
 
   it('lists the visit facts and the route link as key facts', async () => {
-    const body = await generateLlmsTxt('ru');
+    const body = await generateLlmsTxt('ru', NO_CATALOGUE);
     content('ru').site.visit.facts.forEach((fact) =>
       expect(body).toContain(`- ${fact}\n`),
     );
@@ -185,168 +193,50 @@ describe('generateLlmsTxt', () => {
   });
 
   it('lists the hero trust row as key facts', async () => {
-    const body = await generateLlmsTxt('ru');
+    const body = await generateLlmsTxt('ru', NO_CATALOGUE);
     content('ru').home.hero.badges.forEach((fact) =>
       expect(body).toContain(`- ${fact}\n`),
     );
   });
 
-  const withBackend = async (
+  const withCatalogue = async (
     shopOpen: string,
     locale: 'sr' | 'ru' = 'sr',
     fitted: string[] = ['veh_1'],
   ) => {
-    const numbers = ['HU816X', 'HU7020Z', 'HU6004X'];
-    const answers: Record<string, unknown> = {
-      '/store/part-pages': {
-        pages: numbers.map((number) => ({
-          id: `pi_${number}`,
-          type: 'manufacturer-number',
-          value: number,
-          normalized_value: number,
-          superseded: false,
-          brand: { name: 'MANN-FILTER', slug: 'mann-filter' },
-          images: [],
-          part: {
-            id: `part_${number}`,
-            name: 'Масляный фильтр',
-            translations: null,
-            replaced_by: null,
-            category_id: null,
-            attributes: {},
-          },
-          equivalents: [],
-          offers: [],
-          supplier_data: {
-            cross_references: [],
-            applicability: [],
-            images: [],
-          },
-        })),
-        count: numbers.length,
-        offset: 0,
-        limit: 1000,
-      },
-      '/store/fitments': {
-        fitments: fitted.flatMap((vehicle_id) =>
-          numbers.map((number) => ({
-            id: `fit_${vehicle_id}_${number}`,
-            part_id: `part_${number}`,
-            vehicle_id,
-            quantity: 1,
-            axle: null,
-            side: null,
-            production_from: null,
-            production_to: null,
-            gearbox: null,
-            steering: null,
-            note: null,
-            translations: null,
-          })),
-        ),
-        count: fitted.length * numbers.length,
-        offset: 0,
-        limit: 1000,
-      },
-      '/store/categories': {
-        categories: [
-          {
-            id: 'category_oil',
-            slug: 'engine-oil',
-            name: 'Моторное масло',
-            text: 'Масло для двигателя.\n\nВторой абзац.',
-            translations: {
-              sr: {
-                name: 'Motorno ulje',
-                text: 'Ulje za motor.',
-                service_label: 'Zamena ulja',
-              },
-            },
-            maintenance_kit: false,
-            kit_rank: 0,
-            service_label: 'Замена масла',
-            service_price: 2500,
-            service_note: null,
-            installation_price: 1500,
-            image: null,
-            fields: [],
-          },
-        ],
-      },
-      '/store/vehicles': {
-        vehicles: [
-          {
-            id: 'veh_1',
-            slug: 'b47d20o0-140kw',
-            power_kw: 140,
-            drive: 'rwd',
-            market: 'EU',
-            year_from: 2015,
-            year_to: 2019,
-            steering: 'left',
-            model: {
-              slug: 'f30-320d',
-              name: '320d',
-              chassis: {
-                code: 'F30',
-                body_style: 'sedan',
-                series: {
-                  name: '3 серия',
-                  translations: null,
-                  make: { slug: 'bmw', name: 'BMW' },
-                },
-              },
-            },
-            engine: {
-              code: 'B47D20O0',
-              family: 'B47',
-              fuel: 'diesel',
-              displacement_cc: 1995,
-            },
-            identifiers: [],
-            requirements: [],
-          },
-        ],
-      },
-    };
-    answers['/store/catalogue-pages'] = {
-      parts: numbers.map((number) => ({
-        slug: `mann-filter-${number.toLowerCase()}`,
-        indexable: true,
-      })),
-      makes: fitted.length ? [{ slug: 'bmw', name: 'BMW', hub: true }] : [],
-      series: [],
-      categories: [],
-    };
-    (globalThis as { [key: symbol]: Map<string, unknown> | undefined })[
-      Symbol.for('carlab.buildMemo')
-    ]?.clear();
-    vi.stubEnv('MEDUSA_BACKEND_URL', 'http://localhost:9009');
-    vi.stubEnv('MEDUSA_PUBLISHABLE_KEY', 'pk_test');
     vi.stubEnv('SHOP_OPEN', shopOpen);
-    vi.stubGlobal(
-      'fetch',
-      vi.fn(async (url: string) => ({
-        ok: true,
-        json: async () =>
-          answers[new URL(url).pathname] ?? {
-            pages: [],
-            fitments: [],
-            count: 0,
-            offset: 0,
-            limit: 1000,
+    return generateLlmsTxt(locale, {
+      categories: [
+        {
+          id: 'category_oil',
+          slug: 'engine-oil',
+          name: 'Моторное масло',
+          text: 'Масло для двигателя.\n\nВторой абзац.',
+          translations: {
+            sr: {
+              name: 'Motorno ulje',
+              text: 'Ulje za motor.',
+              service_label: 'Zamena ulja',
+            },
           },
-      })),
-    );
-
-    return generateLlmsTxt(locale).finally(() => {
-      vi.unstubAllEnvs();
-      vi.unstubAllGlobals();
-    });
+          maintenance_kit: false,
+          kit_rank: 0,
+          service_label: 'Замена масла',
+          service_price: 2500,
+          service_note: null,
+          installation_price: 1500,
+          image: null,
+          fields: [],
+        },
+      ] as Category[],
+      makes: fitted.length
+        ? [{ slug: 'bmw', name: 'BMW', hub: true, parts: null }]
+        : [],
+    }).finally(() => vi.unstubAllEnvs());
   };
 
   it('lists the Category pages and the page of every Make, but no Make, Model or Vehicle page', async () => {
-    const body = await withBackend('true');
+    const body = await withCatalogue('true');
 
     expect(body).toContain(
       '[Motorno ulje](https://carlab.rs/sr/parts/c/engine-oil/): Ulje za motor. Zamena ulja: 2.500 RSD',
@@ -358,7 +248,7 @@ describe('generateLlmsTxt', () => {
   it('links the Make page of a Make with Parts and no Work', async () => {
     const bmwWork = works.find(({ id }) => id === 'bmw-x5')!;
     bmwWork.data.make = 'audi';
-    const body = await withBackend('true').finally(() => {
+    const body = await withCatalogue('true').finally(() => {
       bmwWork.data.make = 'bmw';
     });
 
@@ -367,13 +257,13 @@ describe('generateLlmsTxt', () => {
   });
 
   it('leaves the page of every Make out while no Make has enough Parts for a page', async () => {
-    const body = await withBackend('true', 'sr', []);
+    const body = await withCatalogue('true', 'sr', []);
 
     expect(body).not.toContain('https://carlab.rs/sr/parts/makes/');
   });
 
   it('names the installation price of a Category beside its add-on service', async () => {
-    const body = await withBackend('true', 'ru');
+    const body = await withCatalogue('true', 'ru');
 
     expect(body).toContain(
       'Масло для двигателя. Замена масла: 2\u00a0500 RSD. Установка в сервисе CarLab: 1\u00a0500 RSD',
@@ -381,12 +271,12 @@ describe('generateLlmsTxt', () => {
   });
 
   it('keeps the workshop prices and orders parts by inquiry, priced by staff, while the shop is closed', async () => {
-    const body = await withBackend('false');
+    const body = await withCatalogue('false');
 
     expect(body).toContain(
       '[Motorno ulje](https://carlab.rs/sr/parts/c/engine-oil/): Ulje za motor. Zamena ulja: 2.500 RSD. Ugradnja u auto servisu CarLab: 1.500 RSD.\n',
     );
-    const ru = await generateLlmsTxt('ru');
+    const ru = await generateLlmsTxt('ru', NO_CATALOGUE);
     expect(ru).toContain(
       '](https://carlab.rs/ru/parts/): Каталог запчастей CarLab: у каждого номера запчасти своя страница с аналогами и характеристиками. Запчасти заказывают по заявке',
     );
@@ -397,7 +287,7 @@ describe('generateLlmsTxt', () => {
   });
 
   it('lists the blog and each Article by its localized title and lead, without overviews', async () => {
-    const body = await generateLlmsTxt('sr');
+    const body = await generateLlmsTxt('sr', NO_CATALOGUE);
 
     expect(body).toContain(
       `[${content('sr').blog.heading}](https://carlab.rs/sr/blog/)`,
@@ -411,7 +301,7 @@ describe('generateLlmsTxt', () => {
   it('leaves the blog out while it lists no Article', async () => {
     const all = articles.splice(0);
     articles.push(...all.filter(({ data }) => data.overview));
-    const body = await generateLlmsTxt('ru').finally(() =>
+    const body = await generateLlmsTxt('ru', NO_CATALOGUE).finally(() =>
       articles.splice(0, articles.length, ...all),
     );
 
@@ -421,32 +311,34 @@ describe('generateLlmsTxt', () => {
 
   it('describes the parts catalogue on the parts index link', async () => {
     vi.stubEnv('SHOP_OPEN', 'true');
-    const body = await generateLlmsTxt('ru').finally(() => vi.unstubAllEnvs());
+    const body = await generateLlmsTxt('ru', NO_CATALOGUE).finally(() =>
+      vi.unstubAllEnvs(),
+    );
     expect(body).toContain(
       '](https://carlab.rs/ru/parts/): Каталог запчастей CarLab: у каждого номера запчасти своя страница с аналогами, ценой и наличием. Запчасти с ценой кладут в корзину и заказывают с самовывозом и оплатой наличными в сервисе',
     );
   });
 
   it('describes the one catalogue search and how to query it', async () => {
-    expect(await generateLlmsTxt('ru')).toContain(
+    expect(await generateLlmsTxt('ru', NO_CATALOGUE)).toContain(
       '[Поиск запчастей](https://carlab.rs/ru/parts/search/): Один поиск по всему каталогу: VIN, номер запчасти в любом написании, название, марка, модель, код кузова или двигателя, в том числе вместе, например «масляный фильтр bmw x3». Запрос передается в параметре q: https://carlab.rs/ru/parts/search/?q=HU+816+x',
     );
   });
 
   it('says how to page through the whole catalogue', async () => {
-    expect(await generateLlmsTxt('ru')).toContain(
+    expect(await generateLlmsTxt('ru', NO_CATALOGUE)).toContain(
       '[Все запчасти каталога](https://carlab.rs/ru/parts/search/): Без запроса поиск показывает весь каталог, по 12 запчастей на странице; следующая страница задается параметром offset: https://carlab.rs/ru/parts/search/?offset=12',
     );
   });
 
   it('links the about page with what it tells about the service', async () => {
-    expect(await generateLlmsTxt('ru')).toContain(
+    expect(await generateLlmsTxt('ru', NO_CATALOGUE)).toContain(
       '[О сервисе](https://carlab.rs/ru/about/): Автосервис CarLab на Звездаре в Белграде: кто мы, оборудование, с какими машинами работаем и как нас найти.',
     );
   });
 
   it('ends with the studio credit, without tracking parameters', async () => {
-    expect((await generateLlmsTxt('ru')).trimEnd()).toMatch(
+    expect((await generateLlmsTxt('ru', NO_CATALOGUE)).trimEnd()).toMatch(
       /\nСайт сделан в студии Zikrasoft: https:\/\/zikrasoft\.com\/$/,
     );
   });

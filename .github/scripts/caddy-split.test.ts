@@ -9,6 +9,10 @@ import {
   linksCaddy404,
   shadowedRedirects,
 } from './caddy-split.ts';
+import {
+  CATALOGUE_HUB_PATTERNS,
+  partPagePattern,
+} from '../../apps/auto-service-shop/src/lib/publish/purge.ts';
 
 const rules = [
   { source: '/old', destination: '/ru/new/' },
@@ -77,8 +81,65 @@ test('the Caddyfile caches every catalogue page and never the search, cart or pr
     '/sr/parts/c/brakes/2/',
     '/ru/parts/bmw/3-series/oil-filters/',
     '/en/cars/bmw/',
+    '/ru/parts/',
+    '/llms.txt',
+    '/sr/llms.txt',
+    '/catalogue-build.json',
+    '/sitemap-catalogue.xml',
+    '/sitemap-catalogue-12.xml',
   ])
     assert.equal(caches(path), true, path);
-  for (const path of ['/ru/parts/search/', '/ru/parts/cart', '/ru/parts/'])
+  for (const path of [
+    '/ru/parts/search/',
+    '/ru/parts/cart',
+    '/ru/parts/prices/',
+    '/ru/parts',
+    '/sitemap-index.xml',
+    '/sitemap-0.xml',
+    '/ru/services/',
+  ])
     assert.equal(caches(path), false, path);
+});
+
+test('a Publish purge empties every cached catalogue hub and only the Part pages it names', () => {
+  const caches = catalogueCaches(
+    readFileSync('infra/auto-service-shop/caddy/Caddyfile', 'utf8'),
+  );
+  const purged = (patterns: string[], path: string) =>
+    patterns.some((pattern) =>
+      new RegExp(pattern).test(`GET-https-carlab.rs-${path}`),
+    );
+  for (const path of [
+    '/sr/parts/c/brakes/2/',
+    '/ru/parts/makes/',
+    '/ru/parts/bmw/',
+    '/ru/parts/porsche/911/',
+    '/ru/parts/bmw/3-series/oil-filters/',
+    '/en/cars/',
+    '/en/cars/bmw/',
+  ]) {
+    assert.equal(caches(path), true, path);
+    assert.equal(purged(CATALOGUE_HUB_PATTERNS, path), true, path);
+  }
+  for (const path of [
+    '/ru/parts/',
+    '/ru/llms.txt',
+    '/llms.txt',
+    '/catalogue-build.json',
+    '/sitemap-catalogue.xml',
+    '/sitemap-catalogue-3.xml',
+  ]) {
+    assert.equal(caches(path), true, path);
+    assert.equal(purged(CATALOGUE_HUB_PATTERNS, path), true, path);
+  }
+  for (const locale of ['ru', 'sr', 'en']) {
+    const part = `/${locale}/parts/p/bosch-0986494524/`;
+    assert.equal(purged(CATALOGUE_HUB_PATTERNS, part), false, part);
+    assert.equal(
+      purged([partPagePattern('bosch-0986494524')], part),
+      true,
+      part,
+    );
+    assert.equal(purged([partPagePattern('bosch-0986')], part), false, part);
+  }
 });

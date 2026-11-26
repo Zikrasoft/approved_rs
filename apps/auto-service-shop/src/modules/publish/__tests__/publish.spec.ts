@@ -1,7 +1,7 @@
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
 import { createVehicleFixture } from '../../../../integration-tests/vehicleFixture';
-import { seriesPartCounts } from '../../../lib/catalogue-structure';
+import { seriesCountsOf } from '../../../lib/catalogue-structure';
 import { CATALOG_MODULE } from '../../catalog';
 import type CatalogModuleService from '../../catalog/service';
 import { PUBLISH_MODULE } from '..';
@@ -23,7 +23,7 @@ medusaIntegrationTestRunner({
         });
 
       const listedOn = async (seriesId: string) =>
-        (await seriesPartCounts(publish)).find(
+        seriesCountsOf(await publish.listedSeriesCategoryCounts()).find(
           (row) => row.series_id === seriesId,
         )?.parts ?? 0;
 
@@ -50,8 +50,8 @@ medusaIntegrationTestRunner({
           (await numberedPart('P 2')).part_identifier_id,
         ].sort();
 
-        const published = (await publish.publishAll()).sort();
-        const again = await publish.publishAll();
+        const published = (await publish.publishAll()).fresh.sort();
+        const again = (await publish.publishAll()).fresh;
         const firstPage = await publish.publishedPage({ limit: 1 });
         const secondPage = await publish.publishedPage({
           after: firstPage[0].id,
@@ -252,9 +252,9 @@ medusaIntegrationTestRunner({
         }
         await publish.publishAll();
 
-        const counts = await seriesPartCounts(publish, {
-          series: [series.id, loneSeries.id],
-        });
+        const counts = seriesCountsOf(
+          await publish.listedSeriesCategoryCounts(),
+        );
         const placeOf = (seriesId: string) =>
           counts.find((row) => row.series_id === seriesId);
 

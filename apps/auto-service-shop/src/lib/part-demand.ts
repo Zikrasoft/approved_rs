@@ -6,8 +6,11 @@ import type CatalogModuleService from '../modules/catalog/service';
 import { DEMAND_MODULE } from '../modules/demand';
 import { DEMAND_WINDOW_DAYS, rankDemand } from '../modules/demand/ranking';
 import type DemandModuleService from '../modules/demand/service';
+import { memoized } from './catalogue-memo';
 
 const DAY_MS = 86_400_000;
+
+export const DEMAND_TTL_MS = 10 * 60_000;
 
 export const daysBack = (now: Date, days: number) =>
   new Date(now.getTime() - (days - 1) * DAY_MS);
@@ -71,3 +74,6 @@ export async function loadPartDemand(
     ),
   );
 }
+
+export const memoPartDemand = (scope: MedusaContainer) =>
+  memoized('demand', () => loadPartDemand(scope), DEMAND_TTL_MS);

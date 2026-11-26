@@ -1,5 +1,6 @@
 import type { MedusaContainer } from '@medusajs/framework/types';
 
+import { clearCatalogueMemo } from '../lib/catalogue-memo';
 import { emitIndexChanges } from '../lib/index-changes';
 import { daysBack, demandModule } from '../lib/part-demand';
 import { CATALOG_MODULE } from '../modules/catalog';
@@ -14,6 +15,7 @@ export async function refreshPartDemandAt(
 ): Promise<void> {
   const demand = demandModule(container);
   await demand.pruneBefore(daysBack(now, DEMAND_KEPT_DAYS));
+  clearCatalogueMemo();
   const moving = await demand.countsSince(
     daysBack(now, DEMAND_WINDOW_DAYS + 1),
   );

@@ -40,8 +40,7 @@ User-visible changes (commit subjects on `carlab-shop`):
 - [ ] GitHub access to the three `site-*` environments (approved.rs, carlab.rs, details.rs).
 - [ ] AWS: S3/IAM administrator; DigitalOcean: an API token with write scope (deploy.md § The first ship: a checklist).
 - [ ] DNS at the `carlab.rs` registrar (same, step 3).
-- [ ] An OpenAI key for the shop, a fine-grained GitHub token for
-      `PUBLISH_DISPATCH_TOKEN` (deploy.md § `.env`).
+- [ ] An OpenAI key for the shop (deploy.md § `.env`).
 - [ ] The BotFather tokens and `.env.local` of each app for the Telegram
       scripts (deploy.md § The Telegram webhooks).
 - [ ] Editor access to the three GA4 properties and the Metrika counters
@@ -131,7 +130,6 @@ one `terraform apply`: `infra/auto-service-shop/terraform/README.md`.
   | `MEDUSA_TAG`                                                                                                                | leave empty; `deploy.sh` writes it                                                                  | deploy.md § `.env`        |
   | `POSTGRES_PASSWORD`, `TYPESENSE_API_KEY`, `JWT_SECRET`, `COOKIE_SECRET`, `CRAWLER_DB_PASSWORD`                              | `openssl rand -hex 32` each                                                                         | deploy.md § `.env`        |
   | `OPENAI_API_KEY`, `IMPORT_CONCURRENCY`                                                                                      | the shop's own OpenAI key; keep the template's concurrency                                          | deploy.md § `.env`        |
-  | `PUBLISH_DISPATCH_TOKEN`                                                                                                    | fine-grained token, `actions: write` on this repository, short expiry                               | deploy.md § `.env`        |
   | `STOREFRONT_ORIGIN`                                                                                                         | `https://carlab.rs`                                                                                 | § The first ship, step 10 |
   | `SHOP_LEAD_SECRET`, `SHOP_CLIENT_SECRET`, `SHOP_ORDER_OUTCOME_SECRET`, `SHOP_EVENTS_SECRET`, `SHOP_VISITOR_SEARCHES_SECRET` | `openssl rand -hex 32` each; the same value goes to the `site-auto-service` environment (section 5) | deploy.md § Shop Orders   |
   | `*_PREVIOUS` of those five                                                                                                  | empty (rotation only)                                                                               | deploy.md § Shop Orders   |
@@ -283,9 +281,9 @@ code on this branch; they were not migrated to GitHub.
       operators read (`TODO:` in `src/lib/crawler/worker.ts`); until then no `From`
       header is sent.
 - [ ] Press **Publish** in the admin top bar. It calls OpenAI on the shop's
-      `OPENAI_API_KEY` (paid), dispatches `publish.yml`, which rebuilds
-      carlab.rs from `deployed/auto-service`, and reindexes search after the run
-      succeeds (deploy.md § `.env`). The reindex is what builds the Typesense
+      `OPENAI_API_KEY` (paid), publishes the numbers, reindexes search and
+      purges the changed catalogue pages from the page cache; it rebuilds
+      nothing (deploy.md § `.env`). The reindex is what builds the Typesense
       index with the current fields (`listed`, `measures`, `universal_facets` in
       `apps/auto-service-shop/src/search/part-identifier.ts`); search is empty
       until then (deploy.md § The server, "Typesense is not backed up").
@@ -468,8 +466,9 @@ Content, from `TODO:` markers in `apps/auto-service`:
 
 carlab.rs renders every catalogue route (`/parts/**`, `/cars/**`) on request, and
 Caddy caches the HTML on the VPS for 24 hours (ADR-0065). The rest of the site is
-prerendered. A Publish rebuilds the site with a light URL list from the shop, not
-the Parts' pages. The real size of the catalogue is not recorded in the
+prerendered. A Publish rebuilds nothing: it purges the changed catalogue pages,
+the catalogue sitemap and `llms.txt` from the cache, and they render again from
+the shop on the next request. The real size of the catalogue is not recorded in the
 repository; measure it before trusting a number.
 
 - [ ] After the first full Import, count the Parts and the catalogue URLs

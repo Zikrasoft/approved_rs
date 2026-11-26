@@ -92,6 +92,23 @@
 	}
 }
 
+http://:2020 {
+	@purge {
+		method PURGE
+		path_regexp ^/souin-api/souin/.*[a-z0-9]{3}
+		not path */flush */mapping
+	}
+	handle @purge {
+		reverse_proxy 127.0.0.1:2019 {
+			header_up Host 127.0.0.1:2019
+		}
+	}
+
+	handle {
+		respond 403
+	}
+}
+
 (node) {
 	reverse_proxy site-{args[0]}:4321 {
 		header_up X-Request-Id {http.request.uuid}
@@ -144,8 +161,9 @@
 
 	@catalogue {
 		method GET HEAD
-		path_regexp ^/[a-z]{2}/(parts/.+|cars/.*)$
+		path_regexp ^/([a-z]{2}/(parts/.*|cars/.*|llms[.]txt)|llms[.]txt|catalogue-build[.]json|sitemap-catalogue(-[0-9]+)?[.]xml)$
 		not path_regexp ^/[a-z]{2}/parts/(search|cart|prices)/?$
+		not expression path_regexp('^/[a-z]{2}/parts/$') && {query} != ''
 		not header_regexp Cookie (^|;\s*)auto_service_shop_preview={$SHOP_PREVIEW_TOKEN:^}(;|$)
 	}
 	handle @catalogue {

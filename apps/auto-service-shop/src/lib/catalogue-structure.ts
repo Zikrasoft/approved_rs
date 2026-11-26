@@ -11,10 +11,8 @@ import { CATALOG_MODULE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
 import { PUBLISH_MODULE } from '../modules/publish';
 import type PublishModuleService from '../modules/publish/service';
-import type {
-  PlaceScope,
-  SeriesCategoryCount,
-} from '../modules/publish/service';
+import type { SeriesCategoryCount } from '../modules/publish/service';
+import { memoized } from './catalogue-memo';
 
 export type CatalogueModules = {
   catalog: CatalogModuleService;
@@ -32,7 +30,9 @@ export type SeriesPartCount = {
   required: number;
 };
 
-const seriesCountsOf = (rows: SeriesCategoryCount[]): SeriesPartCount[] => {
+export const seriesCountsOf = (
+  rows: SeriesCategoryCount[],
+): SeriesPartCount[] => {
   const counts = new Map<string, SeriesPartCount>();
   for (const { series_id, parts, fitted, required } of rows) {
     const known = counts.get(series_id) ?? { series_id, parts: 0, required: 0 };
@@ -47,11 +47,10 @@ const seriesCountsOf = (rows: SeriesCategoryCount[]): SeriesPartCount[] => {
   return [...counts.values()];
 };
 
-export const seriesPartCounts = async (
-  publish: PublishModuleService,
-  scope: Pick<PlaceScope, 'series'> = {},
-): Promise<SeriesPartCount[]> =>
-  seriesCountsOf(await publish.listedSeriesCategoryCounts(scope));
+const listedSeriesCategoryCounts = (publish: PublishModuleService) =>
+  memoized('series-category-counts', () =>
+    publish.listedSeriesCategoryCounts(),
+  );
 
 type SeriesRow = Awaited<
   ReturnType<CatalogModuleService['listSeries']>
@@ -77,10 +76,11 @@ export async function catalogueStructure(
     filter.id && !filter.id.length
       ? []
       : await catalog.listSeries(filter, { relations: ['make'], take: null });
+  const ids = new Set(series.map(({ id }) => id));
   const held = series.length
-    ? await publish.listedSeriesCategoryCounts({
-        series: series.map(({ id }) => id),
-      })
+    ? (await listedSeriesCategoryCounts(publish)).filter(({ series_id }) =>
+        ids.has(series_id),
+      )
     : [];
   const counts = new Map(
     seriesCountsOf(held).map((row) => [row.series_id, row]),
@@ -120,9 +120,10 @@ export async function seriesPagedInCategory(
   modules: CatalogueModules,
   categoryId: string,
 ): Promise<(SeriesRow & { slug: string })[]> {
-  const held = (
-    await modules.publish.listedSeriesCategoryCounts({ category: categoryId })
-  ).filter(({ parts }) => seriesCategoryHasPage(parts));
+  const held = (await listedSeriesCategoryCounts(modules.publish)).filter(
+    ({ category_id, parts }) =>
+      category_id === categoryId && seriesCategoryHasPage(parts),
+  );
   const sure = ({ fitted, required }: SeriesCategoryCount) =>
     seriesHasPage({ parts: fitted, required });
   const surely = held.filter(sure);

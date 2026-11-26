@@ -5,6 +5,7 @@ import { adminLanguage } from './src/lib/admin-language';
 import { readCalendarDatesAsText } from './src/lib/calendar-dates';
 import { DATABASE_POOL, withoutJit } from './src/lib/database-pool';
 import { parseEnv } from './src/lib/env';
+import { SEARCH_REINDEX_BATCH_SIZE } from './src/search/part-changed-event';
 
 loadEnv(process.env.NODE_ENV || 'development', process.cwd());
 
@@ -78,6 +79,7 @@ export default defineConfig({
       resolve: '@medusajs/medusa/search',
       options: {
         default_provider: 'typesense',
+        reindex: { batch_size: SEARCH_REINDEX_BATCH_SIZE },
         providers: [
           {
             resolve: './src/modules/search-typesense',

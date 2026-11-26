@@ -23,7 +23,8 @@ export const REFRESH_LISTED = `
     join part p on p.id = pi.part_id and p.deleted_at is null
     where pi.deleted_at is null
   ) l
-  where pn.id = l.id and pn.listed is distinct from l.listed`;
+  where pn.id = l.id and pn.listed is distinct from l.listed
+  returning pn.id`;
 
 export const PUBLISHED_PAGE = `
   select pn.id, pn.listed from published_number pn
@@ -149,7 +150,6 @@ const LISTED_PLACES = `
     join category_field cf on cf.id = d.field_id and cf.deleted_at is null
     join part p on p.category_id = cf.category_id and p.deleted_at is null
     join listed l on l.part_id = p.id
-    where :category::text is null or p.category_id = :category
     group by d.vehicle_id, p.id, p.category_id
     having ${REQUIREMENTS_MET}
   ), places as (
@@ -159,7 +159,6 @@ const LISTED_PLACES = `
     join fitment f on f.vehicle_id = s.vehicle_id and f.deleted_at is null
     join listed l on l.part_id = f.part_id
     left join part pt on pt.id = f.part_id
-    where :category::text is null or pt.category_id = :category
     union all
     select s.series_id, s.model_id, s.vehicle_id, null, r.part_id,
       r.category_id, false
@@ -233,7 +232,20 @@ export const PUBLISHED_PART_SLUGS = `
   where pn.deleted_at is null
   order by pn.id`;
 
-export const LISTED_NUMBERS_IN_CATEGORY = `
+export const PART_PAGE_COUNTS = `
+  select
+    (select count(distinct (b.slug, pi.normalized_value))
+      from published_number pn
+      join part_identifier pi on pi.id = pn.id
+      join brand b on b.id = pi.brand_id
+      where pn.deleted_at is null)::int as published,
+    (select count(distinct (b.slug, pi.normalized_value))
+      from part_identifier pi
+      join brand b on b.id = pi.brand_id and b.deleted_at is null
+      join part p on p.id = pi.part_id and p.deleted_at is null
+      where pi.deleted_at is null)::int as projected`;
+
+export const LISTED_NUMBERS = `
   select pn.id, b.slug as brand_slug, b.name as brand_name,
     pi.normalized_value, p.id as part_id, p.category_id, p.attributes
   from published_number pn
@@ -241,7 +253,6 @@ export const LISTED_NUMBERS_IN_CATEGORY = `
   join brand b on b.id = pi.brand_id and b.deleted_at is null
   join part p on p.id = pi.part_id and p.deleted_at is null
   where pn.deleted_at is null and pn.listed and p.category_id is not null
-    and (?::text is null or p.category_id = ?)
   order by pn.id`;
 
 export const UNRESOLVED_VIN_CODES = `
@@ -280,7 +291,7 @@ const missingIdentifier = (column: string) =>
 export const ORPHAN_SWEEPS = [
   `delete from supplier_offer o where ${missingIdentifier('o.part_identifier_id')}`,
   `delete from staged_record r where ${missingIdentifier('r.part_identifier_id')}`,
-  `delete from published_number n where ${missingIdentifier('n.id')}`,
+  `delete from published_number n where ${missingIdentifier('n.id')} returning n.id`,
   `delete from supplier_category s where s.category_id is not null and not exists
    (select 1 from category c where c.id = s.category_id and c.deleted_at is null)`,
   `update vin_lookup l set vehicle_id = null where vehicle_id is not null

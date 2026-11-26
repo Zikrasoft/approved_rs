@@ -3,19 +3,17 @@ import { content } from '@/i18n/content';
 import {
   isOrange,
   orangeIn,
+  parseHtml,
   render,
   respond,
   setShop,
+  SHOP_PREVIEW_TOKEN,
+  stubShop,
 } from '@/components/renderAstro';
 import { categoriesForBuild, pageListForBuild } from '@/utils/catalogueEnv';
 import type { Category } from '@podbor/catalog-contract';
 import { FILTERS_INQUIRY_ATTRIBUTE } from '@/scripts/filterSheet';
-import { partsHubOf, type PartsHub as HubData } from '@/utils/partsHub';
 import PartsHub from './index.astro';
-
-const built = vi.hoisted(() => ({ makes: [], categories: [] }) as HubData);
-
-vi.mock('virtual:parts-hub', () => ({ default: built }));
 
 vi.mock('@/utils/catalogueEnv', async (original) => {
   const snapshot = async () => {
@@ -63,30 +61,62 @@ const category = (
 
 type HubMake = { slug: string; name: string; hub: boolean; parts: number };
 
+const emptyListing = {
+  results: [],
+  facets: [],
+  category: null,
+  model: null,
+  count: 0,
+  offset: 0,
+  limit: 12,
+};
+
+const shop = {
+  search: async (_url: URL): Promise<Response> => Response.json(emptyListing),
+  hub: true,
+};
+
+const stubHubShop = (
+  entries: Entry[],
+  makes: HubMake[],
+): ReturnType<typeof stubShop> =>
+  stubShop(async (url) => {
+    if (url.pathname === '/store/search') return shop.search(url);
+    if (!shop.hub) return new Response(null, { status: 500 });
+    return url.pathname === '/store/categories'
+      ? Response.json({ categories: entries.map((entry) => entry.category) })
+      : Response.json({
+          parts: [],
+          makes,
+          series: [],
+          categories: entries.map(({ category: own, listed, demand }) => ({
+            slug: own.slug,
+            name: own.name,
+            listed,
+            demand,
+          })),
+          catalogue_makes: null,
+        });
+  });
+
 const hub = (
   entries = [category('batteries', false), category('wipers', true)],
   makes: HubMake[] = [],
   path = '/ru/parts/',
 ) => {
-  Object.assign(
-    built,
-    partsHubOf(
-      entries.map((entry) => entry.category),
-      {
-        parts: [],
-        makes,
-        series: [],
-        categories: entries.map(({ category: own, listed, demand }) => ({
-          slug: own.slug,
-          name: own.name,
-          listed,
-          demand,
-        })),
-        catalogue_makes: null,
-      },
-    ),
-  );
+  stubHubShop(entries, makes);
   return render(PartsHub, { path, params: { locale: 'ru' } });
+};
+
+const hubResponse = (path = '/ru/parts/', headers: HeadersInit = {}) => {
+  stubHubShop([category('batteries', false)], []);
+  return respond(
+    PartsHub,
+    new Request(new URL(path, 'https://carlab.rs'), { headers }),
+    {
+      params: { locale: 'ru' },
+    },
+  );
 };
 
 const tileOrder = (root: Element) =>
@@ -94,9 +124,56 @@ const tileOrder = (root: Element) =>
 
 afterEach(() => {
   vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
+  shop.search = async () => Response.json(emptyListing);
+  shop.hub = true;
 });
 
 describe('the parts hub', () => {
+  it('answers with the public page header the page cache keeps', async () => {
+    setShop(false);
+
+    const response = await hubResponse();
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBe(
+      'public, s-maxage=86400',
+    );
+  });
+
+  it('keeps a preview out of the page cache', async () => {
+    setShop(false);
+
+    const response = await hubResponse('/ru/parts/', {
+      cookie: `auto_service_shop_preview=${SHOP_PREVIEW_TOKEN}`,
+    });
+
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+  });
+
+  it('still opens, uncached, while the shop cannot give the hub', async () => {
+    setShop(false);
+    shop.hub = false;
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+
+    const response = await hubResponse();
+    const root = parseHtml(await response.text());
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBeNull();
+    expect(root.querySelector('a.card')).toBeNull();
+  });
+
+  it('still opens, uncached, while the search is down', async () => {
+    setShop(false);
+    shop.search = async () => new Response(null, { status: 500 });
+
+    const response = await hubResponse();
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('cache-control')).toBeNull();
+  });
+
   it('never reads the catalogue at build time while it answers a visitor', async () => {
     setShop(false);
     const root = await hub();
@@ -232,33 +309,26 @@ describe('the parts hub', () => {
     });
     const empty = { ...listed(0), results: [] };
     const searchCopy = content('ru').partsSearch;
-    const shop = vi.fn();
 
-    afterEach(() => {
-      vi.unstubAllGlobals();
-      shop.mockReset();
-    });
+    const searched: URL[] = [];
 
-    const stubShop = (count: number) => {
-      vi.stubEnv('MEDUSA_BACKEND_URL', 'http://shop.test');
-      vi.stubEnv('MEDUSA_PUBLISHABLE_KEY', 'pk_test');
+    const stubCatalogue = (count: number) => {
       setShop(false);
-      shop.mockImplementation(async (url: string) => {
-        const offset = Number(new URL(url).searchParams.get('offset') ?? 0);
+      searched.length = 0;
+      shop.search = async (url) => {
+        searched.push(url);
+        const offset = Number(url.searchParams.get('offset') ?? 0);
         return Response.json(count ? listed(count, offset) : empty);
-      });
-      vi.stubGlobal('fetch', shop);
+      };
+      return stubHubShop([category('batteries', false)], []);
     };
 
-    const showcase = async (count: number, path?: string) => {
-      stubShop(count);
-      return hub(undefined, [], path);
+    const showcase = async (count: number, path = '/ru/parts/') => {
+      stubCatalogue(count);
+      return render(PartsHub, { path, params: { locale: 'ru' } });
     };
 
-    const shopSearches = () =>
-      shop.mock.calls
-        .map(([url]) => new URL(String(url)))
-        .filter(({ pathname }) => pathname === '/store/search');
+    const shopSearches = () => searched;
 
     it('opens the hub with the first page of the catalogue and a link to the next', async () => {
       const page = await showcase(30);
@@ -277,11 +347,6 @@ describe('the parts hub', () => {
       expect(root?.querySelector('a[rel="prev"]')).toBeNull();
       expect(root?.querySelector('[aria-live]')).not.toBeNull();
       expect(page.querySelector('meta[name="robots"]')).toBeNull();
-      expect(
-        shop.mock.calls.filter(([url]) =>
-          String(url).includes('/store/catalogue-snapshot'),
-        ),
-      ).toEqual([]);
       expect(
         page.querySelector('link[rel="canonical"]')?.getAttribute('href'),
       ).toBe('https://carlab.rs/ru/parts/');
@@ -340,7 +405,7 @@ describe('the parts hub', () => {
     });
 
     it('moves a page past the end back to the last one', async () => {
-      stubShop(30);
+      stubCatalogue(30);
 
       const response = await respond(
         PartsHub,
@@ -354,7 +419,7 @@ describe('the parts hub', () => {
     });
 
     it('sends a search query on to the search page', async () => {
-      stubShop(30);
+      stubCatalogue(30);
 
       const response = await respond(
         PartsHub,
@@ -378,7 +443,12 @@ describe('the parts hub', () => {
     it('shows nothing for an empty catalogue or without a shop', async () => {
       expect((await showcase(0)).querySelector('parts-browse')).toBeNull();
       vi.unstubAllEnvs();
-      expect((await hub()).querySelector('parts-browse')).toBeNull();
+      const bare = await render(PartsHub, {
+        path: '/ru/parts/',
+        params: { locale: 'ru' },
+      });
+      expect(bare.querySelector('parts-browse')).toBeNull();
+      expect(bare.querySelector('a.card')).toBeNull();
     });
   });
 });

@@ -15,18 +15,20 @@ export async function releasedSupplierData(
         { relations: ['supplier'], take: null },
       )
     : [];
+  const items = new Map<string, unknown[]>();
+  for (const record of staged) {
+    if (!record.supplier.released_kinds.includes(record.kind)) continue;
+    const key = `${record.part_identifier_id}:${record.kind}`;
+    const parsed = stagedPayloadSchema.parse(record.payload).items;
+    const known = items.get(key);
+    if (known) known.push(...parsed);
+    else items.set(key, parsed);
+  }
   return (identifierId) =>
     Object.fromEntries(
       STAGED_DATA_KINDS.map((kind) => [
         kind,
-        staged
-          .filter(
-            (record) =>
-              record.part_identifier_id === identifierId &&
-              record.kind === kind &&
-              record.supplier.released_kinds.includes(kind),
-          )
-          .flatMap((record) => stagedPayloadSchema.parse(record.payload).items),
+        items.get(`${identifierId}:${kind}`) ?? [],
       ]),
     ) as SupplierData;
 }

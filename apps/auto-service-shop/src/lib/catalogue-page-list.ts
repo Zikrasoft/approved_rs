@@ -6,9 +6,9 @@ import {
   partPageSlug,
 } from '@podbor/catalog-contract';
 
-import type { ListedNumber } from '../modules/publish/service';
-import { categoryPartPages } from './category-page';
-import { loadPartDemand } from './part-demand';
+import { memoized } from './catalogue-memo';
+import { categoryPartPages, listedNumbersByCategory } from './category-page';
+import { DEMAND_TTL_MS, memoPartDemand } from './part-demand';
 import {
   type CatalogueModules,
   catalogueModules,
@@ -19,38 +19,36 @@ async function categoryCounts(
   publish: CatalogueModules['publish'],
   demand: Map<string, PartDemand>,
 ) {
-  const numbersOf = new Map<string, ListedNumber[]>();
-  for (const number of await publish.listedNumbersIn(null)) {
-    numbersOf.set(number.category_id, [
-      ...(numbersOf.get(number.category_id) ?? []),
-      number,
-    ]);
-  }
   return new Map(
-    [...numbersOf].map(([categoryId, numbers]) => {
-      const pages = categoryPartPages(numbers);
-      return [
-        categoryId,
-        {
-          listed: pages.length,
-          demand: pages.reduce(
-            (sum, { id }) => sum + (demand.get(id)?.score ?? 0),
-            0,
-          ),
-        },
-      ];
-    }),
+    [...(await listedNumbersByCategory(publish))].map(
+      ([categoryId, numbers]) => {
+        const pages = categoryPartPages(numbers);
+        return [
+          categoryId,
+          {
+            listed: pages.length,
+            demand: pages.reduce(
+              (sum, { id }) => sum + (demand.get(id)?.score ?? 0),
+              0,
+            ),
+          },
+        ];
+      },
+    ),
   );
 }
 
-export async function cataloguePageList(scope: MedusaContainer) {
+export const cataloguePageList = (scope: MedusaContainer) =>
+  memoized('page-list', () => buildPageList(scope), DEMAND_TTL_MS);
+
+async function buildPageList(scope: MedusaContainer) {
   const modules = catalogueModules(scope);
   const { catalog, publish } = modules;
   const structure = await catalogueStructure(modules);
   const { paged } = structure;
   const [slugs, perCategory, categories, catalogueMakes] = await Promise.all([
     publish.publishedPartSlugs(),
-    loadPartDemand(scope).then((demand) => categoryCounts(publish, demand)),
+    memoPartDemand(scope).then((demand) => categoryCounts(publish, demand)),
     catalog.listCategories({}, { select: ['id', 'slug', 'name'], take: null }),
     catalog.listMakes(
       {},

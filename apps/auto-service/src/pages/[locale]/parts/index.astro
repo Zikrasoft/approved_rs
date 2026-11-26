@@ -10,7 +10,7 @@ import CatalogueSearch from '@/components/CatalogueSearch.astro';
 import CatalogueListing from '@/components/CatalogueListing.astro';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { catalogueFor, shopOpen } from '@/utils/catalogueEnv';
-import hub from 'virtual:parts-hub';
+import { loadPartsHub } from '@/utils/partsHub';
 import { inquiryTopic } from '@/utils/catalogueSearch';
 import { chosenFilters, withFacetCopy } from '@/utils/partsSearch';
 import { planSearch } from '@/utils/searchPage';
@@ -29,16 +29,20 @@ if (['q', 'category', 'make', 'model'].some((name) => params.has(name))) {
     302,
   );
 }
+const catalogue = catalogueFor(Astro.request);
 const plan = await planSearch({
   params,
   locale,
-  catalogue: catalogueFor(Astro.request),
+  catalogue,
   path: PathBuilder.parts(locale),
   anchor: PARTS_BROWSE_ANCHOR,
 });
 if ('redirect' in plan) {
   return Astro.redirect(plan.redirect, plan.status);
 }
+const { view } = plan;
+const { found, chosen, ranges, offset, sort } = view;
+const hub = await loadPartsHub(Astro, catalogue, Boolean(found));
 const pages = content(locale).pages;
 const site = content(locale).site;
 const copy = pages.partsInquiry;
@@ -51,8 +55,6 @@ const categories = hub.categories.map((category) => ({
   name: category.name[locale],
   lead: category.lead[locale],
 }));
-const { view } = plan;
-const { found, chosen, ranges, offset, sort } = view;
 const facets = withFacetCopy(view.sheetFacets, searchCopy);
 const chips = chosenFilters(facets, chosen, ranges, searchCopy, (value) =>
   value.toLocaleString(BCP47_BY_LOCALE[locale]),

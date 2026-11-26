@@ -90,7 +90,7 @@ It names `127.0.0.1`, not `localhost`: Node resolves `localhost` to `[::1]`
 first, and anything else listening on IPv6 port 4321 gets the order.
 
 `import:local` stores crawled pages in the private bucket and fails without
-the `S3_*` values. Leave `PUBLISH_DISPATCH_TOKEN` unset; `OPENAI_API_KEY` is
+the `S3_*` values. `OPENAI_API_KEY` is
 only read when you run `pnpm publish:local` yourself. Leave `SHOP_OPEN`
 unset too: outside `NODE_ENV=production` the backend sells to everyone. Set
 `SHOP_OPEN=false` to try the closed beta locally.
@@ -178,11 +178,11 @@ pnpm publish:local
 `import:local` imports every Supplier whose import is on, as one Import run.
 `publish:local` imports nothing (ADR-0048): it skips translate when
 `OPENAI_API_KEY` is unset (as `shop:prepare` runs it) and reindexes Typesense. Each holds the catalogue
-writer lock, so neither starts while an Import, Publish or deletion runs. The deploy step is left out: `publish.yml`
-rebuilds production, and locally "deploy" means rebuilding the storefront (step 6).
+writer lock, so neither starts while an Import, Publish or deletion runs.
 
-The admin's Publish button runs the real chain (translate, deploy, reindex;
-it imports nothing) and, without an OpenAI key, stops at `translate` with
+The admin's Publish button runs the real chain (shrink, sweep, translate, publish,
+reindex, purge; it imports nothing; the purge sends nothing while
+`CACHE_PURGE_URL` is unset) and, without an OpenAI key, stops at `translate` with
 "OPENAI_API_KEY is not set" once any row is untranslated. That is expected
 here. A supplier's Import button on the Suppliers page (`POST
 /admin/suppliers/:id/import`) starts the import in the background; its

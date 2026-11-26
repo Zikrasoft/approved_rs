@@ -5,11 +5,12 @@ import {
 } from '@podbor/catalog-contract';
 import { paragraphs } from '@podbor/site-kit';
 import { localeConfig, type Locale } from '../i18n/config.ts';
+import type { AstroGlobal } from 'astro';
 import {
-  type CatalogueEnv,
-  categoriesForBuild,
-  pageListForBuild,
-} from './catalogueEnv.ts';
+  type Catalogue,
+  PUBLIC_PAGE_CACHE,
+  cacheControlOf,
+} from './cataloguePage.ts';
 import { byDemand } from './demand.ts';
 import { TOP_MAKES, topMakes } from './makeIndex.ts';
 
@@ -22,8 +23,6 @@ export type PartsHub = {
     lead: Record<Locale, string | null>;
   }[];
 };
-
-export const PARTS_HUB_MODULE = 'virtual:parts-hub';
 
 const perLocale = <T>(read: (locale: Locale) => T) =>
   Object.fromEntries(
@@ -55,18 +54,30 @@ export const partsHubOf = (
   };
 };
 
-export function partsHubPlugin(env: CatalogueEnv) {
-  const resolved = `\0${PARTS_HUB_MODULE}`;
-  return {
-    name: 'carlab-parts-hub',
-    resolveId: (id: string) => (id === PARTS_HUB_MODULE ? resolved : null),
-    async load(id: string) {
-      if (id !== resolved) return null;
-      const [categories, list] = await Promise.all([
-        categoriesForBuild(env),
-        pageListForBuild(env),
-      ]);
-      return `export default ${JSON.stringify(partsHubOf(categories, list))};`;
-    },
-  };
+export const EMPTY_PARTS_HUB: PartsHub = { makes: [], categories: [] };
+
+const partsHubFrom = async (catalogue: Catalogue): Promise<PartsHub> =>
+  partsHubOf(
+    ...(await Promise.all([catalogue.categories(), catalogue.pageList()])),
+  );
+
+export async function loadPartsHub(
+  { request, response }: Pick<AstroGlobal, 'request' | 'response'>,
+  catalogue: Catalogue | null,
+  cacheable: boolean,
+): Promise<PartsHub> {
+  if (!catalogue) return EMPTY_PARTS_HUB;
+  try {
+    const hub = await partsHubFrom(catalogue);
+    if (cacheable) {
+      response.headers.set(
+        'cache-control',
+        cacheControlOf(request, PUBLIC_PAGE_CACHE),
+      );
+    }
+    return hub;
+  } catch (error) {
+    console.error('parts hub failed', String(error));
+    return EMPTY_PARTS_HUB;
+  }
 }

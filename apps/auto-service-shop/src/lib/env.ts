@@ -88,7 +88,9 @@ const envFields = z.object({
   LIVE_QUOTE_CACHE_SECONDS: optionalValue
     .transform((seconds) => Number(seconds ?? 60))
     .pipe(z.number().int().nonnegative()),
-  PUBLISH_DISPATCH_TOKEN: optionalSecret,
+  CATALOGUE_SHRINK_ALLOWED: optionalValue
+    .pipe(z.enum(['true', 'false']).optional())
+    .transform((allowed) => allowed === 'true'),
   STOREFRONT_ORIGIN: optionalValue.pipe(
     z
       .url()
@@ -124,6 +126,7 @@ const envFields = z.object({
   DEMO_SUPPLIER_OVERRIDES: optionalValue,
   CRAWLER_FROM: optionalValue.pipe(z.email().optional()),
   FILE_URL: optionalValue.pipe(z.url().optional()),
+  CACHE_PURGE_URL: optionalValue.pipe(z.url().optional()),
   S3_ENDPOINT: optionalValue.pipe(z.url().optional()),
   S3_REGION: optionalValue,
   S3_ACCESS_KEY_ID: optionalSecret,
@@ -210,6 +213,14 @@ const envSchema = envFields
     path: ['FILE_URL'],
     message: 'FILE_URL is required in production',
   })
+  .refine(
+    ({ NODE_ENV, CACHE_PURGE_URL }) =>
+      NODE_ENV !== 'production' || CACHE_PURGE_URL,
+    {
+      path: ['CACHE_PURGE_URL'],
+      message: 'CACHE_PURGE_URL is required in production',
+    },
+  )
   .superRefine(requireS3)
   .superRefine(requireStrongSecrets)
   .transform((env) => ({

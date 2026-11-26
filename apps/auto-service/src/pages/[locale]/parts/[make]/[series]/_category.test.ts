@@ -14,8 +14,8 @@ import SeriesCategoryPage from './[category].astro';
 
 const copy = content('ru').partsSearch;
 
-const PUBLIC_PAGE =
-  'public, s-maxage=86400, stale-while-revalidate=86400, stale-if-error=86400';
+const PUBLIC_PAGE = 'public, s-maxage=86400';
+const NOT_FOUND_PAGE = 'public, s-maxage=600';
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -206,7 +206,7 @@ describe('the Series category page rendered on demand', () => {
     );
 
     expect(response.status).toBe(404);
-    expect(response.headers.get('cache-control')).toBe(PUBLIC_PAGE);
+    expect(response.headers.get('cache-control')).toBe(NOT_FOUND_PAGE);
   });
 
   it('asks the visitor to retry, uncached, when the shop fails', async () => {

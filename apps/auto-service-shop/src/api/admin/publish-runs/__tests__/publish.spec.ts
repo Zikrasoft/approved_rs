@@ -8,7 +8,14 @@ import { createFakeSupplier } from '../../../../../integration-tests/fakeSupplie
 import { importRuns } from '../../../../../integration-tests/importRuns';
 import { loggedEvents } from '../../../../../integration-tests/loggedEvents';
 import { SHOP_AI_REGISTRATION } from '../../../../lib/ai';
-import { PUBLISH_REINDEX_REGISTRATION } from '../../../../lib/publish/chain';
+import { memoized } from '../../../../lib/catalogue-memo';
+import {
+  PUBLISH_PURGE_REGISTRATION,
+  PUBLISH_SEARCH_REGISTRATION,
+  type PublishSearch,
+} from '../../../../lib/publish/chain';
+import type { PublishPurge } from '../../../../lib/publish/purge';
+import type { IndexChanges } from '../../../../lib/index-changes';
 import { SUPPLIER_ADAPTERS_REGISTRATION } from '../../../../lib/suppliers/adapter';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import { PUBLISH_MODULE } from '../../../../modules/publish';
@@ -48,23 +55,39 @@ const ENGLISH = new Map([
 
 type FakeNetwork = {
   openAiRequests: number;
-  dispatches: { url: string; body: unknown; authorization: string | null }[];
+  githubRequests: number;
   unsafeAnswer: boolean;
-  githubStatus: number;
-  runConclusion: string;
-  githubGate: Promise<void> | null;
 };
 
 const network: FakeNetwork = {
   openAiRequests: 0,
-  dispatches: [],
+  githubRequests: 0,
   unsafeAnswer: false,
-  githubStatus: 200,
-  runConclusion: 'success',
-  githubGate: null,
 };
 
-const reindexCalls: number[] = [];
+const searchIndex = {
+  changes: [] as IndexChanges[],
+  swaps: [] as string[],
+  active: true,
+  indexed: null as number | null,
+  refusal: null as Error | null,
+};
+
+const pageCache = {
+  purged: [] as string[],
+  refusal: null as Error | null,
+  gate: null as Promise<void> | null,
+};
+
+const HUB_PATTERNS = [
+  '-/[a-z][a-z]/cars/',
+  '-/[a-z][a-z]/parts/$',
+  '-/[a-z][a-z]/parts/[0-9a-oq-z]',
+  '-/[a-z][a-z]/parts/p[0-9a-z-]',
+  'llms[.]txt',
+  'sitemap',
+  'catalogue-build[.]json',
+];
 
 const openAiAnswer = (body: {
   messages: { content: string }[];
@@ -86,10 +109,6 @@ const openAiAnswer = (body: {
   );
 };
 
-const RUN_URL =
-  'https://api.github.com/repos/Zikrasoft/approved_rs/actions/runs/7';
-const RUN_HTML_URL = 'https://github.com/Zikrasoft/approved_rs/actions/runs/7';
-
 const fakeFetch =
   (realFetch: typeof fetch): typeof fetch =>
   async (input, init) => {
@@ -106,22 +125,8 @@ const fakeFetch =
       );
     }
     if (hostname === 'api.github.com') {
-      await network.githubGate;
-      if (url === RUN_URL) {
-        return Response.json({
-          status: 'completed',
-          conclusion: network.runConclusion,
-        });
-      }
-      network.dispatches.push({
-        url,
-        body: JSON.parse(String(init?.body)),
-        authorization: new Headers(init?.headers).get('authorization'),
-      });
-      return Response.json(
-        { workflow_run_id: 7, run_url: RUN_URL, html_url: RUN_HTML_URL },
-        { status: network.githubStatus },
-      );
+      network.githubRequests += 1;
+      return new Response(null, { status: 500 });
     }
     return realFetch(input, init);
   };
@@ -132,10 +137,27 @@ medusaIntegrationTestRunner({
   hooks: {
     beforeServerStart: async (container) => {
       container.register(
-        PUBLISH_REINDEX_REGISTRATION,
-        asValue(async () => {
-          reindexCalls.push(Date.now());
-        }),
+        PUBLISH_SEARCH_REGISTRATION,
+        asValue({
+          changed: async (changes) => {
+            if (searchIndex.refusal) throw searchIndex.refusal;
+            searchIndex.changes.push(changes);
+          },
+          swap: async (index) => {
+            searchIndex.swaps.push(index);
+          },
+          partsIndexActive: async () => searchIndex.active,
+          settledPublishedDocuments: async (published) =>
+            searchIndex.indexed ?? published,
+        } satisfies PublishSearch),
+      );
+      container.register(
+        PUBLISH_PURGE_REGISTRATION,
+        asValue((async (pattern) => {
+          await pageCache.gate;
+          if (pageCache.refusal) throw pageCache.refusal;
+          pageCache.purged.push(pattern);
+        }) satisfies PublishPurge),
       );
       container.register(
         SUPPLIER_ADAPTERS_REGISTRATION,
@@ -212,7 +234,6 @@ medusaIntegrationTestRunner({
           category_id: oilFilters.id,
         });
         process.env.OPENAI_API_KEY = 'test-openai-key';
-        process.env.PUBLISH_DISPATCH_TOKEN = 'test-dispatch-token';
         realFetch = globalThis.fetch;
         globalThis.fetch = fakeFetch(realFetch);
       });
@@ -220,17 +241,21 @@ medusaIntegrationTestRunner({
       afterAll(() => {
         globalThis.fetch = realFetch;
         delete process.env.OPENAI_API_KEY;
-        delete process.env.PUBLISH_DISPATCH_TOKEN;
       });
 
       beforeEach(() => {
         network.openAiRequests = 0;
-        network.dispatches = [];
+        network.githubRequests = 0;
         network.unsafeAnswer = false;
-        network.githubStatus = 200;
-        network.runConclusion = 'success';
-        network.githubGate = null;
-        reindexCalls.length = 0;
+        searchIndex.changes = [];
+        searchIndex.swaps = [];
+        searchIndex.active = true;
+        searchIndex.indexed = null;
+        searchIndex.refusal = null;
+        pageCache.purged = [];
+        pageCache.refusal = null;
+        pageCache.gate = null;
+        delete process.env.CATALOGUE_SHRINK_ALLOWED;
         supplier.articles.length = 0;
       });
 
@@ -240,7 +265,7 @@ medusaIntegrationTestRunner({
         expect(latest.data.publish_run).toBeNull();
       });
 
-      it('translates Russian names, reindexes, then deploys the site', async () => {
+      it('translates Russian names, reindexes and purges the page cache without asking GitHub anything', async () => {
         const part = await catalog.createParts({ name: 'Масляный фильтр' });
 
         const run = await publish();
@@ -256,14 +281,9 @@ medusaIntegrationTestRunner({
           sr: { name: 'Filter ulja' },
           en: { name: 'Oil filter' },
         });
-        expect(network.dispatches).toEqual([
-          {
-            url: 'https://api.github.com/repos/Zikrasoft/approved_rs/actions/workflows/publish.yml/dispatches',
-            body: { ref: 'main', return_run_details: true },
-            authorization: 'Bearer test-dispatch-token',
-          },
-        ]);
-        expect(reindexCalls).toHaveLength(1);
+        expect(network.githubRequests).toBe(0);
+        expect(searchIndex.swaps).toEqual(['catalogue_car']);
+        expect(pageCache.purged).toEqual(HUB_PATTERNS);
       });
 
       it('imports no Supplier catalogue; its own Import brings the articles Publish then translates', async () => {
@@ -445,7 +465,7 @@ medusaIntegrationTestRunner({
         expect(untouched.translated_from).toBeNull();
       });
 
-      it('stops before the deploy when a translation fails the safety checks', async () => {
+      it('stops before publishing when a translation fails the safety checks', async () => {
         const part = await catalog.createParts({ name: 'Салонный фильтр' });
         network.unsafeAnswer = true;
 
@@ -454,21 +474,10 @@ medusaIntegrationTestRunner({
         expect(run.status).toBe('failed');
         expect(run.failed_step).toBe('translate');
         expect(run.error).toContain('HTML');
-        expect(network.dispatches).toEqual([]);
-        expect(reindexCalls).toEqual([]);
+        expect(pageCache.purged).toEqual([]);
+        expect(searchIndex.changes).toEqual([]);
+        expect(searchIndex.swaps).toEqual([]);
         expect(await translationsOf(part.id)).toEqual({});
-      });
-
-      it('reindexes before the deploy, so a refused dispatch still leaves search fresh', async () => {
-        network.githubStatus = 500;
-
-        const run = await publish();
-
-        expect(run.status).toBe('failed');
-        expect(run.failed_step).toBe('deploy');
-        expect(run.error).toContain('500');
-        expect(run.error).not.toContain('test-dispatch-token');
-        expect(reindexCalls).toHaveLength(1);
       });
 
       it('logs every finished run as catalogue.run, with the failed step as its reason', async () => {
@@ -483,7 +492,7 @@ medusaIntegrationTestRunner({
         };
 
         const succeeded = await publish();
-        network.githubStatus = 500;
+        pageCache.refusal = new Error('The page cache refused the purge: 500');
         const failed = await publish();
 
         expect(await logged(2)).toEqual([
@@ -494,62 +503,31 @@ medusaIntegrationTestRunner({
             run: succeeded.id,
             supplier: null,
             cause: null,
-            counts: {},
+            counts: { published: expect.any(Number) },
           }),
           expect.objectContaining({
             outcome: 'failed',
-            reason: 'deploy',
+            reason: 'purge',
             kind: 'publish',
             run: failed.id,
             cause: expect.stringContaining('500'),
           }),
         ]);
         expect(runs()[0].duration_ms).toBeGreaterThanOrEqual(0);
-        expect(JSON.stringify(runs())).not.toContain('test-dispatch-token');
         jest.restoreAllMocks();
       });
 
-      it('reindexes before the site build, so the build never races the reindex', async () => {
-        network.runConclusion = 'failure';
+      it('drops the catalogue memo so the pages reflect the new Publish', async () => {
+        await memoized('publish-probe', async () => 'before');
 
-        const run = await publish();
+        await publish();
 
-        expect(run.status).toBe('failed');
-        expect(run.failed_step).toBe('deploy');
-        expect(run.error).toBe(
-          `The deploy run did not succeed: failure ${RUN_HTML_URL}`,
+        expect(await memoized('publish-probe', async () => 'after')).toBe(
+          'after',
         );
-        expect(reindexCalls).toHaveLength(1);
       });
 
-      it('marks the brand-numbers of a deployed site as published, never those of a failed deploy', async () => {
-        const [mann] = await catalog.listBrands({ slug: 'mann-filter' });
-        const partId = await catalog.createPartWithIdentifiers({
-          name: 'Масляный фильтр',
-          identifiers: [
-            { type: 'manufacturer-number', brand_id: mann.id, value: 'W 712' },
-          ],
-        });
-        const [identifier] = await catalog.listPartIdentifiers({
-          part_id: partId,
-        });
-        const publishModule: PublishModuleService =
-          getContainer().resolve(PUBLISH_MODULE);
-        const published = async () =>
-          (await publishModule.listPublishedNumbers({ id: identifier.id }))
-            .length;
-
-        network.runConclusion = 'failure';
-        await publish();
-        const afterFailure = await published();
-        network.runConclusion = 'success';
-        await publish();
-
-        expect(afterFailure).toBe(0);
-        expect(await published()).toBe(1);
-      });
-
-      it('publishes the brand-numbers before the site build reads them', async () => {
+      it('publishes the brand-numbers before the page cache is purged', async () => {
         const [mann] = await catalog.listBrands({ slug: 'mann-filter' });
         const partId = await catalog.createPartWithIdentifiers({
           name: 'Масляный фильтр',
@@ -566,7 +544,7 @@ medusaIntegrationTestRunner({
           (await publishModule.listPublishedNumbers({ id: identifier.id }))
             .length;
         let release = () => {};
-        network.githubGate = new Promise((resolve) => {
+        pageCache.gate = new Promise((resolve) => {
           release = resolve;
         });
 
@@ -575,17 +553,17 @@ medusaIntegrationTestRunner({
         while ((await published()) === 0 && Date.now() < deadline) {
           await new Promise((resolve) => setTimeout(resolve, 100));
         }
-        const duringBuild = await published();
+        const beforePurge = await published();
         release();
         const run = await finishedRun();
 
-        expect(duringBuild).toBe(1);
+        expect(beforePurge).toBe(1);
         expect(run.status).toBe('succeeded');
       });
 
       it('refuses a second Publish while one is running', async () => {
         let release = () => {};
-        network.githubGate = new Promise((resolve) => {
+        pageCache.gate = new Promise((resolve) => {
           release = resolve;
         });
 
@@ -602,7 +580,7 @@ medusaIntegrationTestRunner({
 
       it('starts one run for two Publish clicks at the same moment', async () => {
         let release = () => {};
-        network.githubGate = new Promise((resolve) => {
+        pageCache.gate = new Promise((resolve) => {
           release = resolve;
         });
 
@@ -624,6 +602,392 @@ medusaIntegrationTestRunner({
         expect(latest.data.publish_run.created_by_user).toMatchObject({
           email: expect.any(String),
         });
+      });
+
+      describe('the change set search receives', () => {
+        const mannId = async () =>
+          (await catalog.listBrands({ slug: 'mann-filter' }))[0].id;
+
+        const numberedPart = async (value: string) => {
+          const partId = await catalog.createPartWithIdentifiers({
+            name: 'Масляный фильтр',
+            identifiers: [
+              {
+                type: 'manufacturer-number',
+                brand_id: await mannId(),
+                value,
+              },
+            ],
+          });
+          const [identifier] = await catalog.listPartIdentifiers({
+            part_id: partId,
+          });
+          return { partId, identifierId: identifier.id };
+        };
+
+        const settled = async () => {
+          await publish();
+          searchIndex.changes = [];
+          searchIndex.swaps = [];
+        };
+
+        it('is the Part of a freshly published number', async () => {
+          const { partId } = await numberedPart('CS 1');
+          await settled();
+          await catalog.addPartIdentifier(
+            partId,
+            {
+              type: 'manufacturer-number',
+              brand_id: await mannId(),
+              value: 'CS 1 B',
+            },
+            {},
+          );
+
+          const run = await publish();
+
+          expect(run.status).toBe('succeeded');
+          expect(searchIndex.changes).toEqual([
+            { partIds: [partId], deletedIdentifierIds: [] },
+          ]);
+          expect(searchIndex.swaps).toEqual(['catalogue_car']);
+        });
+
+        it('is the Part whose number stopped being listed', async () => {
+          const replaced = await numberedPart('CS 2');
+          const successor = await numberedPart('CS 3');
+          await settled();
+          await catalog.updateParts({
+            id: replaced.partId,
+            replaced_by_id: successor.partId,
+          });
+
+          await publish();
+
+          expect(searchIndex.changes).toEqual([
+            { partIds: [replaced.partId], deletedIdentifierIds: [] },
+          ]);
+        });
+
+        it('is the Part whose translation was written', async () => {
+          const { partId } = await numberedPart('CS 4');
+          await settled();
+          await catalog.updateParts({ id: partId, name: 'Воздушный фильтр' });
+
+          await publish();
+
+          expect(searchIndex.changes).toEqual([
+            { partIds: [partId], deletedIdentifierIds: [] },
+          ]);
+        });
+
+        it('names the swept numbers as deleted', async () => {
+          const { partId } = await numberedPart('CS 5');
+          await catalog.addPartIdentifier(
+            partId,
+            {
+              type: 'manufacturer-number',
+              brand_id: await mannId(),
+              value: 'CS 5 B',
+            },
+            {},
+          );
+          await settled();
+          const [gone] = await catalog.listPartIdentifiers({
+            normalized_value: 'CS5B',
+          });
+          await catalog.softDeletePartIdentifiers([gone.id]);
+
+          await publish();
+
+          expect(searchIndex.changes).toEqual([
+            { partIds: [], deletedIdentifierIds: [gone.id] },
+          ]);
+        });
+
+        it('rebuilds the whole number index instead while it has no active version', async () => {
+          await numberedPart('CS 6');
+          searchIndex.active = false;
+
+          const run = await publish();
+
+          expect(run.status).toBe('succeeded');
+          expect(searchIndex.changes).toEqual([]);
+          expect(searchIndex.swaps).toEqual([
+            'part_identifier',
+            'catalogue_car',
+          ]);
+        });
+      });
+
+      describe('the pages the cache purges', () => {
+        const mannId = async () =>
+          (await catalog.listBrands({ slug: 'mann-filter' }))[0].id;
+
+        const settled = async () => {
+          await publish();
+          pageCache.purged = [];
+        };
+
+        it('are the hubs alone when no number changed', async () => {
+          await settled();
+
+          const run = await publish();
+
+          expect(run.status).toBe('succeeded');
+          expect(pageCache.purged).toEqual(HUB_PATTERNS);
+        });
+
+        it('add the Part page of a freshly published number, in every locale', async () => {
+          await settled();
+          await catalog.createPartWithIdentifiers({
+            name: 'Масляный фильтр',
+            identifiers: [
+              {
+                type: 'manufacturer-number',
+                brand_id: await mannId(),
+                value: 'PG 1',
+              },
+            ],
+          });
+
+          await publish();
+
+          expect(pageCache.purged).toEqual([
+            ...HUB_PATTERNS,
+            '-/[a-z][a-z]/parts/p/mann-filter-pg1/',
+          ]);
+        });
+
+        it('add the Part page whose number stopped being listed', async () => {
+          const brand_id = await mannId();
+          const replaced = await catalog.createPartWithIdentifiers({
+            name: 'Масляный фильтр',
+            identifiers: [
+              { type: 'manufacturer-number', brand_id, value: 'PG 2' },
+            ],
+          });
+          const successor = await catalog.createPartWithIdentifiers({
+            name: 'Масляный фильтр',
+            identifiers: [
+              { type: 'manufacturer-number', brand_id, value: 'PG 3' },
+            ],
+          });
+          await settled();
+          await catalog.updateParts({
+            id: replaced,
+            replaced_by_id: successor,
+          });
+
+          await publish();
+
+          expect(pageCache.purged).toEqual([
+            ...HUB_PATTERNS,
+            '-/[a-z][a-z]/parts/p/mann-filter-pg2/',
+          ]);
+        });
+
+        it('add the Part page of a swept number', async () => {
+          const brand_id = await mannId();
+          await catalog.createPartWithIdentifiers({
+            name: 'Масляный фильтр',
+            identifiers: ['PG 4', 'PG 4 B'].map((value) => ({
+              type: 'manufacturer-number' as const,
+              brand_id,
+              value,
+            })),
+          });
+          await settled();
+          const [gone] = await catalog.listPartIdentifiers({
+            normalized_value: 'PG4B',
+          });
+          await catalog.softDeletePartIdentifiers([gone.id]);
+
+          await publish();
+
+          expect(pageCache.purged).toEqual([
+            ...HUB_PATTERNS,
+            '-/[a-z][a-z]/parts/p/mann-filter-pg4b/',
+          ]);
+        });
+
+        it('fail the run at purge and keep the numbers published when the cache refuses', async () => {
+          await catalog.createPartWithIdentifiers({
+            name: 'Масляный фильтр',
+            identifiers: [
+              {
+                type: 'manufacturer-number',
+                brand_id: await mannId(),
+                value: 'PG 5',
+              },
+            ],
+          });
+          pageCache.refusal = new Error('The page cache refused the purge');
+          const publishModule: PublishModuleService =
+            getContainer().resolve(PUBLISH_MODULE);
+
+          const failed = await publish();
+          const [identifier] = await catalog.listPartIdentifiers({
+            normalized_value: 'PG5',
+          });
+          const kept = await publishModule.listPublishedNumbers({
+            id: identifier.id,
+          });
+          pageCache.refusal = null;
+          const retried = await publish();
+          const retriedPurge = pageCache.purged;
+          pageCache.purged = [];
+          await publish();
+
+          expect(failed).toEqual(
+            expect.objectContaining({
+              status: 'failed',
+              failed_step: 'purge',
+              error: 'The page cache refused the purge',
+            }),
+          );
+          expect(kept).toHaveLength(1);
+          expect(retried.status).toBe('succeeded');
+          expect(retriedPurge).toEqual([
+            ...HUB_PATTERNS,
+            '-/[a-z][a-z]/parts/p/mann-filter-pg5/',
+          ]);
+          expect(pageCache.purged).toEqual(HUB_PATTERNS);
+        });
+
+        it('carry the Part pages of a run that failed before its purge into the next Publish', async () => {
+          await settled();
+          const partId = await catalog.createPartWithIdentifiers({
+            name: 'Масляный фильтр',
+            identifiers: [
+              {
+                type: 'manufacturer-number',
+                brand_id: await mannId(),
+                value: 'PG 6',
+              },
+            ],
+          });
+          searchIndex.changes = [];
+          searchIndex.refusal = new Error('Typesense is down');
+
+          const failed = await publish();
+          searchIndex.refusal = null;
+          const retried = await publish();
+
+          expect(failed).toEqual(
+            expect.objectContaining({
+              status: 'failed',
+              failed_step: 'reindex',
+            }),
+          );
+          expect(retried.status).toBe('succeeded');
+          expect(searchIndex.changes).toEqual([
+            { partIds: [partId], deletedIdentifierIds: [] },
+          ]);
+          expect(pageCache.purged).toEqual([
+            ...HUB_PATTERNS,
+            '-/[a-z][a-z]/parts/p/mann-filter-pg6/',
+          ]);
+        });
+      });
+
+      it('logs search.drift when search disagrees with the published numbers, and still succeeds', async () => {
+        jest.spyOn(console, 'log').mockImplementation(() => undefined);
+        const [mann] = await catalog.listBrands({ slug: 'mann-filter' });
+        await catalog.createPartWithIdentifiers({
+          name: 'Масляный фильтр',
+          identifiers: [
+            { type: 'manufacturer-number', brand_id: mann.id, value: 'DR 1' },
+          ],
+        });
+        searchIndex.indexed = 0;
+
+        const run = await publish();
+        expect(run.status).toBe('succeeded');
+        expect(loggedEvents('search.drift')).toEqual([
+          expect.objectContaining({
+            outcome: 'mismatch',
+            index: 'part_identifier',
+            indexed: 0,
+            published: 1,
+          }),
+        ]);
+        jest.restoreAllMocks();
+      });
+
+      it('logs no drift when search agrees', async () => {
+        jest.spyOn(console, 'log').mockImplementation(() => undefined);
+
+        await publish();
+
+        expect(loggedEvents('search.drift')).toEqual([]);
+        jest.restoreAllMocks();
+      });
+
+      it('refuses, before writing anything, a Publish that would leave fewer than half the Part pages, unless the shrink is allowed', async () => {
+        const [mann] = await catalog.listBrands({ slug: 'mann-filter' });
+        await catalog.createPartWithIdentifiers({
+          name: 'Масляный фильтр',
+          identifiers: ['SH 2', 'SH 3', 'SH 4'].map((value) => ({
+            type: 'manufacturer-number' as const,
+            brand_id: mann.id,
+            value,
+          })),
+        });
+        await publish();
+        const live = await catalog.listPartIdentifiers({}, { take: null });
+        await catalog.softDeletePartIdentifiers(live.map(({ id }) => id));
+        const freshPart = await catalog.createPartWithIdentifiers({
+          name: 'Масляный фильтр',
+          identifiers: [
+            { type: 'manufacturer-number', brand_id: mann.id, value: 'SH 1' },
+          ],
+        });
+        const [fresh] = await catalog.listPartIdentifiers({
+          part_id: freshPart,
+        });
+        const publishModule: PublishModuleService =
+          getContainer().resolve(PUBLISH_MODULE);
+        searchIndex.changes = [];
+        searchIndex.swaps = [];
+        pageCache.purged = [];
+
+        const refused = await publish();
+        const publishedAfterRefusal = await publishModule.listPublishedNumbers({
+          id: [fresh.id, ...live.map(({ id }) => id)],
+        });
+        const refusedAgain = await publish();
+        const touchedByRefusals = [
+          ...searchIndex.changes,
+          ...searchIndex.swaps,
+          ...pageCache.purged,
+        ];
+        process.env.CATALOGUE_SHRINK_ALLOWED = 'true';
+        const allowed = await publish();
+
+        expect(refused).toEqual(
+          expect.objectContaining({
+            status: 'failed',
+            failed_step: 'shrink',
+            error: expect.stringContaining('CATALOGUE_SHRINK_ALLOWED'),
+          }),
+        );
+        expect(refused.error).toContain('1 Part pages');
+        expect(publishedAfterRefusal.map(({ id }) => id).sort()).toEqual(
+          live.map(({ id }) => id).sort(),
+        );
+        expect(refusedAgain.failed_step).toBe('shrink');
+        expect(touchedByRefusals).toEqual([]);
+        expect(allowed.status).toBe('succeeded');
+        expect(
+          await publishModule.listPublishedNumbers({ id: fresh.id }),
+        ).toHaveLength(1);
+        expect(pageCache.purged).toEqual(
+          expect.arrayContaining([
+            '-/[a-z][a-z]/parts/p/mann-filter-sh1/',
+            '-/[a-z][a-z]/parts/p/mann-filter-sh2/',
+          ]),
+        );
       });
 
       it('rejects a translation edit for an unknown locale, field or entity', async () => {

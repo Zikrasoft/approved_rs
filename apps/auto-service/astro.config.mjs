@@ -8,15 +8,10 @@ import tailwindcss from '@tailwindcss/vite';
 import { CARLAB } from '@podbor/brands';
 import { localeConfig } from './src/i18n/config.ts';
 import { blogListed } from '@podbor/blog/article';
-import { carsUrls, catalogueUrls, sitemapFilter } from './src/utils/sitemap.ts';
-import {
-  pageListForBuild,
-  writeCatalogueMakes,
-} from './src/utils/catalogueEnv.ts';
-import { partsHubPlugin } from './src/utils/partsHub.ts';
+import { carsUrls, sitemapFilter } from './src/utils/sitemap.ts';
+import { writeCatalogueMakes } from './src/utils/catalogueEnv.ts';
 
 const site = CARLAB.url;
-const pageList = await pageListForBuild(process.env);
 await writeCatalogueMakes(
   new URL('./src/content/makes.json', import.meta.url),
   process.env,
@@ -58,11 +53,8 @@ export default defineConfig({
     react(),
     keystatic(),
     sitemap({
-      filter: sitemapFilter(site, pageList.parts, blog),
-      customPages: [
-        ...catalogueUrls(site, pageList),
-        ...carsUrls(site, workshopMakes),
-      ],
+      filter: sitemapFilter(site, blog),
+      customPages: carsUrls(site, workshopMakes),
       i18n: {
         defaultLocale: localeConfig.primaryLocale,
         locales: Object.fromEntries(localeConfig.locales.map((l) => [l, l])),
@@ -72,7 +64,6 @@ export default defineConfig({
   vite: {
     plugins: [
       tailwindcss(),
-      partsHubPlugin(process.env),
       {
         name: 'bundle-server-dependencies',
         apply: 'build',

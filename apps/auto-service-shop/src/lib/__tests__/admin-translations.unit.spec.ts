@@ -40,6 +40,20 @@ describe('admin translations', () => {
     }
   });
 
+  it.each([
+    ['ru', ru],
+    ['en', en],
+  ])('%s names every Publish step', (_, copy) => {
+    expect(Object.keys(copy.publish.steps).sort()).toEqual([
+      'publish',
+      'purge',
+      'reindex',
+      'shrink',
+      'sweep',
+      'translate',
+    ]);
+  });
+
   it('ru copy has no Yo and no dashes', () => {
     expect(entries(ru).filter(([, value]) => /[ёЁ–—]/.test(value))).toEqual([]);
   });

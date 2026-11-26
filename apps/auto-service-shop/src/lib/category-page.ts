@@ -11,11 +11,14 @@ import {
   type CategoryPageResponse,
 } from '@podbor/catalog-contract';
 
+import type PublishModuleService from '../modules/publish/service';
 import { SUPPLIER_MODULE } from '../modules/supplier';
 import type SupplierModuleService from '../modules/supplier/service';
+import { memoized } from './catalogue-memo';
+import { groupBy } from './group-by';
 import { CATEGORY_RELATIONS, shownCategory } from './categories';
 import { localizedCategory, localizedSeries } from './catalogue-locale';
-import { loadPartDemand } from './part-demand';
+import { memoPartDemand } from './part-demand';
 import { sluggedPagesOf } from './part-pages';
 import {
   type CatalogueModules,
@@ -30,7 +33,9 @@ async function carsOf(
   categoryId: string,
   locale: CatalogLocale,
 ): Promise<CategoryPageResponse['cars']> {
-  const series = await seriesPagedInCategory(modules, categoryId);
+  const series = await memoized(`category-series:${categoryId}`, () =>
+    seriesPagedInCategory(modules, categoryId),
+  );
   const makes = new Map<
     string,
     { make: { slug: string; name: string }; series: typeof series }
@@ -65,6 +70,11 @@ export const categoryPartPages = <
   });
 };
 
+export const listedNumbersByCategory = (publish: PublishModuleService) =>
+  memoized('listed-numbers', async () =>
+    groupBy(await publish.listedNumbers(), ({ category_id }) => category_id),
+  );
+
 export async function categoryPageAt(
   scope: MedusaContainer,
   slug: string,
@@ -84,11 +94,13 @@ export async function categoryPageAt(
   if (!row) return null;
   const category = shownCategory(row);
 
-  const numbers = categoryPartPages(await publish.listedNumbersIn(category.id));
+  const numbers = categoryPartPages(
+    (await listedNumbersByCategory(publish)).get(category.id) ?? [],
+  );
   const pages = categoryPageCount(numbers.length);
   if (page > pages) return null;
 
-  const demand = await loadPartDemand(scope);
+  const demand = await memoPartDemand(scope);
   const offers = shown
     ? await suppliers.storeOffersFor(numbers.map(({ id }) => id))
     : new Map();

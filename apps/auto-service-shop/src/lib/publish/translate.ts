@@ -268,7 +268,7 @@ async function translateLocale(
   items: Item[],
   locale: TargetLocale,
   apiKey: string | undefined,
-): Promise<void> {
+): Promise<string[]> {
   const stale = items.filter(
     (item) => item.translatedFrom[locale] !== item.hash[locale],
   );
@@ -320,13 +320,15 @@ async function translateLocale(
       for (const chunk of chunks) await translateChunk(chunk);
     }),
   );
+  return stale.map(({ id }) => id);
 }
 
 export async function translateCatalogue(
   catalog: CatalogModuleService,
   apiKey: string | undefined,
-): Promise<void> {
-  for (const entity of TRANSLATABLE_ENTITIES.values()) {
+): Promise<string[]> {
+  const translatedParts = new Set<string>();
+  for (const [name, entity] of TRANSLATABLE_ENTITIES) {
     for (let after: string | null = null; ;) {
       const rows = await entity.list(
         catalog,
@@ -335,12 +337,20 @@ export async function translateCatalogue(
       );
       const items = rows.map((row) => itemOf(entity, row));
       for (const locale of CATALOG_TRANSLATION_LOCALES) {
-        await translateLocale(entity, catalog, items, locale, apiKey);
+        const written = await translateLocale(
+          entity,
+          catalog,
+          items,
+          locale,
+          apiKey,
+        );
+        if (name === 'part') written.forEach((id) => translatedParts.add(id));
       }
       if (rows.length < ROWS_PER_PAGE) break;
       after = rows[rows.length - 1].id;
     }
   }
+  return [...translatedParts];
 }
 
 const entityNamed = (name: string): TranslatableEntity => {
