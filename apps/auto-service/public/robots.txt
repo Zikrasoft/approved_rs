@@ -7,5 +7,16 @@ Disallow: /*/parts/search?*facets=
 Disallow: /*/parts/search?*offset=
 Disallow: /*/parts/search?*range=
 
+User-agent: ClaudeBot
+User-agent: GPTBot
+Crawl-delay: 3
+Allow: /
+Disallow: /api/
+Disallow: /keystatic/
+Disallow: /admin/
+Disallow: /*/parts/search?*facets=
+Disallow: /*/parts/search?*offset=
+Disallow: /*/parts/search?*range=
+
 Sitemap: https://carlab.rs/sitemap-index.xml
 Sitemap: https://carlab.rs/sitemap-catalogue.xml
