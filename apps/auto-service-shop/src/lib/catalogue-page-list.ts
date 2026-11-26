@@ -39,15 +39,7 @@ async function categoryCounts(
 }
 
 export const cataloguePageList = (scope: MedusaContainer) =>
-  memoized(
-    catalogueModules(scope).publish,
-    'page-list',
-    () => buildPageList(scope),
-    DEMAND_TTL_MS,
-  );
-
-export const warmCatalogueMemo = (scope: MedusaContainer) =>
-  cataloguePageList(scope);
+  memoized('page-list', () => buildPageList(scope), DEMAND_TTL_MS);
 
 async function buildPageList(scope: MedusaContainer) {
   const modules = catalogueModules(scope);

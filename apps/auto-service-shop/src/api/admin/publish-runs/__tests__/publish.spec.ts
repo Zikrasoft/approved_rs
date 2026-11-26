@@ -8,6 +8,7 @@ import { createFakeSupplier } from '../../../../../integration-tests/fakeSupplie
 import { importRuns } from '../../../../../integration-tests/importRuns';
 import { loggedEvents } from '../../../../../integration-tests/loggedEvents';
 import { SHOP_AI_REGISTRATION } from '../../../../lib/ai';
+import { memoized } from '../../../../lib/catalogue-memo';
 import {
   PUBLISH_PURGE_REGISTRATION,
   PUBLISH_SEARCH_REGISTRATION,
@@ -514,6 +515,16 @@ medusaIntegrationTestRunner({
         ]);
         expect(runs()[0].duration_ms).toBeGreaterThanOrEqual(0);
         jest.restoreAllMocks();
+      });
+
+      it('drops the catalogue memo so the pages reflect the new Publish', async () => {
+        await memoized('publish-probe', async () => 'before');
+
+        await publish();
+
+        expect(await memoized('publish-probe', async () => 'after')).toBe(
+          'after',
+        );
       });
 
       it('publishes the brand-numbers before the page cache is purged', async () => {

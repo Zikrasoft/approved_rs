@@ -2,8 +2,6 @@ import type { MedusaContainer } from '@medusajs/framework/types';
 import { partPageAddress, type PartDemand } from '@podbor/catalog-contract';
 
 import { CATALOG_MODULE } from '../modules/catalog';
-import { PUBLISH_MODULE } from '../modules/publish';
-import type PublishModuleService from '../modules/publish/service';
 import type CatalogModuleService from '../modules/catalog/service';
 import { DEMAND_MODULE } from '../modules/demand';
 import { DEMAND_WINDOW_DAYS, rankDemand } from '../modules/demand/ranking';
@@ -78,9 +76,4 @@ export async function loadPartDemand(
 }
 
 export const memoPartDemand = (scope: MedusaContainer) =>
-  memoized(
-    scope.resolve<PublishModuleService>(PUBLISH_MODULE),
-    'demand',
-    () => loadPartDemand(scope),
-    DEMAND_TTL_MS,
-  );
+  memoized('demand', () => loadPartDemand(scope), DEMAND_TTL_MS);

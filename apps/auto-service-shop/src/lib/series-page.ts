@@ -44,7 +44,7 @@ async function placeOf(
   const [paged] = (await catalogueStructure(modules, { id: [named.id] })).paged;
   if (!paged) return null;
   const vehicles = await vehiclesOfSeries(catalog, [named.id]);
-  const places = await memoized(publish, `vehicle-parts:${named.id}`, () =>
+  const places = await memoized(`vehicle-parts:${named.id}`, () =>
     publish.listedVehicleParts(named.id),
   );
   return {

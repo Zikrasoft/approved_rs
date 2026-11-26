@@ -24,7 +24,7 @@ import {
 } from './purge';
 import { translateCatalogue } from './translate';
 import { clearCatalogueMemo } from '../catalogue-memo';
-import { warmCatalogueMemo } from '../catalogue-page-list';
+import { cataloguePageList } from '../catalogue-page-list';
 import { type RunOutcome, startCatalogueRun } from '../catalogue-writer';
 import { errorMessage } from '../errors';
 import {
@@ -239,7 +239,7 @@ const publishChain = (scope: MedusaContainer) => {
         changes = withChanges(changes, await publish.publishAll());
         clearCatalogueMemo();
         published = await publish.countPublished();
-        await warmCatalogueMemo(scope);
+        await cataloguePageList(scope);
       },
     },
     {

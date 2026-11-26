@@ -12,7 +12,7 @@ import { seriesSlugOf } from '@podbor/catalog-contract/slug';
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
 import { refreshPartDemandAt } from '../../../../jobs/refresh-part-demand';
 import { clearCatalogueMemo } from '../../../../lib/catalogue-memo';
-import { warmCatalogueMemo } from '../../../../lib/catalogue-page-list';
+import { cataloguePageList } from '../../../../lib/catalogue-page-list';
 import { reindexSupplierOffers } from '../../../../lib/suppliers/markup-reindex';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
@@ -161,7 +161,7 @@ medusaIntegrationTestRunner({
         await publishAll();
         const cold = await bodies();
 
-        await warmCatalogueMemo(getContainer());
+        await cataloguePageList(getContainer());
 
         expect(await bodies()).toEqual(cold);
         expect(cold.list.categories).toEqual([
@@ -205,18 +205,13 @@ medusaIntegrationTestRunner({
         expect(await lowestHeight()).toBe(20);
       });
 
-      it('leaves the old memo behind once a new Publish run starts', async () => {
+      it('leaves the old memo behind once it is cleared', async () => {
         await changeLowestHeight(50);
         await publishAll();
         expect(await lowestHeight()).toBe(50);
         await changeLowestHeight(30);
 
-        await publish().createCatalogueRuns({
-          kind: 'publish',
-          status: 'succeeded',
-          heartbeat_at: new Date(),
-          finished_at: new Date(),
-        });
+        clearCatalogueMemo();
 
         expect(await lowestHeight()).toBe(30);
       });

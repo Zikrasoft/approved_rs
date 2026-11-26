@@ -33,10 +33,8 @@ async function carsOf(
   categoryId: string,
   locale: CatalogLocale,
 ): Promise<CategoryPageResponse['cars']> {
-  const series = await memoized(
-    modules.publish,
-    `category-series:${categoryId}`,
-    () => seriesPagedInCategory(modules, categoryId),
+  const series = await memoized(`category-series:${categoryId}`, () =>
+    seriesPagedInCategory(modules, categoryId),
   );
   const makes = new Map<
     string,
@@ -73,7 +71,7 @@ export const categoryPartPages = <
 };
 
 export const listedNumbersByCategory = (publish: PublishModuleService) =>
-  memoized(publish, 'listed-numbers', async () => {
+  memoized('listed-numbers', async () => {
     const numbersOf = new Map<string, ListedNumber[]>();
     for (const number of await publish.listedNumbersIn(null)) {
       numbersOf.set(number.category_id, [

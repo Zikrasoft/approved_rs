@@ -55,7 +55,7 @@ export const seriesPartCounts = async (
   seriesCountsOf(await publish.listedSeriesCategoryCounts(scope));
 
 const listedSeriesCategoryCounts = (publish: PublishModuleService) =>
-  memoized(publish, 'series-category-counts', () =>
+  memoized('series-category-counts', () =>
     publish.listedSeriesCategoryCounts(),
   );
 
