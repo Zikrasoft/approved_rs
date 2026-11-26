@@ -15,7 +15,9 @@ const catalogueOf = (parts: Row[]) => {
   const fullReads: string[][] = [];
   const catalog = {
     translationSources: async (table: string) =>
-      table === 'part' ? parts : [],
+      table === 'part'
+        ? parts.map(({ id, ...source }) => ({ ...source, ids: [id] }))
+        : [],
     listParts: async ({ id }: { id: string[] }) => {
       fullReads.push(id);
       return parts.filter((part) => id.includes(part.id));
@@ -69,26 +71,29 @@ afterEach(() => {
 });
 
 describe('translateCatalogue', () => {
-  it('scans the Parts a page at a time', async () => {
-    openAi();
-    const parts = Array.from({ length: 20_001 }, (_, index) =>
-      part(index, null),
-    ).sort((a, b) => a.id.localeCompare(b.id));
+  it('reads the stale Parts of one source a page at a time', async () => {
+    const requests = openAi();
+    const parts = Array.from({ length: 20_001 }, (_, index) => ({
+      ...part(index, null),
+      name: 'Фильтр',
+    }));
     const pages: number[] = [];
     const { catalog, updated } = catalogueOf(parts);
     Object.assign(catalog, {
-      translationSources: async (
-        table: string,
-        _fields: string[],
-        after: string | undefined,
-        take: number,
-      ) => {
-        if (table !== 'part') return [];
-        const page = parts
-          .filter(({ id }) => !after || id > after)
-          .slice(0, take);
-        pages.push(page.length);
-        return page;
+      translationSources: async (table: string) =>
+        table === 'part'
+          ? [
+              {
+                name: 'Фильтр',
+                description: null,
+                translated_from: null,
+                ids: parts.map(({ id }) => id),
+              },
+            ]
+          : [],
+      listParts: async ({ id }: { id: string[] }) => {
+        pages.push(id.length);
+        return parts.filter((row) => id.includes(row.id));
       },
     });
 
@@ -96,6 +101,7 @@ describe('translateCatalogue', () => {
 
     expect(pages).toEqual([20_000, 1]);
     expect(new Set(updated.map(({ id }) => id)).size).toBe(20_001);
+    expect(requests.length).toBeGreaterThan(0);
   });
 
   it('stamps Parts with the same source with the same translated_from', async () => {
