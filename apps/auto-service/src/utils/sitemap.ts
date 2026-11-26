@@ -2,6 +2,8 @@ import {
   categoryPageCount,
   type CataloguePageList,
 } from '@podbor/catalog-contract';
+import { CARLAB } from '@podbor/brands';
+import type { Catalogue } from './cataloguePage';
 import { SUPPORTED_LOCALES } from '../i18n/config.ts';
 import { CARS_PAGE_SIZE } from './works';
 import { PathBuilder } from './paths';
@@ -70,7 +72,7 @@ export function carsUrls(site: string, makes: string[]): string[] {
 const XML_HEAD = '<?xml version="1.0" encoding="UTF-8"?>';
 const SITEMAP_NAMESPACE = 'http://www.sitemaps.org/schemas/sitemap/0.9';
 
-export const catalogueSitemapChunks = (urls: string[]): string[][] =>
+const catalogueSitemapChunks = (urls: string[]): string[][] =>
   Array.from(
     { length: Math.ceil(urls.length / CATALOGUE_SITEMAP_SIZE) },
     (_, index) =>
@@ -92,3 +94,6 @@ export const urlsetXml = (urls: string[]): string =>
   `${XML_HEAD}<urlset xmlns="${SITEMAP_NAMESPACE}">${urls
     .map((loc) => `<url><loc>${loc}</loc></url>`)
     .join('')}</urlset>`;
+
+export const catalogueSitemaps = async (catalogue: Catalogue) =>
+  catalogueSitemapChunks(catalogueUrls(CARLAB.url, await catalogue.pageList()));

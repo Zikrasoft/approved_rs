@@ -2,9 +2,8 @@ import type { APIRoute } from 'astro';
 import { CARLAB } from '@podbor/brands';
 import { answerCatalogueFile } from '@/utils/cataloguePage';
 import {
-  catalogueSitemapChunks,
   catalogueSitemapPath,
-  catalogueUrls,
+  catalogueSitemaps,
   sitemapIndexXml,
 } from '@/utils/sitemap';
 
@@ -16,8 +15,8 @@ export const GET: APIRoute = (context) =>
     'application/xml; charset=utf-8',
     async (catalogue) =>
       sitemapIndexXml(
-        catalogueSitemapChunks(
-          catalogueUrls(CARLAB.url, await catalogue.pageList()),
-        ).map((_, chunk) => `${CARLAB.url}${catalogueSitemapPath(chunk)}`),
+        (await catalogueSitemaps(catalogue)).map(
+          (_, chunk) => `${CARLAB.url}${catalogueSitemapPath(chunk)}`,
+        ),
       ),
   );
