@@ -13,6 +13,7 @@ import {
 import type CatalogModuleService from '../../catalog/service';
 import { PUBLISH_MODULE } from '..';
 import type PublishModuleService from '../service';
+import type { VehiclePart } from '../service';
 
 const WALKED_SERIES_CATEGORY_COUNTS = `${LISTED_PLACES}
   select series_id, category_id, count(*)::int as parts,
@@ -81,9 +82,20 @@ medusaIntegrationTestRunner({
           await publish.listedCategoryParts(seriesIds.slice(0, 1)),
         ).toEqual(await walked(WALKED_CATEGORY_PARTS, seriesIds.slice(0, 1)));
         for (const id of seriesIds) {
-          expect(await publish.listedVehicleParts(id)).toEqual(
-            await walked(LISTED_VEHICLE_PARTS, [id]),
-          );
+          const places: VehiclePart[] = await walked(LISTED_VEHICLE_PARTS, [
+            id,
+          ]);
+          expect(await publish.listedVehicleParts(id)).toEqual(places);
+          expect(await publish.seriesVehicleParts(id)).toEqual({
+            fitted: [
+              ...new Set(
+                places
+                  .filter(({ fitted }) => fitted)
+                  .map(({ vehicle_id }) => vehicle_id),
+              ),
+            ],
+            required: places.filter(({ fitted }) => !fitted),
+          });
         }
       };
 

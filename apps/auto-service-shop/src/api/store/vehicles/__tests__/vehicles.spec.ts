@@ -2,12 +2,11 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
-import {
-  listVehicleResponses,
-  VEHICLE_BATCH,
-} from '../../../../lib/store-response';
+import { listVehicleResponses } from '../../../../lib/store-response';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
+
+const VEHICLE_BATCH = 1000;
 
 medusaIntegrationTestRunner({
   moduleName: 'catalog',

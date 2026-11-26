@@ -283,10 +283,10 @@ medusaIntegrationTestRunner({
         await publish.buildCatalogueSnapshot();
         clearCatalogueMemo();
         process.env.SHOP_OPEN = 'false';
-        const lookups = jest.spyOn(publish, 'publishedNumbers');
+        const lookups = jest.spyOn(publish, 'publishedNumbersOfParts');
 
         const page = await answer('capped');
-        const looked = lookups.mock.calls.map(([numbers]) => numbers.length);
+        const looked = lookups.mock.calls.map(([parts]) => parts.length);
         const previewed = await answer('capped', {
           [SHOP_PREVIEW_HEADER]: process.env.SHOP_PREVIEW_TOKEN!,
         });

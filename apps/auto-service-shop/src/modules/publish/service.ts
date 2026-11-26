@@ -30,9 +30,11 @@ import {
   PUBLISH_ALL,
   PUBLISHED_NUMBER_BY_SLUG,
   PUBLISHED_NUMBERS,
+  PUBLISHED_NUMBERS_OF_PARTS,
   PUBLISHED_PAGE,
   PUBLISHED_PART_SLUGS,
   REFRESH_LISTED,
+  SERIES_FITTED_VEHICLES,
 } from '../catalog/cross-module-sql';
 import { INTERRUPTED_BY_RESTART } from '../_shared/run-errors';
 
@@ -191,6 +193,21 @@ class PublishModuleService extends MedusaService({
   }
 
   @InjectManager()
+  async publishedNumbersOfParts(
+    partIds: string[],
+    only: string[] | null = null,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<(PublishedNumber & { part_id: string })[]> {
+    if (!partIds.length || only?.length === 0) return [];
+    const { rows } = await runBoundSql(
+      sharedContext,
+      PUBLISHED_NUMBERS_OF_PARTS,
+      { parts: partIds, only },
+    );
+    return rows;
+  }
+
+  @InjectManager()
   async listedPartsIn(
     categoryId: string,
     @MedusaContext() sharedContext: Context = {},
@@ -280,6 +297,33 @@ class PublishModuleService extends MedusaService({
           series: seriesId,
         });
     return rows;
+  }
+
+  @InjectManager()
+  async seriesVehicleParts(
+    seriesId: string,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<{ fitted: string[]; required: VehiclePart[] }> {
+    if (await this.hasRequirements(sharedContext)) {
+      const places = await this.listedVehicleParts(seriesId, sharedContext);
+      return {
+        fitted: [
+          ...new Set(
+            places
+              .filter(({ fitted }) => fitted)
+              .map(({ vehicle_id }) => vehicle_id),
+          ),
+        ],
+        required: places.filter(({ fitted }) => !fitted),
+      };
+    }
+    const { rows } = await runBoundSql(sharedContext, SERIES_FITTED_VEHICLES, {
+      series: seriesId,
+    });
+    return {
+      fitted: rows.map(({ vehicle_id }: { vehicle_id: string }) => vehicle_id),
+      required: [],
+    };
   }
 
   @InjectManager()

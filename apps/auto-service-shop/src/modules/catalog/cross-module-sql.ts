@@ -66,6 +66,13 @@ export const PUBLISHED_NUMBERS = `
   where pn.deleted_at is null and pn.id = any(?::text[])
   order by pn.id`;
 
+export const PUBLISHED_NUMBERS_OF_PARTS = `
+  select pn.id, pn.listed, pi.part_id from published_number pn
+  join part_identifier pi on pi.id = pn.id and pi.deleted_at is null
+  where pn.deleted_at is null and pi.part_id = any(:parts::text[])
+    and (:only::text[] is null or pn.id = any(:only::text[]))
+  order by pn.id`;
+
 export const LISTED_PARTS_IN_CATEGORY = `
   select p.id, p.category_id, p.attributes from part p
   join part_identifier pi on pi.part_id = p.id and pi.deleted_at is null
@@ -221,6 +228,19 @@ export const LISTED_FITTED_VEHICLE_PARTS = `
     and l.part_id = f.part_id
   group by f.vehicle_id, f.part_id, l.category_id
   order by f.vehicle_id, f.part_id`;
+
+export const SERIES_FITTED_VEHICLES = `
+  with scoped as (${LIVE_VEHICLES}
+      and c.series_id = :series
+  )
+  select s.vehicle_id from scoped s
+  where exists (
+    select 1 from fitment f
+    join listed_series_part l on l.series_id = s.series_id
+      and l.part_id = f.part_id
+    where f.vehicle_id = s.vehicle_id and f.deleted_at is null
+  )
+  order by s.vehicle_id`;
 
 export const PUBLISHED_PART_SLUGS = `
   select b.slug as brand_slug, pi.normalized_value, ${INDEXABLE}

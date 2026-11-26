@@ -12,6 +12,7 @@ import {
 } from '@podbor/catalog-contract';
 
 import { memoized } from './catalogue-memo';
+import { groupBy } from './group-by';
 import { CATEGORY_RELATIONS, shownCategory } from './categories';
 import { localizedCategory, localizedVehicle } from './catalogue-locale';
 import { memoPartDemand } from './part-demand';
@@ -62,14 +63,16 @@ async function kitCars(
   required: Vehicle[],
   loadVehicles: ReturnType<typeof vehiclesLoader>,
 ): Promise<Vehicle[]> {
-  const listed = await memoized(`listed-parts:${part.category_id}`, () =>
-    publish.listedPartsIn(part.category_id),
-  );
   const seeds = byId([...fitted, ...required]);
-  const models = await catalog.listVehicleModels(
-    { slug: distinct(seeds.map(({ model }) => model.slug)) },
-    { select: ['id'], take: null },
-  );
+  const [listed, models] = await Promise.all([
+    memoized(`listed-parts:${part.category_id}`, () =>
+      publish.listedPartsIn(part.category_id),
+    ),
+    catalog.listVehicleModels(
+      { slug: distinct(seeds.map(({ model }) => model.slug)) },
+      { select: ['id'], take: null },
+    ),
+  ]);
   const sameModel = models.length
     ? await loadVehicles({ model_id: models.map(({ id }) => id) })
     : [];
@@ -85,24 +88,21 @@ async function kitCars(
         ).length > 0,
     ),
   ]);
-  const listedIds = new Set(listed.map(({ id }) => id));
-  const fitments = (
-    await catalog.listFitments(
-      {
+  const fitments = groupBy(
+    (
+      await catalog.fitmentRows({
         vehicle_id: distinct(
           [...candidates, ...engineLess].map(({ id }) => id),
         ),
-      },
-      { order: { id: 'ASC' }, take: null },
-    )
-  )
-    .filter(({ part_id }) => listedIds.has(part_id))
-    .map((row) => ({
+        part_id: listed.map(({ id }) => id),
+      })
+    ).map((row) => ({
       ...toFitmentResponse(row),
       category_id: part.category_id,
-    }));
-  const fitsOf = (vehicle: Vehicle) =>
-    fitments.filter(({ vehicle_id }) => vehicle_id === vehicle.id);
+    })),
+    ({ vehicle_id }) => vehicle_id,
+  );
+  const fitsOf = (vehicle: Vehicle) => fitments.get(vehicle.id) ?? [];
   const kitPart = (vehicle: Vehicle) => {
     const own = fitsOf(vehicle);
     const seen = new Set(own.map(({ part_id }) => part_id));
@@ -129,31 +129,72 @@ export async function partPageAt(
   const { catalog, publish } = modules;
   const seriesOf: SeriesOf = new Map();
   const loadVehicles = vehiclesLoader(catalog, seriesOf);
-  const own =
-    address && (await publish.publishedBySlug(address.brand, address.number));
+  const [own, demand] = await Promise.all([
+    address && publish.publishedBySlug(address.brand, address.number),
+    memoPartDemand(scope),
+  ]);
   if (!own) return null;
-  const options = { locale, shown, demand: await memoPartDemand(scope) };
+  const options = { locale, shown, demand };
   const [page] = await sluggedPagesOf(scope, [own], options);
   const { part } = page;
-  const replacementIds = part.replaced_by
-    ? (
-        await catalog.listPartIdentifiers(
-          { part_id: part.replaced_by.id },
-          { select: ['id'], take: null },
-        )
-      ).map(({ id }) => id)
-    : [];
   const equivalentIds = new Set(page.equivalents.map(({ id }) => id));
-  const relatedRows = await publish.publishedNumbers([
-    ...equivalentIds,
-    ...replacementIds,
-  ]);
-  const retired = ![own, ...relatedRows]
-    .filter(({ id }) => id === own.id || equivalentIds.has(id))
-    .some(({ listed }) => listed);
-  const related = (await sluggedPagesOf(scope, relatedRows, options)).filter(
-    (other) => other.slug !== page.slug,
-  );
+
+  const relatedOf = async () => {
+    const replacementIds = part.replaced_by
+      ? (
+          await catalog.listPartIdentifiers(
+            { part_id: part.replaced_by.id },
+            { select: ['id'], take: null },
+          )
+        ).map(({ id }) => id)
+      : [];
+    const relatedRows = await publish.publishedNumbers([
+      ...equivalentIds,
+      ...replacementIds,
+    ]);
+    const retired = ![own, ...relatedRows]
+      .filter(({ id }) => id === own.id || equivalentIds.has(id))
+      .some(({ listed }) => listed);
+    const [related, requirementCars] = await Promise.all([
+      sluggedPagesOf(scope, relatedRows, options),
+      retired ? [] : requirementCarsOf(),
+    ]);
+    return {
+      retired,
+      requirementCars,
+      related: related.filter((other) => other.slug !== page.slug),
+    };
+  };
+
+  const requirementCarsOf = async () => {
+    const ids = distinct(
+      (await publish.partRequirementFits([part.id])).map(
+        ({ vehicle_id }) => vehicle_id,
+      ),
+    );
+    return ids.length ? byId(await loadVehicles({ id: ids })) : [];
+  };
+
+  const fitsOf = async () => {
+    const fitments = (await catalog.fitmentRows({ part_id: [part.id] })).map(
+      toFitmentResponse,
+    );
+    const vehicles = fitments.length
+      ? await loadVehicles({
+          id: distinct(fitments.map(({ vehicle_id }) => vehicle_id)),
+        })
+      : [];
+    const known = new Set(vehicles.map(({ id }) => id));
+    return {
+      fitVehicles: vehicles,
+      fits: fitments
+        .filter(({ vehicle_id }) => known.has(vehicle_id))
+        .map((fit) => localizedFit(fit, locale)),
+    };
+  };
+
+  const [{ retired, requirementCars, related }, { fitVehicles, fits }] =
+    await Promise.all([relatedOf(), fitsOf()]);
 
   const categories = new Map(
     (
@@ -175,33 +216,6 @@ export async function partPageAt(
   const categoryOf = ({ part: { category_id } }: PartPage) =>
     categories.get(category_id ?? '') ?? null;
 
-  const fitments = await catalog.listFitments(
-    { part_id: part.id },
-    { order: { id: 'ASC' }, take: null },
-  );
-  const fitVehicles = fitments.length
-    ? await loadVehicles({
-        id: distinct(fitments.map(({ vehicle_id }) => vehicle_id)),
-      })
-    : [];
-  const vehicleById = new Map(
-    fitVehicles.map((vehicle) => [vehicle.id, vehicle]),
-  );
-  const fits = fitments
-    .map(toFitmentResponse)
-    .filter(({ vehicle_id }) => vehicleById.has(vehicle_id))
-    .map((fit) => localizedFit(fit, locale));
-
-  const requirementIds = retired
-    ? []
-    : distinct(
-        (await publish.partRequirementFits([part.id])).map(
-          ({ vehicle_id }) => vehicle_id,
-        ),
-      );
-  const requirementCars = requirementIds.length
-    ? byId(await loadVehicles({ id: requirementIds }))
-    : [];
   const category = categoryOf(page);
   const kit =
     category?.maintenance_kit && !retired && part.category_id

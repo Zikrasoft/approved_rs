@@ -41,28 +41,28 @@ async function placeOf(
     await catalog.listSeries({ make_id: make.id }, { take: null })
   ).find(({ name }) => seriesSlugOf(name) === seriesSlug);
   if (!named) return null;
-  const [paged] = (await catalogueStructure(modules, { id: [named.id] })).paged;
+  const [structure, vehicles, held] = await Promise.all([
+    catalogueStructure(modules, { id: [named.id] }),
+    vehiclesOfSeries(catalog, [named.id]),
+    publish.listedCategoryParts([named.id]),
+  ]);
+  const [paged] = structure.paged;
   if (!paged) return null;
-  const vehicles = await vehiclesOfSeries(catalog, [named.id]);
-  const places = await publish.listedVehicleParts(named.id);
+  const partsIn = groupBy(held, ({ category_id }) => category_id);
   return {
     ...modules,
     scope,
+    seriesId: named.id,
     series: {
       ...vehicles[0].model.chassis.series,
       slug: paged.slug,
     },
     vehicles,
-    places,
     categories: new Map(
       paged.categoryIds.map((id) => [
         id,
         [
-          ...new Set(
-            places
-              .filter(({ category_id }) => category_id === id)
-              .map(({ part_id }) => part_id),
-          ),
+          ...new Set((partsIn.get(id) ?? []).map(({ part_id }) => part_id)),
         ].sort(),
       ]),
     ),
@@ -71,34 +71,32 @@ async function placeOf(
 
 type Place = NonNullable<Awaited<ReturnType<typeof placeOf>>>;
 
-const modelsWithParts = ({ vehicles, places }: Place): Vehicle[][] => {
-  const fittedBy = groupBy(
-    places.filter(({ fitted }) => fitted),
-    ({ vehicle_id }) => vehicle_id,
-  );
-  const required: VehiclePart[] = places.filter(({ fitted }) => !fitted);
+const modelsWithParts = (
+  vehicles: Vehicle[],
+  { fitted, required }: { fitted: string[]; required: VehiclePart[] },
+): Vehicle[][] => {
+  const fittedIds = new Set(fitted);
+  const requiredBy = groupBy(required, ({ vehicle_id }) => vehicle_id);
   return [...groupBy(vehicles, ({ model }) => model.slug).values()].filter(
     (group) => {
       const engineLess = group.filter(({ engine }) => engine === null);
-      const ids = new Set(group.map(({ id }) => id));
-      const parts = new Set(
-        group.flatMap((vehicle) =>
-          [vehicle, ...generationOf(vehicle, engineLess)].flatMap(({ id }) =>
-            (fittedBy.get(id) ?? []).map(({ part_id }) => part_id),
-          ),
+      const fits = group.some((vehicle) =>
+        [vehicle, ...generationOf(vehicle, engineLess)].some(({ id }) =>
+          fittedIds.has(id),
         ),
       );
       const matched = groupBy(
-        required.filter(({ vehicle_id }) => ids.has(vehicle_id)),
+        group.flatMap(({ id }) => requiredBy.get(id) ?? []),
         ({ category_id }) => category_id,
       );
-      for (const rows of matched.values()) {
-        const partIds = new Set(rows.map(({ part_id }) => part_id));
-        if (requirementMatchesCount(partIds.size)) {
-          partIds.forEach((id) => parts.add(id));
-        }
-      }
-      return parts.size > 0;
+      return (
+        fits ||
+        [...matched.values()].some((rows) =>
+          requirementMatchesCount(
+            new Set(rows.map(({ part_id }) => part_id)).size,
+          ),
+        )
+      );
     },
   );
 };
@@ -107,7 +105,7 @@ const pagesOfParts = async (
   scope: MedusaContainer,
   partIds: string[],
   options: Options & { demand?: Map<string, PartDemand> },
-  only?: (identifierId: string) => boolean,
+  only?: string[],
 ): Promise<SluggedPartPage[]> =>
   sluggedPagesOf(scope, await publishedOfParts(scope, partIds, only), options);
 
@@ -135,24 +133,31 @@ export async function seriesPageAt(
   seriesSlug: string,
   options: Options,
 ): Promise<SeriesPageResponse | null> {
-  const place = await placeOf(scope, makeSlug, seriesSlug);
+  const [place, demand] = await Promise.all([
+    placeOf(scope, makeSlug, seriesSlug),
+    memoPartDemand(scope),
+  ]);
   if (!place) return null;
-  const demand = await memoPartDemand(scope);
   const { locale } = options;
-  return {
-    series: localizedSeries(place.series, locale),
-    models: modelsWithParts(place).map((vehicles) => ({
-      vehicles: localizedPlace({ ...place, vehicles }, locale).vehicles,
-    })),
-    categories: (
-      await shownCategories(place.catalog, [...place.categories.keys()])
-    ).map((category) => localizedCategory(category, locale)),
-    popular: await pagesOfParts(
+  const [categories, popular, parts] = await Promise.all([
+    shownCategories(place.catalog, [...place.categories.keys()]),
+    pagesOfParts(
       scope,
       [...new Set([...place.categories.values()].flat())],
       { ...options, demand },
-      (id) => demand.get(id)?.popular === true,
+      [...demand].flatMap(([id, { popular }]) => (popular ? [id] : [])),
     ),
+    place.publish.seriesVehicleParts(place.seriesId),
+  ]);
+  return {
+    series: localizedSeries(place.series, locale),
+    models: modelsWithParts(place.vehicles, parts).map((vehicles) => ({
+      vehicles: localizedPlace({ ...place, vehicles }, locale).vehicles,
+    })),
+    categories: categories.map((category) =>
+      localizedCategory(category, locale),
+    ),
+    popular,
   };
 }
 
@@ -163,31 +168,36 @@ export async function seriesCategoryPageAt(
   categorySlug: string,
   options: Options,
 ): Promise<SeriesCategoryPageResponse | null> {
-  const place = await placeOf(scope, makeSlug, seriesSlug);
-  if (!place) return null;
-  const [category] = await place.catalog.listCategories(
-    { slug: categorySlug },
-    { relations: CATEGORY_RELATIONS },
+  const [place, [category]] = await Promise.all([
+    placeOf(scope, makeSlug, seriesSlug),
+    catalogueModules(scope).catalog.listCategories(
+      { slug: categorySlug },
+      { relations: CATEGORY_RELATIONS },
+    ),
+  ]);
+  const partIds = place && category && place.categories.get(category.id);
+  if (!place || !category || !partIds) return null;
+  const [pages, fitments] = await Promise.all([
+    pagesOfParts(scope, partIds, options),
+    place.catalog.fitmentRows({
+      part_id: partIds,
+      vehicle_id: place.vehicles.map(({ id }) => id),
+    }),
+  ]);
+  const pagesOf = groupBy(pages, ({ part }) => part.id);
+  const fitsOf = groupBy(
+    fitments.map(toFitmentResponse),
+    ({ part_id }) => part_id,
   );
-  const partIds = category && place.categories.get(category.id);
-  if (!category || !partIds) return null;
-  const pages = await pagesOfParts(scope, partIds, options);
-  const vehicleById = new Map(place.vehicles.map((one) => [one.id, one]));
-  const fitments = (
-    await place.catalog.listFitments(
-      { part_id: partIds, vehicle_id: [...vehicleById.keys()] },
-      { order: { id: 'ASC' }, take: null },
-    )
-  ).map(toFitmentResponse);
   const parts = partIds.flatMap((id) => {
-    const own = pages.filter(({ part }) => part.id === id);
-    return own.length
+    const own = pagesOf.get(id);
+    return own
       ? [
           {
             pages: own,
-            fits: fitments
-              .filter(({ part_id }) => part_id === id)
-              .map((fit) => localizedFit(fit, options.locale)),
+            fits: (fitsOf.get(id) ?? []).map((fit) =>
+              localizedFit(fit, options.locale),
+            ),
           },
         ]
       : [];

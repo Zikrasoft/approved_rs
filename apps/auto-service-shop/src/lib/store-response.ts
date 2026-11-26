@@ -8,6 +8,7 @@ import {
 import { z } from 'zod';
 
 import type CatalogModuleService from '../modules/catalog/service';
+import type { StoreRowFilter } from '../modules/catalog/store-reads';
 
 const VEHICLE_RELATIONS = [
   'model',
@@ -47,31 +48,9 @@ const inheritedRequirements = ownedRequirements.extend({
   model: z.object({ chassis: ownedRequirements }),
 });
 
-export const VEHICLE_BATCH = 1000;
-
 const VEHICLE_READ = {
   relations: VEHICLE_RELATIONS,
   order: { id: 'ASC' as const },
-};
-
-const vehicleRows = async (
-  catalog: CatalogModuleService,
-  filters: Parameters<CatalogModuleService['listVehicles']>[0],
-) => {
-  const batch = (skip: number) =>
-    catalog.listVehicles(filters, {
-      ...VEHICLE_READ,
-      skip,
-      take: VEHICLE_BATCH,
-    });
-  const rows: Awaited<ReturnType<typeof batch>> = [];
-  for (let skip = 0; ; skip += VEHICLE_BATCH) {
-    const next = await batch(skip);
-    rows.push(...next);
-    if (next.length < VEHICLE_BATCH) {
-      return rows;
-    }
-  }
 };
 
 const toVehicleResponse = (
@@ -93,16 +72,16 @@ const toVehicleResponse = (
 
 export const listVehicleResponsesWithSeries = async (
   catalog: CatalogModuleService,
-  filters: Parameters<CatalogModuleService['listVehicles']>[0] = {},
+  filters: StoreRowFilter = {},
 ): Promise<{ vehicle: Vehicle; series_id: string }[]> =>
-  (await vehicleRows(catalog, filters)).map((row) => ({
-    vehicle: toVehicleResponse(row),
-    series_id: row.model.chassis.series_id,
+  (await catalog.vehicleRows(filters)).map((row) => ({
+    vehicle: vehicleSchema.parse(row),
+    series_id: row.series_id,
   }));
 
 export const listVehicleResponses = async (
   catalog: CatalogModuleService,
-  filters: Parameters<CatalogModuleService['listVehicles']>[0] = {},
+  filters: StoreRowFilter = {},
 ): Promise<Vehicle[]> =>
   (await listVehicleResponsesWithSeries(catalog, filters)).map(
     ({ vehicle }) => vehicle,

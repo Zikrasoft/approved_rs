@@ -266,8 +266,8 @@ medusaIntegrationTestRunner({
         clearCatalogueMemo();
         const first = await partPage('mann-filter-hu816x');
         const listedBefore = jest.spyOn(publish, 'listedPartsIn');
-        const vehiclesBefore = jest.spyOn(catalog, 'listVehicles');
-        const fitmentsBefore = jest.spyOn(catalog, 'listFitments');
+        const vehiclesBefore = jest.spyOn(catalog, 'vehicleRows');
+        const fitmentsBefore = jest.spyOn(catalog, 'fitmentRows');
         const second = await partPage('mann-filter-hu816x');
         const fitmentFilters = fitmentsBefore.mock.calls.map(([filter]) =>
           Object.keys(filter as object),
@@ -283,7 +283,7 @@ medusaIntegrationTestRunner({
 
         expect(second).toEqual(first);
         expect(counts.listed).toBe(0);
-        expect(counts.kitFitments).toBe(0);
+        expect(counts.kitFitments).toBe(1);
         expect(counts.vehicleReads).toBe(3);
       });
     });

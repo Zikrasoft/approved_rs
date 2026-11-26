@@ -22,6 +22,7 @@ import type {
 import { SUPPLIER_MODULE } from '../modules/supplier';
 import { releasedSupplierData } from '../modules/supplier/released';
 import type SupplierModuleService from '../modules/supplier/service';
+import { groupBy } from './group-by';
 import { imagesSchema, publicFileUrl, publicImage } from './images';
 import { installationPrice } from './installation';
 import { memoPartDemand } from './part-demand';
@@ -104,44 +105,40 @@ export async function partPagesOf(
   const catalog: CatalogModuleService = scope.resolve(CATALOG_MODULE);
   const pageIds = published.map(({ id }) => id);
   const listedById = new Map(published.map(({ id, listed }) => [id, listed]));
-  const identifiers = pageIds.length
-    ? await catalog.listPartIdentifiers(
-        { id: pageIds },
-        {
-          relations: ['brand', 'part', 'part.category'],
-          order: { id: 'ASC' },
-          take: null,
-        },
-      )
-    : [];
-
-  const siblings = await catalog.listPartIdentifiers(
-    { part_id: [...new Set(identifiers.map(({ part_id }) => part_id))] },
-    { relations: ['brand'], order: { id: 'ASC' }, take: null },
+  const rows = await catalog.partPageRows(pageIds);
+  const identifiers = rows.filter(({ id }) => listedById.has(id));
+  const pictured = new Map(
+    rows.map((row) => [row.id, picturedBrandNumber(row)]),
   );
+  const siblingsOf = groupBy(rows, ({ part_id }) => part_id);
 
   const replacementIds = [
     ...new Set(identifiers.map(({ part }) => part.replaced_by_id)),
   ].filter((id) => id !== null);
-  const replacements = replacementIds.length
-    ? await catalog.listParts(
-        { id: replacementIds },
-        { relations: ['identifiers', 'identifiers.brand'], take: null },
-      )
-    : [];
-  const replacedBy = (id: string | null) => {
-    const part = replacements.find((candidate) => candidate.id === id);
-    return part ? replacement(part) : null;
-  };
   const suppliers: SupplierModuleService = scope.resolve(SUPPLIER_MODULE);
   const identifierIds = identifiers.map(({ id }) => id);
-  const offers = shown
-    ? await suppliers.storeOffersFor(identifierIds)
-    : new Map<string, PartOffer[]>();
-  const supplierData = await releasedSupplierData(suppliers, identifierIds);
+  const [replacements, offers, supplierData] = await Promise.all([
+    replacementIds.length
+      ? catalog.listParts(
+          { id: replacementIds },
+          { relations: ['identifiers', 'identifiers.brand'], take: null },
+        )
+      : [],
+    shown
+      ? suppliers.storeOffersFor(identifierIds)
+      : new Map<string, PartOffer[]>(),
+    releasedSupplierData(suppliers, identifierIds),
+  ]);
+  const replacementOf = new Map(
+    replacements.map((part) => [part.id, part] as const),
+  );
+  const replacedBy = (id: string | null) => {
+    const part = id && replacementOf.get(id);
+    return part ? replacement(part) : null;
+  };
 
   return identifiers.map((identifier) => ({
-    ...picturedBrandNumber(identifier),
+    ...pictured.get(identifier.id)!,
     listed: listedById.get(identifier.id),
     part: {
       id: identifier.part.id,
@@ -153,12 +150,9 @@ export async function partPagesOf(
       attributes: identifier.part.attributes,
       installation_price: installationPrice(identifier.part),
     },
-    equivalents: siblings
-      .filter(
-        ({ id, part_id }) =>
-          part_id === identifier.part_id && id !== identifier.id,
-      )
-      .map(picturedBrandNumber),
+    equivalents: (siblingsOf.get(identifier.part_id) ?? [])
+      .filter(({ id }) => id !== identifier.id)
+      .map(({ id }) => pictured.get(id)!),
     offers: offers.get(identifier.id) ?? [],
     supplier_data: publicSupplierData(supplierData(identifier.id)),
     demand: demand.get(identifier.id) ?? null,
@@ -224,23 +218,11 @@ export async function sluggedPagesOf(
     .filter(({ slug }) => !seen.has(slug) && seen.add(slug));
 }
 
-export async function publishedOfParts(
+export const publishedOfParts = (
   scope: MedusaContainer,
   partIds: string[],
-  only?: (identifierId: string) => boolean,
-): Promise<(PublishedNumber & { part_id: string })[]> {
-  const catalog: CatalogModuleService = scope.resolve(CATALOG_MODULE);
-  const identifiers = partIds.length
-    ? await catalog.listPartIdentifiers(
-        { part_id: partIds },
-        { select: ['id', 'part_id'], order: { id: 'ASC' }, take: null },
-      )
-    : [];
-  const partOf = new Map(identifiers.map(({ id, part_id }) => [id, part_id]));
-  const published = await scope
+  only?: string[],
+): Promise<(PublishedNumber & { part_id: string })[]> =>
+  scope
     .resolve<PublishModuleService>(PUBLISH_MODULE)
-    .publishedNumbers(
-      identifiers.map(({ id }) => id).filter((id) => only?.(id) ?? true),
-    );
-  return published.map((row) => ({ ...row, part_id: partOf.get(row.id)! }));
-}
+    .publishedNumbersOfParts(partIds, only);

@@ -17,6 +17,7 @@ import {
   type GEARBOX_TYPES,
   guardDefinitionChange,
   type SteeringSide,
+  SUPPLIER_VEHICLE_ID,
   type VEHICLE_DRIVES,
   requirementErrors,
   validateAttributes,
@@ -45,6 +46,14 @@ import VehicleIdentifier from './models/vehicle-identifier';
 import VehicleModel from './models/vehicle-model';
 import { adminError, alreadyExists } from '../_shared/admin-error';
 import { runBoundSql } from '../_shared/bound-sql';
+import {
+  FITMENT_ROWS,
+  type FitmentFilter,
+  PART_PAGE_ROWS,
+  type PartPageRow,
+  type StoreRowFilter,
+  VEHICLE_ROWS,
+} from './store-reads';
 import { keysetPages } from '../_shared/keyset-pages';
 import { modelSlugOf, slugOf, vehicleSlugOf } from '../_shared/slug';
 import { nameKey } from '../_shared/keys';
@@ -1459,6 +1468,44 @@ class CatalogModuleService extends CatalogModuleBase {
       );
     }
     return this.createRequirements(requirement, sharedContext);
+  }
+
+  @InjectManager()
+  async fitmentRows(
+    { part_id, vehicle_id }: FitmentFilter,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<Record<string, unknown>[]> {
+    if ([part_id, vehicle_id].some((ids) => ids?.length === 0)) return [];
+    const { rows } = await runBoundSql(sharedContext, FITMENT_ROWS, {
+      parts: part_id ?? null,
+      vehicles: vehicle_id ?? null,
+    });
+    return rows;
+  }
+
+  @InjectManager()
+  async partPageRows(
+    ids: string[],
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<PartPageRow[]> {
+    if (!ids.length) return [];
+    const { rows } = await runBoundSql(sharedContext, PART_PAGE_ROWS, { ids });
+    return rows;
+  }
+
+  @InjectManager()
+  async vehicleRows(
+    { id, model_id, series_id }: StoreRowFilter,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<(Record<string, unknown> & { series_id: string })[]> {
+    if ([id, model_id, series_id].some((ids) => ids?.length === 0)) return [];
+    const { rows } = await runBoundSql(sharedContext, VEHICLE_ROWS, {
+      ids: id ?? null,
+      models: model_id ?? null,
+      series: series_id ?? null,
+      supplier: SUPPLIER_VEHICLE_ID,
+    });
+    return rows;
   }
 
   @InjectManager()
