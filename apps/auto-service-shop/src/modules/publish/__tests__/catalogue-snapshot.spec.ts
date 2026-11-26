@@ -182,26 +182,19 @@ medusaIntegrationTestRunner({
         expect(await snapshotRows()).toBe(before);
       });
 
-      it('builds only an empty snapshot from the deploy script', async () => {
+      it('rebuilds a stale snapshot from the deploy script', async () => {
         await publish.buildCatalogueSnapshot();
+        const full = await snapshotRows();
         await pg.raw(
           'delete from listed_series_part where category_id is null',
         );
-        const partial = await snapshotRows();
 
         await buildCatalogueSnapshotScript({
           container: getContainer(),
           args: [],
         });
-        const kept = await snapshotRows();
-        await pg.raw('delete from listed_series_part');
-        await buildCatalogueSnapshotScript({
-          container: getContainer(),
-          args: [],
-        });
 
-        expect(kept).toBe(partial);
-        expect(await snapshotRows()).toBeGreaterThan(partial);
+        expect(await snapshotRows()).toBe(full);
         await expectParity();
       });
 

@@ -1689,8 +1689,12 @@ moves forward again.
    (`medusa exec ./src/scripts/check-schema.js`, the assertions of
    `src/lib/schema-check.ts`; it catches a database that ran an older version of a
    migration file or was restored from an old dump, and names each difference),
+   then rebuilds the catalogue snapshot (`listed_series_part`) on every deploy
+   (`medusa exec ./src/scripts/build-catalogue-snapshot.js`; the build is idempotent
+   and takes the snapshot's advisory lock, so a deploy after a rollback never serves
+   the snapshot an older image left stale),
    then the production seed in another (`medusa exec ./src/scripts/seed-production.js`,
-   see below); only after all three succeed does `MEDUSA_TAG` in `.env` change, with the
+   see below); only after all four succeed does `MEDUSA_TAG` in `.env` change, with the
    old one going to `.previous-tag`; `up -d --wait`; `caddy reload`; then checks
    `https://api.carlab.rs/health/ready`. It prints stage names and the tag, never a value
    from `.env` (`infra/auto-service-shop/test/scripts.test.sh` plants a canary secret and

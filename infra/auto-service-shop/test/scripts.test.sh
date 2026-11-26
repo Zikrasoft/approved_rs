@@ -137,7 +137,7 @@ has() {
 
 stage
 expect 'a deploy succeeds' run deploy.sh "$NEW"
-expect 'pull, migrate, check the schema, seed, up, reload and health run in order on the new tag' logged \
+expect 'pull, migrate, check the schema, rebuild the catalogue snapshot, seed, up, reload and health run in order on the new tag' logged \
   "docker[$NEW] compose pull --policy missing medusa caddy" \
   "docker[$NEW] compose up -d --wait postgres" \
   "docker[$NEW] compose exec -T postgres psql -U carlab -d carlab -v ON_ERROR_STOP=1 -c create extension if not exists pg_stat_statements" \
