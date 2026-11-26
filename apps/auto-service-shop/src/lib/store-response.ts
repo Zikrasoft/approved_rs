@@ -91,11 +91,22 @@ const toVehicleResponse = (
   });
 };
 
+export const listVehicleResponsesWithSeries = async (
+  catalog: CatalogModuleService,
+  filters: Parameters<CatalogModuleService['listVehicles']>[0] = {},
+): Promise<{ vehicle: Vehicle; series_id: string }[]> =>
+  (await vehicleRows(catalog, filters)).map((row) => ({
+    vehicle: toVehicleResponse(row),
+    series_id: row.model.chassis.series_id,
+  }));
+
 export const listVehicleResponses = async (
   catalog: CatalogModuleService,
   filters: Parameters<CatalogModuleService['listVehicles']>[0] = {},
 ): Promise<Vehicle[]> =>
-  (await vehicleRows(catalog, filters)).map(toVehicleResponse);
+  (await listVehicleResponsesWithSeries(catalog, filters)).map(
+    ({ vehicle }) => vehicle,
+  );
 
 export const modelBySlug = async (
   catalog: CatalogModuleService,
