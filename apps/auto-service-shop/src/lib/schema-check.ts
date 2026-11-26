@@ -144,12 +144,16 @@ export const HAND_WRITTEN_INDEXES: Record<string, RegExp> = {
   IDX_chassis_series_id_code_key_unique: ON_CODE_KEY,
   IDX_slug_redirect_kind_scope_id_from_slug_unique:
     /\(kind, scope_id, from_slug\) NULLS NOT DISTINCT WHERE \(\(kind <> 'part'::text\) AND \(deleted_at IS NULL\)\)$/,
-  IDX_fitment_part_vehicle_all: OVER_TOMBSTONES_TOO,
+  IDX_fitment_part_all: OVER_TOMBSTONES_TOO,
   IDX_fitment_vehicle_all: OVER_TOMBSTONES_TOO,
   IDX_vehicle_model_name_trigram: TRIGRAM,
   IDX_part_name_trigram: TRIGRAM,
   IDX_part_identifier_normalized_value_trigram: TRIGRAM,
   IDX_part_description_hash: /USING hash \(description\)$/,
+  IDX_fitment_note_note_unique:
+    /^CREATE UNIQUE INDEX .* USING btree \(md5\(note\)\)$/,
+  IDX_fitment_unlinked_note:
+    /\(id\) WHERE \(\(note IS NOT NULL\) AND \(note_id IS NULL\)\)$/,
   IDX_order_created_at: /\(created_at\) WHERE \(deleted_at IS NULL\)$/,
   IDX_order_updated_at: /\(updated_at\) WHERE \(deleted_at IS NULL\)$/,
   IDX_vin_lookup_scrub_due: /\(updated_at\) WHERE \(vin IS NOT NULL\)$/,
@@ -164,6 +168,11 @@ const oneOf = (column: string, values: readonly string[]) =>
     `^CHECK \\(\\(${column} = ANY \\(ARRAY\\[${values.map((value) => `'${value}'::text`).join(', ')}\\]\\)\\)\\)$`,
   );
 
+export const HAND_WRITTEN_TRIGGERS: Record<string, RegExp> = {
+  fitment_note_unlink:
+    /^CREATE TRIGGER fitment_note_unlink BEFORE UPDATE OF note ON public\.fitment FOR EACH ROW EXECUTE FUNCTION fitment_note_unlink\(\)$/,
+};
+
 export const HAND_WRITTEN_CONSTRAINTS: Record<string, RegExp> = {
   crawl_page_status: oneOf('status', PAGE_STATUSES),
   crawl_page_error: oneOf('error', FAILURE_REASONS),
@@ -171,6 +180,8 @@ export const HAND_WRITTEN_CONSTRAINTS: Record<string, RegExp> = {
     /^CHECK \(\(markup_percentage >= \(0\)::numeric\)\)$/,
   part_category_id_foreign: / ON DELETE RESTRICT$/,
   vehicle_engine_id_foreign: / ON DELETE RESTRICT$/,
+  fitment_note_id_foreign:
+    /^FOREIGN KEY \(note_id\) REFERENCES fitment_note\(id\) ON UPDATE CASCADE ON DELETE RESTRICT( NOT VALID)?$/,
   rejected_number_brand_id_foreign:
     /^FOREIGN KEY \(brand_id\) REFERENCES brand\(id\) ON UPDATE CASCADE ON DELETE RESTRICT$/,
 };
@@ -297,6 +308,12 @@ export async function schemaProblems(pg: Knex): Promise<string[]> {
        from pg_constraint c join pg_namespace n on n.oid = c.connamespace and n.nspname = 'public'
        where c.conname = any(?::text[])`,
       HAND_WRITTEN_CONSTRAINTS,
+    )),
+    ...(await definitionProblems(
+      pg,
+      `select tgname as name, pg_get_triggerdef(oid) as definition from pg_trigger
+       where not tgisinternal and tgname = any(?::text[])`,
+      HAND_WRITTEN_TRIGGERS,
     )),
   ];
 }

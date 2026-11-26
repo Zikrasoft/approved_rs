@@ -156,16 +156,16 @@ export const TRANSLATABLE_ENTITIES = new Map<string, TranslatableEntity>([
     },
   ],
   [
-    'fitment',
+    'fitment_note',
     {
       subject: 'notes on where a car part fits, such as "Только с M-пакетом"',
       fields: ['note'],
       list: (catalog, filters) =>
-        catalog.listFitments(
-          { ...filters, note: { $ne: null } },
-          { select: [...TRANSLATION_COLUMNS, 'note'], ...UNPAGED },
-        ),
-      update: (catalog, rows) => catalog.updateFitments(rows),
+        catalog.listFitmentNotes(filters, {
+          select: [...TRANSLATION_COLUMNS, 'note'],
+          ...UNPAGED,
+        }),
+      update: (catalog, rows) => catalog.updateFitmentNotes(rows),
     },
   ],
 ]);
@@ -348,6 +348,7 @@ export async function translateCatalogue(
   apiKey: string | undefined,
 ): Promise<string[]> {
   const translatedParts = new Set<string>();
+  await catalog.linkFitmentNotes();
   for (const [name, entity] of TRANSLATABLE_ENTITIES) {
     const hashOf = sourceHasher(entity);
     const sources = await catalog.translationSources(name, entity.fields);

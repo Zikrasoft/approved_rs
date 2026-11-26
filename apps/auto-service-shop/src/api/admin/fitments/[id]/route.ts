@@ -26,15 +26,15 @@ export async function POST(
     ...(await catalog.retrieveFitment(id)),
     ...changes,
   });
+  const [noted] = await catalog.notedFitments([changes]);
   await catalog.updateFitments({
-    ...changes,
+    ...noted,
     id,
     ...updatedBy(req),
   });
 
-  res.json({
-    fitment: adminFitmentSchema.parse(await catalog.retrieveFitment(id)),
-  });
+  const [fitment] = await catalog.listNotedFitments({ id });
+  res.json({ fitment: adminFitmentSchema.parse(fitment) });
 }
 
 export async function DELETE(

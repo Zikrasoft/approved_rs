@@ -7,13 +7,17 @@ export type StoreRowFilter = {
 export type FitmentFilter = { part_id?: string[]; vehicle_id?: string[] };
 
 export const FITMENT_ROWS = `
-  select id, part_id, vehicle_id, quantity, axle, side, production_from,
-    production_to, gearbox, steering, note, translations
-  from fitment
-  where deleted_at is null
-    and (:parts::text[] is null or part_id = any(:parts::text[]))
-    and (:vehicles::text[] is null or vehicle_id = any(:vehicles::text[]))
-  order by id`;
+  select f.id, f.part_id, f.vehicle_id, f.quantity, f.axle, f.side,
+    f.production_from, f.production_to, f.gearbox, f.steering,
+    case when n.id is null then f.note else n.note end as note,
+    case when n.id is null then f.translations else n.translations end
+      as translations
+  from fitment f
+  left join fitment_note n on n.id = f.note_id and n.deleted_at is null
+  where f.deleted_at is null
+    and (:parts::text[] is null or f.part_id = any(:parts::text[]))
+    and (:vehicles::text[] is null or f.vehicle_id = any(:vehicles::text[]))
+  order by f.id`;
 
 export const VEHICLE_ROWS = `
   select v.id, v.slug, v.power_kw, v.drive, v.market, v.year_from, v.year_to,

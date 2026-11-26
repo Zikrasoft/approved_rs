@@ -258,6 +258,14 @@ medusaIntegrationTestRunner({
         expect(mannVehicles).toContain(staff.vehicle.id);
         expect(mannVehicles).toContain(febiFitment.vehicle_id);
         expect(febiFitment.note).toBe('za vozila sa: sportskim paketom');
+        expect(
+          await catalog.listFitmentNotes(
+            { id: febiFitment.note_id! },
+            { select: ['note'] },
+          ),
+        ).toEqual([
+          expect.objectContaining({ note: 'za vozila sa: sportskim paketom' }),
+        ]);
         expect(await catalog.listEngines({ family: 'N52' })).toHaveLength(1);
       });
 

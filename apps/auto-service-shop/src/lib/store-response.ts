@@ -153,6 +153,7 @@ export const fitmentRowSchema = fitmentSchema.extend({
 });
 
 export const adminFitmentSchema = fitmentRowSchema.extend({
+  note_id: z.string().nullable(),
   source: z.string(),
   created_by: z.string().nullable(),
   updated_by: z.string().nullable(),

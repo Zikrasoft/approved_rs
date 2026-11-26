@@ -24,7 +24,7 @@ export async function GET(
 
   const catalog: CatalogModuleService = req.scope.resolve(CATALOG_MODULE);
 
-  const fitments = await catalog.listFitments(filters, { take: null });
+  const fitments = await catalog.listNotedFitments(filters, { take: null });
 
   res.json({
     fitments: await withEditors(
@@ -68,9 +68,6 @@ export async function POST(
     );
   }
 
-  res.json({
-    fitment: adminFitmentSchema.parse(
-      await catalog.retrieveFitment(fitment.id),
-    ),
-  });
+  const [noted] = await catalog.listNotedFitments({ id: fitment.id });
+  res.json({ fitment: adminFitmentSchema.parse(noted) });
 }
