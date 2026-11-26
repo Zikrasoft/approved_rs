@@ -1,4 +1,5 @@
 import { causeOf, logEvent } from './log-event';
+import { outsideStoreRead } from './store-read';
 
 const MEMO_RETRY_MS = 30_000;
 
@@ -32,7 +33,7 @@ function refresh<T>(
   ttlMs: number,
 ): void {
   entry.refreshing = true;
-  compute()
+  outsideStoreRead(compute)
     .then(
       (value) => {
         entry.value = Promise.resolve(value);
@@ -65,7 +66,7 @@ export function memoized<T>(
     }
     return known.value as Promise<T>;
   }
-  const value = compute();
+  const value = outsideStoreRead(compute);
   const entry: Entry = {
     value,
     expires: Date.now() + ttlMs,

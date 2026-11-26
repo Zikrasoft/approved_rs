@@ -6,6 +6,11 @@ import type { MedusaContainer } from '@medusajs/framework/types';
 import { z } from 'zod';
 
 import { answerCataloguePage } from '../catalogue-answer';
+import {
+  clearCatalogueMemo,
+  markCatalogueMemoStale,
+  memoized,
+} from '../catalogue-memo';
 
 import { STORE_READ_TIMEOUT, storeRead } from '../store-read';
 
@@ -43,6 +48,23 @@ describe('A store read', () => {
     await db.transaction(async (trx) => {
       expect(await timeout(trx)).toBe('0');
     });
+  });
+
+  it('leaves a shared catalogue memo it starts without a limit', async () => {
+    clearCatalogueMemo();
+
+    const first = await storeRead(scope, () =>
+      memoized('timeout', () => timeout(db)),
+    );
+    markCatalogueMemoStale('timeout');
+    let refreshed: Promise<string> = Promise.resolve('');
+    await storeRead(scope, () =>
+      memoized('timeout', () => (refreshed = timeout(db))),
+    );
+
+    expect(first).toBe('0');
+    expect(await refreshed).toBe('0');
+    clearCatalogueMemo();
   });
 
   it('wraps every catalogue page load', async () => {

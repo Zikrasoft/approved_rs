@@ -50,3 +50,5 @@ export const storeRead = <T>(
   );
   return reading.run(true, read);
 };
+
+export const outsideStoreRead = <T>(run: () => T): T => reading.exit(run);
