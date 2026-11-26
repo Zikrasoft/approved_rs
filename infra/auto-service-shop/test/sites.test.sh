@@ -34,6 +34,10 @@ called() {
   tr '\n' ' ' <"$LOG" | grep -q "$1"
 }
 
+called_last() {
+  tail -n 1 "$LOG" | grep -q "$1"
+}
+
 failures=0
 expect() {
   name=$1
@@ -229,7 +233,7 @@ ship "$B"
 PURGE_EXIT=7
 export PURGE_EXIT
 refuse 'a failed purge fails the deploy' run deploy-site.sh "$APP" "$B"
-expect 'a failed purge warms nothing' sh -c 'tail -n 1 "$1" | grep -q souin/flush' _ "$LOG"
+expect 'a failed purge warms nothing' called_last souin/flush
 expect 'a failed purge says so' grep -q 'page cache' "$work/stderr"
 expect 'a failed purge leaves the healthy release live' current "$B"
 unset PURGE_EXIT
