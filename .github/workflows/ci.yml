@@ -9,6 +9,10 @@ on:
         description: Deploy every app, whatever the tags say (tests still run only for what changed)
         type: boolean
         default: false
+      skip_check:
+        description: Skip the check job (lint and tests) to ship a hotfix faster
+        type: boolean
+        default: false
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -21,6 +25,7 @@ env:
 
 jobs:
   check:
+    if: ${{ !inputs.skip_check }}
     runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
     permissions:
       contents: read
@@ -132,7 +137,8 @@ jobs:
   translate:
     needs: check
     if: >-
-      needs.check.result == 'success' &&
+      always() &&
+      (needs.check.result == 'success' || (inputs.skip_check && needs.check.result == 'skipped')) &&
       github.actor != 'github-actions[bot]'
     runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
     permissions:
