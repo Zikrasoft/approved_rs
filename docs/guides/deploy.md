@@ -1937,10 +1937,19 @@ still see them.
 
 `fitment` keeps two indexes the planner never needs: the generator's partial
 `IDX_fitment_part_id` and `IDX_fitment_vehicle_id`, covered by the hand-written
-`IDX_fitment_part_vehicle_all` and `IDX_fitment_vehicle_all`. Dropping them would
+`IDX_fitment_part_all` and `IDX_fitment_vehicle_all` (full, so tombstone-aware
+lookups and the Part and Vehicle delete cascades use them). Dropping them would
 make the drift check regenerate them, so their write cost is accepted. Add no
-further partial index on this table; the one deliberate addition is
-`IDX_fitment_source`, which deleting a source's rows scans.
+further partial index on this table; the deliberate additions are
+`IDX_fitment_source`, which deleting a source's rows scans, and the temporary
+`IDX_fitment_unlinked_note`, empty once every note is linked.
+
+A Fitment's note lives once per text in `fitment_note` (its translations with
+it), and `fitment.note_id` points at it. The `link-fitment-notes` migration
+script moved the notes there, and every Publish's translate step links again
+whatever an older image wrote in the meantime. `fitment.note` is still written
+for a rollback and goes, with `translations` and `translated_from`, in a later
+deploy.
 
 ### Monitoring
 

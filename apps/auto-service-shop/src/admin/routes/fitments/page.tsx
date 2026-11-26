@@ -86,6 +86,7 @@ const fitmentSchema = editedBySchema.extend({
   steering: z.string().nullable(),
   gearbox: z.string().nullable(),
   note: z.string().nullable(),
+  note_id: z.string().nullable(),
   source: z.string(),
 });
 
@@ -1207,10 +1208,10 @@ const FitmentsPage = () => {
                       </Table.Cell>
                       <Table.Cell>
                         <div className="flex flex-wrap gap-2 py-2">
-                          {fitment.note && (
+                          {fitment.note && fitment.note_id && (
                             <TranslationsDrawer
-                              entity="fitment"
-                              id={fitment.id}
+                              entity="fitment_note"
+                              id={fitment.note_id}
                               source={{ note: fitment.note }}
                             />
                           )}

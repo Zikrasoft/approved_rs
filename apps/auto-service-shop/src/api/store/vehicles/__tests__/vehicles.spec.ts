@@ -222,6 +222,7 @@ medusaIntegrationTestRunner({
             note: 'Только седан',
             translations: { sr: { note: 'Samo limuzina' } },
           });
+          await catalog.linkFitmentNotes();
 
           const response = await api.get(
             '/store/fitments?limit=1000',

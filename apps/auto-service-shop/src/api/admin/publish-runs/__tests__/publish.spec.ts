@@ -61,12 +61,14 @@ type FakeNetwork = {
   openAiRequests: number;
   githubRequests: number;
   unsafeAnswer: boolean;
+  sourceTexts: string[];
 };
 
 const network: FakeNetwork = {
   openAiRequests: 0,
   githubRequests: 0,
   unsafeAnswer: false,
+  sourceTexts: [],
 };
 
 const searchIndex = {
@@ -109,6 +111,7 @@ const openAiAnswer = (body: {
     string,
     string
   >;
+  network.sourceTexts.push(...Object.values(russian));
   return Object.fromEntries(
     Object.entries(russian).map(([key, text]) => [
       key,
@@ -272,6 +275,7 @@ medusaIntegrationTestRunner({
         network.openAiRequests = 0;
         network.githubRequests = 0;
         network.unsafeAnswer = false;
+        network.sourceTexts = [];
         searchIndex.changes = [];
         searchIndex.swaps = [];
         searchIndex.sawAtSwap = [];
@@ -484,32 +488,90 @@ medusaIntegrationTestRunner({
         ).toEqual({ sr: { label: 'Sintetika' }, en: { label: 'Synthetic' } });
       });
 
-      it('translates a Fitment note and leaves Fitments without one alone', async () => {
+      it('translates each distinct Fitment note once, linking the notes an older image wrote', async () => {
         const vehicle = (
           await createVehicleFixture(catalog, { typeCode: 'PUBLISH-NOTE' })
         ).vehicle;
         const part = await catalog.createParts({ name: 'Масляный фильтр' });
-        const [noted, plain] = await catalog.createFitments([
-          {
-            part_id: part.id,
-            vehicle_id: vehicle.id,
-            axle: 'front',
-            note: 'Только с M-пакетом',
-          },
-          { part_id: part.id, vehicle_id: vehicle.id, axle: 'rear' },
+        const fitment = (row: Record<string, unknown>) => ({
+          part_id: part.id,
+          vehicle_id: vehicle.id,
+          ...row,
+        });
+        const [front, rear, plain] = await catalog.createFitments(
+          await catalog.notedFitments([
+            fitment({ axle: 'front', note: 'Только с M-пакетом' }),
+            fitment({ axle: 'rear', note: 'Только с M-пакетом' }),
+            fitment({ side: 'left' }),
+          ]),
+        );
+        const [older] = await catalog.createFitments([
+          fitment({ side: 'right', note: 'Только с M-пакетом' }),
         ]);
 
         await publish();
 
+        const linked = await catalog.listFitments(
+          { id: [front.id, rear.id, older.id, plain.id] },
+          { select: ['id', 'note_id', 'translations'] },
+        );
+        const noteOf = new Map(linked.map((row) => [row.id, row.note_id]));
+        expect(front.note_id).toEqual(expect.any(String));
+        expect(noteOf.get(rear.id)).toBe(front.note_id);
+        expect(noteOf.get(older.id)).toBe(front.note_id);
+        expect(noteOf.get(plain.id)).toBeNull();
+        expect(linked.map(({ translations }) => translations)).toEqual([
+          null,
+          null,
+          null,
+          null,
+        ]);
         expect(
-          (await get(`/admin/translations/fitment/${noted.id}`)).data
+          (await get(`/admin/translations/fitment_note/${front.note_id}`)).data
             .translations,
         ).toEqual({
           sr: { note: 'Samo sa M paketom' },
           en: { note: 'M Sport package only' },
         });
-        const [untouched] = await catalog.listFitments({ id: plain.id });
-        expect(untouched.translated_from).toBeNull();
+        expect(
+          network.sourceTexts.filter((text) => text === 'Только с M-пакетом'),
+        ).toHaveLength(2);
+      });
+
+      it("keeps a person's translation of a Fitment note for every Fitment carrying it", async () => {
+        const vehicle = (
+          await createVehicleFixture(catalog, { typeCode: 'PUBLISH-EDIT' })
+        ).vehicle;
+        const part = await catalog.createParts({ name: 'Масляный фильтр' });
+        const [front] = await catalog.createFitments(
+          await catalog.notedFitments(
+            (['front', 'rear'] as const).map((axle) => ({
+              part_id: part.id,
+              vehicle_id: vehicle.id,
+              axle,
+              note: 'Только с M-пакетом',
+            })),
+          ),
+        );
+
+        const edited = await post(
+          `/admin/translations/fitment_note/${front.note_id}`,
+          { locale: 'en', fields: { note: 'Only with the M package' } },
+        );
+        expect(edited.status).toBe(200);
+        await publish();
+
+        const fitments = await catalog.listNotedFitments({ part_id: part.id });
+        expect(fitments.map(({ translations }) => translations)).toEqual([
+          {
+            sr: { note: 'Samo sa M paketom' },
+            en: { note: 'Only with the M package' },
+          },
+          {
+            sr: { note: 'Samo sa M paketom' },
+            en: { note: 'Only with the M package' },
+          },
+        ]);
       });
 
       it('stops before publishing when a translation fails the safety checks', async () => {

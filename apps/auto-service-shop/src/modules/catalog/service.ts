@@ -30,6 +30,7 @@ import CategoryFieldOption from './models/category-field-option';
 import Chassis from './models/chassis';
 import Engine from './models/engine';
 import Fitment from './models/fitment';
+import FitmentNote from './models/fitment-note';
 import Make from './models/make';
 import MakeSpelling from './models/make-spelling';
 import Part from './models/part';
@@ -44,6 +45,7 @@ import Vehicle from './models/vehicle';
 import VehicleIdentifier from './models/vehicle-identifier';
 import VehicleModel from './models/vehicle-model';
 import { adminError, alreadyExists } from '../_shared/admin-error';
+import { linkFitmentNotes, noteIdsOf } from './fitment-notes';
 import { runBoundSql } from '../_shared/bound-sql';
 import { keysetPages } from '../_shared/keyset-pages';
 import { modelSlugOf, slugOf, vehicleSlugOf } from '../_shared/slug';
@@ -361,6 +363,7 @@ const CatalogModuleBase = MedusaService({
   Vehicle,
   VehicleIdentifier,
   Fitment,
+  FitmentNote,
   Requirement,
   RejectedNumber,
   SlugRedirect,
@@ -1099,11 +1102,14 @@ class CatalogModuleService extends CatalogModuleBase {
     );
     const created = missing.length
       ? await this.createFitments(
-          missing.map(({ id }) => ({
-            ...conditions,
-            part_id: partId,
-            vehicle_id: id,
-          })),
+          await this.notedFitments(
+            missing.map(({ id }) => ({
+              ...conditions,
+              part_id: partId,
+              vehicle_id: id,
+            })),
+            sharedContext,
+          ),
           sharedContext,
         )
       : [];
@@ -1459,6 +1465,63 @@ class CatalogModuleService extends CatalogModuleBase {
       );
     }
     return this.createRequirements(requirement, sharedContext);
+  }
+
+  @InjectManager()
+  async notedFitments<Row extends object>(
+    rows: (Row & { note?: string | null })[],
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<(Row & { note_id?: string | null })[]> {
+    const ids = await noteIdsOf(
+      (
+        (sharedContext.transactionManager ??
+          sharedContext.manager) as SqlEntityManager
+      ).getKnex(),
+      rows.flatMap(({ note }) => (note ? [note] : [])),
+    );
+    return rows.map((row) =>
+      row.note === undefined
+        ? row
+        : { ...row, note_id: row.note ? ids.get(row.note)! : null },
+    );
+  }
+
+  async listNotedFitments(
+    ...[filters, config]: Parameters<CatalogModuleBase['listFitments']>
+  ) {
+    const rows = await this.listFitments(filters, config);
+    const noteIds = [
+      ...new Set(rows.flatMap(({ note_id }) => (note_id ? [note_id] : []))),
+    ];
+    const notes = new Map(
+      (noteIds.length
+        ? await this.listFitmentNotes(
+            { id: noteIds },
+            { select: ['id', 'note', 'translations'], take: null },
+          )
+        : []
+      ).map((note) => [note.id, note]),
+    );
+    return rows.map((row) => {
+      const note = row.note_id ? notes.get(row.note_id) : undefined;
+      return {
+        ...row,
+        note: note?.note ?? null,
+        translations: note?.translations ?? null,
+      };
+    });
+  }
+
+  @InjectManager()
+  async linkFitmentNotes(
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<number> {
+    return linkFitmentNotes(
+      (
+        (sharedContext.transactionManager ??
+          sharedContext.manager) as SqlEntityManager
+      ).getKnex(),
+    );
   }
 
   @InjectManager()

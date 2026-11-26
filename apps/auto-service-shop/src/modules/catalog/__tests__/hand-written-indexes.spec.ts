@@ -43,7 +43,7 @@ medusaIntegrationTestRunner({
         [
           'a tombstone-aware Fitment',
           `select id from fitment where part_id = 'p' and vehicle_id in ('v')`,
-          /Index.*IDX_fitment_(part_vehicle|vehicle)_all/,
+          /Index.*IDX_fitment_(part|vehicle)_all/,
         ],
         [
           'a decoded Vehicle identifier',
@@ -138,6 +138,11 @@ medusaIntegrationTestRunner({
           'crawl_page.body: column not in the migrations',
         ],
         [
+          'a missing Fitment note table',
+          ['drop table fitment_note cascade'],
+          'fitment_note: table is missing',
+        ],
+        [
           'a missing table',
           ['drop table crawl_run'],
           'crawl_run: table is missing',
@@ -190,6 +195,24 @@ medusaIntegrationTestRunner({
           expect.stringMatching(
             /^part_category_id_foreign is defined as .*SET NULL/,
           ),
+        ],
+        [
+          'a Fitment note text key left unique on the full text',
+          [
+            'drop index "IDX_fitment_note_note_unique"',
+            'create unique index "IDX_fitment_note_note_unique" on fitment_note (note)',
+          ],
+          expect.stringMatching(/^IDX_fitment_note_note_unique is defined as/),
+        ],
+        [
+          'a missing unlinked-note index',
+          ['drop index "IDX_fitment_unlinked_note"'],
+          'IDX_fitment_unlinked_note is missing',
+        ],
+        [
+          'a Fitment note link without its foreign key',
+          ['alter table fitment drop constraint fitment_note_id_foreign'],
+          'fitment_note_id_foreign is missing',
         ],
         [
           'an order index the migration script did not build',
