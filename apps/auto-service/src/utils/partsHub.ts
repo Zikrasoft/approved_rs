@@ -1,6 +1,6 @@
 import {
   translated,
-  type CataloguePageList,
+  type CataloguePartsHub,
   type Category,
 } from '@podbor/catalog-contract';
 import { paragraphs } from '@podbor/site-kit';
@@ -31,7 +31,7 @@ const perLocale = <T>(read: (locale: Locale) => T) =>
 
 export const partsHubOf = (
   categories: Category[],
-  list: CataloguePageList,
+  list: CataloguePartsHub,
 ): PartsHub => {
   const own = new Map(list.categories.map((entry) => [entry.slug, entry]));
   const demand = ({ slug }: Category) => own.get(slug)?.demand ?? 0;
@@ -58,18 +58,18 @@ export const EMPTY_PARTS_HUB: PartsHub = { makes: [], categories: [] };
 
 const partsHubFrom = async (catalogue: Catalogue): Promise<PartsHub> =>
   partsHubOf(
-    ...(await Promise.all([catalogue.categories(), catalogue.pageList()])),
+    ...(await Promise.all([catalogue.categories(), catalogue.partsHub()])),
   );
 
 export async function loadPartsHub(
   { request, response }: Pick<AstroGlobal, 'request' | 'response'>,
   catalogue: Catalogue | null,
-  cacheable: boolean,
+  cacheable: boolean | PromiseLike<boolean>,
 ): Promise<PartsHub> {
   if (!catalogue) return EMPTY_PARTS_HUB;
   try {
     const hub = await partsHubFrom(catalogue);
-    if (cacheable) {
+    if (await cacheable) {
       response.headers.set(
         'cache-control',
         cacheControlOf(request, PUBLIC_PAGE_CACHE),

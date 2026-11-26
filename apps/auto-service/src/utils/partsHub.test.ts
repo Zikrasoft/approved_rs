@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import type { CataloguePageList, Category } from '@podbor/catalog-contract';
+import type { CataloguePartsHub, Category } from '@podbor/catalog-contract';
 import type { Catalogue } from './cataloguePage';
 import { EMPTY_PARTS_HUB, loadPartsHub, partsHubOf } from './partsHub';
 
@@ -13,15 +13,9 @@ const category = (slug: string): Category =>
   }) as unknown as Category;
 
 const listOf = (
-  makes: CataloguePageList['makes'] = [],
-  categories: CataloguePageList['categories'] = [],
-): CataloguePageList => ({
-  parts: [],
-  makes,
-  series: [],
-  categories,
-  catalogue_makes: null,
-});
+  makes: CataloguePartsHub['makes'] = [],
+  categories: CataloguePartsHub['categories'] = [],
+): CataloguePartsHub => ({ makes, categories });
 
 const make = (slug: string, parts: number | null, hub = true) => ({
   slug,
@@ -112,10 +106,10 @@ describe('loadPartsHub', () => {
     },
   });
 
-  const catalogueOf = (pageList: () => Promise<CataloguePageList>) =>
+  const catalogueOf = (partsHub: () => Promise<CataloguePartsHub>) =>
     ({
       categories: async () => [category('brakes')],
-      pageList,
+      partsHub,
     }) as unknown as Catalogue;
 
   const loaded = catalogueOf(async () =>
@@ -129,6 +123,16 @@ describe('loadPartsHub', () => {
 
     expect(hub.makes).toEqual([{ slug: 'bmw', name: 'BMW' }]);
     expect(hub.categories.map(({ slug }) => slug)).toEqual(['brakes']);
+    expect(astro.response.headers.get('cache-control')).toBe(
+      'public, s-maxage=86400',
+    );
+  });
+
+  it('waits for a browse still running before it caches', async () => {
+    const astro = page();
+
+    await loadPartsHub(astro, loaded, Promise.resolve(true));
+
     expect(astro.response.headers.get('cache-control')).toBe(
       'public, s-maxage=86400',
     );

@@ -7,6 +7,9 @@ import {
   watchEvents,
 } from '../../../../../integration-tests/loggedEvents';
 import { parseEnv } from '../../../../lib/env';
+import { clearCatalogueMemo } from '../../../../lib/catalogue-memo';
+import { DEMAND_MODULE } from '../../../../modules/demand';
+import type DemandModuleService from '../../../../modules/demand/service';
 import { PUBLISH_MODULE } from '../../../../modules/publish';
 import type PublishModuleService from '../../../../modules/publish/service';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
@@ -308,6 +311,21 @@ medusaIntegrationTestRunner({
           'HU 816 x': [`${FILE_URL}/mann-160.webp`, false],
           '11 42 8575211': [`${FILE_URL}/supplier-images/bmw`, false],
         });
+      });
+
+      it('reads Demand through the memo', async () => {
+        clearCatalogueMemo();
+        const counts = jest.spyOn(
+          getContainer().resolve<DemandModuleService>(DEMAND_MODULE),
+          'countsSince',
+        );
+
+        await search({ q: 'HU816x', locale: 'ru' });
+        await search({ q: 'HU816x', locale: 'ru' });
+
+        expect(counts).toHaveBeenCalledTimes(1);
+        counts.mockRestore();
+        clearCatalogueMemo();
       });
 
       it('ranks a match in the page locale first', async () => {

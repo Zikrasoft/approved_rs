@@ -2,6 +2,7 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 
+import { clearCatalogueMemo } from '../../../../lib/catalogue-memo';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 
@@ -109,6 +110,30 @@ medusaIntegrationTestRunner({
             },
           ],
         });
+      });
+
+      it('serves a second request from the memo', async () => {
+        clearCatalogueMemo();
+        const catalog: CatalogModuleService =
+          getContainer().resolve(CATALOG_MODULE);
+        const apiKeys: IApiKeyModuleService = getContainer().resolve(
+          Modules.API_KEY,
+        );
+        const key = await apiKeys.createApiKeys({
+          title: 'categories-memo-tests',
+          type: 'publishable',
+          created_by: 'test',
+        });
+        const read = jest.spyOn(catalog, 'listCategories');
+        const headers = { 'x-publishable-api-key': key.token };
+
+        const first = await api.get('/store/categories', { headers });
+        const second = await api.get('/store/categories', { headers });
+
+        expect(second.data).toEqual(first.data);
+        expect(read).toHaveBeenCalledTimes(1);
+        read.mockRestore();
+        clearCatalogueMemo();
       });
     });
   },

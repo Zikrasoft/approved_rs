@@ -367,6 +367,8 @@ export const searchRanking = (
     query_by_weights: fields.map(([, weight]) => weight).join(','),
     num_typos: fields.map(([, , typos]) => typos).join(','),
     text_match_type: 'max_weight',
+    use_cache: true,
+    cache_ttl: 60,
     sort_by: [
       ...fittingFirst(fitting),
       ...(sort === 'popular' ? ['demand:desc'] : []),

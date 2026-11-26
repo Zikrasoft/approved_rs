@@ -30,19 +30,28 @@ if (['q', 'category', 'make', 'model'].some((name) => params.has(name))) {
   );
 }
 const catalogue = catalogueFor(Astro.request);
-const plan = await planSearch({
+const planning = planSearch({
   params,
   locale,
   catalogue,
   path: PathBuilder.parts(locale),
   anchor: PARTS_BROWSE_ANCHOR,
 });
+const [plan, hub] = await Promise.all([
+  planning,
+  loadPartsHub(
+    Astro,
+    catalogue,
+    planning.then(
+      (planned) => 'view' in planned && Boolean(planned.view.found),
+    ),
+  ),
+]);
 if ('redirect' in plan) {
   return Astro.redirect(plan.redirect, plan.status);
 }
 const { view } = plan;
 const { found, chosen, ranges, offset, sort } = view;
-const hub = await loadPartsHub(Astro, catalogue, Boolean(found));
 const pages = content(locale).pages;
 const site = content(locale).site;
 const copy = pages.partsInquiry;

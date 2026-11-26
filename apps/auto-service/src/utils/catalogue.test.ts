@@ -970,6 +970,7 @@ describe('catalogue.search', () => {
       category: 'oil-filters',
       locale: 'ru',
       facets: [],
+      specs: true,
     });
 
     expect(result?.results.map(({ specs }) => specs)).toEqual(['', '5 л']);
@@ -1019,6 +1020,7 @@ describe('catalogue.search', () => {
       q: 'HU816x',
       locale: 'ru',
       facets: [],
+      specs: true,
     });
 
     expect(result?.results[0].specs).toBe('5 л');
@@ -1026,6 +1028,64 @@ describe('catalogue.search', () => {
       expect.stringContaining('category=oil-filters'),
       expect.anything(),
     );
+  });
+
+  it('reads the parts hub from its own small endpoint', async () => {
+    const fetch = answer({
+      makes: [{ slug: 'bmw', name: 'BMW', hub: true }],
+      categories: [{ slug: 'brakes', name: 'Brakes' }],
+    });
+
+    const hub = await catalog(fetch).partsHub();
+
+    expect(fetch).toHaveBeenCalledWith(
+      'http://shop.test/store/catalogue-pages/hub',
+      expect.anything(),
+    );
+    expect(hub.makes[0]).toMatchObject({ slug: 'bmw', parts: null });
+  });
+
+  it('makes one request when the caller needs no specs', async () => {
+    const fetch = vi.fn((url: string) =>
+      url.endsWith('/store/categories')
+        ? respond({ categories: [oilFilters] })
+        : respond({
+            ...found,
+            results: [
+              {
+                ...found.results[0],
+                part: { ...found.results[0].part, attributes: { volume: 5 } },
+              },
+            ],
+          }),
+    );
+
+    const result = await catalog(fetch).search({
+      q: 'x',
+      locale: 'ru',
+      facets: [],
+    });
+
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(result?.results[0].specs).toBe('');
+  });
+
+  it('does not ask again without the sort after a timeout', async () => {
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const fetch = vi.fn(() =>
+      Promise.reject(new DOMException('timed out', 'TimeoutError')),
+    );
+
+    const result = await catalog(fetch).search({
+      category: 'oil-filters',
+      locale: 'ru',
+      facets: [],
+      sort: 'popular',
+    });
+
+    expect(result).toBeNull();
+    expect(fetch).toHaveBeenCalledTimes(1);
+    log.mockRestore();
   });
 
   it('asks for no Categories when no result carries attributes', async () => {

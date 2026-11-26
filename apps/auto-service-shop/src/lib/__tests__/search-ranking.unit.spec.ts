@@ -1,6 +1,13 @@
 import { searchRanking } from '../../search/part-identifier';
 
 describe('searchRanking', () => {
+  it('lets Typesense cache an identical search for a minute', () => {
+    expect(searchRanking('ru')).toMatchObject({
+      use_cache: true,
+      cache_ttl: 60,
+    });
+  });
+
   it('ranks by relevance, then standing, by default', () => {
     expect(searchRanking('ru').sort_by).toBe('_text_match:desc,standing:desc');
   });

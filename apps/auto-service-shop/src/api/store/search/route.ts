@@ -43,7 +43,7 @@ import {
   logEvent,
   type SearchIntent,
 } from '../../../lib/log-event';
-import { demandModule, loadPartDemand } from '../../../lib/part-demand';
+import { demandModule, memoPartDemand } from '../../../lib/part-demand';
 import { pricesShown } from '../../../lib/shop-gate';
 import { CATALOG_MODULE } from '../../../modules/catalog';
 import { SHOP_CURRENCY, SUPPLIER_MODULE } from '../../../modules/supplier';
@@ -505,7 +505,7 @@ export async function GET(
     shown && hits.length
       ? await suppliers.storeOffersFor(hits.map(({ id }) => id))
       : new Map<string, PartOffer[]>();
-  const demand = await loadPartDemand(req.scope);
+  const demand = await memoPartDemand(req.scope);
   const supplierData = await releasedSupplierData(
     suppliers,
     hits.map(({ id }) => id),
