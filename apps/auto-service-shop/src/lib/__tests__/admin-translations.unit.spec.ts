@@ -45,6 +45,7 @@ describe('admin translations', () => {
     ['en', en],
   ])('%s names every Publish step', (_, copy) => {
     expect(Object.keys(copy.publish.steps).sort()).toEqual([
+      'prewarm',
       'publish',
       'purge',
       'reindex',
