@@ -168,6 +168,11 @@ const oneOf = (column: string, values: readonly string[]) =>
     `^CHECK \\(\\(${column} = ANY \\(ARRAY\\[${values.map((value) => `'${value}'::text`).join(', ')}\\]\\)\\)\\)$`,
   );
 
+export const HAND_WRITTEN_TRIGGERS: Record<string, RegExp> = {
+  fitment_note_unlink:
+    /^CREATE TRIGGER fitment_note_unlink BEFORE UPDATE OF note ON public\.fitment FOR EACH ROW EXECUTE FUNCTION fitment_note_unlink\(\)$/,
+};
+
 export const HAND_WRITTEN_CONSTRAINTS: Record<string, RegExp> = {
   crawl_page_status: oneOf('status', PAGE_STATUSES),
   crawl_page_error: oneOf('error', FAILURE_REASONS),
@@ -303,6 +308,12 @@ export async function schemaProblems(pg: Knex): Promise<string[]> {
        from pg_constraint c join pg_namespace n on n.oid = c.connamespace and n.nspname = 'public'
        where c.conname = any(?::text[])`,
       HAND_WRITTEN_CONSTRAINTS,
+    )),
+    ...(await definitionProblems(
+      pg,
+      `select tgname as name, pg_get_triggerdef(oid) as definition from pg_trigger
+       where not tgisinternal and tgname = any(?::text[])`,
+      HAND_WRITTEN_TRIGGERS,
     )),
   ];
 }

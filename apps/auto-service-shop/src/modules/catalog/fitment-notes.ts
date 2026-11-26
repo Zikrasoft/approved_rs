@@ -1,5 +1,15 @@
 import type { Knex } from '@medusajs/framework/mikro-orm/knex';
 
+export type RawSql = (
+  sql: string,
+  bindings?: readonly Knex.RawBinding[],
+) => PromiseLike<{ rows: Record<string, unknown>[]; rowCount: number }>;
+
+export const rawOf =
+  (pg: Knex): RawSql =>
+  (sql, bindings = []) =>
+    pg.raw(sql, bindings);
+
 const NEW_NOTE_ID = `'fnote_' || replace(gen_random_uuid()::text, '-', '')`;
 
 const CREATE_NOTES = `
@@ -28,30 +38,60 @@ const LINK_NOTES = `
     order by id limit ?
   ) and md5(n.note) = md5(f.note) and n.note = f.note`;
 
+const FITMENT_INDEXES = [
+  [
+    'IDX_fitment_unlinked_note',
+    '("id") WHERE note IS NOT NULL AND note_id IS NULL',
+  ],
+  ['IDX_fitment_part_all', '("part_id")'],
+] as const;
+
+const VALID_INDEX = `
+  select i.indisvalid as valid from pg_index i
+  join pg_class c on c.oid = i.indexrelid
+  where c.relname = ?`;
+
 export const LINK_BATCH = 20_000;
 
 export async function noteIdsOf(
-  pg: Knex,
+  raw: RawSql,
   notes: string[],
 ): Promise<Map<string, string>> {
   const distinct = [...new Set(notes)];
   if (!distinct.length) return new Map();
-  await pg.raw(CREATE_NOTES, [distinct]);
-  const { rows } = await pg.raw(NOTES_NAMED, [distinct]);
-  return new Map(
-    rows.map((row: { id: string; note: string }) => [row.note, row.id]),
-  );
+  await raw(CREATE_NOTES, [distinct]);
+  const { rows } = await raw(NOTES_NAMED, [distinct]);
+  return new Map(rows.map((row) => [String(row.note), String(row.id)]));
 }
 
 export async function linkFitmentNotes(
-  pg: Knex,
+  raw: RawSql,
   batch = LINK_BATCH,
 ): Promise<number> {
-  await pg.raw(CREATE_UNLINKED_NOTES);
+  await raw(CREATE_UNLINKED_NOTES);
   let linked = 0;
   for (;;) {
-    const { rowCount } = await pg.raw(LINK_NOTES, [batch]);
+    const { rowCount } = await raw(LINK_NOTES, [batch]);
     linked += rowCount;
     if (rowCount < batch) return linked;
+  }
+}
+
+const indexValidity = async (raw: RawSql, name: string) =>
+  (await raw(VALID_INDEX, [name])).rows[0]?.valid as boolean | undefined;
+
+export async function buildFitmentIndexes(raw: RawSql): Promise<void> {
+  for (const [name, definition] of FITMENT_INDEXES) {
+    if ((await indexValidity(raw, name)) === false) {
+      await raw(`DROP INDEX CONCURRENTLY IF EXISTS "${name}"`);
+    }
+    await raw(
+      `CREATE INDEX CONCURRENTLY IF NOT EXISTS "${name}" ON "fitment" ${definition}`,
+    );
+  }
+  if (await indexValidity(raw, 'IDX_fitment_part_all')) {
+    await raw(
+      'DROP INDEX CONCURRENTLY IF EXISTS "IDX_fitment_part_vehicle_all"',
+    );
   }
 }

@@ -1945,9 +1945,15 @@ further partial index on this table; the deliberate additions are
 `IDX_fitment_unlinked_note`, empty once every note is linked.
 
 A Fitment's note lives once per text in `fitment_note` (its translations with
-it), and `fitment.note_id` points at it. The `link-fitment-notes` migration
-script moved the notes there, and every Publish's translate step links again
-whatever an older image wrote in the meantime. `fitment.note` is still written
+it), and `fitment.note_id` points at it. The migrations only add the table, the
+column, the `NOT VALID` foreign key and the `fitment_note_unlink` trigger, under
+`lock_timeout = '5s'`. The `link-fitment-notes` migration script then builds
+`IDX_fitment_unlinked_note` and `IDX_fitment_part_all` with `CREATE INDEX
+CONCURRENTLY` (rebuilding one an interrupted run left invalid), drops
+`IDX_fitment_part_vehicle_all` concurrently once its replacement is valid, and
+moves the notes. An older image does not know `note_id`: the trigger clears it
+when that image rewrites or clears a note, readers fall back to the row's own
+note while it is unlinked, and every Publish's translate step links again. `fitment.note` is still written
 for a rollback and goes, with `translations` and `translated_from`, in a later
 deploy.
 

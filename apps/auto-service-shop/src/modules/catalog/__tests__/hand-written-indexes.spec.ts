@@ -6,6 +6,7 @@ import path from 'node:path';
 
 import { schemaProblems, SNAPSHOT_TABLES } from '../../../lib/schema-check';
 import { codeKey, nameKey } from '../../_shared/keys';
+import linkFitmentNotesOnce from '../../../migration-scripts/link-fitment-notes';
 import orderTimeIndexes from '../../../migration-scripts/order-time-indexes';
 import checkSchema from '../../../scripts/check-schema';
 
@@ -83,6 +84,49 @@ medusaIntegrationTestRunner({
 
       beforeEach(async () => {
         await orderTimeIndexes({ container: getContainer() });
+        await linkFitmentNotesOnce({ container: getContainer() });
+      });
+
+      const fitmentIndexes = async () =>
+        Object.fromEntries(
+          (
+            await pg().raw(
+              `select c.relname, i.indisvalid from pg_index i
+               join pg_class c on c.oid = i.indexrelid
+               where i.indrelid = 'fitment'::regclass`,
+            )
+          ).rows.map(
+            ({
+              relname,
+              indisvalid,
+            }: {
+              relname: string;
+              indisvalid: boolean;
+            }) => [relname, indisvalid],
+          ),
+        );
+
+      it('builds the Fitment note indexes and drops the wide part and vehicle index', async () => {
+        expect(await fitmentIndexes()).toMatchObject({
+          IDX_fitment_part_all: true,
+          IDX_fitment_unlinked_note: true,
+        });
+        expect(await fitmentIndexes()).not.toHaveProperty(
+          'IDX_fitment_part_vehicle_all',
+        );
+      });
+
+      it('rebuilds an index an interrupted concurrent build left invalid', async () => {
+        await pg().raw(
+          `update pg_index set indisvalid = false
+           where indexrelid = '"IDX_fitment_part_all"'::regclass`,
+        );
+
+        await linkFitmentNotesOnce({ container: getContainer() });
+
+        expect(await fitmentIndexes()).toMatchObject({
+          IDX_fitment_part_all: true,
+        });
       });
 
       it('checks every module snapshot', () => {
@@ -208,6 +252,11 @@ medusaIntegrationTestRunner({
           'a missing unlinked-note index',
           ['drop index "IDX_fitment_unlinked_note"'],
           'IDX_fitment_unlinked_note is missing',
+        ],
+        [
+          'a Fitment note link without its unlinking trigger',
+          ['drop trigger fitment_note_unlink on fitment'],
+          'fitment_note_unlink is missing',
         ],
         [
           'a Fitment note link without its foreign key',

@@ -45,7 +45,7 @@ import Vehicle from './models/vehicle';
 import VehicleIdentifier from './models/vehicle-identifier';
 import VehicleModel from './models/vehicle-model';
 import { adminError, alreadyExists } from '../_shared/admin-error';
-import { linkFitmentNotes, noteIdsOf } from './fitment-notes';
+import { linkFitmentNotes, noteIdsOf, type RawSql } from './fitment-notes';
 import { runBoundSql } from '../_shared/bound-sql';
 import { keysetPages } from '../_shared/keyset-pages';
 import { modelSlugOf, slugOf, vehicleSlugOf } from '../_shared/slug';
@@ -345,6 +345,11 @@ const UNHELD_VEHICLES = `
       where i.vehicle_id = v.id and i.supplier_id is null
         and i.deleted_at is null
     )`;
+
+const boundRaw =
+  (context: Context): RawSql =>
+  (sql, bindings = []) =>
+    runBoundSql(context, sql, bindings);
 
 const CatalogModuleBase = MedusaService({
   Brand,
@@ -1473,10 +1478,7 @@ class CatalogModuleService extends CatalogModuleBase {
     @MedusaContext() sharedContext: Context = {},
   ): Promise<(Row & { note_id?: string | null })[]> {
     const ids = await noteIdsOf(
-      (
-        (sharedContext.transactionManager ??
-          sharedContext.manager) as SqlEntityManager
-      ).getKnex(),
+      boundRaw(sharedContext),
       rows.flatMap(({ note }) => (note ? [note] : [])),
     );
     return rows.map((row) =>
@@ -1503,12 +1505,10 @@ class CatalogModuleService extends CatalogModuleBase {
       ).map((note) => [note.id, note]),
     );
     return rows.map((row) => {
-      const note = row.note_id ? notes.get(row.note_id) : undefined;
-      return {
-        ...row,
-        note: note?.note ?? null,
-        translations: note?.translations ?? null,
-      };
+      const note = row.note_id && notes.get(row.note_id);
+      return note
+        ? { ...row, note: note.note, translations: note.translations }
+        : row;
     });
   }
 
@@ -1516,12 +1516,7 @@ class CatalogModuleService extends CatalogModuleBase {
   async linkFitmentNotes(
     @MedusaContext() sharedContext: Context = {},
   ): Promise<number> {
-    return linkFitmentNotes(
-      (
-        (sharedContext.transactionManager ??
-          sharedContext.manager) as SqlEntityManager
-      ).getKnex(),
-    );
+    return linkFitmentNotes(boundRaw(sharedContext));
   }
 
   @InjectManager()

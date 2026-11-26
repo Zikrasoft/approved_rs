@@ -5,7 +5,7 @@ import type { Knex } from '@medusajs/framework/mikro-orm/knex';
 import { createVehicleFixture } from '../../../../integration-tests/vehicleFixture';
 import linkFitmentNotesOnce from '../../../migration-scripts/link-fitment-notes';
 import { CATALOG_MODULE } from '..';
-import { linkFitmentNotes } from '../fitment-notes';
+import { linkFitmentNotes, rawOf } from '../fitment-notes';
 import type CatalogModuleService from '../service';
 
 jest.setTimeout(60_000);
@@ -110,14 +110,14 @@ medusaIntegrationTestRunner({
         ]);
         const { part } = await olderFitments('BATCHES');
 
-        expect(await linkFitmentNotes(pg(), 1)).toBe(3);
+        expect(await linkFitmentNotes(rawOf(pg()), 1)).toBe(3);
 
         const rows = await stored(part.id);
         expect(rows.filter(({ note_id }) => note_id)).toHaveLength(3);
         expect(rows.find(({ note }) => note === 'Только слева')?.note_id).toBe(
           existing.id,
         );
-        expect(await linkFitmentNotes(pg(), 1)).toBe(0);
+        expect(await linkFitmentNotes(rawOf(pg()), 1)).toBe(0);
       });
 
       it('reads a note and its translations through the link', async () => {
@@ -147,6 +147,78 @@ medusaIntegrationTestRunner({
             { note: null, translations: null },
           ]),
         );
+      });
+
+      it('reads the note an older image wrote until it is linked', async () => {
+        const { part } = await olderFitments('UNLINKED');
+
+        const read = await catalog.listNotedFitments(
+          { part_id: part.id },
+          { order: { id: 'ASC' } },
+        );
+
+        expect(
+          read.map(({ note, translations }) => ({ note, translations })),
+        ).toEqual(
+          expect.arrayContaining([
+            { note: 'Только с M-пакетом', translations: null },
+            {
+              note: 'Только с M-пакетом',
+              translations: { sr: { note: 'Samo sa M paketom' } },
+            },
+            { note: 'Только слева', translations: null },
+            { note: null, translations: null },
+          ]),
+        );
+      });
+
+      it('unlinks a note an older image rewrote or cleared, and links the new text again', async () => {
+        const { part, rows } = await olderFitments('EDITED');
+        await catalog.linkFitmentNotes();
+        const [front, , left] = rows;
+
+        await catalog.updateFitments([
+          { id: front.id, note: 'Только седан' },
+          { id: left.id, note: null },
+        ]);
+        const edited = await stored(part.id);
+        const noteOf = (id: string) =>
+          edited.find((row) => row.id === id)?.note_id;
+        expect(noteOf(front.id)).toBeNull();
+        expect(noteOf(left.id)).toBeNull();
+        expect(
+          (await catalog.listNotedFitments({ id: front.id }))[0].note,
+        ).toBe('Только седан');
+
+        await catalog.linkFitmentNotes();
+
+        const [sedan] = await catalog.listFitmentNotes({
+          note: 'Только седан',
+        });
+        const relinked = await stored(part.id);
+        expect(relinked.find(({ id }) => id === front.id)?.note_id).toBe(
+          sedan.id,
+        );
+        expect(relinked.find(({ id }) => id === left.id)?.note_id).toBeNull();
+      });
+
+      it('creates no note when the Fitment that wanted it fails', async () => {
+        const { vehicle } = await createVehicleFixture(catalog, {
+          typeCode: 'ROLLBACK',
+        });
+        const part = await catalog.createParts({ name: 'Part ROLLBACK' });
+
+        await expect(
+          catalog.attachPartToVehicles(
+            part.id,
+            { vehicle_id: vehicle.id },
+            { quantity: 0, note: 'Только для отката' },
+          ),
+        ).rejects.toThrow();
+
+        expect(
+          await catalog.listFitmentNotes({ note: 'Только для отката' }),
+        ).toEqual([]);
       });
     });
   },
