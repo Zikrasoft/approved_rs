@@ -6,11 +6,15 @@ import { translateCatalogue } from '../translate';
 type Row = { id: string; name: string; description: string | null };
 
 const catalogueOf = (parts: Row[]) => {
-  const updated: { id: string; translations: unknown }[] = [];
+  const updated: {
+    id: string;
+    translations: unknown;
+    translated_from?: unknown;
+  }[] = [];
   const none = async () => [];
   const catalog = {
     listParts: async () => parts,
-    updateParts: async (rows: { id: string; translations: unknown }[]) => {
+    updateParts: async (rows: typeof updated) => {
       updated.push(...rows);
     },
     listSeries: none,
@@ -101,9 +105,10 @@ describe('translateCatalogue', () => {
     await translateCatalogue(catalog, 'key');
 
     const stamps = new Map(
-      (updated as { id: string; translated_from: unknown }[]).map(
-        ({ id, translated_from }) => [id, JSON.stringify(translated_from)],
-      ),
+      updated.map(({ id, translated_from }) => [
+        id,
+        JSON.stringify(translated_from),
+      ]),
     );
     expect(stamps.get('part_a')).toBe(stamps.get('part_b'));
     expect(stamps.get('part_3')).not.toBe(stamps.get('part_a'));
