@@ -1,8 +1,11 @@
 import type { MedusaContainer } from '@medusajs/framework/types';
 
-import { markCatalogueMemoStale } from '../lib/catalogue-memo';
+import {
+  forgetCatalogueMemo,
+  markCatalogueMemoStale,
+} from '../lib/catalogue-memo';
 import { emitIndexChanges } from '../lib/index-changes';
-import { daysBack, demandModule } from '../lib/part-demand';
+import { daysBack, demandModule, memoPartDemand } from '../lib/part-demand';
 import { CATALOG_MODULE } from '../modules/catalog';
 import type CatalogModuleService from '../modules/catalog/service';
 import { DEMAND_WINDOW_DAYS } from '../modules/demand/ranking';
@@ -15,7 +18,9 @@ export async function refreshPartDemandAt(
 ): Promise<void> {
   const demand = demandModule(container);
   await demand.pruneBefore(daysBack(now, DEMAND_KEPT_DAYS));
-  markCatalogueMemoStale('demand', 'page-list');
+  forgetCatalogueMemo('demand');
+  await memoPartDemand(container);
+  markCatalogueMemoStale('page-list');
   const moving = await demand.countsSince(
     daysBack(now, DEMAND_WINDOW_DAYS + 1),
   );

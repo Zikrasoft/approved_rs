@@ -18,6 +18,8 @@ import {
 import { cataloguePageList } from '../../../../lib/catalogue-page-list';
 import { reindexSupplierOffers } from '../../../../lib/suppliers/markup-reindex';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
+import { DEMAND_MODULE } from '../../../../modules/demand';
+import type DemandModuleService from '../../../../modules/demand/service';
 import type CatalogModuleService from '../../../../modules/catalog/service';
 import { PUBLISH_MODULE } from '../../../../modules/publish';
 import type PublishModuleService from '../../../../modules/publish/service';
@@ -198,27 +200,49 @@ medusaIntegrationTestRunner({
         calls.forEach((call) => expect(call).not.toHaveBeenCalled());
       });
 
-      it('reflects the database after a demand refresh', async () => {
-        await changeLowestHeight(50);
+      it('serves the old demand once after a demand refresh, then the refreshed one', async () => {
         await publishAll();
-        expect(await lowestHeight()).toBe(50);
-        await changeLowestHeight(10);
-        expect(await lowestHeight()).toBe(50);
+        const demandOf = async () =>
+          (await get('/store/catalogue-pages')).categories.find(
+            ({ slug }: { slug: string }) => slug === 'oil-filters',
+          ).demand;
+        expect(await demandOf()).toBe(0);
+        const [first] = await catalog().listPartIdentifiers({
+          normalized_value: 'W000',
+        });
+        await getContainer()
+          .resolve<DemandModuleService>(DEMAND_MODULE)
+          .record({ signal: 'order', identifierIds: [first.id] });
 
         await refreshPartDemandAt(getContainer(), new Date());
+        const stale = await demandOf();
+        let fresh = stale;
+        const deadline = Date.now() + 10_000;
+        while (fresh === stale && Date.now() < deadline) {
+          await new Promise((resolve) => setTimeout(resolve, 100));
+          fresh = await demandOf();
+        }
 
-        expect(await lowestHeight()).toBe(10);
+        expect(stale).toBe(0);
+        expect(fresh).toBeGreaterThan(0);
       });
 
-      it('reflects the database after a supplier markup reindex', async () => {
-        await changeLowestHeight(50);
+      it('prices a Part with the new markup after a markup reindex, from the memo it already holds', async () => {
         await publishAll();
-        expect(await lowestHeight()).toBe(50);
-        await changeLowestHeight(20);
+        const firstPrice = async () =>
+          categoryPageResponseSchema
+            .parse(await categoryPage(1))
+            .entries.flatMap(({ offers }) => offers.map(({ price }) => price));
+        expect(await firstPrice()).toEqual([1200]);
+        const calls = aggregateCalls();
 
+        await getContainer()
+          .resolve<SupplierModuleService>(SUPPLIER_MODULE)
+          .updateSuppliers({ id: supplierId, markup_percentage: 50 });
         await reindexSupplierOffers(getContainer(), supplierId);
 
-        expect(await lowestHeight()).toBe(20);
+        expect(await firstPrice()).toEqual([1500]);
+        calls.forEach((call) => expect(call).not.toHaveBeenCalled());
       });
 
       it('leaves the old memo behind once it is cleared', async () => {

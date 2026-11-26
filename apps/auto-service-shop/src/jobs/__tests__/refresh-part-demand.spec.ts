@@ -106,6 +106,16 @@ medusaIntegrationTestRunner({
         expect(counts).not.toHaveBeenCalled();
       });
 
+      it('loads the fresh demand before the page list goes stale', async () => {
+        await memoized('demand', async () => 'before');
+
+        await refreshPartDemandAt(getContainer(), NOW);
+
+        const load = jest.fn(async () => 'after');
+        expect(await memoized('demand', load)).toBeInstanceOf(Map);
+        expect(load).not.toHaveBeenCalled();
+      });
+
       it('forgets demand older than it keeps', async () => {
         await demand().record({
           signal: 'pick',
