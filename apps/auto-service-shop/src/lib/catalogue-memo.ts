@@ -1,3 +1,7 @@
+import { causeOf, logEvent } from './log-event';
+
+const MEMO_RETRY_MS = 30_000;
+
 type Entry = {
   value: Promise<unknown>;
   expires: number;
@@ -22,17 +26,27 @@ export function markCatalogueMemoStale(...names: string[]): void {
 }
 
 function refresh<T>(
+  name: string,
   entry: Entry,
   compute: () => Promise<T>,
   ttlMs: number,
 ): void {
   entry.refreshing = true;
   compute()
-    .then((value) => {
-      entry.value = Promise.resolve(value);
-      entry.expires = Date.now() + ttlMs;
-    })
-    .catch(() => undefined)
+    .then(
+      (value) => {
+        entry.value = Promise.resolve(value);
+        entry.expires = Date.now() + ttlMs;
+      },
+      (error) => {
+        entry.expires = Date.now() + MEMO_RETRY_MS;
+        logEvent('catalogue.warm', {
+          outcome: 'failed',
+          memo: name,
+          cause: causeOf(error),
+        });
+      },
+    )
     .finally(() => {
       entry.refreshing = false;
     });
@@ -47,7 +61,7 @@ export function memoized<T>(
   const known = current.get(name);
   if (known) {
     if (known.settled && known.expires <= Date.now() && !known.refreshing) {
-      refresh(known, compute, ttlMs);
+      refresh(name, known, compute, ttlMs);
     }
     return known.value as Promise<T>;
   }

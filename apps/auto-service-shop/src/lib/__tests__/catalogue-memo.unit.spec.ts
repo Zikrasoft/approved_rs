@@ -4,6 +4,7 @@ import {
   markCatalogueMemoStale,
   memoized,
 } from '../catalogue-memo';
+import { loggedEvents } from '../../../integration-tests/loggedEvents';
 
 const counter = () => {
   let calls = 0;
@@ -124,8 +125,9 @@ describe('memoized', () => {
     expect(compute).toHaveBeenCalledTimes(2);
   });
 
-  it('keeps the old value when the background refresh fails and tries again next read', async () => {
+  it('keeps the old value when the background refresh fails, logs it once and waits 30 s before trying again', async () => {
     jest.useFakeTimers({ now: new Date('2026-11-25T10:00:00Z') });
+    const log = jest.spyOn(console, 'log').mockImplementation(() => undefined);
     await memoized('demand', async () => 'old', TTL_MS);
     jest.setSystemTime(new Date(Date.now() + TTL_MS));
 
@@ -135,7 +137,25 @@ describe('memoized', () => {
     expect(await memoized('demand', failing, TTL_MS)).toBe('old');
     await flush();
     expect(await memoized('demand', failing, TTL_MS)).toBe('old');
+    await flush();
+    const loggedAfterOne = loggedEvents('catalogue.warm');
+    jest.setSystemTime(new Date(Date.now() + 29_999));
+    expect(await memoized('demand', failing, TTL_MS)).toBe('old');
+    expect(failing).toHaveBeenCalledTimes(1);
+    jest.setSystemTime(new Date(Date.now() + 1));
+    expect(await memoized('demand', failing, TTL_MS)).toBe('old');
+    await flush();
+    log.mockRestore();
+
     expect(failing).toHaveBeenCalledTimes(2);
+    expect(loggedAfterOne).toEqual([
+      expect.objectContaining({
+        event: 'catalogue.warm',
+        outcome: 'failed',
+        memo: 'demand',
+        cause: expect.stringContaining('down'),
+      }),
+    ]);
   });
 
   it('serves the old value of a stale entry and swaps the fresh one in', async () => {
