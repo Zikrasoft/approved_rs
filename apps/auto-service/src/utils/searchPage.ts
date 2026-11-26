@@ -164,6 +164,7 @@ export async function planSearch({
           ranges: capped.ranges,
           offset,
           sort,
+          specs: true,
           ...(browse ? { limit: BROWSE_PAGE_SIZE } : {}),
         })
       : null,
