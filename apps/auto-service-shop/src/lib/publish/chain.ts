@@ -142,11 +142,7 @@ async function checkShrink(publish: PublishModuleService) {
   }
 }
 
-async function checkPublishedCount(
-  search: PublishSearch,
-  publish: PublishModuleService,
-) {
-  const published = await publish.countPublished();
+async function checkPublishedCount(search: PublishSearch, published: number) {
   const indexed = await search.settledPublishedDocuments(published);
   if (indexed !== published) {
     logEvent('search.drift', {
@@ -221,7 +217,7 @@ const publishChain = (scope: MedusaContainer) => {
           deletedIdentifierIds: changes.sweptIdentifiers,
         });
         await search.swap(CATALOGUE_CAR_INDEX);
-        await checkPublishedCount(search, publish);
+        await checkPublishedCount(search, published);
       },
     },
     {
