@@ -169,6 +169,7 @@ medusaIntegrationTestRunner({
         });
         await car('V6');
         await publish.publishAll();
+        await publish.buildCatalogueSnapshot();
       });
 
       const named = (rows: { vehicle_id: string; part_id: string }[]) =>

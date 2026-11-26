@@ -84,6 +84,7 @@ medusaIntegrationTestRunner({
         ]);
         await publish.publishAll();
         await publish.unpublish([hidden.part_identifier_id]);
+        await publish.buildCatalogueSnapshot();
       });
 
       const get = (path: string, headers: Record<string, string> = {}) =>

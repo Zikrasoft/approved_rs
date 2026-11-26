@@ -11,9 +11,11 @@ import { seriesSlugOf } from '@podbor/catalog-contract/slug';
 
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
 import { refreshPartDemandAt } from '../../../../jobs/refresh-part-demand';
-import { clearCatalogueMemo } from '../../../../lib/catalogue-memo';
+import {
+  clearCatalogueMemo,
+  forgetCatalogueMemo,
+} from '../../../../lib/catalogue-memo';
 import { cataloguePageList } from '../../../../lib/catalogue-page-list';
-import { DEMAND_TTL_MS } from '../../../../lib/part-demand';
 import { reindexSupplierOffers } from '../../../../lib/suppliers/markup-reindex';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
@@ -29,7 +31,6 @@ const AGGREGATES = [
   'listedNumbers',
   'listedSeriesCategoryCounts',
   'listedVehicleParts',
-  'listedMakePartCounts',
 ] as const;
 
 medusaIntegrationTestRunner({
@@ -115,6 +116,7 @@ medusaIntegrationTestRunner({
           part_identifier_id: first.id,
         });
         await publish().publishAll();
+        await publish().buildCatalogueSnapshot();
       });
 
       afterEach(() => jest.restoreAllMocks());
@@ -147,6 +149,7 @@ medusaIntegrationTestRunner({
 
       const publishAll = async () => {
         await publish().publishAll();
+        await publish().buildCatalogueSnapshot();
         clearCatalogueMemo();
       };
 
@@ -183,18 +186,16 @@ medusaIntegrationTestRunner({
         calls.forEach((call) => expect(call).not.toHaveBeenCalled());
       });
 
-      it('rebuilds the page list once demand expires without recounting the makes', async () => {
+      it('rebuilds the page list without reading the snapshot again', async () => {
         await publishAll();
-        await cataloguePageList(getContainer());
-        const later = Date.now() + DEMAND_TTL_MS + 1;
-        jest.spyOn(Date, 'now').mockReturnValue(later);
-        const slugs = jest.spyOn(publish(), 'publishedPartSlugs');
-        const makes = jest.spyOn(publish(), 'listedMakePartCounts');
+        const before = await cataloguePageList(getContainer());
+        forgetCatalogueMemo('page-list');
+        const calls = aggregateCalls();
+        const makes = jest.spyOn(catalog(), 'listMakes');
 
-        await cataloguePageList(getContainer());
-
-        expect(slugs).toHaveBeenCalled();
-        expect(makes).not.toHaveBeenCalled();
+        expect(await cataloguePageList(getContainer())).toEqual(before);
+        expect(makes).toHaveBeenCalled();
+        calls.forEach((call) => expect(call).not.toHaveBeenCalled());
       });
 
       it('reflects the database after a demand refresh', async () => {

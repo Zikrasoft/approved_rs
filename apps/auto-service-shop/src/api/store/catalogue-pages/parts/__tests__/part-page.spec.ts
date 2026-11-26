@@ -154,6 +154,7 @@ medusaIntegrationTestRunner({
           part_id: hidden,
         });
         await publish.unpublish([hiddenNumber.id]);
+        await publish.buildCatalogueSnapshot();
       });
 
       const get = (slug: string, headers: Record<string, string> = {}) =>

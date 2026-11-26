@@ -103,6 +103,7 @@ medusaIntegrationTestRunner({
           })),
         ]);
         await publish.publishAll();
+        await publish.buildCatalogueSnapshot();
         await demand.record({
           signal: 'order',
           identifierIds: [wiper.part_identifier_id],
@@ -112,12 +113,12 @@ medusaIntegrationTestRunner({
       const list = async () =>
         (await api.get('/store/catalogue-pages', storeHeaders)).data;
 
-      it('counts a Part fitting two series of one Make once', async () => {
+      it('sends make parts as an ordering hint summed over its series, a Part fitting two series counted twice', async () => {
         const { makes } = await list();
         const parts = (slug: string) =>
           makes.find((make: { slug: string }) => make.slug === slug).parts;
 
-        expect(parts('bmw')).toBe(4);
+        expect(parts('bmw')).toBe(6);
         expect(parts('rival')).toBe(5);
       });
 

@@ -143,6 +143,16 @@ medusaIntegrationTestRunner({
           'crawl_run: table is missing',
         ],
         [
+          'a missing catalogue snapshot table',
+          ['drop table listed_series_part'],
+          'listed_series_part: table is missing',
+        ],
+        [
+          'a catalogue snapshot without its series index',
+          ['drop index "IDX_listed_series_part_series"'],
+          'listed_series_part: index IDX_listed_series_part_series is missing',
+        ],
+        [
           'a column left at the generated type',
           ['alter table requirement alter column min type real'],
           'requirement.min: expected numeric, found real',

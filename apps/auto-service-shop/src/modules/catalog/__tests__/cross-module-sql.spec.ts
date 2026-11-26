@@ -3,8 +3,11 @@ import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
 import type { Knex } from '@medusajs/framework/mikro-orm/knex';
 
 import {
+  CATALOGUE_SNAPSHOT_LOCK,
+  FILL_CATALOGUE_SNAPSHOT,
+  FILL_FITTED_CATALOGUE_SNAPSHOT,
   LISTED_CATEGORY_PARTS,
-  LISTED_MAKE_PART_COUNTS,
+  LISTED_FITTED_VEHICLE_PARTS,
   LISTED_SERIES_CATEGORY_COUNTS,
   LISTED_VEHICLE_PARTS,
   ORPHAN_SWEEPS,
@@ -21,16 +24,19 @@ const STATEMENTS: [string, string, Knex.RawBinding[] | Knex.ValueDict][] = [
   ['PUBLISHED_PAGE', PUBLISHED_PAGE, [null, null, 10]],
   ...(
     [
-      ['LISTED_SERIES_CATEGORY_COUNTS', LISTED_SERIES_CATEGORY_COUNTS],
-      ['LISTED_CATEGORY_PARTS', LISTED_CATEGORY_PARTS],
+      ['FILL_CATALOGUE_SNAPSHOT', FILL_CATALOGUE_SNAPSHOT],
+      ['FILL_FITTED_CATALOGUE_SNAPSHOT', FILL_FITTED_CATALOGUE_SNAPSHOT],
       ['LISTED_VEHICLE_PARTS', LISTED_VEHICLE_PARTS],
-      ['LISTED_MAKE_PART_COUNTS', LISTED_MAKE_PART_COUNTS],
     ] as [string, string][]
   ).map(([name, sql]): [string, string, Knex.ValueDict] => [
     name,
     sql,
-    { series: [], category: 'category', min_matches: 2 },
+    { series: null, min_matches: 2 },
   ]),
+  ['CATALOGUE_SNAPSHOT_LOCK', CATALOGUE_SNAPSHOT_LOCK, []],
+  ['LISTED_SERIES_CATEGORY_COUNTS', LISTED_SERIES_CATEGORY_COUNTS, []],
+  ['LISTED_CATEGORY_PARTS', LISTED_CATEGORY_PARTS, [[]]],
+  ['LISTED_FITTED_VEHICLE_PARTS', LISTED_FITTED_VEHICLE_PARTS, { series: 'x' }],
   ['PART_REQUIREMENT_FITS', PART_REQUIREMENT_FITS, [[]]],
   ['UNRESOLVED_VIN_CODES', UNRESOLVED_VIN_CODES, [[], true, 0, 10]],
   ...ORPHAN_SWEEPS.map((sql, index): [string, string, Knex.RawBinding[]] => [

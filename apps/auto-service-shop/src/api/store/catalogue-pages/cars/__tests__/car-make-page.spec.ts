@@ -99,6 +99,7 @@ medusaIntegrationTestRunner({
           part_id: hidden,
         });
         await publish.unpublish([hiddenNumber.id]);
+        await publish.buildCatalogueSnapshot();
       });
 
       const get = (path: string, headers: Record<string, string> = {}) =>
@@ -194,11 +195,12 @@ medusaIntegrationTestRunner({
           part_identifier_id: last.id,
         });
         await publish.publishAll();
+        await publish.buildCatalogueSnapshot();
 
         expect(slugs(await answer('queue'))).toContain('mann-filter-qq113');
       });
 
-      it('breaks a tie between Categories by the one fitted first, as the static site did', async () => {
+      it('breaks a tie between Categories by slug', async () => {
         const container = getContainer();
         const catalog: CatalogModuleService = container.resolve(CATALOG_MODULE);
         const [mann] = await catalog.listBrands({ slug: 'mann-filter' });
@@ -233,13 +235,13 @@ medusaIntegrationTestRunner({
         for (const part_id of [...early, ...late]) {
           await catalog.createFitments({ part_id, vehicle_id: car.vehicle.id });
         }
-        await container
-          .resolve<PublishModuleService>(PUBLISH_MODULE)
-          .publishAll();
+        const publish: PublishModuleService = container.resolve(PUBLISH_MODULE);
+        await publish.publishAll();
+        await publish.buildCatalogueSnapshot();
 
         expect(
           (await answer('tie')).categories.map(({ slug }) => slug),
-        ).toEqual(['z-fitted-first', 'a-fitted-later']);
+        ).toEqual(['a-fitted-later', 'z-fitted-first']);
       });
 
       it('answers 404 for a Make with nothing listed and for an unknown Make', async () => {

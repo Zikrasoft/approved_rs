@@ -135,15 +135,27 @@ export const PART_REQUIREMENT_FITS = `
   having ${REQUIREMENTS_MET}
   order by d.vehicle_id, p.id`;
 
-const LISTED_PLACES = `
-  with listed as (
+const LISTED_PARTS = `listed as (
     select distinct pi.part_id from part_identifier pi
     join published_number pn on pn.id = pi.id
       and pn.deleted_at is null and pn.listed
     where pi.deleted_at is null
-  ), scoped as (${LIVE_VEHICLES}
+  )`;
+
+const SCOPED_VEHICLES = `scoped as (${LIVE_VEHICLES}
       and (:series::text[] is null or c.series_id = any(:series::text[]))
-  ), demands as (${demandsOf('requirement')}
+  )`;
+
+const FITTED_PLACES = `
+    select s.series_id, s.model_id, s.vehicle_id, f.id as fitment_id,
+      f.part_id, pt.category_id, true as fitted
+    from scoped s
+    join fitment f on f.vehicle_id = s.vehicle_id and f.deleted_at is null
+    join listed l on l.part_id = f.part_id
+    left join part pt on pt.id = f.part_id`;
+
+export const LISTED_PLACES = `
+  with ${LISTED_PARTS}, ${SCOPED_VEHICLES}, demands as (${demandsOf('requirement')}
   ), required as (
     select d.vehicle_id, p.id as part_id, p.category_id
     from demands d
@@ -152,68 +164,43 @@ const LISTED_PLACES = `
     join listed l on l.part_id = p.id
     group by d.vehicle_id, p.id, p.category_id
     having ${REQUIREMENTS_MET}
-  ), places as (
-    select s.series_id, s.model_id, s.vehicle_id, f.id as fitment_id,
-      f.part_id, pt.category_id, true as fitted
-    from scoped s
-    join fitment f on f.vehicle_id = s.vehicle_id and f.deleted_at is null
-    join listed l on l.part_id = f.part_id
-    left join part pt on pt.id = f.part_id
+  ), places as (${FITTED_PLACES}
     union all
     select s.series_id, s.model_id, s.vehicle_id, null, r.part_id,
       r.category_id, false
     from required r join scoped s on s.vehicle_id = r.vehicle_id
   )`;
 
-export const LISTED_MAKE_PART_COUNTS = `${LISTED_PLACES}, scoped_places as (
-    select p.model_id, p.part_id, p.category_id, p.fitted, s.make_id
-    from places p
-    join series s on s.id = p.series_id and s.deleted_at is null
-  ), model_matches as (
-    select model_id, category_id, count(distinct part_id) as matches
-    from scoped_places where not fitted group by model_id, category_id
-  ), kept as (
-    select sc.model_id
-    from scoped_places sc
-    left join model_matches mm on not sc.fitted
-      and mm.model_id = sc.model_id and mm.category_id = sc.category_id
-    group by sc.model_id
-    having count(distinct sc.part_id)
-      filter (where sc.fitted
-        or mm.matches >= :min_matches) > 0
-  ), make_matches as (
-    select make_id, category_id, count(distinct part_id) as matches
-    from scoped_places
-    where not fitted and model_id in (select model_id from kept)
-    group by make_id, category_id
-  )
-  select mk.slug as make_slug,
-    (count(distinct sc.part_id)
-      filter (where sc.fitted
-        or mm.matches >= :min_matches))::int as parts
-  from scoped_places sc
-  join kept k on k.model_id = sc.model_id
-  join make mk on mk.id = sc.make_id
-  left join make_matches mm on not sc.fitted
-    and mm.make_id = sc.make_id and mm.category_id = sc.category_id
-  group by mk.slug`;
+const FITTED_LISTED_PLACES = `
+  with ${LISTED_PARTS}, ${SCOPED_VEHICLES}, places as (${FITTED_PLACES}
+  )`;
 
-export const LISTED_SERIES_CATEGORY_COUNTS = `${LISTED_PLACES}
+export const CATALOGUE_SNAPSHOT_LOCK =
+  'select pg_advisory_xact_lock(4120260301)';
+
+const fillCatalogueSnapshot = (places: string) => `
+  insert into listed_series_part
+    (series_id, category_id, part_id, fitted, required)
+  ${places}
+  select series_id, category_id, part_id, bool_or(fitted), bool_or(not fitted)
+  from places
+  group by series_id, category_id, part_id`;
+
+export const FILL_CATALOGUE_SNAPSHOT = fillCatalogueSnapshot(LISTED_PLACES);
+
+export const FILL_FITTED_CATALOGUE_SNAPSHOT =
+  fillCatalogueSnapshot(FITTED_LISTED_PLACES);
+
+export const LISTED_SERIES_CATEGORY_COUNTS = `
   select series_id, category_id, count(*)::int as parts,
     (count(*) filter (where fitted))::int as fitted,
     (count(*) filter (where required))::int as required
-  from (
-    select series_id, category_id, bool_or(fitted) as fitted,
-      bool_or(not fitted) as required
-    from places
-    group by series_id, category_id, part_id
-  ) held
+  from listed_series_part
   group by series_id, category_id`;
 
-export const LISTED_CATEGORY_PARTS = `${LISTED_PLACES}
-  select category_id, part_id, min(fitment_id) as first_fitment_id
-  from places
-  where category_id is not null
+export const LISTED_CATEGORY_PARTS = `
+  select category_id, part_id from listed_series_part
+  where series_id = any(?::text[]) and category_id is not null
   group by category_id, part_id
   order by category_id, part_id`;
 
@@ -222,6 +209,18 @@ export const LISTED_VEHICLE_PARTS = `${LISTED_PLACES}
   from places
   group by vehicle_id, part_id, category_id, fitted
   order by vehicle_id, part_id`;
+
+export const LISTED_FITTED_VEHICLE_PARTS = `
+  with scoped as (${LIVE_VEHICLES}
+      and c.series_id = :series
+  )
+  select f.vehicle_id, f.part_id, l.category_id, true as fitted
+  from scoped s
+  join fitment f on f.vehicle_id = s.vehicle_id and f.deleted_at is null
+  join listed_series_part l on l.series_id = s.series_id
+    and l.part_id = f.part_id
+  group by f.vehicle_id, f.part_id, l.category_id
+  order by f.vehicle_id, f.part_id`;
 
 export const PUBLISHED_PART_SLUGS = `
   select b.slug as brand_slug, pi.normalized_value, ${INDEXABLE}

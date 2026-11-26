@@ -66,6 +66,10 @@ echo "==> Schema check"
 docker compose run --rm -T medusa \
   node_modules/.bin/medusa exec ./src/scripts/check-schema.js
 
+echo "==> Catalogue snapshot"
+docker compose run --rm -T medusa \
+  node_modules/.bin/medusa exec ./src/scripts/build-catalogue-snapshot.js
+
 echo "==> Production seed"
 docker compose run --rm -T medusa \
   node_modules/.bin/medusa exec ./src/scripts/seed-production.js

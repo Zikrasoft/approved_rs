@@ -31,6 +31,7 @@ import {
 import { translateCatalogue } from './translate';
 import { clearCatalogueMemo } from '../catalogue-memo';
 import { cataloguePageList } from '../catalogue-page-list';
+import { listedNumbersByCategory } from '../category-page';
 import { type RunOutcome, startCatalogueRun } from '../catalogue-writer';
 import { errorMessage } from '../errors';
 import {
@@ -192,7 +193,15 @@ const publishChain = (scope: MedusaContainer) => {
         changes = withChanges(changes, await publish.publishAll());
         clearCatalogueMemo();
         published = await publish.countPublished();
-        cataloguePageList(scope).catch(() => undefined);
+      },
+    },
+    {
+      name: 'snapshot',
+      run: async () => {
+        await publish.buildCatalogueSnapshot();
+        clearCatalogueMemo();
+        await cataloguePageList(scope);
+        await listedNumbersByCategory(publish);
       },
     },
     {

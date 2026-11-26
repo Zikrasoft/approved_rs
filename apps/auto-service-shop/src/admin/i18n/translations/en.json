@@ -446,6 +446,7 @@
       "sweep": "catalogue cleanup",
       "translate": "translation",
       "publish": "number publishing",
+      "snapshot": "catalogue page build",
       "reindex": "search refresh",
       "purge": "page cache refresh"
     },

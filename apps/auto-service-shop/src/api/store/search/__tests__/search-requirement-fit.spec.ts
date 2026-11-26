@@ -3,6 +3,7 @@ import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 
 import { createVehicleFixture } from '../../../../../integration-tests/vehicleFixture';
+import { publishCatalogue } from '../../../../../integration-tests/publishCatalogue';
 import { seriesCountsOf } from '../../../../lib/catalogue-structure';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
 import type CatalogModuleService from '../../../../modules/catalog/service';
@@ -196,9 +197,7 @@ medusaIntegrationTestRunner({
           vehicle_id: f30VehicleId,
         });
 
-        await getContainer()
-          .resolve<PublishModuleService>(PUBLISH_MODULE)
-          .publishAll();
+        await publishCatalogue(getContainer());
         await getContainer().resolve(Modules.SEARCH).reindex();
       });
 

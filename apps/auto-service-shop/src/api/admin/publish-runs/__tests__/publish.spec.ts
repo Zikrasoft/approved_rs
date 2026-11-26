@@ -68,6 +68,7 @@ const network: FakeNetwork = {
 const searchIndex = {
   changes: [] as IndexChanges[],
   swaps: [] as string[],
+  sawAtSwap: [] as { memo: string; snapshotRows: number }[],
   active: true,
   indexed: null as number | null,
   refusal: null as Error | null,
@@ -145,6 +146,14 @@ medusaIntegrationTestRunner({
           },
           swap: async (index) => {
             searchIndex.swaps.push(index);
+            searchIndex.sawAtSwap.push({
+              memo: await memoized('swap-probe', async () => 'fresh'),
+              snapshotRows: (
+                await container
+                  .resolve<PublishModuleService>(PUBLISH_MODULE)
+                  .listedSeriesCategoryCounts()
+              ).length,
+            });
           },
           partsIndexActive: async () => searchIndex.active,
           settledPublishedDocuments: async (published) =>
@@ -249,6 +258,7 @@ medusaIntegrationTestRunner({
         network.unsafeAnswer = false;
         searchIndex.changes = [];
         searchIndex.swaps = [];
+        searchIndex.sawAtSwap = [];
         searchIndex.active = true;
         searchIndex.indexed = null;
         searchIndex.refusal = null;
@@ -525,6 +535,45 @@ medusaIntegrationTestRunner({
         expect(await memoized('publish-probe', async () => 'after')).toBe(
           'after',
         );
+      });
+
+      it('builds the catalogue snapshot after publishing, so reindex and purge read the new Publish', async () => {
+        const { vehicle } = await createVehicleFixture(catalog, {
+          typeCode: 'PUBLISH-SNAP',
+        });
+        const [mann] = await catalog.listBrands({ slug: 'mann-filter' });
+        const partId = await catalog.createPartWithIdentifiers({
+          name: 'Масляный фильтр',
+          identifiers: [
+            { type: 'manufacturer-number', brand_id: mann.id, value: 'SN 1' },
+          ],
+        });
+        await catalog.createFitments({
+          part_id: partId,
+          vehicle_id: vehicle.id,
+        });
+        await memoized('swap-probe', async () => 'before');
+        const publishModule: PublishModuleService =
+          getContainer().resolve(PUBLISH_MODULE);
+
+        const run = await publish();
+        const [stored] = await publishModule.listCatalogueRuns({ id: run.id });
+
+        expect(run.status).toBe('succeeded');
+        expect(Object.keys(stored.report?.step_ms ?? {}).sort()).toEqual(
+          [
+            'shrink',
+            'sweep',
+            'translate',
+            'publish',
+            'snapshot',
+            'reindex',
+            'purge',
+          ].sort(),
+        );
+        expect(searchIndex.sawAtSwap).toEqual([
+          { memo: 'fresh', snapshotRows: 1 },
+        ]);
       });
 
       it('publishes the brand-numbers before the page cache is purged', async () => {
@@ -887,6 +936,44 @@ medusaIntegrationTestRunner({
           expect(pageCache.purged).toEqual([
             ...HUB_PATTERNS,
             '-/[a-z][a-z]/parts/p/mann-filter-pg6/',
+          ]);
+        });
+
+        it('carry the Part pages of a run whose snapshot failed into the next Publish', async () => {
+          await settled();
+          await catalog.createPartWithIdentifiers({
+            name: 'Масляный фильтр',
+            identifiers: [
+              {
+                type: 'manufacturer-number',
+                brand_id: await mannId(),
+                value: 'PG 7',
+              },
+            ],
+          });
+          const publishModule: PublishModuleService =
+            getContainer().resolve(PUBLISH_MODULE);
+          jest
+            .spyOn(publishModule, 'buildCatalogueSnapshot')
+            .mockRejectedValueOnce(new Error('The snapshot ran out of disk'));
+
+          const failed = await publish();
+          const purgedOnFailure = [...pageCache.purged];
+          const retried = await publish();
+          jest.restoreAllMocks();
+
+          expect(failed).toEqual(
+            expect.objectContaining({
+              status: 'failed',
+              failed_step: 'snapshot',
+              error: 'The snapshot ran out of disk',
+            }),
+          );
+          expect(purgedOnFailure).toEqual([]);
+          expect(retried.status).toBe('succeeded');
+          expect(pageCache.purged).toEqual([
+            ...HUB_PATTERNS,
+            '-/[a-z][a-z]/parts/p/mann-filter-pg7/',
           ]);
         });
       });

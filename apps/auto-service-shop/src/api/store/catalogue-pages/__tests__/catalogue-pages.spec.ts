@@ -105,6 +105,7 @@ medusaIntegrationTestRunner({
         });
         await publish.publishAll();
         await publish.unpublish([hidden.part_identifier_id]);
+        await publish.buildCatalogueSnapshot();
         await getContainer()
           .resolve(ContainerRegistrationKeys.PG_CONNECTION)('brand')
           .where({ id: gone.id })

@@ -66,6 +66,7 @@ export type CatalogueStructure = {
   stocked: SeriesRow[];
   paged: PagedSeries[];
   hub: (makeSlug: string) => boolean;
+  makeParts: (makeSlug: string) => number;
 };
 
 export async function catalogueStructure(
@@ -104,6 +105,13 @@ export async function catalogueStructure(
       slug: seriesSlugOf(row.name),
       categoryIds: categoryPages.get(row.id) ?? [],
     }));
+  const partsPerMake = new Map<string, number>();
+  for (const { id, make } of series) {
+    partsPerMake.set(
+      make.slug,
+      (partsPerMake.get(make.slug) ?? 0) + (counts.get(id)?.parts ?? 0),
+    );
+  }
   const pagedPerMake = new Map<string, number>();
   for (const { make } of paged) {
     pagedPerMake.set(make.slug, (pagedPerMake.get(make.slug) ?? 0) + 1);
@@ -113,6 +121,7 @@ export async function catalogueStructure(
     stocked: series.filter(({ id }) => counts.has(id)),
     paged,
     hub: (makeSlug) => makeHasPage(pagedPerMake.get(makeSlug) ?? 0),
+    makeParts: (makeSlug) => partsPerMake.get(makeSlug) ?? 0,
   };
 }
 

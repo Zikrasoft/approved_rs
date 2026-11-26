@@ -151,6 +151,7 @@ medusaIntegrationTestRunner({
           await numbered(`AGB ${index}`, bulbs.id, {});
         }
         await publish.publishAll();
+        await publish.buildCatalogueSnapshot();
       });
 
       const list = async (): Promise<CataloguePageList> =>

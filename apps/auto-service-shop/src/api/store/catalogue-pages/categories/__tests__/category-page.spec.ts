@@ -147,6 +147,7 @@ medusaIntegrationTestRunner({
 
         const publish: PublishModuleService = container.resolve(PUBLISH_MODULE);
         await publish.publishAll();
+        await publish.buildCatalogueSnapshot();
         const [hiddenNumber] = await catalog.listPartIdentifiers({
           part_id: hidden,
         });

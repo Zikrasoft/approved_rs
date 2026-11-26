@@ -90,11 +90,13 @@ medusaIntegrationTestRunner({
         ]);
 
         await publish.publishAll();
+        await publish.buildCatalogueSnapshot();
         const bothPublished = [
           await listedOn(oldSeries.id),
           await listedOn(newSeries.id),
         ];
         await publish.unpublish([replacement.part_identifier_id]);
+        await publish.buildCatalogueSnapshot();
         const replacementHidden = [
           await listedOn(oldSeries.id),
           await listedOn(newSeries.id),
@@ -135,6 +137,7 @@ medusaIntegrationTestRunner({
 
         const unpublished = await listedById(ids);
         await publish.publishAll();
+        await publish.buildCatalogueSnapshot();
         const published = await listedById(ids);
         await publish.unpublish([current.part_identifier_id]);
         const currentHidden = await listedById(ids);
@@ -253,6 +256,7 @@ medusaIntegrationTestRunner({
           );
         }
         await publish.publishAll();
+        await publish.buildCatalogueSnapshot();
 
         const counts = seriesCountsOf(
           await publish.listedSeriesCategoryCounts(),
@@ -333,6 +337,7 @@ medusaIntegrationTestRunner({
           { max: 30 },
         );
         await publish.publishAll();
+        await publish.buildCatalogueSnapshot();
 
         const pairs = (await publish.listedVehicleParts(own.series.id))
           .filter(({ fitted }) => !fitted)
