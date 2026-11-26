@@ -1012,7 +1012,7 @@ a live Postgres by `infra/auto-service-shop/test/crawler-role.test.sh`. `restore
 restores with `--no-privileges`, so a dump never needs the role to exist first.
 
 Postgres runs tuned for the 4 GB droplet: `jit=off`, `work_mem=16MB`,
-`shared_buffers=256MB`, `effective_cache_size=640MB`,
+`shared_buffers=256MB`, `effective_cache_size=512MB`,
 `autovacuum_vacuum_scale_factor=0.02`, `autovacuum_analyze_scale_factor=0.02`,
 `random_page_cost=1.1` (SSD), `shared_preload_libraries=pg_stat_statements` and
 `log_min_duration_statement=1000` (statements over one second reach the logs).
@@ -1132,11 +1132,11 @@ logs medusa`) here. TODO: record the measured docs/s.
   `fd00:ca7:1ab::/64`) and `userland-proxy` is disabled in `daemon.json`. Never turn
   the userland proxy back on, or every IPv6 client becomes the docker gateway's
   address.
-- Memory limits for 4 GB: medusa 1120m (an 800 MB Node heap), typesense 640m
+- Memory limits for 4 GB: medusa 1300m (a 1024 MB Node heap), typesense 640m
   (room for the two collections of the nightly swap reindex),
-  postgres 1024m, caddy 160m (with the page cache, below), the three sites 160m each (a 112 MB Node heap),
-  loki 192m, alloy 160m: 3776 MB for what always runs, under 3.75 GB, and
-  grafana's 256m on demand only, 4032 MB with it, under the 4 GB of the host
+  postgres 896m, caddy 160m (with the page cache, below), the three sites 160m each (a 112 MB Node heap),
+  loki 192m, alloy 160m: 3828 MB for what always runs, under 3.75 GB, and
+  grafana's 256m on demand only, 4084 MB with it, under the 4 GB of the host
   (both checked by the compose test), with the 2 GB swap `bootstrap-host.sh`
   makes behind it. Grafana sits behind the `grafana` profile: start it for a
   look with `docker compose --profile grafana up -d grafana` and stop it after.
@@ -1240,7 +1240,7 @@ logs medusa`) here. TODO: record the measured docs/s.
     followed the live pages (2.1 GB for 100,000). But
     eight parallel requests over 13,000 cached pages got it OOM-killed at
     176 MB, sequential new pages at 128 MB, and it needed 256 MB (anonymous
-    memory up to 173 MiB), which does not fit beside Medusa's 1120 MB.
+    memory up to 173 MiB), which does not fit beside Medusa's 1300 MB.
     Nuts and Otter were tried only with surrogate keys still on: Nuts wrote
     1 GB to disk within a few thousand pages, and Otter, which keeps the
     bodies in memory, was OOM-killed at 256 MB before 40,000 pages.

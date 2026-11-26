@@ -61,12 +61,12 @@ services:
       - -c
       - shared_buffers=256MB
       - -c
-      - effective_cache_size=640MB
+      - effective_cache_size=512MB
       - -c
       - autovacuum_vacuum_scale_factor=0.02
       - -c
       - autovacuum_analyze_scale_factor=0.02
-    mem_limit: 1024m
+    mem_limit: 896m
     security_opt: ['no-new-privileges:true']
     networks:
       data:
@@ -114,7 +114,7 @@ services:
     image: ${MEDUSA_IMAGE:-ghcr.io/zikrasoft/podbor-auto-service-shop}:${MEDUSA_TAG:?}
     restart: unless-stopped
     logging: *logging
-    mem_limit: 1120m
+    mem_limit: 1300m
     cap_drop: [ALL]
     security_opt: ['no-new-privileges:true']
     networks: [data, edge]
@@ -126,7 +126,7 @@ services:
       TYPESENSE_PROTOCOL: http
       TYPESENSE_API_KEY: ${TYPESENSE_API_KEY:?}
       CACHE_PURGE_URL: http://caddy:2020/souin-api/souin
-      NODE_OPTIONS: --max-old-space-size=800
+      NODE_OPTIONS: --max-old-space-size=1024
       LOG_LEVEL: info
     depends_on:
       postgres:
