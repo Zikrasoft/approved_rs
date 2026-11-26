@@ -6,7 +6,6 @@ import type {
 } from '@medusajs/framework/types';
 import { Modules } from '@medusajs/framework/utils';
 import { partPageSlug } from '@podbor/catalog-contract';
-import { z } from 'zod';
 
 import { CATALOG_MODULE } from '../../modules/catalog';
 import type CatalogModuleService from '../../modules/catalog/service';
@@ -15,6 +14,13 @@ import type PublishModuleService from '../../modules/publish/service';
 import { PART_IDENTIFIER_INDEX } from '../../search/part-changed-event';
 import { CATALOGUE_CAR_INDEX } from '../car-pages';
 import { parseEnv } from '../env';
+import {
+  identifiersToPurge,
+  identifiersToReindex,
+  NO_CHANGES,
+  unfinishedChanges,
+  withChanges,
+} from './changes';
 import { sweepOrphans } from './orphans';
 import {
   CATALOGUE_HUB_PATTERNS,
@@ -47,24 +53,6 @@ export type PublishSearch = {
   swap: (index: string) => Promise<void>;
   partsIndexActive: () => Promise<boolean>;
   settledPublishedDocuments: (published: number) => Promise<number>;
-};
-
-const publishChangesSchema = z.object({
-  fresh: z.array(z.string()),
-  listedFlipped: z.array(z.string()),
-  translatedParts: z.array(z.string()),
-  sweptIdentifiers: z.array(z.string()),
-});
-
-export type PublishChanges = z.infer<typeof publishChangesSchema>;
-
-const unfinishedReportSchema = z.object({ unfinished: publishChangesSchema });
-
-const NO_CHANGES: PublishChanges = {
-  fresh: [],
-  listedFlipped: [],
-  translatedParts: [],
-  sweptIdentifiers: [],
 };
 
 const SETTLE_TRIES = 12;
@@ -141,34 +129,6 @@ async function partIdsOf(scope: MedusaContainer, identifierIds: string[]) {
   );
   return identifiers.map(({ part_id }) => part_id);
 }
-
-async function unfinishedChanges(
-  publish: PublishModuleService,
-): Promise<PublishChanges> {
-  const [last] = await publish.listCatalogueRuns(
-    { kind: 'publish', report: { $ne: null } },
-    { select: ['report'], order: { created_at: 'DESC' }, take: 1 },
-  );
-  return (
-    unfinishedReportSchema.safeParse(last?.report).data?.unfinished ??
-    NO_CHANGES
-  );
-}
-
-const withChanges = (
-  changes: PublishChanges,
-  more: Partial<PublishChanges>,
-): PublishChanges => {
-  const union = (key: keyof PublishChanges) => [
-    ...new Set([...changes[key], ...(more[key] ?? [])]),
-  ];
-  return {
-    fresh: union('fresh'),
-    listedFlipped: union('listedFlipped'),
-    translatedParts: union('translatedParts'),
-    sweptIdentifiers: union('sweptIdentifiers'),
-  };
-};
 
 async function checkShrink(publish: PublishModuleService) {
   const { published, projected } = await publish.partPageCounts();
@@ -250,10 +210,10 @@ const publishChain = (scope: MedusaContainer) => {
           await search.swap(CATALOGUE_CAR_INDEX);
           return;
         }
-        const identifierParts = await partIdsOf(scope, [
-          ...changes.fresh,
-          ...changes.listedFlipped,
-        ]);
+        const identifierParts = await partIdsOf(
+          scope,
+          identifiersToReindex(changes),
+        );
         await search.changed({
           partIds: [
             ...new Set([...identifierParts, ...changes.translatedParts]),
@@ -267,11 +227,7 @@ const publishChain = (scope: MedusaContainer) => {
     {
       name: 'purge',
       run: async () => {
-        const slugs = await partPageSlugsOf(scope, [
-          ...changes.fresh,
-          ...changes.listedFlipped,
-          ...changes.sweptIdentifiers,
-        ]);
+        const slugs = await partPageSlugsOf(scope, identifiersToPurge(changes));
         for (const pattern of [
           ...CATALOGUE_HUB_PATTERNS,
           ...[...new Set(slugs)].map(partPagePattern),
