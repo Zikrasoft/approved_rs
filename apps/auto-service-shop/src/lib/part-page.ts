@@ -11,6 +11,7 @@ import {
   type Vehicle,
 } from '@podbor/catalog-contract';
 
+import { memoized } from './catalogue-memo';
 import { CATEGORY_RELATIONS, shownCategory } from './categories';
 import { localizedCategory, localizedVehicle } from './catalogue-locale';
 import { memoPartDemand } from './part-demand';
@@ -20,7 +21,10 @@ import {
   catalogueModules,
   catalogueStructure,
 } from './catalogue-structure';
-import { listVehicleResponses, toFitmentResponse } from './store-response';
+import {
+  listVehicleResponsesWithSeries,
+  toFitmentResponse,
+} from './store-response';
 
 const distinct = <T>(values: T[]) => [...new Set(values)];
 
@@ -29,38 +33,45 @@ const byId = <Row extends { id: string }>(rows: Row[]) =>
     a.id.localeCompare(b.id),
   );
 
+type SeriesOf = Map<string, string>;
+
 async function seriesLinks(
   modules: CatalogueModules,
-  vehicleIds: string[],
+  seriesIds: string[],
 ): Promise<LinkedSeries[]> {
-  const { catalog } = modules;
-  if (!vehicleIds.length) return [];
-  const rows = await catalog.listVehicles(
-    { id: vehicleIds },
-    { relations: ['model', 'model.chassis'], take: null },
-  );
-  const seriesIds = distinct(rows.map(({ model }) => model.chassis.series_id));
+  if (!seriesIds.length) return [];
   return (await catalogueStructure(modules, { id: seriesIds })).paged
     .map(({ slug, make }) => ({ make: make.slug, slug }))
     .sort((a, b) => `${a.make}/${a.slug}`.localeCompare(`${b.make}/${b.slug}`));
 }
+
+const vehiclesLoader =
+  (catalog: CatalogueModules['catalog'], seriesOf: SeriesOf) =>
+  async (filters: Parameters<typeof listVehicleResponsesWithSeries>[1]) =>
+    (await listVehicleResponsesWithSeries(catalog, filters)).map(
+      ({ vehicle, series_id }) => {
+        seriesOf.set(vehicle.id, series_id);
+        return vehicle;
+      },
+    );
 
 async function kitCars(
   { catalog, publish }: CatalogueModules,
   part: PartPage['part'] & { category_id: string },
   fitted: Vehicle[],
   required: Vehicle[],
+  loadVehicles: ReturnType<typeof vehiclesLoader>,
 ): Promise<Vehicle[]> {
-  const listed = await publish.listedPartsIn(part.category_id);
+  const listed = await memoized(`listed-parts:${part.category_id}`, () =>
+    publish.listedPartsIn(part.category_id),
+  );
   const seeds = byId([...fitted, ...required]);
   const models = await catalog.listVehicleModels(
     { slug: distinct(seeds.map(({ model }) => model.slug)) },
     { select: ['id'], take: null },
   );
   const sameModel = models.length
-    ? await listVehicleResponses(catalog, {
-        model_id: models.map(({ id }) => id),
-      })
+    ? await loadVehicles({ model_id: models.map(({ id }) => id) })
     : [];
   const engineLess = sameModel.filter(({ engine }) => engine === null);
   const fittedIds = new Set(fitted.map(({ id }) => id));
@@ -74,20 +85,22 @@ async function kitCars(
         ).length > 0,
     ),
   ]);
+  const listedIds = new Set(listed.map(({ id }) => id));
   const fitments = (
     await catalog.listFitments(
       {
         vehicle_id: distinct(
           [...candidates, ...engineLess].map(({ id }) => id),
         ),
-        part_id: listed.map(({ id }) => id),
       },
       { order: { id: 'ASC' }, take: null },
     )
-  ).map((row) => ({
-    ...toFitmentResponse(row),
-    category_id: part.category_id,
-  }));
+  )
+    .filter(({ part_id }) => listedIds.has(part_id))
+    .map((row) => ({
+      ...toFitmentResponse(row),
+      category_id: part.category_id,
+    }));
   const fitsOf = (vehicle: Vehicle) =>
     fitments.filter(({ vehicle_id }) => vehicle_id === vehicle.id);
   const kitPart = (vehicle: Vehicle) => {
@@ -114,6 +127,8 @@ export async function partPageAt(
   const address = partPageAddress(slug);
   const modules = catalogueModules(scope);
   const { catalog, publish } = modules;
+  const seriesOf: SeriesOf = new Map();
+  const loadVehicles = vehiclesLoader(catalog, seriesOf);
   const own =
     address && (await publish.publishedBySlug(address.brand, address.number));
   if (!own) return null;
@@ -165,7 +180,7 @@ export async function partPageAt(
     { order: { id: 'ASC' }, take: null },
   );
   const fitVehicles = fitments.length
-    ? await listVehicleResponses(catalog, {
+    ? await loadVehicles({
         id: distinct(fitments.map(({ vehicle_id }) => vehicle_id)),
       })
     : [];
@@ -185,7 +200,7 @@ export async function partPageAt(
         ),
       );
   const requirementCars = requirementIds.length
-    ? byId(await listVehicleResponses(catalog, { id: requirementIds }))
+    ? byId(await loadVehicles({ id: requirementIds }))
     : [];
   const category = categoryOf(page);
   const kit =
@@ -195,6 +210,7 @@ export async function partPageAt(
           { ...part, category_id: part.category_id },
           fitVehicles,
           requirementCars,
+          loadVehicles,
         )
       : [];
 
@@ -217,7 +233,9 @@ export async function partPageAt(
     linked_series: await seriesLinks(
       modules,
       distinct(
-        [...fitVehicles, ...requirementCars, ...kit].map(({ id }) => id),
+        [...fitVehicles, ...requirementCars, ...kit].flatMap(
+          ({ id }) => seriesOf.get(id) ?? [],
+        ),
       ),
     ),
   };

@@ -11,6 +11,7 @@ import {
 import { SHOP_PREVIEW_HEADER } from '@podbor/catalog-contract/preview';
 import { seriesSlugOf } from '@podbor/catalog-contract/slug';
 
+import { clearCatalogueMemo } from '../../../../../lib/catalogue-memo';
 import { createVehicleFixture } from '../../../../../../integration-tests/vehicleFixture';
 import { CATALOG_MODULE } from '../../../../../modules/catalog';
 import type CatalogModuleService from '../../../../../modules/catalog/service';
@@ -255,6 +256,34 @@ medusaIntegrationTestRunner({
 
         expect(anonymous.page.offers).toEqual([]);
         expect(previewed.page.offers.map(({ price }) => price)).toEqual([1200]);
+      });
+
+      it('loads vehicles once and serves the kit Part list from the memo on a second call', async () => {
+        const container = getContainer();
+        const catalog: CatalogModuleService = container.resolve(CATALOG_MODULE);
+        const publish: PublishModuleService = container.resolve(PUBLISH_MODULE);
+        clearCatalogueMemo();
+        const first = await partPage('mann-filter-hu816x');
+        const listedBefore = jest.spyOn(publish, 'listedPartsIn');
+        const vehiclesBefore = jest.spyOn(catalog, 'listVehicles');
+        const fitmentsBefore = jest.spyOn(catalog, 'listFitments');
+        const second = await partPage('mann-filter-hu816x');
+        const fitmentFilters = fitmentsBefore.mock.calls.map(([filter]) =>
+          Object.keys(filter as object),
+        );
+        const counts = {
+          listed: listedBefore.mock.calls.length,
+          vehicleReads: vehiclesBefore.mock.calls.length,
+          kitFitments: fitmentFilters.filter(
+            (keys) => keys.includes('part_id') && keys.includes('vehicle_id'),
+          ).length,
+        };
+        jest.restoreAllMocks();
+
+        expect(second).toEqual(first);
+        expect(counts.listed).toBe(0);
+        expect(counts.kitFitments).toBe(0);
+        expect(counts.vehicleReads).toBe(3);
       });
     });
   },
