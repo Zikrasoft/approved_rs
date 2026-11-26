@@ -1695,8 +1695,10 @@ moves forward again.
    `MEDUSA_BACKEND_URL`, on zero part pages, and on fewer than half of what the
    live site serves. A shrink that is meant (a supplier removed) goes through
    with `CATALOGUE_SHRINK_ALLOWED=true` in the carlab.rs build env for one
-   build; remove it afterwards. Part pages list only published numbers, the same
-   ones search finds, so a CI deploy and a Publish build the same catalogue.
+   build; remove it afterwards. The guard covers code releases only: a Publish
+   does not build the site, it changes the catalogue the live pages render
+   from, so no build guard sees a Publish. Part pages list only published
+   numbers, the same ones search finds.
 
 The production seed (`apps/auto-service-shop/src/scripts/seed-production.ts`) runs on
 every deploy and is idempotent. It creates the cash-at-pickup commerce defaults
