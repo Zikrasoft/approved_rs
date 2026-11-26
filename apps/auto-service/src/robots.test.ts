@@ -21,6 +21,7 @@ describe('robots.txt', () => {
     expect(groupAfter('User-agent: ClaudeBot')).toEqual([
       'User-agent: ClaudeBot',
       'User-agent: GPTBot',
+      'User-agent: PerplexityBot',
       'Crawl-delay: 3',
       ...shared,
     ]);

@@ -9,6 +9,7 @@ Disallow: /*/parts/search?*range=
 
 User-agent: ClaudeBot
 User-agent: GPTBot
+User-agent: PerplexityBot
 Crawl-delay: 3
 Allow: /
 Disallow: /api/
