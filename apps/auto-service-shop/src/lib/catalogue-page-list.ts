@@ -64,9 +64,11 @@ async function buildPageList(scope: MedusaContainer) {
 
   const categorySlug = new Map(categories.map(({ id, slug }) => [id, slug]));
   const partsPerMake = new Map(
-    (await publish.listedMakePartCounts(paged.map(({ id }) => id))).map(
-      ({ make_slug, parts: held }) => [make_slug, held],
-    ),
+    (
+      await memoized('make-part-counts', () =>
+        publish.listedMakePartCounts(paged.map(({ id }) => id)),
+      )
+    ).map(({ make_slug, parts: held }) => [make_slug, held]),
   );
   const makes = new Map(structure.stocked.map(({ make }) => [make.slug, make]));
 

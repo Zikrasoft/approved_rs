@@ -101,6 +101,8 @@ http://:2020 {
 	handle @purge {
 		reverse_proxy 127.0.0.1:2019 {
 			header_up Host 127.0.0.1:2019
+			header_up -Origin
+			header_up -Sec-Fetch-Mode
 		}
 	}
 

@@ -372,7 +372,7 @@ import { CATALOGUE_HUB_PATTERNS, partPagePattern } from '$here/../../apps/auto-s
 console.log(CATALOGUE_HUB_PATTERNS.join('\n'));
 console.log(partPagePattern('a'));
 " >"$work/purge-patterns"
-hub_status=$(sed '$d' "$work/purge-patterns" | while read -r pattern; do listener -X PURGE "$purge_listener/$pattern"; echo; done | sort -u)
+hub_status=$(sed '$d' "$work/purge-patterns" | while read -r pattern; do listener -X PURGE -H 'Sec-Fetch-Mode: cors' "$purge_listener/$pattern"; echo; done | sort -u)
 if [ "$hub_status" = 204 ]; then echo "ok - the shop's hub purges pass the listener"; else echo "not ok - the hub purges answered $hub_status"; failures=$((failures + 1)); fi
 for path in /ru/cars/bmw/ /ru/cars/audi/ /ru/parts/c/brakes/ /ru/parts/peugeot/3008/ /ru/parts/ /llms.txt /sr/llms.txt /catalogue-build.json /sitemap-catalogue.xml /sitemap-catalogue-0.xml; do
   cached "the hub purge empties $path" 'fwd=uri-miss; stored' carlab "$path"

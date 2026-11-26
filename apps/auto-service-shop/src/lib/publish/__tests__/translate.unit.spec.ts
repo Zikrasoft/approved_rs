@@ -85,6 +85,30 @@ describe('translateCatalogue', () => {
     expect(new Set(updated.map(({ id }) => id)).size).toBe(2_001);
   });
 
+  it('stamps Parts with the same source with the same translated_from', async () => {
+    openAi();
+    const same = (id: string): Row => ({
+      id,
+      name: 'Фильтр',
+      description: 'Масляный',
+    });
+    const { catalog, updated } = catalogueOf([
+      same('part_a'),
+      same('part_b'),
+      part(3, 'Другой'),
+    ]);
+
+    await translateCatalogue(catalog, 'key');
+
+    const stamps = new Map(
+      (updated as { id: string; translated_from: unknown }[]).map(
+        ({ id, translated_from }) => [id, JSON.stringify(translated_from)],
+      ),
+    );
+    expect(stamps.get('part_a')).toBe(stamps.get('part_b'));
+    expect(stamps.get('part_3')).not.toBe(stamps.get('part_a'));
+  });
+
   it('sends long Part descriptions in separate requests', async () => {
     const requests = openAi();
     const long = 'Аккумулятор для запуска двигателя. '.repeat(90);
