@@ -1,3 +1,5 @@
+import type { Knex } from '@medusajs/framework/mikro-orm/knex';
+import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
 import { createVehicleFixture } from '../../../../integration-tests/vehicleFixture';
@@ -346,6 +348,32 @@ medusaIntegrationTestRunner({
           ].sort(),
         );
         expect(pairs.join()).not.toContain(short.part_id);
+      });
+
+      it('skips the requirement fit query while no Requirement exists', async () => {
+        const knex = getContainer().resolve<Knex>(
+          ContainerRegistrationKeys.PG_CONNECTION,
+        );
+        const statements: string[] = [];
+        const recording = {
+          getTransactionContext: () => undefined,
+          getKnex: () => ({
+            raw: (sql: string, bindings: Knex.RawBinding[]) => {
+              statements.push(sql);
+              return knex.raw(sql, bindings);
+            },
+          }),
+        };
+        const part = await numberedPart('REQ-EMPTY-1');
+
+        expect(await publish.hasRequirements()).toBe(false);
+        expect(
+          await publish.partRequirementFits([part.part_id], {
+            manager: recording as never,
+          }),
+        ).toEqual([]);
+        expect(statements).toHaveLength(1);
+        expect(statements[0]).toContain('exists(');
       });
     });
   },
