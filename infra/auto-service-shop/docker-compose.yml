@@ -66,6 +66,7 @@ services:
       - autovacuum_vacuum_scale_factor=0.02
       - -c
       - autovacuum_analyze_scale_factor=0.02
+    shm_size: 256m
     mem_limit: 896m
     security_opt: ['no-new-privileges:true']
     networks:

@@ -71,6 +71,7 @@ expect 'what runs without grafana stays under 3.75 GB' \
 expect 'medusa runs a 1024 MB heap in 1300 MB' \
   '.services.medusa.environment.NODE_OPTIONS == "--max-old-space-size=1024" and .services.medusa.mem_limit == "1363148800"'
 expect 'postgres gets 896 MB' '.services.postgres.mem_limit == "939524096"'
+expect 'postgres gets 256 MB of shared memory for parallel work' '.services.postgres.shm_size == "268435456"'
 expect 'grafana runs only on demand' '.services.grafana.profiles == ["grafana"]'
 sites=$(jq -r '.sites | keys[]' "$here/../../.github/scripts/site-env.json")
 shop_node=$(sed -n 's/^FROM \(node:[^ ]*\).*/\1/p' "$here/Dockerfile" | tail -n 1)

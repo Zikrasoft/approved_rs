@@ -82,9 +82,9 @@ const placeBindings = ({ series = null }: { series?: string[] | null }) => ({
   min_matches: MIN_REQUIREMENT_MATCHES_FOR_PAGE,
 });
 
-const VACUUM_FITMENT = 'vacuum (analyze) fitment';
+const VACUUM_FITMENT = 'vacuum (analyze, parallel 0) fitment';
 
-const VACUUM_SNAPSHOT = 'vacuum (analyze) listed_series_part';
+const VACUUM_SNAPSHOT = 'vacuum (analyze, parallel 0) listed_series_part';
 
 const PRUNE_RUNS_BEFORE = `
   delete from catalogue_run r
