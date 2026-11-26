@@ -11,6 +11,7 @@ import {
   type CheckoutRefusal,
   type PartOffer,
   cataloguePageListSchema,
+  cataloguePartsHubSchema,
   categoriesResponseSchema,
   partPageSlug,
   identifierOffersResponseSchema,
@@ -102,6 +103,7 @@ export type SearchQuery = {
   sort?: SearchSort | null;
   offset?: number;
   limit?: number;
+  specs?: boolean;
 };
 
 export type SearchOutcome = Omit<SearchResponse, 'results'> & {
@@ -462,6 +464,20 @@ export function createCatalogue({
       );
     },
 
+    async partsHub() {
+      const path = '/store/catalogue-pages/hub';
+      const response = await send(path, 'GET');
+      if (response.status === 404) {
+        return cataloguePartsHubSchema.parse(
+          await request('/store/catalogue-pages'),
+        );
+      }
+      if (!response.ok) {
+        throw new Error(`Catalogue ${path} answered ${response.status}`);
+      }
+      return cataloguePartsHubSchema.parse(await response.json());
+    },
+
     async search(query: SearchQuery): Promise<SearchOutcome | null> {
       const {
         q,
@@ -474,6 +490,7 @@ export function createCatalogue({
         offset = 0,
         limit,
         sort = null,
+        specs: withSpecs = false,
       } = query;
       const params = new URLSearchParams({
         ...(q ? { q: latinBrands(q) } : {}),
@@ -500,7 +517,8 @@ export function createCatalogue({
         const found = searchResponseSchema.parse(
           await request(`/store/search?${params}`),
         );
-        const described = found.results.some(({ part }) => part.attributes);
+        const described =
+          withSpecs && found.results.some(({ part }) => part.attributes);
         const bySlug = new Map(
           described
             ? (await categories().catch(() => [])).map((named) => [
@@ -559,7 +577,10 @@ export function createCatalogue({
           'catalogue search failed',
           error instanceof z.ZodError ? z.prettifyError(error) : String(error),
         );
-        return sort ? this.search({ ...query, sort: null }) : null;
+        const stalled =
+          error instanceof Error &&
+          (error.name === 'TimeoutError' || error.name === 'AbortError');
+        return sort && !stalled ? this.search({ ...query, sort: null }) : null;
       }
     },
 

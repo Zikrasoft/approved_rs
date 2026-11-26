@@ -85,7 +85,23 @@ const CRAWL_TABLES: SchemaTable[] = [
   ),
 ];
 
-export const SCHEMA_TABLES = [...SNAPSHOT_TABLES, ...CRAWL_TABLES];
+const CATALOGUE_SNAPSHOT_TABLE = handWrittenTable(
+  'listed_series_part',
+  [
+    column('series_id', 'text'),
+    column('category_id', 'text', true),
+    column('part_id', 'text'),
+    column('fitted', 'boolean'),
+    column('required', 'boolean'),
+  ],
+  ['IDX_listed_series_part_series'],
+);
+
+export const SCHEMA_TABLES = [
+  ...SNAPSHOT_TABLES,
+  ...CRAWL_TABLES,
+  CATALOGUE_SNAPSHOT_TABLE,
+];
 
 const UDT_OF: Record<string, string> = {
   integer: 'int4',

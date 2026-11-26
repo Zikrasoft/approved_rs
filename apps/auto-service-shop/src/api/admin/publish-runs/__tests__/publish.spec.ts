@@ -14,6 +14,10 @@ import {
   PUBLISH_SEARCH_REGISTRATION,
   type PublishSearch,
 } from '../../../../lib/publish/chain';
+import {
+  PUBLISH_PREWARM_REGISTRATION,
+  type PublishPrewarm,
+} from '../../../../lib/publish/prewarm-run';
 import type { PublishPurge } from '../../../../lib/publish/purge';
 import type { IndexChanges } from '../../../../lib/index-changes';
 import { SUPPLIER_ADAPTERS_REGISTRATION } from '../../../../lib/suppliers/adapter';
@@ -68,8 +72,14 @@ const network: FakeNetwork = {
 const searchIndex = {
   changes: [] as IndexChanges[],
   swaps: [] as string[],
+  sawAtSwap: [] as { memo: string; snapshotRows: number }[],
   active: true,
   indexed: null as number | null,
+  refusal: null as Error | null,
+};
+
+const warmUp = {
+  calls: [] as string[],
   refusal: null as Error | null,
 };
 
@@ -145,6 +155,14 @@ medusaIntegrationTestRunner({
           },
           swap: async (index) => {
             searchIndex.swaps.push(index);
+            searchIndex.sawAtSwap.push({
+              memo: await memoized('swap-probe', async () => 'fresh'),
+              snapshotRows: (
+                await container
+                  .resolve<PublishModuleService>(PUBLISH_MODULE)
+                  .listedSeriesCategoryCounts()
+              ).length,
+            });
           },
           partsIndexActive: async () => searchIndex.active,
           settledPublishedDocuments: async (published) =>
@@ -158,6 +176,13 @@ medusaIntegrationTestRunner({
           if (pageCache.refusal) throw pageCache.refusal;
           pageCache.purged.push(pattern);
         }) satisfies PublishPurge),
+      );
+      container.register(
+        PUBLISH_PREWARM_REGISTRATION,
+        asValue((async () => {
+          warmUp.calls.push(`after ${pageCache.purged.length} purges`);
+          if (warmUp.refusal) throw warmUp.refusal;
+        }) satisfies PublishPrewarm),
       );
       container.register(
         SUPPLIER_ADAPTERS_REGISTRATION,
@@ -249,12 +274,15 @@ medusaIntegrationTestRunner({
         network.unsafeAnswer = false;
         searchIndex.changes = [];
         searchIndex.swaps = [];
+        searchIndex.sawAtSwap = [];
         searchIndex.active = true;
         searchIndex.indexed = null;
         searchIndex.refusal = null;
         pageCache.purged = [];
         pageCache.refusal = null;
         pageCache.gate = null;
+        warmUp.calls = [];
+        warmUp.refusal = null;
         delete process.env.CATALOGUE_SHRINK_ALLOWED;
         supplier.articles.length = 0;
       });
@@ -284,6 +312,25 @@ medusaIntegrationTestRunner({
         expect(network.githubRequests).toBe(0);
         expect(searchIndex.swaps).toEqual(['catalogue_car']);
         expect(pageCache.purged).toEqual(HUB_PATTERNS);
+      });
+
+      it('warms the pages after the purge, and a failing warm-up does not fail the run', async () => {
+        const warmed = await publish();
+        expect(warmed.status).toBe('succeeded');
+        expect(warmUp.calls).toEqual([`after ${HUB_PATTERNS.length} purges`]);
+
+        warmUp.refusal = new Error('site down');
+        const refused = await publish();
+        expect(refused).toEqual(
+          expect.objectContaining({ status: 'succeeded', failed_step: null }),
+        );
+      });
+
+      it('does not warm anything when the purge fails', async () => {
+        pageCache.refusal = new Error('The page cache refused the purge');
+        const failed = await publish();
+        expect(failed.failed_step).toBe('purge');
+        expect(warmUp.calls).toEqual([]);
       });
 
       it('imports no Supplier catalogue; its own Import brings the articles Publish then translates', async () => {
@@ -525,6 +572,46 @@ medusaIntegrationTestRunner({
         expect(await memoized('publish-probe', async () => 'after')).toBe(
           'after',
         );
+      });
+
+      it('builds the catalogue snapshot after publishing, so reindex and purge read the new Publish', async () => {
+        const { vehicle } = await createVehicleFixture(catalog, {
+          typeCode: 'PUBLISH-SNAP',
+        });
+        const [mann] = await catalog.listBrands({ slug: 'mann-filter' });
+        const partId = await catalog.createPartWithIdentifiers({
+          name: 'Масляный фильтр',
+          identifiers: [
+            { type: 'manufacturer-number', brand_id: mann.id, value: 'SN 1' },
+          ],
+        });
+        await catalog.createFitments({
+          part_id: partId,
+          vehicle_id: vehicle.id,
+        });
+        await memoized('swap-probe', async () => 'before');
+        const publishModule: PublishModuleService =
+          getContainer().resolve(PUBLISH_MODULE);
+
+        const run = await publish();
+        const [stored] = await publishModule.listCatalogueRuns({ id: run.id });
+
+        expect(run.status).toBe('succeeded');
+        expect(Object.keys(stored.report?.step_ms ?? {}).sort()).toEqual(
+          [
+            'shrink',
+            'sweep',
+            'translate',
+            'publish',
+            'snapshot',
+            'reindex',
+            'purge',
+            'prewarm',
+          ].sort(),
+        );
+        expect(searchIndex.sawAtSwap).toEqual([
+          { memo: 'fresh', snapshotRows: 1 },
+        ]);
       });
 
       it('publishes the brand-numbers before the page cache is purged', async () => {
@@ -889,6 +976,67 @@ medusaIntegrationTestRunner({
             '-/[a-z][a-z]/parts/p/mann-filter-pg6/',
           ]);
         });
+
+        it('carry the Part pages of a run whose snapshot failed into the next Publish', async () => {
+          await settled();
+          await catalog.createPartWithIdentifiers({
+            name: 'Масляный фильтр',
+            identifiers: [
+              {
+                type: 'manufacturer-number',
+                brand_id: await mannId(),
+                value: 'PG 7',
+              },
+            ],
+          });
+          const publishModule: PublishModuleService =
+            getContainer().resolve(PUBLISH_MODULE);
+          jest
+            .spyOn(publishModule, 'buildCatalogueSnapshot')
+            .mockRejectedValueOnce(new Error('The snapshot ran out of disk'));
+
+          const failed = await publish();
+          const purgedOnFailure = [...pageCache.purged];
+          const retried = await publish();
+          jest.restoreAllMocks();
+
+          expect(failed).toEqual(
+            expect.objectContaining({
+              status: 'failed',
+              failed_step: 'snapshot',
+              error: 'The snapshot ran out of disk',
+            }),
+          );
+          expect(purgedOnFailure).toEqual([]);
+          expect(retried.status).toBe('succeeded');
+          expect(pageCache.purged).toEqual([
+            ...HUB_PATTERNS,
+            '-/[a-z][a-z]/parts/p/mann-filter-pg7/',
+          ]);
+        });
+      });
+
+      it('logs a failed catalogue warm after the snapshot and still reindexes and purges', async () => {
+        jest.spyOn(console, 'log').mockImplementation(() => undefined);
+        const publishModule: PublishModuleService =
+          getContainer().resolve(PUBLISH_MODULE);
+        jest
+          .spyOn(publishModule, 'listedNumbers')
+          .mockRejectedValue(new Error('The warm timed out'));
+
+        const run = await publish();
+        const warms = loggedEvents('catalogue.warm');
+        jest.restoreAllMocks();
+
+        expect(run.status).toBe('succeeded');
+        expect(warms).toContainEqual(
+          expect.objectContaining({
+            outcome: 'failed',
+            memo: 'listed-numbers',
+            cause: expect.stringContaining('The warm timed out'),
+          }),
+        );
+        expect(pageCache.purged).toEqual(HUB_PATTERNS);
       });
 
       it('logs search.drift when search disagrees with the published numbers, and still succeeds', async () => {

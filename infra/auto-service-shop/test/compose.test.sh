@@ -47,8 +47,8 @@ expect 'postgres and typesense sit on the internal network only' \
 pg_address=$(sed -n "s/^POSTGRES_ADDRESS=\\(.*\\):5432\$/\\1/p" "$here/harden-ssh.sh")
 expect "postgres keeps the fixed address the crawler tunnel may open ($pg_address)" \
   ".services.postgres.networks.data.ipv4_address == \"$pg_address\" and .networks.data.ipam.config == [{\"subnet\": \"10.200.0.0/24\", \"ip_range\": \"10.200.0.128/25\"}]"
-expect 'postgres runs jit off, tuned for the droplet, with pg_stat_statements and a slow-query log, shared_buffers left at its default' \
-  '.services.postgres.command == ["postgres", "-c", "jit=off", "-c", "work_mem=8MB", "-c", "random_page_cost=1.1", "-c", "shared_preload_libraries=pg_stat_statements", "-c", "log_min_duration_statement=1000"]'
+expect 'postgres runs jit off, tuned for the droplet, with pg_stat_statements, a slow-query log and 256 MB of shared_buffers' \
+  '.services.postgres.command == ["postgres", "-c", "jit=off", "-c", "work_mem=16MB", "-c", "random_page_cost=1.1", "-c", "shared_preload_libraries=pg_stat_statements", "-c", "log_min_duration_statement=1000", "-c", "shared_buffers=256MB", "-c", "effective_cache_size=512MB", "-c", "autovacuum_vacuum_scale_factor=0.02", "-c", "autovacuum_analyze_scale_factor=0.02"]'
 expect 'medusa reaches typesense by service name with the shared key' \
   '.services.medusa.environment.TYPESENSE_HOST == "typesense" and .services.medusa.environment.TYPESENSE_API_KEY == "y" and .services.typesense.environment.TYPESENSE_API_KEY == "y"'
 expect 'medusa reaches postgres by service name' \
@@ -68,6 +68,9 @@ expect 'every service has a memory limit, together under the 4 GB of the host' \
   '[.services[] | .mem_limit | tonumber] | (all(. > 0) and add < 4096 * 1024 * 1024)'
 expect 'what runs without grafana stays under 3.75 GB' \
   '[.services[] | select(.profiles != ["grafana"]) | .mem_limit | tonumber] | add < 3840 * 1024 * 1024'
+expect 'medusa runs a 1024 MB heap in 1300 MB' \
+  '.services.medusa.environment.NODE_OPTIONS == "--max-old-space-size=1024" and .services.medusa.mem_limit == "1363148800"'
+expect 'postgres gets 896 MB' '.services.postgres.mem_limit == "939524096"'
 expect 'grafana runs only on demand' '.services.grafana.profiles == ["grafana"]'
 sites=$(jq -r '.sites | keys[]' "$here/../../.github/scripts/site-env.json")
 shop_node=$(sed -n 's/^FROM \(node:[^ ]*\).*/\1/p' "$here/Dockerfile" | tail -n 1)
@@ -107,7 +110,7 @@ expect 'caddy serves the three sites on their own domains' \
 expect 'caddy serves the CRM bot webhooks on a host of their own' \
   '.services.caddy.environment.CRM_HOST == "crm.carlab.rs"'
 expect 'caddy pulls the page cache image CI built for the same commit as medusa, inside its 128 MB' \
-  '.services.caddy | .image == "ghcr.io/zikrasoft/podbor-carlab-caddy:0000000000000000000000000000000000000000" and .build == null and .mem_limit == "134217728"'
+  '.services.caddy | .image == "ghcr.io/zikrasoft/podbor-carlab-caddy:0000000000000000000000000000000000000000" and .build == null and .mem_limit == "167772160"'
 expect 'caddy takes the preview token from .env to verify the preview cookie' \
   ".services.caddy.environment.SHOP_PREVIEW_TOKEN == \"$preview_token\""
 expect 'the caddy image tag falls back to the shop tag unless CADDY_TAG names its own content tag' \

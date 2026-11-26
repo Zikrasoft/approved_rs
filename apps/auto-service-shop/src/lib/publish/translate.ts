@@ -10,7 +10,6 @@ import {
 import { z } from 'zod';
 
 import { OPENAI_MODEL } from '../openai-model';
-import { keysetPages } from '../../modules/_shared/keyset-pages';
 import type CatalogModuleService from '../../modules/catalog/service';
 
 export type TargetLocale = (typeof CATALOG_TRANSLATION_LOCALES)[number];
@@ -351,19 +350,16 @@ export async function translateCatalogue(
   const translatedParts = new Set<string>();
   for (const [name, entity] of TRANSLATABLE_ENTITIES) {
     const hashOf = sourceHasher(entity);
-    for await (const sources of keysetPages(
-      (after, take) =>
-        catalog.translationSources(name, entity.fields, after, take),
-      ROWS_PER_PAGE,
-    )) {
-      const staleIds = sources
-        .map((row) => itemOf(entity, row, hashOf))
-        .filter(isStale)
-        .map(({ id }) => id);
-      if (staleIds.length === 0) continue;
-      const items = (await entity.list(catalog, { id: staleIds })).map((row) =>
-        itemOf(entity, row, hashOf),
-      );
+    const sources = await catalog.translationSources(name, entity.fields);
+    const staleIds = sources
+      .filter((group) => isStale(itemOf(entity, { ...group, id: '' }, hashOf)))
+      .flatMap(({ ids }) => ids);
+    for (let start = 0; start < staleIds.length; start += ROWS_PER_PAGE) {
+      const items = (
+        await entity.list(catalog, {
+          id: staleIds.slice(start, start + ROWS_PER_PAGE),
+        })
+      ).map((row) => itemOf(entity, row, hashOf));
       for (const locale of CATALOG_TRANSLATION_LOCALES) {
         const written = await translateLocale(
           entity,

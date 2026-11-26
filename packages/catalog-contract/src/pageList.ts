@@ -24,4 +24,11 @@ export const cataloguePageListSchema = z.object({
   catalogue_makes: makeListSchema.nullable().default(null),
 });
 
+export const cataloguePartsHubSchema = cataloguePageListSchema.pick({
+  makes: true,
+  categories: true,
+});
+
 export type CataloguePageList = z.infer<typeof cataloguePageListSchema>;
+
+export type CataloguePartsHub = z.infer<typeof cataloguePartsHubSchema>;

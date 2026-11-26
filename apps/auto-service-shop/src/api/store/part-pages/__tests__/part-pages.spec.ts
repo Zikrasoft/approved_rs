@@ -2,6 +2,7 @@ import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 
+import { clearCatalogueMemo } from '../../../../lib/catalogue-memo';
 import { PUBLISH_MODULE } from '../../../../modules/publish';
 import type PublishModuleService from '../../../../modules/publish/service';
 import { CATALOG_MODULE } from '../../../../modules/catalog';
@@ -192,6 +193,7 @@ medusaIntegrationTestRunner({
         await getContainer()
           .resolve<DemandModuleService>(DEMAND_MODULE)
           .record({ signal: 'inquiry', identifierIds: [mannOil.id] });
+        clearCatalogueMemo();
 
         const page = (await get()).data.pages.find(
           ({ id }: { id: string }) => id === mannOil.id,
@@ -238,6 +240,21 @@ medusaIntegrationTestRunner({
             (page: { normalized_value: string }) => page.normalized_value,
           ),
         ).not.toContain('C30005');
+      });
+
+      it('reads Demand through the memo', async () => {
+        clearCatalogueMemo();
+        const counts = jest.spyOn(
+          getContainer().resolve<DemandModuleService>(DEMAND_MODULE),
+          'countsSince',
+        );
+
+        await get();
+        await get();
+
+        expect(counts).toHaveBeenCalledTimes(1);
+        counts.mockRestore();
+        clearCatalogueMemo();
       });
 
       it.each(['?limit=0', '?limit=1001', '?after=', '?limit=abc'])(

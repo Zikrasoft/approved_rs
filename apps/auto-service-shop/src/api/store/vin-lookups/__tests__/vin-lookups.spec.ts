@@ -208,9 +208,10 @@ medusaIntegrationTestRunner({
             });
           }
         }
-        await getContainer()
-          .resolve<PublishModuleService>(PUBLISH_MODULE)
-          .publishAll();
+        const publish =
+          getContainer().resolve<PublishModuleService>(PUBLISH_MODULE);
+        await publish.publishAll();
+        await publish.buildCatalogueSnapshot();
         await getContainer().resolve(Modules.SEARCH).reindex();
 
         expect((await lookUp(OWNER_VIN)).data.place).toMatchObject({

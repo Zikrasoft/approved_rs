@@ -28,9 +28,15 @@ import {
   partPagePattern,
   type PublishPurge,
 } from './purge';
+import {
+  PUBLISH_PREWARM_REGISTRATION,
+  prewarmCatalogue,
+  type PublishPrewarm,
+} from './prewarm-run';
 import { translateCatalogue } from './translate';
 import { clearCatalogueMemo } from '../catalogue-memo';
 import { cataloguePageList } from '../catalogue-page-list';
+import { listedNumbersByCategory } from '../category-page';
 import { type RunOutcome, startCatalogueRun } from '../catalogue-writer';
 import { errorMessage } from '../errors';
 import {
@@ -38,7 +44,7 @@ import {
   hasNoActiveVersion,
   type IndexChanges,
 } from '../index-changes';
-import { logEvent } from '../log-event';
+import { causeOf, logEvent } from '../log-event';
 
 export const PUBLISH_SEARCH_REGISTRATION = 'publishSearch';
 
@@ -100,6 +106,11 @@ const purgeOf = (scope: MedusaContainer): PublishPurge =>
     ? scope.resolve<PublishPurge>(PUBLISH_PURGE_REGISTRATION)
     : cachePurge(parseEnv(process.env).CACHE_PURGE_URL);
 
+const prewarmOf = (scope: MedusaContainer): PublishPrewarm =>
+  scope.hasRegistration(PUBLISH_PREWARM_REGISTRATION)
+    ? scope.resolve<PublishPrewarm>(PUBLISH_PREWARM_REGISTRATION)
+    : () => prewarmCatalogue(scope);
+
 async function partPageSlugsOf(
   scope: MedusaContainer,
   identifierIds: string[],
@@ -140,6 +151,18 @@ async function checkShrink(publish: PublishModuleService) {
   }
 }
 
+async function warmCatalogueMemo(memo: string, warm: () => Promise<unknown>) {
+  try {
+    await warm();
+  } catch (error) {
+    logEvent('catalogue.warm', {
+      outcome: 'failed',
+      memo,
+      cause: causeOf(error),
+    });
+  }
+}
+
 async function checkPublishedCount(search: PublishSearch, published: number) {
   const indexed = await search.settledPublishedDocuments(published);
   if (indexed !== published) {
@@ -156,6 +179,7 @@ const publishChain = (scope: MedusaContainer) => {
   const publish = scope.resolve<PublishModuleService>(PUBLISH_MODULE);
   const search = searchOf(scope);
   const purge = purgeOf(scope);
+  const prewarm = prewarmOf(scope);
   let changes = NO_CHANGES;
   let published = 0;
   const stepMs: Record<string, number> = {};
@@ -192,7 +216,17 @@ const publishChain = (scope: MedusaContainer) => {
         changes = withChanges(changes, await publish.publishAll());
         clearCatalogueMemo();
         published = await publish.countPublished();
-        cataloguePageList(scope).catch(() => undefined);
+      },
+    },
+    {
+      name: 'snapshot',
+      run: async () => {
+        await publish.buildCatalogueSnapshot();
+        clearCatalogueMemo();
+        await warmCatalogueMemo('page-list', () => cataloguePageList(scope));
+        await warmCatalogueMemo('listed-numbers', () =>
+          listedNumbersByCategory(publish),
+        );
       },
     },
     {
@@ -227,6 +261,12 @@ const publishChain = (scope: MedusaContainer) => {
         ]) {
           await purge(pattern);
         }
+      },
+    },
+    {
+      name: 'prewarm',
+      run: async () => {
+        void prewarm().catch(() => undefined);
       },
     },
   ];

@@ -1,3 +1,5 @@
+import type { Knex } from '@medusajs/framework/mikro-orm/knex';
+import { ContainerRegistrationKeys } from '@medusajs/framework/utils';
 import { medusaIntegrationTestRunner } from '@medusajs/test-utils';
 
 import { createVehicleFixture } from '../../../../integration-tests/vehicleFixture';
@@ -88,11 +90,13 @@ medusaIntegrationTestRunner({
         ]);
 
         await publish.publishAll();
+        await publish.buildCatalogueSnapshot();
         const bothPublished = [
           await listedOn(oldSeries.id),
           await listedOn(newSeries.id),
         ];
         await publish.unpublish([replacement.part_identifier_id]);
+        await publish.buildCatalogueSnapshot();
         const replacementHidden = [
           await listedOn(oldSeries.id),
           await listedOn(newSeries.id),
@@ -133,6 +137,7 @@ medusaIntegrationTestRunner({
 
         const unpublished = await listedById(ids);
         await publish.publishAll();
+        await publish.buildCatalogueSnapshot();
         const published = await listedById(ids);
         await publish.unpublish([current.part_identifier_id]);
         const currentHidden = await listedById(ids);
@@ -251,6 +256,7 @@ medusaIntegrationTestRunner({
           );
         }
         await publish.publishAll();
+        await publish.buildCatalogueSnapshot();
 
         const counts = seriesCountsOf(
           await publish.listedSeriesCategoryCounts(),
@@ -331,6 +337,7 @@ medusaIntegrationTestRunner({
           { max: 30 },
         );
         await publish.publishAll();
+        await publish.buildCatalogueSnapshot();
 
         const pairs = (await publish.listedVehicleParts(own.series.id))
           .filter(({ fitted }) => !fitted)
@@ -346,6 +353,32 @@ medusaIntegrationTestRunner({
           ].sort(),
         );
         expect(pairs.join()).not.toContain(short.part_id);
+      });
+
+      it('skips the requirement fit query while no Requirement exists', async () => {
+        const knex = getContainer().resolve<Knex>(
+          ContainerRegistrationKeys.PG_CONNECTION,
+        );
+        const statements: string[] = [];
+        const recording = {
+          getTransactionContext: () => undefined,
+          getKnex: () => ({
+            raw: (sql: string, bindings: Knex.RawBinding[]) => {
+              statements.push(sql);
+              return knex.raw(sql, bindings);
+            },
+          }),
+        };
+        const part = await numberedPart('REQ-EMPTY-1');
+
+        expect(await publish.hasRequirements()).toBe(false);
+        expect(
+          await publish.partRequirementFits([part.part_id], {
+            manager: recording as never,
+          }),
+        ).toEqual([]);
+        expect(statements).toHaveLength(1);
+        expect(statements[0]).toContain('exists(');
       });
     });
   },

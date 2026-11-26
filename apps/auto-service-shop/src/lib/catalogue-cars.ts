@@ -17,16 +17,6 @@ import { localizedCategory } from './catalogue-locale';
 import { publishedOfParts, sluggedPagesOf } from './part-pages';
 import { catalogueModules, catalogueStructure } from './catalogue-structure';
 
-const firstFitment = (rows: CategoryPart[]) =>
-  rows.reduce<string | null>(
-    (first, { first_fitment_id: id }) =>
-      id !== null && (first === null || id < first) ? id : first,
-    null,
-  );
-
-const byFirstFitment = (a: string | null, b: string | null) =>
-  a === b ? 0 : a === null ? 1 : b === null ? -1 : a < b ? -1 : 1;
-
 export async function carMakePageAt(
   scope: MedusaContainer,
   slug: string,
@@ -55,18 +45,13 @@ export async function carMakePageAt(
   );
   const partsIn = (id: string) => byCategory.get(id)!;
   const top = [...categories]
-    .sort(
-      (a, b) =>
-        partsIn(b.id).length - partsIn(a.id).length ||
-        byFirstFitment(
-          firstFitment(partsIn(a.id)),
-          firstFitment(partsIn(b.id)),
-        ),
-    )
+    .sort((a, b) => partsIn(b.id).length - partsIn(a.id).length)
     .slice(0, MAKE_TOP_CATEGORIES);
+  const candidates = (id: string) =>
+    options.shown ? partsIn(id) : partsIn(id).slice(0, MAKE_SHOWCASE * 2);
   const published = await publishedOfParts(
     scope,
-    top.flatMap(({ id }) => partsIn(id).map(({ part_id }) => part_id)),
+    top.flatMap(({ id }) => candidates(id).map(({ part_id }) => part_id)),
   );
   const offers = options.shown
     ? await scope

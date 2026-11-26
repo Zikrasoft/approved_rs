@@ -13,7 +13,6 @@ import { seriesSlugOf } from '@podbor/catalog-contract/slug';
 
 import type CatalogModuleService from '../modules/catalog/service';
 import type { VehiclePart } from '../modules/publish/service';
-import { memoized } from './catalogue-memo';
 import { CATEGORY_RELATIONS, shownCategory } from './categories';
 import {
   localizedCategory,
@@ -45,9 +44,7 @@ async function placeOf(
   const [paged] = (await catalogueStructure(modules, { id: [named.id] })).paged;
   if (!paged) return null;
   const vehicles = await vehiclesOfSeries(catalog, [named.id]);
-  const places = await memoized(`vehicle-parts:${named.id}`, () =>
-    publish.listedVehicleParts(named.id),
-  );
+  const places = await publish.listedVehicleParts(named.id);
   return {
     ...modules,
     scope,

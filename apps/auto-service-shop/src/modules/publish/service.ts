@@ -16,9 +16,12 @@ import CatalogueRun from './models/catalogue-run';
 import PublishedNumber from './models/published-number';
 import { runBoundSql } from '../_shared/bound-sql';
 import {
+  CATALOGUE_SNAPSHOT_LOCK,
+  FILL_CATALOGUE_SNAPSHOT,
+  FILL_FITTED_CATALOGUE_SNAPSHOT,
   LISTED_CATEGORY_PARTS,
+  LISTED_FITTED_VEHICLE_PARTS,
   LISTED_NUMBERS,
-  LISTED_MAKE_PART_COUNTS,
   LISTED_PARTS_IN_CATEGORY,
   LISTED_SERIES_CATEGORY_COUNTS,
   LISTED_VEHICLE_PARTS,
@@ -33,8 +36,6 @@ import {
 } from '../catalog/cross-module-sql';
 import { INTERRUPTED_BY_RESTART } from '../_shared/run-errors';
 
-export type MakePartCount = { make_slug: string; parts: number };
-
 export type SeriesCategoryCount = {
   series_id: string;
   category_id: string | null;
@@ -43,11 +44,7 @@ export type SeriesCategoryCount = {
   required: number;
 };
 
-export type CategoryPart = {
-  category_id: string;
-  part_id: string;
-  first_fitment_id: string | null;
-};
+export type CategoryPart = { category_id: string; part_id: string };
 
 export type VehiclePart = {
   vehicle_id: string;
@@ -84,6 +81,10 @@ const placeBindings = ({ series = null }: { series?: string[] | null }) => ({
   series,
   min_matches: MIN_REQUIREMENT_MATCHES_FOR_PAGE,
 });
+
+const VACUUM_FITMENT = 'vacuum (analyze) fitment';
+
+const VACUUM_SNAPSHOT = 'vacuum (analyze) listed_series_part';
 
 const PRUNE_RUNS_BEFORE = `
   delete from catalogue_run r
@@ -213,17 +214,33 @@ class PublishModuleService extends MedusaService({
     return rows;
   }
 
+  async buildCatalogueSnapshot(): Promise<void> {
+    await this.runOutsideTransaction(VACUUM_FITMENT);
+    await this.fillCatalogueSnapshot(await this.hasRequirements());
+    await this.runOutsideTransaction(VACUUM_SNAPSHOT);
+  }
+
   @InjectManager()
-  async listedMakePartCounts(
-    seriesIds: string[],
+  protected async runOutsideTransaction(
+    sql: string,
     @MedusaContext() sharedContext: Context = {},
-  ): Promise<MakePartCount[]> {
-    const { rows } = await runBoundSql(
+  ): Promise<void> {
+    await runBoundSql(sharedContext, sql);
+  }
+
+  @InjectTransactionManager()
+  protected async fillCatalogueSnapshot(
+    requirements: boolean,
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<void> {
+    await runBoundSql(sharedContext, CATALOGUE_SNAPSHOT_LOCK);
+    await runBoundSql(sharedContext, "set local work_mem = '64MB'");
+    await runBoundSql(sharedContext, 'delete from listed_series_part');
+    await runBoundSql(
       sharedContext,
-      LISTED_MAKE_PART_COUNTS,
-      placeBindings({ series: seriesIds }),
+      requirements ? FILL_CATALOGUE_SNAPSHOT : FILL_FITTED_CATALOGUE_SNAPSHOT,
+      placeBindings({}),
     );
-    return rows;
   }
 
   @InjectManager()
@@ -233,7 +250,6 @@ class PublishModuleService extends MedusaService({
     const { rows } = await runBoundSql(
       sharedContext,
       LISTED_SERIES_CATEGORY_COUNTS,
-      placeBindings({}),
     );
     return rows;
   }
@@ -243,11 +259,9 @@ class PublishModuleService extends MedusaService({
     seriesIds: string[],
     @MedusaContext() sharedContext: Context = {},
   ): Promise<CategoryPart[]> {
-    const { rows } = await runBoundSql(
-      sharedContext,
-      LISTED_CATEGORY_PARTS,
-      placeBindings({ series: seriesIds }),
-    );
+    const { rows } = await runBoundSql(sharedContext, LISTED_CATEGORY_PARTS, [
+      seriesIds,
+    ]);
     return rows;
   }
 
@@ -256,12 +270,27 @@ class PublishModuleService extends MedusaService({
     seriesId: string,
     @MedusaContext() sharedContext: Context = {},
   ): Promise<VehiclePart[]> {
+    const { rows } = (await this.hasRequirements(sharedContext))
+      ? await runBoundSql(
+          sharedContext,
+          LISTED_VEHICLE_PARTS,
+          placeBindings({ series: [seriesId] }),
+        )
+      : await runBoundSql(sharedContext, LISTED_FITTED_VEHICLE_PARTS, {
+          series: seriesId,
+        });
+    return rows;
+  }
+
+  @InjectManager()
+  async hasRequirements(
+    @MedusaContext() sharedContext: Context = {},
+  ): Promise<boolean> {
     const { rows } = await runBoundSql(
       sharedContext,
-      LISTED_VEHICLE_PARTS,
-      placeBindings({ series: [seriesId] }),
+      'select exists(select 1 from requirement where deleted_at is null) as present',
     );
-    return rows;
+    return rows[0].present;
   }
 
   @InjectManager()
@@ -269,7 +298,9 @@ class PublishModuleService extends MedusaService({
     partIds: string[],
     @MedusaContext() sharedContext: Context = {},
   ): Promise<Omit<VehiclePart, 'fitted'>[]> {
-    if (!partIds.length) return [];
+    if (!partIds.length || !(await this.hasRequirements(sharedContext))) {
+      return [];
+    }
     const { rows } = await runBoundSql(sharedContext, PART_REQUIREMENT_FITS, [
       partIds,
     ]);

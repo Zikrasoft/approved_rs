@@ -23,6 +23,7 @@ case "$*" in
   exit "${CRM_MIGRATE_EXIT:-0}"
   ;;
 *check-schema*) exit "${SCHEMA_EXIT:-0}" ;;
+*build-catalogue-snapshot*) exit "${SNAPSHOT_EXIT:-0}" ;;
 *seed-production*) exit "${SEED_EXIT:-0}" ;;
 *ON_ERROR_STOP*) exit "${ROLE_EXIT:-0}" ;;
 *pg_dump*)
@@ -136,13 +137,14 @@ has() {
 
 stage
 expect 'a deploy succeeds' run deploy.sh "$NEW"
-expect 'pull, migrate, check the schema, seed, up, reload and health run in order on the new tag' logged \
+expect 'pull, migrate, check the schema, rebuild the catalogue snapshot, seed, up, reload and health run in order on the new tag' logged \
   "docker[$NEW] compose pull --policy missing medusa caddy" \
   "docker[$NEW] compose up -d --wait postgres" \
   "docker[$NEW] compose exec -T postgres psql -U carlab -d carlab -v ON_ERROR_STOP=1 -c create extension if not exists pg_stat_statements" \
   "docker[$NEW] compose exec -T postgres pg_dump -U carlab -d carlab --format=custom" \
   "docker[$NEW] compose run --rm -T medusa node_modules/.bin/medusa db:migrate --execute-safe-links --all-or-nothing" \
   "docker[$NEW] compose run --rm -T medusa node_modules/.bin/medusa exec ./src/scripts/check-schema.js" \
+  "docker[$NEW] compose run --rm -T medusa node_modules/.bin/medusa exec ./src/scripts/build-catalogue-snapshot.js" \
   "docker[$NEW] compose run --rm -T medusa node_modules/.bin/medusa exec ./src/scripts/seed-production.js" \
   "docker[$NEW] compose exec -T postgres psql -q -v ON_ERROR_STOP=1 -U carlab -d carlab" \
   "docker[$NEW] compose exec -T postgres psql -q -v ON_ERROR_STOP=1 -U carlab -d carlab" \
@@ -150,6 +152,7 @@ expect 'pull, migrate, check the schema, seed, up, reload and health run in orde
   "docker[$NEW] compose up -d --wait --wait-timeout 300 --remove-orphans" \
   "docker[$NEW] compose exec -T caddy caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile" \
   'curl -fsS -o /dev/null --max-time 10 --retry 12 --retry-delay 5 --retry-all-errors https://api.test/health/ready' \
+  "docker[$NEW] compose exec -T -d medusa node_modules/.bin/medusa exec ./src/scripts/warm-pages.js" \
   "docker[$NEW] image ls ghcr.io/zikrasoft/podbor-auto-service-shop --format {{.Tag}}" \
   "docker[$NEW] image ls ghcr.io/zikrasoft/podbor-carlab-caddy --format {{.Tag}}"
 expect '.env names the new tag' has "MEDUSA_TAG=$NEW" "$work/host/.env"
@@ -246,6 +249,14 @@ expect 'a failed schema check leaves .env on the old tag' has "MEDUSA_TAG=$OLD" 
 refuse 'a failed schema check seeds nothing' grep -q 'seed-production' "$LOG"
 refuse 'a failed schema check restarts nothing' grep -q 'up -d --wait --wait-timeout' "$LOG"
 expect 'a failed schema check releases the lock' test ! -d "$work/host/.deploy.lock"
+
+stage
+SNAPSHOT_EXIT=1
+export SNAPSHOT_EXIT
+refuse 'a failed catalogue snapshot build fails the deploy' run deploy.sh "$NEW"
+unset SNAPSHOT_EXIT
+expect 'a failed catalogue snapshot build leaves .env on the old tag' has "MEDUSA_TAG=$OLD" "$work/host/.env"
+refuse 'a failed catalogue snapshot build restarts nothing' grep -q 'up -d --wait --wait-timeout' "$LOG"
 
 stage
 SEED_EXIT=1

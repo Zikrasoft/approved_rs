@@ -1479,25 +1479,19 @@ class CatalogModuleService extends CatalogModuleBase {
   async translationSources(
     table: string,
     fields: readonly string[],
-    after: string | undefined,
-    take: number,
     @MedusaContext() sharedContext: Context = {},
-  ): Promise<({ id: string } & Record<string, unknown>)[]> {
+  ): Promise<({ ids: string[] } & Record<string, unknown>)[]> {
     const knex = (
       (sharedContext.transactionManager ??
         sharedContext.manager) as SqlEntityManager
     ).getKnex();
     return knex(table)
-      .select('id', ...fields, 'translated_from')
+      .select(...fields, 'translated_from', knex.raw('array_agg(id) as ids'))
       .whereNull('deleted_at')
       .where((sourced) => {
         for (const field of fields) sourced.orWhereNotNull(field);
       })
-      .modify((query) => {
-        if (after) query.where('id', '>', after);
-      })
-      .orderBy('id')
-      .limit(take);
+      .groupBy(...fields, 'translated_from');
   }
 
   @InjectManager()

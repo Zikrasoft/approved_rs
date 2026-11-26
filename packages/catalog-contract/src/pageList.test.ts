@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { cataloguePageListSchema } from './pageList.ts';
+import {
+  cataloguePageListSchema,
+  cataloguePartsHubSchema,
+} from './pageList.ts';
 
 const list = {
   parts: [{ slug: 'bmw-11428575211', indexable: true }],
@@ -53,5 +56,31 @@ describe('cataloguePageListSchema', () => {
   it('refuses a list without its Parts', () => {
     const { parts: _parts, ...broken } = list;
     expect(cataloguePageListSchema.safeParse(broken).success).toBe(false);
+  });
+});
+
+describe('cataloguePartsHubSchema', () => {
+  const hub = { makes: list.makes, categories: list.categories };
+
+  it('reads only the makes and Categories and strips a key a newer shop adds', () => {
+    expect(
+      cataloguePartsHubSchema.parse({
+        ...hub,
+        parts: list.parts,
+        generated_at: 'now',
+        makes: [{ ...list.makes[0], flag: true }],
+      }),
+    ).toEqual(hub);
+  });
+
+  it('reads the counts an older shop leaves out as null', () => {
+    const { parts: _parts, ...older } = list.makes[0];
+    const { listed: _listed, demand: _demand, ...bare } = list.categories[0];
+    const parsed = cataloguePartsHubSchema.parse({
+      makes: [older],
+      categories: [bare],
+    });
+    expect(parsed.makes[0].parts).toBeNull();
+    expect(parsed.categories[0]).toMatchObject({ listed: null, demand: null });
   });
 });

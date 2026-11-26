@@ -3,12 +3,14 @@ import { Modules } from '@medusajs/framework/utils';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 import {
   CATALOGUE_LOCALE_HEADER,
+  MAKE_SHOWCASE,
   carMakePagePath,
   carMakePageResponseSchema,
 } from '@podbor/catalog-contract';
 import { SHOP_PREVIEW_HEADER } from '@podbor/catalog-contract/preview';
 
 import { createVehicleFixture } from '../../../../../../integration-tests/vehicleFixture';
+import { clearCatalogueMemo } from '../../../../../lib/catalogue-memo';
 import { CATALOG_MODULE } from '../../../../../modules/catalog';
 import type CatalogModuleService from '../../../../../modules/catalog/service';
 import { PUBLISH_MODULE } from '../../../../../modules/publish';
@@ -99,6 +101,7 @@ medusaIntegrationTestRunner({
           part_id: hidden,
         });
         await publish.unpublish([hiddenNumber.id]);
+        await publish.buildCatalogueSnapshot();
       });
 
       const get = (path: string, headers: Record<string, string> = {}) =>
@@ -194,11 +197,12 @@ medusaIntegrationTestRunner({
           part_identifier_id: last.id,
         });
         await publish.publishAll();
+        await publish.buildCatalogueSnapshot();
 
         expect(slugs(await answer('queue'))).toContain('mann-filter-qq113');
       });
 
-      it('breaks a tie between Categories by the one fitted first, as the static site did', async () => {
+      it('breaks a tie between Categories by slug', async () => {
         const container = getContainer();
         const catalog: CatalogModuleService = container.resolve(CATALOG_MODULE);
         const [mann] = await catalog.listBrands({ slug: 'mann-filter' });
@@ -233,13 +237,65 @@ medusaIntegrationTestRunner({
         for (const part_id of [...early, ...late]) {
           await catalog.createFitments({ part_id, vehicle_id: car.vehicle.id });
         }
-        await container
-          .resolve<PublishModuleService>(PUBLISH_MODULE)
-          .publishAll();
+        const publish: PublishModuleService = container.resolve(PUBLISH_MODULE);
+        await publish.publishAll();
+        await publish.buildCatalogueSnapshot();
 
         expect(
           (await answer('tie')).categories.map(({ slug }) => slug),
-        ).toEqual(['z-fitted-first', 'a-fitted-later']);
+        ).toEqual(['a-fitted-later', 'z-fitted-first']);
+      });
+
+      it('looks up the numbers of only twice the showcase per Category while prices are hidden', async () => {
+        const container = getContainer();
+        const catalog: CatalogModuleService = container.resolve(CATALOG_MODULE);
+        const publish: PublishModuleService = container.resolve(PUBLISH_MODULE);
+        const [mann] = await catalog.listBrands({ slug: 'mann-filter' });
+        const [filters] = await catalog.listCategories({ slug: 'oil-filters' });
+        const capped = await createVehicleFixture(catalog, {
+          make: { slug: 'capped', name: 'Capped' },
+          typeCode: 'CP1',
+          seriesName: 'Capped series',
+          modelSlug: 'capped-1',
+          chassisCode: 'CP1C',
+          engineCode: 'CP1E',
+        });
+        const ids: string[] = [];
+        for (let index = 0; index < MAKE_SHOWCASE * 3; index += 1) {
+          ids.push(
+            await catalog.createPartWithIdentifiers({
+              name: `Capped ${index}`,
+              category_id: filters.id,
+              identifiers: [
+                {
+                  type: 'manufacturer-number',
+                  brand_id: mann.id,
+                  value: `CP ${100 + index}`,
+                },
+              ],
+            }),
+          );
+        }
+        await catalog.createFitments(
+          ids.map((part_id) => ({ part_id, vehicle_id: capped.vehicle.id })),
+        );
+        await publish.publishAll();
+        await publish.buildCatalogueSnapshot();
+        clearCatalogueMemo();
+        process.env.SHOP_OPEN = 'false';
+        const lookups = jest.spyOn(publish, 'publishedNumbers');
+
+        const page = await answer('capped');
+        const looked = lookups.mock.calls.map(([numbers]) => numbers.length);
+        const previewed = await answer('capped', {
+          [SHOP_PREVIEW_HEADER]: process.env.SHOP_PREVIEW_TOKEN!,
+        });
+        delete process.env.SHOP_OPEN;
+        jest.restoreAllMocks();
+
+        expect(looked[0]).toBe(MAKE_SHOWCASE * 2);
+        expect(slugs(page)).toEqual(slugs(previewed));
+        expect(slugs(page)).toHaveLength(MAKE_SHOWCASE);
       });
 
       it('answers 404 for a Make with nothing listed and for an unknown Make', async () => {

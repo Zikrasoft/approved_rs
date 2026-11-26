@@ -1,7 +1,7 @@
 import type { MedusaRequest, MedusaResponse } from '@medusajs/framework/http';
 import { partPagesResponseSchema } from '@podbor/catalog-contract';
 
-import { loadPartDemand } from '../../../lib/part-demand';
+import { memoPartDemand } from '../../../lib/part-demand';
 import { partPagesAfter } from '../../../lib/part-pages';
 import { pricesShown } from '../../../lib/shop-gate';
 import { nextCursor } from '../../../lib/store-response';
@@ -17,7 +17,7 @@ export async function GET(
     after,
     limit,
     shown: pricesShown(req),
-    demand: await loadPartDemand(req.scope),
+    demand: await memoPartDemand(req.scope),
   });
 
   res.json(
