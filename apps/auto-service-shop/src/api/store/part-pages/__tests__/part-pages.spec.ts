@@ -170,6 +170,7 @@ medusaIntegrationTestRunner({
             cross_references: [],
             applicability: [],
             images: [],
+            photos: [],
           },
           demand: null,
         });

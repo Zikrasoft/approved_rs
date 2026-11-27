@@ -51,7 +51,12 @@ const page = {
   },
   equivalents: [],
   offers: OFFERS,
-  supplier_data: { cross_references: [], applicability: [], images: [] },
+  supplier_data: {
+    cross_references: [],
+    applicability: [],
+    images: [],
+    photos: [],
+  },
 };
 
 const SLUG = 'bmw-61218381715';

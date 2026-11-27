@@ -60,7 +60,7 @@ export const publicImage = ({
   width,
   height,
   srcset,
-}: Pick<StoredImage, 'src' | 'width' | 'height' | 'srcset'>): Image => ({
+}: Picture): Image => ({
   src: publicFileUrl(src),
   width,
   height,
@@ -100,13 +100,16 @@ export async function readImageUpload(req: MedusaRequest): Promise<Buffer> {
   return body;
 }
 
-export async function storeImage(
-  scope: MedusaContainer,
-  body: Buffer,
-  name: string,
-  actor: string | null,
-): Promise<StoredImage> {
-  const files: IFileModuleService = scope.resolve(Modules.FILE);
+export const pictureSchema = storedImageSchema.pick({
+  src: true,
+  width: true,
+  height: true,
+  srcset: true,
+});
+
+export type Picture = z.infer<typeof pictureSchema>;
+
+export async function webpVariants(body: Buffer) {
   const resized = await Promise.all(
     IMAGE_WIDTHS.map((width) =>
       sharp(body)
@@ -116,22 +119,29 @@ export async function storeImage(
         .toBuffer({ resolveWithObject: true }),
     ),
   );
+  return resized.filter(
+    ({ info }, index) =>
+      resized.findIndex((other) => other.info.width === info.width) === index,
+  );
+}
+
+export async function storeImage(
+  scope: MedusaContainer,
+  body: Buffer,
+  name: string,
+  actor: string | null,
+): Promise<StoredImage> {
+  const files: IFileModuleService = scope.resolve(Modules.FILE);
   const variants = await Promise.all(
-    resized
-      .filter(
-        ({ info }, index) =>
-          resized.findIndex((other) => other.info.width === info.width) ===
-          index,
-      )
-      .map(async ({ data, info }) => ({
-        info,
-        file: await files.createFiles({
-          filename: `${name}-${info.width}.webp`,
-          mimeType: 'image/webp',
-          content: data.toString('base64'),
-          access: 'public',
-        }),
-      })),
+    (await webpVariants(body)).map(async ({ data, info }) => ({
+      info,
+      file: await files.createFiles({
+        filename: `${name}-${info.width}.webp`,
+        mimeType: 'image/webp',
+        content: data.toString('base64'),
+        access: 'public',
+      }),
+    })),
   );
   const largest = variants[variants.length - 1];
   return {

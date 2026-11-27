@@ -42,7 +42,12 @@ const entry = (
   },
   equivalents: [],
   offers: [],
-  supplier_data: { cross_references: [], applicability: [], images: [] },
+  supplier_data: {
+    cross_references: [],
+    applicability: [],
+    images: [],
+    photos: [],
+  },
   demand: null,
   priceOnRequest: true,
   category: null,

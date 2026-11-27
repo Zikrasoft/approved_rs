@@ -37,6 +37,7 @@ import {
   imagesSchema,
   publicFileUrl,
   storedImageSchema,
+  type Picture,
 } from '../../../lib/images';
 import {
   loggedQuery,
@@ -91,7 +92,7 @@ const hitSchema = brandNumberSchema.extend({
 
 const thumbnail = (
   { images, part }: z.infer<typeof hitSchema>,
-  [supplierImage]: string[],
+  [supplierPhoto]: Picture[],
 ) => {
   const [own] = images.items;
   if (own)
@@ -99,9 +100,9 @@ const thumbnail = (
       thumbnail: publicFileUrl(smallestImage(own)),
       thumbnail_illustration: false,
     };
-  if (supplierImage) {
+  if (supplierPhoto) {
     return {
-      thumbnail: publicFileUrl(supplierImage),
+      thumbnail: publicFileUrl(smallestImage(supplierPhoto)),
       thumbnail_illustration: false,
     };
   }
@@ -515,7 +516,7 @@ export async function GET(
     .map((hit) => ({
       ...brandNumberSchema.parse(hit),
       offers: offers.get(hit.id) ?? [],
-      ...thumbnail(hit, supplierData(hit.id).images),
+      ...thumbnail(hit, supplierData(hit.id).photos ?? []),
       demand: demand.get(hit.id) ?? null,
       part: {
         id: hit.part.id,

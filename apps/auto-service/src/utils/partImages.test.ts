@@ -59,6 +59,39 @@ describe('partGallery', () => {
     ]);
   });
 
+  it('takes the sized WebP copies of a supplier photo when the shop sends them', () => {
+    const MEDIA = 'https://media.carlab.rs/supplier-images';
+    const sized = {
+      ...page([], [`${MEDIA}/abc`]),
+      supplier_data: {
+        ...page([], [`${MEDIA}/abc`]).supplier_data,
+        photos: [
+          {
+            src: `${MEDIA}/abc-960.webp`,
+            width: 960,
+            height: 515,
+            srcset: [
+              { url: `${MEDIA}/abc-160.webp`, width: 160 },
+              { url: `${MEDIA}/abc-960.webp`, width: 960 },
+            ],
+          },
+        ],
+      },
+    };
+    expect(partGallery(sized)).toEqual([
+      {
+        src: `${MEDIA}/abc-960.webp`,
+        srcset: `${MEDIA}/abc-160.webp 160w, ${MEDIA}/abc-960.webp 960w`,
+        width: 960,
+        height: 515,
+        thumb: `${MEDIA}/abc-160.webp`,
+      },
+    ]);
+    expect(partThumbnail(sized, category)).toEqual(
+      photo(`${MEDIA}/abc-160.webp`),
+    );
+  });
+
   it('is empty when nothing has a photo', () => {
     expect(partGallery(page([]))).toEqual([]);
   });

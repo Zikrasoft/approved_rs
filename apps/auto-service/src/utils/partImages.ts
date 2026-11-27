@@ -1,10 +1,9 @@
 import {
   smallestImage,
+  supplierImage,
   type Image,
   type PartPage,
 } from '@podbor/catalog-contract';
-
-const SUPPLIER_IMAGE_SIZE = 800;
 
 export type GalleryImage = {
   src: string;
@@ -16,28 +15,28 @@ export type GalleryImage = {
 
 type Pictured = {
   images: Image[];
-  supplier_data: Pick<PartPage['supplier_data'], 'images'>;
+  supplier_data: Pick<PartPage['supplier_data'], 'images'> &
+    Partial<Pick<PartPage['supplier_data'], 'photos'>>;
 };
+
+const galleryImage = (image: Image): GalleryImage => ({
+  src: image.src,
+  srcset:
+    image.srcset.map(({ url, width }) => `${url} ${width}w`).join(', ') ||
+    undefined,
+  width: image.width,
+  height: image.height,
+  thumb: smallestImage(image),
+});
 
 export const partGallery = ({
   images,
   supplier_data,
-}: Pictured): GalleryImage[] => [
-  ...images.map((image) => ({
-    src: image.src,
-    srcset: image.srcset.map(({ url, width }) => `${url} ${width}w`).join(', '),
-    width: image.width,
-    height: image.height,
-    thumb: smallestImage(image),
-  })),
-  ...supplier_data.images.map((url) => ({
-    src: url,
-    srcset: undefined,
-    width: SUPPLIER_IMAGE_SIZE,
-    height: SUPPLIER_IMAGE_SIZE,
-    thumb: url,
-  })),
-];
+}: Pictured): GalleryImage[] =>
+  [
+    ...images,
+    ...(supplier_data.photos ?? supplier_data.images.map(supplierImage)),
+  ].map(galleryImage);
 
 type Illustrated = { image: Image | null } | null;
 

@@ -1,6 +1,7 @@
 import { createServer, type Server } from 'node:http';
 import type { AddressInfo, LookupFunction } from 'node:net';
 
+import sharp from 'sharp';
 import { asValue } from '@medusajs/framework/awilix';
 import type { IApiKeyModuleService } from '@medusajs/framework/types';
 import {
@@ -1385,6 +1386,7 @@ medusaIntegrationTestRunner({
           cross_references: [],
           applicability: ['BMW E46 320d 2001-2005'],
           images: [],
+          photos: [],
         });
       });
 
@@ -1393,12 +1395,27 @@ medusaIntegrationTestRunner({
         let port: number;
         const served: string[] = [];
 
+        let photo: Buffer;
+
         beforeAll(async () => {
+          photo = await sharp({
+            create: {
+              width: 1280,
+              height: 687,
+              channels: 3,
+              background: '#888888',
+            },
+          })
+            .jpeg()
+            .toBuffer();
           server = createServer((request, response) => {
             served.push(request.url!);
             if (request.url === '/hu7020z.jpg') {
               response.writeHead(200, { 'content-type': 'image/jpeg' });
               response.end(Buffer.from('jpeg-bytes'));
+            } else if (request.url === '/hu7020z-photo.jpg') {
+              response.writeHead(200, { 'content-type': 'image/jpeg' });
+              response.end(photo);
             } else if (request.url === '/hu7020z-box.jpg') {
               response.writeHead(200, { 'content-type': 'image/jpeg' });
               response.end(Buffer.from('box-bytes'));
@@ -1470,8 +1487,45 @@ medusaIntegrationTestRunner({
             `${parseEnv(process.env).FILE_URL}/${key}`,
           ]);
           expect(await stagedImages()).toEqual([
-            { items: [key], sources: { [key]: source } },
+            { items: [key], sources: { [key]: source }, pictures: {} },
           ]);
+          expect((await page('HU7020Z'))?.supplier_data.photos).toEqual([
+            {
+              src: `${parseEnv(process.env).FILE_URL}/${key}`,
+              width: 800,
+              height: 800,
+              srcset: [],
+            },
+          ]);
+        });
+
+        it('serves a crawled photo as WebP copies sized once, on the first import', async () => {
+          const source = brandImage('/hu7020z-photo.jpg');
+          intercars.articles.push(articleWithImages([source]));
+
+          await runImport();
+          const resizedAt = [...storage.images.objects.keys()];
+          await runImport();
+
+          expect([...storage.images.objects.keys()]).toEqual(resizedAt);
+          const [key] = (await stagedImages())[0].items as string[];
+          const url = (width: number) =>
+            `${parseEnv(process.env).FILE_URL}/${key}-${width}.webp`;
+          expect((await page('HU7020Z'))?.supplier_data).toMatchObject({
+            images: [`${parseEnv(process.env).FILE_URL}/${key}`],
+            photos: [
+              {
+                src: url(960),
+                width: 960,
+                height: 515,
+                srcset: [
+                  { url: url(160), width: 160 },
+                  { url: url(480), width: 480 },
+                  { url: url(960), width: 960 },
+                ],
+              },
+            ],
+          });
         });
 
         it('stages every image of the page in its order and one copy of identical files, on every import', async () => {

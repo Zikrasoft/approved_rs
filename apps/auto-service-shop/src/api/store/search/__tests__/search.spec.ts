@@ -275,7 +275,20 @@ medusaIntegrationTestRunner({
             supplier_id: released.id,
             part_identifier_id: await identifierOf(oilFilterId, '11428575211'),
             kind: 'images',
-            payload: { items: ['supplier-images/bmw'] },
+            payload: {
+              items: ['supplier-images/bmw'],
+              pictures: {
+                'supplier-images/bmw': {
+                  src: 'supplier-images/bmw-480.webp',
+                  width: 480,
+                  height: 258,
+                  srcset: [
+                    { url: 'supplier-images/bmw-160.webp', width: 160 },
+                    { url: 'supplier-images/bmw-480.webp', width: 480 },
+                  ],
+                },
+              },
+            },
           },
           {
             supplier_id: held.id,
@@ -309,7 +322,7 @@ medusaIntegrationTestRunner({
           '15C94E': [`${FILE_URL}/oil-160.webp`, true],
           '13 71 8511877': [null, false],
           'HU 816 x': [`${FILE_URL}/mann-160.webp`, false],
-          '11 42 8575211': [`${FILE_URL}/supplier-images/bmw`, false],
+          '11 42 8575211': [`${FILE_URL}/supplier-images/bmw-160.webp`, false],
         });
       });
 

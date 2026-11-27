@@ -47,6 +47,7 @@ export const supplierDataSchema = z.object({
   cross_references: z.array(crossReferenceSchema),
   applicability: z.array(z.string()),
   images: z.array(z.url()),
+  photos: z.array(imageSchema).nullable().default(null),
 });
 
 export const partDemandSchema = z.object({

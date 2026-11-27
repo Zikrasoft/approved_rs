@@ -1338,6 +1338,18 @@ the file>`, with the source URL in the object's `source-url` metadata, and a
   refused), and a download stops at 10 MB. An image that cannot be fetched is
   staged nowhere, so the site never links the brand's server, and is tried again
   on the next import.
+  Each copied image is also written as 160, 480 and 960 px WebP copies beside
+  it (`supplier-images/<sha256>-<width>.webp`, never enlarged) with a record of
+  their sizes in `supplier-images/<sha256>.json`; the staged record carries
+  those sizes, and the storefront serves them as `srcset`. An image is resized
+  once: a later import reads the `.json` record. An image copied before the
+  copies existed, or one that cannot be decoded, has no record and is served as
+  the original until an import resizes it, so the first import after the
+  deploy that ships this sizes every image already in the bucket. Resizing
+  happens in the shop at import time, never per request: the storefront's
+  Astro `/_image` endpoint stays closed in Caddy, because sharp in the 160 MB
+  site container would run on every uncached size a visitor or a crawler asks
+  for.
 - **Private bucket** (`S3_PRIVATE_BUCKET`): the crawler's raw pages, gzipped, under
   `crawl/<supplier key>/<sha256 of the URL>.html.gz`, such as `crawl/mann-filter/…`. The import reads them back from there.
 

@@ -68,6 +68,7 @@ const picturedBrandNumber = (row: BrandNumberRow) => ({
 const publicSupplierData = (data: SupplierData): SupplierData => ({
   ...data,
   images: data.images.map(publicFileUrl),
+  photos: (data.photos ?? []).map(publicImage),
 });
 
 const replacement = ({

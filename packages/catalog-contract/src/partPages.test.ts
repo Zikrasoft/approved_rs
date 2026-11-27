@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { smallestImage } from './images.ts';
+import { smallestImage, supplierImage } from './images.ts';
 import { partPageSchema } from './partPages.ts';
 
 const page = {
@@ -23,7 +23,12 @@ const page = {
   },
   equivalents: [],
   offers: [],
-  supplier_data: { cross_references: [], applicability: [], images: [] },
+  supplier_data: {
+    cross_references: [],
+    applicability: [],
+    images: [],
+    photos: [],
+  },
   demand: null,
 };
 
@@ -128,6 +133,45 @@ describe('partPageSchema', () => {
         images: [{ ...image, file_ids: ['f_1'] }],
       }).images,
     ).toEqual([image]);
+  });
+
+  it('carries each supplier image as a sized photo, null from a shop that predates them', () => {
+    const photo = {
+      src: 'https://media.carlab.rs/supplier-images/abc-960.webp',
+      width: 960,
+      height: 515,
+      srcset: [
+        {
+          url: 'https://media.carlab.rs/supplier-images/abc-160.webp',
+          width: 160,
+        },
+      ],
+    };
+    const supplier_data = {
+      ...page.supplier_data,
+      images: ['https://media.carlab.rs/supplier-images/abc'],
+      photos: [photo],
+    };
+    expect(
+      partPageSchema.parse({ ...page, supplier_data }).supplier_data,
+    ).toEqual(supplier_data);
+    expect(
+      partPageSchema.parse({
+        ...page,
+        supplier_data: { ...supplier_data, photos: undefined },
+      }).supplier_data.photos,
+    ).toBeNull();
+  });
+
+  it('sizes a supplier image the shop has no photo for as an 800 px square with no variants', () => {
+    expect(
+      supplierImage('https://media.carlab.rs/supplier-images/abc'),
+    ).toEqual({
+      src: 'https://media.carlab.rs/supplier-images/abc',
+      width: 800,
+      height: 800,
+      srcset: [],
+    });
   });
 
   it('accepts offers with a price, currency, stock and lead time', () => {

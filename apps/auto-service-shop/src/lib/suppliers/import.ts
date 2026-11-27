@@ -41,7 +41,8 @@ import { batteryName, isBattery } from './part-name';
 import { errorMessage } from '../errors';
 import { emitIndexChanges } from '../index-changes';
 import { shopStorage, type ShopStorage } from '../storage';
-import { mirroredImage } from './mirrored-images';
+import type { Picture } from '../images';
+import { mirroredImage, supplierPicture } from './mirrored-images';
 import { quotedFields } from './live-quote';
 import { nameKey, normalizePartNumber } from '../../modules/_shared/keys';
 import { partNumberKey } from '../../modules/_shared/part-number-key';
@@ -430,15 +431,26 @@ async function storeOffer(
 async function stagedImages(
   { scope, storage, logger, summary }: Context,
   images: string[],
-): Promise<{ items: string[]; sources?: Record<string, string> }> {
+): Promise<{
+  items: string[];
+  sources?: Record<string, string>;
+  pictures?: Record<string, Picture>;
+}> {
   if (!storage) return { items: images };
   const sources: Record<string, string> = {};
+  const pictures: Record<string, Picture> = {};
   for (const source of images) {
     const mirrored = await mirroredImage(scope, storage, source, logger);
-    if (mirrored) sources[mirrored] ??= source;
-    else summary.images_failed += 1;
+    if (!mirrored) {
+      summary.images_failed += 1;
+      continue;
+    }
+    if (sources[mirrored]) continue;
+    sources[mirrored] = source;
+    const picture = await supplierPicture(storage, mirrored, logger);
+    if (picture) pictures[mirrored] = picture;
   }
-  return { items: Object.keys(sources), sources };
+  return { items: Object.keys(sources), sources, pictures };
 }
 
 async function stage(

@@ -7,7 +7,14 @@ import type { Logger, MedusaContainer } from '@medusajs/framework/types';
 import { CARLAB } from '@podbor/brands';
 
 import { errorMessage } from '../errors';
-import { IMAGE_TYPES, MAX_IMAGE_BYTES, publicFileKey } from '../images';
+import {
+  IMAGE_TYPES,
+  MAX_IMAGE_BYTES,
+  pictureSchema,
+  publicFileKey,
+  webpVariants,
+  type Picture,
+} from '../images';
 import { publicLookup, refusePrivateHost } from '../private-address';
 import type { ShopStorage } from '../storage';
 import { readCapped } from '../uploads';
@@ -111,6 +118,50 @@ export async function mirroredImage(
     await storage.pages.put(failure, Buffer.from(String(Date.now())), {
       contentType: 'text/plain',
     });
+    return null;
+  }
+}
+
+async function sizedPicture(
+  storage: ShopStorage,
+  key: string,
+): Promise<Picture> {
+  const body = await storage.images.get(key);
+  if (!body) throw new Error('the original is missing');
+  const variants = await Promise.all(
+    (await webpVariants(body)).map(async ({ data, info }) => {
+      const url = `${key}-${info.width}.webp`;
+      await storage.images.put(url, data, { contentType: 'image/webp' });
+      return { url, info };
+    }),
+  );
+  const largest = variants[variants.length - 1];
+  return {
+    src: largest.url,
+    width: largest.info.width,
+    height: largest.info.height,
+    srcset: variants.map(({ url, info }) => ({ url, width: info.width })),
+  };
+}
+
+export async function supplierPicture(
+  storage: ShopStorage,
+  key: string,
+  logger: Logger,
+): Promise<Picture | null> {
+  const record = `${key}.json`;
+  const known = await storage.images.get(record);
+  if (known) return pictureSchema.parse(JSON.parse(known.toString()));
+  try {
+    const picture = await sizedPicture(storage, key);
+    await storage.images.put(record, Buffer.from(JSON.stringify(picture)), {
+      contentType: 'application/json',
+    });
+    return picture;
+  } catch (error) {
+    logger.warn(
+      `Supplier image ${key} not resized, served as is: ${errorMessage(error)}`,
+    );
     return null;
   }
 }
