@@ -1,5 +1,6 @@
 #!/bin/sh
 set -eu
+trap '' HUP
 umask 077
 cd "$(dirname -- "$0")"
 

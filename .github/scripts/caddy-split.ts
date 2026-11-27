@@ -205,11 +205,18 @@ async function probeUnknownSlugs(app: string): Promise<string[]> {
   return failures;
 }
 
-async function probeOnDemandPages(app: string): Promise<string[]> {
+export const PROBED_APPS = Object.keys(PROBES);
+
+export function missingProbes(app: string): string[] {
   const probes = PROBES[app] ?? {};
-  const failures = onDemandPages(`apps/${app}/src/pages`)
+  return onDemandPages(`apps/${app}/src/pages`)
     .filter((page) => !(page in probes))
     .map((page) => `${app}: on-demand page ${page} has no probe here`);
+}
+
+async function probeOnDemandPages(app: string): Promise<string[]> {
+  const probes = PROBES[app] ?? {};
+  const failures = missingProbes(app);
   const port = await freePort();
   const server = spawn('node', [`apps/${app}/dist/server/entry.mjs`], {
     env: { ...process.env, HOST: '127.0.0.1', PORT: String(port) },

@@ -7,6 +7,8 @@ import {
   caddyServes,
   catalogueCaches,
   linksCaddy404,
+  missingProbes,
+  PROBED_APPS,
   shadowedRedirects,
 } from './caddy-split.ts';
 import {
@@ -142,4 +144,8 @@ test('a Publish purge empties every cached catalogue hub and only the Part pages
     );
     assert.equal(purged([partPagePattern('bosch-0986')], part), false, part);
   }
+});
+
+test('every on-demand page of a probed app has a probe', () => {
+  assert.deepEqual(PROBED_APPS.flatMap(missingProbes), []);
 });
