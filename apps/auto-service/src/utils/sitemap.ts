@@ -7,6 +7,7 @@ import { CARLAB } from '@podbor/brands';
 import type { Catalogue } from './cataloguePage';
 import { SUPPORTED_LOCALES } from '../i18n/config.ts';
 import { CARS_PAGE_SIZE } from './works';
+import { makeHubPageCount } from './makeHub';
 import { PathBuilder } from './paths';
 
 export const CATALOGUE_SITEMAP_SIZE = 45_000;
@@ -34,7 +35,16 @@ export function catalogueUrls(
     [
       PathBuilder.parts(locale),
       PathBuilder.partsMakes(locale),
-      ...hubs.map(({ slug }) => PathBuilder.partsMake(locale, slug)),
+      ...hubs.flatMap(({ slug }) =>
+        Array.from(
+          {
+            length: makeHubPageCount(
+              series.filter(({ make }) => make === slug).length,
+            ),
+          },
+          (_, index) => PathBuilder.partsMake(locale, slug, index + 1),
+        ),
+      ),
       ...series.flatMap((entry) => [
         PathBuilder.partsSeries(locale, entry.make, entry.slug),
         ...entry.categories.flatMap((category) =>

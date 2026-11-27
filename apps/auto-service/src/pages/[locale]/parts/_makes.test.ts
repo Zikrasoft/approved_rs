@@ -6,7 +6,10 @@ import {
   SHOP_PREVIEW_TOKEN,
   stubShop,
 } from '@/components/renderAstro';
+import { content } from '@/i18n/content';
 import MakesPage from './makes.astro';
+
+const { cars } = content('ru').pages;
 
 const PUBLIC_PAGE = 'public, s-maxage=86400';
 
@@ -35,6 +38,40 @@ afterEach(() => {
 });
 
 describe('the makes list rendered on demand', () => {
+  it('searches a long list of Makes', async () => {
+    setShop(false);
+    const makes = Array.from({ length: 41 }, (_, index) => ({
+      slug: `make-${index}`,
+      name: `Make ${index}`,
+    }));
+    const page = parseHtml(await (await makesResponse(makes).response).text());
+    const index = JSON.parse(
+      page.querySelector('script[data-search-index]')?.textContent ?? '[]',
+    );
+
+    expect(
+      page
+        .querySelector('list-search [data-search-input]')
+        ?.getAttribute('placeholder'),
+    ).toBe(cars.searchPlaceholder);
+    expect(page.querySelector('[data-search-empty]')?.textContent?.trim()).toBe(
+      cars.noMatch,
+    );
+    expect(page.querySelector('[data-search-idle] h2')).not.toBeNull();
+    expect(index).toHaveLength(41);
+    expect(index).toContainEqual({
+      name: 'Make 40',
+      href: '/ru/parts/make-40/',
+    });
+  });
+
+  it('offers no search over a short list of Makes', async () => {
+    setShop(false);
+    const page = parseHtml(await (await makesResponse().response).text());
+
+    expect(page.querySelector('[data-search-input]')).toBeNull();
+  });
+
   it('groups the Makes by letter with a link to each hub', async () => {
     setShop(false);
     const page = parseHtml(await (await makesResponse().response).text());

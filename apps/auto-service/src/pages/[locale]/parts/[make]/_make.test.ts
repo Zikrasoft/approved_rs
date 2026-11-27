@@ -11,10 +11,12 @@ import {
 import { work } from '@/components/workFixture';
 import { getCollection } from 'astro:content';
 import MakePage from './index.astro';
+import SeriesRoute from './[series]/index.astro';
 
 vi.mock('astro:content', () => ({ getCollection: vi.fn(async () => []) }));
 
 const PUBLIC_PAGE = 'public, s-maxage=86400';
+const copy = content('ru').partsCar.hubs.make;
 const NOT_FOUND_PAGE = 'public, s-maxage=600';
 
 const series = (name: string, slug: string, categories: string[] = []) => ({
@@ -30,17 +32,32 @@ const hubResponse = (
   entries: Answer = [series('1', '1')],
   { path = `/ru/parts/${make.slug}/`, headers = {} } = {},
 ) => {
-  const shop = stubShop(() => Response.json({ make, series: entries }));
-  const [, locale, , slug] = path.split('/');
+  const shop = stubShop((url) =>
+    url.pathname.includes('/makes/')
+      ? Response.json({ make, series: entries })
+      : new Response(null, { status: 404 }),
+  );
+  const [, locale, , slug, segment] = path.split('/');
   return {
     shop,
     response: respond(
-      MakePage,
+      segment ? SeriesRoute : MakePage,
       new Request(new URL(path, 'https://carlab.rs'), { headers }),
-      { params: { locale, make: slug } },
+      { params: { locale, make: slug, ...(segment && { series: segment }) } },
     ),
   };
 };
+
+const many = (count: number) =>
+  Array.from({ length: count }, (_, index) =>
+    series(`Golf ${String(index + 1).padStart(3, '0')}`, `golf-${index + 1}`),
+  );
+
+const VW = { slug: 'volkswagen', name: 'Volkswagen' };
+const tiles = (page: ParentNode) =>
+  [...page.querySelectorAll('[data-search-idle] a[data-search-href]')].map(
+    (link) => link.getAttribute('href'),
+  );
 
 const hubHtml = async (...args: Parameters<typeof hubResponse>) =>
   parseHtml(await (await hubResponse(...args).response).text());
@@ -52,7 +69,7 @@ afterEach(() => {
 });
 
 describe('the make hub', () => {
-  it('names each series with its make and lists its categories', async () => {
+  it('names each series with its make, in name order', async () => {
     setShop(false);
     const page = await hubHtml({ slug: 'bmw', name: 'BMW' }, [
       series('3 GT', '3-gt', ['Фильтры', 'Тормоза']),
@@ -62,12 +79,115 @@ describe('the make hub', () => {
       ...page.querySelectorAll(`main ul a[href^="/ru/parts/bmw/"]`),
     ];
 
-    expect(
-      rows.map((link) => link.querySelector('span, div')?.textContent?.trim()),
-    ).toEqual(['BMW 1', 'BMW 3 GT']);
-    expect(rows[1].textContent).toContain('Фильтры, Тормоза');
+    expect(rows.map((link) => link.textContent?.trim())).toEqual([
+      'BMW 1',
+      'BMW 3 GT',
+    ]);
     expect(rows[1].getAttribute('href')).toBe('/ru/parts/bmw/3-gt/');
   });
+
+  it('offers no search and no pages for a short list', async () => {
+    setShop(false);
+    const page = await hubHtml(VW, many(40));
+
+    expect(tiles(page)).toHaveLength(40);
+    expect(page.querySelector('[data-search-input]')).toBeNull();
+    expect(page.querySelector('nav a[href*="/page-"]')).toBeNull();
+  });
+
+  it('searches every series of a long list, not only the page shown', async () => {
+    setShop(false);
+    const page = await hubHtml(VW, many(100));
+    const index = JSON.parse(
+      page.querySelector('script[data-search-index]')?.textContent ?? '[]',
+    );
+
+    expect(
+      page.querySelector('list-search [data-search-input]'),
+    ).not.toBeNull();
+    expect(
+      page.querySelector('[data-search-input]')?.getAttribute('placeholder'),
+    ).toBe(copy.searchPlaceholder);
+    expect(page.querySelector('[data-search-empty]')?.textContent?.trim()).toBe(
+      copy.noMatch,
+    );
+    expect(
+      page
+        .querySelector<HTMLTemplateElement>('template[data-search-template]')
+        ?.content.querySelector('[data-search-href] [data-search-name]'),
+    ).not.toBeNull();
+    expect(index).toHaveLength(100);
+    expect(index[99]).toEqual({
+      name: 'Volkswagen Golf 100',
+      href: '/ru/parts/volkswagen/golf-100/',
+    });
+  });
+
+  it('shows the first page of a long list and links the next ones', async () => {
+    setShop(false);
+    const page = await hubHtml(VW, many(100));
+    const pages = [...page.querySelectorAll('nav a')]
+      .map((link) => link.getAttribute('href'))
+      .filter((href) => href?.includes('/page-'));
+
+    expect(tiles(page)).toHaveLength(48);
+    expect(tiles(page)[0]).toBe('/ru/parts/volkswagen/golf-1/');
+    expect(pages).toEqual(
+      expect.arrayContaining([
+        '/ru/parts/volkswagen/page-2/',
+        '/ru/parts/volkswagen/page-3/',
+      ]),
+    );
+    expect(page.querySelector('link[rel="next"]')?.getAttribute('href')).toBe(
+      '/ru/parts/volkswagen/page-2/',
+    );
+  });
+
+  it('answers a later page under the series segment, canonical to itself', async () => {
+    setShop(false);
+    const { shop, response } = hubResponse(VW, many(100), {
+      path: '/ru/parts/volkswagen/page-3/',
+    });
+    const answer = await response;
+    const page = parseHtml(await answer.text());
+
+    expect(answer.status).toBe(200);
+    expect(answer.headers.get('cache-control')).toBe(PUBLIC_PAGE);
+    expect(String(shop.mock.calls[0][0])).toBe(
+      'http://shop.test/store/catalogue-pages/makes/volkswagen',
+    );
+    expect(tiles(page)).toEqual(
+      many(100)
+        .slice(96)
+        .map(({ slug }) => `/ru/parts/volkswagen/${slug}/`),
+    );
+    expect(
+      page.querySelector('link[rel="canonical"]')?.getAttribute('href'),
+    ).toBe('https://carlab.rs/ru/parts/volkswagen/page-3/');
+    expect(page.querySelector('link[rel="prev"]')?.getAttribute('href')).toBe(
+      '/ru/parts/volkswagen/page-2/',
+    );
+    expect(page.querySelector('h1')?.textContent?.trim()).toBe(
+      withPlaceholder(
+        withPlaceholder(copy.pageName, 'make', 'Volkswagen'),
+        'page',
+        '3',
+      ),
+    );
+    expect(page.querySelector('title')?.textContent).toContain('3');
+  });
+
+  it.each(['page-4', 'page-1', 'page-02'])(
+    'answers %s with a 404',
+    async (segment) => {
+      setShop(false);
+      const { response } = hubResponse(VW, many(100), {
+        path: `/ru/parts/volkswagen/${segment}/`,
+      });
+
+      expect((await response).status).toBe(404);
+    },
+  );
 
   it('asks the shop for the Make in the locale of the path', async () => {
     setShop(false);

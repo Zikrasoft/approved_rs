@@ -25,6 +25,17 @@ All three sites follow it:
   URI) and `src/pages/[locale]/llms.txt.ts`. Some AI crawlers do not follow
   redirects, and this is the one URI where that risk is not worth taking, so
   `createLocaleMiddleware` keeps `/llms.txt` unlocalized for every site.
+- **A listing page number is a path segment, never a query string.** The
+  carlab.rs page cache keys on the path alone (`disable_query` in the
+  Caddyfile), so `?page=2` would be served page 1. A page past the first is
+  `/{n}/` where the segment after the list holds nothing else (`/cars/2/`,
+  `/parts/c/{slug}/2/`, `/parts/{make}/{series}/{category}/2/`). The parts Make
+  hub is `/parts/{make}/page-{n}/`: the next segment there is a Series slug,
+  and a Series can be named `1` (BMW), so the `[series]` route tells a page
+  from a Series with `makeHubPageNumber` (`src/utils/makeHub.ts`), the way
+  `cars/[make].astro` does with `CARS_PAGE_NUMBER`. A Series slugged
+  `page-<n>` would be shadowed by it. `page-1` is not a page: page 1 is the bare
+  hub.
 
 ## Source locale and primary locale
 

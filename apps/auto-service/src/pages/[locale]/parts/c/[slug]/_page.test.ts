@@ -186,6 +186,25 @@ describe('the car picker on a category page', () => {
   });
 });
 
+describe('the search over a long category', () => {
+  it('searches the catalogue within the category once the list is long', async () => {
+    const doc = await categoryPage({ entries: [wirePage()], count: 41 });
+    const form = doc.querySelector('main catalogue-search form')!;
+
+    expect(form.getAttribute('action')).toBe('/ru/parts/search/');
+    expect(form.querySelector('input[name=q]')).not.toBeNull();
+    expect(
+      form.querySelector('input[name=category]')?.getAttribute('value'),
+    ).toBe('batteries');
+  });
+
+  it('offers no search over a short category', async () => {
+    const doc = await categoryPage({ entries: [wirePage()], count: 40 });
+
+    expect(doc.querySelector('main catalogue-search')).toBeNull();
+  });
+});
+
 describe('an empty category', () => {
   it('ends on the inquiry card without a full band of padding under it', async () => {
     const doc = await categoryPage({ cars });

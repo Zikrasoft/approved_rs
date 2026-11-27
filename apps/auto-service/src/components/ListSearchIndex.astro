@@ -1,0 +1,16 @@
+---
+import type { ListSearchEntry } from '@podbor/site-kit/list-search';
+
+interface Props {
+  entries: ListSearchEntry[];
+}
+
+const { entries } = Astro.props;
+---
+
+<script
+  is:inline
+  type="application/json"
+  data-search-index
+  set:html={JSON.stringify(entries).replaceAll('<', '\\u003c')}
+/>

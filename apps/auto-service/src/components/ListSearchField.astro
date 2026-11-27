@@ -1,0 +1,29 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  label: string;
+  placeholder: string;
+}
+
+const { label, placeholder } = Astro.props;
+---
+
+<label class="relative block w-full sm:max-w-sm">
+  <span class="sr-only">{label}</span>
+  <Icon
+    name="search"
+    size={16}
+    class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted"
+  />
+  <input
+    type="search"
+    data-search-input
+    autocomplete="off"
+    autocapitalize="off"
+    spellcheck="false"
+    enterkeyhint="search"
+    placeholder={placeholder}
+    class="field min-h-12 py-2 pl-9 [&::-webkit-search-cancel-button]:appearance-none"
+  />
+</label>

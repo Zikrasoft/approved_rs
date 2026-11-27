@@ -2,10 +2,14 @@
 export const prerender = false;
 
 import Shell from '@/layouts/Shell.astro';
+import IndexLink from '@/components/IndexLink.astro';
+import ListSearchField from '@/components/ListSearchField.astro';
+import ListSearchIndex from '@/components/ListSearchIndex.astro';
 import PageHero from '@/components/PageHero.astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { loadCataloguePage } from '@/utils/cataloguePage';
+import { LONG_LIST } from '@/utils/listing';
 import { makesByLetter } from '@/utils/makeIndex';
 import { PathBuilder } from '@/utils/paths';
 
@@ -17,10 +21,12 @@ const loaded = await loadCataloguePage(
 if (loaded instanceof Response) return loaded;
 const letters = loaded;
 const locale = localeFrom(Astro.url.pathname);
-const site = content(locale).site;
+const { site, pages } = content(locale);
 const hubs = content(locale).partsCar.hubs;
 const copy = hubs.makes;
 const anchor = (index: number) => `makes-${index}`;
+const makes = letters.flatMap(({ makes: own }) => own);
+const searchable = makes.length > LONG_LIST;
 ---
 
 <Shell title={copy.metaTitle} description={copy.metaDescription}>
@@ -35,10 +41,45 @@ const anchor = (index: number) => `makes-${index}`;
     ]}
   />
 
-  <section class="wrap flex flex-col gap-8 py-band md:py-band-lg">
+  <list-search class="wrap flex flex-col gap-8 py-band md:py-band-lg">
+    {
+      searchable && (
+        <>
+          <ListSearchField
+            label={pages.cars.searchLabel}
+            placeholder={pages.cars.searchPlaceholder}
+          />
+          <ul
+            data-search-results
+            hidden
+            class="-mt-4 grid gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3"
+          />
+          <template data-search-template>
+            <li>
+              <IndexLink />
+            </li>
+          </template>
+          <ListSearchIndex
+            entries={makes.map((make) => ({
+              name: make.name,
+              href: PathBuilder.partsMake(locale, make.slug),
+            }))}
+          />
+          <p
+            data-search-empty
+            hidden
+            class="-mt-4 card p-6 text-base text-muted"
+          >
+            {pages.cars.noMatch}
+          </p>
+          <p data-search-status aria-live="polite" class="sr-only" />
+        </>
+      )
+    }
+
     {
       letters.length > 1 && (
-        <nav aria-label={copy.lettersLabel}>
+        <nav data-search-idle aria-label={copy.lettersLabel}>
           <ul class="flex flex-wrap gap-1">
             {letters.map(({ letter }, index) => (
               <li>
@@ -58,6 +99,7 @@ const anchor = (index: number) => `makes-${index}`;
     {
       letters.map(({ letter, makes }, index) => (
         <section
+          data-search-idle
           id={anchor(index)}
           class="flex scroll-mt-24 flex-col gap-3 border-t border-line pt-4"
         >
@@ -77,5 +119,11 @@ const anchor = (index: number) => `makes-${index}`;
         </section>
       ))
     }
-  </section>
+  </list-search>
 </Shell>
+
+<script>
+  import { defineListSearch } from '@podbor/site-kit/list-search';
+
+  defineListSearch();
+</script>

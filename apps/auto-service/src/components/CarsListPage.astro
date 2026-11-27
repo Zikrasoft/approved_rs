@@ -1,8 +1,8 @@
 ---
-import type { ImageMetadata } from 'astro';
 import type { Page } from '@podbor/site-kit/pagination';
 import Shell from '@/layouts/Shell.astro';
-import Icon from '@/components/Icon.astro';
+import ListSearchField from '@/components/ListSearchField.astro';
+import ListSearchIndex from '@/components/ListSearchIndex.astro';
 import MakeCard from '@/components/MakeCard.astro';
 import PageHero from '@/components/PageHero.astro';
 import ListingPager from '@/components/ListingPager.astro';
@@ -58,24 +58,10 @@ const searchIndex = await Promise.all(
         <p class="card p-6 text-base text-muted">{copy.empty}</p>
       ) : (
         <list-search class="flex flex-col gap-6 md:gap-8">
-          <label class="relative block w-full sm:max-w-sm">
-            <span class="sr-only">{copy.searchLabel}</span>
-            <Icon
-              name="search"
-              size={16}
-              class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted"
-            />
-            <input
-              type="search"
-              data-search-input
-              autocomplete="off"
-              autocapitalize="off"
-              spellcheck="false"
-              enterkeyhint="search"
-              placeholder={copy.searchPlaceholder}
-              class="field min-h-12 py-2 pl-9 [&::-webkit-search-cancel-button]:appearance-none"
-            />
-          </label>
+          <ListSearchField
+            label={copy.searchLabel}
+            placeholder={copy.searchPlaceholder}
+          />
 
           <ul
             data-search-idle
@@ -102,12 +88,7 @@ const searchIndex = await Promise.all(
               <MakeCard template />
             </li>
           </template>
-          <script
-            is:inline
-            type="application/json"
-            data-search-index
-            set:html={JSON.stringify(searchIndex).replaceAll('<', '\\u003c')}
-          />
+          <ListSearchIndex entries={searchIndex} />
 
           <p data-search-empty hidden class="card p-6 text-base text-muted">
             {copy.noMatch}

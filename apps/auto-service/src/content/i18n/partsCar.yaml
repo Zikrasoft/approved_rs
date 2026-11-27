@@ -106,6 +106,11 @@ hubs:
     eyebrow: Запчасти по марке
     lead: Выберите модель, чтобы увидеть запчасти по категориям.
     modelsHeading: Модели
+    searchLabel: Найти модель
+    searchPlaceholder: Модель, например Golf
+    noMatch: Такой модели в списке нет. Напишите нам, подберем запчасти по VIN.
+    pagination: Страницы списка моделей
+    pageName: '{make}: модели, страница {page}'
   model:
     metaTitle: '{model}: запчасти | CarLab'
     metaDescription: 'Запчасти для {model} по категориям, с количеством и местом установки. Подбор по VIN и установка в сервисе CarLab в Белграде.'

@@ -113,6 +113,11 @@ export const partsCarContentSchema = z
             eyebrow: z.string(),
             lead: z.string(),
             modelsHeading: z.string(),
+            searchLabel: z.string(),
+            searchPlaceholder: z.string(),
+            noMatch: z.string(),
+            pagination: z.string(),
+            pageName: z.string(),
           })
           .strict(),
         model: z

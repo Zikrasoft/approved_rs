@@ -1,82 +1,11 @@
 ---
 export const prerender = false;
 
-import { getCollection } from 'astro:content';
-import LinkRow from '@/components/LinkRow.astro';
-import Icon from '@/components/Icon.astro';
-import { withPlaceholder } from '@podbor/i18n';
-import { seriesName } from '@/utils/carName';
-import Shell from '@/layouts/Shell.astro';
-import PageHero from '@/components/PageHero.astro';
-import { localeFrom } from '@/i18n/config';
-import { content } from '@/i18n/content';
-import { loadCataloguePage } from '@/utils/cataloguePage';
-import { PathBuilder } from '@/utils/paths';
-import { workshopMakePages } from '@/utils/works';
+import MakeHubPage from '@/components/MakeHubPage.astro';
+import { loadMakeHub } from '@/utils/makeHub';
 
-const loaded = await loadCataloguePage(Astro, (catalogue, catalogueLocale) =>
-  catalogue.makeHub(Astro.params.make ?? '', catalogueLocale),
-);
-if (loaded instanceof Response) return loaded;
-const { make } = loaded;
-const workshop = workshopMakePages(
-  await getCollection('works'),
-  await getCollection('articles'),
-  [],
-).some(({ make: workshopMake }) => workshopMake.slug === make.slug);
-const locale = localeFrom(Astro.url.pathname);
-const site = content(locale).site;
-const copy = content(locale).partsCar.hubs.make;
-const series = loaded.series
-  .map((entry) => ({
-    ...entry,
-    label: seriesName({ name: entry.name, translations: null }, make, locale),
-  }))
-  .toSorted((a, b) => a.label.localeCompare(b.label, 'en', { numeric: true }));
+const hub = await loadMakeHub(Astro, 1);
+if (hub instanceof Response) return hub;
 ---
 
-<Shell
-  title={copy.metaTitle.replace('{make}', make.name)}
-  description={copy.metaDescription.replace('{make}', make.name)}
->
-  <PageHero
-    actions={false}
-    eyebrow={copy.eyebrow}
-    heading={make.name}
-    lead={copy.lead}
-    crumbs={[
-      { href: PathBuilder.parts(locale), label: site.nav.parts },
-      { href: PathBuilder.partsMake(locale, make.slug), label: make.name },
-    ]}
-  />
-
-  <section class="wrap flex flex-col gap-4 py-band md:pt-band-lg">
-    <h2 class="text-section">{copy.modelsHeading}</h2>
-    <ul class="card divide-y divide-line">
-      {
-        series.map(({ slug, label, category_names: categoryNames }) => (
-          <LinkRow
-            href={PathBuilder.partsSeries(locale, make.slug, slug)}
-            label={label}
-            detail={categoryNames.join(', ')}
-          />
-        ))
-      }
-    </ul>
-    {
-      workshop && (
-        <a
-          href={PathBuilder.carsMake(locale, make.slug)}
-          class="link-underlined inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-semibold text-ink"
-        >
-          {withPlaceholder(
-            content(locale).pages.make.headingTemplate,
-            'make',
-            make.name,
-          )}
-          <Icon name="chevronRight" size={14} />
-        </a>
-      )
-    }
-  </section>
-</Shell>
+<MakeHubPage {...hub} />

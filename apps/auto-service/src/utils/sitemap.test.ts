@@ -113,6 +113,36 @@ describe('catalogueUrls', () => {
   });
 });
 
+describe('catalogueUrls for a long Make hub', () => {
+  const seriesOf = (make: string, count: number) =>
+    Array.from({ length: count }, (_, index) => ({
+      make,
+      slug: `s-${index}`,
+      name: `S ${index}`,
+      categories: [],
+      listed: null,
+    }));
+  const hubUrls = (count: number) =>
+    catalogueUrls(SITE, {
+      parts: [],
+      makes: [{ slug: 'vw', name: 'VW', hub: true, parts: 1 }],
+      series: [...seriesOf('vw', count), ...seriesOf('bmw', 200)],
+      categories: [],
+      catalogue_makes: null,
+    }).filter((url) => /\/parts\/vw\/page-/.test(url));
+
+  it('adds a page for every 48 Series of the Make', () => {
+    expect(hubUrls(97)).toEqual(
+      expect.arrayContaining([
+        `${SITE}/sr/parts/vw/page-2/`,
+        `${SITE}/ru/parts/vw/page-3/`,
+      ]),
+    );
+    expect(hubUrls(97)).not.toContain(`${SITE}/ru/parts/vw/page-4/`);
+    expect(hubUrls(48)).toEqual([]);
+  });
+});
+
 describe('carsUrls', () => {
   it('lists /cars/ and each Make in every locale', () => {
     expect(

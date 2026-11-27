@@ -1,6 +1,8 @@
 import { withPlaceholder } from '@podbor/i18n';
 import { SITE_NAME } from './constants';
 
+export const LONG_LIST = 40;
+
 type ListingPage = { number: number; count: number };
 
 export const listingHeading = (

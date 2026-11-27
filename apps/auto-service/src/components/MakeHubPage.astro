@@ -1,0 +1,136 @@
+---
+import { getCollection } from 'astro:content';
+import { withPlaceholder } from '@podbor/i18n';
+import Shell from '@/layouts/Shell.astro';
+import Icon from '@/components/Icon.astro';
+import IndexLink from '@/components/IndexLink.astro';
+import InquiryLink from '@/components/InquiryLink.astro';
+import ListingPager from '@/components/ListingPager.astro';
+import ListSearchField from '@/components/ListSearchField.astro';
+import ListSearchIndex from '@/components/ListSearchIndex.astro';
+import PageHero from '@/components/PageHero.astro';
+import { localeFrom } from '@/i18n/config';
+import { content } from '@/i18n/content';
+import {
+  LONG_LIST,
+  listingHeading,
+  listingTitle,
+  neighbours,
+} from '@/utils/listing';
+import type { MakeHub } from '@/utils/makeHub';
+import { PathBuilder } from '@/utils/paths';
+import { workshopMakePages } from '@/utils/works';
+
+type Props = MakeHub;
+
+const { make, series, listing } = Astro.props;
+const locale = localeFrom(Astro.url.pathname);
+const site = content(locale).site;
+const copy = content(locale).partsCar.hubs.make;
+const workshop = workshopMakePages(
+  await getCollection('works'),
+  await getCollection('articles'),
+  [],
+).some(({ make: workshopMake }) => workshopMake.slug === make.slug);
+const fill = (template: string) => withPlaceholder(template, 'make', make.name);
+const listingCopy = {
+  heading: make.name,
+  pageName: fill(copy.pageName),
+  metaTitle: fill(copy.metaTitle),
+};
+const pageHref = (number: number) =>
+  PathBuilder.partsMake(locale, make.slug, number);
+const { prev, next } = neighbours(listing, pageHref);
+const seriesHref = (slug: string) =>
+  PathBuilder.partsSeries(locale, make.slug, slug);
+const searchable = series.length > LONG_LIST;
+const GRID = 'grid gap-2 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3';
+---
+
+<Shell
+  title={listingTitle(listing.number, listingCopy)}
+  description={fill(copy.metaDescription)}
+>
+  {prev && <link slot="head" rel="prev" href={prev} />}
+  {next && <link slot="head" rel="next" href={next} />}
+  <PageHero
+    actions={false}
+    eyebrow={copy.eyebrow}
+    heading={listingHeading(listing.number, listingCopy)}
+    lead={listing.number === 1 ? copy.lead : undefined}
+    crumbs={[
+      { href: PathBuilder.parts(locale), label: site.nav.parts },
+      { href: pageHref(1), label: make.name },
+    ]}
+  />
+
+  <section class="wrap flex flex-col gap-4 py-band md:pt-band-lg">
+    <h2 class="text-section">{copy.modelsHeading}</h2>
+    <list-search class="flex flex-col gap-4">
+      {
+        searchable && (
+          <ListSearchField
+            label={copy.searchLabel}
+            placeholder={copy.searchPlaceholder}
+          />
+        )
+      }
+      <ul data-search-idle class={GRID}>
+        {
+          listing.items.map(({ slug, label }) => (
+            <li>
+              <IndexLink href={seriesHref(slug)} label={label} />
+            </li>
+          ))
+        }
+      </ul>
+      {
+        searchable && (
+          <>
+            <ul data-search-results hidden class={GRID} />
+            <template data-search-template>
+              <li>
+                <IndexLink />
+              </li>
+            </template>
+            <ListSearchIndex
+              entries={series.map(({ slug, label }) => ({
+                name: label,
+                href: seriesHref(slug),
+              }))}
+            />
+            <p data-search-empty hidden class="card p-6 text-base text-muted">
+              {copy.noMatch}
+            </p>
+            <p data-search-status aria-live="polite" class="sr-only" />
+          </>
+        )
+      }
+      <div data-search-idle class="contents">
+        <ListingPager
+          label={copy.pagination}
+          listing={listing}
+          href={pageHref}
+        />
+      </div>
+    </list-search>
+    <InquiryLink topic={make.name} />
+    {
+      workshop && (
+        <a
+          href={PathBuilder.carsMake(locale, make.slug)}
+          class="link-underlined inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-semibold text-ink"
+        >
+          {fill(content(locale).pages.make.headingTemplate)}
+          <Icon name="chevronRight" size={14} />
+        </a>
+      )
+    }
+  </section>
+</Shell>
+
+<script>
+  import { defineListSearch } from '@podbor/site-kit/list-search';
+
+  defineListSearch();
+</script>

@@ -176,6 +176,14 @@ before touching its area:
 - **Hand-editing a translation, touching `translatedFrom`, the translate cache
   or a translate script:** [docs/guides/translation.md](docs/guides/translation.md).
   Translation belongs to CI.
+- **Rendering a list longer than `LONG_LIST` (40, `src/utils/listing.ts`):**
+  it ships with a search, `defineListSearch` from
+  `@podbor/site-kit/list-search` (the app's `ListSearchField` and
+  `ListSearchIndex`) when the page can carry every item as a JSON index, the
+  Typesense-backed `CatalogueSearch` scoped to the list when the list is the
+  parts catalogue itself. A list too long for one page is also paginated with
+  `ListingPager`: each page crawlable, canonical to itself, a 404 past the
+  last, listed in the sitemap. Page URL schemes: [docs/guides/routing.md](docs/guides/routing.md).
 
 ## Commands
 
