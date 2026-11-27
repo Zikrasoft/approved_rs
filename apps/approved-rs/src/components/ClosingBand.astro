@@ -1,6 +1,7 @@
 ---
 import type { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
+import { IMAGE_QUALITY } from '@/utils/heroImage';
 import ContactCTA from './ContactCTA.astro';
 import StatBlock from './StatBlock.astro';
 
@@ -37,6 +38,8 @@ const {
       src={image}
       alt={imageAlt}
       format="webp"
+      quality={IMAGE_QUALITY}
+      decoding="async"
       widths={[480, 768, 1024, 1440, 1920]}
       sizes="100vw"
       loading="lazy"

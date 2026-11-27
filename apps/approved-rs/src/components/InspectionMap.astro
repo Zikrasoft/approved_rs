@@ -1,6 +1,7 @@
 ---
 import PageSection from './PageSection.astro';
 import { Image } from 'astro:assets';
+import { IMAGE_QUALITY } from '@/utils/heroImage';
 import carPhoto from '@/assets/inspection-car.jpg';
 import Button from './Button.astro';
 import SectionHeading from './SectionHeading.astro';
@@ -70,6 +71,10 @@ const SPOTS = [
           <Image
             src={carPhoto}
             alt={heading}
+            format="webp"
+            quality={IMAGE_QUALITY}
+            loading="lazy"
+            decoding="async"
             widths={[420, 560, 720, 1080]}
             sizes="(min-width: 1024px) 40vw, 92vw"
             class="car w-full h-auto rounded-sm"

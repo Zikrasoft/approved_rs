@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import { Image } from 'astro:assets';
+import { IMAGE_QUALITY, shareImage } from '@/utils/heroImage';
 import Breadcrumbs from '@/components/Breadcrumbs.astro';
 import Button from '@/components/Button.astro';
 import ContactCTA from '@/components/ContactCTA.astro';
@@ -90,7 +91,8 @@ const hook = excerptFromMarkdown(
   translation?.body ?? c.body ?? '',
   Math.max(156 - caseFacts.length, 60),
 );
-const imageUrl = c.data.image ? `${SITE_URL}${c.data.image.src}` : undefined;
+const share = c.data.image ? await shareImage(c.data.image) : undefined;
+const imageUrl = share ? `${SITE_URL}${share.src}` : undefined;
 
 const metaTitle = cc.metaTitleFor({
   car: c.data.car,
@@ -110,8 +112,8 @@ const meta = {
     ? `${hook} ${caseFacts}`
     : `${c.data.car} ${c.data.year}, ${c.data.price.value}. ${cc.realCaseFallback}`,
   ogImage: imageUrl,
-  ogImageWidth: c.data.image?.width,
-  ogImageHeight: c.data.image?.height,
+  ogImageWidth: share?.width,
+  ogImageHeight: share?.height,
 };
 
 const schema = generateArticleSchema({
@@ -208,6 +210,10 @@ const schema = generateArticleSchema({
                 src={c.data.image}
                 alt={c.data.car}
                 format="webp"
+                quality={IMAGE_QUALITY}
+                loading="eager"
+                fetchpriority="high"
+                decoding="async"
                 widths={[480, 720, 960]}
                 sizes="(min-width: 1024px) 420px, 92vw"
                 class="w-full h-full object-cover"
