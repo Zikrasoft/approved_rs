@@ -126,7 +126,7 @@ hubs:
     metaDescription: '{category} для {model}: подходящие номера, количество и место установки. Подбор по VIN и установка в сервисе CarLab.'
     eyebrow: '{model}'
     partsHeading: Подходящие запчасти
-translatedFrom: 31ec92dfc0cb82e6
+translatedFrom: 4cbdc330f3a05abe
 translations:
   sr:
     vin:
@@ -239,8 +239,8 @@ translations:
         modelsHeading: Modeli
         searchLabel: Pronađite model
         searchPlaceholder: Model, na primer Golf
-        noMatch: Tog modela nema na spisku. Pišite nam i pronaći ćemo auto delove prema broju šasije.
-        pagination: Stranice sa spiskom modela
+        noMatch: Taj model nije na spisku. Pišite nam, pronaći ćemo auto delove prema broju šasije.
+        pagination: Stranice sa modelima
         pageName: '{make}: modeli, stranica {page}'
       model:
         metaTitle: '{model}: auto delovi | CarLab'
@@ -368,9 +368,9 @@ translations:
         modelsHeading: Models
         searchLabel: Find a model
         searchPlaceholder: Model, for example Golf
-        noMatch: That model isn't on the list. Get in touch and we'll find the parts by VIN.
+        noMatch: This model isn't listed. Contact us and we'll find parts by VIN.
         pagination: Model list pages
-        pageName: '{make} models, page {page}'
+        pageName: '{make}: models, page {page}'
       model:
         metaTitle: '{model}: parts | CarLab'
         metaDescription: Parts for {model} by category, with quantity and fitting position. VIN matching and fitting at CarLab in Belgrade.
