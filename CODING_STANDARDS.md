@@ -51,6 +51,7 @@ holds the general ones. Where the two overlap, AGENTS.md wins on specifics.
   a component, never pasted between pages.
 - **DRY is about knowledge, not keystrokes.** Two things that look alike but
   change for different reasons stay separate.
+- **Libraries first.** Before writing a mechanism by hand (a storage wrapper, a queue, a parser, retries, date maths), look for a ready npm library that does it. Use it when it is good quality: many GitHub stars and weekly downloads, maintained recently, typed, small for what it does; pin it exactly. Hand-written code is right only when no such library fits or the job is a few lines.
 
 ## TDD and tests
 
