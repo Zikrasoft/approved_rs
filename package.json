@@ -30,6 +30,12 @@
     ],
     "apps/*/src/content/i18n/*.yaml": [
       "node --experimental-strip-types .github/scripts/yaml-content-valid.ts"
+    ],
+    "*.sh": [
+      "sh .github/scripts/shellcheck-staged.sh"
+    ],
+    "apps/*/src/pages/**/*.astro": [
+      "sh -c 'node --experimental-strip-types --test .github/scripts/caddy-split.test.ts' --"
     ]
   },
   "devDependencies": {

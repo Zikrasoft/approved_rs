@@ -51,6 +51,7 @@ holds the general ones. Where the two overlap, AGENTS.md wins on specifics.
   a component, never pasted between pages.
 - **DRY is about knowledge, not keystrokes.** Two things that look alike but
   change for different reasons stay separate.
+- **Libraries first.** Before writing a mechanism by hand (a storage wrapper, a queue, a parser, retries, date maths), look for a ready npm library that does it. Use it when it is good quality: many GitHub stars and weekly downloads, maintained recently, typed, small for what it does; pin it exactly. Hand-written code is right only when no such library fits or the job is a few lines.
 
 ## TDD and tests
 
@@ -60,6 +61,11 @@ holds the general ones. Where the two overlap, AGENTS.md wins on specifics.
   says so.
 - **Red, green, refactor.** Write the failing test first, see it fail for the
   right reason, then write the fix.
+- **A test reaches the branch it names.** A test for a cache, a memo, a flag or
+  a fallback runs under a setup that takes that path (the shop closed when the
+  memo only applies then, the stale entry present, the old shop answering 404),
+  and goes red when the change is reverted. A report that a test "was not run
+  red" sends the reviewer to revert the change and run it.
 - **Cover every change completely.** Test each new or changed branch, edge case
   and failure path. `packages/*` hold 100% coverage, enforced in CI. In apps,
   report the coverage of the touched files and explain any gap.

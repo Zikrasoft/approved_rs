@@ -395,7 +395,7 @@ jobs:
           printf '%s\n' "$VPS_KNOWN_HOSTS" >~/.ssh/known_hosts
           chmod 600 ~/.ssh/id_ed25519 ~/.ssh/known_hosts
           echo "TARGET=$VPS_USER@$VPS_HOST" >>"$GITHUB_ENV"
-          echo "SSH=ssh -o BatchMode=yes -o StrictHostKeyChecking=yes -o ControlMaster=auto -o ControlPath=$RUNNER_TEMP/cm -o ControlPersist=300" >>"$GITHUB_ENV"
+          echo "SSH=ssh -o BatchMode=yes -o StrictHostKeyChecking=yes -o ControlMaster=auto -o ControlPath=$RUNNER_TEMP/cm -o ControlPersist=300 -o ServerAliveInterval=30 -o ServerAliveCountMax=20" >>"$GITHUB_ENV"
       - name: Ship the stack files
         if: steps.guard.outputs.deploy == 'true'
         run: |

@@ -1,5 +1,6 @@
 #!/bin/sh
 set -eu
+trap '' HUP
 cd "$(dirname -- "$0")"
 
 app=${1:-}
