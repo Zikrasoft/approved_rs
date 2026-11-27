@@ -237,6 +237,11 @@ translations:
         eyebrow: Auto delovi po marki
         lead: Izaberite model da biste videli auto delove po kategorijama.
         modelsHeading: Modeli
+        searchLabel: Pronađite model
+        searchPlaceholder: Model, na primer Golf
+        noMatch: Tog modela nema na spisku. Pišite nam i pronaći ćemo auto delove prema broju šasije.
+        pagination: Stranice sa spiskom modela
+        pageName: '{make}: modeli, stranica {page}'
       model:
         metaTitle: '{model}: auto delovi | CarLab'
         metaDescription: Auto delovi za {model} po kategorijama, sa količinom i mestom ugradnje. Izbor prema broju šasije i ugradnja u CarLab servisu u Beogradu.
@@ -361,6 +366,11 @@ translations:
         eyebrow: Parts by make
         lead: Choose a model to browse parts by category.
         modelsHeading: Models
+        searchLabel: Find a model
+        searchPlaceholder: Model, for example Golf
+        noMatch: That model isn't on the list. Get in touch and we'll find the parts by VIN.
+        pagination: Model list pages
+        pageName: '{make} models, page {page}'
       model:
         metaTitle: '{model}: parts | CarLab'
         metaDescription: Parts for {model} by category, with quantity and fitting position. VIN matching and fitting at CarLab in Belgrade.
