@@ -86,5 +86,8 @@ describe('WorkCard', () => {
     expect(image.getAttribute('src')).toBe(BUILT_COVER.src);
     expect(image.getAttribute('srcset')).toBe(BUILT_COVER.srcset);
     expect(image.getAttribute('width')).toBe('1080');
+    expect(
+      image.parentElement?.querySelector('source')?.getAttribute('srcset'),
+    ).toBe(BUILT_COVER.avifSrcset);
   });
 });

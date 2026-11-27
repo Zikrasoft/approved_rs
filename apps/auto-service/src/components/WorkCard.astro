@@ -4,6 +4,7 @@ import { PathBuilder } from '@/utils/paths';
 import { localizedWork, titleNamesCar, type Work } from '@/utils/works';
 import { isServiceSlug } from '@/utils/services';
 import { coverScale, coverSizes } from '@/utils/coverSizes';
+import CoverPicture from './CoverPicture.astro';
 import { content } from '@/i18n/content';
 import { builtCover, optimizedCover } from '@/utils/coverImages';
 
@@ -32,15 +33,11 @@ const cover = await (Astro.isPrerendered ? optimizedCover : builtCover)(
 ---
 
 <a href={PathBuilder.work(locale, work.id)} class="tile group">
-  <img
-    src={cover.src}
-    srcset={cover.srcset}
+  <CoverPicture
+    {cover}
     sizes={coverSizes(sizes, coverScale(work.data.image, 4 / 3))}
-    width={cover.width}
-    height={cover.height}
     alt={title}
-    loading={eager ? 'eager' : 'lazy'}
-    decoding="async"
+    {eager}
     class="aspect-[4/3] w-full object-cover object-[50%_40%]"
   />
   <div class="flex flex-1 flex-col gap-2 border-t border-line p-4">

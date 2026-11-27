@@ -3,7 +3,8 @@ import { getCollection } from 'astro:content';
 import { DEVELOPER } from '@podbor/brands';
 import { aboutPageSchema } from '@podbor/site-kit';
 import Shell from '@/layouts/Shell.astro';
-import { Image } from 'astro:assets';
+import { Picture } from 'astro:assets';
+import { AVIF_QUALITY } from '@/utils/coverImages';
 import PanelHero from '@/components/PanelHero.astro';
 import HeroContacts from '@/components/HeroContacts.astro';
 import LinkChip from '@/components/LinkChip.astro';
@@ -93,11 +94,13 @@ const photo = await panelPhoto({
     </SplitSection>
 
     <div class={block}>
-      <Image
+      <Picture
+        formats={['avif', 'webp']}
         src={wallSign}
         alt={site.photos.wallSign}
         widths={[640, 960, 1280, 1920, 2400]}
         sizes={signSizes}
+        quality={AVIF_QUALITY}
         loading="lazy"
         class="block aspect-[2/1] w-full rounded-block object-cover object-right sm:aspect-[3/1] sm:object-center"
       />
@@ -143,11 +146,13 @@ const photo = await panelPhoto({
       <div class="grid grid-cols-2 gap-3">
         {
           lounge.map(({ image, alt }) => (
-            <Image
+            <Picture
+              formats={['avif', 'webp']}
               src={image}
               alt={alt}
               widths={[320, 480, 720, 960, 1440]}
               sizes={coverSizes(loungeSizes, coverScale(image, 4 / 5))}
+              quality={AVIF_QUALITY}
               loading="lazy"
               class="block aspect-[4/5] w-full rounded-block object-cover"
             />

@@ -1,5 +1,6 @@
 import { getImage } from 'astro:assets';
 import { coverScale, coverSizes } from './coverSizes';
+import { IMAGE_QUALITY } from './coverImages';
 import type { Photo } from './works';
 
 const BANNER_SIZES = 'calc(100vw - 2.5rem)';
@@ -13,6 +14,7 @@ const photoIn =
       widths: [480, 720, 1080, 1280, 1920],
       sizes,
       format: 'webp',
+      quality: IMAGE_QUALITY,
     });
     return {
       src,

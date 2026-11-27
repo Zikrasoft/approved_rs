@@ -28,6 +28,8 @@ export const BUILT_COVER = {
   src: '/_astro/cover_360.webp',
   srcset:
     '/_astro/cover_360.webp 360w, /_astro/cover_560.webp 560w, /_astro/cover_1080.webp 1080w',
+  avifSrcset:
+    '/_astro/cover_360.avif 360w, /_astro/cover_560.avif 560w, /_astro/cover_1080.avif 1080w',
   width: 1080,
   height: 810,
 };

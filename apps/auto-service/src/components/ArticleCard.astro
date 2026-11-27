@@ -3,6 +3,7 @@ import { localizedArticle } from '@podbor/blog/article';
 import { localeFrom } from '@/i18n/config';
 import { PathBuilder } from '@/utils/paths';
 import type { Article } from '@/utils/blog';
+import CoverPicture from './CoverPicture.astro';
 import ArticleDate from './ArticleDate.astro';
 import { coverScale, coverSizes } from '@/utils/coverSizes';
 import { builtCover, optimizedCover } from '@/utils/coverImages';
@@ -26,18 +27,14 @@ const cover = await (Astro.isPrerendered ? optimizedCover : builtCover)(
   data-article-card
   class="tile group"
 >
-  <img
-    src={cover.src}
-    srcset={cover.srcset}
-    alt=""
-    width={cover.width}
-    height={cover.height}
-    decoding="async"
+  <CoverPicture
+    {cover}
     sizes={coverSizes(
       '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, calc(100vw - 2.5rem)',
       coverScale(article.data.image, 3 / 2),
     )}
-    loading={eager ? 'eager' : 'lazy'}
+    alt=""
+    {eager}
     class="aspect-[3/2] w-full object-cover"
   />
   <div class="flex flex-1 flex-col gap-2 border-t border-line p-4 sm:p-5">

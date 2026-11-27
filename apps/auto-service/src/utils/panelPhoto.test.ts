@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import tall from '@/assets/mechanic-engine-teardown-tall.jpg';
 import wide from '@/assets/mechanic-engine-teardown-wide.jpg';
 import cover from '@/assets/workshop-facade.jpg';
+import { IMAGE_QUALITY } from './coverImages';
 import { panelPhoto, visitPhoto } from './panelPhoto';
 
 describe('panelPhoto', () => {
@@ -38,6 +39,12 @@ describe('panelPhoto', () => {
 
     expect(await widest(wide)).toBe(1920);
     expect(await widest(cover)).toBe(1280);
+  });
+
+  it('encodes every candidate at the shared image quality', async () => {
+    expect((await panelPhoto({ image: wide, alt: '' })).srcset).toContain(
+      `q=${IMAGE_QUALITY}`,
+    );
   });
 
   it('keeps the alt text it was given', async () => {

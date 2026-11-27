@@ -1,5 +1,6 @@
 ---
 import type { ImageMetadata } from 'astro';
+import CoverPicture from './CoverPicture.astro';
 import { coverScale, coverSizes } from '@/utils/coverSizes';
 import {
   builtCover,
@@ -33,18 +34,14 @@ const built = cover
   }
   {
     cover && built && (
-      <img
-        src={built.src}
-        srcset={built.srcset}
-        alt=""
-        width={built.width}
-        height={built.height}
-        decoding="async"
+      <CoverPicture
+        cover={built}
         sizes={coverSizes(
           '(min-width: 1024px) 25vw, (min-width: 640px) 33vw, calc(50vw - 1.5rem)',
           coverScale(cover, 3 / 2),
         )}
-        loading={eager ? 'eager' : 'lazy'}
+        alt=""
+        {eager}
         class={picture}
       />
     )

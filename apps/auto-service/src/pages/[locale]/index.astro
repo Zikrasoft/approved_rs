@@ -1,6 +1,7 @@
 ---
 import { contactCta, contactPlacement } from '@podbor/site-kit/contact-control';
 import { getImage } from 'astro:assets';
+import { IMAGE_QUALITY } from '@/utils/coverImages';
 import { getCollection } from 'astro:content';
 import { faqPageSchema, websiteSchema } from '@podbor/site-kit';
 import { DEVELOPER } from '@podbor/brands';
@@ -40,12 +41,14 @@ const heroWide = await getImage({
   widths: [480, 720, 1080, 1440],
   sizes: HERO_SIZES_SM,
   format: 'webp',
+  quality: IMAGE_QUALITY,
 });
 const heroTall = await getImage({
   src: heroTallImage,
   widths: [560, 800, 1080, 1280],
   sizes: HERO_SIZES_LG,
   format: 'webp',
+  quality: IMAGE_QUALITY,
 });
 const locale = localeFrom(Astro.url.pathname);
 const home = content(locale).home;

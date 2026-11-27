@@ -1,8 +1,9 @@
 ---
-import { Image } from 'astro:assets';
+import { Picture } from 'astro:assets';
 import { BCP47_BY_LOCALE, localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
 import { PathBuilder } from '@/utils/paths';
+import { AVIF_QUALITY } from '@/utils/coverImages';
 import { isServiceSlug } from '@/utils/services';
 import { localizedWork, type Work } from '@/utils/works';
 
@@ -42,11 +43,13 @@ const fact = 'flex flex-col gap-0.5 border-t border-line pt-3';
       portrait && 'lg:grid-cols-[26rem_minmax(0,1fr)] lg:items-start lg:gap-12',
     ]}
   >
-    <Image
+    <Picture
+      formats={['avif', 'webp']}
       src={image}
       alt={title}
       widths={cover.widths}
       sizes={cover.sizes}
+      quality={AVIF_QUALITY}
       loading="eager"
       fetchpriority="high"
       class:list={['card block w-full', cover.class]}

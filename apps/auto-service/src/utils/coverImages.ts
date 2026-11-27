@@ -8,6 +8,7 @@ export const COVER_IMAGES_FILE = 'cover-images.json';
 const coverImageSchema = z.object({
   src: z.string(),
   srcset: z.string(),
+  avifSrcset: z.string(),
   width: z.number(),
   height: z.number(),
 });
@@ -17,6 +18,10 @@ const coverImagesSchema = z.record(z.string(), coverImageSchema);
 export type CoverImage = z.infer<typeof coverImageSchema>;
 
 type CoverImages = z.infer<typeof coverImagesSchema>;
+
+export const IMAGE_QUALITY = 68;
+
+export const AVIF_QUALITY = 50;
 
 export const COVER_WIDTHS = [360, 560, 760, 1080];
 
@@ -31,16 +36,21 @@ export async function optimizedCover(
   image: ImageMetadata,
   widths = COVER_WIDTHS,
 ): Promise<CoverImage> {
-  const { src, srcSet, attributes } = await getImage({
-    src: image,
-    widths,
-    quality: 68,
-  });
+  const [webp, avif] = await Promise.all([
+    getImage({ src: image, widths, quality: IMAGE_QUALITY }),
+    getImage({
+      src: image,
+      widths,
+      format: 'avif',
+      quality: AVIF_QUALITY,
+    }),
+  ]);
   return {
-    src,
-    srcset: srcSet.attribute,
-    width: Number(attributes.width),
-    height: Number(attributes.height),
+    src: webp.src,
+    srcset: webp.srcSet.attribute,
+    avifSrcset: avif.srcSet.attribute,
+    width: Number(webp.attributes.width),
+    height: Number(webp.attributes.height),
   };
 }
 
