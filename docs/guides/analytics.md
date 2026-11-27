@@ -182,13 +182,25 @@ When the shop opens (`SHOP_OPEN=true`), wire these same goals from the offer
 cart's `items[]` / `value` / `currency` (`rsd`) rather than invent new event
 names, and mark them as key events in the GA4 property at the same time.
 
+## When the counters load
+
+`gtag.js`, Metrika's `tag.js` and `fbevents.js` stay off the critical path. Each
+one is fetched on the visitor's first `pointerdown`, `keydown`, `scroll` or
+`touchstart`, or, failing that, once the browser is idle
+`ANALYTICS_IDLE_DELAY_MS` (2 s) after `load`, whichever comes first
+(`whenIdle` in `packages/site-kit/src/analytics.ts`). Nothing is lost while they
+wait: consent is checked first, then `init`/`config` and the page view go into
+the `ym`, `dataLayer` and `fbq` queue stubs, and every `reachGoal` before the
+download queues behind them. Each script drains its queue in that order when it
+arrives. A refusal still loads nothing, interaction or not.
+
 ## Meta Pixel
 
 Every goal goes through `reachGoal`, which reaches GA4, Metrika and, on a site with a
 pixel id, the Meta Pixel. The pixel shares the Google tag's gate in
 `packages/site-kit/src/analytics.ts`: never in dev, never under a refusal, queued
-on the first page view (`init` + `PageView`) with `fbevents.js` fetched while the
-browser is idle. There is no `<noscript>` image: the sites count nothing without
+on the first page view (`init` + `PageView`) with `fbevents.js` fetched as
+described under "When the counters load". There is no `<noscript>` image: the sites count nothing without
 JavaScript anyway.
 
 Only goals with a Meta standard event reach the pixel — `META_EVENTS` in the same

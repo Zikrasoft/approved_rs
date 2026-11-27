@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { defineAnalytics } from './analytics.ts';
+import { ANALYTICS_IDLE_DELAY_MS, defineAnalytics } from './analytics.ts';
 import { CONSENT_EVENT, newConsent, STORAGE_KEY } from './consent.ts';
 
 const GA = 'G-TEST12345';
@@ -13,13 +13,18 @@ const refuse = () =>
   );
 
 let idleTasks: (() => void)[] = [];
-const runIdle = () => {
+const runIdleTasks = () => {
   const queued = idleTasks;
   idleTasks = [];
   queued.forEach((task) => task());
 };
+const runIdle = () => {
+  vi.advanceTimersByTime(ANALYTICS_IDLE_DELAY_MS);
+  runIdleTasks();
+};
 
 beforeEach(() => {
+  vi.useFakeTimers();
   document.head.innerHTML = '';
   localStorage.clear();
   idleTasks = [];
@@ -36,6 +41,8 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  dispatchEvent(new Event('pointerdown'));
+  vi.useRealTimers();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
@@ -74,14 +81,61 @@ describe('defineAnalytics with GA4', () => {
     expect(srcs()).toEqual([GTAG_SRC(GA)]);
   });
 
-  it('falls back to a timer where requestIdleCallback is missing', () => {
+  it('waits a couple of seconds after load before asking for idle time', () => {
+    defineAnalytics({ gaMeasurementId: GA });
+    vi.advanceTimersByTime(ANALYTICS_IDLE_DELAY_MS - 1);
+    runIdleTasks();
+    expect(srcs()).toEqual([]);
+    vi.advanceTimersByTime(1);
+    runIdleTasks();
+    expect(srcs()).toEqual([GTAG_SRC(GA)]);
+  });
+
+  it('falls back to the delay alone where requestIdleCallback is missing', () => {
     vi.stubGlobal('requestIdleCallback', undefined);
-    vi.useFakeTimers();
     defineAnalytics({ gaMeasurementId: GA });
     expect(srcs()).toEqual([]);
-    vi.runAllTimers();
+    vi.advanceTimersByTime(ANALYTICS_IDLE_DELAY_MS);
     expect(srcs()).toEqual([GTAG_SRC(GA)]);
-    vi.useRealTimers();
+  });
+
+  it.each(['pointerdown', 'keydown', 'scroll', 'touchstart'])(
+    'loads at once on the first %s, before the idle fallback',
+    (type) => {
+      vi.spyOn(document, 'readyState', 'get').mockReturnValue('loading');
+      defineAnalytics({ gaMeasurementId: GA });
+      expect(srcs()).toEqual([]);
+      document.body.dispatchEvent(new Event(type, { bubbles: true }));
+      expect(srcs()).toEqual([GTAG_SRC(GA)]);
+    },
+  );
+
+  it('loads once when an interaction and the idle fallback both arrive', () => {
+    defineAnalytics({ gaMeasurementId: GA });
+    dispatchEvent(new Event('scroll'));
+    dispatchEvent(new Event('keydown'));
+    runIdle();
+    expect(srcs()).toEqual([GTAG_SRC(GA)]);
+  });
+
+  it('flushes a goal queued before the interaction into the loaded tag', () => {
+    defineAnalytics({ gaMeasurementId: GA });
+    window.trackGoal?.('contact_click', { channel: 'phone' });
+    dispatchEvent(new Event('pointerdown'));
+    expect(srcs()).toEqual([GTAG_SRC(GA)]);
+    expect(dataLayer().at(-1)).toEqual([
+      'event',
+      'contact_click',
+      { channel: 'phone' },
+    ]);
+  });
+
+  it('loads nothing on an interaction when the visitor refused analytics', () => {
+    refuse();
+    defineAnalytics({ gaMeasurementId: GA, ymCounterId: 1, metaPixelId: '1' });
+    dispatchEvent(new Event('pointerdown'));
+    runIdle();
+    expect(srcs()).toEqual([]);
   });
 
   it('waits for load before scheduling when the page is still parsing', () => {

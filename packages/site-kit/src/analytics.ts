@@ -69,11 +69,32 @@ function loadOnce(src: string): void {
   document.head.appendChild(element);
 }
 
+export const ANALYTICS_IDLE_DELAY_MS = 2000;
+const FIRST_INTERACTIONS = [
+  'pointerdown',
+  'keydown',
+  'scroll',
+  'touchstart',
+] as const;
+
 function whenIdle(run: () => void): void {
-  const schedule = (): void => {
+  let ran = false;
+  const once = (): void => {
+    if (ran) return;
+    ran = true;
+    for (const type of FIRST_INTERACTIONS)
+      removeEventListener(type, once, { capture: true });
+    run();
+  };
+  for (const type of FIRST_INTERACTIONS)
+    addEventListener(type, once, { capture: true, passive: true });
+  const askForIdle = (): void => {
     if (typeof requestIdleCallback === 'function')
-      requestIdleCallback(run, { timeout: 4000 });
-    else setTimeout(run, 1200);
+      requestIdleCallback(once, { timeout: 4000 });
+    else once();
+  };
+  const schedule = (): void => {
+    setTimeout(askForIdle, ANALYTICS_IDLE_DELAY_MS);
   };
   if (document.readyState === 'complete') schedule();
   else addEventListener('load', schedule, { once: true });
