@@ -34,7 +34,7 @@ const PROBES: Record<string, Record<string, string>> = {
     '[locale]/parts/p/[slug].astro': '/ru/parts/p/bosch-0986494524/',
     '[locale]/parts/c/[slug]/[...page].astro': '/ru/parts/c/brakes/',
     '[locale]/parts/[make]/[series]/index.astro': '/ru/parts/bmw/3-series/',
-    '[locale]/parts/[make]/[series]/[category].astro':
+    '[locale]/parts/[make]/[series]/[category]/[...page].astro':
       '/ru/parts/bmw/3-series/oil-filters/',
     'admin/work-draft.astro': '/admin/work-draft',
   },
