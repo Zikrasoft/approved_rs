@@ -1,6 +1,8 @@
 ---
 import Icon from './Icon.astro';
-import { Image, getImage } from 'astro:assets';
+import { getImage } from 'astro:assets';
+import Photo from './Photo.astro';
+import { PHOTO_QUALITY } from '@/utils/photo';
 import type { ImageMetadata } from 'astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
@@ -16,7 +18,11 @@ const site = content(locale).site;
 const LARGEST_WIDTH = 1300;
 const views = await Promise.all(
   images.map((image) =>
-    getImage({ src: image, width: Math.min(image.width, LARGEST_WIDTH) }),
+    getImage({
+      src: image,
+      width: Math.min(image.width, LARGEST_WIDTH),
+      quality: PHOTO_QUALITY,
+    }),
   ),
 );
 ---
@@ -34,12 +40,11 @@ const views = await Promise.all(
         data-reveal-delay={(i % 2) * 80}
       >
         <span class="core block overflow-hidden">
-          <Image
+          <Photo
             src={image}
             alt={`${alt} — ${i + 1}`}
             widths={[420, 640, 900, LARGEST_WIDTH]}
             sizes="(min-width: 640px) 45vw, calc(100vw - 2.5rem)"
-            loading="lazy"
             class="block aspect-[4/3] w-full object-cover transition-transform duration-[1200ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-[1.04]"
           />
         </span>

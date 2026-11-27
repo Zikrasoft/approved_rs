@@ -1,6 +1,6 @@
 ---
 import Icon from './Icon.astro';
-import { Image } from 'astro:assets';
+import Photo from './Photo.astro';
 import type { ImageMetadata } from 'astro';
 import { localeFrom } from '@/i18n/config';
 import { content } from '@/i18n/content';
@@ -22,25 +22,25 @@ const site = content(locale).site;
     class="core group relative isolate block overflow-hidden"
     style="--split:50%"
   >
-    <Image
+    <Photo
       src={after}
       alt={`${alt} — ${site.common.afterLabel}`}
       widths={[480, 720, 1024, 1440]}
       sizes="(min-width: 1024px) 60vw, calc(100vw - 2.5rem)"
       class="block h-full w-full object-cover"
-      loading="lazy"
+      priority
     />
     <div
       class="absolute inset-0"
       style="clip-path:inset(0 calc(100% - var(--split)) 0 0)"
     >
-      <Image
+      <Photo
         src={before}
         alt={`${alt} — ${site.common.beforeLabel}`}
         widths={[480, 720, 1024, 1440]}
         sizes="(min-width: 1024px) 60vw, calc(100vw - 2.5rem)"
         class="block h-full w-full object-cover"
-        loading="lazy"
+        priority
       />
     </div>
 

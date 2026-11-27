@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
-import { Image } from 'astro:assets';
+import Photo from '@/components/Photo.astro';
 import Shell from '@/layouts/Shell.astro';
 import PageHero from '@/components/PageHero.astro';
 import Gallery from '@/components/Gallery.astro';
@@ -90,12 +90,12 @@ const dateLabel = new Intl.DateTimeFormat(BCP47_BY_LOCALE[locale], {
         />
       ) : (
         <div class="shell" data-reveal>
-          <Image
+          <Photo
             src={work.data.image}
             alt={title}
             widths={[540, 760, 1080, 1440]}
             sizes="(min-width: 1024px) 80vw, calc(100vw - 2.5rem)"
-            loading="eager"
+            priority
             class="core block aspect-[4/3] w-full object-cover sm:aspect-[16/10]"
           />
         </div>

@@ -207,13 +207,7 @@ const website = websiteSchema({
         )
       }
     </div>
-    {
-      featured.length > 0 ? (
-        <WorkGrid works={featured} eager={1} />
-      ) : (
-        <EmptyState />
-      )
-    }
+    {featured.length > 0 ? <WorkGrid works={featured} /> : <EmptyState />}
   </section>
 
   <section class="wrap mt-32 sm:mt-40">
