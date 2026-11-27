@@ -1,7 +1,5 @@
 import type { AstroGlobal } from 'astro';
 import { paginate } from '@podbor/site-kit/pagination';
-import { localeFrom } from '../i18n/config.ts';
-import { seriesName } from './carName';
 import { loadCataloguePage } from './cataloguePage';
 
 export const MAKE_HUB_PAGE_SIZE = 48;
@@ -26,12 +24,8 @@ export const loadMakeHub = (
       catalogueLocale,
     );
     if (!hub) return null;
-    const locale = localeFrom(astro.url.pathname);
     const series = hub.series
-      .map(({ slug, name }) => ({
-        slug,
-        label: seriesName({ name, translations: null }, hub.make, locale),
-      }))
+      .map(({ slug, name }) => ({ slug, label: name }))
       .toSorted((a, b) =>
         a.label.localeCompare(b.label, 'en', { numeric: true }),
       );

@@ -69,7 +69,7 @@ afterEach(() => {
 });
 
 describe('the make hub', () => {
-  it('names each series with its make, in name order', async () => {
+  it('names each series without repeating its make, in name order', async () => {
     setShop(false);
     const page = await hubHtml({ slug: 'bmw', name: 'BMW' }, [
       series('3 GT', '3-gt', ['Фильтры', 'Тормоза']),
@@ -79,10 +79,7 @@ describe('the make hub', () => {
       ...page.querySelectorAll(`main ul a[href^="/ru/parts/bmw/"]`),
     ];
 
-    expect(rows.map((link) => link.textContent?.trim())).toEqual([
-      'BMW 1',
-      'BMW 3 GT',
-    ]);
+    expect(rows.map((link) => link.textContent?.trim())).toEqual(['1', '3 GT']);
     expect(rows[1].getAttribute('href')).toBe('/ru/parts/bmw/3-gt/');
   });
 
@@ -118,7 +115,7 @@ describe('the make hub', () => {
     ).not.toBeNull();
     expect(index).toHaveLength(100);
     expect(index[99]).toEqual({
-      name: 'Volkswagen Golf 100',
+      name: 'Golf 100',
       href: '/ru/parts/volkswagen/golf-100/',
     });
   });
