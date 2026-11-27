@@ -38,12 +38,14 @@ function pageHeight(px: number): void {
   });
 }
 
-let resized: (() => void) | undefined;
+type Resized = (entries: { borderBoxSize: { blockSize: number }[] }[]) => void;
+
+let resized: Resized | undefined;
 
 vi.stubGlobal(
   'ResizeObserver',
   class {
-    constructor(callback: () => void) {
+    constructor(callback: Resized) {
       resized = callback;
     }
     observe(): void {}
@@ -59,10 +61,17 @@ const publishedHeight = () =>
 beforeEach(() => {
   localStorage.clear();
   document.body.innerHTML = '';
-  vi.useFakeTimers();
+  vi.useFakeTimers({
+    toFake: ['setTimeout', 'clearTimeout', 'requestAnimationFrame'],
+  });
   window.scrollY = 0;
   pageHeight(window.innerHeight * 3);
 });
+
+function paint(): void {
+  vi.advanceTimersToNextFrame();
+  vi.advanceTimersByTime(1);
+}
 
 function scrollTo(y: number): void {
   window.scrollY = y;
@@ -103,8 +112,7 @@ describe('defineCookieConsent', () => {
 
   it('publishes its height for the bars it would otherwise cover', () => {
     const el = mount();
-    Object.defineProperty(el, 'offsetHeight', { value: 56 });
-    resized!();
+    resized!([{ borderBoxSize: [{ blockSize: 55.6 }] }]);
     expect(publishedHeight()).toBe('56px');
     el.remove();
     expect(publishedHeight()).toBe('');
@@ -300,13 +308,32 @@ describe('the answer reaching the rest of the page', () => {
 });
 
 describe('pages the visitor cannot scroll past', () => {
-  it('asks straight away when there is no second screen to reach', () => {
+  it('asks once the first frame has painted when there is no second screen to reach', () => {
     pageHeight(Math.round(window.innerHeight * 1.4));
-    expect(mount().hidden).toBe(false);
+    const el = mount();
+    expect(el.hidden).toBe(true);
+    paint();
+    expect(el.hidden).toBe(false);
   });
 
   it('asks on a position restored past the first screen, with no scroll event', () => {
     window.scrollY = window.innerHeight;
-    expect(mount().hidden).toBe(false);
+    const el = mount();
+    paint();
+    expect(el.hidden).toBe(false);
+  });
+
+  it('measures nothing for an element that went away before the first paint', () => {
+    pageHeight(Math.round(window.innerHeight * 1.4));
+    const el = mount();
+    el.remove();
+    paint();
+    expect(el.hidden).toBe(true);
+  });
+
+  it('leaves the first screen alone after the first paint on a long page', () => {
+    const el = mount();
+    paint();
+    expect(el.hidden).toBe(true);
   });
 });

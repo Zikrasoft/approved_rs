@@ -6,6 +6,7 @@ import {
   type LeadFormResult,
 } from '@podbor/lead-crm/submit';
 import { GOALS, reachGoal } from './goals.ts';
+import { afterNextPaint } from './afterPaint.ts';
 
 export const LEAD_FORM_ATTRIBUTE = 'data-lead-form';
 export const BRAND_LINK_ATTRIBUTE = 'data-brand-link';
@@ -43,6 +44,7 @@ function trackScroll(signal: AbortSignal): void {
   signal.addEventListener('abort', () => controller.abort());
 
   const check = (): void => {
+    if (controller.signal.aborted) return;
     const reached = scrolledPercent();
     for (const mark of pending) {
       const [depth, goal] = mark;
@@ -57,8 +59,10 @@ function trackScroll(signal: AbortSignal): void {
     passive: true,
     signal: controller.signal,
   });
-  addEventListener('load', check, { signal: controller.signal });
-  check();
+  addEventListener('load', () => afterNextPaint(check), {
+    signal: controller.signal,
+  });
+  afterNextPaint(check);
 }
 
 function trackForms(signal: AbortSignal): void {

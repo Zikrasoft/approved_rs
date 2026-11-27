@@ -7,6 +7,7 @@ import {
   type ConsentDetail,
 } from './consent.ts';
 import { forgetAdTouch } from './adTouch.ts';
+import { afterNextPaint } from './afterPaint.ts';
 import { forgetVisitorId } from './visitorId.ts';
 
 export { CONSENT_EVENT, type ConsentDetail };
@@ -45,10 +46,10 @@ export function defineCookieConsent(tagName = 'cookie-consent'): void {
         this.controller?.abort();
         this.controller = new AbortController();
         this.resizes?.disconnect();
-        this.resizes = new ResizeObserver(() =>
+        this.resizes = new ResizeObserver(([entry]) =>
           document.documentElement.style.setProperty(
             COOKIE_CONSENT_HEIGHT_VAR,
-            `${this.offsetHeight}px`,
+            `${Math.round(entry!.borderBoxSize[0]!.blockSize)}px`,
           ),
         );
         this.resizes.observe(this);
@@ -117,10 +118,9 @@ export function defineCookieConsent(tagName = 'cookie-consent'): void {
           window.scrollY >= window.innerHeight ||
           document.documentElement.scrollHeight < window.innerHeight * 2;
 
-        if (pastFirstScreen()) {
-          reveal();
-          return;
-        }
+        afterNextPaint(() => {
+          if (!pending.signal.aborted && pastFirstScreen()) reveal();
+        });
 
         window.addEventListener(
           'scroll',

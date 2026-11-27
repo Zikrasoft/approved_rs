@@ -69,7 +69,15 @@ const scrollTo = (y: number): void => {
   dispatchEvent(new Event('scroll'));
 };
 
+const paint = (): void => {
+  vi.advanceTimersToNextFrame();
+  vi.advanceTimersByTime(1);
+};
+
 beforeEach(() => {
+  vi.useFakeTimers({
+    toFake: ['setTimeout', 'clearTimeout', 'requestAnimationFrame'],
+  });
   page = new AbortController();
   observed = [];
   disconnected = 0;
@@ -81,6 +89,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  vi.useRealTimers();
   page.abort();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
@@ -132,10 +141,30 @@ describe('defineFunnelTracking', () => {
     expect(goalNames()).toEqual([GOALS.scroll50, GOALS.scroll90]);
   });
 
-  it('reports a page that fits the screen as read without any scrolling', () => {
+  it('reports a page that fits the screen as read once the first frame has painted', () => {
     stubViewport(500, 1000);
     start();
+    expect(goalNames()).toEqual([]);
+    paint();
     expect(goalNames()).toEqual([GOALS.scroll50, GOALS.scroll90]);
+  });
+
+  it('measures a position the browser restored on load once that frame has painted', () => {
+    start();
+    paint();
+    vi.stubGlobal('scrollY', 500);
+    dispatchEvent(new Event('load'));
+    expect(goalNames()).toEqual([]);
+    paint();
+    expect(goalNames()).toEqual([GOALS.scroll50]);
+  });
+
+  it('measures nothing once the page tore tracking down before the paint', () => {
+    stubViewport(500, 1000);
+    start();
+    page.abort();
+    paint();
+    expect(goalNames()).toEqual([]);
   });
 
   it('reports the form coming into view', () => {
