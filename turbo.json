@@ -64,6 +64,7 @@
         "AUTH_CORS",
         "TYPESENSE_*",
         "PORT",
+        "SHOP_SHARDS",
         "DB_HOST",
         "DB_PORT",
         "DB_USERNAME",
