@@ -1,0 +1,21 @@
+name: Isolate runner
+description: >-
+  Gives the shop's test Postgres and Typesense a compose project and host ports
+  of this runner's own, so jobs on several self-hosted runners of one machine
+  never share or tear down each other's containers. The number comes from the
+  runner name (zikrasoft-mac-N); a runner without one keeps the defaults.
+
+runs:
+  using: composite
+  steps:
+    - run: |
+        n=${RUNNER_NAME##*-}
+        case $n in
+          '' | *[!0-9]*) exit 0 ;;
+        esac
+        {
+          echo "COMPOSE_PROJECT_NAME=podbor-ci-$n"
+          echo "SHOP_TEST_DB_PORT=$((55432 + n * 10))"
+          echo "SHOP_TEST_TYPESENSE_PORT=$((58108 + n * 10))"
+        } >>"$GITHUB_ENV"
+      shell: bash

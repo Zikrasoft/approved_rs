@@ -344,6 +344,7 @@ jobs:
         with:
           ref: ${{ needs.translate.outputs.sha }}
           persist-credentials: false
+      - uses: ./.github/actions/isolate-runner
 
       - name: Build
         run: |

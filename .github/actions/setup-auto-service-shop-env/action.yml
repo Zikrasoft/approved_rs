@@ -10,6 +10,8 @@ description: >-
 runs:
   using: composite
   steps:
+    - uses: ./.github/actions/isolate-runner
+
     - run: >-
         docker compose -f apps/auto-service-shop/docker-compose.test.yml up -d --wait
       shell: bash
