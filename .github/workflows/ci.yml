@@ -122,6 +122,7 @@ jobs:
         run: sh infra/auto-service-shop/test/harden-ssh.test.sh
       - run: sh .github/scripts/migrations-frozen.test.sh
       - run: sh .github/scripts/check-base.test.sh
+      - run: sh .github/scripts/isolate-runner.test.sh
       - run: sh .github/scripts/shop-backend-up.test.sh
       - run: sh .github/scripts/shop-ci-env.test.sh
       - run: sh .github/scripts/upload-site.test.sh
