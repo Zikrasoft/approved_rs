@@ -38,6 +38,7 @@ jobs:
       - run: pnpm exec prettier --check .
       - run: node --experimental-strip-types .github/scripts/yaml-content-valid.ts
       - run: node --experimental-strip-types --test .github/scripts/russian-copy-hygiene.test.ts
+      - run: node --experimental-strip-types --test .github/scripts/shop-slow-issue.test.ts
       - run: node --experimental-strip-types .github/scripts/russian-copy-hygiene.ts
       - run: sh .github/scripts/migrations-frozen.sh apps/auto-service-shop 'src/modules/*/migrations/*.ts' 'src/migration-scripts/*.ts'
         env:
@@ -130,6 +131,27 @@ jobs:
           docker run --rm -v "$PWD:/repo" -w /repo --entrypoint shellcheck "$ACTIONLINT_IMAGE"
           .github/scripts/*.sh infra/auto-service-shop/*.sh infra/auto-service-shop/test/*.sh
       - run: docker run --rm -v "$PWD:/repo" -w /repo "$ACTIONLINT_IMAGE" -color
+      - name: Clean up
+        if: always()
+        run: docker compose -f apps/auto-service-shop/docker-compose.test.yml down -v
+
+  shop-slow:
+    if: github.event_name == 'push'
+    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-pnpm
+      - uses: ./.github/actions/setup-auto-service-shop-env
+      - run: pnpm exec turbo run test:slow --filter=@podbor/auto-service-shop
+      - name: Report the failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: node --experimental-strip-types .github/scripts/shop-slow-issue.ts "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
       - name: Clean up
         if: always()
         run: docker compose -f apps/auto-service-shop/docker-compose.test.yml down -v

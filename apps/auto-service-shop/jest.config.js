@@ -1,3 +1,5 @@
+const slow = process.env.SHOP_SLOW === 'true';
+
 module.exports = {
   transform: {
     '^.+\\.[jt]s$': [
@@ -14,6 +16,11 @@ module.exports = {
   moduleNameMapper: {
     '^@medusajs/test-utils$': '<rootDir>/integration-tests/test-utils.js',
   },
-  testMatch: ['**/src/**/__tests__/**/*.spec.[jt]s'],
+  testMatch: [
+    slow
+      ? '**/src/**/__tests__/**/*.slow.spec.[jt]s'
+      : '**/src/**/__tests__/**/*.spec.[jt]s',
+  ],
+  testPathIgnorePatterns: slow ? [] : ['\\.slow\\.spec\\.[jt]s$'],
   testTimeout: 600_000,
 };

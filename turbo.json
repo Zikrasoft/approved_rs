@@ -70,6 +70,24 @@
         "DB_PASSWORD"
       ]
     },
+    "@podbor/auto-service-shop#test:slow": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "env": [
+        "DATABASE_*",
+        "JWT_SECRET",
+        "COOKIE_SECRET",
+        "STORE_CORS",
+        "ADMIN_CORS",
+        "AUTH_CORS",
+        "TYPESENSE_*",
+        "PORT",
+        "DB_HOST",
+        "DB_PORT",
+        "DB_USERNAME",
+        "DB_PASSWORD"
+      ]
+    },
     "lint": {}
   }
 }
