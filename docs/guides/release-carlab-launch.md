@@ -64,7 +64,7 @@ checked (`terraform state list` prints names only, never the keys in the state).
 - [ ] CI is green on the branch head. `main` was green on 2026-11-04 (the run for
       `73d1691c`), so the lead-crm timeout of 2026-11-02 is gone. The last red run,
       on `feat/phone-always-visible` (2026-11-08), failed only in `check`, in
-      `src/lib/publish/__tests__/large-catalogue.spec.ts` ("Exceeded timeout of
+      `src/lib/publish/__tests__/large-catalogue.slow.spec.ts` ("Exceeded timeout of
       360000 ms", the shard with the 70 000-row publish test). That spec also runs
       on the push to `main` that ships the shop, so rerun it and find out whether it
       is slow or flaky before the merge. Fix or rerun until `check`, `translate`
