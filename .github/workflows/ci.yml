@@ -127,7 +127,7 @@ jobs:
       - run: sh .github/scripts/upload-site.test.sh
       - run: >-
           node --experimental-strip-types --test
-          .github/scripts/ci-gates.test.ts .github/scripts/shop-shards.test.ts
+          .github/scripts/ci-gates.test.ts .github/scripts/shop-shards.test.ts .github/scripts/shop-affected.test.ts
           .github/scripts/russian-copy-hygiene.test.ts .github/scripts/shop-slow-issue.test.ts
           .github/scripts/site-env.test.ts .github/scripts/env-to-github.test.ts .github/scripts/caddy-split.test.ts
       - run: >-
@@ -148,9 +148,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: ./.github/actions/setup-pnpm
       - id: affected
-        uses: ./.github/actions/affected
+        run: echo "shop=$(sh .github/scripts/shop-affected.sh)" >>"$GITHUB_OUTPUT"
+      - if: steps.affected.outputs.shop == 'true'
+        uses: ./.github/actions/setup-pnpm
       - if: steps.affected.outputs.shop == 'true'
         uses: ./.github/actions/setup-auto-service-shop-env
       - if: steps.affected.outputs.shop == 'true'
@@ -158,7 +159,7 @@ jobs:
           SHOP_SHARDS: ${{ matrix.shard }}/${{ strategy.job-total }}
         run: pnpm exec turbo run test --filter=@podbor/auto-service-shop
       - name: Clean up
-        if: always()
+        if: always() && steps.affected.outputs.shop == 'true'
         run: docker compose -f apps/auto-service-shop/docker-compose.test.yml down -v
 
   shop-drift:
@@ -170,9 +171,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: ./.github/actions/setup-pnpm
       - id: affected
-        uses: ./.github/actions/affected
+        run: echo "shop=$(sh .github/scripts/shop-affected.sh)" >>"$GITHUB_OUTPUT"
+      - if: steps.affected.outputs.shop == 'true'
+        uses: ./.github/actions/setup-pnpm
       - if: steps.affected.outputs.shop == 'true'
         uses: ./.github/actions/setup-auto-service-shop-env
       - name: Shop migrations match the models
@@ -182,7 +184,7 @@ jobs:
           docker compose -f apps/auto-service-shop/docker-compose.test.yml exec -T postgres sh -c "dropdb -U postgres --if-exists migration_drift && createdb -U postgres migration_drift"
           DATABASE_URL=postgres://postgres:postgres@127.0.0.1:${SHOP_TEST_DB_PORT:-55432}/migration_drift sh .github/scripts/shop-migration-drift.sh
       - name: Clean up
-        if: always()
+        if: always() && steps.affected.outputs.shop == 'true'
         run: docker compose -f apps/auto-service-shop/docker-compose.test.yml down -v
 
   shop-slow:

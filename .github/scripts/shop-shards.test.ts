@@ -1,9 +1,20 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import { relative } from 'node:path';
+import { parse } from 'yaml';
 
-const SHARDS = 6;
+const SHARDS = (
+  parse(
+    readFileSync(
+      new URL('../workflows/ci.yml', import.meta.url).pathname,
+      'utf8',
+    ),
+  ) as {
+    jobs: { shop: { strategy: { matrix: { shard: number[] } } } };
+  }
+).jobs.shop.strategy.matrix.shard.length;
 const shop = new URL('../../apps/auto-service-shop/', import.meta.url).pathname;
 
 const jestList = (args: string[], slow = false): string[] =>
@@ -30,7 +41,7 @@ const specs = execFileSync(
   .toSorted();
 const isSlow = (path: string) => /\.slow\.spec\.[jt]s$/.test(path);
 
-test('the 6 shards run every spec that is not slow exactly once', () => {
+test('the shards run every spec that is not slow exactly once', () => {
   const sharded = Array.from({ length: SHARDS }, (_, i) =>
     jestList([`--shard=${i + 1}/${SHARDS}`]),
   ).flat();

@@ -23,11 +23,7 @@ runs:
         set -euo pipefail
         base=$(sh .github/scripts/check-base.sh)
         packages=$(pnpm exec turbo run typecheck test build ${base:+"--filter=...[$base]"} --dry=json | jq -c .packages)
-        shop=false
-        if [ -z "$base" ] || jq -e 'index("@podbor/auto-service-shop")' <<<"$packages" >/dev/null \
-           || ! git diff --quiet "$base" HEAD -- infra/auto-service-shop; then
-          shop=true
-        fi
+        shop=$(sh .github/scripts/shop-affected.sh)
         sites=$(jq -r --argjson sites "$(jq -c '.sites | keys | map("@podbor/" + .)' .github/scripts/site-env.json)" \
           '[.[] | select(. as $p | $sites | index($p)) | ltrimstr("@podbor/")] | join(" ")' <<<"$packages")
         echo "Affected: $packages; shop: $shop; sites: ${sites:-none}"
