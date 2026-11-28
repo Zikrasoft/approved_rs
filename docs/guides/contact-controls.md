@@ -42,7 +42,7 @@ House style for all three sites. Unqualified paths are relative to
   and fails on a `tel:` link offered to a mouse or left in the tab order,
   fine-only markup on a touchscreen, or a control outside any
   `data-contact-placement`. Local only; CI gets the placement half from
-  `.github/scripts/contact-placement.ts` in `check`.
+  `.github/scripts/contact-placement.ts` in the `sites` job.
 - **No boolean rides down to a contact component to say which page it is on.**
   `ContactCTA direct`, `BaseLayout directContacts` and the `openModal` threaded
   through `ContactCTA` and `ClosingBand` are all gone (issue #92). What replaced

@@ -32,7 +32,7 @@ before the seed, with the previous image still serving, when the schema is not
 what the migrations build. An index on one of Medusa's own tables
 (the `order` time indexes) cannot sit in our modules' migrations, which may run
 before Medusa's; it is a script in `src/migration-scripts/`, which `db:migrate`
-runs once after every module migration. `check` runs
+runs once after every module migration. The `shop-drift` job runs
 `.github/scripts/shop-migration-drift.sh`, which fails when `medusa db:generate`
 on a fresh database writes anything.
 
@@ -41,7 +41,7 @@ on a fresh database writes anything.
 **The migration files are frozen by a manifest.** `apps/auto-service-shop/migrations.sha256`
 lists the sha256 of every file under `src/modules/*/migrations/*.ts` and
 `src/migration-scripts/*.ts`, and `.github/scripts/migrations-frozen.sh`
-in `check` fails when a listed file changes or disappears, or when a migration
+in the `static` job fails when a listed file changes or disappears, or when a migration
 file is missing from the list. A new migration is appended to it in the same
 commit: `cd apps/auto-service-shop && sha256sum <file> >>migrations.sha256`.
 A failing check means a migration a database has run was edited: restore the

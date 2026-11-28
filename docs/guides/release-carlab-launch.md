@@ -63,12 +63,12 @@ checked (`terraform state list` prints names only, never the keys in the state).
 
 - [ ] CI is green on the branch head. `main` was green on 2026-11-04 (the run for
       `73d1691c`), so the lead-crm timeout of 2026-11-02 is gone. The last red run,
-      on `feat/phone-always-visible` (2026-11-08), failed only in `check`, in
+      on `feat/phone-always-visible` (2026-11-08), failed only in the former `check` job, in
       `src/lib/publish/__tests__/large-catalogue.slow.spec.ts` ("Exceeded timeout of
       360000 ms", the shard with the 70 000-row publish test). That spec also runs
       on the push to `main` that ships the shop, so rerun it and find out whether it
-      is slow or flaky before the merge. Fix or rerun until `check`, `translate`
-      and `verify` pass (deploy.md § Job order).
+      is slow or flaky before the merge. Fix or rerun until the test jobs, `shop-slow`,
+      `translate` and `verify` pass (deploy.md § Job order).
 - [ ] `translate` committed its "Auto-translate content" commit after the last
       Russian change (deploy.md § Content auto-translation). The carlab en/sr
       guidance in `apps/auto-service/src/i18n/translateConfig.ts` changed
@@ -212,9 +212,9 @@ code on this branch; they were not migrated to GitHub.
 ## 6. Merge and deploy
 
 - [ ] The owner merges `release/<date>` into `main` (owner's rule).
-- [ ] Watch Actions → CI on `main`: `check` → `translate` → `verify` →
-      `shop-image` → `deploy-shop` → `record-shop`, with `deploy` (approved.rs)
-      and `deploy-brand-site` (details.rs, carlab.rs) after; carlab.rs waits
+- [ ] Watch Actions → CI on `main`: the test jobs beside `translate` →
+      `verify` → `shop-image` → `deploy-shop` → `record-shop`, with
+      `deploy-site` (approved.rs, details.rs, carlab.rs) after; it waits
       for `deploy-shop` (deploy.md § Job order; § How it ships).
       `gh run watch --repo Zikrasoft/approved_rs` follows it from a terminal.
 - [ ] `verify` → `scope` log lists all four apps with "+ … will deploy"
