@@ -205,7 +205,7 @@ in this repo:
   naturally in context
 - Ё/ё: never in authored copy, write Е/е
 
-`.github/scripts/russian-copy-hygiene.ts` fails the `check` job on an em dash
+`.github/scripts/russian-copy-hygiene.ts` fails the `static` job on an em dash
 or Ё in Russian source copy, so these two are not a matter of judgement.
 
 Keep every fact, number, price, car spec and proper noun exactly as written.

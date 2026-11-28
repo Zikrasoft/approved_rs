@@ -107,8 +107,8 @@ and the Pixel beside `'self'` and the inline Astro scripts. They live in
 `infra/auto-service-shop/caddy/security-headers.caddy`, generated from
 `SECURITY_HEADERS` in `packages/site-kit`, whose CSP takes the tag hosts from
 the analytics module; change it there and run
-`.github/scripts/security-headers-drift.sh`, which also fails `check` on a hand
-edit. Its `report-uri` is each site's `/api/csp-report`,
+`.github/scripts/security-headers-drift.sh`, which also fails the `static` job on a
+hand edit. Its `report-uri` is each site's `/api/csp-report`,
 which logs one `[csp] <directive> <blocked host>` line per violation and nothing
 about the visitor.
 
@@ -117,14 +117,23 @@ all three site containers shows no violation from the analytics scripts or the m
 
 ### Job order
 
-`check` (lint/prettier/typecheck/test, the shell tests for the scripts,
-shellcheck, actionlint) → `translate` → `verify` → `deploy-site` (approved.rs,
-details.rs, carlab.rs). Beside them, `shop-image` →
+The test jobs run in parallel: `static` (lint, prettier, the YAML and copy
+checks, the frozen-migration and pinned-version checks, typecheck), `sites` (the
+non-shop tests and the affected sites' builds), `infra` (the shell and script
+tests, shellcheck, actionlint), the `shop` matrix of shard jobs and
+`shop-drift`. `shop-slow` runs the `*.slow.spec.ts` load specs on every push
+without gating a deploy. `translate` starts at once, beside them, and
+`translate` → `verify` → `deploy-site` (approved.rs, details.rs, carlab.rs)
+follows. Beside them, `shop-image` →
 `deploy-shop` → `record-shop` ship the shop backend to its VPS (see
 [the shop backend](#the-shop-backend-medusa-on-a-vps-apicarlabrs)), and
 `deploy-site` waits for `shop-image` and `deploy-shop`, and holds every leg
 back if either _failed_: the shop image carries the `crm` migrations, so a site
-never ships against a schema that was not migrated. The
+never ships against a schema that was not migrated. `deploy-site` gates on
+`static` and `sites`, `deploy-shop` on `static`, `infra`, every shard and
+`shop-drift`. On a push that does not touch the shop, the shard and drift jobs
+decide so with a `git diff` (`.github/scripts/shop-affected.sh`) before
+installing anything and finish in seconds. The
 `deploy*` jobs only run on `main`, each only if the previous one passed. The workflow fires on a push to
 any **branch** and never
 on a tag: a tag filter without a branch filter would switch branches off entirely,
@@ -141,9 +150,9 @@ that SHA (`turbo run test --filter="...[<pushed SHA>]"`, so only the apps whose
 content moved and whatever `git pull --rebase` brought in): `translate` pushes as
 `GITHUB_TOKEN`, and such a push starts no new run — otherwise nobody would check
 the translated tree. When nothing was translated the SHA is the pushed one, which
-`check` already tested, and `verify` runs no tests at all.
+the test jobs already tested, and `verify` runs no tests at all.
 
-### What `check` tests
+### What the test jobs test
 
 Lint, prettier, the YAML and Russian-copy checks, pinned versions, the
 security-headers drift, the Caddy split check, the migration manifest, shellcheck and actionlint run on every
@@ -152,10 +161,12 @@ contact-placement check, and the shop's Docker Postgres, migration drift and
 `infra/auto-service-shop/test/*.test.sh` run only for what changed since the
 newest commit every app has passed CI with:
 `.github/scripts/check-base.sh` takes the merge-base of the `deployed/*` tags
-(they move only after `check` passed and the deploy finished) and the step runs
+(they move only after the test jobs passed and the deploy finished) and the step runs
 `turbo --filter="...[<base>]"`, dependents included. The shop counts as changed
-when turbo names `@podbor/auto-service-shop` or anything under
-`infra/auto-service-shop/` moved. `check` tests everything when there is no
+when `.github/scripts/shop-affected.sh` sees a change under
+`apps/auto-service-shop/`, `infra/auto-service-shop/` or a workspace package the
+shop depends on (`shop-affected.test.ts` keeps that list equal to the shop's
+dependency closure). The jobs test everything when there is no
 `deployed/*` tag, a tag is not an ancestor of `HEAD`, the merge-base is not
 itself a deployed commit, a root build file or anything under `.github/`, the
 eslint or prettier config changed, or a `workflow_dispatch` run sets `force`.
@@ -203,8 +214,8 @@ pnpm-lock.yaml  pnpm-workspace.yaml  turbo.json  package.json
 ```
 
 Any change to those ships every app whose `deployed/*` tag is older than the
-change. The list lives once, in `.github/scripts/root-changed.sh`, which `check`
-reads too. If a new file starts affecting the build, it has to be added there. The rest of `.github/` is deliberately not tracked:
+change. The list lives once, in `.github/scripts/root-changed.sh`, which the test
+jobs read too. If a new file starts affecting the build, it has to be added there. The rest of `.github/` is deliberately not tracked:
 otherwise any workflow edit would ship all three sites. By the same logic
 `setup-pnpm` installs the whole workspace in every job; until that measurably
 hurts, we don't introduce `pnpm install --filter`.
@@ -296,8 +307,8 @@ outside the site's own env. Only the one deploy step carries them, not the job.
 (`process.env.X`, `import.meta.env.X`, `requireEnv('X')`, the env zod schemas)
 in `apps/<app>/src`, `astro.config.mjs`, `keystatic.config.ts` and the
 `packages/*` it depends on, and fails on a name the manifest does not list for
-that site. A new variable lands in the manifest in the same change, or `check`
-goes red. A value holding a single quote or a line break is refused by name:
+that site. A new variable lands in the manifest in the same change, or the `infra`
+job goes red. A value holding a single quote or a line break is refused by name:
 the `.env` quotes values in single quotes, which compose and `node --env-file`
 both read literally.
 
@@ -799,7 +810,7 @@ one with `pnpm --filter @podbor/lead-crm exec prisma migrate dev --name <name>`
 against the local test database and commit it: Prisma applies the folders in
 name order, so every one, `20261116000000_init` included, starts with its
 timestamp. The migration files are frozen by `packages/lead-crm/migrations.sha256`,
-which `.github/scripts/migrations-frozen.sh` checks in `check`, as the shop's
+which `.github/scripts/migrations-frozen.sh` checks in the `static` job, as the shop's
 are; append a new migration's line in the same commit.
 
 The nightly `backup.sh` dumps `crm` beside `carlab` (`crm-<stamp>.dump`, same
@@ -892,7 +903,8 @@ The sites' own secrets and variables are not in this table: the manifest
 
 | Job           | `permissions`                       | Why exactly that much                                                                        |
 | ------------- | ----------------------------------- | -------------------------------------------------------------------------------------------- |
-| `check`       | `contents: read`                    | a checkout with `fetch-depth: 0`, for the `deployed/*` tags its test scope starts from       |
+| test jobs     | `contents: read`                    | a checkout with `fetch-depth: 0`, for the `deployed/*` tags its test scope starts from       |
+| `shop-slow`   | `contents: read`, `issues: write`   | opens or comments on the issue that reports a failed load spec                               |
 | `translate`   | `contents: write`                   | commits and pushes translations into the same branch                                         |
 | `verify`      | `contents: read`                    | a checkout with `fetch-depth: 0`; the `deployed/*` tags arrive with the history              |
 | `shop-image`  | `contents: read`, `packages: write` | pushes `ghcr.io/zikrasoft/podbor-auto-service-shop:<sha>` and `podbor-carlab-caddy:<sha>`    |
@@ -946,7 +958,7 @@ account. All of it is described in `infra/auto-service-shop/`:
 | `crawler-role.sh`                        | the crawler's Postgres role, run by `deploy.sh` and `restore.sh` after the migrations                                                                                |
 | `move-static-to-s3.sh`                   | once: copies the old `static` volume to the public bucket; stored image keys need no rewrite                                                                         |
 | `bootstrap-host.sh`, `harden-ssh.sh`     | first-time server setup (once, by hand)                                                                                                                              |
-| `test/*.test.sh`                         | the compose shape, the Caddy rules against a live Caddy, the crawler role against a live Postgres, the scripts' behaviour against a stubbed `docker`, run in `check` |
+| `test/*.test.sh`                         | the compose shape, the Caddy rules against a live Caddy, the crawler role against a live Postgres, the scripts' behaviour against a stubbed `docker`, run in `infra` |
 
 There is no Redis: one Medusa process runs the in-memory event bus, cache and
 workflow engine. A second Medusa instance would need Redis first.
@@ -1158,7 +1170,7 @@ logs medusa`) here. TODO: record the measured docs/s.
   Every redirect comes from node: each site's 404 is on demand, so middleware
   runs for every path Caddy hands over. Caddy adds only the security headers,
   from `caddy/security-headers.caddy` (shared by the three sites;
-  `.github/scripts/security-headers-drift.sh` fails `check` when it drifts).
+  `.github/scripts/security-headers-drift.sh` fails the `static` job when it drifts).
   Proxied requests keep the apex `Host`, carry `X-Forwarded-Proto: https` and an
   `X-Request-Id`, and `X-Forwarded-For` is Caddy's own view of the client. The `carlab-reminders`
   systemd timer runs `reminders.sh` at 08:00 UTC, which calls carlab.rs's

@@ -10,7 +10,7 @@ on:
         type: boolean
         default: false
       skip_check:
-        description: Skip the check job (lint and tests) to ship a hotfix faster
+        description: Skip the test jobs (lint and tests) to ship a hotfix faster
         type: boolean
         default: false
 
@@ -24,7 +24,7 @@ env:
   ACTIONLINT_IMAGE: rhysd/actionlint:1.7.12
 
 jobs:
-  check:
+  static:
     if: ${{ !inputs.skip_check }}
     runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
     permissions:
@@ -37,7 +37,6 @@ jobs:
       - run: pnpm lint
       - run: pnpm exec prettier --check .
       - run: node --experimental-strip-types .github/scripts/yaml-content-valid.ts
-      - run: node --experimental-strip-types --test .github/scripts/russian-copy-hygiene.test.ts
       - run: node --experimental-strip-types .github/scripts/russian-copy-hygiene.ts
       - run: sh .github/scripts/migrations-frozen.sh apps/auto-service-shop 'src/modules/*/migrations/*.ts' 'src/migration-scripts/*.ts'
         env:
@@ -45,47 +44,34 @@ jobs:
       - run: sh .github/scripts/migrations-frozen.sh packages/lead-crm 'prisma/migrations/*/migration.sql'
         env:
           FROZEN_BASE: ${{ github.event.before }}
-      - run: sh .github/scripts/migrations-frozen.test.sh
-      - run: sh .github/scripts/check-base.test.sh
       - run: sh .github/scripts/pinned-deps.sh
       - run: sh .github/scripts/security-headers-drift.sh
-
       - id: affected
-        env:
-          TURBO_TELEMETRY_DISABLED: '1'
-          FORCE: ${{ inputs.force || false }}
-        run: |
-          set -euo pipefail
-          base=$(sh .github/scripts/check-base.sh)
-          packages=$(pnpm exec turbo run typecheck test build ${base:+"--filter=...[$base]"} --dry=json | jq -c .packages)
-          shop=false
-          if [ -z "$base" ] || jq -e 'index("@podbor/auto-service-shop")' <<<"$packages" >/dev/null \
-             || ! git diff --quiet "$base" HEAD -- infra/auto-service-shop; then
-            shop=true
-          fi
-          sites=$(jq -r --argjson sites "$(jq -c '.sites | keys | map("@podbor/" + .)' .github/scripts/site-env.json)" \
-            '[.[] | select(. as $p | $sites | index($p)) | ltrimstr("@podbor/")] | join(" ")' <<<"$packages")
-          echo "Affected: $packages; shop: $shop; sites: ${sites:-none}"
-          {
-            echo "base=$base"
-            echo "shop=$shop"
-            echo "sites=$sites"
-          } >>"$GITHUB_OUTPUT"
-
+        uses: ./.github/actions/affected
       - if: steps.affected.outputs.shop == 'true'
         uses: ./.github/actions/setup-auto-service-shop-env
       - env:
           BASE: ${{ steps.affected.outputs.base }}
         run: pnpm exec turbo run typecheck ${BASE:+"--filter=...[$BASE]"}
+      - name: Clean up
+        if: always()
+        run: docker compose -f apps/auto-service-shop/docker-compose.test.yml down -v
+
+  sites:
+    if: ${{ !inputs.skip_check }}
+    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-pnpm
+      - id: affected
+        uses: ./.github/actions/affected
       - env:
           BASE: ${{ steps.affected.outputs.base }}
-        run: pnpm exec turbo run test ${BASE:+"--filter=...[$BASE]"}
-      - name: Shop migrations match the models
-        if: steps.affected.outputs.shop == 'true'
-        run: |
-          docker compose -f apps/auto-service-shop/docker-compose.test.yml exec -T postgres sh -c "dropdb -U postgres --if-exists migration_drift && createdb -U postgres migration_drift"
-          DATABASE_URL=postgres://postgres:postgres@127.0.0.1:${SHOP_TEST_DB_PORT:-55432}/migration_drift sh .github/scripts/shop-migration-drift.sh
-
+        run: pnpm exec turbo run test ${BASE:+"--filter=...[$BASE]"} --filter='!@podbor/auto-service-shop'
       - if: steps.affected.outputs.sites != ''
         env:
           PUBLIC_PHONE_NUMBER: '381000000000'
@@ -106,6 +92,18 @@ jobs:
           node --experimental-strip-types .github/scripts/contact-placement.ts "${dists[@]}"
           node --experimental-strip-types .github/scripts/caddy-split.ts "${sites[@]}"
 
+  infra:
+    if: ${{ !inputs.skip_check }}
+    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup-pnpm
+      - id: affected
+        uses: ./.github/actions/affected
       - if: steps.affected.outputs.shop == 'true'
         run: sh infra/auto-service-shop/test/scripts.test.sh
       - if: steps.affected.outputs.shop == 'true'
@@ -122,24 +120,97 @@ jobs:
         run: sh infra/auto-service-shop/test/crm-role.test.sh
       - if: steps.affected.outputs.shop == 'true'
         run: sh infra/auto-service-shop/test/harden-ssh.test.sh
+      - run: sh .github/scripts/migrations-frozen.test.sh
+      - run: sh .github/scripts/check-base.test.sh
+      - run: sh .github/scripts/isolate-runner.test.sh
       - run: sh .github/scripts/shop-backend-up.test.sh
       - run: sh .github/scripts/shop-ci-env.test.sh
       - run: sh .github/scripts/upload-site.test.sh
-      - run: node --experimental-strip-types --test .github/scripts/site-env.test.ts .github/scripts/env-to-github.test.ts .github/scripts/caddy-split.test.ts
+      - run: >-
+          node --experimental-strip-types --test
+          .github/scripts/ci-gates.test.ts .github/scripts/shop-shards.test.ts .github/scripts/shop-affected.test.ts
+          .github/scripts/russian-copy-hygiene.test.ts .github/scripts/shop-slow-issue.test.ts
+          .github/scripts/site-env.test.ts .github/scripts/env-to-github.test.ts .github/scripts/caddy-split.test.ts
       - run: >-
           docker run --rm -v "$PWD:/repo" -w /repo --entrypoint shellcheck "$ACTIONLINT_IMAGE"
           .github/scripts/*.sh infra/auto-service-shop/*.sh infra/auto-service-shop/test/*.sh
       - run: docker run --rm -v "$PWD:/repo" -w /repo "$ACTIONLINT_IMAGE" -color
+
+  shop:
+    if: ${{ !inputs.skip_check }}
+    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: affected
+        run: echo "shop=$(sh .github/scripts/shop-affected.sh)" >>"$GITHUB_OUTPUT"
+      - if: steps.affected.outputs.shop == 'true'
+        uses: ./.github/actions/setup-pnpm
+      - if: steps.affected.outputs.shop == 'true'
+        uses: ./.github/actions/setup-auto-service-shop-env
+      - if: steps.affected.outputs.shop == 'true'
+        env:
+          SHOP_SHARDS: ${{ matrix.shard }}/${{ strategy.job-total }}
+        run: pnpm exec turbo run test --filter=@podbor/auto-service-shop
+      - name: Clean up
+        if: always() && steps.affected.outputs.shop == 'true'
+        run: docker compose -f apps/auto-service-shop/docker-compose.test.yml down -v
+
+  shop-drift:
+    if: ${{ !inputs.skip_check }}
+    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: affected
+        run: echo "shop=$(sh .github/scripts/shop-affected.sh)" >>"$GITHUB_OUTPUT"
+      - if: steps.affected.outputs.shop == 'true'
+        uses: ./.github/actions/setup-pnpm
+      - if: steps.affected.outputs.shop == 'true'
+        uses: ./.github/actions/setup-auto-service-shop-env
+      - name: Shop migrations match the models
+        if: steps.affected.outputs.shop == 'true'
+        run: |
+          pnpm exec turbo run build --filter='@podbor/auto-service-shop^...'
+          docker compose -f apps/auto-service-shop/docker-compose.test.yml exec -T postgres sh -c "dropdb -U postgres --if-exists migration_drift && createdb -U postgres migration_drift"
+          DATABASE_URL=postgres://postgres:postgres@127.0.0.1:${SHOP_TEST_DB_PORT:-55432}/migration_drift sh .github/scripts/shop-migration-drift.sh
+      - name: Clean up
+        if: always() && steps.affected.outputs.shop == 'true'
+        run: docker compose -f apps/auto-service-shop/docker-compose.test.yml down -v
+
+  shop-slow:
+    if: github.event_name == 'push'
+    runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-pnpm
+      - uses: ./.github/actions/setup-auto-service-shop-env
+      - run: pnpm exec turbo run test:slow --filter=@podbor/auto-service-shop
+      - name: Report the failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: node --experimental-strip-types .github/scripts/shop-slow-issue.ts "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
       - name: Clean up
         if: always()
         run: docker compose -f apps/auto-service-shop/docker-compose.test.yml down -v
 
   translate:
-    needs: check
-    if: >-
-      always() &&
-      (needs.check.result == 'success' || (inputs.skip_check && needs.check.result == 'skipped')) &&
-      github.actor != 'github-actions[bot]'
+    if: github.actor != 'github-actions[bot]'
     runs-on: ${{ vars.RUNNER || 'ubuntu-latest' }}
     permissions:
       contents: write
@@ -201,7 +272,7 @@ jobs:
           TRANSLATED: ${{ needs.translate.outputs.sha }}
         run: |
           if [ "$TRANSLATED" = "$GITHUB_SHA" ]; then
-            echo "Nothing was translated: check already tested $GITHUB_SHA."
+            echo "Nothing was translated: the test jobs already tested $GITHUB_SHA."
             echo "needed=false" >> "$GITHUB_OUTPUT"
           else
             echo "needed=true" >> "$GITHUB_OUTPUT"
@@ -276,6 +347,7 @@ jobs:
         with:
           ref: ${{ needs.translate.outputs.sha }}
           persist-credentials: false
+      - uses: ./.github/actions/isolate-runner
 
       - name: Build
         run: |
@@ -354,9 +426,11 @@ jobs:
           docker compose -f apps/auto-service-shop/docker-compose.test.yml down -v
 
   deploy-shop:
-    needs: [translate, verify, shop-image]
+    needs: [static, shop, shop-drift, infra, translate, verify, shop-image]
     if: >-
       !cancelled() &&
+      (inputs.skip_check || (needs.static.result == 'success' && needs.shop.result == 'success' &&
+       needs.shop-drift.result == 'success' && needs.infra.result == 'success')) &&
       needs.shop-image.result == 'success' &&
       github.ref == 'refs/heads/main' &&
       contains(fromJSON(needs.verify.outputs.changed), 'auto-service-shop')
@@ -439,9 +513,10 @@ jobs:
               -f ref="refs/tags/deployed/$APP" -f sha="$SHA"
 
   deploy-site:
-    needs: [translate, verify, shop-image, deploy-shop]
+    needs: [static, sites, translate, verify, shop-image, deploy-shop]
     if: >-
       !cancelled() &&
+      (inputs.skip_check || (needs.static.result == 'success' && needs.sites.result == 'success')) &&
       needs.verify.result == 'success' &&
       github.ref == 'refs/heads/main' &&
       needs.verify.outputs.changed != '[]'
@@ -466,9 +541,10 @@ jobs:
           SHOP: ${{ needs.deploy-shop.result }}
           SHOP_IMAGE_RESULT: ${{ needs.shop-image.result }}
         run: |
-          if [ "$SHOP" = failure ] || [ "$SHOP_IMAGE_RESULT" = failure ]; then
+          if [ "$SHOP" = failure ] || [ "$SHOP_IMAGE_RESULT" = failure ] \
+             || { [ "$SHOP" != success ] && jq -e 'index("auto-service-shop")' <<<"$CHANGED" >/dev/null 2>&1; }; then
             echo "deploy=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::The shop image or deploy failed, so the CRM migrations it carries may not have run: $APP is not deployed; deployed/$APP stays put."
+            echo "::warning::The shop image or deploy failed or did not run, so the CRM migrations it carries may not have run: $APP is not deployed; deployed/$APP stays put."
           elif ! jq -e 'type == "array"' <<<"$CHANGED" >/dev/null; then
             echo "deploy=true" >> "$GITHUB_OUTPUT"
             echo "::warning::unreadable changed list, deploying $APP anyway"

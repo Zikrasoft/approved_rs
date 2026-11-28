@@ -1,0 +1,34 @@
+name: Affected workspaces
+description: >-
+  Works out what this push has to test: the base commit for turbo's affected
+  filter, whether the shop is affected and which sites are. Must run after
+  setup-pnpm on a checkout with fetch-depth 0.
+
+outputs:
+  base:
+    value: ${{ steps.affected.outputs.base }}
+  shop:
+    value: ${{ steps.affected.outputs.shop }}
+  sites:
+    value: ${{ steps.affected.outputs.sites }}
+
+runs:
+  using: composite
+  steps:
+    - id: affected
+      shell: bash
+      env:
+        TURBO_TELEMETRY_DISABLED: '1'
+      run: |
+        set -euo pipefail
+        base=$(sh .github/scripts/check-base.sh)
+        packages=$(pnpm exec turbo run typecheck test build ${base:+"--filter=...[$base]"} --dry=json | jq -c .packages)
+        shop=$(sh .github/scripts/shop-affected.sh)
+        sites=$(jq -r --argjson sites "$(jq -c '.sites | keys | map("@podbor/" + .)' .github/scripts/site-env.json)" \
+          '[.[] | select(. as $p | $sites | index($p)) | ltrimstr("@podbor/")] | join(" ")' <<<"$packages")
+        echo "Affected: $packages; shop: $shop; sites: ${sites:-none}"
+        {
+          echo "base=$base"
+          echo "shop=$shop"
+          echo "sites=$sites"
+        } >>"$GITHUB_OUTPUT"

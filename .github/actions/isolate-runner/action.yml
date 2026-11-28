@@ -1,0 +1,12 @@
+name: Isolate runner
+description: >-
+  Gives the shop's test Postgres and Typesense a compose project and host ports
+  of this runner's own, so jobs on several self-hosted runners of one machine
+  never share or tear down each other's containers. The number comes from the
+  runner name (zikrasoft-mac-N); a runner without one keeps the defaults.
+
+runs:
+  using: composite
+  steps:
+    - run: sh .github/scripts/isolate-runner.sh >>"$GITHUB_ENV"
+      shell: bash

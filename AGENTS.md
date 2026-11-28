@@ -164,12 +164,12 @@ before touching its area:
   `@podbor/site-kit/locale-middleware`); Caddy only adds the security headers,
   from `infra/auto-service-shop/caddy/security-headers.caddy`, which
   `.github/scripts/security-headers-drift.sh` regenerates from site-kit's
-  `SECURITY_HEADERS` and fails `check` on a hand edit.
+  `SECURITY_HEADERS` and fails the `static` job on a hand edit.
 - **Rendering a lead form or the lead modal:**
   [docs/guides/lead-forms.md](docs/guides/lead-forms.md).
 - **Touching a contact control, `tel:` link, messenger or Telegram tile, or
   `/thanks/`:** [docs/guides/contact-controls.md](docs/guides/contact-controls.md).
-  `.github/scripts/contact-placement.ts` enforces placement in `check`;
+  `.github/scripts/contact-placement.ts` enforces placement in the `sites` job;
   `scripts/contact-controls-pass.ts` checks pointer variants locally.
 - **Editing content collections, YAML copy, a Keystatic collection or a service
   slug:** [docs/guides/content.md](docs/guides/content.md).
@@ -233,7 +233,7 @@ a commit but cannot run the review itself.
 
 **Writing or changing a migration in `apps/auto-service-shop`:** read
 [docs/guides/shop-migrations.md](docs/guides/shop-migrations.md). Every shop
-migration is **additive**; `check` runs `.github/scripts/shop-migration-drift.sh`
+migration is **additive**; the `shop-drift` job runs `.github/scripts/shop-migration-drift.sh`
 and `.github/scripts/migrations-frozen.sh` against the
 `apps/auto-service-shop/migrations.sha256` manifest.
 
@@ -244,7 +244,7 @@ shop's, for the same reason: the shop deploy migrates `crm` with the new shop
 image while the sites still serve the previous build, and a rollback brings an
 older image over the newer schema. Folder names start with a timestamp, since
 Prisma applies them in name order. The files are frozen the same way:
-`check` runs `.github/scripts/migrations-frozen.sh` against
+the `static` job runs `.github/scripts/migrations-frozen.sh` against
 `packages/lead-crm/migrations.sha256`, and a new migration is appended to it in
 the same commit (`cd packages/lead-crm && sha256sum <file> >>migrations.sha256`).
 How it ships: `docs/guides/deploy.md`, "CRM migrations".
@@ -256,7 +256,7 @@ How it ships: `docs/guides/deploy.md`, "CRM migrations".
 **Touching lead storage, a lead or contact-click route, the CRM bot, a capture
 bot or the reminder cron:** read [docs/guides/lead-crm.md](docs/guides/lead-crm.md).
 
-See `docs/guides/deploy.md` for the full environment-variable list and the deploy to the VPS. The sites' env lives in GitHub, shared names at repository level and the rest in each site's `site-<app>` environment, and `.github/scripts/site-env.json` is the one manifest of those names: a variable a site starts reading goes into it in the same change, or `site-env.test.ts` fails `check`.
+See `docs/guides/deploy.md` for the full environment-variable list and the deploy to the VPS. The sites' env lives in GitHub, shared names at repository level and the rest in each site's `site-<app>` environment, and `.github/scripts/site-env.json` is the one manifest of those names: a variable a site starts reading goes into it in the same change, or `site-env.test.ts` fails the `infra` job.
 
 ## i18n
 
@@ -319,7 +319,7 @@ subpath — put the schema next to such a module, not inside it.
 
 Every dependency in `package.json` must be pinned to an exact version — no `^` or `~` ranges. This applies to `dependencies` and `devDependencies` alike.
 
-`pnpm add --save-exact` (or `-e`) does not reliably write an exact version in this repo — confirmed it silently kept the `^` prefix even when passed explicitly (both on a version bump and on a no-op re-add). Don't trust the flag; `.github/scripts/pinned-deps.sh` is what catches what it leaves behind, in `check` and on commit.
+`pnpm add --save-exact` (or `-e`) does not reliably write an exact version in this repo — confirmed it silently kept the `^` prefix even when passed explicitly (both on a version bump and on a no-op re-add). Don't trust the flag; `.github/scripts/pinned-deps.sh` is what catches what it leaves behind, in the `static` job and on commit.
 
 ## Adding dependencies vs. hand-rolling code
 
