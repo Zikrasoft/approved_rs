@@ -61,7 +61,7 @@ medusaIntegrationTestRunner({
       );
     });
 
-    it('lets the server take a free port instead of a pinned one', async () => {
+    it('starts the server with no pinned PORT', async () => {
       expect(process.env.PORT).toBeUndefined();
       const { status } = await api.get('/health');
       expect(status).toBe(200);

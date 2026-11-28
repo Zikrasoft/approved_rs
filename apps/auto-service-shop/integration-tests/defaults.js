@@ -1,8 +1,10 @@
+const { databaseUrl } = require('./template-database');
+
 process.env.DB_HOST ??= 'localhost';
 process.env.DB_PORT ??= '55432';
 process.env.DB_USERNAME ??= 'postgres';
 process.env.DB_PASSWORD ??= 'postgres';
-process.env.DATABASE_URL ??= `postgres://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/medusa`;
+process.env.DATABASE_URL ??= databaseUrl('medusa');
 process.env.JWT_SECRET ??= 'jest-only-jwt-secret';
 process.env.COOKIE_SECRET ??= 'jest-only-cookie-secret';
 process.env.STORE_CORS ??= 'http://localhost:4321';

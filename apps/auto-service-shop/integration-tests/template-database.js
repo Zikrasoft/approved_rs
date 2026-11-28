@@ -6,7 +6,7 @@ const quote = (name) => `"${name.replace(/"/g, '""')}"`;
 const databaseUrl = (name) =>
   `postgres://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}:${process.env.DB_PORT}/${name}`;
 
-const onServer = async (...statements) => {
+const onMaintenanceDatabase = async (...statements) => {
   const client = new Client({ connectionString: databaseUrl('postgres') });
   await client.connect();
   try {
@@ -29,16 +29,16 @@ const templateName = () => {
 };
 
 const dropDatabase = (name) =>
-  onServer(`drop database if exists ${quote(name)} with (force)`);
+  onMaintenanceDatabase(`drop database if exists ${quote(name)} with (force)`);
 
 const createDatabase = (name) =>
-  onServer(
+  onMaintenanceDatabase(
     `drop database if exists ${quote(name)} with (force)`,
     `create database ${quote(name)}`,
   );
 
 const cloneTemplate = (name) =>
-  onServer(
+  onMaintenanceDatabase(
     `drop database if exists ${quote(name)} with (force)`,
     `create database ${quote(name)} template ${quote(templateName())} strategy file_copy`,
   );
